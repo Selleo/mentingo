@@ -38,6 +38,10 @@ ApiClient.instance.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (error.config?.url?.includes("/refresh")) {
+      authService.logout();
+    }
+
     if (
       error.response?.status === 401 &&
       !error.config._retry &&
@@ -45,10 +49,9 @@ ApiClient.instance.interceptors.response.use(
     ) {
       error.config._retry = true;
       try {
-        authService.logout();
         await authService.refreshToken();
         return ApiClient.instance(error.config);
-      } catch {
+      } catch (e) {
         requestManager.abortAll();
         return Promise.reject(error);
       }
