@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/Selleo/lms-core/blob/main/apps/web/app/assets/menitngo_logo.png?raw=true" alt"" />
+  <img src="https://github.com/Selleo/lms-core/blob/main/apps/web/app/assets/menitngo_logo dark.png?raw=true" alt"" />
 
 # Mentingo LMS Core Project
 
