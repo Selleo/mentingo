@@ -1,0 +1,34 @@
+{
+    "family": "learn-api-95d06ad3",
+    "containerDefinitions": [
+        {
+            "name": "learn-api",
+            "image": "",
+            "cpu": 512,
+            "memory": 1024,
+            "portMappings": [
+                {
+                    "name": "http",
+                    "containerPort": 3000,
+                    "hostPort": 0,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "learn/production/api/ecs/learn-api",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "networkMode": "bridge",
+    "taskRoleArn": "arn:aws:iam::324037293989:role/learn-api-95d06ad3-task",
+    "executionRoleArn": "arn:aws:iam::324037293989:role/learn-api-95d06ad3-task-execution",
+    "requiresCompatibilities": ["EC2"],
+    "cpu": "512",
+    "memory": "1024"
+}

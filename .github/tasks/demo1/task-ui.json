@@ -1,0 +1,34 @@
+{
+    "family": "learn-ui-f28be1c1",
+    "containerDefinitions": [
+        {
+            "name": "learn-ui",
+            "image": "",
+            "cpu": 512,
+            "memory": 1024,
+            "portMappings": [
+                {
+                    "name": "http",
+                    "containerPort": 8080,
+                    "hostPort": 0,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "learn/production/ui/ecs/learn-ui",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "networkMode": "bridge",
+    "taskRoleArn": "arn:aws:iam::324037293989:role/learn-ui-f28be1c1-task",
+    "executionRoleArn": "arn:aws:iam::324037293989:role/learn-ui-f28be1c1-task-execution",
+    "requiresCompatibilities": ["EC2"],
+    "cpu": "512",
+    "memory": "1024"
+}

@@ -1,0 +1,202 @@
+name: Deploy Demo1 (Production)
+
+on:
+  push:
+    tags:
+      - 'demo1-v*'
+
+jobs:
+  deploy_api:
+    runs-on: ubuntu-latest
+    environment:
+      name: demo1-production
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Set tag
+        run: echo "IMAGE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2.0.1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_URL: ${{ steps.login-ecr.outputs.registry }}/learn/production/api
+        run: |
+          docker build -f ./api.Dockerfile --build-arg VERSION=$IMAGE_TAG -t $ECR_URL:$IMAGE_TAG .
+          docker push $ECR_URL:$IMAGE_TAG
+          echo "IMAGE=$ECR_URL:$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Render secrets from parameter store
+        id: render-secrets
+        uses: Selleo/amazon-ecs-render-task-definition-secrets@v1.0.0
+        with:
+          region: eu-central-1
+          task-definition: .github/tasks/demo1/task-api.json
+          envs: |
+            NODE_ENV
+            DATABASE_URL
+            AWS_REGION
+            AWS_BUCKET_NAME
+            AWS_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY
+            JWT_SECRET
+            JWT_REFRESH_SECRET
+            JWT_EXPIRATION_TIME
+            SMTP_HOST     
+            SMTP_PORT
+            SMTP_USER
+            SMTP_PASSWORD
+            EMAIL_ADAPTER
+            SENTRY_DSN
+            SENTRY_ENVIRONMENT
+            SES_EMAIL
+            STRIPE_PUBLISHABLE_KEY
+            STRIPE_SECRET_KEY
+            STRIPE_WEBHOOK_SECRET
+            REDIS_URL
+            CORS_ORIGIN
+
+          paths: |
+            /learn/production/api/terraform/
+            /learn/production/api/editable/
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-secrets.outputs.task-definition }}
+          container-name: learn-api
+          image: ${{ env.IMAGE }}
+
+      - name: Render secrets from parameter store for migrate
+        id: render-secrets-migrate
+        uses: Selleo/amazon-ecs-render-task-definition-secrets@v1.0.0
+        with:
+          region: eu-central-1
+          task-definition: .github/tasks/demo1/task-migrate.json
+          envs: |
+            NODE_ENV
+            DATABASE_URL
+            AWS_REGION
+            AWS_BUCKET_NAME
+            AWS_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY
+            JWT_SECRET
+            JWT_REFRESH_SECRET
+            JWT_EXPIRATION_TIME
+            SMTP_HOST     
+            SMTP_PORT
+            SMTP_USER
+            SMTP_PASSWORD
+            EMAIL_ADAPTER
+            SENTRY_DSN
+            SENTRY_ENVIRONMENT
+            SES_EMAIL
+            STRIPE_PUBLISHABLE_KEY
+            STRIPE_SECRET_KEY
+            STRIPE_WEBHOOK_SECRET
+            REDIS_URL
+            CORS_ORIGIN
+
+          paths: |
+            /learn/production/api/terraform/
+            /learn/production/api/editable/
+
+      - name: Fill in the new image ID in the Amazon ECS task definition for migrate
+        id: task-def-migrate
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-secrets-migrate.outputs.task-definition }}
+          container-name: learn-api-migrate
+          image: ${{ env.IMAGE }}
+
+      - name: ECS Run migrations
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2.3.0
+        with:
+          task-definition: ${{ steps.task-def-migrate.outputs.task-definition }}
+          cluster: learn-abd3b18c
+          run-task: true
+          run-task-launch-type: EC2
+          wait-for-task-stopped: true
+
+      - name: ECS Deployment
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2.3.0
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: learn-api
+          cluster: learn-abd3b18c
+          wait-for-service-stability: true
+
+  deploy_ui:
+    runs-on: ubuntu-latest
+    environment:
+      name: demo1-production
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Set tag
+        run: echo "IMAGE_TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2.0.1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_URL: ${{ steps.login-ecr.outputs.registry }}/learn/production/ui
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{secrets.STRIPE_PUBLISHABLE_KEY}}
+          VITE_SENTRY_AUTH_TOKEN: ${{secrets.SENTRY_AUTH_TOKEN}}
+          VITE_SENTRY_ORG: ${{secrets.SENTRY_ORG}}
+          VITE_SENTRY_PROJECT: ${{secrets.SENTRY_PROJECT}}
+          VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
+        run: |
+          docker build -f ./web.Dockerfile \
+            --build-arg VERSION=$IMAGE_TAG \
+            --build-arg VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY \
+            --build-arg VITE_SENTRY_AUTH_TOKEN=$VITE_SENTRY_AUTH_TOKEN \
+            --build-arg VITE_SENTRY_ORG=$VITE_SENTRY_ORG \
+            --build-arg VITE_SENTRY_PROJECT=$VITE_SENTRY_PROJECT \
+            --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
+            -t $ECR_URL:$IMAGE_TAG .
+          docker push $ECR_URL:$IMAGE_TAG
+          echo "image=$ECR_URL:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .github/tasks/demo1/task-ui.json
+          container-name: learn-ui
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: learn-ui
+          cluster: learn-abd3b18c
+          wait-for-service-stability: true
