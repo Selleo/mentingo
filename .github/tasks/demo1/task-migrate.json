@@ -1,0 +1,31 @@
+{
+    "family": "learn-api-95d06ad3-migrate",
+    "containerDefinitions": [
+        {
+            "name": "learn-api-migrate",
+            "image": "",
+            "cpu": 256,
+            "memory": 512,
+            "command": [
+                "migrate"
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "learn/production/api/ecs/learn-api-migrate",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "networkMode": "bridge",
+    "taskRoleArn": "arn:aws:iam::324037293989:role/learn-api-95d06ad3-task",
+    "executionRoleArn": "arn:aws:iam::324037293989:role/learn-api-95d06ad3-task-execution",
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
