@@ -13,7 +13,7 @@
       "goBack": "Wróć",
       "clearAll": "Wyczyść wszystko",
       "ignore": "Ignoruj",
-      "validate": "Waliduj"
+      "validate": "Popraw błędy"
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -560,7 +560,7 @@
           "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
           "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
           "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
-          "leaveContentBodyValidate": "Jeśli chcesz zapisać formularz, musisz najpierw zatwierdzić formularz"
+          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu."
         }
       }
     },
