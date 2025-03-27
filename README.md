@@ -47,15 +47,15 @@ A modern, scalable Learning Management System built with cutting-edge technologi
 
 </div>
 
-- **Course Structure**: Courses built from categories, modules and various lesson types  
-- **Lesson Types**: Supports text, video, presentation and quiz lessons  
-- **Quiz Engine**: Multiple-choice, single-choice, true/false, gap-filling, short/long text answers and image-based questions  
-- **Price Configuration**: Flexible setup for free and paid course access  
-- **Progress Tracking**: Automatic progress saving and course completion logic  
-- **Daily Streak Tracking**: Motivational system for tracking learning consistency  
-- **Statistics & Insights**: Detailed data on user engagement and learning results  
-- **Admin Panel**: Tools for managing users, courses, content and statistics  
-- **User Roles**: Separate experiences for students and administrators  
+- **Course Structure**: Courses built from categories, modules and various lesson types
+- **Lesson Types**: Supports text, video, presentation and quiz lessons
+- **Quiz Engine**: Multiple-choice, single-choice, true/false, gap-filling, short/long text answers and image-based questions
+- **Price Configuration**: Flexible setup for free and paid course access
+- **Progress Tracking**: Automatic progress saving and course completion logic
+- **Daily Streak Tracking**: Motivational system for tracking learning consistency
+- **Statistics & Insights**: Detailed data on user engagement and learning results
+- **Admin Panel**: Tools for managing users, courses, content and statistics
+- **User Roles**: Separate experiences for students and administrators
 
 </br>
 <div align="center">
