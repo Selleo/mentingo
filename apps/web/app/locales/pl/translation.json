@@ -494,7 +494,7 @@
           "atLeastOneOptionRequired": "Wymagana jest przynajmniej jedna opcja",
           "imageRequired": "Obrazek jest wymagany",
           "descriptionLength": "Opis musi mieć co najmniej 10 znaków.",
-          "descritpionMaxLength": "Treść może mieć maksymalnie 3000 znaków.",
+          "descritpionMaxLength": "Treść może mieć maksymalnie 5000 znaków.",
           "atLeastOneOptionCorrect": "Przynajmniej jedna opcja musi być oznaczona jako poprawna.",
           "allOptionsCorrect": "Wszystkie opcje muszą być poprawne",
           "titleRequired": "Tytuł jest wymagany",

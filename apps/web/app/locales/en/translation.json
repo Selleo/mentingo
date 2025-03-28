@@ -494,7 +494,7 @@
           "atLeastOneOptionRequired": "At least one option is required",
           "imageRequired": "Image is required",
           "descriptionLength": "Description must have at least 10 characters.",
-          "descritpionMaxLength": "Content can have a maximum of 3000 characters.",
+          "descritpionMaxLength": "Content can have a maximum of 5000 characters.",
           "atLeastOneOptionCorrect": "At least one option must be marked as correct for question.",
           "allOptionsCorrect": "All options must be correct",
           "titleRequired": "Title is required",
