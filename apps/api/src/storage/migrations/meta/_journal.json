@@ -92,6 +92,13 @@
       "when": 1736901318915,
       "tag": "0012_remove_is_published_from_chapters_table",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1743173029514,
+      "tag": "0013_change_type_of_description_column_in_lessons",
+      "breakpoints": true
     }
   ]
 }

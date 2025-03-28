@@ -46,7 +46,7 @@ const TextLessonForm = ({
     setIsModalOpen(true);
   };
 
-  const maxDescriptionFieldLength = 3000;
+  const maxDescriptionFieldLength = 5000;
 
   const watchedContentLength = form.watch("description").length;
   const descriptionFieldCharactersLeft = Math.max(
