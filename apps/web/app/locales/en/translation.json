@@ -277,6 +277,14 @@
       "status": "Status",
       "createdAt": "Created At"
     },
+    "lessonCard": {
+      "mappedTypes": {
+        "video": "Video",
+        "presentation": "Presentation",
+        "text": "Text",
+        "quiz": "Quiz"
+      }
+    },
     "other": {
       "selected": "Selected"
     },

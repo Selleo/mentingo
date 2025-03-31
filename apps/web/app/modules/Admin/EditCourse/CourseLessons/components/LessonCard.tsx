@@ -1,10 +1,11 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
 import { LessonType, type Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
-import { mapItemType, mapTypeToIcon } from "../CourseLessons.helpers";
+import { mapTypeToIcon } from "../CourseLessons.helpers";
 
 import type { ReactNode } from "react";
 import type { IconName } from "~/types/shared";
@@ -18,8 +19,8 @@ interface LessonCardProps {
 
 const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: LessonCardProps) => {
   const contentType = item.type === "file" ? item.fileType : item.type;
+  const { t } = useTranslation();
 
-  const mappedItemType = useMemo(() => mapItemType(contentType), [contentType]);
   const getIcon = useMemo(() => mapTypeToIcon(contentType as string), [contentType]);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -64,7 +65,9 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
               item.title
             )}
           </p>
-          <p className="details text-neutral-600">{mappedItemType}</p>
+          <p className="details text-neutral-600">
+            {t(`adminCoursesView.lessonCard.mappedTypes.${contentType}`)}
+          </p>
         </hgroup>
       </div>
     </div>
