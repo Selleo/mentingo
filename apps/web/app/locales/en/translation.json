@@ -773,7 +773,8 @@
       "changeSearchCriteria": "Please change the search criteria or try again later"
     },
     "lesson": {
-      "yourAnswer": "Your Answer",
+      "missingAnswer": "Missing answer",
+      "yourAnswer": "Your answer",
       "singleChoice": "Single choice question",
       "multipleChoice": "Multiple choice question",
       "trueOfFalseChoice": "True or false question",

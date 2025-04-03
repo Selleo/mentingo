@@ -773,6 +773,7 @@
       "changeSearchCriteria": "Zmień kryteria wyszukiwania lub spróbuj ponownie później"
     },
     "lesson": {
+      "missingAnswer": "Brakująca odpowiedź",
       "yourAnswer": "Twoja odpowiedź",
       "singleChoice": "Pytanie jednokrotnego wyboru",
       "multipleChoice": "Pytanie wielokrotnego wyboru",
