@@ -122,7 +122,7 @@ export const MultiSelect = ({
       >
         <span>{answer}</span>
         <span className={classes}>
-          {isStudentAnswer && isCompleted && "(Your answer)"}
+          {isStudentAnswer && isCompleted && ""}
           {isCorrectAnswerNotSelected && "(Missing answer)"}
         </span>
       </Label>

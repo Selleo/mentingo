@@ -20,7 +20,7 @@ export const BriefResponse = ({ question, isCompleted = false }: BriefResponsePr
   return (
     <QuestionCard
       title={question.title}
-      questionType="Instruction: Provide a brief response (1-2 sentences)."
+      questionType="oneOrTwoWordSentence"
       questionNumber={question.displayOrder}
     >
       <Textarea

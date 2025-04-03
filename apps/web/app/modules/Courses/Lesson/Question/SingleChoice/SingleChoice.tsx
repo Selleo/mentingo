@@ -16,7 +16,7 @@ export const SingleChoice = ({ question, isCompleted = false }: SingleChoiceProp
   return (
     <QuestionCard
       title={question.title}
-      questionType="Single Choice question"
+      questionType="singleChoice"
       questionNumber={question.displayOrder}
       data-testid="single-choice"
     >

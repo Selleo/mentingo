@@ -159,7 +159,7 @@ const ChapterCard = ({
                 <h3 className="body-base-md text-neutral-950">{chapter.title}</h3>
                 <div className="body-sm-md text-neutral-800">
                   {t("adminCourseView.curriculum.other.chapter")} {chapter.displayOrder} •{" "}
-                  {t("adminCourseView.curriculum.other.lesson")} {chapter.lessons.length}
+                  {t("adminCourseView.curriculum.other.lessonNumber")} {chapter.lessons.length}
                 </div>
               </hgroup>
               <AccordionTrigger
@@ -188,7 +188,7 @@ const ChapterCard = ({
                   "ml-9": !isOpen || chapter.lessons.length === 0,
                 })}
               >
-                <Button variant="outline" onClick={handleAddLessonClick} className="">
+                <Button variant="outline" onClick={handleAddLessonClick}>
                   <Icon name="Plus" className="mr-2 text-primary-800" />
                   {t("adminCourseView.curriculum.lesson.button.addLesson")}
                 </Button>

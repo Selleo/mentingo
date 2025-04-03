@@ -452,6 +452,7 @@
         "subHeader": "Użyj panelu po lewej, aby utworzyć nowe lub zaktualizować istniejące rozdziały"
       },
       "other": {
+        "lessonNumber": "Liczba lekcji",
         "chapter": "Rozdział",
         "lesson": "Lekcja",
         "edit": "Edytuj",
@@ -542,6 +543,7 @@
           "enterWord": "Wprowadź słowo"
         },
         "other": {
+          "lessonNumber": "Liczba lekcji",
           "chooseType": "Wybierz typ",
           "text": "Tekst",
           "video": "Wideo",
@@ -769,6 +771,14 @@
     "other": {
       "cannotFindCourses": "Nie znaleziono żadnych kursów",
       "changeSearchCriteria": "Zmień kryteria wyszukiwania lub spróbuj ponownie później"
+    },
+    "lesson": {
+      "yourAnswer": "Twoja odpowiedź",
+      "singleChoice": "Pytanie jednokrotnego wyboru",
+      "multipleChoice": "Pytanie wielokrotnego wyboru",
+      "trueOrFalseChoice": "Pytanie prawda fałsz",
+      "oneOrTwoWordSentence": "Podaj krótką odpowiedź (1-2 zadań)",
+      "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)"
     },
     "sideSection": {
       "optionHeader": "Opcja",

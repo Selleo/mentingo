@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Input } from "~/components/ui/input";
@@ -34,7 +35,7 @@ export const SingleSelect = ({
   optionFieldId = "singleAnswerQuestions",
 }: SelectAnswerOptionQuizProps) => {
   const { register, setValue, getValues } = useFormContext<QuizForm>();
-
+  const { t } = useTranslation();
   const getAnswerClasses = () => {
     if (isCorrectAnswer === null) return SELECT_OPTION_VARIANTS.default;
 
@@ -118,7 +119,9 @@ export const SingleSelect = ({
         onClick={(e) => e.stopPropagation()}
       >
         <span>{answer}</span>
-        <span className={classes}>{isStudentAnswer && isCompleted && "(Your answer)"}</span>
+        <span className={classes}>
+          {isStudentAnswer && isCompleted && t("studentCourseView.lesson.yourAnswer")}
+        </span>
       </Label>
     </label>
   );

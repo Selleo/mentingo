@@ -19,7 +19,7 @@ export const DetailedResponse = ({ question, isCompleted = false }: DetailedResp
   return (
     <QuestionCard
       title={question.title}
-      questionType="Instruction: Write a detailed response (3-5 sentences)."
+      questionType="threeOrFiveWordSentence"
       questionNumber={question.displayOrder}
     >
       <Textarea
