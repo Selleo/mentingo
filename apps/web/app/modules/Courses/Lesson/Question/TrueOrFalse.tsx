@@ -19,7 +19,7 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
   return (
     <QuestionCard
       title={question.title ?? ""}
-      questionType="True or false question."
+      questionType="trueOrFalseQuestion"
       questionNumber={question.displayOrder ?? 0}
     >
       {question.options?.map(

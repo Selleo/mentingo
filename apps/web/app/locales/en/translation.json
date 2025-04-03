@@ -277,6 +277,14 @@
       "status": "Status",
       "createdAt": "Created At"
     },
+    "lessonCard": {
+      "mappedTypes": {
+        "video": "Video",
+        "presentation": "Presentation",
+        "text": "Text",
+        "quiz": "Quiz"
+      }
+    },
     "other": {
       "selected": "Selected"
     },
@@ -444,6 +452,7 @@
         "subHeader": "Use the panel on the left to create new or update the existing chapters"
       },
       "other": {
+        "lessonNumber": "Number of lessons",
         "chapter": "Chapter",
         "lesson": "Lesson",
         "edit": "Edit",
@@ -534,6 +543,7 @@
           "enterWord": "Enter a word"
         },
         "other": {
+          "lessonNumber": "Number of lessons",
           "chooseType": "Choose type",
           "text": "Text",
           "video": "Video",
@@ -761,6 +771,15 @@
     "other": {
       "cannotFindCourses": "We could not find any courses",
       "changeSearchCriteria": "Please change the search criteria or try again later"
+    },
+    "lesson": {
+      "missingAnswer": "Missing answer",
+      "yourAnswer": "Your answer",
+      "singleChoice": "Single choice question",
+      "multipleChoice": "Multiple choice question",
+      "trueOfFalseChoice": "True or false question",
+      "oneOrTwoWordSentence": "Provide a brief response (1-2 sentences).",
+      "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences)."
     },
     "sideSection": {
       "optionHeader": "Option",

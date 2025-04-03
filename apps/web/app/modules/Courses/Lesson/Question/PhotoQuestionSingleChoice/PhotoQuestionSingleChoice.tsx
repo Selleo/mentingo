@@ -19,7 +19,7 @@ export const PhotoQuestionSingleChoice = ({
   return (
     <QuestionCard
       title={question.title}
-      questionType="Single select question."
+      questionType="singleChoice"
       questionNumber={question.displayOrder}
       data-testid="photo-question-single-choice"
     >

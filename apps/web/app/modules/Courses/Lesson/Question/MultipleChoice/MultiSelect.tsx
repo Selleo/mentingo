@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Input } from "~/components/ui/input";
@@ -34,7 +35,7 @@ export const MultiSelect = ({
   optionFieldId = "multiAnswerQuestions",
 }: MultiSelectProps) => {
   const { register, setValue, getValues } = useFormContext<QuizForm>();
-
+  const { t } = useTranslation();
   const getAnswerClasses = () => {
     if (isCorrectAnswer === null) return SELECT_OPTION_VARIANTS.default;
 
@@ -122,8 +123,8 @@ export const MultiSelect = ({
       >
         <span>{answer}</span>
         <span className={classes}>
-          {isStudentAnswer && isCompleted && "(Your answer)"}
-          {isCorrectAnswerNotSelected && "(Missing answer)"}
+          {isStudentAnswer && isCompleted && t("studentCourseView.lesson.yourAnswer")}
+          {isCorrectAnswerNotSelected && t("studentCourseView.lesson.missingAnswer")}
         </span>
       </Label>
     </label>

@@ -5,7 +5,12 @@ import type { ReactNode } from "react";
 type QuestionCardProps = {
   questionNumber: number | undefined;
   title: string | undefined;
-  questionType: string;
+  questionType:
+    | "singleChoice"
+    | "multipleChoice"
+    | "trueOrFalseQuestion"
+    | "oneOrTwoWordSentence"
+    | "threeOrFiveWordSentence";
   children: ReactNode;
 };
 
@@ -22,7 +27,9 @@ export const QuestionCard = ({
         {t("studentLessonView.other.question")} {questionNumber ?? 0}
       </div>
       <div className="h6 text-neutral-950" dangerouslySetInnerHTML={{ __html: title }} />
-      <div className="body-base text-neutral-900">{questionType}</div>
+      <div className="body-base text-neutral-900">
+        {t(`studentCourseView.lesson.${questionType}`)}
+      </div>
       <div className="mt-4 flex flex-col gap-4">{children}</div>
     </div>
   );

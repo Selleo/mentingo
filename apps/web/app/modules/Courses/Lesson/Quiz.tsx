@@ -28,6 +28,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
 
   const questions = lesson.quizDetails?.questions;
 
+  const isUserSubmittedAnswer = questions?.[0]?.options?.[0].studentAnswer !== null;
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
     // Temporary workaround
@@ -57,7 +58,11 @@ export const Quiz = ({ lesson }: QuizProps) => {
         })}
       >
         <Questions questions={questions} isQuizCompleted={lesson.lessonCompleted} />
-        <Button type="submit" className="flex items-center gap-x-2 self-end" disabled={isAdminLike}>
+        <Button
+          type="submit"
+          className="flex items-center gap-x-2 self-end"
+          disabled={isAdminLike || isUserSubmittedAnswer}
+        >
           <span>{t("studentLessonView.button.submit")}</span>
           <Icon name="ArrowRight" className="h-auto w-4" />
         </Button>

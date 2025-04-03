@@ -16,7 +16,7 @@ export const MultipleChoice = ({ question, isCompleted = false }: MultipleChoice
   return (
     <QuestionCard
       title={question.title}
-      questionType="Multiple Choice question"
+      questionType="multipleChoice"
       questionNumber={question.displayOrder}
     >
       <MultipleChoiceOptionList
