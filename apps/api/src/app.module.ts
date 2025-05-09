@@ -79,7 +79,10 @@ import { UserModule } from "./user/user.module";
     StudentLessonProgressModule,
     FileModule,
     S3Module,
-    StripeModule,
+    ConditionalModule.registerWhen(
+      StripeModule,
+      (env: NodeJS.ProcessEnv) => !!env["STRIPE_SECRET_KEY"] && !!env["STRIPE_WEBHOOK_SECRET"],
+    ),
     EventsModule,
     StatisticsModule,
     ScormModule,
