@@ -58,7 +58,14 @@ const FileLessonForm = ({
 
   useEffect(() => {
     setDisplayFileUrl(lessonToEdit?.fileS3SignedUrl);
-  }, [lessonToEdit]);
+    form.reset({
+      ...lessonToEdit,
+      type:
+        lessonToEdit?.type === "presentation" || lessonToEdit?.type === "video"
+          ? lessonToEdit.type
+          : undefined,
+    });
+  }, [lessonToEdit, form]);
 
   const onCloseModal = () => {
     setIsModalOpen(false);

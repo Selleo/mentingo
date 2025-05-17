@@ -35,7 +35,7 @@ const FileUploadInput = ({
   useEffect(() => {
     if (url) {
       setVideoPreview(url);
-    }
+    } else setVideoPreview(null);
   }, [url]);
 
   const acceptedTypes = ACCEPTED_TYPE_FORMATS[contentTypeToDisplay];
