@@ -1,4 +1,5 @@
 import { EditorContent, useEditor } from "@tiptap/react";
+import { useEffect } from "react";
 
 import { cn } from "~/lib/utils";
 
@@ -27,6 +28,12 @@ const Editor = ({ content, placeholder, onChange, id, className }: EditorProps) 
       },
     },
   });
+
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content || "");
+    }
+  }, [content]);
 
   if (!editor) return <></>;
 
