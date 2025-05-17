@@ -22,7 +22,6 @@ export const FormTextareaField = <T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => {
-        // TODO: check why this descripion is not changing
         return (
           <FormItem>
             {label && (
