@@ -4,6 +4,7 @@ import { ModuleRef } from "@nestjs/core";
 import { match, P } from "ts-pattern";
 
 import { LocalAdapter } from "../adapters/local.adapter";
+import { MailgunAdapter } from "../adapters/mailgun.adapter";
 import { AWSSESAdapter } from "../adapters/ses.adapter";
 import { SmtpAdapter } from "../adapters/smtp.adapter";
 
@@ -25,6 +26,7 @@ export class EmailAdapterFactory {
       .with("mailhog", () => LocalAdapter)
       .with("smtp", () => SmtpAdapter)
       .with("ses", () => AWSSESAdapter)
+      .with("mailgun", () => MailgunAdapter)
       .with(P.nullish, () => {
         throw new Error("EMAIL_ADAPTER is not defined in configuration");
       })
