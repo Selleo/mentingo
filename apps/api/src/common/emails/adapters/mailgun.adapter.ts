@@ -6,16 +6,11 @@ import Mailgun from "mailgun.js";
 import { EmailAdapter } from "./email.adapter";
 
 import type { Email } from "../email.interface";
-import type {
-  Interfaces,
-  MailgunClientOptions,
-  MailgunMessageData,
-} from 'mailgun.js/definitions';
-
+import type { Interfaces, MailgunClientOptions, MailgunMessageData } from "mailgun.js/definitions";
 
 @Injectable()
 export class MailgunAdapter extends EmailAdapter {
-  private client: Interfaces.IMailgunClient
+  private client: Interfaces.IMailgunClient;
   private domain: string;
   private logger = new Logger(MailgunAdapter.name);
 
@@ -42,7 +37,7 @@ export class MailgunAdapter extends EmailAdapter {
       throw new Error("Mailgun API key (MAILGUN_KEY) is not configured.");
     }
 
-    return { key: apiKey, username: "api", };
+    return { key: apiKey, username: "api" };
   }
 
   async sendMail(email: Email): Promise<void> {
@@ -58,9 +53,7 @@ export class MailgunAdapter extends EmailAdapter {
     } else if (text) {
       mailgunPayload = { from, to, subject, text };
     } else {
-      throw new Error(
-        "Email must have text or html content if not using a mailgun template.",
-      );
+      throw new Error("Email must have text or html content if not using a mailgun template.");
     }
 
     try {

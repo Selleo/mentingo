@@ -272,7 +272,7 @@ export class UserService {
         subject: "Welcome to the Platform!",
         text,
         html,
-        from: process.env.SES_EMAIL || "",
+        from: process.env.SENDER_EMAIL_ADDRESS || "",
       });
 
       if (USER_ROLES.TEACHER === createdUser.role || USER_ROLES.ADMIN === createdUser.role)

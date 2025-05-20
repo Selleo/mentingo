@@ -1,5 +1,6 @@
 import { registerAs } from "@nestjs/config";
 import { type Static, Type } from "@sinclair/typebox";
+
 import { configValidator } from "src/utils/configValidator";
 
 const schema = Type.Object({
@@ -7,7 +8,12 @@ const schema = Type.Object({
   SMTP_PORT: Type.Number(),
   SMTP_USER: Type.String(),
   SMTP_PASSWORD: Type.String(),
-  EMAIL_ADAPTER: Type.Union([Type.Literal("mailhog"), Type.Literal("smtp"), Type.Literal("ses"), Type.Literal("mailgun")]),
+  EMAIL_ADAPTER: Type.Union([
+    Type.Literal("mailhog"),
+    Type.Literal("smtp"),
+    Type.Literal("ses"),
+    Type.Literal("mailgun"),
+  ]),
 });
 
 export type EmailConfigSchema = Static<typeof schema>;
