@@ -58,7 +58,14 @@ const FileLessonForm = ({
 
   useEffect(() => {
     setDisplayFileUrl(lessonToEdit?.fileS3SignedUrl);
-  }, [lessonToEdit]);
+    form.reset({
+      ...lessonToEdit,
+      type:
+        lessonToEdit?.type === "presentation" || lessonToEdit?.type === "video"
+          ? lessonToEdit.type
+          : undefined,
+    });
+  }, [lessonToEdit, form]);
 
   const onCloseModal = () => {
     setIsModalOpen(false);
@@ -91,7 +98,7 @@ const FileLessonForm = ({
   );
 
   const handleSourceTypeChange = (value: SourceType) => {
-    const isExternalUrlValue = value === "external" ? true : false;
+    const isExternalUrlValue = value === "external";
     form.setValue("isExternal", isExternalUrlValue);
     form.setValue("fileS3Key", "");
     setDisplayFileUrl("");
@@ -148,6 +155,7 @@ const FileLessonForm = ({
             control={form.control}
             name="isExternal"
             render={() => (
+              // TODO: add translation keys
               <FormItem>
                 <Label className="body-base-md text-neutral-950">Source Type</Label>
                 <Select
