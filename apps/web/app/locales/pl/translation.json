@@ -390,8 +390,8 @@
       "somethingWentWrong": "Coś poszło nie tak"
     },
     "other": {
-      "buyFor": "Kup dla",
-      "enrollCourse": "Zapisz na kurs"
+      "buyFor": "Kup za",
+      "enrollCourse": "Zapisz się na kurs"
     }
   },
   "adminCourseView": {
@@ -482,7 +482,7 @@
           "title": "Tytuł"
         },
         "other": {
-          "freemium": "Freemium",
+          "freemium": "Darmowa lekcja",
           "freemiumToolTip": "Studenci mogą uzyskać dostęp do rozdziałów freemium bez zapisywania się na kurs."
         }
       },
