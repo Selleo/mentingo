@@ -20,7 +20,7 @@
     },
     "roles": {
       "admin": "Administrator",
-      "teacher": "Nauczyciel",
+      "teacher": "Twórca treści",
       "student": "Uczeń"
     },
     "error": {

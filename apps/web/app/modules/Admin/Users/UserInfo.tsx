@@ -57,7 +57,7 @@ export const UserInfo = memo<{
                 <SelectGroup>
                   {[USER_ROLE.student, USER_ROLE.admin, USER_ROLE.teacher].map((role) => (
                     <SelectItem className="capitalize" value={role} key={role}>
-                      {t(role)}
+                      {t(`common.roles.${role}`)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
