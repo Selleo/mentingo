@@ -141,7 +141,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
     const buttonValues = currentValue
       ? [...currentValue.matchAll(regex)]
           .map((match) => match[1]?.trim() || "")
-          .map((text) => text.replace(/\n/g, "").split(" ")[0])
+          .map((text) => text.replace(/\n/g, "").slice(0, -2))
       : [];
 
     const updatedOptions = [...currentOptions];
@@ -210,7 +210,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
     const buttonValues = currentDescription
       ? [...currentDescription.matchAll(regex)]
           .map((match) => match[1]?.trim() || "")
-          .map((text) => text.replace(/\n/g, "").split(" ")[0])
+          .map((text) => text.replace(/\n/g, "").slice(0, -2))
       : [];
 
     const updatedOptions = form.getValues(`questions.${questionIndex}.options`)?.map((option) => {
@@ -240,7 +240,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
           { shouldDirty: true },
         );
 
-        const optionValue = button.innerText.trim().replace(/\s+/g, " ").split(" ")[0];
+        const optionValue = button.innerText.trim().replace(/\s+/g, " ").slice(0, -2);
 
         if (optionValue) {
           const updatedOptions = form
@@ -261,7 +261,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
         const buttonValues = currentValue
           ? [...currentValue.matchAll(regex)]
               .map((match) => match[1]?.trim() || "")
-              .map((text) => text.replace(/\n/g, "").split(" ")[0])
+              .map((text) => text.replace(/\n/g, "").slice(0, -2))
           : [];
 
         const updatedOptions = form
