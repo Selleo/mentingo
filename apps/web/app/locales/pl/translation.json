@@ -614,10 +614,14 @@
         "enrollmentDate": "Data zapisania na kurs"
       },
       "statuses": {
-        "allStatuses": "Wszystkie statusy uczestnictwa",
         "enrolled": "Zapisany",
         "notEnrolled": "Niezapisany"
-      }
+      },
+      "confirmation": {
+        "title": "Potwierdź zapis",
+        "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
+      },
+      "successResponse": "studentów zostało zapisanych do kursu."
     }
   },
   "registerView": {

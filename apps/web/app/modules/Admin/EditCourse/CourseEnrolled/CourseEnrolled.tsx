@@ -14,6 +14,16 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -23,15 +33,16 @@ import {
 } from "~/components/ui/table";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
+import { useBulkCourseEnroll } from "~/modules/Admin/EditCourse/CourseEnrolled/hooks/useBulkCourseEnroll";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 
 import type { Row, SortingState, RowSelectionState, ColumnDef } from "@tanstack/react-table";
-import type { ReactElement } from "react";
+import type { ReactElement, FormEvent } from "react";
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
-// TODO: create GET endpoint to get student_courses array by course_id
+// TODO: create GET endpoint to get student_courses array by course_id and override this data
 const courseData: { studentId: string; createdAt: string }[] = [
   {
     studentId: "f43543cc-b99c-407b-b8ad-1baac84fc203",
@@ -50,7 +61,9 @@ type EnrolledStudent = GetUsersResponse["data"][number] & {
 
 export const CourseEnrolled = (): ReactElement => {
   const { t } = useTranslation();
+  // course id will be needed for backend queries/mutations
   // const { id: courseId } = useParams();
+  const { mutate: bulkCreate } = useBulkCourseEnroll();
 
   const [searchParams, setSearchParams] = useState<{
     keyword?: string;
@@ -165,6 +178,14 @@ export const CourseEnrolled = (): ReactElement => {
     },
   });
 
+  const filterConfig: FilterConfig[] = [
+    {
+      type: "text",
+      name: "keyword",
+      placeholder: t("adminCourseView.enrolled.filters.placeholder.searchByKeyword"),
+    },
+  ];
+
   const handleFilterChange = (name: string, value: FilterValue) => {
     startTransition(() => {
       setSearchParams((prev) => ({
@@ -174,16 +195,15 @@ export const CourseEnrolled = (): ReactElement => {
     });
   };
 
-  const filterConfig: FilterConfig[] = [
-    {
-      type: "text",
-      name: "keyword",
-      placeholder: t("adminCourseView.enrolled.filters.placeholder.searchByKeyword"),
-    },
-  ];
-
   const handleRowClick = (row: Row<EnrolledStudent>) => () => {
     row.toggleSelected(!row.getIsSelected());
+  };
+
+  const handleFormSubmit = (event: FormEvent) => {
+    // TODO: handle form submitting here, pass the valid objects
+    bulkCreate({ data: Object.keys(rowSelection) });
+    setRowSelection({});
+    event.preventDefault();
   };
 
   return (
@@ -191,17 +211,42 @@ export const CourseEnrolled = (): ReactElement => {
       <div className="flex items-center justify-between gap-2">
         <SearchFilter
           filters={filterConfig}
-          values={{}}
+          values={searchParams}
           onChange={handleFilterChange}
           isLoading={false}
         />
-        <Button
-          className="border border-primary-500 bg-transparent text-primary-700"
-          onClick={() => alert("not implemented")}
-          disabled={Object.values(rowSelection).length === 0}
-        >
-          {t("adminCourseView.enrolled.enrollSelected")}
-        </Button>
+
+        <Dialog>
+          <DialogTrigger>
+            <Button
+              className="border border-primary-500 bg-transparent text-primary-700"
+              disabled={Object.values(rowSelection).length === 0}
+            >
+              {t("adminCourseView.enrolled.enrollSelected")}
+            </Button>
+          </DialogTrigger>
+          <DialogPortal>
+            <DialogOverlay />
+            <DialogContent>
+              <DialogTitle>{t("adminCourseView.enrolled.confirmation.title")}</DialogTitle>
+              <DialogDescription>
+                {t("adminCourseView.enrolled.confirmation.description")}
+              </DialogDescription>
+              <form onSubmit={handleFormSubmit}>
+                <div className={"flex justify-end gap-4"}>
+                  <DialogClose>
+                    <Button type={"reset"} variant={"ghost"}>
+                      {t("common.button.cancel")}
+                    </Button>
+                  </DialogClose>
+                  <DialogClose>
+                    <Button type={"submit"}>{t("common.button.save")}</Button>
+                  </DialogClose>
+                </div>
+              </form>
+            </DialogContent>
+          </DialogPortal>
+        </Dialog>
       </div>
       <Table className="border bg-neutral-50">
         <TableHeader>
