@@ -33,7 +33,7 @@ const Editor = ({ content, placeholder, onChange, id, className }: EditorProps) 
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content || "");
     }
-  }, [content]);
+  }, [content, editor]);
 
   if (!editor) return <></>;
 
