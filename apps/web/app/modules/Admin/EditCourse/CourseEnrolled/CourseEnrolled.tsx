@@ -31,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { USER_ROLE } from "~/config/userRoles";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import { useBulkCourseEnroll } from "~/modules/Admin/EditCourse/CourseEnrolled/hooks/useBulkCourseEnroll";
@@ -78,11 +79,13 @@ export const CourseEnrolled = (): ReactElement => {
 
   const enrolledStudents = useMemo(
     () =>
-      usersData.map((user) => ({
-        ...user,
-        isEnrolled: !!courseData.find((course) => course.studentId === user.id)?.createdAt,
-        enrolledAt: courseData.find((course) => course.studentId === user.id)?.createdAt ?? "",
-      })),
+      usersData
+        .filter(({ role }) => role === USER_ROLE.student)
+        .map((user) => ({
+          ...user,
+          isEnrolled: !!courseData.find((course) => course.studentId === user.id)?.createdAt,
+          enrolledAt: courseData.find((course) => course.studentId === user.id)?.createdAt ?? "",
+        })),
     [usersData],
   );
 
