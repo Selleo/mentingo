@@ -614,6 +614,10 @@
         "status": "Enrollment status",
         "enrollmentDate": "Date enrolled"
       },
+      "statuses": {
+        "enrolled": "Enrolled",
+        "notEnrolled": "Not enrolled"
+      },
       "confirmation": {
         "title": "Confirm enrollment",
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."

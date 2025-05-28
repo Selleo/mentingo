@@ -62,7 +62,7 @@ type EnrolledStudent = GetUsersResponse["data"][number] & {
 
 export const CourseEnrolled = (): ReactElement => {
   const { t } = useTranslation();
-  // course id will be needed for backend queries/mutations
+  // courseId will be needed for backend queries/mutations
   // const { id: courseId } = useParams();
   const { mutate: bulkCreate } = useBulkCourseEnroll();
 
