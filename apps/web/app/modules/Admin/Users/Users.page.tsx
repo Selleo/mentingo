@@ -135,6 +135,7 @@ const Users = () => {
     {
       accessorKey: "role",
       header: t("adminUsersView.field.role"),
+      cell: ({ row }) => t(`common.roles.${row.original.role}`),
     },
     {
       accessorKey: "archived",

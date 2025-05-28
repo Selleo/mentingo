@@ -20,7 +20,7 @@
     },
     "roles": {
       "admin": "Administrator",
-      "teacher": "Nauczyciel",
+      "teacher": "Twórca treści",
       "student": "Uczeń"
     },
     "error": {
@@ -390,8 +390,8 @@
       "somethingWentWrong": "Coś poszło nie tak"
     },
     "other": {
-      "buyFor": "Kup dla",
-      "enrollCourse": "Zapisz na kurs"
+      "buyFor": "Kup za",
+      "enrollCourse": "Zapisz się na kurs"
     }
   },
   "adminCourseView": {
@@ -452,7 +452,7 @@
         "subHeader": "Użyj panelu po lewej, aby utworzyć nowe lub zaktualizować istniejące rozdziały"
       },
       "other": {
-        "lessonNumber": "Liczba lekcji",
+        "lessonNumber": "Liczba lekcji:",
         "chapter": "Rozdział",
         "lesson": "Lekcja",
         "edit": "Edytuj",
@@ -482,7 +482,7 @@
           "title": "Tytuł"
         },
         "other": {
-          "freemium": "Freemium",
+          "freemium": "Darmowa lekcja",
           "freemiumToolTip": "Studenci mogą uzyskać dostęp do rozdziałów freemium bez zapisywania się na kurs."
         }
       },

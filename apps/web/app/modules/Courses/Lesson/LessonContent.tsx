@@ -46,7 +46,7 @@ export const LessonContent = ({
     }
 
     setIsNextDisabled(false);
-  }, [lesson.lessonCompleted, lesson.type]);
+  }, [isAdminLike, lesson.lessonCompleted, lesson.type]);
 
   const Content = () =>
     match(lesson.type)
