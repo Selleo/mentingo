@@ -400,7 +400,7 @@
       "curriculum": "Program nauczania",
       "status": "Status",
       "pricing": "Cennik",
-      "preview": "Podgląd"
+      "enrolledStudents": "Zapisani studenci"
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
@@ -597,6 +597,26 @@
       },
       "validation": {
         "priceInCents": "Kurs musi kosztować co najmniej 2.00 lub być darmowy"
+      }
+    },
+    "enrolled": {
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Szukaj po słowie kluczowym..."
+        }
+      },
+      "enrollSelected": "Zapisz wybranych na kurs",
+      "table": {
+        "name": "Imię",
+        "surname": "Nazwisko",
+        "email": "Email",
+        "status": "Status uczestnictwa",
+        "enrollmentDate": "Data zapisania na kurs"
+      },
+      "statuses": {
+        "allStatuses": "Wszystkie statusy uczestnictwa",
+        "enrolled": "Zapisany",
+        "notEnrolled": "Niezapisany"
       }
     }
   },

@@ -400,7 +400,8 @@
       "curriculum": "Curriculum",
       "status": "Status",
       "pricing": "Pricing",
-      "preview": "Preview"
+      "preview": "Preview",
+      "enrolledStudents": "Enrolled students"
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
@@ -597,6 +598,26 @@
       },
       "validation": {
         "priceInCents": "Price must be at least 2.00 or free"
+      }
+    },
+    "enrolled": {
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Search by keyword..."
+        }
+      },
+      "enrollSelected": "Enroll selected",
+      "table": {
+        "name": "Name",
+        "surname": "Surname",
+        "email": "Email",
+        "status": "Enrollment status",
+        "enrollmentDate": "Date enrolled"
+      },
+      "statuses": {
+        "allStatuses": "All statuses",
+        "enrolled": "Enrolled",
+        "notEnrolled": "Not enrolled"
       }
     }
   },

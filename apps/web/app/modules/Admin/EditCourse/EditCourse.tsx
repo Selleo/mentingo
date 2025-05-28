@@ -7,6 +7,8 @@ import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
+import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
+import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
 
 import CourseLessons from "./CourseLessons/CourseLessons";
 import CoursePricing from "./CoursePricing/CoursePricing";
@@ -20,6 +22,7 @@ const EditCourse = () => {
   const { id } = useParams();
   const params = new URLSearchParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const courseTabs = useEditCourseTabs();
 
   if (!id) throw new Error("Course ID not found");
   const { data: course, isLoading, dataUpdatedAt } = useBetaCourseById(id);
@@ -72,12 +75,7 @@ const EditCourse = () => {
           </Button>
         </div>
         <TabsList className="w-min">
-          {[
-            { label: t("adminCourseView.common.settings"), value: "Settings" },
-            { label: t("adminCourseView.common.curriculum"), value: "Curriculum" },
-            { label: t("adminCourseView.common.pricing"), value: "Pricing" },
-            { label: t("adminCourseView.common.status"), value: "Status" },
-          ].map(({ label, value }) => (
+          {courseTabs.map(({ label, value }) => (
             <TabsTrigger key={value} value={value} onClick={() => handleTabChange(value)}>
               {label}
             </TabsTrigger>
@@ -111,6 +109,9 @@ const EditCourse = () => {
       </TabsContent>
       <TabsContent value="Status">
         <CourseStatus courseId={course?.id || ""} isPublished={!!course?.isPublished} />
+      </TabsContent>
+      <TabsContent value="Enrolled">
+        <CourseEnrolled />
       </TabsContent>
     </Tabs>
   );
