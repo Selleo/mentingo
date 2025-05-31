@@ -10,7 +10,7 @@ export const CourseList: React.FC<{
   availableCourses: GetAvailableCoursesResponse["data"];
   courseListLayout: CourseListLayout;
 }> = ({ availableCourses, courseListLayout }) =>
-  match(courseListLayout)
-    .with("card", () => <CardCourseList availableCourses={availableCourses} />)
-    .with("table", () => <TableCourseList availableCourses={availableCourses} />)
-    .exhaustive();
+    match(courseListLayout)
+      .with("card", () => <CardCourseList availableCourses={availableCourses} />)
+      .with("table", () => <TableCourseList availableCourses={availableCourses} />)
+      .exhaustive();

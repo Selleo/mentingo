@@ -83,6 +83,12 @@ export interface CurrentUserResponse {
   };
 }
 
+export interface VisitorCurrentUserResponse {
+  data: {
+    role: USER_ROLE.visitor;
+  };
+}
+
 export interface ForgotPasswordBody {
   /**
    * @format email
@@ -1250,6 +1256,7 @@ import type {
   ResponseType,
 } from "axios";
 import axios from "axios";
+import { USER_ROLE } from "~/config/userRoles";
 
 export type QueryParamsType = Record<string | number, any>;
 
@@ -1469,13 +1476,14 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AuthControllerCurrentUser
      * @request GET:/api/auth/current-user
      */
-    authControllerCurrentUser: (params: RequestParams = {}) =>
-      this.request<CurrentUserResponse, any>({
+    authControllerCurrentUser: (params: RequestParams = {}) => {
+      return this.request<CurrentUserResponse, any>({
         path: `/api/auth/current-user`,
         method: "GET",
         format: "json",
         ...params,
-      }),
+      });
+    },
 
     /**
      * No description

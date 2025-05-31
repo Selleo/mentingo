@@ -4,6 +4,7 @@ export const routes: (
   defineRoutes: (callback: (defineRoute: DefineRouteFunction) => void) => RouteManifest,
 ) => RouteManifest | Promise<RouteManifest> = (defineRoutes) => {
   return defineRoutes((route) => {
+    route("visitor-courses", "modules/VisitorCourses/VisitorCourses.page.tsx");
     route("auth", "modules/Auth/Auth.layout.tsx", () => {
       route("login", "modules/Auth/Login.page.tsx", { index: true });
       route("register", "modules/Auth/Register.page.tsx");
