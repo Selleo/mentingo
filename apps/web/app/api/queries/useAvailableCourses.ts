@@ -11,6 +11,7 @@ type CourseParams = {
   sort?: SortOption;
   userId?: string;
   excludeCourseId?: string;
+  userRole?: string;
 };
 
 export const availableCoursesQueryOptions = (searchParams?: CourseParams) => ({
