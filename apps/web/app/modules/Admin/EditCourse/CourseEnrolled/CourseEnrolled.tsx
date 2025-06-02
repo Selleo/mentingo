@@ -43,20 +43,9 @@ import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
-// TODO: create GET endpoint to get student_courses array by course_id and override this data
-const courseData: { studentId: string; createdAt: string }[] = [
-  {
-    studentId: "f43543cc-b99c-407b-b8ad-1baac84fc203",
-    createdAt: "2025-05-18 12:24:55.393 +00:00",
-  },
-  {
-    studentId: "2da5a8b2-44b2-455f-a3bb-b163cd8823ea",
-    createdAt: "2025-05-23 13:42:55.393 +00:00",
-  },
-];
+const courseData: { studentId: string; createdAt: string }[] = [];
 
 type EnrolledStudent = GetUsersResponse["data"][number] & {
-  isEnrolled: boolean;
   enrolledAt: string;
 };
 
@@ -77,13 +66,13 @@ export const CourseEnrolled = (): ReactElement => {
 
   const { data: usersData } = useAllUsersSuspense(searchParams);
 
+  // TODO: create GET endpoint to get student_courses array by course_id and override this data
   const enrolledStudents = useMemo(
     () =>
       usersData
         .filter(({ role }) => role === USER_ROLE.student)
         .map((user) => ({
           ...user,
-          isEnrolled: !!courseData.find((course) => course.studentId === user.id)?.createdAt,
           enrolledAt: courseData.find((course) => course.studentId === user.id)?.createdAt ?? "",
         })),
     [usersData],
@@ -141,7 +130,7 @@ export const CourseEnrolled = (): ReactElement => {
       ),
     },
     {
-      accessorKey: "isEnrolled",
+      accessorKey: "enrolledAt",
       header: ({ column }) => (
         <SortButton<EnrolledStudent> column={column}>
           {t("adminCourseView.enrolled.table.status")}
@@ -149,7 +138,7 @@ export const CourseEnrolled = (): ReactElement => {
       ),
       cell: ({ row }) => (
         <Badge variant={"secondary"} className="w-max">
-          {row.original.isEnrolled
+          {row.original.enrolledAt
             ? t("adminCourseView.enrolled.statuses.enrolled")
             : t("adminCourseView.enrolled.statuses.notEnrolled")}
         </Badge>
