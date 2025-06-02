@@ -60,8 +60,10 @@ import type {
   AllStudentCoursesResponse,
 } from "./schemas/course.schema";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
+import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { InferSelectModel } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { Pagination, UUIDType } from "src/common";
 import type {
@@ -251,6 +253,20 @@ export class CourseService {
         },
       };
     });
+  }
+
+  async getStudentsIdsByCourseId(courseId: UUIDType) {
+    const [data] = await this.db
+      .select({
+        studentId: studentCourses.studentId,
+        createdAt: studentCourses.createdAt,
+      })
+      .from(studentCourses)
+      .where(eq(studentCourses.courseId, courseId));
+
+    return {
+      data: data ?? [],
+    };
   }
 
   async getAvailableCourses(
@@ -765,14 +781,60 @@ export class CourseService {
     const isTest = testKey && testKey === process.env.TEST_KEY;
     if (!isTest && Boolean(course.price)) throw new ForbiddenException();
 
+    await this.createStudentCourse(id, studentId);
     await this.createCourseDependencies(id, studentId);
   }
 
-  async createCourseDependencies(
+  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment) {
+    const { studentIds } = body;
+
+    const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
+    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+
+    const existingEnrollments = await this.db
+      .select({
+        studentId: studentCourses.studentId,
+      })
+      .from(studentCourses)
+      .where(
+        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
+      );
+
+    const enrolledStudents = new Set(existingEnrollments.map(({ studentId }) => studentId));
+
+    if (enrolledStudents.size > 0) {
+      const alreadyEnrolledStudents = studentIds.filter((studentId) =>
+        enrolledStudents.has(studentId),
+      );
+
+      throw new ConflictException(
+        `Students ${alreadyEnrolledStudents.join(", ")} are already enrolled in course ${courseId}`,
+      );
+    }
+
+    await this.db.transaction(async (trx) => {
+      const studentCoursesValues = studentIds.map((studentId) => {
+        return {
+          studentId,
+          courseId,
+        };
+      });
+
+      await trx.insert(studentCourses).values(studentCoursesValues);
+
+      await Promise.all(
+        studentIds.map(async (studentId) => {
+          await this.createCourseDependencies(courseId, studentId);
+        }),
+      );
+    });
+  }
+
+  async createStudentCourse(
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
-  ) {
+  ): Promise<InferSelectModel<typeof studentCourses>> {
     const [enrolledCourse] = await this.db
       .insert(studentCourses)
       .values({ studentId, courseId, paymentId })
@@ -780,6 +842,14 @@ export class CourseService {
 
     if (!enrolledCourse) throw new ConflictException("Course not enrolled");
 
+    return enrolledCourse;
+  }
+
+  async createCourseDependencies(
+    courseId: UUIDType,
+    studentId: UUIDType,
+    paymentId: string | null = null,
+  ) {
     await this.db.transaction(async (trx) => {
       const courseChapterList = await trx
         .select({

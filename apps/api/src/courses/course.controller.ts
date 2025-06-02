@@ -47,6 +47,13 @@ import {
 } from "src/courses/validations/validations";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
+import {
+  CreateCoursesEnrollment,
+  createCoursesEnrollmentSchema,
+} from "./schemas/createCoursesEnrollment";
+import { studentsIdsSchema } from "./schemas/studentsById";
+
+import type { StudentsIds } from "./schemas/studentsById";
 import type {
   AllCoursesForTeacherResponse,
   AllCoursesResponse,
@@ -131,6 +138,18 @@ export class CourseController {
     const data = await this.courseService.getCoursesForUser(query, currentUserId);
 
     return new PaginatedResponse(data);
+  }
+
+  @Roles(USER_ROLES.ADMIN)
+  @Get(":courseId/student-ids")
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(studentsIdsSchema),
+  })
+  async getCoursesByStudent(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<BaseResponse<StudentsIds>> {
+    return await this.courseService.getStudentsIdsByCourseId(courseId);
   }
 
   @Get("available-courses")
@@ -259,6 +278,31 @@ export class CourseController {
     await this.courseService.enrollCourse(id, currentUserId, testKey);
 
     return new BaseResponse({ message: "Course enrolled successfully" });
+  }
+
+  @Post("/:courseId/enroll-courses")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "courseId",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: createCoursesEnrollmentSchema,
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async enrollCourses(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: CreateCoursesEnrollment,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.enrollCourses(courseId, body);
+
+    return new BaseResponse({ message: "Courses enrolled successfully" });
   }
 
   @Delete("unenroll-course")
