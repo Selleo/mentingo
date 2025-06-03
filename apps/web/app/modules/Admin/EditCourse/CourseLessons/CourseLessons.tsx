@@ -16,6 +16,7 @@ import QuizLessonForm from "./NewLesson/QuizLessonForm/QuizLessonForm";
 import TextLessonForm from "./NewLesson/TextLessonForm/TextLessonForm";
 
 import type { Chapter, Lesson } from "../EditCourse.types";
+import type { Sortable } from "~/components/SortableList/SortableList";
 
 interface CourseLessonsProps {
   chapters?: Chapter[];
@@ -102,13 +103,18 @@ const CourseLessons = ({ chapters, canRefetchChapterList }: CourseLessonsProps) 
     return contentMap[contentTypeToDisplay] || null;
   }, [contentTypeToDisplay, selectedChapter, selectedLesson]);
 
+  const sortableChapters: Sortable<Chapter>[] = useMemo(
+    () => chapters?.map((chapter) => ({ ...chapter, sortableId: chapter.id })) ?? [],
+    [chapters],
+  );
+
   return (
     <div className="flex h-full basis-full gap-x-8 rounded-lg">
       <div className="flex h-full w-full flex-col justify-between md:max-w-[480px]">
         <div className="flex h-full flex-col overflow-y-auto">
           <ChaptersList
             canRefetchChapterList={canRefetchChapterList}
-            chapters={chapters?.map((item) => ({ ...item, sortableId: item.id }))}
+            chapters={sortableChapters}
             setContentTypeToDisplay={setContentTypeToDisplay}
             setSelectedChapter={setSelectedChapter}
             setSelectedLesson={setSelectedLesson}
