@@ -6,7 +6,17 @@ import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [svgr(), tsconfigPaths()],
+  plugins: [
+    svgr({
+      svgrOptions: {
+        ref: true,
+        svgo: false,
+        titleProp: true,
+      },
+      include: "**/*.svg?react",
+    }),
+    tsconfigPaths(),
+  ],
   resolve: {
     alias: {
       "~": path.resolve(__dirname, "./app"),

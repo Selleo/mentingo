@@ -21,6 +21,7 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -101,7 +102,7 @@ export class UserController {
   }
 
   @Get("details")
-  @Roles(...Object.values(USER_ROLES))
+  @Public()
   @Validate({
     request: [{ type: "query", name: "userId", schema: UUIDSchema, required: true }],
     response: baseResponse(userDetailsSchema),

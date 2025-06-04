@@ -1,6 +1,7 @@
 import { useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
+import { useCurrentUser } from "~/api/queries";
 import { useTeacherCourses } from "~/api/queries/useTeacherCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
@@ -18,13 +19,16 @@ export default function TeacherPage() {
   const { data: userDetails } = useUserDetails(id);
   const { data: teacherCourses } = useTeacherCourses(id);
   const { t } = useTranslation();
+  const { data: currentUser } = useCurrentUser();
 
   return (
     <PageWrapper>
-      <TeacherPageBreadcrumbs
-        id={id}
-        username={`${userDetails?.firstName} ${userDetails?.lastName}`}
-      />
+      {currentUser && (
+        <TeacherPageBreadcrumbs
+          id={id}
+          username={`${userDetails?.firstName} ${userDetails?.lastName}`}
+        />
+      )}
       <div className="flex flex-col gap-6 xl:flex-row">
         <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow xl:w-full xl:max-w-[480px]">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">

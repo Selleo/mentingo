@@ -487,8 +487,8 @@ describe("CourseController (e2e)", () => {
 
   describe("GET /api/course/available-courses", () => {
     describe("when user is not logged in", () => {
-      it("returns 401", async () => {
-        await request(app.getHttpServer()).get("/api/course/available-courses").expect(401);
+      it("returns 200", async () => {
+        await request(app.getHttpServer()).get("/api/course/available-courses").expect(200);
       });
     });
 
@@ -737,10 +737,6 @@ describe("CourseController (e2e)", () => {
   });
 
   describe("GET /api/course/teacher-courses", () => {
-    it("returns 401 when not logged in", async () => {
-      await request(app.getHttpServer()).get("/api/course/teacher-courses").expect(401);
-    });
-
     it("returns only published courses by specified teacher", async () => {
       const student = await userFactory
         .withCredentials({ password })
