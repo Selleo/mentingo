@@ -74,6 +74,7 @@ describe("CourseController (e2e)", () => {
       "student_lesson_progress",
       "student_courses",
       "users",
+      "categories",
     ]);
   });
 
