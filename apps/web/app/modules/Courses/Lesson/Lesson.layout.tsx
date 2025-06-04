@@ -6,7 +6,6 @@ import { queryClient } from "~/api/queryClient";
 import { Navigation } from "~/components/Navigation";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { RouteGuard } from "~/Guards/RouteGuard";
-import { useAuthEffect } from "~/modules/Auth/authEffect";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 export const clientLoader = async () => {
@@ -26,7 +25,6 @@ export const clientLoader = async () => {
 export default function LessonLayout() {
   const { t } = useTranslation();
   const { currentUser } = useCurrentUserStore();
-  useAuthEffect();
 
   return (
     <div className="flex min-h-dvh flex-col">
