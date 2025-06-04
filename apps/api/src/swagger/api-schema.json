@@ -1130,9 +1130,9 @@
         }
       }
     },
-    "/api/course/{courseId}/student-ids": {
+    "/api/course/{courseId}/students": {
       "get": {
-        "operationId": "CourseController_getCoursesByStudent",
+        "operationId": "CourseController_getStudentsWithEnrollmentDate",
         "parameters": [
           {
             "name": "courseId",
@@ -1142,6 +1142,31 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "enrolledAt",
+                  "type": "string"
+                },
+                {
+                  "const": "-enrolledAt",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -1149,7 +1174,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetCoursesByStudentResponse"
+                  "$ref": "#/components/schemas/GetStudentsWithEnrollmentDateResponse"
                 }
               }
             }
@@ -3490,24 +3515,46 @@
           "pagination"
         ]
       },
-      "GetCoursesByStudentResponse": {
+      "GetStudentsWithEnrollmentDateResponse": {
         "type": "object",
         "properties": {
           "data": {
-            "type": "object",
-            "properties": {
-              "studentId": {
-                "format": "uuid",
-                "type": "string"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "enrolledAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                }
               },
-              "createdAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "studentId",
-              "createdAt"
-            ]
+              "required": [
+                "firstName",
+                "lastName",
+                "email",
+                "enrolledAt",
+                "id"
+              ]
+            }
           }
         },
         "required": [

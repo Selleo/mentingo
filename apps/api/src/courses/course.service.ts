@@ -16,6 +16,7 @@ import {
   isNotNull,
   like,
   ne,
+  or,
   sql,
 } from "drizzle-orm";
 import { isEmpty } from "lodash";
@@ -52,6 +53,8 @@ import {
   type CourseSortField,
   CourseSortFields,
   type CoursesQuery,
+  EnrolledStudentSortFields,
+  type EnrolledStudentFilterSchema,
 } from "./schemas/courseQuery";
 
 import type {
@@ -61,11 +64,11 @@ import type {
 } from "./schemas/course.schema";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
+import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
-import type { InferSelectModel } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { Pagination, UUIDType } from "src/common";
+import type { BaseResponse, Pagination, UUIDType } from "src/common";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -255,14 +258,41 @@ export class CourseService {
     });
   }
 
-  async getStudentsIdsByCourseId(courseId: UUIDType) {
-    const [data] = await this.db
+  async getStudentsWithEnrollmentDate(
+    courseId: UUIDType,
+    filters: EnrolledStudentFilterSchema,
+  ): Promise<BaseResponse<EnrolledStudent[]>> {
+    const { keyword, sort = EnrolledStudentSortFields.enrolledAt } = filters;
+
+    const { sortOrder } = getSortOptions(sort);
+
+    const conditions = [];
+
+    if (keyword) {
+      conditions.push(
+        or(
+          ilike(users.firstName, `%${keyword.toLowerCase()}%`),
+          ilike(users.lastName, `%${keyword.toLowerCase()}%`),
+          ilike(users.email, `%${keyword.toLowerCase()}%`),
+        ),
+      );
+    }
+
+    const data = await this.db
       .select({
-        studentId: studentCourses.studentId,
-        createdAt: studentCourses.createdAt,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        id: users.id,
+        enrolledAt: studentCourses.createdAt,
       })
-      .from(studentCourses)
-      .where(eq(studentCourses.courseId, courseId));
+      .from(users)
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
+      )
+      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT)))
+      .orderBy(sortOrder(studentCourses.createdAt));
 
     return {
       data: data ?? [],
@@ -756,7 +786,7 @@ export class CourseService {
     });
   }
 
-  async enrollCourse(id: UUIDType, studentId: UUIDType, testKey?: string) {
+  async enrollCourse(id: UUIDType, studentId: UUIDType, testKey?: string, paymentId?: string) {
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -781,8 +811,10 @@ export class CourseService {
     const isTest = testKey && testKey === process.env.TEST_KEY;
     if (!isTest && Boolean(course.price)) throw new ForbiddenException();
 
-    await this.createStudentCourse(id, studentId);
-    await this.createCourseDependencies(id, studentId);
+    this.db.transaction(async (trx) => {
+      await this.createStudentCourse(id, studentId);
+      await this.createCourseDependencies(id, studentId, paymentId, trx);
+    });
   }
 
   async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment) {
@@ -824,7 +856,7 @@ export class CourseService {
 
       await Promise.all(
         studentIds.map(async (studentId) => {
-          await this.createCourseDependencies(courseId, studentId);
+          await this.createCourseDependencies(courseId, studentId, null, trx);
         }),
       );
     });
@@ -834,7 +866,7 @@ export class CourseService {
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
-  ): Promise<InferSelectModel<typeof studentCourses>> {
+  ): Promise<StudentCourseSelect> {
     const [enrolledCourse] = await this.db
       .insert(studentCourses)
       .values({ studentId, courseId, paymentId })
@@ -849,62 +881,61 @@ export class CourseService {
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
+    trx: PostgresJsDatabase<typeof schema>,
   ) {
-    await this.db.transaction(async (trx) => {
-      const courseChapterList = await trx
-        .select({
-          id: chapters.id,
-          itemCount: chapters.lessonCount,
-        })
-        .from(chapters)
-        .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
-        .where(eq(chapters.courseId, courseId))
-        .groupBy(chapters.id);
+    const courseChapterList = await trx
+      .select({
+        id: chapters.id,
+        itemCount: chapters.lessonCount,
+      })
+      .from(chapters)
+      .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .where(eq(chapters.courseId, courseId))
+      .groupBy(chapters.id);
 
-      const existingLessonProgress = await this.lessonRepository.getLessonsProgressByCourseId(
-        courseId,
-        studentId,
-        trx,
+    const existingLessonProgress = await this.lessonRepository.getLessonsProgressByCourseId(
+      courseId,
+      studentId,
+      trx,
+    );
+
+    await this.createStatisicRecordForCourse(
+      courseId,
+      paymentId,
+      isEmpty(existingLessonProgress),
+      trx,
+    );
+
+    if (courseChapterList.length > 0) {
+      await trx.insert(studentChapterProgress).values(
+        courseChapterList.map((chapter) => ({
+          studentId,
+          chapterId: chapter.id,
+          courseId,
+          completedLessonItemCount: 0,
+        })),
       );
 
-      await this.createStatisicRecordForCourse(
-        courseId,
-        paymentId,
-        isEmpty(existingLessonProgress),
-        trx,
+      await Promise.all(
+        courseChapterList.map(async (chapter) => {
+          const chapterLessons = await trx
+            .select({ id: lessons.id, type: lessons.type })
+            .from(lessons)
+            .where(eq(lessons.chapterId, chapter.id));
+
+          await trx.insert(studentLessonProgress).values(
+            chapterLessons.map((lesson) => ({
+              studentId,
+              lessonId: lesson.id,
+              chapterId: chapter.id,
+              completedQuestionCount: 0,
+              quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
+              completedAt: null,
+            })),
+          );
+        }),
       );
-
-      if (courseChapterList.length > 0) {
-        await trx.insert(studentChapterProgress).values(
-          courseChapterList.map((chapter) => ({
-            studentId,
-            chapterId: chapter.id,
-            courseId,
-            completedLessonItemCount: 0,
-          })),
-        );
-
-        await Promise.all(
-          courseChapterList.map(async (chapter) => {
-            const chapterLessons = await trx
-              .select({ id: lessons.id, type: lessons.type })
-              .from(lessons)
-              .where(eq(lessons.chapterId, chapter.id));
-
-            await trx.insert(studentLessonProgress).values(
-              chapterLessons.map((lesson) => ({
-                studentId,
-                lessonId: lesson.id,
-                chapterId: chapter.id,
-                completedQuestionCount: 0,
-                quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
-                completedAt: null,
-              })),
-            );
-          }),
-        );
-      }
-    });
+    }
   }
 
   async unenrollCourse(id: UUIDType, userId: UUIDType) {

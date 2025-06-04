@@ -31,8 +31,8 @@ export class StripeWebhookHandler {
     if (!course) return null;
 
     try {
-      await this.courseService.createStudentCourse(courseId, userId, paymentIntent.id);
-      await this.courseService.createCourseDependencies(courseId, userId, paymentIntent.id);
+      await this.courseService.enrollCourse(courseId, userId, paymentIntent.id);
+
       return true;
     } catch (error) {
       console.log(error);

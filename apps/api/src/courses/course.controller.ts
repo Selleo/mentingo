@@ -33,6 +33,7 @@ import {
   COURSE_ENROLLMENT_SCOPES,
   CourseEnrollmentScope,
   SortCourseFieldsOptions,
+  SortEnrolledStudentsOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -44,6 +45,7 @@ import {
   allCoursesValidation,
   coursesValidation,
   studentCoursesValidation,
+  studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
@@ -51,15 +53,17 @@ import {
   CreateCoursesEnrollment,
   createCoursesEnrollmentSchema,
 } from "./schemas/createCoursesEnrollment";
-import { studentsIdsSchema } from "./schemas/studentsById";
 
-import type { StudentsIds } from "./schemas/studentsById";
+import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
 import type {
   AllCoursesForTeacherResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
 } from "src/courses/schemas/course.schema";
-import type { CoursesFilterSchema } from "src/courses/schemas/courseQuery";
+import type {
+  CoursesFilterSchema,
+  EnrolledStudentFilterSchema,
+} from "src/courses/schemas/courseQuery";
 import type {
   CommonShowBetaCourse,
   CommonShowCourse,
@@ -141,15 +145,18 @@ export class CourseController {
   }
 
   @Roles(USER_ROLES.ADMIN)
-  @Get(":courseId/student-ids")
-  @Validate({
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
-    response: baseResponse(studentsIdsSchema),
-  })
-  async getCoursesByStudent(
+  @Get(":courseId/students")
+  @Validate(studentsWithEnrolmentValidation)
+  async getStudentsWithEnrollmentDate(
     @Param("courseId") courseId: UUIDType,
-  ): Promise<BaseResponse<StudentsIds>> {
-    return await this.courseService.getStudentsIdsByCourseId(courseId);
+    @Query("keyword") keyword: string,
+    @Query("sort") sort: SortEnrolledStudentsOptions,
+  ): Promise<BaseResponse<EnrolledStudent[]>> {
+    const filters: EnrolledStudentFilterSchema = {
+      keyword,
+      sort,
+    };
+    return await this.courseService.getStudentsWithEnrollmentDate(courseId, filters);
   }
 
   @Get("available-courses")
