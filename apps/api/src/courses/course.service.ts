@@ -269,11 +269,13 @@ export class CourseService {
     const conditions = [];
 
     if (keyword) {
+      const searchKeyword = keyword.toLowerCase();
+
       conditions.push(
         or(
-          ilike(users.firstName, `%${keyword.toLowerCase()}%`),
-          ilike(users.lastName, `%${keyword.toLowerCase()}%`),
-          ilike(users.email, `%${keyword.toLowerCase()}%`),
+          ilike(users.firstName, `%${searchKeyword}%`),
+          ilike(users.lastName, `%${searchKeyword}%`),
+          ilike(users.email, `%${searchKeyword}%`),
         ),
       );
     }
@@ -823,7 +825,7 @@ export class CourseService {
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
     if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
 
-    const existingEnrollments = await this.db
+    const existingStudentsEnrollments = await this.db
       .select({
         studentId: studentCourses.studentId,
       })
@@ -832,15 +834,15 @@ export class CourseService {
         and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
       );
 
-    const enrolledStudents = new Set(existingEnrollments.map(({ studentId }) => studentId));
-
-    if (enrolledStudents.size > 0) {
-      const alreadyEnrolledStudents = studentIds.filter((studentId) =>
-        enrolledStudents.has(studentId),
+    if (existingStudentsEnrollments.length > 0) {
+      const existingStudentsEnrollmentsIds = existingStudentsEnrollments.map(
+        ({ studentId }) => studentId,
       );
 
       throw new ConflictException(
-        `Students ${alreadyEnrolledStudents.join(", ")} are already enrolled in course ${courseId}`,
+        `Students ${existingStudentsEnrollmentsIds.join(
+          ", ",
+        )} are already enrolled in course ${courseId}`,
       );
     }
 

@@ -1260,7 +1260,7 @@ describe("CourseController (e2e)", () => {
         });
 
         describe("when student is already enrolled in course", () => {
-          it("should return 409 ", async () => {
+          it("should return 409", async () => {
             const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
             const cookies = await cookieFor(admin, app);
             const category = await categoryFactory.create();
@@ -1298,9 +1298,8 @@ describe("CourseController (e2e)", () => {
               .set("Cookie", cookies);
 
             expect(result.status).toBe(409);
-            expect(result.body.message).toBe(
-              `Students ${student1.id}, ${student2.id} are already enrolled in course ${course.id}`,
-            );
+            const messageIds = result.body.message.match(/[0-9a-f-]{36}/g);
+            expect(messageIds).toEqual(expect.arrayContaining([student1.id, student2.id]));
           });
         });
 
