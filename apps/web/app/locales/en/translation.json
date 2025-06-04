@@ -286,7 +286,8 @@
       }
     },
     "other": {
-      "selected": "Selected"
+      "selected": "Selected",
+      "noLessons": "No lessons"
     },
     "button": {
       "uploadScorm": "Upload SCORM",

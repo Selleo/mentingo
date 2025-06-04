@@ -20,6 +20,8 @@ type SortableListProps<T extends BaseItem> = {
   className?: string;
 };
 
+export type Sortable<T> = T & { sortableId: string };
+
 /**
  * A sortable list component that allows users to rearrange items by dragging and dropping.
  * This component is unstyled, allowing full customization through external CSS classes.

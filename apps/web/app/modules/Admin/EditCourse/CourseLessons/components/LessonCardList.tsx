@@ -1,21 +1,23 @@
+import { useParams } from "@remix-run/react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useChangeLessonDisplayOrder } from "~/api/mutations/admin/changeLessonDisplayOrder";
+import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList/SortableList";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import LessonCard from "~/modules/Admin/EditCourse/CourseLessons/components/LessonCard";
 import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import type { Sortable } from "~/components/SortableList/SortableList";
 import type { Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
-
-type DraggableLesson = Lesson & { sortableId: string };
 
 type LessonCardListProps = {
   setSelectedLesson: (lesson: Lesson) => void;
   setContentTypeToDisplay: (contentType: string) => void;
-  lessons: DraggableLesson[];
+  lessons: Sortable<Lesson>[];
   selectedLesson: Lesson | null;
 };
 
@@ -25,15 +27,11 @@ export const LessonCardList = ({
   setContentTypeToDisplay,
   selectedLesson,
 }: LessonCardListProps) => {
-  const [items, setItems] = useState(lessons);
-  const mutation = useChangeLessonDisplayOrder();
+  const { id: courseId } = useParams();
+  const { mutateAsync: mutateLessonDisplayOrder } = useChangeLessonDisplayOrder();
   const { openLeaveModal, isCurrentFormDirty, setIsLeavingContent } = useLeaveModal();
   const [pendingLesson, setPendingLesson] = useState<Lesson | null>(null);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    setItems(lessons);
-  }, [lessons]);
 
   const onClickLessonCard = useCallback(
     (lesson: Lesson) => {
@@ -72,6 +70,24 @@ export const LessonCardList = ({
     ],
   );
 
+  const handleOrderChange = useCallback(
+    async (
+      updatedItems: Sortable<Lesson>[],
+      newChapterPosition: number,
+      newDisplayOrder: number,
+    ) => {
+      await mutateLessonDisplayOrder({
+        lesson: {
+          lessonId: updatedItems[newChapterPosition].sortableId,
+          displayOrder: newDisplayOrder,
+        },
+      });
+
+      await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+    },
+    [courseId, mutateLessonDisplayOrder],
+  );
+
   useEffect(() => {
     if (!isCurrentFormDirty && pendingLesson) {
       onClickLessonCard(pendingLesson);
@@ -80,23 +96,14 @@ export const LessonCardList = ({
     }
   }, [isCurrentFormDirty, pendingLesson, onClickLessonCard, setIsLeavingContent]);
 
-  if (!lessons) {
-    return <p>{t("lessonEmptyState")}</p>;
+  if (!lessons.length) {
+    return <div className="ml-9">{t("adminCoursesView.other.noLessons")}</div>;
   }
 
   return (
     <SortableList
-      items={items}
-      onChange={async (updatedItems, newChapterPosition, newDisplayOrder) => {
-        setItems(updatedItems);
-
-        await mutation.mutateAsync({
-          lesson: {
-            lessonId: updatedItems[newChapterPosition].sortableId,
-            displayOrder: newDisplayOrder,
-          },
-        });
-      }}
+      items={lessons}
+      onChange={handleOrderChange}
       className="mt-4 grid grid-cols-1 gap-4"
       renderItem={(item) => (
         <SortableList.Item id={item.sortableId}>
