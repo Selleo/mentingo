@@ -1,27 +1,29 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useTranslation } from "react-i18next";
 
+import { ApiClient } from "~/api/api-client";
+import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/useUsersEnrolled";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
-type BulkCourseEnroll = {
-  data: Array<string>;
-};
+import type { EnrollCoursesBody } from "~/api/generated-api";
 
-export function useBulkCourseEnroll() {
+export function useBulkCourseEnroll(courseId = "") {
   const { toast } = useToast();
-  const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ data }: BulkCourseEnroll) => {
-      // TODO: call an api here to bulk enroll students
-      return { data };
+    mutationFn: async (data: EnrollCoursesBody) => {
+      const response = await ApiClient.api.courseControllerEnrollCourses(courseId, data);
+
+      await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
+
+      return response.data;
     },
 
     onSuccess: ({ data }) => {
       toast({
         variant: "default",
-        description: `${data.length} ${t("adminCourseView.enrolled.successResponse")}`,
+        description: data.message,
       });
     },
 

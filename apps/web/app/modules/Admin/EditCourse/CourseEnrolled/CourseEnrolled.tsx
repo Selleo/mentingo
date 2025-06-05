@@ -1,3 +1,4 @@
+import { useParams } from "@remix-run/react";
 import {
   useReactTable,
   flexRender,
@@ -5,10 +6,10 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { startTransition, useMemo, useState } from "react";
+import { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useAllUsersSuspense } from "~/api/queries";
+import { useAllUsersEnrolledSuspense } from "~/api/queries/useUsersEnrolled";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -31,7 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { USER_ROLE } from "~/config/userRoles";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import { useBulkCourseEnroll } from "~/modules/Admin/EditCourse/CourseEnrolled/hooks/useBulkCourseEnroll";
@@ -39,44 +39,22 @@ import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 
 import type { Row, SortingState, RowSelectionState, ColumnDef } from "@tanstack/react-table";
 import type { ReactElement, FormEvent } from "react";
-import type { GetUsersResponse } from "~/api/generated-api";
-import type { UserRole } from "~/config/userRoles";
+import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
+import type { UsersEnrolledSearchParams } from "~/api/queries/useUsersEnrolled";
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
-const courseData: { studentId: string; createdAt: string }[] = [];
-
-type EnrolledStudent = GetUsersResponse["data"][number] & {
-  enrolledAt: string;
-};
+type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];
 
 export const CourseEnrolled = (): ReactElement => {
   const { t } = useTranslation();
-  // courseId will be needed for backend queries/mutations
-  // const { id: courseId } = useParams();
-  const { mutate: bulkCreate } = useBulkCourseEnroll();
+  const { id: courseId } = useParams();
+  const { mutate: bulkEnroll } = useBulkCourseEnroll(courseId);
 
-  const [searchParams, setSearchParams] = useState<{
-    keyword?: string;
-    role?: UserRole;
-    archived?: boolean;
-    status?: string;
-  }>({});
-  const [sorting, setSorting] = useState<SortingState>([{ id: "isEnrolled", desc: true }]);
+  const [searchParams, setSearchParams] = useState<UsersEnrolledSearchParams>({});
+  const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const { data: usersData } = useAllUsersSuspense(searchParams);
-
-  // TODO: create GET endpoint to get student_courses array by course_id and override this data
-  const enrolledStudents = useMemo(
-    () =>
-      usersData
-        .filter(({ role }) => role === USER_ROLE.student)
-        .map((user) => ({
-          ...user,
-          enrolledAt: courseData.find((course) => course.studentId === user.id)?.createdAt ?? "",
-        })),
-    [usersData],
-  );
+  const { data: usersData } = useAllUsersEnrolledSuspense(courseId, searchParams);
 
   const columns: ColumnDef<EnrolledStudent>[] = [
     {
@@ -158,7 +136,7 @@ export const CourseEnrolled = (): ReactElement => {
   ];
 
   const table = useReactTable({
-    data: enrolledStudents,
+    data: usersData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -192,8 +170,17 @@ export const CourseEnrolled = (): ReactElement => {
   };
 
   const handleFormSubmit = (event: FormEvent) => {
-    // TODO: handle form submitting here, pass the valid objects
-    bulkCreate({ data: Object.keys(rowSelection) });
+    const mutationData = {
+      studentIds: Object.keys(rowSelection)
+        .map((idx) => usersData[Number(idx)])
+        .filter((user) => !user.enrolledAt)
+        .map(({ id }) => id),
+    };
+
+    if (mutationData.studentIds.length > 0) {
+      bulkEnroll(mutationData);
+    }
+
     setRowSelection({});
     event.preventDefault();
   };
