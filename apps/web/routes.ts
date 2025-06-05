@@ -35,6 +35,7 @@ export const routes: (
       route("categories", "modules/Admin/Categories/Categories.page.tsx");
       route("categories/:id", "modules/Admin/Categories/Category.page.tsx");
       route("categories/new", "modules/Admin/Categories/CreateNewCategory.page.tsx");
+      route("groups", "modules/Admin/Groups/Groups.page.tsx");
     });
   });
 };

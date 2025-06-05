@@ -110,6 +110,7 @@
     "myCourses": "My courses",
     "categories": "Categories",
     "users": "Users",
+    "groups": "Groups",
     "browseCourses": "Browse Courses"
   },
   "changeUserEmailView": {
@@ -376,6 +377,13 @@
     },
     "error": {
       "userNotFound": "User not found"
+    }
+  },
+  "adminGroupsView": {
+    "name": "Group name",
+    "description": "Description",
+    "buttons": {
+      "create": "Create new"
     }
   },
   "enrollCourseView": {

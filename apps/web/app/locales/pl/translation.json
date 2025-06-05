@@ -110,6 +110,7 @@
     "myCourses": "Moje kursy",
     "categories": "Kategorie",
     "users": "Użytkownicy",
+    "groups": "Grupy",
     "browseCourses": "Przeglądaj kursy"
   },
   "changeUserEmailView": {
@@ -376,6 +377,13 @@
     },
     "error": {
       "userNotFound": "Użytkownik nie został znaleziony"
+    }
+  },
+  "adminGroupsView": {
+    "name": "Nazwa grupy",
+    "description": "Opis",
+    "buttons": {
+      "create": "Stwórz nową grupę"
     }
   },
   "enrollCourseView": {
