@@ -1,8 +1,13 @@
 import { Type } from "@sinclair/typebox";
 
-import { paginatedResponse, UUIDSchema } from "src/common";
+import { baseResponse, paginatedResponse, UUIDSchema } from "src/common";
 import { allCoursesSchema, allStudentCoursesSchema } from "src/courses/schemas/course.schema";
-import { sortCourseFieldsOptions } from "src/courses/schemas/courseQuery";
+import {
+  sortCourseFieldsOptions,
+  sortEnrolledStudentsOptions,
+} from "src/courses/schemas/courseQuery";
+
+import { enrolledStudentSchema } from "../schemas/enrolledStudent.schema";
 
 export const allCoursesValidation = {
   response: paginatedResponse(allCoursesSchema),
@@ -80,5 +85,22 @@ export const coursesValidation = {
     { type: "query" as const, name: "perPage", schema: Type.Number() },
     { type: "query" as const, name: "sort", schema: sortCourseFieldsOptions },
     { type: "query" as const, name: "excludeCourseId", schema: UUIDSchema },
+  ],
+};
+
+export const studentsWithEnrolmentValidation = {
+  response: baseResponse(Type.Array(enrolledStudentSchema)),
+  request: [
+    { type: "param" as const, name: "courseId", schema: UUIDSchema },
+    {
+      type: "query" as const,
+      name: "keyword",
+      schema: Type.String(),
+    },
+    {
+      type: "query" as const,
+      name: "sort",
+      schema: sortEnrolledStudentsOptions,
+    },
   ],
 };

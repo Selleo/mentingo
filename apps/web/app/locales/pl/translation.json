@@ -286,7 +286,8 @@
       }
     },
     "other": {
-      "selected": "Wybrany"
+      "selected": "Wybrany",
+      "noLessons": "Brak lekcji"
     },
     "button": {
       "uploadScorm": "Prześlij SCORM",

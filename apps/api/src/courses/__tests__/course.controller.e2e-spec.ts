@@ -1,7 +1,16 @@
+import { faker } from "@faker-js/faker";
+import { eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
 import { FileService } from "src/file/file.service";
-import { coursesSummaryStats, studentCourses } from "src/storage/schema";
+import { LESSON_TYPES } from "src/lesson/lesson.type";
+import {
+  coursesSummaryStats,
+  lessons,
+  studentChapterProgress,
+  studentCourses,
+  studentLessonProgress,
+} from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -57,7 +66,16 @@ describe("CourseController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await truncateTables(db, ["courses"]);
+    await truncateTables(db, [
+      "courses",
+      "chapters",
+      "lessons",
+      "student_chapter_progress",
+      "student_lesson_progress",
+      "student_courses",
+      "users",
+      "categories",
+    ]);
   });
 
   describe("GET /api/course/all", () => {
@@ -480,6 +498,256 @@ describe("CourseController (e2e)", () => {
           totalItems: 15,
           page: 2,
           perPage: 5,
+        });
+      });
+    });
+  });
+
+  describe("GET /api/course/:courseId/students", () => {
+    describe("when user is not logged in", () => {
+      it("should return unauthorized", () => {
+        return request(app.getHttpServer()).get("/api/course/1/students").expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      describe("when user is not admin", () => {
+        it("should return status 403", async () => {
+          const admin = await userFactory.withCredentials({ password }).create({
+            role: USER_ROLES.STUDENT,
+          });
+          const cookies = await cookieFor(admin, app);
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/${faker.string.uuid()}/students`)
+            .set("Cookie", cookies);
+
+          expect(response.status).toBe(403);
+          expect(response.body.message).toBe("Forbidden resource");
+        });
+      });
+
+      describe("when user is admin", () => {
+        it("should return list of students with enrollment date", async () => {
+          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const cookies = await cookieFor(admin, app);
+
+          const students = await Promise.all(
+            Array.from({ length: 2 }, (_, _i) => userFactory.create({ role: USER_ROLES.STUDENT })),
+          );
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            isPublished: true,
+          });
+
+          const studentCourse = await db
+            .insert(studentCourses)
+            .values({
+              studentId: students[0].id,
+              courseId: course.id,
+              finishedChapterCount: 0,
+            })
+            .returning();
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/${course.id}/students`)
+            .set("Cookie", cookies);
+
+          expect(response.status).toBe(200);
+          expect(response.body).toEqual({
+            data: [
+              {
+                firstName: students[0].firstName,
+                lastName: students[0].lastName,
+                email: students[0].email,
+                id: students[0].id,
+                enrolledAt: studentCourse[0].createdAt,
+              },
+              {
+                firstName: students[1].firstName,
+                lastName: students[1].lastName,
+                email: students[1].email,
+                id: students[1].id,
+                enrolledAt: null,
+              },
+            ],
+          });
+        });
+
+        it("should return list filtered by firstName", async () => {
+          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const cookies = await cookieFor(admin, app);
+
+          const students = await Promise.all(
+            Array.from({ length: 2 }, (_, _i) =>
+              userFactory.withCredentials({ password }).create(),
+            ),
+          );
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            isPublished: true,
+          });
+
+          const studentCourse = await db
+            .insert(studentCourses)
+            .values({
+              studentId: students[0].id,
+              courseId: course.id,
+              finishedChapterCount: 0,
+            })
+            .returning();
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/${course.id}/students?keyword=${students[0].firstName}`)
+            .set("Cookie", cookies);
+
+          expect(response.status).toBe(200);
+          expect(response.body).toEqual({
+            data: [
+              {
+                firstName: students[0].firstName,
+                lastName: students[0].lastName,
+                email: students[0].email,
+                id: students[0].id,
+                enrolledAt: studentCourse[0].createdAt,
+              },
+            ],
+          });
+        });
+
+        it("should return list filtered by lastName", async () => {
+          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const cookies = await cookieFor(admin, app);
+
+          const students = await Promise.all(
+            Array.from({ length: 2 }, (_, _i) =>
+              userFactory.withCredentials({ password }).create(),
+            ),
+          );
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            isPublished: true,
+          });
+
+          const studentCourse = await db
+            .insert(studentCourses)
+            .values({
+              studentId: students[0].id,
+              courseId: course.id,
+              finishedChapterCount: 0,
+            })
+            .returning();
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/${course.id}/students?keyword=${students[0].lastName}`)
+            .set("Cookie", cookies);
+
+          expect(response.status).toBe(200);
+          expect(response.body).toEqual({
+            data: [
+              {
+                firstName: students[0].firstName,
+                lastName: students[0].lastName,
+                email: students[0].email,
+                id: students[0].id,
+                enrolledAt: studentCourse[0].createdAt,
+              },
+            ],
+          });
+        });
+
+        it("should return list filtered by email", async () => {
+          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const cookies = await cookieFor(admin, app);
+
+          const students = await Promise.all(
+            Array.from({ length: 2 }, (_, _i) =>
+              userFactory.withCredentials({ password }).create(),
+            ),
+          );
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            isPublished: true,
+          });
+
+          const studentCourse = await db
+            .insert(studentCourses)
+            .values({
+              studentId: students[0].id,
+              courseId: course.id,
+              finishedChapterCount: 0,
+            })
+            .returning();
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/${course.id}/students?keyword=${students[0].email}`)
+            .set("Cookie", cookies);
+
+          expect(response.status).toBe(200);
+          expect(response.body).toEqual({
+            data: [
+              {
+                firstName: students[0].firstName,
+                lastName: students[0].lastName,
+                email: students[0].email,
+                id: students[0].id,
+                enrolledAt: studentCourse[0].createdAt,
+              },
+            ],
+          });
+        });
+
+        it("should return list of students in desc order with enrollment date", async () => {
+          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const cookies = await cookieFor(admin, app);
+
+          const students = await Promise.all(
+            Array.from({ length: 2 }, (_, _i) =>
+              userFactory.withCredentials({ password }).create(),
+            ),
+          );
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            isPublished: true,
+          });
+
+          const studentCourse = await db
+            .insert(studentCourses)
+            .values({
+              studentId: students[0].id,
+              courseId: course.id,
+              finishedChapterCount: 0,
+            })
+            .returning();
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/${course.id}/students?sort=-enrolledAt`)
+            .set("Cookie", cookies);
+
+          expect(response.status).toBe(200);
+          expect(response.body).toEqual({
+            data: [
+              {
+                firstName: students[1].firstName,
+                lastName: students[1].lastName,
+                email: students[1].email,
+                id: students[1].id,
+                enrolledAt: null,
+              },
+              {
+                firstName: students[0].firstName,
+                lastName: students[0].lastName,
+                email: students[0].email,
+                id: students[0].id,
+                enrolledAt: studentCourse[0].createdAt,
+              },
+            ],
+          });
         });
       });
     });
@@ -952,6 +1220,147 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0].hasFreeChapters).toBe(true);
       expect(response.body.data[0].priceInCents).toBe(1999);
       expect(response.body.data[0].currency).toBe("usd");
+    });
+  });
+
+  describe("POST /api/course/:courseId/enroll-courses", () => {
+    describe("when user is not logged in", () => {
+      it("returns 401 for unauthorized request", async () => {
+        await request(app.getHttpServer()).post("/api/course/1/enroll-courses").expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      describe("when user is not admin", () => {
+        it("should return 403 Forbidden", async () => {
+          const user = await userFactory.withCredentials({ password }).create({
+            role: USER_ROLES.STUDENT,
+          });
+          const cookies = await cookieFor(user, app);
+
+          await request(app.getHttpServer())
+            .post("/api/course/1/enroll-courses")
+            .set("Cookie", cookies)
+            .expect(403);
+        });
+      });
+
+      describe("when user is admin", () => {
+        describe("when course is not found", () => {
+          it("should return 404", async () => {
+            const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+            const cookies = await cookieFor(admin, app);
+
+            await request(app.getHttpServer())
+              .post(`/api/course/${faker.string.uuid()}/enroll-courses`)
+              .send({ studentIds: [faker.string.uuid()] })
+              .set("Cookie", cookies)
+              .expect(404);
+          });
+        });
+
+        describe("when student is already enrolled in course", () => {
+          it("should return 409", async () => {
+            const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+            const cookies = await cookieFor(admin, app);
+            const category = await categoryFactory.create();
+
+            const course = await courseFactory.create({
+              authorId: admin.id,
+              categoryId: category.id,
+              isPublished: true,
+              thumbnailS3Key: null,
+            });
+
+            const student1 = await userFactory.withCredentials({ password }).create();
+            const student2 = await userFactory.withCredentials({ password }).create();
+
+            await db.insert(studentCourses).values({
+              studentId: student1.id,
+              courseId: course.id,
+            });
+
+            await db.insert(studentCourses).values({
+              studentId: student2.id,
+              courseId: course.id,
+            });
+
+            await courseFactory.create({
+              authorId: admin.id,
+              categoryId: category.id,
+              isPublished: true,
+              thumbnailS3Key: null,
+            });
+
+            const result = await request(app.getHttpServer())
+              .post(`/api/course/${course.id}/enroll-courses`)
+              .send({ studentIds: [student1.id, student2.id] })
+              .set("Cookie", cookies);
+
+            expect(result.status).toBe(409);
+            const messageIds = result.body.message.match(/[0-9a-f-]{36}/g);
+            expect(messageIds).toEqual(expect.arrayContaining([student1.id, student2.id]));
+          });
+        });
+
+        it("should create enrollments with courses dependencies", async () => {
+          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            isPublished: true,
+          });
+
+          const chapter = await chapterFactory.create({
+            courseId: course.id,
+            title: "Free Chapter",
+            isFreemium: true,
+          });
+
+          await db.insert(lessons).values({
+            chapterId: chapter.id,
+            type: LESSON_TYPES.QUIZ,
+            title: "Quiz",
+          });
+
+          const students = await Promise.all(
+            Array.from({ length: 2 }, (_, _i) =>
+              userFactory.withCredentials({ password }).create(),
+            ),
+          );
+          const studentsIds = students.map((student) => student.id);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-courses`)
+            .send({ studentIds: studentsIds })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          const studentCoursesData = await db
+            .select()
+            .from(studentCourses)
+            .where(eq(studentCourses.courseId, course.id));
+
+          expect(studentCoursesData.length).toBe(2);
+
+          const studentChapterProgressData = await db
+            .select()
+            .from(studentChapterProgress)
+            .where(inArray(studentChapterProgress.studentId, studentsIds));
+
+          expect(studentChapterProgressData.length).toBe(2);
+
+          const studentLessonProgressData = await db
+            .select()
+            .from(studentLessonProgress)
+            .where(inArray(studentLessonProgress.studentId, studentsIds));
+
+          expect(studentLessonProgressData.length).toBe(2);
+        });
+      });
     });
   });
 });
