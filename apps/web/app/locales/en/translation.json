@@ -401,7 +401,8 @@
       "curriculum": "Curriculum",
       "status": "Status",
       "pricing": "Pricing",
-      "preview": "Preview"
+      "preview": "Preview",
+      "enrolledStudents": "Enrolled students"
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
@@ -599,6 +600,30 @@
       "validation": {
         "priceInCents": "Price must be at least 2.00 or free"
       }
+    },
+    "enrolled": {
+      "filters": {
+        "placeholder": {
+          "searchByKeyword": "Search by keyword..."
+        }
+      },
+      "enrollSelected": "Enroll selected",
+      "table": {
+        "name": "Name",
+        "surname": "Surname",
+        "email": "Email",
+        "status": "Enrollment status",
+        "enrollmentDate": "Date enrolled"
+      },
+      "statuses": {
+        "enrolled": "Enrolled",
+        "notEnrolled": "Not enrolled"
+      },
+      "confirmation": {
+        "title": "Confirm enrollment",
+        "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
+      },
+      "successResponse": "students have been assigned to the course."
     }
   },
   "registerView": {

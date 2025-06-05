@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Inject,
@@ -823,7 +824,9 @@ export class CourseService {
     const { studentIds } = body;
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
     if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+    if (!studentIds.length) throw new BadRequestException("Student ids not found");
 
     const existingStudentsEnrollments = await this.db
       .select({

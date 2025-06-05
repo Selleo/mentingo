@@ -376,6 +376,17 @@ export interface GetStudentCoursesResponse {
   appliedFilters?: object;
 }
 
+export interface GetStudentsWithEnrollmentDateResponse {
+  data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    enrolledAt: string | null;
+    /** @format uuid */
+    id: string;
+  }[];
+}
+
 export interface GetAvailableCoursesResponse {
   data: {
     /** @format uuid */
@@ -606,6 +617,16 @@ export interface UpdateCourseResponse {
 }
 
 export interface EnrollCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface EnrollCoursesBody {
+  studentIds: string[];
+}
+
+export interface EnrollCoursesResponse {
   data: {
     message: string;
   };
@@ -1986,6 +2007,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerGetStudentsWithEnrollmentDate
+     * @request GET:/api/course/{courseId}/students
+     */
+    courseControllerGetStudentsWithEnrollmentDate: (
+      courseId: string,
+      query?: {
+        keyword?: string;
+        sort?: "enrolledAt" | "-enrolledAt";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetStudentsWithEnrollmentDateResponse, any>({
+        path: `/api/course/${courseId}/students`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerGetAvailableCourses
      * @request GET:/api/course/available-courses
      */
@@ -2144,6 +2187,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/enroll-course`,
         method: "POST",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerEnrollCourses
+     * @request POST:/api/course/{courseId}/enroll-courses
+     */
+    courseControllerEnrollCourses: (
+      courseId: string,
+      data: EnrollCoursesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollCoursesResponse, any>({
+        path: `/api/course/${courseId}/enroll-courses`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
