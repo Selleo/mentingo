@@ -79,3 +79,27 @@ export const COURSE_ENROLLMENT_SCOPES = {
 
 export type CourseEnrollmentScope =
   (typeof COURSE_ENROLLMENT_SCOPES)[keyof typeof COURSE_ENROLLMENT_SCOPES];
+
+// enrolledStudent query
+
+export const enrolledStudentSortFields = ["enrolledAt"] as const;
+
+export const EnrolledStudentSortFields: Record<string, string> = {
+  enrolledAt: "enrolledAt",
+};
+
+export type EnrolledStudentSortField = (typeof enrolledStudentSortFields)[number];
+
+export const sortEnrolledStudentsOptions = Type.Union([
+  Type.Literal("enrolledAt"),
+  Type.Literal("-enrolledAt"),
+]);
+
+export type SortEnrolledStudentsOptions = Static<typeof sortEnrolledStudentsOptions>;
+
+export const enrolledStudentFilterSchema = Type.Object({
+  keyword: Type.String(),
+  sort: sortEnrolledStudentsOptions,
+});
+
+export type EnrolledStudentFilterSchema = Static<typeof enrolledStudentFilterSchema>;
