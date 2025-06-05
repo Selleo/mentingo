@@ -9,7 +9,8 @@ import { format } from "date-fns";
 import { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useAllUsersEnrolledSuspense } from "~/api/queries/useUsersEnrolled";
+import { useBulkCourseEnroll } from "~/api/mutations/admin/useBulkCourseEnroll";
+import { useAllUsersEnrolledSuspense } from "~/api/queries/admin/useUsersEnrolled";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -34,13 +35,12 @@ import {
 } from "~/components/ui/table";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
-import { useBulkCourseEnroll } from "~/modules/Admin/EditCourse/CourseEnrolled/hooks/useBulkCourseEnroll";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 
 import type { Row, SortingState, RowSelectionState, ColumnDef } from "@tanstack/react-table";
 import type { ReactElement, FormEvent } from "react";
 import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
-import type { UsersEnrolledSearchParams } from "~/api/queries/useUsersEnrolled";
+import type { UsersEnrolledSearchParams } from "~/api/queries/admin/useUsersEnrolled";
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
 type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];

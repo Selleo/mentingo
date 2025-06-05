@@ -17,11 +17,11 @@ export const useUsersEnrolledQuery = (
 ) => ({
   queryKey: [ENROLLED_USERS_QUERY_KEY, searchParams],
   queryFn: async () => {
-    const response = await ApiClient.api.courseControllerGetStudentsWithEnrollmentDate(courseId, {
+    const { data } = await ApiClient.api.courseControllerGetStudentsWithEnrollmentDate(courseId, {
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
     });
-    return response.data;
+    return data;
   },
   select: ({ data }: GetStudentsWithEnrollmentDateResponse) => data,
 });
