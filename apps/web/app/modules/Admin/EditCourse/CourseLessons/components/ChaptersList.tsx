@@ -1,7 +1,6 @@
 import * as Switch from "@radix-ui/react-switch";
 import { useParams } from "@remix-run/react";
-import { useCallback, useEffect, useState } from "react";
-import { flushSync } from "react-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useChangeChapterDisplayOrder } from "~/api/mutations/admin/changeChapterDisplayOrder";
@@ -9,7 +8,7 @@ import { useUpdateLessonFreemiumStatus } from "~/api/mutations/admin/useUpdateLe
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
-import { SortableList } from "~/components/SortableList/SortableList";
+import { type Sortable, SortableList } from "~/components/SortableList/SortableList";
 import {
   Accordion,
   AccordionContent,
@@ -56,7 +55,7 @@ const ChapterCard = ({
   dragTrigger,
 }: ChapterCardProps) => {
   const { mutateAsync: updateFreemiumStatus } = useUpdateLessonFreemiumStatus();
-  const { id } = useParams();
+  const { id: courseId } = useParams();
   const { openLeaveModal, isCurrentFormDirty, setIsLeavingContent } = useLeaveModal();
   const [isNewLesson, setIsNewLesson] = useState(false);
   const [pendingChapter, setPendingChapter] = useState<Chapter | null>(null);
@@ -133,14 +132,18 @@ const ChapterCard = ({
           chapterId: chapter.id,
           data: { isFreemium: !chapter.isFree },
         });
-        queryClient.invalidateQueries({
-          queryKey: [COURSE_QUERY_KEY, { id }],
-        });
       } catch (error) {
         console.error("Failed to update chapter premium status:", error);
+      } finally {
+        await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
       }
     },
-    [chapter, updateFreemiumStatus, id],
+    [chapter, updateFreemiumStatus, courseId],
+  );
+
+  const sortableLessons: Sortable<Lesson>[] = useMemo(
+    () => chapter.lessons.map((lesson) => ({ ...lesson, sortableId: lesson.id })),
+    [chapter.lessons],
   );
 
   return (
@@ -171,16 +174,12 @@ const ChapterCard = ({
               </AccordionTrigger>
             </div>
             <AccordionContent className="mt-2 text-gray-700">
-              {chapter.lessonCount > 0 ? (
-                <LessonCardList
-                  lessons={chapter.lessons.map((lesson) => ({ ...lesson, sortableId: lesson.id }))}
-                  selectedLesson={selectedLesson}
-                  setSelectedLesson={setSelectedLesson}
-                  setContentTypeToDisplay={setContentTypeToDisplay}
-                />
-              ) : (
-                <div className="ml-9">No lessons</div>
-              )}
+              <LessonCardList
+                lessons={sortableLessons}
+                selectedLesson={selectedLesson}
+                setSelectedLesson={setSelectedLesson}
+                setContentTypeToDisplay={setContentTypeToDisplay}
+              />
             </AccordionContent>
             <div className="mt-3 flex items-center justify-between">
               <div
@@ -239,10 +238,8 @@ const ChapterCard = ({
   );
 };
 
-type DraggableChapter = Chapter & { sortableId: string };
-
 type ChaptersListProps = {
-  chapters?: DraggableChapter[];
+  chapters: Sortable<Chapter>[];
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setSelectedChapter: (selectedChapter: Chapter | null) => void;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
@@ -285,20 +282,36 @@ const ChaptersList = ({
   selectedLesson,
   canRefetchChapterList,
 }: ChaptersListProps) => {
+  const { id: courseId } = useParams();
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
-  const [items, setItems] = useState(chapters);
-  const mutation = useChangeChapterDisplayOrder();
+  const { mutateAsync: mutateChapterDisplayOrder } = useChangeChapterDisplayOrder();
   const chapterId = getChapterWithLatestLesson(chapters ?? []);
 
   useEffect(() => {
-    setItems(chapters);
-
     if (canRefetchChapterList) {
       chapterId && setOpenItem(chapterId);
     }
   }, [chapters, canRefetchChapterList, chapterId]);
 
-  if (!items) return;
+  const handleChapterOrderChange = useCallback(
+    async (
+      updatedItems: Sortable<Chapter>[],
+      newChapterPosition: number,
+      newDisplayOrder: number,
+    ) => {
+      await mutateChapterDisplayOrder({
+        chapter: {
+          chapterId: updatedItems[newChapterPosition].sortableId,
+          displayOrder: newDisplayOrder,
+        },
+      });
+
+      await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+    },
+    [courseId, mutateChapterDisplayOrder],
+  );
+
+  if (!chapters) return;
 
   return (
     <Accordion
@@ -309,19 +322,8 @@ const ChaptersList = ({
       defaultValue={openItem}
     >
       <SortableList
-        items={items}
-        onChange={(updatedItems, newChapterPosition, newDisplayOrder) => {
-          flushSync(() => {
-            setItems(updatedItems);
-
-            mutation.mutate({
-              chapter: {
-                chapterId: updatedItems[newChapterPosition].sortableId,
-                displayOrder: newDisplayOrder,
-              },
-            });
-          });
-        }}
+        items={chapters}
+        onChange={handleChapterOrderChange}
         className="grid grid-cols-1"
         renderItem={(chapter) => (
           <SortableList.Item id={chapter.sortableId} data-id={chapter.id}>

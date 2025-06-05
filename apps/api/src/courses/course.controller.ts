@@ -33,6 +33,7 @@ import {
   COURSE_ENROLLMENT_SCOPES,
   CourseEnrollmentScope,
   SortCourseFieldsOptions,
+  SortEnrolledStudentsOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -44,15 +45,25 @@ import {
   allCoursesValidation,
   coursesValidation,
   studentCoursesValidation,
+  studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
+import {
+  CreateCoursesEnrollment,
+  createCoursesEnrollmentSchema,
+} from "./schemas/createCoursesEnrollment";
+
+import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
 import type {
   AllCoursesForTeacherResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
 } from "src/courses/schemas/course.schema";
-import type { CoursesFilterSchema } from "src/courses/schemas/courseQuery";
+import type {
+  CoursesFilterSchema,
+  EnrolledStudentFilterSchema,
+} from "src/courses/schemas/courseQuery";
 import type {
   CommonShowBetaCourse,
   CommonShowCourse,
@@ -131,6 +142,21 @@ export class CourseController {
     const data = await this.courseService.getCoursesForUser(query, currentUserId);
 
     return new PaginatedResponse(data);
+  }
+
+  @Roles(USER_ROLES.ADMIN)
+  @Get(":courseId/students")
+  @Validate(studentsWithEnrolmentValidation)
+  async getStudentsWithEnrollmentDate(
+    @Param("courseId") courseId: UUIDType,
+    @Query("keyword") keyword: string,
+    @Query("sort") sort: SortEnrolledStudentsOptions,
+  ): Promise<BaseResponse<EnrolledStudent[]>> {
+    const filters: EnrolledStudentFilterSchema = {
+      keyword,
+      sort,
+    };
+    return await this.courseService.getStudentsWithEnrollmentDate(courseId, filters);
   }
 
   @Get("available-courses")
@@ -259,6 +285,31 @@ export class CourseController {
     await this.courseService.enrollCourse(id, currentUserId, testKey);
 
     return new BaseResponse({ message: "Course enrolled successfully" });
+  }
+
+  @Post("/:courseId/enroll-courses")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "courseId",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: createCoursesEnrollmentSchema,
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async enrollCourses(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: CreateCoursesEnrollment,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.enrollCourses(courseId, body);
+
+    return new BaseResponse({ message: "Courses enrolled successfully" });
   }
 
   @Delete("unenroll-course")

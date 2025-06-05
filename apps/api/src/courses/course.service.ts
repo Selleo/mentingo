@@ -16,6 +16,7 @@ import {
   isNotNull,
   like,
   ne,
+  or,
   sql,
 } from "drizzle-orm";
 import { isEmpty } from "lodash";
@@ -52,6 +53,8 @@ import {
   type CourseSortField,
   CourseSortFields,
   type CoursesQuery,
+  EnrolledStudentSortFields,
+  type EnrolledStudentFilterSchema,
 } from "./schemas/courseQuery";
 
 import type {
@@ -60,10 +63,12 @@ import type {
   AllStudentCoursesResponse,
 } from "./schemas/course.schema";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
+import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
+import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { Pagination, UUIDType } from "src/common";
+import type { BaseResponse, Pagination, UUIDType } from "src/common";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -251,6 +256,49 @@ export class CourseService {
         },
       };
     });
+  }
+
+  async getStudentsWithEnrollmentDate(
+    courseId: UUIDType,
+    filters: EnrolledStudentFilterSchema,
+  ): Promise<BaseResponse<EnrolledStudent[]>> {
+    const { keyword, sort = EnrolledStudentSortFields.enrolledAt } = filters;
+
+    const { sortOrder } = getSortOptions(sort);
+
+    const conditions = [];
+
+    if (keyword) {
+      const searchKeyword = keyword.toLowerCase();
+
+      conditions.push(
+        or(
+          ilike(users.firstName, `%${searchKeyword}%`),
+          ilike(users.lastName, `%${searchKeyword}%`),
+          ilike(users.email, `%${searchKeyword}%`),
+        ),
+      );
+    }
+
+    const data = await this.db
+      .select({
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        id: users.id,
+        enrolledAt: studentCourses.createdAt,
+      })
+      .from(users)
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
+      )
+      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT)))
+      .orderBy(sortOrder(studentCourses.createdAt));
+
+    return {
+      data: data ?? [],
+    };
   }
 
   async getAvailableCourses(
@@ -740,7 +788,7 @@ export class CourseService {
     });
   }
 
-  async enrollCourse(id: UUIDType, studentId: UUIDType, testKey?: string) {
+  async enrollCourse(id: UUIDType, studentId: UUIDType, testKey?: string, paymentId?: string) {
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -765,14 +813,62 @@ export class CourseService {
     const isTest = testKey && testKey === process.env.TEST_KEY;
     if (!isTest && Boolean(course.price)) throw new ForbiddenException();
 
-    await this.createCourseDependencies(id, studentId);
+    this.db.transaction(async (trx) => {
+      await this.createStudentCourse(id, studentId);
+      await this.createCourseDependencies(id, studentId, paymentId, trx);
+    });
   }
 
-  async createCourseDependencies(
+  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment) {
+    const { studentIds } = body;
+
+    const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
+    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+
+    const existingStudentsEnrollments = await this.db
+      .select({
+        studentId: studentCourses.studentId,
+      })
+      .from(studentCourses)
+      .where(
+        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
+      );
+
+    if (existingStudentsEnrollments.length > 0) {
+      const existingStudentsEnrollmentsIds = existingStudentsEnrollments.map(
+        ({ studentId }) => studentId,
+      );
+
+      throw new ConflictException(
+        `Students ${existingStudentsEnrollmentsIds.join(
+          ", ",
+        )} are already enrolled in course ${courseId}`,
+      );
+    }
+
+    await this.db.transaction(async (trx) => {
+      const studentCoursesValues = studentIds.map((studentId) => {
+        return {
+          studentId,
+          courseId,
+        };
+      });
+
+      await trx.insert(studentCourses).values(studentCoursesValues);
+
+      await Promise.all(
+        studentIds.map(async (studentId) => {
+          await this.createCourseDependencies(courseId, studentId, null, trx);
+        }),
+      );
+    });
+  }
+
+  async createStudentCourse(
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
-  ) {
+  ): Promise<StudentCourseSelect> {
     const [enrolledCourse] = await this.db
       .insert(studentCourses)
       .values({ studentId, courseId, paymentId })
@@ -780,61 +876,68 @@ export class CourseService {
 
     if (!enrolledCourse) throw new ConflictException("Course not enrolled");
 
-    await this.db.transaction(async (trx) => {
-      const courseChapterList = await trx
-        .select({
-          id: chapters.id,
-          itemCount: chapters.lessonCount,
-        })
-        .from(chapters)
-        .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
-        .where(eq(chapters.courseId, courseId))
-        .groupBy(chapters.id);
+    return enrolledCourse;
+  }
 
-      const existingLessonProgress = await this.lessonRepository.getLessonsProgressByCourseId(
-        courseId,
-        studentId,
-        trx,
+  async createCourseDependencies(
+    courseId: UUIDType,
+    studentId: UUIDType,
+    paymentId: string | null = null,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    const courseChapterList = await trx
+      .select({
+        id: chapters.id,
+        itemCount: chapters.lessonCount,
+      })
+      .from(chapters)
+      .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .where(eq(chapters.courseId, courseId))
+      .groupBy(chapters.id);
+
+    const existingLessonProgress = await this.lessonRepository.getLessonsProgressByCourseId(
+      courseId,
+      studentId,
+      trx,
+    );
+
+    await this.createStatisicRecordForCourse(
+      courseId,
+      paymentId,
+      isEmpty(existingLessonProgress),
+      trx,
+    );
+
+    if (courseChapterList.length > 0) {
+      await trx.insert(studentChapterProgress).values(
+        courseChapterList.map((chapter) => ({
+          studentId,
+          chapterId: chapter.id,
+          courseId,
+          completedLessonItemCount: 0,
+        })),
       );
 
-      await this.createStatisicRecordForCourse(
-        courseId,
-        paymentId,
-        isEmpty(existingLessonProgress),
-        trx,
+      await Promise.all(
+        courseChapterList.map(async (chapter) => {
+          const chapterLessons = await trx
+            .select({ id: lessons.id, type: lessons.type })
+            .from(lessons)
+            .where(eq(lessons.chapterId, chapter.id));
+
+          await trx.insert(studentLessonProgress).values(
+            chapterLessons.map((lesson) => ({
+              studentId,
+              lessonId: lesson.id,
+              chapterId: chapter.id,
+              completedQuestionCount: 0,
+              quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
+              completedAt: null,
+            })),
+          );
+        }),
       );
-
-      if (courseChapterList.length > 0) {
-        await trx.insert(studentChapterProgress).values(
-          courseChapterList.map((chapter) => ({
-            studentId,
-            chapterId: chapter.id,
-            courseId,
-            completedLessonItemCount: 0,
-          })),
-        );
-
-        await Promise.all(
-          courseChapterList.map(async (chapter) => {
-            const chapterLessons = await trx
-              .select({ id: lessons.id, type: lessons.type })
-              .from(lessons)
-              .where(eq(lessons.chapterId, chapter.id));
-
-            await trx.insert(studentLessonProgress).values(
-              chapterLessons.map((lesson) => ({
-                studentId,
-                lessonId: lesson.id,
-                chapterId: chapter.id,
-                completedQuestionCount: 0,
-                quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
-                completedAt: null,
-              })),
-            );
-          }),
-        );
-      }
-    });
+    }
   }
 
   async unenrollCourse(id: UUIDType, userId: UUIDType) {
