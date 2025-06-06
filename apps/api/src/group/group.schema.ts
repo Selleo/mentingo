@@ -16,6 +16,7 @@ export const baseGroupSchema = Type.Object({
   name: Type.String(),
   description: Type.Optional(Type.String()),
 });
+export const bulkDeleteGroupsSchema = Type.Array(UUIDSchema);
 
 export const groupsFilterSchema = Type.Object({
   keyword: Type.Optional(Type.String()),

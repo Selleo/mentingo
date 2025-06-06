@@ -5,7 +5,7 @@ import { ApiClient } from "~/api/api-client";
 import type { GetAllGroupsResponse } from "~/api/generated-api";
 
 export type GroupsSearchParams = {
-  keyword?: string;
+  name?: string;
   sort?: string;
 };
 
@@ -15,7 +15,7 @@ export const useGroupsQuery = (searchParams?: GroupsSearchParams) => ({
   queryKey: [GROUPS_QUERY_KEY],
   queryFn: async () => {
     const { data } = await ApiClient.api.groupControllerGetAllGroups({
-      ...(searchParams?.keyword && { keyword: searchParams.keyword }),
+      ...(searchParams?.name && { name: searchParams.name }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
     });
     return data;

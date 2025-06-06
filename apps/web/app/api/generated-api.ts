@@ -1249,6 +1249,27 @@ export interface GetAllGroupsResponse {
   appliedFilters?: object;
 }
 
+export interface GetGroupByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    description: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  };
+}
+
 export interface GetUserGroupsResponse {
   data: {
     /** @format uuid */
@@ -1302,6 +1323,14 @@ export interface UpdateGroupResponse {
 }
 
 export interface DeleteGroupResponse {
+  data: {
+    message: string;
+  };
+}
+
+export type BulkDeleteGroupsBody = string[];
+
+export interface BulkDeleteGroupsResponse {
   data: {
     message: string;
   };
@@ -2727,40 +2756,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name GroupControllerGetUserGroups
-     * @request GET:/api/group/{userId}
+     * @name GroupControllerGetGroupById
+     * @request GET:/api/group/{groupId}
      */
-    groupControllerGetUserGroups: (
-      userId: string,
-      query?: {
-        keyword?: string;
-        /** @min 1 */
-        page?: number;
-        perPage?: number;
-        sort?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetUserGroupsResponse, any>({
-        path: `/api/group/${userId}`,
+    groupControllerGetGroupById: (groupId: string, params: RequestParams = {}) =>
+      this.request<GetGroupByIdResponse, any>({
+        path: `/api/group/${groupId}`,
         method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerCreateGroup
-     * @request POST:/api/group
-     */
-    groupControllerCreateGroup: (data: CreateGroupBody, params: RequestParams = {}) =>
-      this.request<CreateGroupResponse, any>({
-        path: `/api/group`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -2795,6 +2797,63 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<DeleteGroupResponse, any>({
         path: `/api/group/${groupId}`,
         method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetUserGroups
+     * @request GET:/api/group/user/{userId}
+     */
+    groupControllerGetUserGroups: (
+      userId: string,
+      query?: {
+        keyword?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserGroupsResponse, any>({
+        path: `/api/group/user/${userId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerCreateGroup
+     * @request POST:/api/group
+     */
+    groupControllerCreateGroup: (data: CreateGroupBody, params: RequestParams = {}) =>
+      this.request<CreateGroupResponse, any>({
+        path: `/api/group`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerBulkDeleteGroups
+     * @request DELETE:/api/group
+     */
+    groupControllerBulkDeleteGroups: (data: BulkDeleteGroupsBody, params: RequestParams = {}) =>
+      this.request<BulkDeleteGroupsResponse, any>({
+        path: `/api/group`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

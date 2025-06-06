@@ -5,9 +5,12 @@ import {
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
+import { isEmpty } from "lodash-es";
+import { Trash } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useBulkDeleteGroups } from "~/api/mutations/admin/useBulkDeleteGroups";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { Button } from "~/components/ui/button";
 import {
@@ -32,7 +35,8 @@ const Groups = (): ReactElement => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const { data } = useGroupsQuerySuspense({});
+  const { data } = useGroupsQuerySuspense();
+  const { mutateAsync: deleteGroupsMutation } = useBulkDeleteGroups();
 
   const table = useReactTable({
     data,
@@ -47,6 +51,8 @@ const Groups = (): ReactElement => {
     },
   });
 
+  const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original.id);
+
   const handleGroupEdit = useCallback(
     (groupId: string) => () => {
       navigate(groupId);
@@ -54,16 +60,41 @@ const Groups = (): ReactElement => {
     [navigate],
   );
 
+  const handleGroupsDelete = useCallback(async () => {
+    await deleteGroupsMutation(selectedRows);
+    setRowSelection({});
+  }, [deleteGroupsMutation, selectedRows]);
+
   return (
     <div className="flex flex-col">
       <h4 className={"text-2xl font-bold"}>{t("navigationSideBar.groups")}</h4>
-      <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
-        <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 pt-6">
           <Link to={"new"}>
-            <Button>{t("adminGroupsView.buttons.create")}</Button>
+            <Button variant={"outline"}>{t("adminGroupsView.buttons.create")}</Button>
           </Link>
         </div>
+        <div className={"flex items-center justify-between gap-2 px-4 py-2"}>
+          <p
+            className={cn("text-sm", {
+              "text-neutral-500": isEmpty(selectedRows),
+              "text-neutral-900": !isEmpty(selectedRows),
+            })}
+          >
+            {t("common.other.selected")} ({selectedRows.length})
+          </p>
+          <Button
+            onClick={handleGroupsDelete}
+            size="sm"
+            className="flex items-center gap-x-2"
+            disabled={isEmpty(selectedRows)}
+          >
+            <Trash className="h-3 w-3" />
+            <span className="text-xs">{t("adminCategoriesView.button.deleteSelected")}</span>
+          </Button>
+        </div>
       </div>
+      <div className="ml-auto flex items-center gap-x-2 px-4 py-2"></div>
       <Table className="border bg-neutral-50">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

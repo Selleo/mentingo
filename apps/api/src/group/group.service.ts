@@ -1,5 +1,11 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, count, countDistinct, eq, ilike, or, sql } from "drizzle-orm";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { and, count, countDistinct, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -16,6 +22,7 @@ import type {
   UpsertGroupBody,
   GroupsFilterSchema,
   GroupsQuery,
+  GroupResponse,
 } from "src/group/group.types";
 
 @Injectable()
@@ -53,6 +60,16 @@ export class GroupService {
         page,
         perPage,
       },
+    };
+  }
+
+  public async getGroupById(groupId: UUIDType): Promise<{ data: GroupResponse }> {
+    const [group] = await this.db
+      .select()
+      .from(groups)
+      .where(and(eq(groups.id, groupId)));
+    return {
+      data: group,
     };
   }
 
@@ -136,6 +153,14 @@ export class GroupService {
     if (!deletedGroup) {
       throw new NotFoundException("Group not found");
     }
+  }
+
+  public async bulkDeleteGroups(groupIds: UUIDType[]) {
+    if (groupIds.length === 0) {
+      throw new BadRequestException("Groups not found");
+    }
+
+    await this.db.delete(groups).where(inArray(groups.id, groupIds)).returning();
   }
 
   async assignUserToGroup(groupId: UUIDType, userId: UUIDType) {

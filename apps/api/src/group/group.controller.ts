@@ -22,7 +22,12 @@ import {
 } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { allGroupsSchema, baseGroupSchema } from "src/group/group.schema";
+import {
+  allGroupsSchema,
+  baseGroupSchema,
+  bulkDeleteGroupsSchema,
+  groupSchema,
+} from "src/group/group.schema";
 import { GroupService } from "src/group/group.service";
 import { UpsertGroupBody, GroupSortFieldsOptions } from "src/group/group.types";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -61,7 +66,17 @@ export class GroupController {
     return new PaginatedResponse(groups);
   }
 
-  @Get(":userId")
+  @Get(":groupId")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "groupId", schema: UUIDSchema }],
+    response: baseResponse(groupSchema),
+  })
+  async getGroupById(@Param("groupId") userId: UUIDType): Promise<{ data: GroupResponse }> {
+    return await this.groupService.getGroupById(userId);
+  }
+
+  @Get("/user/:userId")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [
@@ -135,6 +150,20 @@ export class GroupController {
 
     return new BaseResponse({
       message: "Group deleted successfully",
+    });
+  }
+
+  @Delete("")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: bulkDeleteGroupsSchema }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async bulkDeleteGroups(@Body() groupIds: UUIDType[]): Promise<BaseResponse<{ message: string }>> {
+    await this.groupService.bulkDeleteGroups(groupIds);
+
+    return new BaseResponse({
+      message: "Groups deleted successfully",
     });
   }
 

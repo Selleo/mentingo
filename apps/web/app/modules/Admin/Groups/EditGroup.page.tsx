@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateGroup } from "~/api/mutations/admin/useUpdateGroup";
+import { useGroupByIdQuerySuspense } from "~/api/queries/admin/useGroupById";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
 import { Button } from "~/components/ui/button";
@@ -13,6 +14,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { groupFormSchema } from "~/modules/Admin/Groups/group.utils";
+import Loader from "~/modules/common/Loader/Loader";
 
 import type { ReactElement } from "react";
 import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";
@@ -23,30 +25,30 @@ const EditGroup = (): ReactElement => {
 
   const { t } = useTranslation();
 
-  // const { data: group, isLoading } = useGroupById();
+  const { data, isLoading } = useGroupByIdQuerySuspense(groupId ?? "");
   const { mutateAsync: updateGroupMutation } = useUpdateGroup(groupId ?? "");
 
   const form = useForm<GroupFormValues>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: data.name,
+      description: data.description ?? "",
     },
   });
 
-  // if (isLoading)
-  //   return (
-  //     <div className="flex h-full items-center justify-center">
-  //       <Loader />
-  //     </div>
-  //   );
-  //
-  // if (!group) throw new Error(t("adminGroupsView.updateGroup.groupNotFound"));
+  if (isLoading)
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader />
+      </div>
+    );
+
+  if (!data) throw new Error(t("adminGroupsView.updateGroup.groupNotFound"));
 
   const handleSubmit = async (group: GroupFormValues) => {
     try {
       await updateGroupMutation(group);
-      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY, { groupId }] });
       navigate("/admin/groups");
     } catch (error) {
       console.error(error);
@@ -91,7 +93,7 @@ const EditGroup = (): ReactElement => {
             )}
           />
           <DialogFooter>
-            <Button type="submit" disabled={!form.formState.isValid && form.formState.isDirty}>
+            <Button type="submit" disabled={!form.formState.isValid || !form.formState.isDirty}>
               {t("adminGroupsView.updateGroup.submit")}
             </Button>
           </DialogFooter>
