@@ -53,6 +53,11 @@ export const getNavigationConfig = (
     iconName: "Hat",
   },
   {
+    label: t("navigationSideBar.groups"),
+    path: "admin/groups",
+    iconName: "Share",
+  },
+  {
     label: t("navigationSideBar.profile"),
     path: `teachers/${userId}`,
     iconName: "User",

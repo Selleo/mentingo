@@ -350,3 +350,27 @@ export const scormFiles = pgTable("scorm_files", {
   type: text("type").notNull(),
   s3KeyPath: text("s3_key_path").notNull(),
 });
+
+export const groups = pgTable("groups", {
+  ...id,
+  ...timestamps,
+  name: text("name").notNull(),
+  description: text("description"),
+});
+
+export const groupUsers = pgTable(
+  "group_users",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    groupId: uuid("group_id")
+      .references(() => groups.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.userId, table.groupId),
+  }),
+);

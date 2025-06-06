@@ -99,6 +99,13 @@
       "when": 1743173029514,
       "tag": "0013_change_type_of_description_column_in_lessons",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1749111686023,
+      "tag": "0014_groups_table_created",
+      "breakpoints": true
     }
   ]
 }
