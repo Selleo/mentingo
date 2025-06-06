@@ -384,7 +384,8 @@
     "name": "Nazwa grupy",
     "description": "Opis",
     "buttons": {
-      "create": "Stwórz nową grupę"
+      "create": "Stwórz nową grupę",
+      "deleteSelected": "Usuń wybrane"
     },
     "newGroup": {
       "header": "Utwórz nową grupę",
@@ -404,6 +405,12 @@
       "submit": "Edytuj grupę",
       "groupUpdatedSuccessfully": "Grupa zaktualizowana pomyślnie",
       "groupNotFound": "Nie znaleziono grupy"
+    },
+    "deleteGroup": {
+      "title": "Potwierdź usunięcie",
+      "description": "Czy na pewno chcesz usunąć te grupy?",
+      "cancel": "Anuluj",
+      "submit": "Usuń"
     }
   },
   "enrollCourseView": {

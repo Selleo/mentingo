@@ -384,7 +384,8 @@
     "name": "Group name",
     "description": "Description",
     "buttons": {
-      "create": "Create new"
+      "create": "Create new",
+      "deleteSelected": "Delete selected"
     },
     "newGroup": {
       "header": "Create New Group",
@@ -404,6 +405,12 @@
       "submit": "Edit group",
       "groupUpdatedSuccessfully": "Group updated successfully",
       "groupNotFound": "Group not found"
+    },
+    "deleteGroup": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete these groups?",
+      "cancel": "Cancel",
+      "submit": "Delete"
     }
   },
   "enrollCourseView": {

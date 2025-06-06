@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, count, countDistinct, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, countDistinct, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -42,25 +42,31 @@ export class GroupService {
     const { sortOrder, sortedField } = getSortOptions(sort);
     const conditions = this.getFiltersConditions(filters);
 
-    const groupEntities = await this.db
-      .select()
-      .from(groups)
-      .where(and(...conditions))
-      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as GroupSortField)));
+    return this.db.transaction(async (trx) => {
+      const queryDB = trx
+        .select()
+        .from(groups)
+        .where(and(...conditions))
+        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as GroupSortField)));
 
-    const [{ totalItems }] = await this.db
-      .select({ totalItems: count() })
-      .from(groups)
-      .where(and(...conditions));
+      const dynamicQuery = queryDB.$dynamic();
+      const paginatedQuery = addPagination(dynamicQuery, page, perPage);
+      const data = await paginatedQuery;
 
-    return {
-      data: groupEntities,
-      pagination: {
-        totalItems,
-        page,
-        perPage,
-      },
-    };
+      const [{ totalItems }] = await trx
+        .select({ totalItems: countDistinct(groups.id) })
+        .from(groups)
+        .where(and(...conditions));
+
+      return {
+        data,
+        pagination: {
+          totalItems,
+          page,
+          perPage,
+        },
+      };
+    });
   }
 
   public async getGroupById(groupId: UUIDType): Promise<{ data: GroupResponse }> {

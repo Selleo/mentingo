@@ -14,6 +14,16 @@ import { useBulkDeleteGroups } from "~/api/mutations/admin/useBulkDeleteGroups";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { Button } from "~/components/ui/button";
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -25,7 +35,7 @@ import { cn } from "~/lib/utils";
 import { useGroupTable } from "~/modules/Admin/Groups/hooks/useGroupTable";
 
 import type { SortingState, RowSelectionState } from "@tanstack/react-table";
-import type { ReactElement } from "react";
+import type { ReactElement, FormEvent } from "react";
 
 const Groups = (): ReactElement => {
   const { t } = useTranslation();
@@ -60,10 +70,14 @@ const Groups = (): ReactElement => {
     [navigate],
   );
 
-  const handleGroupsDelete = useCallback(async () => {
-    await deleteGroupsMutation(selectedRows);
-    setRowSelection({});
-  }, [deleteGroupsMutation, selectedRows]);
+  const handleGroupsDelete = useCallback(
+    async (event: FormEvent) => {
+      event.preventDefault();
+      await deleteGroupsMutation(selectedRows);
+      setRowSelection({});
+    },
+    [deleteGroupsMutation, selectedRows],
+  );
 
   return (
     <div className="flex flex-col">
@@ -83,15 +97,42 @@ const Groups = (): ReactElement => {
           >
             {t("common.other.selected")} ({selectedRows.length})
           </p>
-          <Button
-            onClick={handleGroupsDelete}
-            size="sm"
-            className="flex items-center gap-x-2"
-            disabled={isEmpty(selectedRows)}
-          >
-            <Trash className="h-3 w-3" />
-            <span className="text-xs">{t("adminCategoriesView.button.deleteSelected")}</span>
-          </Button>
+
+          <Dialog>
+            <DialogTrigger disabled={isEmpty(selectedRows)}>
+              <Button
+                size="sm"
+                className="flex items-center gap-x-2"
+                disabled={isEmpty(selectedRows)}
+              >
+                <Trash className="h-3 w-3" />
+                <span className="text-xs">{t("adminGroupsView.buttons.deleteSelected")}</span>
+              </Button>
+            </DialogTrigger>
+            <DialogPortal>
+              <DialogOverlay />
+              <DialogContent>
+                <DialogTitle>{t("adminGroupsView.deleteGroup.title")}</DialogTitle>
+                <DialogDescription>
+                  {t("adminGroupsView.deleteGroup.description")}
+                </DialogDescription>
+                <form onSubmit={handleGroupsDelete}>
+                  <div className={"flex justify-end gap-4"}>
+                    <DialogClose>
+                      <Button type={"reset"} variant={"ghost"}>
+                        {t("adminGroupsView.deleteGroup.cancel")}
+                      </Button>
+                    </DialogClose>
+                    <DialogClose>
+                      <Button type={"submit"} variant={"secondary"}>
+                        {t("adminGroupsView.deleteGroup.submit")}
+                      </Button>
+                    </DialogClose>
+                  </div>
+                </form>
+              </DialogContent>
+            </DialogPortal>
+          </Dialog>
         </div>
       </div>
       <div className="ml-auto flex items-center gap-x-2 px-4 py-2"></div>
