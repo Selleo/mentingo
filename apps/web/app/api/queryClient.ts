@@ -4,6 +4,7 @@ import { isAxiosError, isCancel } from "axios";
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5,
       retry(failureCount, error: unknown) {
         if (isCancel(error)) return false;
 

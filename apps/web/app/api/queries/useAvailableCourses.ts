@@ -3,6 +3,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetAvailableCoursesResponse } from "../generated-api";
+import type { UserRole } from "~/config/userRoles";
 import type { SortOption } from "~/types/sorting";
 
 type CourseParams = {
@@ -11,6 +12,7 @@ type CourseParams = {
   sort?: SortOption;
   userId?: string;
   excludeCourseId?: string;
+  userRole?: UserRole;
 };
 
 export const availableCoursesQueryOptions = (searchParams?: CourseParams) => ({

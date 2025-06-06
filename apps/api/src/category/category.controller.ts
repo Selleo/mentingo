@@ -20,6 +20,7 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -41,7 +42,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
-  @Roles(...Object.values(USER_ROLES))
+  @Public()
   @Validate({
     response: paginatedResponse(Type.Array(categorySchema)),
     request: [
@@ -58,7 +59,7 @@ export class CategoryController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCategoryFieldsOptions,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser("role") currentUserRole?: UserRole,
   ): Promise<PaginatedResponse<AllCategoriesResponse>> {
     const filters = { archived, title };
     const query = { filters, page, perPage, sort };

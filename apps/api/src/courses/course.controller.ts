@@ -24,6 +24,7 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -161,6 +162,7 @@ export class CourseController {
 
   @Get("available-courses")
   @Validate(coursesValidation)
+  @Public()
   async getAvailableCourses(
     @Query("title") title: string,
     @Query("category") category: string,
@@ -171,7 +173,7 @@ export class CourseController {
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCourseFieldsOptions,
     @Query("excludeCourseId") excludeCourseId: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("userId") currentUserId?: UUIDType,
   ): Promise<PaginatedResponse<AllStudentCoursesResponse>> {
     const filters: CoursesFilterSchema = {
       title,
@@ -189,6 +191,7 @@ export class CourseController {
     return new PaginatedResponse(data);
   }
 
+  @Public()
   @Get("teacher-courses")
   @Validate({
     request: [
@@ -213,6 +216,7 @@ export class CourseController {
     return new BaseResponse(await this.courseService.getTeacherCourses(query));
   }
 
+  @Public()
   @Get()
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
