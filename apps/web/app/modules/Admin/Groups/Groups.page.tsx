@@ -1,13 +1,14 @@
-import { Link } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import {
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { Button } from "~/components/ui/button";
 import {
   Table,
@@ -25,13 +26,16 @@ import type { ReactElement } from "react";
 
 const Groups = (): ReactElement => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { columns } = useGroupTable();
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const { data } = useGroupsQuerySuspense({});
+
   const table = useReactTable({
-    data: [],
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -43,12 +47,19 @@ const Groups = (): ReactElement => {
     },
   });
 
+  const handleGroupEdit = useCallback(
+    (groupId: string) => () => {
+      navigate(groupId);
+    },
+    [navigate],
+  );
+
   return (
     <div className="flex flex-col">
       <h4 className={"text-2xl font-bold"}>{t("navigationSideBar.groups")}</h4>
       <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
         <div className="flex items-center justify-between gap-2">
-          <Link to={""}>
+          <Link to={"new"}>
             <Button>{t("adminGroupsView.buttons.create")}</Button>
           </Link>
         </div>
@@ -70,7 +81,7 @@ const Groups = (): ReactElement => {
             <TableRow
               key={row.id}
               data-state={row.getIsSelected() && "selected"}
-              onClick={() => alert("not implemented")}
+              onClick={handleGroupEdit(row.original?.id)}
               className="cursor-pointer hover:bg-neutral-100"
             >
               {row.getVisibleCells().map((cell, index) => (

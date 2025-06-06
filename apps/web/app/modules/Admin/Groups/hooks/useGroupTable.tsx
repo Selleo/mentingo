@@ -4,8 +4,11 @@ import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Checkbox } from "~/components/ui/checkbox";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import type { GetAllGroupsResponse } from "~/api/generated-api";
 
-export const useGroupTable: () => { columns: ColumnDef<unknown>[] } = () => {
+type GroupColumns = GetAllGroupsResponse["data"][number];
+
+export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () => {
   const { t } = useTranslation();
 
   return {
@@ -32,13 +35,13 @@ export const useGroupTable: () => { columns: ColumnDef<unknown>[] } = () => {
       {
         accessorKey: "name",
         header: ({ column }) => (
-          <SortButton<unknown> column={column}>{t("adminGroupsView.name")}</SortButton>
+          <SortButton<GroupColumns> column={column}>{t("adminGroupsView.name")}</SortButton>
         ),
       },
       {
         accessorKey: "description",
         header: ({ column }) => (
-          <SortButton<unknown> column={column}>{t("adminGroupsView.description")}</SortButton>
+          <SortButton<GroupColumns> column={column}>{t("adminGroupsView.description")}</SortButton>
         ),
       },
     ],

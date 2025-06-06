@@ -21,6 +21,7 @@ import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseModule } from "./courses/course.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
+import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { QuestionsModule } from "./questions/question.module";
@@ -74,6 +75,7 @@ import { UserModule } from "./user/user.module";
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => env.NODE_ENV !== "test"),
     CourseModule,
+    GroupModule,
     LessonModule,
     QuestionsModule,
     StudentLessonProgressModule,

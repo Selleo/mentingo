@@ -385,6 +385,25 @@
     "description": "Opis",
     "buttons": {
       "create": "Stwórz nową grupę"
+    },
+    "newGroup": {
+      "header": "Utwórz nową grupę",
+      "subheader": "Wprowadź dane dla swojej nowej grupy. Kliknij zapisz, gdy skończysz.",
+      "fields": {
+        "name": "Nazwa grupy",
+        "description": "Opis"
+      },
+      "submit": "Utwórz grupę"
+    },
+    "updateGroup": {
+      "header": "Edytuj grupę",
+      "fields": {
+        "name": "Nazwa grupy",
+        "description": "Opis"
+      },
+      "submit": "Edytuj grupę",
+      "groupUpdatedSuccessfully": "Grupa zaktualizowana pomyślnie",
+      "groupNotFound": "Nie znaleziono grupy"
     }
   },
   "enrollCourseView": {

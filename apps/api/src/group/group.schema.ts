@@ -14,7 +14,7 @@ export const groupSchema = Type.Object({
 export const allGroupsSchema = Type.Array(groupSchema);
 export const baseGroupSchema = Type.Object({
   name: Type.String(),
-  description: Type.String(),
+  description: Type.Optional(Type.String()),
 });
 
 export const groupsFilterSchema = Type.Object({
