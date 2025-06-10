@@ -304,7 +304,7 @@ export class CourseService {
 
   async getAvailableCourses(
     query: CoursesQuery,
-    currentUserId: UUIDType,
+    currentUserId?: UUIDType,
   ): Promise<{ data: AllStudentCoursesResponse; pagination: Pagination }> {
     const {
       sort = CourseSortFields.title,
@@ -316,8 +316,8 @@ export class CourseService {
 
     return this.db.transaction(async (trx) => {
       const availableCourseIds = await this.getAvailableCourseIds(
-        currentUserId,
         trx,
+        currentUserId,
         undefined,
         query.excludeCourseId,
       );
@@ -624,8 +624,8 @@ export class CourseService {
 
     if (scope === COURSE_ENROLLMENT_SCOPES.AVAILABLE) {
       const availableCourseIds = await this.getAvailableCourseIds(
-        currentUserId,
         this.db,
+        currentUserId,
         authorId,
         excludeCourseId,
       );
@@ -1155,8 +1155,8 @@ export class CourseService {
   }
 
   private async getAvailableCourseIds(
-    currentUserId: UUIDType,
     trx: PostgresJsDatabase<typeof schema>,
+    currentUserId?: UUIDType,
     authorId?: UUIDType,
     excludeCourseId?: UUIDType,
   ) {

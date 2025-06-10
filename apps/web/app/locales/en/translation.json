@@ -110,7 +110,10 @@
     "myCourses": "My courses",
     "categories": "Categories",
     "users": "Users",
-    "browseCourses": "Browse Courses"
+    "browseCourses": "Browse Courses",
+    "ariaLabels": {
+      "goToAvailableCourses": "Go to available courses"
+    }
   },
   "changeUserEmailView": {
     "header": "Change user information",

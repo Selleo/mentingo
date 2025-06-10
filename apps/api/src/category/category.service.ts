@@ -30,7 +30,7 @@ export class CategoryService {
 
   public async getCategories(
     query: CategoryQuery,
-    userRole: UserRole,
+    userRole?: UserRole,
   ): Promise<{
     data: AllCategoriesResponse;
     pagination: Pagination;
