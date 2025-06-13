@@ -16,6 +16,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
   const { role } = useUserRole();
 
+  if (!role) return null;
+
   return (
     <header className="sticky top-0 z-10 h-min w-full 2xl:static 2xl:flex 2xl:h-dvh 2xl:w-14 2xl:flex-col 2xl:gap-y-6 2xl:px-2 2xl:py-4 3xl:w-60 3xl:p-4">
       <NavigationHeader isMobileNavOpen={isMobileNavOpen} setIsMobileNavOpen={setIsMobileNavOpen} />

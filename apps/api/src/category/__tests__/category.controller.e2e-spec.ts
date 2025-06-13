@@ -107,11 +107,5 @@ describe("CategoryController (e2e)", () => {
         expect(res.body.pagination.totalItems).toBe(CATEGORIES_COUNT);
       });
     });
-
-    describe("when the request is unauthenticated", () => {
-      it("returns 401 ", async () => {
-        await request(app.getHttpServer()).get("/api/category").expect(401);
-      });
-    });
   });
 });

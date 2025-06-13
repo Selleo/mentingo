@@ -7,88 +7,98 @@ import {
   availableCoursesQueryOptions,
   currentUserQueryOptions,
   studentCoursesQueryOptions,
+  useCategoriesSuspense,
 } from "~/api/queries";
 import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
-import { categoriesQueryOptions, useCategoriesSuspense } from "~/api/queries/useCategories";
+import { categoriesQueryOptions } from "~/api/queries/useCategories";
 import { allCoursesQueryOptions } from "~/api/queries/useCourses";
-import { useStudentCourses } from "~/api/queries/useStudentCourses";
 import { queryClient } from "~/api/queryClient";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { USER_ROLE } from "~/config/userRoles";
+import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
-import { SORT_OPTIONS, type SortOption } from "~/types/sorting";
-
-import { useLayoutsStore } from "../common/Layout/LayoutsStore";
-import Loader from "../common/Loader/Loader";
+import { useLayoutsStore } from "~/modules/common/Layout/LayoutsStore";
+import Loader from "~/modules/common/Loader/Loader";
 import {
   type FilterConfig,
   type FilterValue,
   SearchFilter,
-} from "../common/SearchFilter/SearchFilter";
-import { DashboardIcon, HamburgerIcon } from "../icons/icons";
-
-import { CourseList } from "./components/CourseList";
-import { CoursesCarousel } from "./components/CoursesCarousel";
+} from "~/modules/common/SearchFilter/SearchFilter";
+import { CourseList } from "~/modules/Courses/components/CourseList";
+import { StudentsCurses } from "~/modules/Courses/components/StudentsCurses";
+import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
+import { SORT_OPTIONS, type SortOption } from "~/types/sorting";
 
 import type { MetaFunction } from "@remix-run/node";
-
-type State = {
-  searchTitle: string | undefined;
-  sort: SortOption | undefined | "";
-  category: string | undefined;
-};
-
-type Action =
-  | { type: "SET_SEARCH_TITLE"; payload: string | undefined }
-  | { type: "SET_SORT"; payload: string | undefined }
-  | { type: "SET_CATEGORY"; payload: string | undefined };
 
 export const meta: MetaFunction = () => {
   return [{ title: "Courses" }, { name: "description", content: "Courses" }];
 };
 
-export const clientLoader = async () => {
-  const { data: user } = await queryClient.fetchQuery(currentUserQueryOptions);
-
+const prefetchQueriesForUser = async (userRole: string | undefined) => {
   await queryClient.prefetchQuery(categoriesQueryOptions());
 
-  if (user.role === "admin" || user.role === "teacher") {
-    await queryClient.prefetchQuery(allCoursesQueryOptions());
-  } else {
-    await queryClient.prefetchQuery(availableCoursesQueryOptions());
-    await queryClient.prefetchQuery(studentCoursesQueryOptions());
-  }
+  return match(userRole)
+    .with(USER_ROLE.admin, USER_ROLE.teacher, async () => {
+      await queryClient.prefetchQuery(allCoursesQueryOptions());
+    })
+    .with(USER_ROLE.student, async () => {
+      await queryClient.prefetchQuery(availableCoursesQueryOptions());
+      await queryClient.prefetchQuery(studentCoursesQueryOptions());
+    })
+    .otherwise(async () => {
+      await queryClient.prefetchQuery(availableCoursesQueryOptions());
+    });
+};
+
+export const clientLoader = async () => {
+  const currentUser = await queryClient.ensureQueryData(currentUserQueryOptions);
+  const userRole = currentUser?.data.role;
+
+  await prefetchQueriesForUser(userRole);
 
   return null;
 };
 
-function reducer(state: State, action: Action): State {
-  return match<Action, State>(action)
-    .with({ type: "SET_SEARCH_TITLE" }, ({ payload }) => ({
-      ...state,
-      searchTitle: payload,
-    }))
-    .with({ type: "SET_SORT" }, ({ payload }) => ({
-      ...state,
-      sort: payload as SortOption,
-    }))
-    .with({ type: "SET_CATEGORY" }, ({ payload }) => ({
-      ...state,
-      category: payload === "all" ? undefined : payload,
-    }))
-    .exhaustive();
-}
-
 export default function CoursesPage() {
+  const { isStudent } = useUserRole();
+
+  type State = {
+    searchTitle: string | undefined;
+    sort: SortOption | undefined | "";
+    category: string | undefined;
+  };
+
+  type Action =
+    | { type: "SET_SEARCH_TITLE"; payload: string | undefined }
+    | { type: "SET_SORT"; payload: string | undefined }
+    | { type: "SET_CATEGORY"; payload: string | undefined };
+
   const { t } = useTranslation();
+  function reducer(state: State, action: Action): State {
+    return match<Action, State>(action)
+      .with({ type: "SET_SEARCH_TITLE" }, ({ payload }) => ({
+        ...state,
+        searchTitle: payload,
+      }))
+      .with({ type: "SET_SORT" }, ({ payload }) => ({
+        ...state,
+        sort: payload as SortOption,
+      }))
+      .with({ type: "SET_CATEGORY" }, ({ payload }) => ({
+        ...state,
+        category: payload === "all" ? undefined : payload,
+      }))
+      .exhaustive();
+  }
+
   const [state, dispatch] = useReducer(reducer, {
     searchTitle: undefined,
     sort: undefined,
     category: undefined,
   });
-
-  const { data: studentCourses, isLoading: isStudentCoursesLoading } = useStudentCourses();
 
   const { data: userAvailableCourses, isLoading: isAvailableCoursesLoading } = useAvailableCourses({
     title: state.searchTitle,
@@ -140,43 +150,7 @@ export default function CoursesPage() {
   return (
     <PageWrapper>
       <div className="flex h-auto flex-1 flex-col gap-y-12">
-        <div className="flex flex-col gap-y-6">
-          <div className="flex flex-col">
-            <h4 className="pb-1 text-2xl font-bold leading-10 text-neutral-950">
-              {t("studentCoursesView.enrolledCourses.header")}
-            </h4>
-            <p className="text-lg leading-7 text-neutral-800">
-              {t("studentCoursesView.enrolledCourses.subHeader")}
-            </p>
-          </div>
-          <div
-            data-testid="enrolled-courses"
-            className="flex w-full gap-6 drop-shadow-primary lg:rounded-lg lg:bg-white lg:p-8"
-          >
-            {!studentCourses ||
-              (isEmpty(studentCourses) && (
-                <div className="col-span-3 flex gap-8">
-                  <div>
-                    <Icon name="EmptyCourse" className="mr-2 text-neutral-900" />
-                  </div>
-                  <div className="flex flex-col justify-center gap-2">
-                    <p className="text-lg font-bold leading-5 text-neutral-950">
-                      {t("studentCoursesView.other.cannotFindCourses")}
-                    </p>
-                    <p className="text-base font-normal leading-6 text-neutral-800">
-                      {t("studentCoursesView.other.changeSearchCriteria")}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            {isStudentCoursesLoading && (
-              <div className="flex h-full items-center justify-center">
-                <Loader />
-              </div>
-            )}
-            <CoursesCarousel courses={studentCourses} buttonContainerClasses="lg:-right-8" />
-          </div>
-        </div>
+        {isStudent && <StudentsCurses />}
         <div className="flex flex-col">
           <div className="flex flex-col lg:p-0">
             <h4 className="pb-1 text-2xl font-bold leading-10 text-neutral-950">
