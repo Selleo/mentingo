@@ -13,11 +13,20 @@ import { StripeWebhookHandler } from "./stripeWebhook.handler";
     StripeModuleConfig.forRootAsync(StripeModuleConfig, {
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        /**
+         * This Stripe module is **optional**. It initializes using `STRIPE_SECRET_KEY`
+         * and `STRIPE_WEBHOOK_SECRET` from environment variables.
+         *
+         * If these keys are not provided, the module will initialize with
+         * fallback "empty" values. In this scenario, `StripeService` will be
+         * instantiated with a `null` Stripe client, preventing startup errors and
+         * allowing the application to run without active Stripe integration.
+         */
         return {
-          apiKey: configService.get<string>("stripe.secretKey") || "",
+          apiKey: configService.get<string>("stripe.secretKey") || "empty",
           webhookConfig: {
             stripeSecrets: {
-              account: configService.get<string>("stripe.webhookSecret") || "",
+              account: configService.get<string>("stripe.webhookSecret") || "empty",
             },
             loggingConfiguration: {
               logMatchingEventHandlers: true,
