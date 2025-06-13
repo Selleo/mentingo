@@ -31,12 +31,12 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
     if (!currentUser) {
       return (
         <Link to="/auth/register">
-          <Button className="gap-x-2 w-full" variant="primary">
+          <Button className="w-full gap-x-2" variant="primary">
             <Enroll />
             <span>{t("studentCourseView.sideSection.button.enrollCourse")}</span>
           </Button>
         </Link>
-      )
+      );
     }
 
     return (
@@ -44,8 +44,8 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
         <Enroll />
         <span>{t("studentCourseView.sideSection.button.enrollCourse")}</span>
       </Button>
-    )
-  }
+    );
+  };
 
   return (
     <>

@@ -13,7 +13,5 @@ export default function PublicDashboardLayout() {
 
   const isAuthenticated = Boolean(user);
 
-  return (
-    <Dashboard isAuthenticated={isAuthenticated} />
-  )
+  return <Dashboard isAuthenticated={isAuthenticated} />;
 }

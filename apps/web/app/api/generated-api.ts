@@ -1222,6 +1222,132 @@ export interface MarkLessonAsCompletedResponse {
   };
 }
 
+export interface GetAllGroupsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    description: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetGroupByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    description: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  };
+}
+
+export interface GetUserGroupsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    description: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateGroupBody {
+  name: string;
+  description?: string;
+}
+
+export interface CreateGroupResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export interface UpdateGroupBody {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateGroupResponse {
+  data: {
+    name: string;
+    description?: string;
+  };
+}
+
+export interface DeleteGroupResponse {
+  data: {
+    message: string;
+  };
+}
+
+export type BulkDeleteGroupsBody = string[];
+
+export interface BulkDeleteGroupsResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface AssignUserToGroupResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UnassignUserFromGroupResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface CreatePaymentIntentResponse {
   data: {
     clientSecret: string;
@@ -2598,6 +2724,181 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<MarkLessonAsCompletedResponse, any>({
         path: `/api/studentLessonProgress`,
         method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetAllGroups
+     * @request GET:/api/group/all
+     */
+    groupControllerGetAllGroups: (
+      query?: {
+        keyword?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllGroupsResponse, any>({
+        path: `/api/group/all`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetGroupById
+     * @request GET:/api/group/{groupId}
+     */
+    groupControllerGetGroupById: (groupId: string, params: RequestParams = {}) =>
+      this.request<GetGroupByIdResponse, any>({
+        path: `/api/group/${groupId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerUpdateGroup
+     * @request PATCH:/api/group/{groupId}
+     */
+    groupControllerUpdateGroup: (
+      groupId: string,
+      data: UpdateGroupBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateGroupResponse, any>({
+        path: `/api/group/${groupId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerDeleteGroup
+     * @request DELETE:/api/group/{groupId}
+     */
+    groupControllerDeleteGroup: (groupId: string, params: RequestParams = {}) =>
+      this.request<DeleteGroupResponse, any>({
+        path: `/api/group/${groupId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetUserGroups
+     * @request GET:/api/group/user/{userId}
+     */
+    groupControllerGetUserGroups: (
+      userId: string,
+      query?: {
+        keyword?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserGroupsResponse, any>({
+        path: `/api/group/user/${userId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerCreateGroup
+     * @request POST:/api/group
+     */
+    groupControllerCreateGroup: (data: CreateGroupBody, params: RequestParams = {}) =>
+      this.request<CreateGroupResponse, any>({
+        path: `/api/group`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerBulkDeleteGroups
+     * @request DELETE:/api/group
+     */
+    groupControllerBulkDeleteGroups: (data: BulkDeleteGroupsBody, params: RequestParams = {}) =>
+      this.request<BulkDeleteGroupsResponse, any>({
+        path: `/api/group`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerAssignUserToGroup
+     * @request POST:/api/group/assign
+     */
+    groupControllerAssignUserToGroup: (
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @format uuid */
+        groupId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<AssignUserToGroupResponse, any>({
+        path: `/api/group/assign`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerUnassignUserFromGroup
+     * @request DELETE:/api/group/unassign
+     */
+    groupControllerUnassignUserFromGroup: (
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @format uuid */
+        groupId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UnassignUserFromGroupResponse, any>({
+        path: `/api/group/unassign`,
+        method: "DELETE",
         query: query,
         format: "json",
         ...params,

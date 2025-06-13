@@ -110,6 +110,7 @@
     "myCourses": "My courses",
     "categories": "Categories",
     "users": "Users",
+    "groups": "Groups",
     "browseCourses": "Browse Courses",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
@@ -380,6 +381,39 @@
     },
     "error": {
       "userNotFound": "User not found"
+    }
+  },
+  "adminGroupsView": {
+    "name": "Group name",
+    "description": "Description",
+    "buttons": {
+      "create": "Create new",
+      "deleteSelected": "Delete selected"
+    },
+    "newGroup": {
+      "header": "Create New Group",
+      "subheader": "Fill in the details to create a new group. Click save when you're done.",
+      "fields": {
+        "name": "Name",
+        "description": "Description"
+      },
+      "submit": "Create group"
+    },
+    "updateGroup": {
+      "header": "Update group",
+      "fields": {
+        "name": "Name",
+        "description": "Description"
+      },
+      "submit": "Edit group",
+      "groupUpdatedSuccessfully": "Group updated successfully",
+      "groupNotFound": "Group not found"
+    },
+    "deleteGroup": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete these groups?",
+      "cancel": "Cancel",
+      "submit": "Delete"
     }
   },
   "enrollCourseView": {

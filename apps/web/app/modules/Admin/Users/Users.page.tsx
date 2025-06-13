@@ -186,6 +186,7 @@ const Users = () => {
 
   return (
     <div className="flex flex-col">
+      <h4 className={"text-2xl font-bold"}>{t("navigationSideBar.users")}</h4>
       <div className="flex items-center justify-between gap-2">
         <Link to="new">
           <Button variant="outline">{t("adminUsersView.button.createNew")}</Button>
