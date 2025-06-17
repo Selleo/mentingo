@@ -632,6 +632,14 @@ export interface EnrollCoursesResponse {
   };
 }
 
+export type DeleteCourseResponse = null;
+
+export interface DeleteManyCoursesBody {
+  ids: string[];
+}
+
+export type DeleteManyCoursesResponse = null;
+
 export type UnenrollCourseResponse = null;
 
 export interface FileUploadResponse {
@@ -2331,6 +2339,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<EnrollCoursesResponse, any>({
         path: `/api/course/${courseId}/enroll-courses`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteCourse
+     * @request DELETE:/api/course/deleteCourse/{id}
+     */
+    courseControllerDeleteCourse: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteCourseResponse, any>({
+        path: `/api/course/deleteCourse/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteManyCourses
+     * @request DELETE:/api/course/deleteManyCourses
+     */
+    courseControllerDeleteManyCourses: (data: DeleteManyCoursesBody, params: RequestParams = {}) =>
+      this.request<DeleteManyCoursesResponse, any>({
+        path: `/api/course/deleteManyCourses`,
+        method: "DELETE",
         body: data,
         type: ContentType.Json,
         format: "json",

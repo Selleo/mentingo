@@ -316,6 +316,34 @@ export class CourseController {
     return new BaseResponse({ message: "Courses enrolled successfully" });
   }
 
+  @Delete("deleteCourse/:id")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: nullResponse(),
+  })
+  async deleteCourse(
+    @Param("id") id: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<null> {
+    await this.courseService.deleteCourse(id, currentUserRole);
+
+    return null;
+  }
+
+  @Delete("deleteManyCourses")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: Type.Object({ ids: Type.Array(UUIDSchema) }) }],
+    response: nullResponse(),
+  })
+  async deleteManyCourses(
+    @Body() body: { ids: UUIDType[] },
+    @CurrentUser("role") currentUserRole: UserRole,
+  ) {
+    return await this.courseService.deleteManyCourses(body.ids, currentUserRole);
+  }
+
   @Delete("unenroll-course")
   @Roles(USER_ROLES.STUDENT)
   @Validate({

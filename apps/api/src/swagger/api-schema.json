@@ -1568,6 +1568,60 @@
         }
       }
     },
+    "/api/course/deleteCourse/{id}": {
+      "delete": {
+        "operationId": "CourseController_deleteCourse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/deleteManyCourses": {
+      "delete": {
+        "operationId": "CourseController_deleteManyCourses",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteManyCoursesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteManyCoursesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/unenroll-course": {
       "delete": {
         "operationId": "CourseController_unenrollCourse",
@@ -4889,6 +4943,27 @@
         "required": [
           "data"
         ]
+      },
+      "DeleteCourseResponse": {
+        "type": "null"
+      },
+      "DeleteManyCoursesBody": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "DeleteManyCoursesResponse": {
+        "type": "null"
       },
       "UnenrollCourseResponse": {
         "type": "null"

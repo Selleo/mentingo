@@ -14,8 +14,10 @@ import { Trash } from "lucide-react";
 import { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteCourse } from "~/api/mutations/admin/useDeleteCourse";
+import { useDeleteManyCourses } from "~/api/mutations/admin/useDeleteManyCourses";
 import { categoriesQueryOptions } from "~/api/queries";
-import { ALL_COURSES_QUERY_KEY, useCoursesSuspense } from "~/api/queries/useCourses";
+import { useCoursesSuspense } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
@@ -192,11 +194,26 @@ const Courses = () => {
 
   const selectedCourses = table.getSelectedRowModel().rows.map((row) => row.original.id);
 
+  const { mutate: deleteCourse } = useDeleteCourse();
+  const { mutate: deleteManyCourses } = useDeleteManyCourses();
   const handleDeleteCourses = () => {
-    // TODO: Implement archive functionality
-    alert("Not implemented");
-    table.resetRowSelection();
-    queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
+    if (selectedCourses.length === 1) {
+      deleteCourse(selectedCourses[0], {
+        onSuccess: () => {
+          setRowSelection({});
+        },
+      });
+    } else if (selectedCourses.length > 1) {
+      console.log("elooo", selectedCourses);
+      deleteManyCourses(selectedCourses, {
+        onSuccess: () => {
+          setRowSelection({});
+        },
+        onError: (error) => {
+          console.error("Error deleting courses:", error);
+        },
+      });
+    }
   };
 
   const handleRowClick = (courseId: string) => {
