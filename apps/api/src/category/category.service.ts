@@ -4,12 +4,12 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { and, count, eq, ilike, like } from "drizzle-orm";
+import { and, count, eq, ilike, like, inArray } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { categories } from "src/storage/schema";
+import { categories, courses } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -126,6 +126,74 @@ export class CategoryService {
       default:
         return categories.title;
     }
+  }
+
+  async deleteCategory(id: UUIDType) {
+    try {
+      const [category] = await this.db.select().from(categories).where(eq(categories.id, id));
+
+      if (!category) {
+        throw new NotFoundException("Category not found");
+      }
+
+      const coursesWithCategory = await this.db
+        .select({ id: courses.id, title: courses.title })
+        .from(courses)
+        .where(eq(courses.categoryId, id));
+
+      if (coursesWithCategory.length > 0) {
+        throw new UnprocessableEntityException(
+          `Cannot delete category. It is assigned to ${coursesWithCategory.length} course(s): ${coursesWithCategory.map((c) => c.title).join(", ")}`,
+        );
+      }
+      await this.db.delete(categories).where(eq(categories.id, id));
+    } catch (error) {
+      console.error(error);
+      throw new NotFoundException("Category not found");
+    }
+  }
+
+  async deleteManyCategories(categoryIds: string[]): Promise<string> {
+    return this.db.transaction(async (tx) => {
+      const existingCategories = await tx
+        .select({ id: categories.id, title: categories.title })
+        .from(categories)
+        .where(inArray(categories.id, categoryIds));
+
+      if (existingCategories.length === 0) {
+        throw new NotFoundException("No categories found to delete");
+      }
+
+      const categoriesWithCourses = await tx
+        .select({
+          categoryId: courses.categoryId,
+          courseTitle: courses.title,
+        })
+        .from(courses)
+        .where(
+          inArray(
+            courses.categoryId,
+            existingCategories.map((cat) => cat.id),
+          ),
+        );
+
+      if (categoriesWithCourses.length > 0) {
+        const courseTitles = [...new Set(categoriesWithCourses.map((c) => c.courseTitle))];
+        throw new UnprocessableEntityException(
+          `Cannot delete categories. Some are assigned to courses: ${courseTitles.join(", ")}`,
+        );
+      }
+
+      await tx.delete(categories).where(
+        inArray(
+          categories.id,
+          existingCategories.map((cat) => cat.id),
+        ),
+      );
+
+      const deletedTitles = existingCategories.map((cat) => cat.title);
+      return `Successfully deleted categories: ${deletedTitles.join(", ")}`;
+    });
   }
 
   private serializeCategories = (data: AllCategoriesResponse, isAdmin: boolean) =>

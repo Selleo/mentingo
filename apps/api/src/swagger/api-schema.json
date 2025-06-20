@@ -863,6 +863,60 @@
         }
       }
     },
+    "/api/category/deleteCategory/{id}": {
+      "delete": {
+        "operationId": "CategoryController_deleteCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/category/deleteManyCategories": {
+      "delete": {
+        "operationId": "CategoryController_deleteManyCategories",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteManyCategoriesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteManyCategoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/all": {
       "get": {
         "operationId": "CourseController_getAllCourses",
@@ -1561,6 +1615,60 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EnrollCoursesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/deleteCourse/{id}": {
+      "delete": {
+        "operationId": "CourseController_deleteCourse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/deleteManyCourses": {
+      "delete": {
+        "operationId": "CourseController_deleteManyCourses",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteManyCoursesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteManyCoursesResponse"
                 }
               }
             }
@@ -3612,6 +3720,51 @@
           "data"
         ]
       },
+      "DeleteCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteManyCategoriesBody": {
+        "type": "array",
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "DeleteManyCategoriesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetAllCoursesResponse": {
         "type": "object",
         "properties": {
@@ -4889,6 +5042,27 @@
         "required": [
           "data"
         ]
+      },
+      "DeleteCourseResponse": {
+        "type": "null"
+      },
+      "DeleteManyCoursesBody": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "DeleteManyCoursesResponse": {
+        "type": "null"
       },
       "UnenrollCourseResponse": {
         "type": "null"

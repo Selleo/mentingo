@@ -297,6 +297,16 @@
       "uploadScorm": "Upload SCORM",
       "createNew": "Create new",
       "deleteSelected": "Delete selected"
+    },
+    "deleteModal": {
+      "titleSingle": "Delete course",
+      "titleMultiple": "Delete courses",
+      "descriptionSingle": "Are you sure you want to delete this course? This action cannot be undone.",
+      "descriptionMultiple": "Are you sure you want to delete {{count}} courses? This action cannot be undone."
+    },
+    "toast": {
+      "deleteCourseSuccessfully": "Course deleted successfully",
+      "deleteCourseFailed": "Failed to delete course"
     }
   },
   "adminCategoriesView": {
@@ -314,6 +324,16 @@
       "createNew": "Create new",
       "clearAll": "Clear all",
       "deleteSelected": "Delete selected"
+    },
+    "deleteModal": {
+      "titleSingle": "Delete category",
+      "titleMultiple": "Delete categories",
+      "descriptionSingle": "Are you sure you want to delete this category? This action cannot be undone.",
+      "descriptionMultiple": "Are you sure you want to delete {{count}} categories? This action cannot be undone."
+    },
+    "toast": {
+      "deleteCategorySuccessfully": "Category deleted successfully",
+      "deleteCategoryFailed": "Failed to delete category"
     }
   },
   "adminCategoryView": {

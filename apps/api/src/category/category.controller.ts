@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -121,5 +122,31 @@ export class CategoryController {
     const category = await this.categoryService.updateCategory(id, updateCategoryBody);
 
     return new BaseResponse(category);
+  }
+
+  @Delete("deleteCategory/:id")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(Type.Object({ message: Type.String() })),
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+  })
+  async deleteCategory(@Param("id") id: UUIDType): Promise<BaseResponse<{ message: string }>> {
+    await this.categoryService.deleteCategory(id);
+
+    return new BaseResponse({ message: "Category deleted successfully" });
+  }
+
+  @Delete("deleteManyCategories")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(Type.Object({ message: Type.String() })),
+    request: [{ type: "body", schema: Type.Array(UUIDSchema) }],
+  })
+  async deleteManyCategories(
+    @Body() deleteCategoriesIds: string[],
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.categoryService.deleteManyCategories(deleteCategoriesIds);
+
+    return new BaseResponse({ message: "Categories deleted successfully" });
   }
 }

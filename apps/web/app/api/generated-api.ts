@@ -318,6 +318,20 @@ export interface UpdateCategoryResponse {
   };
 }
 
+export interface DeleteCategoryResponse {
+  data: {
+    message: string;
+  };
+}
+
+export type DeleteManyCategoriesBody = string[];
+
+export interface DeleteManyCategoriesResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface GetAllCoursesResponse {
   data: {
     /** @format uuid */
@@ -631,6 +645,14 @@ export interface EnrollCoursesResponse {
     message: string;
   };
 }
+
+export type DeleteCourseResponse = null;
+
+export interface DeleteManyCoursesBody {
+  ids: string[];
+}
+
+export type DeleteManyCoursesResponse = null;
 
 export type UnenrollCourseResponse = null;
 
@@ -2053,6 +2075,39 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CategoryControllerDeleteCategory
+     * @request DELETE:/api/category/deleteCategory/{id}
+     */
+    categoryControllerDeleteCategory: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteCategoryResponse, any>({
+        path: `/api/category/deleteCategory/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerDeleteManyCategories
+     * @request DELETE:/api/category/deleteManyCategories
+     */
+    categoryControllerDeleteManyCategories: (
+      data: DeleteManyCategoriesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteManyCategoriesResponse, any>({
+        path: `/api/category/deleteManyCategories`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerGetAllCourses
      * @request GET:/api/course/all
      */
@@ -2331,6 +2386,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<EnrollCoursesResponse, any>({
         path: `/api/course/${courseId}/enroll-courses`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteCourse
+     * @request DELETE:/api/course/deleteCourse/{id}
+     */
+    courseControllerDeleteCourse: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteCourseResponse, any>({
+        path: `/api/course/deleteCourse/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteManyCourses
+     * @request DELETE:/api/course/deleteManyCourses
+     */
+    courseControllerDeleteManyCourses: (data: DeleteManyCoursesBody, params: RequestParams = {}) =>
+      this.request<DeleteManyCoursesResponse, any>({
+        path: `/api/course/deleteManyCourses`,
+        method: "DELETE",
         body: data,
         type: ContentType.Json,
         format: "json",

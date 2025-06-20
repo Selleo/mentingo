@@ -297,6 +297,16 @@
       "uploadScorm": "Prześlij SCORM",
       "createNew": "Utwórz nowy",
       "deleteSelected": "Usuń wybrane"
+    },
+    "deleteModal": {
+      "titleSingle": "Usuń kurs",
+      "titleMultiple": "Usuń kursy",
+      "descriptionSingle": "Czy na pewno chcesz usunąć ten kurs? Ta operacja nie może zostać cofnięta.",
+      "descriptionMultiple": "Czy na pewno chcesz usunąć {{count}} kursów? Ta operacja nie może zostać cofnięta."
+    },
+    "toast": {
+      "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
+      "deleteCourseFailed": "Nie udało się usunąć kursu"
     }
   },
   "adminCategoriesView": {
@@ -314,6 +324,16 @@
       "createNew": "Utwórz nowy",
       "clearAll": "Wyczyść wszystko",
       "deleteSelected": "Usuń wybrane"
+    },
+    "deleteModal": {
+      "titleSingle": "Usuń kategorię",
+      "titleMultiple": "Usuń kategorie",
+      "descriptionSingle": "Czy na pewno chcesz usunąć tę kategorię? Ta operacja nie może zostać cofnięta.",
+      "descriptionMultiple": "Czy na pewno chcesz usunąć {{count}} kategorii? Ta operacja nie może zostać cofnięta."
+    },
+    "toast": {
+      "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
+      "deleteCategoryFailed": "Nie udało się usunąć kategorii"
     }
   },
   "adminCategoryView": {

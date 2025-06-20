@@ -40,6 +40,7 @@ import {
   coursesSummaryStats,
   lessons,
   questions,
+  quizAttempts,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -75,6 +76,7 @@ import type {
   LessonForChapterSchema,
 } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
+import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
 @Injectable()
@@ -941,6 +943,68 @@ export class CourseService {
         }),
       );
     }
+  }
+
+  async deleteCourse(id: UUIDType, currentUserRole: UserRole) {
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.TEACHER) {
+      throw new ForbiddenException("You don't have permission to delete this course");
+    }
+
+    if (course.isPublished) {
+      throw new ForbiddenException("You can't delete a published course");
+    }
+
+    return this.db.transaction(async (trx) => {
+      await trx.delete(quizAttempts).where(eq(quizAttempts.courseId, id));
+      await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
+      await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
+      await trx.delete(coursesSummaryStats).where(eq(coursesSummaryStats.courseId, id));
+
+      const [deletedCourse] = await trx.delete(courses).where(eq(courses.id, id)).returning();
+
+      if (!deletedCourse) {
+        throw new ConflictException("Failed to delete course");
+      }
+
+      return null;
+    });
+  }
+
+  async deleteManyCourses(ids: UUIDType[], currentUserRole: UserRole) {
+    if (!ids.length) {
+      throw new BadRequestException("No course ids provided");
+    }
+
+    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.TEACHER) {
+      throw new ForbiddenException("You don't have permission to delete these courses");
+    }
+
+    const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
+
+    if (course.some((course) => course.isPublished)) {
+      throw new ForbiddenException("You can't delete a published course");
+    }
+
+    return this.db.transaction(async (trx) => {
+      await trx.delete(quizAttempts).where(inArray(quizAttempts.courseId, ids));
+      await trx.delete(studentCourses).where(inArray(studentCourses.courseId, ids));
+      await trx.delete(studentChapterProgress).where(inArray(studentChapterProgress.courseId, ids));
+      await trx.delete(coursesSummaryStats).where(inArray(coursesSummaryStats.courseId, ids));
+
+      const deletedCourses = await trx.delete(courses).where(inArray(courses.id, ids)).returning();
+
+      if (!deletedCourses.length) {
+        throw new ConflictException("Failed to delete courses");
+      }
+
+      return null;
+    });
   }
 
   async unenrollCourse(id: UUIDType, userId: UUIDType) {
