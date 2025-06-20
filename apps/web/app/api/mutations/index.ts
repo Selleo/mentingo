@@ -2,6 +2,8 @@ export { useChangePassword } from "./useChangePassword";
 export { useCreateCourse } from "./useCreateCourse";
 export { useCreateNewPassword } from "./useCreateNewPassword";
 export { useCreateUser } from "./admin/useCreateUser";
+export { useDeleteCategory } from "./admin/useDeleteCategory";
+export { useDeleteManyCategories } from "./admin/useDeleteManyCategories";
 export { useEnrollCourse } from "./useEnrollCourse";
 export { useLoginUser } from "./useLoginUser";
 export { useLogoutUser } from "./useLogoutUser";

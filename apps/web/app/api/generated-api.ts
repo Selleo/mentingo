@@ -318,6 +318,20 @@ export interface UpdateCategoryResponse {
   };
 }
 
+export interface DeleteCategoryResponse {
+  data: {
+    message: string;
+  };
+}
+
+export type DeleteManyCategoriesBody = string[];
+
+export interface DeleteManyCategoriesResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface GetAllCoursesResponse {
   data: {
     /** @format uuid */
@@ -2052,6 +2066,39 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateCategoryResponse, any>({
         path: `/api/category/${id}`,
         method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerDeleteCategory
+     * @request DELETE:/api/category/deleteCategory/{id}
+     */
+    categoryControllerDeleteCategory: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteCategoryResponse, any>({
+        path: `/api/category/deleteCategory/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerDeleteManyCategories
+     * @request DELETE:/api/category/deleteManyCategories
+     */
+    categoryControllerDeleteManyCategories: (
+      data: DeleteManyCategoriesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteManyCategoriesResponse, any>({
+        path: `/api/category/deleteManyCategories`,
+        method: "DELETE",
         body: data,
         type: ContentType.Json,
         format: "json",

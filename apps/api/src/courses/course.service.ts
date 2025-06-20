@@ -956,6 +956,10 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
+    if (course.isPublished) {
+      throw new ForbiddenException("You can't delete a published course");
+    }
+
     return this.db.transaction(async (trx) => {
       await trx.delete(quizAttempts).where(eq(quizAttempts.courseId, id));
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
@@ -979,6 +983,12 @@ export class CourseService {
 
     if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.TEACHER) {
       throw new ForbiddenException("You don't have permission to delete these courses");
+    }
+
+    const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
+
+    if (course.some((course) => course.isPublished)) {
+      throw new ForbiddenException("You can't delete a published course");
     }
 
     return this.db.transaction(async (trx) => {

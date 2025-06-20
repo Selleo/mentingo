@@ -17,12 +17,22 @@ import { useTranslation } from "react-i18next";
 import { useDeleteCourse } from "~/api/mutations/admin/useDeleteCourse";
 import { useDeleteManyCourses } from "~/api/mutations/admin/useDeleteManyCourses";
 import { categoriesQueryOptions } from "~/api/queries";
-import { useCoursesSuspense } from "~/api/queries/useCourses";
+import { useCoursesSuspense, ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -32,6 +42,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { useToast } from "~/components/ui/use-toast";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
 import { cn } from "~/lib/utils";
@@ -192,6 +203,8 @@ const Courses = () => {
     },
   });
 
+  const { toast } = useToast();
+
   const selectedCourses = table.getSelectedRowModel().rows.map((row) => row.original.id);
 
   const { mutate: deleteCourse } = useDeleteCourse();
@@ -201,19 +214,46 @@ const Courses = () => {
       deleteCourse(selectedCourses[0], {
         onSuccess: () => {
           setRowSelection({});
-        },
-      });
-    } else if (selectedCourses.length > 1) {
-      console.log("elooo", selectedCourses);
-      deleteManyCourses(selectedCourses, {
-        onSuccess: () => {
-          setRowSelection({});
+          queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
+          toast({
+            title: t("adminCoursesView.toast.deleteCourseSuccessfully"),
+          });
         },
         onError: (error) => {
           console.error("Error deleting courses:", error);
+          toast({
+            title: t("adminCoursesView.toast.deleteCourseFailed"),
+          });
+        },
+      });
+    } else {
+      deleteManyCourses(selectedCourses, {
+        onSuccess: () => {
+          setRowSelection({});
+          queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
+        },
+        onError: (error) => {
+          console.error("Error deleting courses:", error);
+          toast({
+            title: t("adminCoursesView.toast.deleteCourseFailed"),
+          });
         },
       });
     }
+  };
+
+  const getDeleteModalTitle = () => {
+    if (selectedCourses.length === 1) {
+      return t("adminCoursesView.deleteModal.titleSingle");
+    }
+    return t("adminCoursesView.deleteModal.titleMultiple");
+  };
+
+  const getDeleteModalDescription = () => {
+    if (selectedCourses.length === 1) {
+      return t("adminCoursesView.deleteModal.descriptionSingle");
+    }
+    return t("adminCoursesView.deleteModal.descriptionMultiple", { count: selectedCourses.length });
   };
 
   const handleRowClick = (courseId: string) => {
@@ -260,15 +300,45 @@ const Courses = () => {
           >
             {t("common.other.selected")} ({selectedCourses.length})
           </p>
-          <Button
-            onClick={handleDeleteCourses}
-            size="sm"
-            className="flex items-center gap-x-2"
-            disabled={isEmpty(selectedCourses)}
-          >
-            <Trash className="h-3 w-3" />
-            <span className="text-xs">{t("adminCoursesView.button.deleteSelected")}</span>
-          </Button>
+
+          <Dialog>
+            <DialogTrigger disabled={isEmpty(selectedCourses)}>
+              <Button
+                size="sm"
+                className="flex items-center gap-x-2"
+                disabled={isEmpty(selectedCourses)}
+              >
+                <Trash className="h-3 w-3" />
+                <span className="text-xs">{t("adminCoursesView.button.deleteSelected")}</span>
+              </Button>
+            </DialogTrigger>
+            <DialogPortal>
+              <DialogOverlay className="bg-primary-400 opacity-65" />
+              <DialogContent className="max-w-md">
+                <DialogTitle className="text-xl font-semibold text-neutral-900">
+                  {getDeleteModalTitle()}
+                </DialogTitle>
+                <DialogDescription className="mt-2 text-sm text-neutral-600">
+                  {getDeleteModalDescription()}
+                </DialogDescription>
+                <div className="mt-6 flex justify-end gap-4">
+                  <DialogClose>
+                    <Button variant="ghost" className="text-primary-800">
+                      {t("common.button.cancel")}
+                    </Button>
+                  </DialogClose>
+                  <DialogClose>
+                    <Button
+                      onClick={handleDeleteCourses}
+                      className="bg-error-500 text-white hover:bg-error-600"
+                    >
+                      {t("common.button.delete")}
+                    </Button>
+                  </DialogClose>
+                </div>
+              </DialogContent>
+            </DialogPortal>
+          </Dialog>
         </div>
       </div>
       <Table className="border bg-neutral-50">
