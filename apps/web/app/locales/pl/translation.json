@@ -811,7 +811,9 @@
       "multiple": "Wielokrotna",
       "fillInTheBlanks": "Uzupełnij luki.",
       "selectQuestion": "Wybierz pytanie.",
-      "trueOrFalseQuestion": "Pytanie prawda/fałsz."
+      "trueOrFalseQuestion": "Pytanie prawda/fałsz.",
+      "multipleChoice": "Pytanie wielokrotnego wyboru.",
+      "singleChoice": "Pytanie jednokrotnego wyboru."
     },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"

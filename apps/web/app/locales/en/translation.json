@@ -811,7 +811,9 @@
       "multiple": "Multiple",
       "fillInTheBlanks": "Fill in the blanks.",
       "selectQuestion": "select question.",
-      "trueOrFalseQuestion": "True or false question."
+      "trueOrFalseQuestion": "True or false question.",
+      "multipleChoice": "Multiple choice question.",
+      "singleChoice": "Single choice question"
     },
     "placeholder": {
       "openQuestion": "Type your answer here"
