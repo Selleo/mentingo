@@ -319,10 +319,8 @@ We welcome contributions to LMS Core! Please check our Contributing Guide (comin
 
 This project was generated using [Selleo LMS](https://github.com/Selleo/lms-core) which is licensed under the MIT license.
 
-## About Selleo
+## Partners
 
 ![selleo](https://raw.githubusercontent.com/Selleo/selleo-resources/master/public/github_footer.png)
 
-Software development teams with an entrepreneurial sense of ownership at their core delivering great digital products and building culture people want to belong to. We are a community of engaged co-workers passionate about crafting impactful web solutions which transform the way our clients do business.
-
-All names and logos for [Selleo](https://selleo.com/about) are trademark of Selleo Labs Sp. z o.o. (formerly Selleo Sp. z o.o. Sp.k.)
+Ready to scale your eLearning platform - [contact Selleo](https://selleo.com/lms-software-development)? Their product-minded dev teams are here to make it happen.
