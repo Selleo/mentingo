@@ -323,4 +323,4 @@ This project was generated using [Selleo LMS](https://github.com/Selleo/lms-core
 
 ![selleo](https://raw.githubusercontent.com/Selleo/selleo-resources/master/public/github_footer.png)
 
-Ready to scale your eLearning platform - [contact Selleo](https://selleo.com/lms-software-development)? Their product-minded dev teams are here to make it happen.
+Ready to scale your eLearning platform? [Selleo](https://selleo.com/lms-software-development) will help with product-minded dev teams who are here to make it happen.
