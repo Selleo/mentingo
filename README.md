@@ -159,6 +159,17 @@ Populate the database with initial data:
 pnpm db:seed
 ```
 
+### Default User Accounts
+
+After running the database seeding, the following default accounts are available for testing:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Student | user@example.com | password |
+
+> [!NOTE]
+> These accounts are created during the seeding process and are intended for development and testing purposes only.
+
 </br>
 <div align="center">
 
@@ -314,6 +325,69 @@ lms-core
 </div>
 
 We welcome contributions to LMS Core! Please check our Contributing Guide (coming soon) for guidelines about how to proceed.
+
+### 📚 Naming Conventions: Branches, Commits, and Pull Requests
+
+To ensure consistency and clarity across our development workflow, we follow the naming conventions outlined below.
+
+---
+
+#### 🔀 Branch Naming
+
+Each branch name should follow this pattern:
+
+`[initials]_[type]_[module]_[ticket]_[short_description]`
+
+**Components:**
+- `initials` – First letter of the author's first and last name, in lowercase (e.g., `jd` for *John Doe*)
+- `type` – Type of change:
+  - `feat` – New feature
+  - `fix` – Bug fix
+  - `chore` – Maintenance or build-related tasks
+  - `refactor` – Code refactoring without functional changes
+- `module` – Relevant module or system (e.g. `lms`)
+- `ticket` – Ticket or issue number (e.g. `459`)
+- `short_description` *(optional)* – Brief description in `snake_case`
+
+**Example:**
+```
+jd_feat_lms_459_implement_sso
+```
+
+---
+
+#### ✅ Commit Messages
+
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+**Format:**
+```
+<prefix>: description of the change
+```
+
+**Examples:**
+```
+feat: implement SSO authentication
+fix: resolve token expiration issue
+```
+---
+
+#### 📦 Pull Requests
+
+Pull Requests should:
+
+- Use conventional title format:
+```
+feat(LMS-459): Implement SSO authentication
+fix(LMS-482): Resolve token expiration issue
+refactor(LMS-501): Simplify chart rendering logic
+```
+
+- Follow the project's PR template and fill out all required sections
+- Provide a brief description of the change and link to the related ticket
+- Include screenshots, test results, or instructions if applicable
+
+---
 
 ## Legal notice
 
