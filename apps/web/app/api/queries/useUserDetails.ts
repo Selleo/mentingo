@@ -4,16 +4,13 @@ import { ApiClient } from "../api-client";
 
 import type { GetUserDetailsResponse } from "../generated-api";
 
-export const userDetails = (userId?: string, canView?: boolean) => {
+export const userDetails = (userId?: string) => {
   return {
-    enabled: !!userId && canView,
+    enabled: !!userId,
     queryKey: ["user-details", userId],
     queryFn: async () => {
       if (!userId) {
         throw new Error("userId is required");
-      }
-      if (!canView) {
-        throw new Error("canView is required");
       }
 
       const response = await ApiClient.api.userControllerGetUserDetails({ userId });
@@ -24,10 +21,10 @@ export const userDetails = (userId?: string, canView?: boolean) => {
   };
 };
 
-export function useUserDetails(userId?: string, canView?: boolean) {
-  return useQuery(userDetails(userId, canView));
+export function useUserDetails(userId?: string) {
+  return useQuery(userDetails(userId));
 }
 
-export function useUserDetailsSuspense(userId?: string, canView?: boolean) {
-  return useSuspenseQuery(userDetails(userId, canView));
+export function useUserDetailsSuspense(userId?: string) {
+  return useSuspenseQuery(userDetails(userId));
 }

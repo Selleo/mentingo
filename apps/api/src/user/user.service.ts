@@ -95,16 +95,18 @@ export class UserService {
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
-        id: userDetails.id,
+        role: users.role,
+        id: users.id,
         description: userDetails.description,
         contactEmail: userDetails.contactEmail,
         contactPhone: userDetails.contactPhoneNumber,
         jobTitle: userDetails.jobTitle,
       })
-      .from(userDetails)
-      .leftJoin(users, eq(userDetails.userId, users.id))
-      .where(eq(userDetails.userId, userId));
+      .from(users)
+      .leftJoin(userDetails, eq(userDetails.userId, users.id))
+      .where(eq(users.id, userId));
 
+    // This condition appears redundant, as it sets the public contact email to the user's private email. Would it not be preferable to leave it null and allow the user to provide this information themselves? It seems this was originally implemented to ensure userBio is defined, but it may no longer be necessary.
     if (!userBio && (USER_ROLES.TEACHER === userRole || USER_ROLES.ADMIN === userRole)) {
       // TODO: quick
       // throw new NotFoundException("User details not found");
@@ -112,6 +114,7 @@ export class UserService {
         .select({
           id: users.id,
           email: users.email,
+          role: users.role,
           firstName: users.firstName,
           lastName: users.lastName,
         })
@@ -129,7 +132,7 @@ export class UserService {
           jobTitle: userDetails.jobTitle,
         });
 
-      return { firstName: user.firstName, lastName: user.lastName, ...userBio };
+      return { firstName: user.firstName, lastName: user.lastName, role: user.role, ...userBio };
     }
     return userBio;
   }

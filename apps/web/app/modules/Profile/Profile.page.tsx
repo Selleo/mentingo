@@ -1,7 +1,6 @@
 import { useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
-import { useCurrentUser } from "~/api/queries";
 import { useTeacherCourses } from "~/api/queries/useTeacherCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
@@ -10,39 +9,35 @@ import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
 import CourseCard from "~/modules/Dashboard/Courses/CourseCard";
 
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
 export default function ProfilePage() {
   const { id = "" } = useParams();
-  const { isAdminLike } = useUserRole();
-  const { data: currentUser } = useCurrentUser();
-  const isUserProfile = id === currentUser?.id;
-  const { data: userDetails } = useUserDetails(id, !isUserProfile || isAdminLike);
+  const { data: userDetails } = useUserDetails(id);
+
   const { data: teacherCourses } = useTeacherCourses(id);
   const { t } = useTranslation();
-
-  const isTeacher = !!userDetails?.jobTitle;
-
-  const nameToShow = userDetails
-    ? `${userDetails?.firstName} ${userDetails?.lastName}`
-    : `${currentUser?.firstName} ${currentUser?.lastName}`;
-  const avatarEmail = userDetails ? userDetails?.contactEmail : currentUser?.email;
   return (
     <PageWrapper>
-      {currentUser && <ProfilePageBreadcrumbs id={id} username={nameToShow} />}
+      {userDetails && (
+        <ProfilePageBreadcrumbs
+          id={id}
+          username={`${userDetails?.firstName} ${userDetails?.lastName}`}
+        />
+      )}
       <div className="flex flex-col gap-6 xl:flex-row">
         <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow xl:w-full xl:max-w-[480px]">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <Avatar className="h-20 w-20">
-              <Gravatar email={avatarEmail || ""} />
+              {/* Using email for avatar lookup may cause issues if the email changes. Is there a plan to handle this? Would using a public user ID for the profile image be simpler? Also contactEmail is empty for students */}
+              <Gravatar email={userDetails?.contactEmail || ""} />
             </Avatar>
             <div className="flex flex-col">
-              <h2 className="h6 text-neutral-950">{nameToShow}</h2>
+              <h2 className="h6 text-neutral-950">{`${userDetails?.firstName} ${userDetails?.lastName}`}</h2>
               <div className="flex flex-col gap-y-1">
-                {isTeacher && (
+                {userDetails?.role === "teacher" && (
                   <p className="body-sm">
                     <span className="text-neutral-900">{t("teacherView.other.title")}</span>{" "}
                     <span className="font-medium text-neutral-950">{userDetails?.jobTitle}</span>
@@ -51,7 +46,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          {isTeacher && (
+          {userDetails?.role === "teacher" && (
             <div className="flex flex-col gap-y-2">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("teacherView.other.about")}</span>
@@ -60,7 +55,7 @@ export default function ProfilePage() {
               <p className="body-base mt-2 text-neutral-950">{userDetails?.description}</p>
             </div>
           )}
-          {isTeacher && (
+          {userDetails?.role === "teacher" && (
             <div className="flex flex-col gap-y-1 md:gap-y-4 xl:mt-auto">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("teacherView.other.contact")}</span>
@@ -84,13 +79,13 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-          {isTeacher && (
+          {userDetails?.role === "teacher" && (
             <Button variant="outline" className="sr-only">
               {t("teacherView.button.collapse")}
             </Button>
           )}
         </section>
-        {isTeacher && (
+        {userDetails?.role === "teacher" && (
           <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">
               <h2 className="h5">{t("teacherView.other.courses")}</h2>

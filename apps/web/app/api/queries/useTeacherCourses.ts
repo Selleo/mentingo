@@ -9,13 +9,21 @@ type SearchParams = {
   excludeCourseId?: string;
 };
 
-export const teacherCoursesOptions = (authorId?: string, searchParams?: SearchParams) => {
+export const teacherCoursesOptions = (
+  authorId?: string,
+  searchParams?: SearchParams,
+  isTeacher?: boolean,
+) => {
   return {
-    enabled: !!authorId,
+    enabled: !!authorId && isTeacher,
     queryKey: ["teacher-courses", authorId],
     queryFn: async () => {
       if (!authorId) {
         throw new Error("Author ID is required");
+      }
+
+      if (!isTeacher) {
+        throw new Error("Author must be a teacher");
       }
 
       const response = await ApiClient.api.courseControllerGetTeacherCourses({
@@ -30,6 +38,10 @@ export const teacherCoursesOptions = (authorId?: string, searchParams?: SearchPa
   };
 };
 
-export function useTeacherCourses(authorId?: string, searchParams?: SearchParams) {
-  return useQuery(teacherCoursesOptions(authorId, searchParams));
+export function useTeacherCourses(
+  authorId?: string,
+  searchParams?: SearchParams,
+  isTeacher?: boolean,
+) {
+  return useQuery(teacherCoursesOptions(authorId, searchParams, isTeacher));
 }
