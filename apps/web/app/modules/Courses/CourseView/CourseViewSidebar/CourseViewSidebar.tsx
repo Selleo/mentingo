@@ -61,7 +61,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
         <span>{t("studentCourseView.sideSection.other.collapse")}</span>
       </Button>
       <Button variant="outline">
-        <Link to={`/teachers/${course?.authorId}`}>
+        <Link to={`/profile/${course?.authorId}`}>
           <span>{t("studentCourseView.sideSection.button.goToTeacherPage")}</span>
         </Link>
       </Button>

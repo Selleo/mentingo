@@ -17,6 +17,7 @@ export const MoreCoursesByAuthor = ({ courseId, teacherId }: MoreCoursesByAuthor
     scope: "available",
     excludeCourseId: courseId,
   });
+
   const { data: teacherData } = useUserDetails(teacherId);
   const { t } = useTranslation();
 
