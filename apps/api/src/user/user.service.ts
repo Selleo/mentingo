@@ -131,7 +131,6 @@ export class UserService {
 
       return { firstName: user.firstName, lastName: user.lastName, ...userBio };
     }
-
     return userBio;
   }
 

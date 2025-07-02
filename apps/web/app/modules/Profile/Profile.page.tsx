@@ -18,10 +18,14 @@ import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 export default function ProfilePage() {
   const { id = "" } = useParams();
   const { isAdminLike } = useUserRole();
-  const { data: userDetails } = useUserDetails(id, isAdminLike);
+  const { data: currentUser } = useCurrentUser();
+  const isUserProfile = id === currentUser?.id;
+  const { data: userDetails } = useUserDetails(id, !isUserProfile || isAdminLike);
   const { data: teacherCourses } = useTeacherCourses(id);
   const { t } = useTranslation();
-  const { data: currentUser } = useCurrentUser();
+
+  const isTeacher = !!userDetails?.jobTitle;
+
   const nameToShow = userDetails
     ? `${userDetails?.firstName} ${userDetails?.lastName}`
     : `${currentUser?.firstName} ${currentUser?.lastName}`;
@@ -38,7 +42,7 @@ export default function ProfilePage() {
             <div className="flex flex-col">
               <h2 className="h6 text-neutral-950">{nameToShow}</h2>
               <div className="flex flex-col gap-y-1">
-                {isAdminLike && (
+                {isTeacher && (
                   <p className="body-sm">
                     <span className="text-neutral-900">{t("teacherView.other.title")}</span>{" "}
                     <span className="font-medium text-neutral-950">{userDetails?.jobTitle}</span>
@@ -47,7 +51,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          {isAdminLike && (
+          {isTeacher && (
             <div className="flex flex-col gap-y-2">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("teacherView.other.about")}</span>
@@ -56,7 +60,7 @@ export default function ProfilePage() {
               <p className="body-base mt-2 text-neutral-950">{userDetails?.description}</p>
             </div>
           )}
-          {isAdminLike && (
+          {isTeacher && (
             <div className="flex flex-col gap-y-1 md:gap-y-4 xl:mt-auto">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("teacherView.other.contact")}</span>
@@ -80,13 +84,13 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-          {isAdminLike && (
+          {isTeacher && (
             <Button variant="outline" className="sr-only">
               {t("teacherView.button.collapse")}
             </Button>
           )}
         </section>
-        {isAdminLike && (
+        {isTeacher && (
           <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">
               <h2 className="h5">{t("teacherView.other.courses")}</h2>
