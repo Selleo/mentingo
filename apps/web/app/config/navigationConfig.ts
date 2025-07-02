@@ -59,7 +59,7 @@ export const getNavigationConfig = (
   },
   {
     label: t("navigationSideBar.profile"),
-    path: `teachers/${userId}`,
+    path: `profile/${userId}`,
     iconName: "User",
   },
 ];

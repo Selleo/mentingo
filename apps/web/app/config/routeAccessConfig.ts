@@ -87,7 +87,7 @@ export const routeAccessConfig = createRouteConfig({
   // Client part
   "": ALL_ROLES, // Dashboard
   settings: ALL_ROLES,
-  "teachers/:id": ALL_ROLES,
+  "profile/:id": ALL_ROLES,
   "course/:courseId/lesson/:lessonId": ALL_ROLES,
   //Client and public
   "course/:id": ALL_ROLES,

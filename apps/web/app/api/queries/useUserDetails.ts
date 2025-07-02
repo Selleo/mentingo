@@ -4,14 +4,18 @@ import { ApiClient } from "../api-client";
 
 import type { GetUserDetailsResponse } from "../generated-api";
 
-export const userDetails = (userId?: string) => {
+export const userDetails = (userId?: string, isAdminLike?: boolean) => {
   return {
-    enabled: !!userId,
+    enabled: !!userId && isAdminLike,
     queryKey: ["user-details", userId],
     queryFn: async () => {
       if (!userId) {
         throw new Error("userId is required");
       }
+      if (!isAdminLike) {
+        throw new Error("isAdminLike is required");
+      }
+
       const response = await ApiClient.api.userControllerGetUserDetails({ userId });
 
       return response.data;
@@ -20,8 +24,8 @@ export const userDetails = (userId?: string) => {
   };
 };
 
-export function useUserDetails(userId?: string) {
-  return useQuery(userDetails(userId));
+export function useUserDetails(userId?: string, isAdminLike?: boolean) {
+  return useQuery(userDetails(userId, isAdminLike));
 }
 
 export function useUserDetailsSuspense(userId?: string) {
