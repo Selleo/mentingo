@@ -10,14 +10,15 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import CourseCard from "~/modules/Dashboard/Courses/CourseCard";
+import { isAdminLike } from "~/utils/userRoles";
 
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
 export default function ProfilePage() {
   const { id = "" } = useParams();
   const { data: userDetails } = useUserDetails(id);
-
-  const { data: teacherCourses } = useTeacherCourses(id);
+  const hasPermission = isAdminLike(userDetails?.role ?? "");
+  const { data: teacherCourses } = useTeacherCourses(id, undefined, hasPermission);
   const { t } = useTranslation();
   return (
     <PageWrapper>
@@ -37,7 +38,7 @@ export default function ProfilePage() {
             <div className="flex flex-col">
               <h2 className="h6 text-neutral-950">{`${userDetails?.firstName} ${userDetails?.lastName}`}</h2>
               <div className="flex flex-col gap-y-1">
-                {userDetails?.role === "teacher" && (
+                {hasPermission && (
                   <p className="body-sm">
                     <span className="text-neutral-900">{t("teacherView.other.title")}</span>{" "}
                     <span className="font-medium text-neutral-950">{userDetails?.jobTitle}</span>
@@ -46,7 +47,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          {userDetails?.role === "teacher" && (
+          {hasPermission && (
             <div className="flex flex-col gap-y-2">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("teacherView.other.about")}</span>
@@ -55,7 +56,7 @@ export default function ProfilePage() {
               <p className="body-base mt-2 text-neutral-950">{userDetails?.description}</p>
             </div>
           )}
-          {userDetails?.role === "teacher" && (
+          {hasPermission && (
             <div className="flex flex-col gap-y-1 md:gap-y-4 xl:mt-auto">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("teacherView.other.contact")}</span>
@@ -79,13 +80,13 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-          {userDetails?.role === "teacher" && (
+          {hasPermission && (
             <Button variant="outline" className="sr-only">
               {t("teacherView.button.collapse")}
             </Button>
           )}
         </section>
-        {userDetails?.role === "teacher" && (
+        {hasPermission && (
           <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">
               <h2 className="h5">{t("teacherView.other.courses")}</h2>

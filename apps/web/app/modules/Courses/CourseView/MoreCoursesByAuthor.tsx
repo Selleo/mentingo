@@ -13,10 +13,14 @@ type MoreCoursesByAuthorProps = {
 };
 
 export const MoreCoursesByAuthor = ({ courseId, teacherId }: MoreCoursesByAuthorProps) => {
-  const { data: teacherCourses, isLoading } = useTeacherCourses(teacherId, {
-    scope: "available",
-    excludeCourseId: courseId,
-  });
+  const { data: teacherCourses, isLoading } = useTeacherCourses(
+    teacherId,
+    {
+      scope: "available",
+      excludeCourseId: courseId,
+    },
+    true,
+  );
 
   const { data: teacherData } = useUserDetails(teacherId);
   const { t } = useTranslation();
