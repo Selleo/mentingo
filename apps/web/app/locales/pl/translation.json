@@ -474,6 +474,10 @@
       "button": {
         "removeThumbnail": "Usuń miniaturę"
       },
+      "selectButton": {
+        "uploadFile": "Plik",
+        "External": "Link zewnętrzny (URL)"
+      },
       "sideSection": {
         "header": "Podgląd karty",
         "subHeader": "Tak będzie wyglądał twój kurs dla studentów.",
@@ -583,8 +587,10 @@
         },
         "field": {
           "title": "Tytuł",
+          "sourceType": "Typ źródła",
           "description": "Treść lekcji",
           "video": "Prześlij wideo",
+          "presentation": "Prześlij prezentację",
           "questions": "Pytania",
           "options": "Opcje",
           "image": "Obrazek",
@@ -599,7 +605,8 @@
           "matchedWords": "Dopasowane słowa",
           "singleChoice": "Pojedynczy wybór",
           "multipleChoice": "Wielokrotny wybór",
-          "enterWord": "Wprowadź słowo"
+          "enterWord": "Wprowadź słowo",
+          "enterURL": "Wpisz link"
         },
         "other": {
           "lessonNumber": "Liczba lekcji",
