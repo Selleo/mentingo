@@ -32,7 +32,7 @@ export default function ProfilePage() {
         <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow xl:w-full xl:max-w-[480px]">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <Avatar className="h-20 w-20">
-              {/* Using email for avatar lookup may cause issues if the email changes. Is there a plan to handle this? Would using a public user ID for the profile image be simpler? Also contactEmail is empty for students */}
+              {/* Is using public email viable here? Should we fall back to private email? What happens when we check to student. The student has no public email, it falls back to undefined and shows default photo. */}
               <Gravatar email={userDetails?.contactEmail || ""} />
             </Avatar>
             <div className="flex flex-col">
