@@ -711,7 +711,7 @@
     },
     "breadcrumbs": {
       "dashboard": "Panel",
-      "availableCourses": "Dostępne kursy"
+      "myCourses": "Moje kursy"
     }
   },
   "registerView": {

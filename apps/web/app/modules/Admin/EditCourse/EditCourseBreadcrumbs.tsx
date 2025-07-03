@@ -23,7 +23,7 @@ export const EditeCourseBreadcrumbs = ({ id, title }: BreadcrumbsProps) => {
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbLink href={`/admin/courses`}>
-            {t("adminCourseView.breadcrumbs.availableCourses")}
+            {t("adminCourseView.breadcrumbs.myCourses")}
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

@@ -711,7 +711,7 @@
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
-      "availableCourses": "Available courses"
+      "myCourses": "My courses"
     }
   },
   "registerView": {
