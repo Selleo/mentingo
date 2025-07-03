@@ -474,6 +474,10 @@
       "button": {
         "removeThumbnail": "Remove Thumbnail"
       },
+      "selectButton": {
+        "uploadFile": "Upload file",
+        "External": "External (URL)"
+      },
       "sideSection": {
         "header": "Card Preview",
         "subHeader": "This is how your Course will be visible to students.",
@@ -583,8 +587,10 @@
         },
         "field": {
           "title": "Title",
-          "description": "Description",
+          "sourceType": "Source Type",
           "video": "Upload video",
+          "presentation": "Upload presentation",
+          "description": "Description",
           "questions": "Questions",
           "options": "Options",
           "image": "Image",
@@ -599,7 +605,8 @@
           "matchedWords": "Matched words",
           "singleChoice": "Single choice",
           "multipleChoice": "Multiple choice",
-          "enterWord": "Enter a word"
+          "enterWord": "Enter a word",
+          "enterURL": "Enter URL…"
         },
         "other": {
           "lessonNumber": "Number of lessons",
