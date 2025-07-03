@@ -16,15 +16,15 @@ import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
 export default function ProfilePage() {
   const { id = "" } = useParams();
-  const { data: userDetails, isLoading } = useUserDetails(id);
+  const { data: userDetails, error } = useUserDetails(id);
   const hasPermission = isAdminLike(userDetails?.role ?? "");
   const { data: contentCreatorCourses } = useContentCreatorCourses(id, undefined, hasPermission);
   const { t } = useTranslation();
 
-  if (!userDetails && !isLoading) return <Navigate to={"/"} />;
+  if (error) return <Navigate to={"/"} />;
 
   return (
-    <PageWrapper role="heading">
+    <PageWrapper role="main">
       <ProfilePageBreadcrumbs
         id={id}
         username={`${userDetails?.firstName} ${userDetails?.lastName}`}
