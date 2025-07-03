@@ -14,7 +14,4 @@ export {
   useStudentCoursesSuspense,
 } from "./useStudentCourses";
 export { useAllUsers, useAllUsersSuspense, usersQueryOptions } from "./useUsers";
-export {
-  useContentCreatorStatistics,
-  useContentCreatorStatisticsSuspense,
-} from "./useContentCreatorStatistics";
+export { useContentCreatorStatistics } from "./useContentCreatorStatistics";

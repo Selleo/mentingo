@@ -1,4 +1,4 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
@@ -18,8 +18,4 @@ export const contentCreatorStatistics = () => {
 
 export function useContentCreatorStatistics() {
   return useQuery(contentCreatorStatistics());
-}
-
-export function useContentCreatorStatisticsSuspense() {
-  return useSuspenseQuery(contentCreatorStatistics());
 }
