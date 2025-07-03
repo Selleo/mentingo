@@ -307,6 +307,10 @@
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
       "deleteCourseFailed": "Failed to delete course"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "myCourses": "My courses"
     }
   },
   "adminCategoriesView": {
@@ -334,6 +338,11 @@
     "toast": {
       "deleteCategorySuccessfully": "Category deleted successfully",
       "deleteCategoryFailed": "Failed to delete category"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "categories": "Categories",
+      "createNew": "Create new category"
     }
   },
   "adminCategoryView": {
@@ -354,6 +363,11 @@
     "error": {
       "categoryNotFound": "Category not found",
       "categoryIdNotFound": "Category ID not found"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "categories": "Categories",
+      "categoryDetails": "Category details"
     }
   },
   "adminUsersView": {
@@ -377,6 +391,13 @@
     "button": {
       "createNew": "Create new",
       "deleteSelected": "Delete selected"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "createNew": "Create new user",
+      "editUser": "Edit user",
+      "userDetails": "User details"
     }
   },
   "adminUserView": {
@@ -434,6 +455,12 @@
       "description": "Are you sure you want to delete these groups?",
       "cancel": "Cancel",
       "submit": "Delete"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "groups": "Groups",
+      "createNew": "Create new",
+      "editGroup": "Edit group"
     }
   },
   "enrollCourseView": {
@@ -681,6 +708,10 @@
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
       },
       "successResponse": "students have been assigned to the course."
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "availableCourses": "Available courses"
     }
   },
   "registerView": {
@@ -779,6 +810,10 @@
           "sort": "Sort"
         }
       }
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "availableCourses": "Available courses"
     }
   },
   "studentQuizSummaryView": {
@@ -818,7 +853,7 @@
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
-      "lessonTitle": "Lesson"
+      "availableCourses": "Available Courses"
     },
     "button": {
       "previous": "Previous",
@@ -886,12 +921,22 @@
         "enrollCourse": "Enroll to the course",
         "goToTeacherPage": "Go to teacher page"
       }
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "availableCourses": "Available courses"
     }
   },
   "studentChapterView": {
     "chapterProgress": {
       "header": "Table of content:",
       "courseProgress": "Course progress"
+    }
+  },
+  "settingsView": {
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "settings": "Settings"
     }
   }
 }

@@ -9,6 +9,8 @@ import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSideba
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
 import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
 
+import { CourseViewPageBreadcrumbs } from "./CourseViewPageBreadcrumbs";
+
 export default function CourseViewPage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
@@ -16,20 +18,9 @@ export default function CourseViewPage() {
 
   if (!course) return null;
 
-  // TODO: Add breadcrumbs
-  // const breadcrumbs = [
-  //   {
-  //     title: "Dashboard",
-  //     href: "/",
-  //   },
-  //   {
-  //     title: course?.title ?? "",
-  //     href: `/course/${id}`,
-  //   },
-  // ];
-
   return (
     <PageWrapper className="max-w-full">
+      <CourseViewPageBreadcrumbs id={course.id ?? ""} title={course.title ?? ""} />
       <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
         <div className="flex flex-col gap-y-6 overflow-hidden">
           <CourseOverview course={course} />

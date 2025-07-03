@@ -307,6 +307,10 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
       "deleteCourseFailed": "Nie udało się usunąć kursu"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "myCourses": "Moje kursy"
     }
   },
   "adminCategoriesView": {
@@ -334,6 +338,11 @@
     "toast": {
       "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "categories": "Kategorie",
+      "createNew": "Utwórz nową kategorię"
     }
   },
   "adminCategoryView": {
@@ -354,6 +363,11 @@
     "error": {
       "categoryNotFound": "Kategoria nie została znaleziona",
       "categoryIdNotFound": "ID kategorii nie zostało znalezione"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "categories": "Kategorie",
+      "categoryDetails": "Informacje o kategorii"
     }
   },
   "adminUsersView": {
@@ -377,6 +391,13 @@
     "button": {
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "users": "Użytkownicy",
+      "createNew": "Utwórz nowego użytkownika",
+      "editUser": "Edytuj użytkownika",
+      "userDetails": "Informacje o użytkowniku"
     }
   },
   "adminUserView": {
@@ -434,6 +455,12 @@
       "description": "Czy na pewno chcesz usunąć te grupy?",
       "cancel": "Anuluj",
       "submit": "Usuń"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "groups": "Grupy",
+      "createNew": "Utwórz nową",
+      "editGroup": "Edytuj grupę"
     }
   },
   "enrollCourseView": {
@@ -681,6 +708,10 @@
         "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
       },
       "successResponse": "studentów zostało zapisanych do kursu."
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "availableCourses": "Dostępne kursy"
     }
   },
   "registerView": {
@@ -779,6 +810,10 @@
           "sort": "Sortuj"
         }
       }
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "availableCourses": "Dostępne kursy"
     }
   },
   "studentQuizSummaryView": {
@@ -817,8 +852,8 @@
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
-      "lessonTitle": "Lekcja"
+      "dashboard": "Panel",
+      "availableCourses": "Dostępne kursy"
     },
     "button": {
       "previous": "Poprzedni",
@@ -886,12 +921,22 @@
         "enrollCourse": "Zapisz się na kurs",
         "goToTeacherPage": "Przejdź do strony nauczyciela"
       }
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "availableCourses": "Dostępne kursy"
     }
   },
   "studentChapterView": {
     "chapterProgress": {
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
+    }
+  },
+  "settingsView": {
+    "breadcrumbs": {
+      "dashboard": "Panel",
+      "settings": "Ustawienia"
     }
   }
 }

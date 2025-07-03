@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
 import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
+import { PageWrapper } from "~/components/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -36,6 +37,8 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+
+import { UsersPageBreadcrumbs } from "./UsersPageBreadcrumbs";
 
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
@@ -185,68 +188,71 @@ const Users = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      <h4 className={"text-2xl font-bold"}>{t("navigationSideBar.users")}</h4>
-      <div className="flex items-center justify-between gap-2">
-        <Link to="new">
-          <Button variant="outline">{t("adminUsersView.button.createNew")}</Button>
-        </Link>
-        <SearchFilter
-          filters={filterConfig}
-          values={searchParams}
-          onChange={handleFilterChange}
-          isLoading={isPending}
-        />
-        <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
-          <p
-            className={cn("text-sm", {
-              "text-neutral-900": !isEmpty(selectedUsers),
-              "text-neutral-500": isEmpty(selectedUsers),
-            })}
-          >
-            {t("common.other.selected")} ({selectedUsers.length})
-          </p>
-          <Button
-            onClick={handleDeleteUsers}
-            size="sm"
-            className="flex items-center gap-x-2"
-            disabled={isEmpty(selectedUsers)}
-          >
-            <Trash className="h-3 w-3" />
-            <span className="text-xs">{t("adminUsersView.button.deleteSelected")}</span>
-          </Button>
-        </div>
-      </div>
-      <Table className="border bg-neutral-50">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-              onClick={() => handleRowClick(row.original.id)}
-              className="cursor-pointer hover:bg-neutral-100"
+    <PageWrapper>
+      <UsersPageBreadcrumbs />
+      <div className="flex flex-col">
+        <h4 className={"text-2xl font-bold"}>{t("navigationSideBar.users")}</h4>
+        <div className="flex items-center justify-between gap-2">
+          <Link to="new">
+            <Button variant="outline">{t("adminUsersView.button.createNew")}</Button>
+          </Link>
+          <SearchFilter
+            filters={filterConfig}
+            values={searchParams}
+            onChange={handleFilterChange}
+            isLoading={isPending}
+          />
+          <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
+            <p
+              className={cn("text-sm", {
+                "text-neutral-900": !isEmpty(selectedUsers),
+                "text-neutral-500": isEmpty(selectedUsers),
+              })}
             >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+              {t("common.other.selected")} ({selectedUsers.length})
+            </p>
+            <Button
+              onClick={handleDeleteUsers}
+              size="sm"
+              className="flex items-center gap-x-2"
+              disabled={isEmpty(selectedUsers)}
+            >
+              <Trash className="h-3 w-3" />
+              <span className="text-xs">{t("adminUsersView.button.deleteSelected")}</span>
+            </Button>
+          </div>
+        </div>
+        <Table className="border bg-neutral-50">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={() => handleRowClick(row.original.id)}
+                className="cursor-pointer hover:bg-neutral-100"
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </PageWrapper>
   );
 };
 

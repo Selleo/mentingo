@@ -8,6 +8,8 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 
+import { LessonPageBreadcrumbs } from "./LessonPageBreadcrumbs";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type Chapters = GetCourseResponse["data"]["chapters"];
@@ -109,6 +111,12 @@ export default function LessonPage() {
 
   return (
     <PageWrapper className="h-auto max-w-full">
+      <LessonPageBreadcrumbs
+        course_id={courseId}
+        lesson_id={lessonId}
+        currentCourse={course.title}
+        currentChapter={currentChapter?.title}
+      />
       <div className="flex h-full w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
         <div className="flex h-full w-full flex-col divide-y rounded-lg bg-white">
           <div className="flex items-center px-12 py-6">

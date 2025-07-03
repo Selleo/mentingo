@@ -7,6 +7,7 @@ import * as z from "zod";
 import { useCreateUser } from "~/api/mutations/admin/useCreateUser";
 import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
+import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
@@ -21,6 +22,8 @@ import {
 } from "~/components/ui/select";
 import { USER_ROLE } from "~/config/userRoles";
 import { CreatePageHeader } from "~/modules/Admin/components";
+
+import { CreateNewUserPageBreadcrumbs } from "./CreateNewUserPageBreadcrumbs";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters."),
@@ -57,89 +60,92 @@ export default function CreateNewUserPage() {
   const isFormValid = form.formState.isValid;
 
   return (
-    <div className="flex flex-col gap-y-6">
-      <CreatePageHeader
-        title={t("adminUserView.header")}
-        description={t("adminUserView.subHeader")}
-      />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="firstName" className="text-right">
-                  {t("adminUserView.field.firstName")}
-                </Label>
-                <FormControl>
-                  <Input id="firstName" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="lastName" className="text-right">
-                  {t("adminUserView.field.lastName")}
-                </Label>
-                <FormControl>
-                  <Input id="lastName" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="email" className="text-right">
-                  {t("adminUserView.field.email")}
-                </Label>
-                <FormControl>
-                  <Input id="email" type="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="role" className="text-right">
-                  {t("adminUserView.field.role")}
-                </Label>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <PageWrapper>
+      <CreateNewUserPageBreadcrumbs />
+      <div className="flex flex-col gap-y-6">
+        <CreatePageHeader
+          title={t("adminUserView.header")}
+          description={t("adminUserView.subHeader")}
+        />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="firstName" className="text-right">
+                    {t("adminUserView.field.firstName")}
+                  </Label>
                   <FormControl>
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder={t("adminUserView.placeholder.role")} />
-                    </SelectTrigger>
+                    <Input id="firstName" {...field} />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value={USER_ROLE.student}>{t("common.roles.student")}</SelectItem>
-                    <SelectItem value={USER_ROLE.admin}>{t("common.roles.admin")}</SelectItem>
-                    <SelectItem value={USER_ROLE.teacher}>{t("common.roles.teacher")}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <DialogFooter>
-            <Button type="submit" disabled={!isFormValid}>
-              {t("adminUserView.button.createUser")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
-    </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="lastName" className="text-right">
+                    {t("adminUserView.field.lastName")}
+                  </Label>
+                  <FormControl>
+                    <Input id="lastName" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="email" className="text-right">
+                    {t("adminUserView.field.email")}
+                  </Label>
+                  <FormControl>
+                    <Input id="email" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="role" className="text-right">
+                    {t("adminUserView.field.role")}
+                  </Label>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger id="role">
+                        <SelectValue placeholder={t("adminUserView.placeholder.role")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={USER_ROLE.student}>{t("common.roles.student")}</SelectItem>
+                      <SelectItem value={USER_ROLE.admin}>{t("common.roles.admin")}</SelectItem>
+                      <SelectItem value={USER_ROLE.teacher}>{t("common.roles.teacher")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit" disabled={!isFormValid}>
+                {t("adminUserView.button.createUser")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </div>
+    </PageWrapper>
   );
 }

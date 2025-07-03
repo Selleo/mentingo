@@ -31,6 +31,8 @@ import { StudentsCurses } from "~/modules/Courses/components/StudentsCurses";
 import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { SORT_OPTIONS, type SortOption } from "~/types/sorting";
 
+import { CoursesPageBreadcrumbs } from "./CoursesPageBreadcrumbs";
+
 import type { MetaFunction } from "@remix-run/node";
 
 export const meta: MetaFunction = () => {
@@ -149,6 +151,7 @@ export default function CoursesPage() {
 
   return (
     <PageWrapper>
+      <CoursesPageBreadcrumbs />
       <div className="flex h-auto flex-1 flex-col gap-y-12">
         {isStudent && <StudentsCurses />}
         <div className="flex flex-col">
