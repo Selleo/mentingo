@@ -1006,7 +1006,7 @@ describe("CourseController (e2e)", () => {
     });
   });
 
-  describe("GET /api/course/contentCreator-courses", () => {
+  describe("GET /api/course/content-creator-courses", () => {
     it("returns only published courses by specified contentCreator", async () => {
       const student = await userFactory
         .withCredentials({ password })
@@ -1038,7 +1038,7 @@ describe("CourseController (e2e)", () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/api/course/contentCreator-courses?authorId=${contentCreator.id}`)
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}`)
         .set("Cookie", cookies)
         .expect(200);
 
@@ -1075,7 +1075,7 @@ describe("CourseController (e2e)", () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/api/course/contentCreator-courses?authorId=${contentCreator.id}&scope=enrolled`)
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&scope=enrolled`)
         .set("Cookie", cookies)
         .expect(200);
 
@@ -1113,7 +1113,7 @@ describe("CourseController (e2e)", () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/api/course/contentCreator-courses?authorId=${contentCreator.id}&scope=available`)
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&scope=available`)
         .set("Cookie", cookies)
         .expect(200);
 
@@ -1146,7 +1146,7 @@ describe("CourseController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .get(
-          `/api/course/contentCreator-courses?authorId=${contentCreator.id}&excludeCourseId=${courseToExclude.id}&scope=available`,
+          `/api/course/content-creator-courses?authorId=${contentCreator.id}&excludeCourseId=${courseToExclude.id}&scope=available`,
         )
         .set("Cookie", cookies)
         .expect(200);
@@ -1176,7 +1176,7 @@ describe("CourseController (e2e)", () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/api/course/contentCreator-courses?authorId=${contentCreator.id}`)
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}`)
         .set("Cookie", cookies)
         .expect(200);
 
@@ -1210,7 +1210,7 @@ describe("CourseController (e2e)", () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/api/course/contentCreator-courses?authorId=${contentCreator.id}`)
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}`)
         .set("Cookie", cookies)
         .expect(200);
 
