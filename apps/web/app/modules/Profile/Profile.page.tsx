@@ -31,7 +31,7 @@ export default function ProfilePage() {
       <div className="flex flex-col gap-6 xl:flex-row">
         <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow xl:w-full xl:max-w-[480px]">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
-            <Avatar className="h-20 w-20">
+            <Avatar className="size-20">
               {/* Is using public email viable here? Should we fall back to private email? What happens when we check to student. The student has no public email, it falls back to undefined and shows default photo. */}
               <Gravatar email={userDetails?.contactEmail || ""} />
             </Avatar>
@@ -51,7 +51,7 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-y-2">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("contentCreatorView.other.about")}</span>
-                <div className="h-[1px] w-full bg-primary-200" />
+                <div className="h-px w-full bg-primary-200" />
               </div>
               <p className="body-base mt-2 text-neutral-950">{userDetails?.description}</p>
             </div>
@@ -60,21 +60,21 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-y-1 md:gap-y-4 xl:mt-auto">
               <div className="flex items-center gap-x-3">
                 <span className="text-neutral-900">{t("contentCreatorView.other.contact")}</span>
-                <div className="h-[1px] w-full bg-primary-200" />
+                <div className="h-px w-full bg-primary-200" />
               </div>
               <div className="flex flex-col gap-3 md:flex-row md:*:w-full">
                 <a
                   href={`tel:${userDetails?.contactPhone}`}
                   className="body-base-md inline-flex gap-x-2 rounded-lg bg-primary-50 px-3 py-2 text-primary-700"
                 >
-                  <Icon name="Phone" className="h-6 w-6 text-neutral-900" />
+                  <Icon name="Phone" className="size-6 text-neutral-900" />
                   <span>{userDetails?.contactPhone}</span>
                 </a>
                 <a
                   href={`mailto:${userDetails?.contactEmail}`}
                   className="body-base-md inline-flex gap-x-2 rounded-lg bg-primary-50 px-3 py-2 text-primary-700"
                 >
-                  <Icon name="Email" className="h-6 w-6 text-neutral-900" />
+                  <Icon name="Email" className="size-6 text-neutral-900" />
                   <span>{userDetails?.contactEmail}</span>
                 </a>
               </div>
