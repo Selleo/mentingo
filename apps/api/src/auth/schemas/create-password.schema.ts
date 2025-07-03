@@ -1,7 +1,9 @@
 import { type Static, Type } from "@sinclair/typebox";
 
+import { passwordSchema } from "./password.schema";
+
 export const createPasswordSchema = Type.Object({
-  password: Type.String({ minLength: 8, maxLength: 64 }),
+  password: passwordSchema,
   createToken: Type.String({ minLength: 1 }),
 });
 
