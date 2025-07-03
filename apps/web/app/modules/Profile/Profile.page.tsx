@@ -1,4 +1,4 @@
-import { useParams } from "@remix-run/react";
+import { Navigate, useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useTeacherCourses } from "~/api/queries/useTeacherCourses";
@@ -16,18 +16,19 @@ import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
 export default function ProfilePage() {
   const { id = "" } = useParams();
-  const { data: userDetails } = useUserDetails(id);
+  const { data: userDetails, isLoading } = useUserDetails(id);
   const hasPermission = isAdminLike(userDetails?.role ?? "");
   const { data: teacherCourses } = useTeacherCourses(id, undefined, hasPermission);
   const { t } = useTranslation();
+
+  if (!userDetails && !isLoading) return <Navigate to={"/"} />;
+
   return (
-    <PageWrapper>
-      {userDetails && (
-        <ProfilePageBreadcrumbs
-          id={id}
-          username={`${userDetails?.firstName} ${userDetails?.lastName}`}
-        />
-      )}
+    <PageWrapper role="heading">
+      <ProfilePageBreadcrumbs
+        id={id}
+        username={`${userDetails?.firstName} ${userDetails?.lastName}`}
+      />
       <div className="flex flex-col gap-6 xl:flex-row">
         <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow xl:w-full xl:max-w-[480px]">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">

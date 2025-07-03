@@ -110,8 +110,9 @@ export class UserController {
   async getUserDetails(
     @Query("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<UserDetails>> {
-    const userDetails = await this.usersService.getUserDetails(userId, role);
+    const userDetails = await this.usersService.getUserDetails(userId, currentUserId, role);
     return new BaseResponse(userDetails);
   }
 

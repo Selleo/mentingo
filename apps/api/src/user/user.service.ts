@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -90,7 +91,11 @@ export class UserService {
     return user;
   }
 
-  public async getUserDetails(userId: UUIDType, userRole: UserRole): Promise<UserDetails> {
+  public async getUserDetails(
+    userId: UUIDType,
+    currentUserId: UUIDType,
+    userRole: UserRole,
+  ): Promise<UserDetails> {
     const [userBio]: UserDetails[] = await this.db
       .select({
         firstName: users.firstName,
@@ -106,33 +111,15 @@ export class UserService {
       .leftJoin(userDetails, eq(userDetails.userId, users.id))
       .where(eq(users.id, userId));
 
-    // This condition appears redundant, as it sets the public contact email to the user's private email. Would it not be preferable to leave it null and allow the user to provide this information themselves? It seems this was originally implemented to ensure userBio is defined, but it may no longer be necessary.
-    if (!userBio && (USER_ROLES.TEACHER === userRole || USER_ROLES.ADMIN === userRole)) {
-      // TODO: quick
-      // throw new NotFoundException("User details not found");
-      const [user] = await this.db
-        .select({
-          id: users.id,
-          email: users.email,
-          role: users.role,
-          firstName: users.firstName,
-          lastName: users.lastName,
-        })
-        .from(users)
-        .where(eq(users.id, userId));
+    const canView =
+      userId === currentUserId ||
+      USER_ROLES.ADMIN === userRole ||
+      USER_ROLES.TEACHER === userRole ||
+      USER_ROLES.ADMIN === userBio.role ||
+      USER_ROLES.TEACHER === userBio.role;
 
-      const [userBio] = await this.db
-        .insert(userDetails)
-        .values({ userId, contactEmail: user.email })
-        .returning({
-          id: userDetails.id,
-          description: userDetails.description,
-          contactEmail: userDetails.contactEmail,
-          contactPhone: userDetails.contactPhoneNumber,
-          jobTitle: userDetails.jobTitle,
-        });
-
-      return { firstName: user.firstName, lastName: user.lastName, role: user.role, ...userBio };
+    if (!canView) {
+      throw new ForbiddenException("Cannot access user details");
     }
     return userBio;
   }
