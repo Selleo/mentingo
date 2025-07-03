@@ -361,7 +361,7 @@
                   "type": "string"
                 },
                 {
-                  "const": "teacher",
+                  "const": "content_creator",
                   "type": "string"
                 }
               ]
@@ -1377,9 +1377,9 @@
         }
       }
     },
-    "/api/course/teacher-courses": {
+    "/api/course/content-creator-courses": {
       "get": {
-        "operationId": "CourseController_getTeacherCourses",
+        "operationId": "CourseController_getContentCreatorCourses",
         "parameters": [
           {
             "name": "authorId",
@@ -1426,7 +1426,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetTeacherCoursesResponse"
+                  "$ref": "#/components/schemas/GetContentCreatorCoursesResponse"
                 }
               }
             }
@@ -1777,16 +1777,16 @@
         }
       }
     },
-    "/api/statistics/teacher-stats": {
+    "/api/statistics/content-creator-stats": {
       "get": {
-        "operationId": "StatisticsController_getTeacherStats",
+        "operationId": "StatisticsController_getContentCreatorStats",
         "parameters": [],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetTeacherStatsResponse"
+                  "$ref": "#/components/schemas/GetContentCreatorStatsResponse"
                 }
               }
             }
@@ -3216,7 +3216,7 @@
                 "type": "string"
               },
               {
-                "const": "teacher",
+                "const": "content_creator",
                 "type": "string"
               }
             ]
@@ -3339,7 +3339,7 @@
                 "type": "string"
               },
               {
-                "const": "teacher",
+                "const": "content_creator",
                 "type": "string"
               }
             ]
@@ -3466,7 +3466,7 @@
                 "type": "string"
               },
               {
-                "const": "teacher",
+                "const": "content_creator",
                 "type": "string"
               }
             ]
@@ -4149,7 +4149,7 @@
           "pagination"
         ]
       },
-      "GetTeacherCoursesResponse": {
+      "GetContentCreatorCoursesResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -5322,7 +5322,7 @@
           "data"
         ]
       },
-      "GetTeacherStatsResponse": {
+      "GetContentCreatorStatsResponse": {
         "type": "object",
         "properties": {
           "data": {

@@ -13,7 +13,7 @@ const TEST_SETTINGS = {
   },
 } as const;
 
-test.describe("Teacher settings", () => {
+test.describe("Content creator settings", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
@@ -30,7 +30,7 @@ test.describe("Teacher settings", () => {
     await page.locator('#user-details button[type="submit"]').click();
 
     await page.getByRole("button", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
-    await page.waitForURL(/\/teachers\/[a-f0-9-]{36}/);
+    await page.waitForURL(/\/content-creators\/[a-f0-9-]{36}/);
     const paragraph = page.locator("div.flex.flex-col.gap-y-2 p.body-base.mt-2.text-neutral-950");
     const jobTitle = page.locator("p.body-sm span.font-medium.text-neutral-950");
     await expect(paragraph).toHaveText(TEST_SETTINGS.description);

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCurrentUser, useTeacherStatistics } from "~/api/queries";
+import { useCurrentUser, useContentCreatorStatistics } from "~/api/queries";
 import { Gravatar } from "~/components/Gravatar";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Avatar } from "~/components/ui/avatar";
@@ -15,7 +15,7 @@ import type { ChartConfig } from "~/components/ui/chart";
 
 export const AdminStatistics = () => {
   const { data: user } = useCurrentUser();
-  const { data: statistics, isLoading } = useTeacherStatistics();
+  const { data: statistics, isLoading } = useContentCreatorStatistics();
   const { t } = useTranslation();
   const totalCoursesCompletion =
     statistics?.totalCoursesCompletionStats.totalCoursesCompletion ?? 0;

@@ -6,9 +6,9 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { ChartLegendBadge } from "~/modules/Statistics/Client/components";
 
-import type { GetTeacherStatsResponse } from "~/api/generated-api";
+import type { GetContentCreatorStatsResponse } from "~/api/generated-api";
 
-type Data = GetTeacherStatsResponse["data"]["fiveMostPopularCourses"];
+type Data = GetContentCreatorStatsResponse["data"]["fiveMostPopularCourses"];
 
 type MostPopularCoursesChartProps = { data: Data | undefined; isLoading: boolean | undefined };
 

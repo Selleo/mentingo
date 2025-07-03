@@ -6,9 +6,9 @@ export const useUserRole = () => {
 
   const role = data?.role ?? null;
   const isAdmin = data?.role === USER_ROLE.admin;
-  const isTeacher = data?.role === USER_ROLE.teacher;
+  const isContentCreator = data?.role === USER_ROLE.contentCreator;
   const isStudent = data?.role === USER_ROLE.student;
-  const isAdminLike = isAdmin || isTeacher;
+  const isAdminLike = isAdmin || isContentCreator;
 
-  return { role, isAdmin, isTeacher, isAdminLike, isStudent };
+  return { role, isAdmin, isContentCreator, isAdminLike, isStudent };
 };

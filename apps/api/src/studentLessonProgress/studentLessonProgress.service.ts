@@ -43,7 +43,7 @@ export class StudentLessonProgressService {
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
-    if (userRole === USER_ROLES.TEACHER || userRole === USER_ROLES.ADMIN) return;
+    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");

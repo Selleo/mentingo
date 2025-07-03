@@ -45,7 +45,7 @@ export class ChapterController {
   }
 
   @Post("beta-create-chapter")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -65,7 +65,7 @@ export class ChapterController {
   }
 
   @Patch()
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -90,7 +90,7 @@ export class ChapterController {
   }
 
   @Patch("chapter-display-order")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -119,7 +119,7 @@ export class ChapterController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "chapterId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -134,7 +134,7 @@ export class ChapterController {
   }
 
   @Patch("freemium-status")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {

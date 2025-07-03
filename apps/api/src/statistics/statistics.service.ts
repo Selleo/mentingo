@@ -62,7 +62,7 @@ export class StatisticsService {
     };
   }
 
-  async getTeacherStats(userId: UUIDType) {
+  async getContentCreatorStats(userId: UUIDType) {
     const fiveMostPopularCourses =
       await this.statisticsRepository.getFiveMostPopularCourses(userId);
     const [totalCoursesCompletionStats] =

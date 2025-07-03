@@ -29,7 +29,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CourseService } from "src/courses/course.service";
-import { allCoursesForTeacherSchema } from "src/courses/schemas/course.schema";
+import { allCoursesForContentCreatorSchema } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseEnrollmentScope,
@@ -57,7 +57,7 @@ import {
 
 import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
 import type {
-  AllCoursesForTeacherResponse,
+  AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
 } from "src/courses/schemas/course.schema";
@@ -76,7 +76,7 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.TEACHER)
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate(allCoursesValidation)
   async getAllCourses(
     @Query("title") title: string,
@@ -192,7 +192,7 @@ export class CourseController {
   }
 
   @Public()
-  @Get("teacher-courses")
+  @Get("content-creator-courses")
   @Validate({
     request: [
       { type: "query", name: "authorId", schema: UUIDSchema, required: true },
@@ -203,17 +203,17 @@ export class CourseController {
       },
       { type: "query", name: "excludeCourseId", schema: UUIDSchema },
     ],
-    response: baseResponse(allCoursesForTeacherSchema),
+    response: baseResponse(allCoursesForContentCreatorSchema),
   })
-  async getTeacherCourses(
+  async getContentCreatorCourses(
     @Query("authorId") authorId: UUIDType,
     @Query("scope") scope: CourseEnrollmentScope = COURSE_ENROLLMENT_SCOPES.ALL,
     @Query("excludeCourseId") excludeCourseId: UUIDType,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<AllCoursesForTeacherResponse>> {
+  ): Promise<BaseResponse<AllCoursesForContentCreatorResponse>> {
     const query = { authorId, currentUserId, excludeCourseId, scope };
 
-    return new BaseResponse(await this.courseService.getTeacherCourses(query));
+    return new BaseResponse(await this.courseService.getContentCreatorCourses(query));
   }
 
   @Public()
@@ -230,7 +230,7 @@ export class CourseController {
   }
 
   @Get("beta-course-by-id")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
     response: baseResponse(commonShowBetaCourseSchema),
@@ -240,7 +240,7 @@ export class CourseController {
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.TEACHER)
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "body", schema: createCourseSchema }],
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
@@ -256,7 +256,7 @@ export class CourseController {
 
   @Patch(":id")
   @UseInterceptors(FileInterceptor("image"))
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },

@@ -63,13 +63,13 @@ const config: PlaywrightTestConfig = {
       fullyParallel: false,
     },
     {
-      name: "chromium-teacher",
-      testDir: "./e2e/tests/teacher",
+      name: "chromium-content-creator",
+      testDir: "./e2e/tests/content-creator",
       dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
-        storageState: "e2e/.auth/teacher.json",
+        storageState: "e2e/.auth/content-creator.json",
       },
       testMatch: /.*\.(spec|test)\.ts$/,
       fullyParallel: false,

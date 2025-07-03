@@ -68,16 +68,16 @@ async function seedProduction() {
     });
     console.log("Created or found student user:", studentUser);
 
-    const teacherUser = await createOrFindUser("teacher@example.com", "password", {
+    const contentCreatorUser = await createOrFindUser("contentcreator@example.com", "password", {
       id: faker.string.uuid(),
-      email: "teacher@example.com",
+      email: "contentcreator@example.com",
       firstName: faker.person.firstName(),
-      lastName: "Teacher",
+      lastName: "Content Creator",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      role: USER_ROLES.TEACHER,
+      role: USER_ROLES.CONTENT_CREATOR,
     });
-    console.log("Created or found teacher user:", teacherUser);
+    console.log("Created or found content creator user:", contentCreatorUser);
 
     console.log("Seeding completed successfully");
   } catch (error) {

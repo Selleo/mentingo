@@ -41,7 +41,7 @@ const prefetchQueriesForUser = async (userRole: string | undefined) => {
   await queryClient.prefetchQuery(categoriesQueryOptions());
 
   return match(userRole)
-    .with(USER_ROLE.admin, USER_ROLE.teacher, async () => {
+    .with(USER_ROLE.admin, USER_ROLE.contentCreator, async () => {
       await queryClient.prefetchQuery(allCoursesQueryOptions());
     })
     .with(USER_ROLE.student, async () => {

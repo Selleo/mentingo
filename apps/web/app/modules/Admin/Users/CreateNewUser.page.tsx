@@ -26,7 +26,7 @@ const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters."),
   lastName: z.string().min(2, "Last name must be at least 2 characters."),
   email: z.string().email("Please enter a valid email address."),
-  role: z.enum([USER_ROLE.admin, USER_ROLE.teacher, USER_ROLE.student], {
+  role: z.enum([USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student], {
     required_error: "Please select a role.",
   }),
 });
@@ -126,7 +126,9 @@ export default function CreateNewUserPage() {
                   <SelectContent>
                     <SelectItem value={USER_ROLE.student}>{t("common.roles.student")}</SelectItem>
                     <SelectItem value={USER_ROLE.admin}>{t("common.roles.admin")}</SelectItem>
-                    <SelectItem value={USER_ROLE.teacher}>{t("common.roles.teacher")}</SelectItem>
+                    <SelectItem value={USER_ROLE.contentCreator}>
+                      {t("common.roles.contentCreator")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
