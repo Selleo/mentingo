@@ -35,10 +35,10 @@ export const clientLoader = async () => {
 };
 
 const AdminGuard = ({ children }: PropsWithChildren) => {
-  const { isAdmin, isTeacher } = useUserRole();
+  const { isAdmin, isContentCreator } = useUserRole();
   const navigate = useNavigate();
 
-  const isAllowed = isAdmin || isTeacher;
+  const isAllowed = isAdmin || isContentCreator;
 
   useLayoutEffect(() => {
     if (!isAllowed) {

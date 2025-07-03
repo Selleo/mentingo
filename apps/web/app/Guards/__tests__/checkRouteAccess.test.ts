@@ -5,7 +5,7 @@ import { checkRouteAccess } from "../RouteGuard";
 describe("checkRouteAccess", () => {
   it("should allow access to exact matching routes", () => {
     expect(checkRouteAccess("admin/courses", USER_ROLE.admin)).toBe(true);
-    expect(checkRouteAccess("admin/courses", USER_ROLE.teacher)).toBe(true);
+    expect(checkRouteAccess("admin/courses", USER_ROLE.contentCreator)).toBe(true);
     expect(checkRouteAccess("admin/courses", USER_ROLE.student)).toBe(false);
   });
 
@@ -13,12 +13,12 @@ describe("checkRouteAccess", () => {
     expect(checkRouteAccess("admin/users", USER_ROLE.admin)).toBe(true);
     expect(checkRouteAccess("admin/users/123", USER_ROLE.admin)).toBe(true);
     expect(checkRouteAccess("admin/users/new", USER_ROLE.admin)).toBe(true);
-    expect(checkRouteAccess("admin/users", USER_ROLE.teacher)).toBe(false);
+    expect(checkRouteAccess("admin/users", USER_ROLE.contentCreator)).toBe(false);
   });
 
   it("should handle public routes", () => {
     expect(checkRouteAccess("auth/login", USER_ROLE.admin)).toBe(true);
-    expect(checkRouteAccess("auth/login", USER_ROLE.teacher)).toBe(true);
+    expect(checkRouteAccess("auth/login", USER_ROLE.contentCreator)).toBe(true);
     expect(checkRouteAccess("auth/login", USER_ROLE.student)).toBe(true);
   });
 

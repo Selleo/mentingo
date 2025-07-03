@@ -1,7 +1,7 @@
 import { Navigate, useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
-import { useTeacherCourses } from "~/api/queries/useTeacherCourses";
+import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Gravatar } from "~/components/Gravatar";
@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const { id = "" } = useParams();
   const { data: userDetails, isLoading } = useUserDetails(id);
   const hasPermission = isAdminLike(userDetails?.role ?? "");
-  const { data: teacherCourses } = useTeacherCourses(id, undefined, hasPermission);
+  const { data: contentCreatorCourses } = useContentCreatorCourses(id, undefined, hasPermission);
   const { t } = useTranslation();
 
   if (!userDetails && !isLoading) return <Navigate to={"/"} />;
@@ -41,7 +41,7 @@ export default function ProfilePage() {
               <div className="flex flex-col gap-y-1">
                 {hasPermission && (
                   <p className="body-sm">
-                    <span className="text-neutral-900">{t("teacherView.other.title")}</span>{" "}
+                    <span className="text-neutral-900">{t("contentCreatorView.other.title")}</span>{" "}
                     <span className="font-medium text-neutral-950">{userDetails?.jobTitle}</span>
                   </p>
                 )}
@@ -51,7 +51,7 @@ export default function ProfilePage() {
           {hasPermission && (
             <div className="flex flex-col gap-y-2">
               <div className="flex items-center gap-x-3">
-                <span className="text-neutral-900">{t("teacherView.other.about")}</span>
+                <span className="text-neutral-900">{t("contentCreatorView.other.about")}</span>
                 <div className="h-[1px] w-full bg-primary-200" />
               </div>
               <p className="body-base mt-2 text-neutral-950">{userDetails?.description}</p>
@@ -60,7 +60,7 @@ export default function ProfilePage() {
           {hasPermission && (
             <div className="flex flex-col gap-y-1 md:gap-y-4 xl:mt-auto">
               <div className="flex items-center gap-x-3">
-                <span className="text-neutral-900">{t("teacherView.other.contact")}</span>
+                <span className="text-neutral-900">{t("contentCreatorView.other.contact")}</span>
                 <div className="h-[1px] w-full bg-primary-200" />
               </div>
               <div className="flex flex-col gap-3 md:flex-row md:*:w-full">
@@ -83,14 +83,14 @@ export default function ProfilePage() {
           )}
           {hasPermission && (
             <Button variant="outline" className="sr-only">
-              {t("teacherView.button.collapse")}
+              {t("contentCreatorView.button.collapse")}
             </Button>
           )}
         </section>
         {hasPermission && (
           <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">
-              <h2 className="h5">{t("teacherView.other.courses")}</h2>
+              <h2 className="h5">{t("contentCreatorView.other.courses")}</h2>
               <ButtonGroup
                 className="flex !w-full !max-w-none *:w-full md:!w-min"
                 buttons={[
@@ -109,10 +109,10 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex flex-wrap gap-6 *:max-w-[250px] lg:max-h-[calc(100dvh-260px)] lg:overflow-y-scroll xl:gap-4">
-              {teacherCourses?.map((course) => <CourseCard key={course.id} {...course} />)}
+              {contentCreatorCourses?.map((course) => <CourseCard key={course.id} {...course} />)}
             </div>
             <Button variant="outline" className="sr-only">
-              {t("teacherView.button.showMore")}
+              {t("contentCreatorView.button.showMore")}
             </Button>
           </section>
         )}

@@ -16,11 +16,11 @@ const TEST_NAVIGATION = {
   },
 } as const;
 
-test.describe("Teacher navigation", () => {
+test.describe("Content creator navigation", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
-  test("should check teacher navigation", async ({ page }) => {
+  test("should check content creator navigation", async ({ page }) => {
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.dashboard, "i") })
       .click();
@@ -48,9 +48,9 @@ test.describe("Teacher navigation", () => {
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.profile, "i") })
       .click();
-    await page.waitForURL(/\/teachers\/[a-f0-9-]{36}/);
+    await page.waitForURL(/\/content-creators\/[a-f0-9-]{36}/);
     const currentURL = page.url();
-    expect(currentURL).toMatch(/\/teachers\/[a-f0-9-]{36}/);
+    expect(currentURL).toMatch(/\/content-creators\/[a-f0-9-]{36}/);
 
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })

@@ -2,31 +2,31 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-import type { GetTeacherCoursesResponse } from "../generated-api";
+import type { GetContentCreatorCoursesResponse } from "../generated-api";
 
 type SearchParams = {
   scope?: "all" | "enrolled" | "available";
   excludeCourseId?: string;
 };
 
-export const teacherCoursesOptions = (
+export const ContentCreatorCoursesOptions = (
   authorId?: string,
   searchParams?: SearchParams,
-  isTeacher?: boolean,
+  isContentCreator?: boolean,
 ) => {
   return {
-    enabled: !!authorId && isTeacher,
-    queryKey: ["teacher-courses", authorId],
+    enabled: !!authorId && isContentCreator,
+    queryKey: ["contentCreator-courses", authorId],
     queryFn: async () => {
       if (!authorId) {
         throw new Error("Author ID is required");
       }
 
-      if (!isTeacher) {
-        throw new Error("Author must be a teacher");
+      if (!isContentCreator) {
+        throw new Error("Author must be a content creator");
       }
 
-      const response = await ApiClient.api.courseControllerGetTeacherCourses({
+      const response = await ApiClient.api.courseControllerGetContentCreatorCourses({
         authorId,
         ...(searchParams?.scope && { scope: searchParams.scope }),
         ...(searchParams?.excludeCourseId && { excludeCourseId: searchParams.excludeCourseId }),
@@ -34,14 +34,14 @@ export const teacherCoursesOptions = (
 
       return response.data;
     },
-    select: (data: GetTeacherCoursesResponse) => data.data,
+    select: (data: GetContentCreatorCoursesResponse) => data.data,
   };
 };
 
-export function useTeacherCourses(
+export function useContentCreatorCourses(
   authorId?: string,
   searchParams?: SearchParams,
-  isTeacher?: boolean,
+  isContentCreator?: boolean,
 ) {
-  return useQuery(teacherCoursesOptions(authorId, searchParams, isTeacher));
+  return useQuery(ContentCreatorCoursesOptions(authorId, searchParams, isContentCreator));
 }

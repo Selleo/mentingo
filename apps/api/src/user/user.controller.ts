@@ -142,7 +142,7 @@ export class UserController {
   }
 
   @Patch("details")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
     request: [{ type: "body", schema: upsertUserDetailsSchema }],

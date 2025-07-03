@@ -9,7 +9,7 @@ const TEST_EDIT_COURSE = {
   },
 } as const;
 
-test.describe("Teacher edit course", () => {
+test.describe("Content creator edit course", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });

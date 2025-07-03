@@ -114,9 +114,9 @@ export class UserService {
     const canView =
       userId === currentUserId ||
       USER_ROLES.ADMIN === userRole ||
-      USER_ROLES.TEACHER === userRole ||
+      USER_ROLES.CONTENT_CREATOR === userRole ||
       USER_ROLES.ADMIN === userBio.role ||
-      USER_ROLES.TEACHER === userBio.role;
+      USER_ROLES.CONTENT_CREATOR === userBio.role;
 
     if (!canView) {
       throw new ForbiddenException("Cannot access user details");
@@ -264,7 +264,7 @@ export class UserService {
         from: process.env.SES_EMAIL || "",
       });
 
-      if (USER_ROLES.TEACHER === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
+      if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
