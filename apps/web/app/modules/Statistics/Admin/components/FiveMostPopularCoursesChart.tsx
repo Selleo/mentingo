@@ -46,9 +46,10 @@ export const FiveMostPopularCoursesChart = ({ data, isLoading }: MostPopularCour
       fill: chartColors[index % chartColors.length],
     }));
 
-    const chartConfig = input?.reduce((config, { courseName }, index) => {
-      const key = `desktop${index === 0 ? "" : index}`;
-      config[key] = { label: courseName };
+    // TODO: Needs to be refactor
+    const chartConfig = input?.reduce((config) => {
+      const key = `studentCount`;
+      config[key] = { label: t("mostPopularCoursesView.other.students") };
       return config;
     }, {} as ChartConfig);
 
