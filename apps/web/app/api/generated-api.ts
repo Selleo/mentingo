@@ -161,7 +161,7 @@ export interface UpdateUserBody {
   lastName?: string;
   /** @format email */
   email?: string;
-  role?: "admin" | "student" | "teacher";
+  role?: "admin" | "student" | "content_creator";
   archived?: boolean;
 }
 
@@ -199,7 +199,7 @@ export interface AdminUpdateUserBody {
   lastName?: string;
   /** @format email */
   email?: string;
-  role?: "admin" | "student" | "teacher";
+  role?: "admin" | "student" | "content_creator";
   archived?: boolean;
 }
 
@@ -252,7 +252,7 @@ export interface CreateUserBody {
    * @maxLength 64
    */
   lastName: string;
-  role: "admin" | "student" | "teacher";
+  role: "admin" | "student" | "content_creator";
 }
 
 export interface CreateUserResponse {
@@ -431,7 +431,7 @@ export interface GetAvailableCoursesResponse {
   appliedFilters?: object;
 }
 
-export interface GetTeacherCoursesResponse {
+export interface GetContentCreatorCoursesResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -707,7 +707,7 @@ export interface GetUserStatisticsResponse {
   };
 }
 
-export interface GetTeacherStatsResponse {
+export interface GetContentCreatorStatsResponse {
   data: {
     fiveMostPopularCourses: {
       courseName: string;
@@ -1771,7 +1771,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     userControllerGetUsers: (
       query?: {
         keyword?: string;
-        role?: "admin" | "student" | "teacher";
+        role?: "admin" | "student" | "content_creator";
         archived?: string;
         /** @min 1 */
         page?: number;
@@ -2252,10 +2252,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CourseControllerGetTeacherCourses
-     * @request GET:/api/course/teacher-courses
+     * @name CourseControllerGetContentCreatorCourses
+     * @request GET:/api/course/content-creator-courses
      */
-    courseControllerGetTeacherCourses: (
+    courseControllerGetContentCreatorCourses: (
       query: {
         /** @format uuid */
         authorId: string;
@@ -2265,8 +2265,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<GetTeacherCoursesResponse, any>({
-        path: `/api/course/teacher-courses`,
+      this.request<GetContentCreatorCoursesResponse, any>({
+        path: `/api/course/content-creator-courses`,
         method: "GET",
         query: query,
         format: "json",
@@ -2504,12 +2504,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name StatisticsControllerGetTeacherStats
-     * @request GET:/api/statistics/teacher-stats
+     * @name StatisticsControllerGetContentCreatorStats
+     * @request GET:/api/statistics/content-creator-stats
      */
-    statisticsControllerGetTeacherStats: (params: RequestParams = {}) =>
-      this.request<GetTeacherStatsResponse, any>({
-        path: `/api/statistics/teacher-stats`,
+    statisticsControllerGetContentCreatorStats: (params: RequestParams = {}) =>
+      this.request<GetContentCreatorStatsResponse, any>({
+        path: `/api/statistics/content-creator-stats`,
         method: "GET",
         format: "json",
         ...params,

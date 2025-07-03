@@ -13,7 +13,7 @@ export const routes: (
     route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
       route("courses", "modules/Courses/Courses.page.tsx");
       route("course/:id", "modules/Courses/CourseView/CourseView.page.tsx");
-      route("teachers/:id", "modules/Teacher/Teacher.page.tsx");
+      route("content-creators/:id", "modules/ContentCreator/ContentCreator.page.tsx");
     });
     route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
       route("", "modules/Statistics/Statistics.page.tsx", {

@@ -76,7 +76,7 @@ const Users = () => {
       options: [
         { value: USER_ROLE.admin, label: t("common.roles.admin") },
         { value: USER_ROLE.student, label: t("common.roles.student") },
-        { value: USER_ROLE.teacher, label: t("common.roles.teacher") },
+        { value: USER_ROLE.contentCreator, label: t("common.roles.contentCreator") },
       ],
     },
     {

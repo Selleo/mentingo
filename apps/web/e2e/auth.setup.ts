@@ -17,10 +17,10 @@ setup("authenticate", async ({ page }) => {
     path: "e2e/.auth/admin.json",
   });
 
-  const teacherAuthFixture = new AuthFixture(page);
-  await teacherAuthFixture.login("teacher@example.com", "password");
+  const contentCreatorAuthFixture = new AuthFixture(page);
+  await contentCreatorAuthFixture.login("contentcreator@example.com", "password");
 
   await page.context().storageState({
-    path: "e2e/.auth/teacher.json",
+    path: "e2e/.auth/content-creator.json",
   });
 });

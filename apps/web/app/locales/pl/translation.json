@@ -20,7 +20,7 @@
     },
     "roles": {
       "admin": "Administrator",
-      "teacher": "Twórca treści",
+      "contentCreator": "Twórca treści",
       "student": "Uczeń"
     },
     "error": {
@@ -172,7 +172,7 @@
       "passwordCreatedSuccessfully": "Hasło zostało utworzone pomyślnie"
     }
   },
-  "teacherView": {
+  "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
       "showMore": "Pokaż więcej"
@@ -884,7 +884,7 @@
         "continueLearning": "Kontynuuj naukę",
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
-        "goToTeacherPage": "Przejdź do strony nauczyciela"
+        "goToContentCreatorPage": "Przejdź do strony twórcy treści"
       }
     }
   },

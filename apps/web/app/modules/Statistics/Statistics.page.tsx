@@ -4,9 +4,9 @@ import { AdminStatistics } from "./Admin/AdminStatistics";
 import ClientStatistics from "./Client/ClientStatistics";
 
 export default function StatisticsPage() {
-  const { isAdmin, isTeacher } = useUserRole();
+  const { isAdmin, isContentCreator } = useUserRole();
 
-  if (isAdmin || isTeacher) {
+  if (isAdmin || isContentCreator) {
     return <AdminStatistics />;
   }
 

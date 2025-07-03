@@ -74,9 +74,9 @@ const createRouteConfig = <T extends Record<string, UserRole[]>>(config: T): Rou
 
 const defineRoles = <R extends UserRole[]>(roles: [...R]) => roles;
 
-const ALL_ROLES = defineRoles([USER_ROLE.admin, USER_ROLE.teacher, USER_ROLE.student]);
+const ALL_ROLES = defineRoles([USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student]);
 const ADMIN_ONLY = defineRoles([USER_ROLE.admin]);
-const ADMIN_AND_TEACHER = defineRoles([USER_ROLE.admin, USER_ROLE.teacher]);
+const ADMIN_AND_CONTENT_CREATOR = defineRoles([USER_ROLE.admin, USER_ROLE.contentCreator]);
 
 export const routeAccessConfig = createRouteConfig({
   "auth/login": ALL_ROLES,
@@ -87,29 +87,29 @@ export const routeAccessConfig = createRouteConfig({
   // Client part
   "": ALL_ROLES, // Dashboard
   settings: ALL_ROLES,
-  "teachers/:id": ALL_ROLES,
+  "content-creators/:id": ALL_ROLES,
   "course/:courseId/lesson/:lessonId": ALL_ROLES,
   //Client and public
   "course/:id": ALL_ROLES,
   courses: ALL_ROLES,
 
   // Admin part
-  "admin/courses": ADMIN_AND_TEACHER,
-  "admin/courses/new": ADMIN_AND_TEACHER,
-  "admin/beta-courses/new": ADMIN_AND_TEACHER,
-  "admin/courses/:id": ADMIN_AND_TEACHER,
-  "admin/beta-courses/:id": ADMIN_AND_TEACHER,
+  "admin/courses": ADMIN_AND_CONTENT_CREATOR,
+  "admin/courses/new": ADMIN_AND_CONTENT_CREATOR,
+  "admin/beta-courses/new": ADMIN_AND_CONTENT_CREATOR,
+  "admin/courses/:id": ADMIN_AND_CONTENT_CREATOR,
+  "admin/beta-courses/:id": ADMIN_AND_CONTENT_CREATOR,
   "admin/users/*": ADMIN_ONLY,
   "admin/groups/*": ADMIN_ONLY,
   "admin/categories": ADMIN_ONLY,
-  "admin/categories/:id": ADMIN_AND_TEACHER,
-  "admin/categories/new": ADMIN_AND_TEACHER,
-  "admin/lessons": ADMIN_AND_TEACHER,
-  "admin/lessons/:id": ADMIN_AND_TEACHER,
-  "admin/lessons/new": ADMIN_AND_TEACHER,
-  "admin/lesson-items": ADMIN_AND_TEACHER,
-  "admin/lesson-items/new-file": ADMIN_AND_TEACHER,
-  "admin/lesson-items/new-text-block": ADMIN_AND_TEACHER,
-  "admin/lesson-items/new-question": ADMIN_AND_TEACHER,
-  "admin/lesson-items/:id": ADMIN_AND_TEACHER,
+  "admin/categories/:id": ADMIN_AND_CONTENT_CREATOR,
+  "admin/categories/new": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lessons": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lessons/:id": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lessons/new": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lesson-items": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lesson-items/new-file": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lesson-items/new-text-block": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lesson-items/new-question": ADMIN_AND_CONTENT_CREATOR,
+  "admin/lesson-items/:id": ADMIN_AND_CONTENT_CREATOR,
 });

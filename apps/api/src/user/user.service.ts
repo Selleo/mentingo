@@ -105,7 +105,7 @@ export class UserService {
       .leftJoin(users, eq(userDetails.userId, users.id))
       .where(eq(userDetails.userId, userId));
 
-    if (!userBio && (USER_ROLES.TEACHER === userRole || USER_ROLES.ADMIN === userRole)) {
+    if (!userBio && (USER_ROLES.CONTENT_CREATOR === userRole || USER_ROLES.ADMIN === userRole)) {
       // TODO: quick
       // throw new NotFoundException("User details not found");
       const [user] = await this.db
@@ -275,7 +275,7 @@ export class UserService {
         from: process.env.SES_EMAIL || "",
       });
 
-      if (USER_ROLES.TEACHER === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
+      if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });

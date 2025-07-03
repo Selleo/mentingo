@@ -28,7 +28,7 @@ import { USER_ROLES } from "../user/schemas/userRoles";
 import { e2eCourses } from "./e2e-data-seeds";
 import { niceCourses } from "./nice-data-seeds";
 import { createNiceCourses, seedTruncateAllTables } from "./seed-helpers";
-import { admin, students, teachers } from "./users-seed";
+import { admin, contentCreators, students } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
 import type { DatabasePg, UUIDType } from "../common";
@@ -71,7 +71,7 @@ async function createOrFindUser(email: string, password: string, userData: any) 
 
   await insertCredential(newUser.id, password);
 
-  if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.TEACHER)
+  if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.CONTENT_CREATOR)
     await insertUserDetails(newUser.id);
 
   return newUser;
@@ -231,7 +231,7 @@ async function seed() {
   try {
     const createdStudents = await createUsers(students, "password");
     const [createdAdmin] = await createUsers(admin, "password");
-    const createdTeachers = await createUsers(teachers, "password");
+    const createdContentCreators = await createUsers(contentCreators, "password");
     await createUsers(
       [
         {
@@ -245,11 +245,14 @@ async function seed() {
     );
 
     const createdStudentIds = createdStudents.map((student) => student.id);
-    const creatorCourseIds = [createdAdmin.id, ...createdTeachers.map((teacher) => teacher.id)];
+    const creatorCourseIds = [
+      createdAdmin.id,
+      ...createdContentCreators.map((contentCreator) => contentCreator.id),
+    ];
 
     console.log("Created or found admin user:", createdAdmin);
     console.log("Created or found students user:", createdStudents);
-    console.log("Created or found teachers user:", createdTeachers);
+    console.log("Created or found content creators user:", createdContentCreators);
 
     const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses);
     console.log("✨✨✨Created created nice courses✨✨✨");

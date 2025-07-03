@@ -46,7 +46,7 @@ export default function CourseViewPage() {
               );
             })}
           </div>
-          <MoreCoursesByAuthor courseId={course.id} teacherId={course.authorId} />
+          <MoreCoursesByAuthor courseId={course.id} contentCreatorId={course.authorId} />
           <YouMayBeInterestedIn courseId={course.id} category={course.category} />
         </div>
         <CourseViewSidebar course={course} />
