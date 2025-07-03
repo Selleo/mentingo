@@ -27,7 +27,7 @@ export const studentCourseSchema = Type.Object({
   enrolled: Type.Optional(Type.Boolean()),
 });
 
-export const coursesForTeacherSchema = Type.Object({
+export const coursesForContentCreatorSchema = Type.Object({
   ...studentCourseSchema.properties,
   authorId: UUIDSchema,
   authorEmail: Type.String(),
@@ -35,8 +35,8 @@ export const coursesForTeacherSchema = Type.Object({
 
 export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
-export const allCoursesForTeacherSchema = Type.Array(coursesForTeacherSchema);
+export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCreatorSchema);
 
 export type AllCoursesResponse = Static<typeof allCoursesSchema>;
 export type AllStudentCoursesResponse = Static<typeof allStudentCoursesSchema>;
-export type AllCoursesForTeacherResponse = Static<typeof allCoursesForTeacherSchema>;
+export type AllCoursesForContentCreatorResponse = Static<typeof allCoursesForContentCreatorSchema>;

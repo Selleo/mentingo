@@ -7,18 +7,20 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 
-type TeacherPageBreadcrumbsProps = {
+type ContentCreatorPageBreadcrumbsProps = {
   id: string;
   username: string;
 };
 
-export const ProfilePageBreadcrumbs = ({ id, username }: TeacherPageBreadcrumbsProps) => {
+export const ProfilePageBreadcrumbs = ({ id, username }: ContentCreatorPageBreadcrumbsProps) => {
   const { t } = useTranslation();
   return (
     <div className="mb-4 bg-primary-50">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href={`/`}>{t("teacherView.breadcrumbs.dashboard")}</BreadcrumbLink>
+          <BreadcrumbLink href={`/`}>
+            {t("contentCreatorView.breadcrumbs.dashboard")}
+          </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem className="text-neutral-950">

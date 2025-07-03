@@ -7,10 +7,10 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { UserStatsSchema, TeacherStatsSchema } from "./schemas/userStats.schema";
+import { UserStatsSchema, ContentCreatorStatsSchema } from "./schemas/userStats.schema";
 import { StatisticsService } from "./statistics.service";
 
-import type { UserStats, TeacherStats } from "./schemas/userStats.schema";
+import type { UserStats, ContentCreatorStats } from "./schemas/userStats.schema";
 
 @UseGuards(RolesGuard)
 @Controller("statistics")
@@ -27,14 +27,14 @@ export class StatisticsController {
     return new BaseResponse(await this.statisticsService.getUserStats(currentUserId));
   }
 
-  @Get("teacher-stats")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.TEACHER)
+  @Get("content-creator-stats")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
-    response: baseResponse(TeacherStatsSchema),
+    response: baseResponse(ContentCreatorStatsSchema),
   })
-  async getTeacherStats(
+  async getContentCreatorStats(
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<TeacherStats>> {
-    return new BaseResponse(await this.statisticsService.getTeacherStats(currentUserId));
+  ): Promise<BaseResponse<ContentCreatorStats>> {
+    return new BaseResponse(await this.statisticsService.getContentCreatorStats(currentUserId));
   }
 }

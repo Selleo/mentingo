@@ -60,7 +60,7 @@ import {
 } from "./schemas/courseQuery";
 
 import type {
-  AllCoursesForTeacherResponse,
+  AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
 } from "./schemas/course.schema";
@@ -106,7 +106,7 @@ export class CourseService {
 
     const conditions = this.getFiltersConditions(filters, false);
 
-    if (currentUserRole === USER_ROLES.TEACHER && currentUserId) {
+    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
       conditions.push(eq(courses.authorId, currentUserId));
     }
 
@@ -607,7 +607,7 @@ export class CourseService {
     };
   }
 
-  async getTeacherCourses({
+  async getContentCreatorCourses({
     currentUserId,
     authorId,
     scope,
@@ -617,7 +617,7 @@ export class CourseService {
     authorId: UUIDType;
     scope: CourseEnrollmentScope;
     excludeCourseId?: UUIDType;
-  }): Promise<AllCoursesForTeacherResponse> {
+  }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.isPublished, true), eq(courses.authorId, authorId)];
 
     if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
@@ -637,7 +637,7 @@ export class CourseService {
       conditions.push(inArray(courses.id, availableCourseIds));
     }
 
-    const teacherCourses = await this.db
+    const contentCreatorCourses = await this.db
       .select({
         id: courses.id,
         description: sql<string>`${courses.description}`,
@@ -687,7 +687,7 @@ export class CourseService {
       );
 
     return await Promise.all(
-      teacherCourses.map(async (course) => ({
+      contentCreatorCourses.map(async (course) => ({
         ...course,
         thumbnailUrl: course.thumbnailUrl
           ? await this.fileService.getFileUrl(course.thumbnailUrl)
@@ -952,7 +952,7 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.TEACHER) {
+    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
@@ -981,7 +981,7 @@ export class CourseService {
       throw new BadRequestException("No course ids provided");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.TEACHER) {
+    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 

@@ -163,8 +163,8 @@ pnpm db:seed
 
 After running the database seeding, the following default accounts are available for testing:
 
-| Role | Email | Password |
-|------|-------|----------|
+| Role    | Email            | Password |
+| ------- | ---------------- | -------- |
 | Student | user@example.com | password |
 
 > [!NOTE]
@@ -339,7 +339,8 @@ Each branch name should follow this pattern:
 `[initials]_[type]_[module]_[ticket]_[short_description]`
 
 **Components:**
-- `initials` – First letter of the author's first and last name, in lowercase (e.g., `jd` for *John Doe*)
+
+- `initials` – First letter of the author's first and last name, in lowercase (e.g., `jd` for _John Doe_)
 - `type` – Type of change:
   - `feat` – New feature
   - `fix` – Bug fix
@@ -347,9 +348,10 @@ Each branch name should follow this pattern:
   - `refactor` – Code refactoring without functional changes
 - `module` – Relevant module or system (e.g. `lms`)
 - `ticket` – Ticket or issue number (e.g. `459`)
-- `short_description` *(optional)* – Brief description in `snake_case`
+- `short_description` _(optional)_ – Brief description in `snake_case`
 
 **Example:**
+
 ```
 jd_feat_lms_459_implement_sso
 ```
@@ -361,15 +363,18 @@ jd_feat_lms_459_implement_sso
 We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
 
 **Format:**
+
 ```
 <prefix>: description of the change
 ```
 
 **Examples:**
+
 ```
 feat: implement SSO authentication
 fix: resolve token expiration issue
 ```
+
 ---
 
 #### 📦 Pull Requests
@@ -377,6 +382,7 @@ fix: resolve token expiration issue
 Pull Requests should:
 
 - Use conventional title format:
+
 ```
 feat(LMS-459): Implement SSO authentication
 fix(LMS-482): Resolve token expiration issue

@@ -62,7 +62,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
       </Button>
       <Button variant="outline">
         <Link to={`/profile/${course?.authorId}`}>
-          <span>{t("studentCourseView.sideSection.button.goToTeacherPage")}</span>
+          <span>{t("studentCourseView.sideSection.button.goToContentCreatorPage")}</span>
         </Link>
       </Button>
     </section>

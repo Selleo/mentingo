@@ -107,7 +107,7 @@ export class UserService {
       .where(eq(users.id, userId));
 
     // This condition appears redundant, as it sets the public contact email to the user's private email. Would it not be preferable to leave it null and allow the user to provide this information themselves? It seems this was originally implemented to ensure userBio is defined, but it may no longer be necessary.
-    if (!userBio && (USER_ROLES.TEACHER === userRole || USER_ROLES.ADMIN === userRole)) {
+    if (!userBio && (USER_ROLES.CONTENT_CREATOR === userRole || USER_ROLES.ADMIN === userRole)) {
       // TODO: quick
       // throw new NotFoundException("User details not found");
       const [user] = await this.db
@@ -277,7 +277,7 @@ export class UserService {
         from: process.env.SES_EMAIL || "",
       });
 
-      if (USER_ROLES.TEACHER === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
+      if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });

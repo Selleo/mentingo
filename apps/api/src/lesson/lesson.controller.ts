@@ -59,7 +59,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -78,7 +78,7 @@ export class LessonController {
   }
 
   @Post("beta-create-lesson/quiz")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -99,7 +99,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/quiz")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -125,7 +125,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -149,7 +149,7 @@ export class LessonController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -227,7 +227,7 @@ export class LessonController {
   //   }
 
   @Patch("update-lesson-display-order")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {

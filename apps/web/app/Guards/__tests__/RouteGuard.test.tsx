@@ -18,7 +18,7 @@ describe("RouteGuard", () => {
     vi.mocked(useUserRole).mockReturnValue({
       role: "admin",
       isAdmin: true,
-      isTeacher: false,
+      isContentCreator: false,
       isAdminLike: true,
       isStudent: false,
     });
@@ -48,7 +48,7 @@ describe("RouteGuard", () => {
     vi.mocked(useUserRole).mockReturnValue({
       role: "student",
       isAdmin: false,
-      isTeacher: false,
+      isContentCreator: false,
       isAdminLike: false,
       isStudent: false,
     });

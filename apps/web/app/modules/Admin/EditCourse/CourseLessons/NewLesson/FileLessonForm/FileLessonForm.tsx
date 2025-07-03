@@ -157,7 +157,9 @@ const FileLessonForm = ({
             render={() => (
               // TODO: add translation keys
               <FormItem>
-                <Label className="body-base-md text-neutral-950">Source Type</Label>
+                <Label className="body-base-md text-neutral-950">
+                  {t("adminCourseView.curriculum.lesson.field.sourceType")}
+                </Label>
                 <Select
                   value={isExternalUrl ? "external" : "upload"}
                   onValueChange={(value: SourceType) => handleSourceTypeChange(value)}
@@ -166,8 +168,12 @@ const FileLessonForm = ({
                     <SelectValue placeholder="Select source type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="upload">Upload File</SelectItem>
-                    <SelectItem value="external">External (URL)</SelectItem>
+                    <SelectItem value="upload">
+                      {t("adminCourseView.settings.selectButton.uploadFile")}
+                    </SelectItem>
+                    <SelectItem value="external">
+                      {t("adminCourseView.settings.selectButton.External")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -177,8 +183,8 @@ const FileLessonForm = ({
             <FormTextField
               control={form.control}
               name="fileS3Key"
-              label="External URL"
-              placeholder="Enter URL..."
+              label={t("adminCourseView.settings.selectButton.External")}
+              placeholder={t("adminCourseView.curriculum.lesson.placeholder.enterURL")}
               required
             />
           ) : (
@@ -186,8 +192,8 @@ const FileLessonForm = ({
               <Label htmlFor="file" className="body-base-md text-neutral-950">
                 <span className="text-error-600">*</span>{" "}
                 {contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM
-                  ? "Upload video"
-                  : "Upload presentation"}
+                  ? t("adminCourseView.curriculum.lesson.field.video")
+                  : t("adminCourseView.curriculum.lesson.field.presentation")}
               </Label>
               <FormControl>
                 <FileUploadInput
@@ -201,7 +207,7 @@ const FileLessonForm = ({
             </FormItem>
           )}
           <FormTextareaField
-            label="Description"
+            label={t("adminCourseView.settings.field.description")}
             name="description"
             control={form.control}
             placeholder={t("adminCourseView.curriculum.lesson.placeholder.fileDescription", {
