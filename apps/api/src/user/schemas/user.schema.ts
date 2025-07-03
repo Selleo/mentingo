@@ -11,7 +11,7 @@ export const userDetailsSchema = Type.Object({
   contactEmail: Type.Union([Type.String(), Type.Null()]),
   contactPhone: Type.Union([Type.String(), Type.Null()]),
   jobTitle: Type.Union([Type.String(), Type.Null()]),
-  role: Type.Union([Type.String(), Type.Null()]),
+  role: Type.String(),
 });
 
 export type UserDetails = Static<typeof userDetailsSchema>;
