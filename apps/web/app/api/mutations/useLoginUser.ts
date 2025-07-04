@@ -6,6 +6,8 @@ import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
+import { currentUserQueryOptions } from "../queries/useCurrentUser";
+import { queryClient } from "../queryClient";
 
 import type { LoginBody } from "../generated-api";
 
@@ -27,6 +29,8 @@ export function useLoginUser() {
     onSuccess: ({ data }) => {
       setLoggedIn(true);
       setCurrentUser(data);
+      queryClient.setQueryData(currentUserQueryOptions.queryKey, { data });
+      queryClient.invalidateQueries(currentUserQueryOptions);
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

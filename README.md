@@ -161,11 +161,15 @@ pnpm db:seed
 
 ### Default User Accounts
 
-After running the database seeding, the following default accounts are available for testing:
+After running the database seeding **AFTER** renaming the `teacher` role to `content creator`, the following default accounts are available:
 
-| Role    | Email            | Password |
-| ------- | ---------------- | -------- |
-| Student | user@example.com | password |
+| Role            | Email                       | Password |
+| --------------- | --------------------------- | -------- |
+| Student         | student@example.com         | password |
+| Student         | student2@example.com        | password |
+| Content Creator | contentcreator@example.com  | password |
+| Content Creator | contentcreator2@example.com | password |
+| Admin           | admin@example.com           | password |
 
 > [!NOTE]
 > These accounts are created during the seeding process and are intended for development and testing purposes only.
