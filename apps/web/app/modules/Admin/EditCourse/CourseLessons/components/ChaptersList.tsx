@@ -42,6 +42,8 @@ interface ChapterCardProps {
   selectedChapter: Chapter | null;
   selectedLesson: Lesson | null;
   dragTrigger: React.ReactNode;
+  openItem: string | undefined;
+  setOpenItem: (value: string | undefined) => void;
 }
 
 const ChapterCard = ({
@@ -53,6 +55,8 @@ const ChapterCard = ({
   selectedChapter,
   selectedLesson,
   dragTrigger,
+  openItem,
+  setOpenItem,
 }: ChapterCardProps) => {
   const { mutateAsync: updateFreemiumStatus } = useUpdateLessonFreemiumStatus();
   const { id: courseId } = useParams();
@@ -87,6 +91,7 @@ const ChapterCard = ({
       openLeaveModal();
       return;
     }
+
     setContentTypeToDisplay(ContentTypes.CHAPTER_FORM);
     setSelectedChapter(chapter);
     setSelectedLesson(null);
@@ -127,6 +132,9 @@ const ChapterCard = ({
     async (event: React.MouseEvent) => {
       event.stopPropagation();
       event.preventDefault();
+
+      const currentOpenState = openItem;
+
       try {
         await updateFreemiumStatus({
           chapterId: chapter.id,
@@ -136,9 +144,12 @@ const ChapterCard = ({
         console.error("Failed to update chapter premium status:", error);
       } finally {
         await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+        setTimeout(() => {
+          setOpenItem(currentOpenState);
+        }, 0);
       }
     },
-    [chapter, updateFreemiumStatus, courseId],
+    [chapter, updateFreemiumStatus, courseId, openItem, setOpenItem],
   );
 
   const sortableLessons: Sortable<Lesson>[] = useMemo(
@@ -336,6 +347,8 @@ const ChaptersList = ({
               setSelectedLesson={setSelectedLesson}
               selectedLesson={selectedLesson}
               selectedChapter={selectedChapter}
+              setOpenItem={setOpenItem}
+              openItem={openItem}
               dragTrigger={
                 <SortableList.DragHandle>
                   <Icon name="DragAndDropIcon" className="cursor-move" />
