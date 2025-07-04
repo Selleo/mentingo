@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
-import { usersQueryOptions } from "../../queries/useUsers";
 import { queryClient } from "../../queryClient";
 
 import type { UpdateUserBody } from "../../generated-api";
@@ -26,10 +25,11 @@ export function useAdminUpdateUser() {
         options.data,
       );
 
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(usersQueryOptions());
       toast({ description: t("changeUserInformationView.toast.userUpdatedSuccessfully") });
     },
     onError: (error) => {

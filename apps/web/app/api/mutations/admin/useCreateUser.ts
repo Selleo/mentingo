@@ -3,7 +3,6 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
-import { currentUserQueryOptions } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -21,10 +20,11 @@ export function useCreateUser() {
     mutationFn: async (options: CreateUserOptions) => {
       const response = await ApiClient.api.userControllerCreateUser(options.data);
 
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(currentUserQueryOptions);
       toast({ description: t("adminUserView.toast.userCreatedSuccessfully") });
     },
     onError: (error) => {
