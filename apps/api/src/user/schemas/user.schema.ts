@@ -1,6 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 
 import { commonUserSchema } from "src/common/schemas/common-user.schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 export const allUsersSchema = Type.Array(commonUserSchema);
 export const userDetailsSchema = Type.Object({
@@ -11,7 +12,7 @@ export const userDetailsSchema = Type.Object({
   contactEmail: Type.Union([Type.String(), Type.Null()]),
   contactPhone: Type.Union([Type.String(), Type.Null()]),
   jobTitle: Type.Union([Type.String(), Type.Null()]),
-  role: Type.String(),
+  role: Type.Enum(USER_ROLES),
 });
 
 export type UserDetails = Static<typeof userDetailsSchema>;
