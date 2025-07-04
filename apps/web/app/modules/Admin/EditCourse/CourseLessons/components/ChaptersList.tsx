@@ -204,7 +204,7 @@ const ChapterCard = ({
                 >
                   <Switch.Thumb
                     className={cn(
-                      "block h-4 w-4 translate-x-1 transform rounded-full bg-white transition-transform",
+                      "block size-4 translate-x-1 transform rounded-full bg-white transition-transform",
                       chapter.isFree ? "translate-x-6" : "",
                     )}
                   />

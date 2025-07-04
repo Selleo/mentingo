@@ -99,7 +99,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
         if (filter?.type === "text") {
           return (
             <div key={filter?.name} className="relative max-w-2xl flex-grow">
-              <Search className="absolute left-2 top-1/2 h-5 w-5 -translate-y-1/2 transform text-neutral-800" />
+              <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform text-neutral-800" />
               <Input
                 ref={inputRef}
                 type="text"

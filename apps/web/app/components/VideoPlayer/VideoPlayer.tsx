@@ -98,7 +98,7 @@ export const VideoPlayer = ({ url, onVideoEnded }: VideoPlayerProps) => {
           className="relative rounded-full p-4 transition-transform duration-200 hover:scale-110"
         >
           <div className="absolute inset-0 rounded-full bg-white opacity-32" />
-          <SkipBack className="relative z-10 h-8 w-8 text-white" />
+          <SkipBack className="relative z-10 size-8 text-white" />
         </button>
 
         <button
@@ -107,9 +107,9 @@ export const VideoPlayer = ({ url, onVideoEnded }: VideoPlayerProps) => {
         >
           <div className="absolute inset-0 rounded-full bg-white opacity-32" />
           {isPlaying ? (
-            <Pause className="relative z-10 h-8 w-8 text-white" />
+            <Pause className="relative z-10 size-8 text-white" />
           ) : (
-            <Play className="relative z-10 h-8 w-8 text-white" />
+            <Play className="relative z-10 size-8 text-white" />
           )}
         </button>
 
@@ -118,7 +118,7 @@ export const VideoPlayer = ({ url, onVideoEnded }: VideoPlayerProps) => {
           className="relative rounded-full p-4 transition-transform duration-200 hover:scale-110"
         >
           <div className="absolute inset-0 rounded-full bg-white opacity-32" />
-          <SkipForward className="relative z-10 h-8 w-8 text-white" />
+          <SkipForward className="relative z-10 size-8 text-white" />
         </button>
       </div>
     </div>

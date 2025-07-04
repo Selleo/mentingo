@@ -19,7 +19,7 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
   return (
     <menu className="grid w-full grid-cols-2 gap-2 md:grid-cols-6 md:gap-4 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
       <li className="col-span-2 md:col-span-6 2xl:hidden">
-        <Separator className="bg-primary-200 2xl:h-[1px] 3xl:my-2" />
+        <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
       </li>
       <li className="col-span-2 md:col-span-3">
         <Tooltip>
@@ -47,7 +47,7 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
         </Tooltip>
       </li>
       <li className="hidden 2xl:block">
-        <Separator className="bg-primary-200 2xl:h-[1px]" />
+        <Separator className="bg-primary-200 2xl:h-px" />
       </li>
       <li className="col-span-2 md:col-span-3">
         <Tooltip>

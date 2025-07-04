@@ -46,7 +46,7 @@ const CoursePricing = ({ courseId, priceInCents, currency }: CoursePricingProps)
                   name="isFree"
                   checked={isFree === true}
                   onChange={() => setValue("isFree", true)}
-                  className="h-4 w-4 cursor-pointer p-1"
+                  className="size-4 cursor-pointer p-1"
                   id="isFree"
                 />
               </div>
@@ -80,7 +80,7 @@ const CoursePricing = ({ courseId, priceInCents, currency }: CoursePricingProps)
                   name="isPaid"
                   checked={isFree === false}
                   onChange={() => setValue("isFree", false)}
-                  className="h-4 w-4 cursor-pointer p-1 pt-4"
+                  className="size-4 cursor-pointer p-1 pt-4"
                   id="isPaid"
                 />
               </div>

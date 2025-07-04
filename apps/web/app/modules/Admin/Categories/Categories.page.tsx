@@ -253,7 +253,7 @@ const Categories = () => {
                 className="flex items-center gap-x-2"
                 disabled={isEmpty(selectedCategories)}
               >
-                <Trash className="h-3 w-3" />
+                <Trash className="size-3" />
                 <span className="text-xs">{t("adminCategoriesView.button.deleteSelected")}</span>
               </Button>
             </DialogTrigger>

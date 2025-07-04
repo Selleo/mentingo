@@ -20,7 +20,7 @@ export function Toaster() {
           <Toast key={id} {...props}>
             <div className="flex items-center gap-1">
               {props.variant === "default" && (
-                <Icon name="InputRoundedMarkerSuccess" className="mr-2 h-4 w-4 text-green-500" />
+                <Icon name="InputRoundedMarkerSuccess" className="mr-2 size-4 text-green-500" />
               )}
               <div className="flex flex-col">
                 {title && <ToastTitle>{title}</ToastTitle>}

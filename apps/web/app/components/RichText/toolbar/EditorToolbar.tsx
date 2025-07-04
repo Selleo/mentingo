@@ -42,7 +42,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 className={`bg-transparent text-black ${editor.isActive("bold") ? "bg-blue-100" : "hover:bg-blue-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleBold().run())}
               >
-                <Bold className="h-4 w-4" />
+                <Bold className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Bold: Makes selected text bold</TooltipContent>
@@ -55,7 +55,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 className={`bg-transparent text-black ${editor.isActive("italic") ? "bg-blue-100" : "hover:bg-blue-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleItalic().run())}
               >
-                <Italic className="h-4 w-4" />
+                <Italic className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Italic: Italicizes the selected text</TooltipContent>
@@ -68,7 +68,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 className={`bg-transparent text-black ${editor.isActive("strike") ? "bg-blue-100" : "hover:bg-blue-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleStrike().run())}
               >
-                <Strikethrough className="h-4 w-4" />
+                <Strikethrough className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Strikethrough: Adds a line through the text</TooltipContent>
@@ -81,7 +81,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 className={`bg-transparent text-black ${editor.isActive("bulletList") ? "bg-blue-100" : "hover:bg-blue-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleBulletList().run())}
               >
-                <List className="h-4 w-4" />
+                <List className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Bullet List: Starts a bulleted list</TooltipContent>
@@ -94,7 +94,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 className={`bg-transparent text-black ${editor.isActive("orderedList") ? "bg-blue-100" : "hover:bg-blue-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleOrderedList().run())}
               >
-                <ListOrdered className="h-4 w-4" />
+                <ListOrdered className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Ordered List: Starts a numbered list</TooltipContent>
@@ -107,7 +107,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 className={`bg-transparent text-black ${editor.isActive("codeBlock") ? "bg-blue-100" : "hover:bg-blue-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleCodeBlock().run())}
               >
-                <Code className="h-4 w-4" />
+                <Code className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Code Block: Formats text as code</TooltipContent>
@@ -120,7 +120,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 className={`bg-transparent text-black ${editor.isActive("blockquote") ? "bg-blue-100" : "hover:bg-blue-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleBlockquote().run())}
               >
-                <Quote className="h-4 w-4" />
+                <Quote className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Quote: Formats text as a blockquote</TooltipContent>
@@ -132,7 +132,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 onClick={handleToggle(() => editor.chain().focus().setHorizontalRule().run())}
                 className={`bg-transparent text-black hover:bg-blue-100`}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Horizontal Rule: Inserts a horizontal line</TooltipContent>
@@ -148,7 +148,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
                 })}
                 onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
               >
-                <CheckSquare className="h-4 w-4" />
+                <CheckSquare className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Checkbox: Adds a checklist</TooltipContent>
@@ -165,7 +165,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             onClick={handleToggle(() => editor.chain().focus().undo().run())}
             className={`bg-transparent text-black ${editor.can().chain().focus().undo().run() ? "hover:bg-blue-100" : ""}`}
           >
-            <Undo className="h-4 w-4" />
+            <Undo className="size-4" />
           </Button>
 
           <Button
@@ -173,7 +173,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             onClick={handleToggle(() => editor.chain().focus().redo().run())}
             className={`bg-transparent text-black ${editor.can().chain().focus().redo().run() ? "hover:bg-blue-100" : ""}`}
           >
-            <Redo className="h-4 w-4" />
+            <Redo className="size-4" />
           </Button>
         </ToggleGroup>
       </TooltipProvider>

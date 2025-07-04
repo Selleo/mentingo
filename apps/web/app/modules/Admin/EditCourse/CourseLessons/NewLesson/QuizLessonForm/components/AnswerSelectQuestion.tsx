@@ -138,7 +138,7 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                                 name={`questions.${questionIndex}.options.${index}.isCorrect`}
                                 checked={item.isCorrect === true}
                                 onChange={() => handleOptionChange(index, "isCorrect", true)}
-                                className="h-4 w-4 cursor-pointer"
+                                className="size-4 cursor-pointer"
                               />
                             ) : (
                               <div className="cursor-pointer">
@@ -167,7 +167,7 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                                   <div className="group">
                                     <Icon
                                       name="TrashIcon"
-                                      className="ml-3 h-7 w-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                      className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
                                       onClick={() => handleRemoveOption(index)}
                                     />
                                   </div>
