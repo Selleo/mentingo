@@ -2,6 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
+import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -23,6 +25,8 @@ export function useUpdateCourse() {
         options.courseId,
         options.data,
       );
+
+      await queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
 
       return response.data;
     },

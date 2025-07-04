@@ -176,7 +176,7 @@ const Users = () => {
   const handleDeleteUsers = () => {
     deleteUsers({ data: { userIds: selectedUsers } }).then(() => {
       table.resetRowSelection();
-      queryClient.invalidateQueries(usersQueryOptions());
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     });
   };
 
