@@ -130,7 +130,8 @@
     "header": "Most Popular",
     "subHeader": "Your top 5 Courses",
     "other": {
-      "noData": "No data available"
+      "noData": "No data available",
+      "students": "Students"
     }
   },
   "enrollmentChartView": {
