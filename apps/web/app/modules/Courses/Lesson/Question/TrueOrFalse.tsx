@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
@@ -15,7 +16,7 @@ type TrueOrFalseProps = {
 
 export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
   const { register } = useFormContext<QuizForm>();
-
+  const { t } = useTranslation();
   return (
     <QuestionCard
       title={question.title ?? ""}
@@ -50,8 +51,8 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   value="true"
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
-                />{" "}
-                True
+                />
+                {t("studentLessonView.other.true")}
               </label>
               <label className="flex items-center gap-x-1">
                 <Input
@@ -61,8 +62,8 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
                   type="radio"
                   value="false"
-                />{" "}
-                False
+                />
+                {t("studentLessonView.other.false")}
               </label>
             </div>
           </div>
