@@ -6,7 +6,6 @@ import { CopyUrlButton } from "~/components/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
-import { cn } from "~/lib/utils";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -47,8 +46,8 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
         />
       )}
       <div className="flex flex-col gap-y-2">
-        <CopyUrlButton className={cn("gap-x-2")} variant="outline">
-          <Icon name="Share" className={cn("h-auto w-6 text-primary-800")} />
+        <CopyUrlButton className={"gap-x-2"} variant="outline">
+          <Icon name="Share" className={"h-auto w-6 text-primary-800"} />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
