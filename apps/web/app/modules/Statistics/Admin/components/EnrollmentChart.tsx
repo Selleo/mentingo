@@ -62,7 +62,7 @@ export const EnrollmentChart = ({ data, isLoading = false }: EnrollmentChartProp
           <div className="flex w-full flex-col gap-y-1">
             <div className="relative flex w-full flex-col gap-y-[23px]">
               {Array.from({ length: 10 }).map((_, index) => (
-                <Skeleton key={index} className="h-[1px] w-full" />
+                <Skeleton key={index} className="h-px w-full" />
               ))}
               <div className="absolute bottom-0 left-2 flex w-full justify-between">
                 {Array.from({ length: 12 }).map((_, index) => (

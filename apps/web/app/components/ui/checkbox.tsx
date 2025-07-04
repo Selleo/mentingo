@@ -20,7 +20,7 @@ const Checkbox = React.forwardRef<
   >
     <CheckboxPrimitive.Indicator className={cn("flex items-center justify-center text-current")}>
       {isSquareCheck ? (
-        <div className="h-[9px] w-[9px] border-[1px] border-primary-700 bg-primary-700" />
+        <div className="border-px h-[9px] w-[9px] border-primary-700 bg-primary-700" />
       ) : (
         <Check className="size-4" />
       )}

@@ -83,7 +83,7 @@ export const FiveMostPopularCoursesChart = ({ data, isLoading }: MostPopularCour
             <Skeleton className="h-6 w-[34%] rounded-lg bg-neutral-100" />
             <div className="absolute left-0 top-0 flex h-full w-full justify-between">
               {Array.from({ length: 21 }).map((_, index) => (
-                <Skeleton key={index} className="h-full w-[1px]" />
+                <Skeleton key={index} className="h-full w-px" />
               ))}
             </div>
           </div>
@@ -120,7 +120,7 @@ export const FiveMostPopularCoursesChart = ({ data, isLoading }: MostPopularCour
         <div className="md:flex md:size-full md:gap-x-3">
           <div className="relative flex h-full min-h-[200px] w-full items-center justify-between gap-y-3 py-2 md:min-h-[316px] md:gap-y-10">
             {Array.from({ length: 21 }).map((_, index) => (
-              <div key={index} className="h-full w-[1px] bg-neutral-100" />
+              <div key={index} className="h-full w-px bg-neutral-100" />
             ))}
             <div className="h5 md:h3 absolute left-0 top-0 z-0 flex size-full items-center justify-center text-primary-950">
               {t("mostPopularCoursesView.other.noData")}
