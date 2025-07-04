@@ -308,7 +308,7 @@ const Courses = () => {
                 className="flex items-center gap-x-2"
                 disabled={isEmpty(selectedCourses)}
               >
-                <Trash className="h-3 w-3" />
+                <Trash className="size-3" />
                 <span className="text-xs">{t("adminCoursesView.button.deleteSelected")}</span>
               </Button>
             </DialogTrigger>

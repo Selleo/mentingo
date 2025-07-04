@@ -15,12 +15,12 @@ const SortButton = <T,>({ column, children }: SortButtonProps<T>) => {
     const sortDirection = column.getIsSorted();
 
     if (sortDirection === "asc") {
-      return <ArrowUp className="ml-2 h-4 w-4" />;
+      return <ArrowUp className="ml-2 size-4" />;
     }
     if (sortDirection === "desc") {
-      return <ArrowDown className="ml-2 h-4 w-4" />;
+      return <ArrowDown className="ml-2 size-4" />;
     }
-    return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    return <ArrowUpDown className="ml-2 size-4" />;
   };
 
   return (

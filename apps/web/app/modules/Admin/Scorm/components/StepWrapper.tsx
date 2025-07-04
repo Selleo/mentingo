@@ -25,7 +25,7 @@ export function StepWrapper({ title, description, children }: PropsWithChildren<
     <div className="space-y-6">
       <div>
         <Button size="sm" variant="outline" onClick={() => navigate(-1)}>
-          <Icon name="ArrowRight" className="mr-2 h-4 w-4 rotate-180" />
+          <Icon name="ArrowRight" className="mr-2 size-4 rotate-180" />
           <span>{t("adminScorm.button.back")}</span>
         </Button>
       </div>

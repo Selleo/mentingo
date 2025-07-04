@@ -212,7 +212,7 @@ const Users = () => {
             className="flex items-center gap-x-2"
             disabled={isEmpty(selectedUsers)}
           >
-            <Trash className="h-3 w-3" />
+            <Trash className="size-3" />
             <span className="text-xs">{t("adminUsersView.button.deleteSelected")}</span>
           </Button>
         </div>

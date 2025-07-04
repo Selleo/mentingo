@@ -32,7 +32,7 @@ export default function ProfilePage() {
       <div className="flex flex-col gap-6 xl:flex-row">
         <section className="flex flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow xl:w-full xl:max-w-[480px]">
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
-            <Avatar className="h-20 w-20">
+            <Avatar className="size-20">
               <Gravatar email={userDetails?.contactEmail || ""} />
             </Avatar>
             <div className="flex flex-col">

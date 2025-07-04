@@ -76,7 +76,7 @@ const QuestionTitle = ({
             <div className="group">
               <Icon
                 name={getIconForQuestionType(questionType)}
-                className="h-5 w-5 text-primary-700"
+                className="size-5 text-primary-700"
               />
             </div>
           </TooltipTrigger>
@@ -104,7 +104,7 @@ const QuestionTitle = ({
               <div className="group">
                 <Icon
                   name="TrashIcon"
-                  className="ml-3 h-7 w-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                  className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
                   onClick={handleRemoveQuestion}
                 />
               </div>

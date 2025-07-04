@@ -141,7 +141,7 @@ const MatchWordsQuestion = ({ form, questionIndex }: MatchWordsQuestionProps) =>
                                 <div className="group">
                                   <Icon
                                     name="TrashIcon"
-                                    className="ml-3 h-7 w-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                    className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
                                     onClick={() => handleRemoveOption(index)}
                                   />
                                 </div>

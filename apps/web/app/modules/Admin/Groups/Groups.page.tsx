@@ -105,7 +105,7 @@ const Groups = (): ReactElement => {
                 className="flex items-center gap-x-2"
                 disabled={isEmpty(selectedRows)}
               >
-                <Trash className="h-3 w-3" />
+                <Trash className="size-3" />
                 <span className="text-xs">{t("adminGroupsView.buttons.deleteSelected")}</span>
               </Button>
             </DialogTrigger>

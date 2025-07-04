@@ -33,7 +33,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
         {t("studentCourseView.sideSection.other.author")}
       </h4>
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
-        <Avatar className="h-20 w-20">
+        <Avatar className="size-20">
           <Gravatar email={userDetails?.contactEmail || ""} />
         </Avatar>
         <div className="flex flex-col">

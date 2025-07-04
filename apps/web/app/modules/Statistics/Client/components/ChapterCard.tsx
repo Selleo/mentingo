@@ -86,7 +86,7 @@ export const ChapterCard = (
                 {startCase(chapterDetails.chapterProgress)}
               </CardBadge>
             )}
-            <span className="absolute bottom-0 right-0 flex h-8 w-8 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-white text-primary-700">
+            <span className="absolute bottom-0 right-0 flex size-8 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-white text-primary-700">
               {chapterDetails.chapterDisplayOrder.toString().padStart(2, "0")}
             </span>
           </div>
@@ -112,7 +112,7 @@ export const ChapterCard = (
                 buttonColorClass,
               )}
             >
-              {buttonText} <Icon name="CarretRight" className="ml-1 h-4 w-4" />
+              {buttonText} <Icon name="CarretRight" className="ml-1 size-4" />
             </button>
           </div>
         </Link>

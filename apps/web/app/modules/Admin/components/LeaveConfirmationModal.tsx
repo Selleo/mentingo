@@ -31,7 +31,7 @@ const LeaveConfirmationModal = ({
       <DialogOverlay className="bg-primary-400 opacity-65" />
       <DialogContent className="max-w-[40%] p-12">
         <div className="flex items-start gap-4">
-          <Icon name="Warning" className="mt-0.5 h-5 w-5 text-yellow-600" />
+          <Icon name="Warning" className="mt-0.5 size-5 text-yellow-600" />
           <div>
             <DialogTitle className="text-xl font-semibold text-neutral-900">
               {t("adminCourseView.curriculum.lesson.other.leaveContentHeader")}

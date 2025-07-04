@@ -89,7 +89,7 @@ export const FiveMostPopularCoursesChart = ({ data, isLoading }: MostPopularCour
           </div>
         </div>
         <div className="flex justify-between pt-2 md:pl-[172px]">
-          <Skeleton className="h-2 w-2 rounded-lg bg-neutral-100" />
+          <Skeleton className="size-2 rounded-lg bg-neutral-100" />
           <Skeleton className="h-2 w-6 rounded-lg bg-neutral-100" />
           <Skeleton className="h-2 w-6 rounded-lg bg-neutral-100" />
           <Skeleton className="h-2 w-6 rounded-lg bg-neutral-100" />

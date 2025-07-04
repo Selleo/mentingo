@@ -70,13 +70,13 @@ function Calendar({
         button_next: cn(
           buttonVariants({
             variant: "outline",
-            className: "absolute right-0 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+            className: "absolute right-0 size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
           }),
         ),
         button_previous: cn(
           buttonVariants({
             variant: "outline",
-            className: "absolute left-0 h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+            className: "absolute left-0 size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
           }),
         ),
         nav: "flex items-start justify-between absolute w-full",

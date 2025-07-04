@@ -24,7 +24,7 @@ export const Progress = ({ currentStep, steps }: ProgressProps) => {
           <div key={step.id} className={cn("flex items-center", { "flex-1": !isLastStep })}>
             <div
               className={cn(
-                "relative flex h-10 w-10 items-center justify-center rounded-full bg-primary-50 transition-all duration-300 ease-in-out",
+                "relative flex size-10 items-center justify-center rounded-full bg-primary-50 transition-all duration-300 ease-in-out",
                 {
                   "bg-secondary-50": state === "current",
                   "bg-success-50": state === "previous",
@@ -39,7 +39,7 @@ export const Progress = ({ currentStep, steps }: ProgressProps) => {
                   },
                 )}
               >
-                <Icon name="InProgress" className="h-6 w-6" />
+                <Icon name="InProgress" className="size-6" />
               </div>
 
               <div
@@ -50,7 +50,7 @@ export const Progress = ({ currentStep, steps }: ProgressProps) => {
                   },
                 )}
               >
-                <div className="h-6 w-6 rounded-full border-2 border-success-600 p-px text-success-600">
+                <div className="size-6 rounded-full border-2 border-success-600 p-px text-success-600">
                   <Icon name="Checkmark" />
                 </div>
               </div>

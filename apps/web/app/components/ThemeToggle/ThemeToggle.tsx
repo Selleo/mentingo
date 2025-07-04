@@ -21,7 +21,7 @@ export default function ThemeToggle({ className, variant = "ghost" }: ThemeToggl
 
   return (
     <Button variant={variant} className={className} onClick={toggleTheme}>
-      <ToggleIcon className="h-5 w-5" />
+      <ToggleIcon className="size-5" />
     </Button>
   );
 }

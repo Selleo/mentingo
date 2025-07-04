@@ -24,7 +24,7 @@ const CourseCardButton = ({
     if (enrolled) {
       return (
         <span className="flex items-center gap-x-2">
-          <Icon name="ArrowRight" className="h-4 w-4 text-white" />{" "}
+          <Icon name="ArrowRight" className="size-4 text-white" />{" "}
           {t("studentCoursesView.button.continue")}
         </span>
       );

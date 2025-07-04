@@ -90,7 +90,7 @@ const CourseCard = ({
           </div>
           {authorEmail && (
             <div className="mb-2 mt-1 flex items-center gap-x-1.5">
-              <Avatar className="h-4 w-4">
+              <Avatar className="size-4">
                 <Gravatar email={authorEmail} />
               </Avatar>
               <span className="text-neutral-950">{author}</span>

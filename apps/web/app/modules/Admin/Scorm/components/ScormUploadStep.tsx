@@ -66,7 +66,7 @@ export function ScormUploadStep({ handleNext, handleBack: _ }: StepComponentProp
       )}
       <div className="flex gap-3">
         <Button variant="outline" onClick={() => navigate(-1)}>
-          <Icon name="ArrowRight" className="mr-2 h-4 w-4 rotate-180" />
+          <Icon name="ArrowRight" className="mr-2 size-4 rotate-180" />
           <span>{t("common.button.cancel")}</span>
         </Button>
         <Button onClick={handleNext}>{t("adminScorm.other.setUpCourse")}</Button>

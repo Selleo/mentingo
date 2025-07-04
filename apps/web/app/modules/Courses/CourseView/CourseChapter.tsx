@@ -43,7 +43,7 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
           <div className="flex w-full flex-col">
             <AccordionTrigger className="border text-start data-[state=closed]:rounded-lg data-[state=open]:rounded-t-lg data-[state=open]:border-primary-500 data-[state=open]:bg-primary-50 [&[data-state=open]>div>div>svg]:rotate-180 [&[data-state=open]>div>div>svg]:duration-200 [&[data-state=open]>div>div>svg]:ease-out">
               <div className="flex w-full items-center gap-x-1 px-2 py-4 md:gap-x-4 md:p-4">
-                <div className="grid h-8 w-8 place-items-center">
+                <div className="grid size-8 place-items-center">
                   <Icon name="CarretDownLarge" className="h-auto w-6 text-primary-700" />
                 </div>
                 <div className="flex w-full flex-col">
