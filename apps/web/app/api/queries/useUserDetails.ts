@@ -12,6 +12,7 @@ export const userDetails = (userId?: string) => {
       if (!userId) {
         throw new Error("userId is required");
       }
+
       const response = await ApiClient.api.userControllerGetUserDetails({ userId });
       return response.data;
     },
