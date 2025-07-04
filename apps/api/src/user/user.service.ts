@@ -100,7 +100,7 @@ export class UserService {
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
-        role: users.role,
+        role: sql<UserRole>`users.role`,
         id: users.id,
         description: userDetails.description,
         contactEmail: userDetails.contactEmail,

@@ -16,7 +16,7 @@ export const ContentCreatorCoursesOptions = (
 ) => {
   return {
     enabled: !!authorId && isContentCreator,
-    queryKey: ["contentCreator-courses", authorId],
+    queryKey: ["content-creator-courses", authorId],
     queryFn: async () => {
       if (!authorId) {
         throw new Error("Author ID is required");
