@@ -49,6 +49,7 @@ const Groups = (): ReactElement => {
   const { mutateAsync: deleteGroupsMutation } = useBulkDeleteGroups();
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),

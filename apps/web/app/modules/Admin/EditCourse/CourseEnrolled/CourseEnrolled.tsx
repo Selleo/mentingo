@@ -136,6 +136,7 @@ export const CourseEnrolled = (): ReactElement => {
   ];
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data: usersData,
     columns,
     getCoreRowModel: getCoreRowModel(),

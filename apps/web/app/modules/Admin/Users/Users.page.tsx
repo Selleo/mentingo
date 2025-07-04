@@ -159,6 +159,7 @@ const Users = () => {
   ];
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),

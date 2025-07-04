@@ -149,6 +149,7 @@ const Categories = () => {
   ];
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -162,7 +163,6 @@ const Categories = () => {
   });
 
   const selectedCategories = table.getSelectedRowModel().rows.map((row) => row.original.id);
-
   const handleDelete = () => {
     try {
       if (selectedCategories.length === 1) {
