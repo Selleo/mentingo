@@ -46,8 +46,8 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
         />
       )}
       <div className="flex flex-col gap-y-2">
-        <CopyUrlButton className={"gap-x-2"} variant="outline">
-          <Icon name="Share" className={"h-auto w-6 text-primary-800"} />
+        <CopyUrlButton className="gap-x-2" variant="outline">
+          <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
