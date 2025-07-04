@@ -14,7 +14,6 @@ export const userDetails = (userId?: string) => {
       }
 
       const response = await ApiClient.api.userControllerGetUserDetails({ userId });
-
       return response.data;
     },
     select: (data: GetUserDetailsResponse) => data.data,

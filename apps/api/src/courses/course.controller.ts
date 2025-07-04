@@ -251,7 +251,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const { id } = await this.courseService.createCourse(createCourseBody, currentUserId);
 
-    return new BaseResponse({ id, message: "Course created successfully" });
+    return new BaseResponse({ id, message: "Pomyślnie utworzono kurs" });
   }
 
   @Patch(":id")
@@ -272,7 +272,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.updateCourse(id, updateCourseBody, image, currentUserId);
 
-    return new BaseResponse({ message: "Course updated successfully" });
+    return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
   }
 
   @Post("enroll-course")
@@ -288,7 +288,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourse(id, currentUserId, testKey);
 
-    return new BaseResponse({ message: "Course enrolled successfully" });
+    return new BaseResponse({ message: "Pomyślnie zapisano na kurs" });
   }
 
   @Post("/:courseId/enroll-courses")
@@ -313,7 +313,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourses(courseId, body);
 
-    return new BaseResponse({ message: "Courses enrolled successfully" });
+    return new BaseResponse({ message: "Pomyślnie zapisano na kursy" });
   }
 
   @Delete("deleteCourse/:id")

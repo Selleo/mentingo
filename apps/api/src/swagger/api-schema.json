@@ -3179,16 +3179,10 @@
               "role": {
                 "anyOf": [
                   {
-                    "const": "admin",
                     "type": "string"
                   },
                   {
-                    "const": "student",
-                    "type": "string"
-                  },
-                  {
-                    "const": "content_creator",
-                    "type": "string"
+                    "type": "null"
                   }
                 ]
               }
