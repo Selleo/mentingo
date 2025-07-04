@@ -12,10 +12,7 @@ type ContentCreatorPageBreadcrumbsProps = {
   username: string;
 };
 
-export const ContentCreatorPageBreadcrumbs = ({
-  id,
-  username,
-}: ContentCreatorPageBreadcrumbsProps) => {
+export const ProfilePageBreadcrumbs = ({ id, username }: ContentCreatorPageBreadcrumbsProps) => {
   const { t } = useTranslation();
   return (
     <div className="mb-4 bg-primary-50">
@@ -27,7 +24,7 @@ export const ContentCreatorPageBreadcrumbs = ({
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem className="text-neutral-950">
-          <BreadcrumbLink href={`/content-creators/${id}`}>{username}</BreadcrumbLink>
+          <BreadcrumbLink href={`/profile/${id}`}>{username}</BreadcrumbLink>
         </BreadcrumbItem>
       </BreadcrumbList>
     </div>

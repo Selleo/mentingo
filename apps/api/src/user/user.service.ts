@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -90,48 +91,36 @@ export class UserService {
     return user;
   }
 
-  public async getUserDetails(userId: UUIDType, userRole: UserRole): Promise<UserDetails> {
+  public async getUserDetails(
+    userId: UUIDType,
+    currentUserId: UUIDType,
+    userRole: UserRole,
+  ): Promise<UserDetails> {
     const [userBio]: UserDetails[] = await this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
-        id: userDetails.id,
+        role: sql<UserRole>`users.role`,
+        id: users.id,
         description: userDetails.description,
         contactEmail: userDetails.contactEmail,
         contactPhone: userDetails.contactPhoneNumber,
         jobTitle: userDetails.jobTitle,
       })
-      .from(userDetails)
-      .leftJoin(users, eq(userDetails.userId, users.id))
-      .where(eq(userDetails.userId, userId));
+      .from(users)
+      .leftJoin(userDetails, eq(userDetails.userId, users.id))
+      .where(eq(users.id, userId));
 
-    if (!userBio && (USER_ROLES.CONTENT_CREATOR === userRole || USER_ROLES.ADMIN === userRole)) {
-      // TODO: quick
-      // throw new NotFoundException("User details not found");
-      const [user] = await this.db
-        .select({
-          id: users.id,
-          email: users.email,
-          firstName: users.firstName,
-          lastName: users.lastName,
-        })
-        .from(users)
-        .where(eq(users.id, userId));
+    const canView =
+      userId === currentUserId ||
+      USER_ROLES.ADMIN === userRole ||
+      USER_ROLES.CONTENT_CREATOR === userRole ||
+      USER_ROLES.ADMIN === userBio.role ||
+      USER_ROLES.CONTENT_CREATOR === userBio.role;
 
-      const [userBio] = await this.db
-        .insert(userDetails)
-        .values({ userId, contactEmail: user.email })
-        .returning({
-          id: userDetails.id,
-          description: userDetails.description,
-          contactEmail: userDetails.contactEmail,
-          contactPhone: userDetails.contactPhoneNumber,
-          jobTitle: userDetails.jobTitle,
-        });
-
-      return { firstName: user.firstName, lastName: user.lastName, ...userBio };
+    if (!canView) {
+      throw new ForbiddenException("Cannot access user details");
     }
-
     return userBio;
   }
 

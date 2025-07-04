@@ -13,10 +13,15 @@ type MoreCoursesByAuthorProps = {
 };
 
 export const MoreCoursesByAuthor = ({ courseId, contentCreatorId }: MoreCoursesByAuthorProps) => {
-  const { data: contentCreatorCourses, isLoading } = useContentCreatorCourses(contentCreatorId, {
-    scope: "available",
-    excludeCourseId: courseId,
-  });
+  const { data: contentCreatorCourses, isLoading } = useContentCreatorCourses(
+    contentCreatorId,
+    {
+      scope: "available",
+      excludeCourseId: courseId,
+    },
+    true,
+  );
+
   const { data: contentCreatorData } = useUserDetails(contentCreatorId);
   const { t } = useTranslation();
 

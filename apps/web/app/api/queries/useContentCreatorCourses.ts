@@ -9,13 +9,21 @@ type SearchParams = {
   excludeCourseId?: string;
 };
 
-export const contentCreatorCoursesOptions = (authorId?: string, searchParams?: SearchParams) => {
+export const ContentCreatorCoursesOptions = (
+  authorId?: string,
+  searchParams?: SearchParams,
+  isContentCreator?: boolean,
+) => {
   return {
-    enabled: !!authorId,
+    enabled: !!authorId && isContentCreator,
     queryKey: ["content-creator-courses", authorId],
     queryFn: async () => {
       if (!authorId) {
         throw new Error("Author ID is required");
+      }
+
+      if (!isContentCreator) {
+        throw new Error("Author must be a content creator");
       }
 
       const response = await ApiClient.api.courseControllerGetContentCreatorCourses({
@@ -30,6 +38,10 @@ export const contentCreatorCoursesOptions = (authorId?: string, searchParams?: S
   };
 };
 
-export function useContentCreatorCourses(authorId?: string, searchParams?: SearchParams) {
-  return useQuery(contentCreatorCoursesOptions(authorId, searchParams));
+export function useContentCreatorCourses(
+  authorId?: string,
+  searchParams?: SearchParams,
+  isContentCreator?: boolean,
+) {
+  return useQuery(ContentCreatorCoursesOptions(authorId, searchParams, isContentCreator));
 }

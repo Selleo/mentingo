@@ -59,7 +59,7 @@ export const getNavigationConfig = (
   },
   {
     label: t("navigationSideBar.profile"),
-    path: `content-creators/${userId}`,
+    path: `profile/${userId}`,
     iconName: "User",
   },
 ];
@@ -67,10 +67,10 @@ export const getNavigationConfig = (
 /**
  * Finds matching route access roles for a given path by checking different types of routes in order:
  * 1. Exact matches (e.g., "courses/new" matches "courses/new")
- * 2. Parameter routes (e.g., "content-creators/123" matches "content-creators/:id")
- * 3. Wildcard routes (e.g., "content-creators/123/settings" matches "content-creators/*")
+ * 2. Parameter routes (e.g., "profile/123" matches "profile/:id")
+ * 3. Wildcard routes (e.g., "profile/123/settings" matches "profile/*")
  *
- * @param path - The actual URL path to match (e.g., "content-creators/123")
+ * @param path - The actual URL path to match (e.g., "profile/123")
  * @returns UserRole[] | undefined - Array of user roles that can access this path, or undefined if no match
  *
  * @example
@@ -78,11 +78,11 @@ export const getNavigationConfig = (
  * findMatchingRoute("courses/new") // matches "courses/new" in config
  *
  * // Parameter match
- * findMatchingRoute("content-creators/123") // matches "content-creators/:id" in config
+ * findMatchingRoute("profile/123") // matches "profile/:id" in config
  * findMatchingRoute("course/456/lesson/789") // matches "course/:courseId/lesson/:lessonId"
  *
  * // Wildcard match
- * findMatchingRoute("content-creators/123/settings") // matches "content-creators/*"
+ * findMatchingRoute("profile/123/settings") // matches "profile/*"
  *
  * How matching works:
  * 1. First, tries to find an exact match in routeAccessConfig

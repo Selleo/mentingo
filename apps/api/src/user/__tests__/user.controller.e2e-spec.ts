@@ -177,4 +177,44 @@ describe("UsersController (e2e)", () => {
         .expect(403);
     });
   });
+  describe("GET /user/details?userId=:id", () => {
+    let cookies: string;
+
+    beforeAll(async () => {
+      const anotherUser = await authService.register({
+        email: "another4@example.com",
+        password: testPassword,
+        firstName: "Another",
+        lastName: "User",
+      });
+      const loginResponse = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: anotherUser.email,
+          password: testPassword,
+        })
+        .expect(201);
+
+      cookies = loginResponse.headers["set-cookie"];
+    });
+    it("should return user details", async () => {
+      await request(app.getHttpServer())
+        .get(`/api/user/details?userId=${testUser.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+    });
+
+    it("should return forbidden", async () => {
+      const anotherUser2 = await authService.register({
+        email: "another5@example.com",
+        password: testPassword,
+        firstName: "Another",
+        lastName: "User",
+      });
+      await request(app.getHttpServer())
+        .get(`/api/user/details?userId=${anotherUser2.id}`)
+        .set("Cookie", cookies)
+        .expect(403);
+    });
+  });
 });

@@ -153,6 +153,7 @@ export interface GetUserDetailsResponse {
     contactEmail: string | null;
     contactPhone: string | null;
     jobTitle: string | null;
+    role: string | null;
   };
 }
 
