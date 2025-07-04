@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCourse } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
+import { useUserRole } from "~/hooks/useUserRole";
 import { CourseChapter } from "~/modules/Courses/CourseView/CourseChapter";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
 import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
@@ -15,12 +16,17 @@ export default function CourseViewPage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
   const { data: course } = useCourse(id);
+  const { isStudent } = useUserRole();
 
   if (!course) return null;
 
   return (
     <PageWrapper className="max-w-full">
-      <CourseViewPageBreadcrumbs id={course.id ?? ""} title={course.title ?? ""} />
+      <CourseViewPageBreadcrumbs
+        id={course.id ?? ""}
+        title={course.title ?? ""}
+        isStudent={isStudent}
+      />
       <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
         <div className="flex flex-col gap-y-6 overflow-hidden">
           <CourseOverview course={course} />

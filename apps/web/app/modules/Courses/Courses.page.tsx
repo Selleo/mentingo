@@ -151,7 +151,7 @@ export default function CoursesPage() {
 
   return (
     <PageWrapper>
-      <CoursesPageBreadcrumbs />
+      <CoursesPageBreadcrumbs isStudent={isStudent} />
       <div className="flex h-auto flex-1 flex-col gap-y-12">
         {isStudent && <StudentsCurses />}
         <div className="flex flex-col">

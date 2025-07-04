@@ -10,9 +10,10 @@ import {
 type BreadcrumbsProps = {
   id: string;
   title: string;
+  isStudent: boolean;
 };
 
-export const CourseViewPageBreadcrumbs = ({ id, title }: BreadcrumbsProps) => {
+export const CourseViewPageBreadcrumbs = ({ id, title, isStudent }: BreadcrumbsProps) => {
   const { t } = useTranslation();
   return (
     <div className="mb-4 bg-primary-50">
@@ -23,7 +24,11 @@ export const CourseViewPageBreadcrumbs = ({ id, title }: BreadcrumbsProps) => {
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbLink href={`/courses`}>
-            {t("studentCourseView.breadcrumbs.availableCourses")}
+            {t(
+              isStudent
+                ? "studentCourseView.enrolledCourses.breadcrumbs.yourCourses"
+                : "studentCourseView.breadcrumbs.availableCourses",
+            )}
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

@@ -7,7 +7,11 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 
-export const CoursesPageBreadcrumbs = () => {
+type BreadcrumbsProps = {
+  isStudent?: boolean;
+};
+
+export const CoursesPageBreadcrumbs = ({ isStudent }: BreadcrumbsProps) => {
   const { t } = useTranslation();
   return (
     <div className="mb-4 bg-primary-50">
@@ -20,7 +24,11 @@ export const CoursesPageBreadcrumbs = () => {
         <BreadcrumbSeparator />
         <BreadcrumbItem className="text-neutral-950">
           <BreadcrumbLink href={`/courses`}>
-            {t("studentCoursesView.breadcrumbs.availableCourses")}
+            {t(
+              isStudent
+                ? "studentCoursesView.enrolledCourses.breadcrumbs.yourCourses"
+                : "studentCoursesView.breadcrumbs.availableCourses",
+            )}
           </BreadcrumbLink>
         </BreadcrumbItem>
       </BreadcrumbList>

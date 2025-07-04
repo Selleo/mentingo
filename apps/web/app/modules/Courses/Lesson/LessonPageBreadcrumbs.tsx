@@ -12,6 +12,7 @@ type BreadcrumbsProps = {
   lesson_id: string;
   currentCourse: string;
   currentChapter?: string;
+  isStudent: boolean;
 };
 
 export const LessonPageBreadcrumbs = ({
@@ -19,6 +20,7 @@ export const LessonPageBreadcrumbs = ({
   lesson_id,
   currentCourse,
   currentChapter,
+  isStudent,
 }: BreadcrumbsProps) => {
   const { t } = useTranslation();
   return (
@@ -30,7 +32,11 @@ export const LessonPageBreadcrumbs = ({
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbLink href={`/courses`}>
-            {t("studentLessonView.breadcrumbs.availableCourses")}
+            {t(
+              isStudent
+                ? "studentLessonView.enrolledCourses.breadcrumbs.yourCourses"
+                : "studentLessonView.breadcrumbs.availableCourses",
+            )}
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

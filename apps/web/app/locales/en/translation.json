@@ -798,7 +798,10 @@
     },
     "enrolledCourses": {
       "header": "Your Courses",
-      "subHeader": "Courses you are currently enrolled in"
+      "subHeader": "Courses you are currently enrolled in",
+      "breadcrumbs": {
+        "yourCourses": "Your courses"
+      }
     },
     "availableCourses": {
       "header": "Available Courses",
@@ -867,6 +870,11 @@
         "courseProgress": "Course progress:"
       }
     },
+    "enrolledCourses": {
+      "breadcrumbs": {
+        "yourCourses": "Your courses"
+      }
+    },
     "validation": {
       "answerCannotBeEmpty": "Answer cannot be empty.",
       "atLeastOneOptionMustBeSelected": "At least one option must be selected for question {{questionId}}.",
@@ -920,6 +928,11 @@
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
         "goToTeacherPage": "Go to teacher page"
+      }
+    },
+    "enrolledCourses": {
+      "breadcrumbs": {
+        "yourCourses": "Your courses"
       }
     },
     "breadcrumbs": {

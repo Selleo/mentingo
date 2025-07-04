@@ -798,7 +798,10 @@
     },
     "enrolledCourses": {
       "header": "Twoje kursy",
-      "subHeader": "Kursy, w których jesteś obecnie zapisany"
+      "subHeader": "Kursy, w których jesteś obecnie zapisany",
+      "breadcrumbs": {
+        "yourCourses": "Twoje kursy"
+      }
     },
     "availableCourses": {
       "header": "Dostępne kursy",
@@ -867,6 +870,11 @@
         "courseProgress": "Postęp w kursie:"
       }
     },
+    "enrolledCourses": {
+      "breadcrumbs": {
+        "yourCourses": "Twoje kursy"
+      }
+    },
     "validation": {
       "answerCannotBeEmpty": "Odpowiedź nie może być pusta.",
       "atLeastOneOptionMustBeSelected": "Należy wybrać co najmniej jedną opcję dla pytania {{questionId}}.",
@@ -920,6 +928,11 @@
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
         "goToTeacherPage": "Przejdź do strony nauczyciela"
+      }
+    },
+    "enrolledCourses": {
+      "breadcrumbs": {
+        "yourCourses": "Twoje kursy"
       }
     },
     "breadcrumbs": {
