@@ -13,7 +13,7 @@ const TEST_NAVIGATION = {
   },
   header: {
     welcomeBack: "Welcome back",
-    yourCourses: "Your courses",
+    yourCourses: "Available Courses",
     changeUserInformation: "Change user information",
   },
 } as const;
@@ -64,9 +64,9 @@ test.describe("Admin navigation", () => {
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.profile, "i") })
       .click();
-    await page.waitForURL(/\/content-creators\/[a-f0-9-]{36}/);
+    await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
     const currentURL = page.url();
-    expect(currentURL).toMatch(/\/content-creators\/[a-f0-9-]{36}/);
+    expect(currentURL).toMatch(/\/profile\/[a-f0-9-]{36}/);
 
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })
