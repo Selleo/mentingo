@@ -20,14 +20,14 @@ export default function ProfilePage() {
   const { data: contentCreatorCourses } = useContentCreatorCourses(id, undefined, hasPermission);
   const { t } = useTranslation();
 
+  if (error) return <Navigate to="/" />;
+
   if (!userDetails)
     return (
       <div className="grid h-full w-full place-items-center">
         <Loader />
       </div>
     );
-
-  if (error) return <Navigate to="/" />;
 
   return (
     <PageWrapper role="main">
