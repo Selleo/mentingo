@@ -181,6 +181,7 @@
       "dashboard": "Dashboard"
     },
     "other": {
+      "pageTitle": "Profile",
       "about": "About",
       "contact": "Contact",
       "courses": "Courses",
