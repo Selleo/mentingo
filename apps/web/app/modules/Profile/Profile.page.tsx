@@ -27,7 +27,7 @@ export default function ProfilePage() {
       </div>
     );
 
-  if (error) return <Navigate to={"/"} />;
+  if (error) return <Navigate to="/" />;
 
   return (
     <PageWrapper role="main">

@@ -18,7 +18,7 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
   return (
     <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
-        <Avatar className="h-32 w-32">
+        <Avatar className="size-32">
           <Gravatar email={userDetails?.contactEmail || ""} />
         </Avatar>
         <div className="flex w-full flex-col gap-4">
@@ -39,14 +39,14 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
                 href={`tel:${userDetails?.contactPhone}`}
                 className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-3 py-2 text-primary-700 md:justify-start"
               >
-                <Icon name="Phone" className="h-5 w-5 text-neutral-900" />
+                <Icon name="Phone" className="size-5 text-neutral-900" />
                 <span>{userDetails?.contactPhone}</span>
               </a>
               <a
                 href={`mailto:${userDetails?.contactEmail}`}
                 className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-2 py-1 text-primary-700 md:justify-start"
               >
-                <Icon name="Email" className="h-5 w-5 text-neutral-900" />
+                <Icon name="Email" className="size-5 text-neutral-900" />
                 <span>{userDetails?.contactEmail}</span>
               </a>
             </div>
