@@ -15,7 +15,7 @@ export const useUsersEnrolledQuery = (
   courseId: string,
   searchParams?: UsersEnrolledSearchParams,
 ) => ({
-  queryKey: [ENROLLED_USERS_QUERY_KEY, searchParams],
+  queryKey: [ENROLLED_USERS_QUERY_KEY, courseId, searchParams],
   queryFn: async () => {
     const { data } = await ApiClient.api.courseControllerGetStudentsWithEnrollmentDate(courseId, {
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),

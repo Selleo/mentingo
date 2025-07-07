@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
+import { CATEGORIES_QUERY_KEY } from "~/api/queries/useCategories";
 
 export const useDeleteManyCategories = () => {
   const queryClient = useQueryClient();
@@ -9,7 +10,7 @@ export const useDeleteManyCategories = () => {
     mutationFn: async (categoryIds: string[]) =>
       await ApiClient.api.categoryControllerDeleteManyCategories(categoryIds),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["category"] });
+      queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
     },
     onError: (error) => {
       if (error instanceof Error) {
