@@ -109,7 +109,10 @@ export const AdminStatistics = () => {
   );
 
   return (
-    <PageWrapper className="flex flex-col gap-y-6 xl:!h-full xl:gap-y-8 2xl:!h-auto">
+    <PageWrapper
+      className="flex flex-col gap-y-6 xl:!h-full xl:gap-y-8 2xl:!h-auto"
+      shouldApplyContainerStyles={true}
+    >
       <div className="flex items-center gap-x-2 xl:gap-x-4">
         <p className="h5 xl:h2 text-neutral-950">
           {t("adminStatisticsView.header")} {user?.firstName}

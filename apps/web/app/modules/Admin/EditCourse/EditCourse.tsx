@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { Icon } from "~/components/Icon";
+import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
@@ -43,77 +44,86 @@ const EditCourse = () => {
     );
   }
 
+  const breadcrumbs = [
+    { title: t("adminCourseView.breadcrumbs.myCourses"), href: "/admin/courses" },
+    { title: course?.title || "", href: `/admin/beta-courses/${id}` },
+  ];
+
+  const backButton = { title: t("adminCourseView.breadcrumbs.back"), href: "/admin/courses" };
+
   return (
-    <Tabs
-      defaultValue={searchParams.get("tab") ?? "Curriculum"}
-      className="flex h-full flex-col gap-y-4"
-    >
-      <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
-        <div className="flex items-center justify-between">
-          <h4 className="h4 flex items-center text-neutral-950">
-            {course?.title || ""}
-            {course?.isPublished ? (
-              <span className="ml-2 flex items-center rounded-sm bg-success-50 px-2 py-1 text-sm text-success-800">
-                <Icon name="Success" className="mr-1" />
-                {t("common.other.published")}
-              </span>
-            ) : (
-              <span className="ml-2 flex items-center rounded-sm bg-warning-50 px-2 py-1 text-sm text-yellow-600">
-                <Icon name="Warning" className="mr-1" />
-                {t("common.other.draft")}
-              </span>
-            )}
-          </h4>
-          <Button
-            asChild
-            className="flex justify-end border border-neutral-200 bg-transparent text-primary-700"
-          >
-            <Link to={`/course/${course?.id}`}>
-              <Icon name="Eye" className="mr-2" />
-              {t("adminCourseView.common.preview")}{" "}
-            </Link>
-          </Button>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+      <Tabs
+        defaultValue={searchParams.get("tab") ?? "Curriculum"}
+        className="flex h-full flex-col gap-y-4"
+      >
+        <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
+          <div className="flex items-center justify-between">
+            <h4 className="h4 flex items-center text-neutral-950">
+              {course?.title || ""}
+              {course?.isPublished ? (
+                <span className="ml-2 flex items-center rounded-sm bg-success-50 px-2 py-1 text-sm text-success-800">
+                  <Icon name="Success" className="mr-1" />
+                  {t("common.other.published")}
+                </span>
+              ) : (
+                <span className="ml-2 flex items-center rounded-sm bg-warning-50 px-2 py-1 text-sm text-yellow-600">
+                  <Icon name="Warning" className="mr-1" />
+                  {t("common.other.draft")}
+                </span>
+              )}
+            </h4>
+            <Button
+              asChild
+              className="flex justify-end border border-neutral-200 bg-transparent text-primary-700"
+            >
+              <Link to={`/course/${course?.id}`}>
+                <Icon name="Eye" className="mr-2" />
+                {t("adminCourseView.common.preview")}{" "}
+              </Link>
+            </Button>
+          </div>
+          <TabsList className="w-min">
+            {courseTabs.map(({ label, value }) => (
+              <TabsTrigger key={value} value={value} onClick={() => handleTabChange(value)}>
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </div>
-        <TabsList className="w-min">
-          {courseTabs.map(({ label, value }) => (
-            <TabsTrigger key={value} value={value} onClick={() => handleTabChange(value)}>
-              {label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </div>
-      <TabsContent value="Settings">
-        <CourseSettings
-          courseId={course?.id || ""}
-          title={course?.title}
-          description={course?.description}
-          categoryId={course?.categoryId}
-          thumbnailS3SingedUrl={course?.thumbnailS3SingedUrl}
-          thumbnailS3Key={course?.thumbnailS3Key}
-        />
-      </TabsContent>
-      <TabsContent value="Curriculum" className="h-full overflow-hidden">
-        <LeaveModalProvider>
-          <CourseLessons
-            chapters={course?.chapters as Chapter[]}
-            canRefetchChapterList={!!canRefetchChapterList}
+        <TabsContent value="Settings">
+          <CourseSettings
+            courseId={course?.id || ""}
+            title={course?.title}
+            description={course?.description}
+            categoryId={course?.categoryId}
+            thumbnailS3SingedUrl={course?.thumbnailS3SingedUrl}
+            thumbnailS3Key={course?.thumbnailS3Key}
           />
-        </LeaveModalProvider>
-      </TabsContent>
-      <TabsContent value="Pricing">
-        <CoursePricing
-          courseId={course?.id || ""}
-          currency={course?.currency}
-          priceInCents={course?.priceInCents}
-        />
-      </TabsContent>
-      <TabsContent value="Status">
-        <CourseStatus courseId={course?.id || ""} isPublished={!!course?.isPublished} />
-      </TabsContent>
-      <TabsContent value="Enrolled">
-        <CourseEnrolled />
-      </TabsContent>
-    </Tabs>
+        </TabsContent>
+        <TabsContent value="Curriculum" className="h-full overflow-hidden">
+          <LeaveModalProvider>
+            <CourseLessons
+              chapters={course?.chapters as Chapter[]}
+              canRefetchChapterList={!!canRefetchChapterList}
+            />
+          </LeaveModalProvider>
+        </TabsContent>
+        <TabsContent value="Pricing">
+          <CoursePricing
+            courseId={course?.id || ""}
+            currency={course?.currency}
+            priceInCents={course?.priceInCents}
+          />
+        </TabsContent>
+        <TabsContent value="Status">
+          <CourseStatus courseId={course?.id || ""} isPublished={!!course?.isPublished} />
+        </TabsContent>
+        <TabsContent value="Enrolled">
+          <CourseEnrolled />
+        </TabsContent>
+      </Tabs>
+    </PageWrapper>
   );
 };
 

@@ -7,6 +7,7 @@ import { useUpdateGroup } from "~/api/mutations/admin/useUpdateGroup";
 import { useGroupByIdQuerySuspense } from "~/api/queries/admin/useGroupById";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
+import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
@@ -55,51 +56,60 @@ const EditGroup = (): ReactElement => {
     }
   };
 
+  const breadcrumbs = [
+    { title: t("adminGroupsView.breadcrumbs.groups"), href: "/admin/groups" },
+    { title: t("adminGroupsView.breadcrumbs.editGroup"), href: `/admin/groups/${groupId}` },
+  ];
+
+  const backButton = { title: t("adminGroupsView.breadcrumbs.back"), href: "/admin/groups" };
+
   return (
-    <div className="flex flex-col gap-y-6">
-      <h2 className="mb-4 text-2xl font-semibold text-neutral-950">
-        {t("adminGroupsView.updateGroup.header")}
-      </h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="max-w-md space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="name" className="text">
-                  {t("adminGroupsView.updateGroup.fields.name")}
-                </Label>
-                <FormControl>
-                  <Input id="name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="description" className="text">
-                  {t("adminGroupsView.updateGroup.fields.description")}
-                </Label>
-                <FormControl>
-                  <Textarea id="description" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <DialogFooter>
-            <Button type="submit" disabled={!form.formState.isValid || !form.formState.isDirty}>
-              {t("adminGroupsView.updateGroup.submit")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
-    </div>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+      <div className="flex flex-col gap-y-6">
+        <h2 className="mb-4 text-2xl font-semibold text-neutral-950">
+          {t("adminGroupsView.updateGroup.header")}
+        </h2>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="max-w-md space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="name" className="text">
+                    {t("adminGroupsView.updateGroup.fields.name")}
+                  </Label>
+                  <FormControl>
+                    <Input id="name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="description" className="text">
+                    {t("adminGroupsView.updateGroup.fields.description")}
+                  </Label>
+                  <FormControl>
+                    <Textarea id="description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit" disabled={!form.formState.isValid || !form.formState.isDirty}>
+                {t("adminGroupsView.updateGroup.submit")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </div>
+    </PageWrapper>
   );
 };
 
