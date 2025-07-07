@@ -539,7 +539,7 @@ export class CourseService {
     };
   }
 
-  async getBetaCourseById(id: UUIDType) {
+  async getBetaCourseById(id: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -552,12 +552,17 @@ export class CourseService {
         isPublished: courses.isPublished,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
+        authorId: courses.authorId,
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
       .where(and(eq(courses.id, id)));
 
     if (!course) throw new NotFoundException("Course not found");
+
+    if (currentUserRole !== USER_ROLES.ADMIN && course.authorId !== currentUserId) {
+      throw new ForbiddenException("You do not have permission to edit this course");
+    }
 
     const courseChapterList = await this.db
       .select({
@@ -735,8 +740,9 @@ export class CourseService {
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
     image?: Express.Multer.File,
-    currentUserId?: UUIDType,
   ) {
     return this.db.transaction(async (trx) => {
       const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
@@ -745,7 +751,7 @@ export class CourseService {
         throw new NotFoundException("Course not found");
       }
 
-      if (existingCourse.authorId !== currentUserId) {
+      if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
         throw new ForbiddenException("You don't have permission to update course");
       }
 

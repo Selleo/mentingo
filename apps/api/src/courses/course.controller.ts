@@ -235,8 +235,14 @@ export class CourseController {
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
     response: baseResponse(commonShowBetaCourseSchema),
   })
-  async getBetaCourseById(@Query("id") id: UUIDType): Promise<BaseResponse<CommonShowBetaCourse>> {
-    return new BaseResponse(await this.courseService.getBetaCourseById(id));
+  async getBetaCourseById(
+    @Query("id") id: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<BaseResponse<CommonShowBetaCourse>> {
+    return new BaseResponse(
+      await this.courseService.getBetaCourseById(id, currentUserId, currentUserRole),
+    );
   }
 
   @Post()
@@ -269,8 +275,15 @@ export class CourseController {
     @Body() updateCourseBody: UpdateCourseBody,
     @UploadedFile() image: Express.Multer.File,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateCourse(id, updateCourseBody, image, currentUserId);
+    await this.courseService.updateCourse(
+      id,
+      updateCourseBody,
+      currentUserId,
+      currentUserRole,
+      image,
+    );
 
     return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
   }
