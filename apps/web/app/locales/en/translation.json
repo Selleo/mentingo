@@ -847,7 +847,6 @@
       "answerCannotBeEmptyForTextQuestion": "Answer cannot be empty for text question {{questionId}}.",
       "invalidSelectionForSingleAnswer": "Invalid selection for a single-answer question.",
       "invalidFormatForMultiAnswer": "Invalid format for multi-answer questions.",
-      "trueOrFalseRequired": "A true or false response is required.",
       "photoQuestionMustHaveAnswer": "An answer is required for this photo question.",
       "unansweredQuestions": "It seems you haven't checked all the answers yet. Please review them and try again!"
     }
@@ -868,7 +867,6 @@
       "yourAnswer": "Your answer",
       "singleChoice": "Single choice question",
       "multipleChoice": "Multiple choice question",
-      "trueOfFalseChoice": "True or false question",
       "oneOrTwoWordSentence": "Provide a brief response (1-2 sentences).",
       "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences)."
     },
