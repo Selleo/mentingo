@@ -15,7 +15,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   breadcrumbs?: { title: string; href: string }[];
   backButton?: BackButton;
-  shouldApplyContainerStyles?: boolean;
+  isBarebones?: boolean;
   children: ReactNode;
   className?: string;
 };
@@ -46,7 +46,7 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
               onClick={() => navigate(backButton.href)}
               className="h-min w-auto text-sm"
             >
-              <Icon name="ChevronLeft" className="mr-2 h-3 w-3" />
+              <Icon name="ChevronLeft" className="mr-2 size-3" />
               {backButton.title}
             </Button>
           </BreadcrumbLink>
@@ -79,18 +79,16 @@ export const PageWrapper = ({
   className,
   breadcrumbs,
   backButton,
-  shouldApplyContainerStyles,
+  isBarebones,
   children,
   ...props
 }: PageWrapperProps) => {
   const hasBreadcrumbs = Boolean(breadcrumbs);
 
   const classes = cn(
-    shouldApplyContainerStyles &&
-      "w-full pt-6 px-4 pb-4 md:px-6 md:pb-6 3xl:pt-12 3xl:px-8 3xl:pb-8",
+    !isBarebones && "w-full pt-6 px-4 pb-4 md:px-6 md:pb-6 3xl:pt-12 3xl:px-8 3xl:pb-8",
     {
-      "pt-8 md:pt-6 3xl:pt-6 3xl:pb-2": hasBreadcrumbs,
-      "[&_.breadcrumbs]:mb-2": hasBreadcrumbs,
+      "pt-8 md:pt-6 3xl:pt-6 3xl:pb-2 [&_.breadcrumbs]:mb-2": hasBreadcrumbs,
     },
     className,
   );

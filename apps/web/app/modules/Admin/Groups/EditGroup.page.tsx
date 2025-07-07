@@ -64,7 +64,7 @@ const EditGroup = (): ReactElement => {
   const backButton = { title: t("adminGroupsView.breadcrumbs.back"), href: "/admin/groups" };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} isBarebones>
       <div className="flex flex-col gap-y-6">
         <h2 className="mb-4 text-2xl font-semibold text-neutral-950">
           {t("adminGroupsView.updateGroup.header")}

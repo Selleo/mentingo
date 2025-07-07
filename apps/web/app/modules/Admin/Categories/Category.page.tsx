@@ -68,7 +68,7 @@ const Category = () => {
   const backButton = { title: t("adminCategoryView.breadcrumbs.back"), href: "/admin/categories" };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} isBarebones>
       <div className="flex flex-col">
         <form onSubmit={handleSubmit(onSubmit)} className="h-full rounded-lg">
           <div className="flex items-center justify-between">

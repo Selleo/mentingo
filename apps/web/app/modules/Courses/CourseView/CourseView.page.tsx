@@ -31,11 +31,7 @@ export default function CourseViewPage() {
   const backButton = { title: t("studentCourseView.breadcrumbs.back"), href: "/courses" };
 
   return (
-    <PageWrapper
-      breadcrumbs={breadcrumbs}
-      backButton={backButton}
-      shouldApplyContainerStyles={true}
-    >
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
       <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
         <div className="flex flex-col gap-y-6 overflow-hidden">
           <CourseOverview course={course} />

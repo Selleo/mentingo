@@ -129,12 +129,7 @@ export default function LessonPage() {
   };
 
   return (
-    <PageWrapper
-      className="h-auto max-w-full"
-      breadcrumbs={breadcrumbs}
-      backButton={backButton}
-      shouldApplyContainerStyles={true}
-    >
+    <PageWrapper className="h-auto max-w-full" breadcrumbs={breadcrumbs} backButton={backButton}>
       <div className="flex h-full w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
         <div className="flex h-full w-full flex-col divide-y rounded-lg bg-white">
           <div className="flex items-center px-12 py-6">

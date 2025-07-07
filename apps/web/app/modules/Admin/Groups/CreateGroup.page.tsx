@@ -50,7 +50,7 @@ const CreateGroup = (): ReactElement => {
   const backButton = { title: t("adminGroupsView.breadcrumbs.back"), href: "/admin/groups" };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} isBarebones>
       <div className="flex flex-col gap-y-6">
         <CreatePageHeader
           title={t("adminGroupsView.newGroup.header")}

@@ -52,7 +52,7 @@ const EditCourse = () => {
   const backButton = { title: t("adminCourseView.breadcrumbs.back"), href: "/admin/courses" };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} isBarebones={true}>
       <Tabs
         defaultValue={searchParams.get("tab") ?? "Curriculum"}
         className="flex h-full flex-col gap-y-4"
