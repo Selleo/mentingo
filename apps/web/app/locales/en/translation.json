@@ -116,6 +116,17 @@
       "goToAvailableCourses": "Go to available courses"
     }
   },
+  "changeUserLanguageView": {
+    "header": "Change Language",
+    "subHeader": "Select your preferred language",
+    "field": {
+      "language": "Language"
+    },
+    "options": {
+      "english": "English",
+      "polish": "Polish"
+    }
+  },
   "changeUserEmailView": {
     "header": "Change user information",
     "subHeader": "Update your user information here.",
