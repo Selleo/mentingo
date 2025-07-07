@@ -3,45 +3,102 @@ import path from "path";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
-import { GenericContainer, type StartedTestContainer } from "testcontainers";
+import { GenericContainer, Wait, type StartedTestContainer } from "testcontainers";
 
 import * as schema from "../src/storage/schema";
 
 import type { DatabasePg } from "../src/common";
 
-let container: StartedTestContainer;
+let pgContainer: StartedTestContainer;
 let sql: ReturnType<typeof postgres>;
 let db: DatabasePg;
 
 export async function setupTestDatabase(): Promise<{
   db: DatabasePg;
-  container: StartedTestContainer;
-  connectionString: string;
+  pgContainer: StartedTestContainer;
+  pgConnectionString: string;
 }> {
-  container = await new GenericContainer("postgres:16")
+  pgContainer = await new GenericContainer("postgres:16")
     .withExposedPorts(5432)
     .withEnvironment({
       POSTGRES_DB: "testdb",
       POSTGRES_USER: "testuser",
       POSTGRES_PASSWORD: "testpass",
     })
+    .withWaitStrategy(Wait.forLogMessage("database system is ready to accept connections"))
     .start();
 
-  const connectionString = `postgresql://testuser:testpass@${container.getHost()}:${container.getMappedPort(
+  const pgConnectionString = `postgresql://testuser:testpass@${pgContainer.getHost()}:${pgContainer.getMappedPort(
     5432,
   )}/testdb`;
 
-  sql = postgres(connectionString);
+  sql = postgres(pgConnectionString);
   db = drizzle(sql, { schema }) as DatabasePg;
 
-  await migrate(db, {
-    migrationsFolder: path.join(__dirname, "../src/storage/migrations"),
-  });
+  try {
+    let migrationRetries = 0;
+    const maxMigrationRetries = 5;
 
-  return { db, container, connectionString };
+    while (migrationRetries < maxMigrationRetries) {
+      try {
+        await migrate(db, {
+          migrationsFolder: path.join(__dirname, "../src/storage/migrations"),
+        });
+        console.log("Migrations completed successfully");
+        break;
+      } catch (migrationError) {
+        migrationRetries++;
+        console.log(
+          `Migration attempt ${migrationRetries}/${maxMigrationRetries} failed:`,
+          migrationError.message,
+        );
+
+        if (migrationRetries >= maxMigrationRetries) {
+          console.error("All migration attempts failed:", migrationError);
+          throw migrationError;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+  } catch (migrationError) {
+    console.error("Error running migrations:", migrationError);
+    throw migrationError;
+  }
+
+  return { db, pgContainer, pgConnectionString };
 }
 
 export async function closeTestDatabase() {
-  if (sql) await sql.end();
-  if (container) await container.stop();
+  console.info("Attempting to close test database resources...");
+  let pgSqlClosed = false;
+  let pgContainerStopped = false;
+
+  if (sql) {
+    try {
+      await sql.end({ timeout: 5 });
+      pgSqlClosed = true;
+      console.info("Postgres.js connection ended successfully.");
+    } catch (sqlError) {
+      console.error("Error ending postgres.js connection:", sqlError);
+    }
+  } else {
+    pgSqlClosed = true;
+  }
+
+  if (pgContainer) {
+    try {
+      await pgContainer.stop({ timeout: 10000 });
+      pgContainerStopped = true;
+      console.info("PostgreSQL test container stopped successfully.");
+    } catch (containerError) {
+      console.error("Error stopping PostgreSQL test container:", containerError);
+    }
+  } else {
+    pgContainerStopped = true;
+  }
+
+  console.info(
+    `Resource cleanup status: pgSqlClosed=${pgSqlClosed}, pgContainerStopped=${pgContainerStopped}`,
+  );
 }

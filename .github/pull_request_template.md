@@ -21,6 +21,9 @@
 
 - [ ] A
 - [ ] B
-- [ ] C
+- [ ] C 
+-->
 
-### Notes -->
+### Notes 
+
+- [ ] fired up e2e tests and got a positive result
