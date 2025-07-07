@@ -3179,10 +3179,16 @@
               "role": {
                 "anyOf": [
                   {
+                    "const": "admin",
                     "type": "string"
                   },
                   {
-                    "type": "null"
+                    "const": "student",
+                    "type": "string"
+                  },
+                  {
+                    "const": "content_creator",
+                    "type": "string"
                   }
                 ]
               }
@@ -7822,7 +7828,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -7884,7 +7890,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -7932,7 +7938,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -7994,7 +8000,7 @@
             "required": [
               "id",
               "name",
-              "description"
+              "characteristic"
             ]
           }
         },
@@ -8017,7 +8023,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8079,7 +8085,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -8120,7 +8126,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -8158,7 +8164,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -8175,7 +8181,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "type": "string"
               }
             },

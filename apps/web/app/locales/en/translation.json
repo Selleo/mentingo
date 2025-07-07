@@ -405,19 +405,24 @@
   },
   "adminGroupsView": {
     "name": "Group name",
-    "description": "Description",
+    "characteristic": "Charakterystyka",
     "buttons": {
       "create": "Create new",
       "deleteSelected": "Delete selected"
     },
     "newGroup": {
       "header": "Create New Group",
-      "subheader": "Fill in the details to create a new group. Click save when you're done.",
+      "card": {
+        "header": "Detail information",
+        "subheader": "Define your group name and their characteristic",
+        "footer": "Remember, group members will see this description. AI Mentor will use it in conversations."
+      },
       "fields": {
         "name": "Name",
-        "description": "Description"
+        "characteristic": "Characteristic"
       },
-      "submit": "Create group"
+      "cancel": "Cancel",
+      "submit": "Publish"
     },
     "updateGroup": {
       "header": "Update group",

@@ -47,7 +47,6 @@ const Groups = (): ReactElement => {
 
   const { data } = useGroupsQuerySuspense();
   const { mutateAsync: deleteGroupsMutation } = useBulkDeleteGroups();
-
   const table = useReactTable({
     data,
     columns,
@@ -81,10 +80,10 @@ const Groups = (): ReactElement => {
 
   return (
     <div className="flex flex-col">
-      <h4 className={"text-2xl font-bold"}>{t("navigationSideBar.groups")}</h4>
+      <h4 className="text-2xl font-bold">{t("navigationSideBar.groups")}</h4>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center justify-between gap-2 pt-6">
-          <Link to={"new"}>
+          <Link to="new">
             <Button variant={"outline"}>{t("adminGroupsView.buttons.create")}</Button>
           </Link>
         </div>
@@ -151,7 +150,7 @@ const Groups = (): ReactElement => {
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow
-              key={row.id}
+              key={row.original.id}
               data-state={row.getIsSelected() && "selected"}
               onClick={handleGroupEdit(row.original?.id)}
               className="cursor-pointer hover:bg-neutral-100"
