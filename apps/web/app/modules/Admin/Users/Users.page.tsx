@@ -36,6 +36,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { snakeCaseToCamelCase } from "~/utils/snakeCaseToCamelCase";
 
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
@@ -135,7 +136,7 @@ const Users = () => {
     {
       accessorKey: "role",
       header: t("adminUsersView.field.role"),
-      cell: ({ row }) => t(`common.roles.${row.original.role}`),
+      cell: ({ row }) => t(`common.roles.${snakeCaseToCamelCase(row.original.role)}`),
     },
     {
       accessorKey: "archived",
