@@ -297,7 +297,8 @@
         "video": "Video",
         "presentation": "Presentation",
         "text": "Text",
-        "quiz": "Quiz"
+        "quiz": "Quiz",
+        "ai": "AI Mentor"
       }
     },
     "other": {

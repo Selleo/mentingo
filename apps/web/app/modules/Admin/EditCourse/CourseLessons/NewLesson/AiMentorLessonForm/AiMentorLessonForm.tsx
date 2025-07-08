@@ -19,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.helper";
 
-import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
+import { DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { useAiMentorLessonForm } from "./hooks/useAiMentorLessonForm";
@@ -236,14 +236,6 @@ const AiMentorLessonForm = ({
                   {t("common.button.delete")}
                 </Button>
               )}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setContentTypeToDisplay(ContentTypes.EMPTY)}
-                className={"text-error-600 hover:border-error-600 hover:text-error-600"}
-              >
-                {t("common.button.cancel")}
-              </Button>
             </div>
           </form>
         </Form>
