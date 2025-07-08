@@ -8,10 +8,10 @@ import { ApiClient } from "../api-client";
 import { currentUserQueryOptions } from "../queries/useCurrentUser";
 import { queryClient } from "../queryClient";
 
-import type { UpdateFullUserBody } from "../generated-api";
+import type { UpdateUserProfileBody } from "../generated-api";
 
 type UpdateUserProfileOptions = {
-  data: UpdateFullUserBody;
+  data: UpdateUserProfileBody;
   id: string;
 };
 
@@ -20,7 +20,7 @@ export function useUpdateUserProfile() {
   const { t } = useTranslation();
   return useMutation({
     mutationFn: async (options: UpdateUserProfileOptions) => {
-      const response = await ApiClient.api.userControllerUpdateFullUser(options.data);
+      const response = await ApiClient.api.userControllerUpdateUserProfile(options.data);
 
       return response.data;
     },

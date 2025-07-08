@@ -580,14 +580,14 @@
     },
     "/api/user/profile": {
       "patch": {
-        "operationId": "UserController_updateFullUser",
+        "operationId": "UserController_updateUserProfile",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateFullUserBody"
+                "$ref": "#/components/schemas/UpdateUserProfileBody"
               }
             }
           }
@@ -597,7 +597,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateFullUserResponse"
+                  "$ref": "#/components/schemas/UpdateUserProfileResponse"
                 }
               }
             }
@@ -3359,7 +3359,7 @@
           "data"
         ]
       },
-      "UpdateFullUserBody": {
+      "UpdateUserProfileBody": {
         "type": "object",
         "properties": {
           "firstName": {
@@ -3383,47 +3383,18 @@
           }
         }
       },
-      "UpdateFullUserResponse": {
+      "UpdateUserProfileResponse": {
         "type": "object",
         "properties": {
           "data": {
             "type": "object",
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "firstName": {
-                    "type": "string"
-                  },
-                  "lastName": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "contactEmail": {
-                    "format": "email",
-                    "type": "string"
-                  },
-                  "contactPhoneNumber": {
-                    "type": "string"
-                  },
-                  "jobTitle": {
-                    "type": "string"
-                  }
-                }
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "message": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "message"
-                ]
+            "properties": {
+              "message": {
+                "type": "string"
               }
+            },
+            "required": [
+              "message"
             ]
           }
         },

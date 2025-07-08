@@ -31,9 +31,9 @@ import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUs
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
 import {
-  UpdateFullUserBody,
-  updateFullUserSchema,
   type UpdateUserBody,
+  UpdateUserProfileBody,
+  updateUserProfileSchema,
   updateUserSchema,
   UpsertUserDetailsBody,
   upsertUserDetailsSchema,
@@ -165,18 +165,18 @@ export class UserController {
 
   @Patch("profile")
   @Validate({
-    response: baseResponse(
-      Type.Intersect([updateFullUserSchema, Type.Object({ message: Type.String() })]),
-    ),
-    request: [{ type: "body", schema: updateFullUserSchema }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+    request: [{ type: "body", schema: updateUserProfileSchema }],
   })
-  async updateFullUser(
-    @Body() data: UpdateFullUserBody,
+  async updateUserProfile(
+    @Body() data: UpdateUserProfileBody,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof updateFullUserSchema>>> {
-    const updatedUser = await this.usersService.updateFullUser(currentUserId, data);
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.usersService.updateUserProfile(currentUserId, data);
 
-    return new BaseResponse({ ...updatedUser, message: "User updated successfully" });
+    return new BaseResponse({
+      message: "User profile updated successfully",
+    });
   }
 
   @Patch("admin")

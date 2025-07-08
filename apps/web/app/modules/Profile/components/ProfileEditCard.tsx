@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { type EditProfileFieldType, ProfileEditFieldRenderer } from "./ProfileEditFieldRenderer";
 
 import type { Control } from "react-hook-form";
-import type { UpdateFullUserBody } from "~/api/generated-api";
+import type { UpdateUserProfileBody } from "~/api/generated-api";
 
 const personalInfoFields: EditProfileFieldType[] = [
   { name: "firstName", iconName: "User", type: "text" },
@@ -19,8 +19,8 @@ const aboutFields: EditProfileFieldType[] = [
 ];
 
 type ProfileEditCardProps = {
-  user: UpdateFullUserBody;
-  control: Control<UpdateFullUserBody>;
+  user: UpdateUserProfileBody;
+  control: Control<UpdateUserProfileBody>;
   isAdminLike: boolean;
 };
 
@@ -28,7 +28,7 @@ export const ProfileEditCard = ({ user, control, isAdminLike }: ProfileEditCardP
   const { t } = useTranslation();
 
   const visiblePersonalFields = useMemo(
-    () => personalInfoFields.filter(({ name }) => user[name as keyof UpdateFullUserBody]),
+    () => personalInfoFields.filter(({ name }) => user[name as keyof UpdateUserProfileBody]),
     [user],
   );
 

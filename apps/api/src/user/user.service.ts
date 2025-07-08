@@ -27,7 +27,7 @@ import {
 } from "./schemas/userQuery";
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
-import type { UpdateFullUserBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
+import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
 import type { UserDetails } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
@@ -161,37 +161,24 @@ export class UserService {
     return updatedUserDetails;
   }
 
-  async updateFullUser(id: UUIDType, data: UpdateFullUserBody): Promise<UpdateFullUserBody> {
-    const { firstName, lastName, description, contactEmail, contactPhoneNumber, jobTitle } = data;
-
-    await this.updateUser(id, {
-      firstName,
-      lastName,
-    });
-
-    if (description || contactEmail || contactPhoneNumber || jobTitle) {
-      await this.upsertUserDetails(id, {
-        description,
-        contactEmail,
-        contactPhoneNumber,
-        jobTitle,
+  async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody) {
+    if (data.firstName || data.lastName) {
+      await this.updateUser(id, {
+        firstName: data.firstName,
+        lastName: data.lastName,
       });
     }
 
-    const [fullUserData] = await this.db
-      .select({
-        firstName: users.firstName,
-        lastName: users.lastName,
-        description: userDetails.description,
-        contactEmail: userDetails.contactEmail,
-        contactPhoneNumber: userDetails.contactPhoneNumber,
-        jobTitle: userDetails.jobTitle,
-      })
-      .from(users)
-      .leftJoin(userDetails, eq(userDetails.userId, users.id))
-      .where(eq(users.id, id));
+    if (data.description || data.contactEmail || data.contactPhoneNumber || data.jobTitle) {
+      const userDetailsToUpdate: Partial<UpsertUserDetailsBody> = {};
 
-    return fullUserData as UpdateFullUserBody;
+      if (data.description) userDetailsToUpdate.description = data.description;
+      if (data.contactEmail) userDetailsToUpdate.contactEmail = data.contactEmail;
+      if (data.contactPhoneNumber) userDetailsToUpdate.contactPhoneNumber = data.contactPhoneNumber;
+      if (data.jobTitle) userDetailsToUpdate.jobTitle = data.jobTitle;
+
+      await this.db.update(userDetails).set(userDetailsToUpdate).where(eq(userDetails.userId, id));
+    }
   }
 
   async changePassword(id: UUIDType, oldPassword: string, newPassword: string) {

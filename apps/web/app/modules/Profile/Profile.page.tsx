@@ -20,15 +20,15 @@ import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
-import type { UpdateFullUserBody } from "~/api/generated-api";
+import type { UpdateUserProfileBody } from "~/api/generated-api";
 
-const updateFullUserSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  description: z.string(),
-  contactEmail: z.string().email(),
-  contactPhoneNumber: z.string(),
-  jobTitle: z.string(),
+const updateUserProfileSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  description: z.string().optional(),
+  contactEmail: z.string().email().optional(),
+  contactPhoneNumber: z.string().optional(),
+  jobTitle: z.string().optional(),
 });
 
 export default function ProfilePage() {
@@ -56,13 +56,28 @@ export default function ProfilePage() {
     control,
     reset,
     formState: { isDirty },
-  } = useForm<UpdateFullUserBody>({ resolver: zodResolver(updateFullUserSchema) });
+  } = useForm<UpdateUserProfileBody>({ resolver: zodResolver(updateUserProfileSchema) });
 
-  const { mutate: updateFullUser } = useUpdateUserProfile();
+  const { mutate: updateUserProfile } = useUpdateUserProfile();
 
-  const onSubmit = (data: UpdateFullUserBody) => {
+  const onSubmit = (data: UpdateUserProfileBody) => {
     if (isDirty) {
-      updateFullUser({ data, id: currentUser?.id ?? userDetails?.id ?? "" });
+      const filteredData = Object.entries(data).reduce((acc, [key, value]) => {
+        if (
+          value &&
+          value.trim() !== "" &&
+          value !== userDetails?.[key as keyof typeof userDetails]
+        ) {
+          acc[key as keyof UpdateUserProfileBody] = value;
+        }
+        return acc;
+      }, {} as Partial<UpdateUserProfileBody>);
+
+      if (filteredData["contactPhoneNumber"] === userDetails?.contactPhone) {
+        delete filteredData.contactPhoneNumber;
+      }
+
+      updateUserProfile({ data: filteredData, id: currentUser?.id ?? userDetails?.id ?? "" });
       reset(data);
       setIsEditing(false);
     }
@@ -109,12 +124,12 @@ export default function ProfilePage() {
           <ProfileEditCard
             control={control}
             user={{
-              firstName: userDetails?.firstName ?? undefined,
-              lastName: userDetails?.lastName ?? undefined,
-              description: userDetails?.description ?? undefined,
-              contactEmail: userDetails?.contactEmail ?? undefined,
-              contactPhoneNumber: userDetails?.contactPhone ?? undefined,
-              jobTitle: userDetails?.jobTitle ?? undefined,
+              firstName: userDetails?.firstName || "",
+              lastName: userDetails?.lastName || "",
+              description: userDetails?.description || "",
+              jobTitle: userDetails?.jobTitle || "",
+              contactEmail: userDetails?.contactEmail || "",
+              contactPhoneNumber: userDetails?.contactPhone || "",
             }}
             isAdminLike={hasPermission}
           />

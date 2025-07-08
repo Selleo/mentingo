@@ -6,19 +6,19 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 
 import type { Control } from "react-hook-form";
-import type { UpdateFullUserBody } from "~/api/generated-api";
+import type { UpdateUserProfileBody } from "~/api/generated-api";
 import type { IconName } from "~/types/shared";
 
 export type EditProfileFieldType = {
-  name: keyof UpdateFullUserBody;
+  name: keyof UpdateUserProfileBody;
   iconName?: IconName;
   type?: "email" | "text" | "textarea";
 };
 
 type FieldRendererProps = {
   field: EditProfileFieldType;
-  control: Control<UpdateFullUserBody>;
-  user: UpdateFullUserBody;
+  control: Control<UpdateUserProfileBody>;
+  user: UpdateUserProfileBody;
   t: (key: string) => string;
 };
 

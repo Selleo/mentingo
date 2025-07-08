@@ -5,16 +5,16 @@ import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 
 import type { UseFormHandleSubmit, UseFormReset } from "react-hook-form";
-import type { UpdateFullUserBody } from "~/api/generated-api";
+import type { UpdateUserProfileBody } from "~/api/generated-api";
 
 type ProfileActionButtonsProps = {
   isEditing: boolean;
   isProfileOwner: boolean;
   toggleEditing: () => void;
   copyLinkToClipboard: () => void;
-  handleSubmit: UseFormHandleSubmit<UpdateFullUserBody, undefined>;
-  onSubmit: (data: Partial<UpdateFullUserBody>) => void;
-  reset: UseFormReset<UpdateFullUserBody>;
+  handleSubmit: UseFormHandleSubmit<UpdateUserProfileBody, undefined>;
+  onSubmit: (data: Partial<UpdateUserProfileBody>) => void;
+  reset: UseFormReset<UpdateUserProfileBody>;
 };
 
 export const ProfileActionButtons = ({
