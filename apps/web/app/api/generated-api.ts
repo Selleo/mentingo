@@ -195,6 +195,30 @@ export interface UpsertUserDetailsResponse {
   };
 }
 
+export interface UpdateFullUserBody {
+  firstName?: string;
+  lastName?: string;
+  description?: string;
+  /** @format email */
+  contactEmail?: string;
+  contactPhoneNumber?: string;
+  jobTitle?: string;
+}
+
+export interface UpdateFullUserResponse {
+  data: {
+    firstName?: string;
+    lastName?: string;
+    description?: string;
+    /** @format email */
+    contactEmail?: string;
+    contactPhoneNumber?: string;
+    jobTitle?: string;
+  } & {
+    message: string;
+  };
+}
+
 export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
@@ -1896,6 +1920,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     userControllerUpsertUserDetails: (data: UpsertUserDetailsBody, params: RequestParams = {}) =>
       this.request<UpsertUserDetailsResponse, any>({
         path: `/api/user/details`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerUpdateFullUser
+     * @request PATCH:/api/user/profile
+     */
+    userControllerUpdateFullUser: (data: UpdateFullUserBody, params: RequestParams = {}) =>
+      this.request<UpdateFullUserResponse, any>({
+        path: `/api/user/profile`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,

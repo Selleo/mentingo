@@ -1,8 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useParams } from "@remix-run/react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
+import { useUpdateUserProfile } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
@@ -17,9 +20,16 @@ import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
-import type { CurrentUserResponse, GetUserDetailsResponse } from "~/api/generated-api";
+import type { UpdateFullUserBody } from "~/api/generated-api";
 
-export type UpdateFullUserBody = CurrentUserResponse["data"] & GetUserDetailsResponse["data"];
+const updateFullUserSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  description: z.string(),
+  contactEmail: z.string().email(),
+  contactPhoneNumber: z.string(),
+  jobTitle: z.string(),
+});
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -46,10 +56,16 @@ export default function ProfilePage() {
     control,
     reset,
     formState: { isDirty },
-  } = useForm<UpdateFullUserBody>();
+  } = useForm<UpdateFullUserBody>({ resolver: zodResolver(updateFullUserSchema) });
 
-  const onSubmit = (data: Partial<UpdateFullUserBody>) => {
-    if (isDirty) console.log("Form submitted with data:", data);
+  const { mutate: updateFullUser } = useUpdateUserProfile();
+
+  const onSubmit = (data: UpdateFullUserBody) => {
+    if (isDirty) {
+      updateFullUser({ data, id: currentUser?.id ?? userDetails?.id ?? "" });
+      reset(data);
+      setIsEditing(false);
+    }
   };
 
   const copyLinkToClipboard = () =>
@@ -92,7 +108,14 @@ export default function ProfilePage() {
         {isEditing ? (
           <ProfileEditCard
             control={control}
-            user={{ ...userDetails, ...currentUser } as UpdateFullUserBody}
+            user={{
+              firstName: userDetails?.firstName ?? undefined,
+              lastName: userDetails?.lastName ?? undefined,
+              description: userDetails?.description ?? undefined,
+              contactEmail: userDetails?.contactEmail ?? undefined,
+              contactPhoneNumber: userDetails?.contactPhone ?? undefined,
+              jobTitle: userDetails?.jobTitle ?? undefined,
+            }}
             isAdminLike={hasPermission}
           />
         ) : (

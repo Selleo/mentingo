@@ -4,8 +4,8 @@ import { match } from "ts-pattern";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 
-import type { UpdateFullUserBody } from "../Profile.page";
 import type { UseFormHandleSubmit, UseFormReset } from "react-hook-form";
+import type { UpdateFullUserBody } from "~/api/generated-api";
 
 type ProfileActionButtonsProps = {
   isEditing: boolean;

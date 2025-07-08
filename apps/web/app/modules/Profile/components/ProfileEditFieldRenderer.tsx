@@ -5,8 +5,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 
-import type { UpdateFullUserBody } from "../Profile.page";
 import type { Control } from "react-hook-form";
+import type { UpdateFullUserBody } from "~/api/generated-api";
 import type { IconName } from "~/types/shared";
 
 export type EditProfileFieldType = {

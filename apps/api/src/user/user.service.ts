@@ -27,7 +27,7 @@ import {
 } from "./schemas/userQuery";
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
-import type { UpsertUserDetailsBody } from "./schemas/updateUser.schema";
+import type { UpdateFullUserBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
 import type { UserDetails } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
@@ -104,7 +104,7 @@ export class UserService {
         id: users.id,
         description: userDetails.description,
         contactEmail: userDetails.contactEmail,
-        contactPhone: userDetails.contactPhoneNumber,
+        contactPhone: userDetails.contactPhoneNumber, // Map database field to frontend field
         jobTitle: userDetails.jobTitle,
       })
       .from(users)
@@ -159,6 +159,39 @@ export class UserService {
       .returning();
 
     return updatedUserDetails;
+  }
+
+  async updateFullUser(id: UUIDType, data: UpdateFullUserBody): Promise<UpdateFullUserBody> {
+    const { firstName, lastName, description, contactEmail, contactPhoneNumber, jobTitle } = data;
+
+    await this.updateUser(id, {
+      firstName,
+      lastName,
+    });
+
+    if (description || contactEmail || contactPhoneNumber || jobTitle) {
+      await this.upsertUserDetails(id, {
+        description,
+        contactEmail,
+        contactPhoneNumber,
+        jobTitle,
+      });
+    }
+
+    const [fullUserData] = await this.db
+      .select({
+        firstName: users.firstName,
+        lastName: users.lastName,
+        description: userDetails.description,
+        contactEmail: userDetails.contactEmail,
+        contactPhoneNumber: userDetails.contactPhoneNumber,
+        jobTitle: userDetails.jobTitle,
+      })
+      .from(users)
+      .leftJoin(userDetails, eq(userDetails.userId, users.id))
+      .where(eq(users.id, id));
+
+    return fullUserData as UpdateFullUserBody;
   }
 
   async changePassword(id: UUIDType, oldPassword: string, newPassword: string) {

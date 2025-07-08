@@ -3,14 +3,14 @@ import { useTranslation } from "react-i18next";
 
 import { type EditProfileFieldType, ProfileEditFieldRenderer } from "./ProfileEditFieldRenderer";
 
-import type { UpdateFullUserBody } from "../Profile.page";
 import type { Control } from "react-hook-form";
+import type { UpdateFullUserBody } from "~/api/generated-api";
 
 const personalInfoFields: EditProfileFieldType[] = [
   { name: "firstName", iconName: "User", type: "text" },
   { name: "lastName", iconName: "User", type: "text" },
   { name: "contactEmail", iconName: "Email", type: "email" },
-  { name: "contactPhone", iconName: "Phone", type: "text" },
+  { name: "contactPhoneNumber", iconName: "Phone", type: "text" },
 ];
 
 const aboutFields: EditProfileFieldType[] = [
@@ -28,7 +28,7 @@ export const ProfileEditCard = ({ user, control, isAdminLike }: ProfileEditCardP
   const { t } = useTranslation();
 
   const visiblePersonalFields = useMemo(
-    () => personalInfoFields.filter(({ name }) => user[name]),
+    () => personalInfoFields.filter(({ name }) => user[name as keyof UpdateFullUserBody]),
     [user],
   );
 
@@ -43,7 +43,7 @@ export const ProfileEditCard = ({ user, control, isAdminLike }: ProfileEditCardP
         </p>
         {visiblePersonalFields.map((field) => (
           <ProfileEditFieldRenderer
-            key={field.name}
+            key={String(field.name)}
             field={field}
             control={control}
             user={user}
@@ -63,7 +63,7 @@ export const ProfileEditCard = ({ user, control, isAdminLike }: ProfileEditCardP
             </p>
             {aboutFields.map((field) => (
               <ProfileEditFieldRenderer
-                key={field.name}
+                key={String(field.name)}
                 field={field}
                 control={control}
                 user={user}

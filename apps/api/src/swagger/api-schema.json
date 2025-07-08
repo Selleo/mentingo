@@ -578,6 +578,33 @@
         }
       }
     },
+    "/api/user/profile": {
+      "patch": {
+        "operationId": "UserController_updateFullUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFullUserBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateFullUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/admin": {
       "patch": {
         "operationId": "UserController_adminUpdateUser",
@@ -3325,6 +3352,78 @@
             "required": [
               "id",
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateFullUserBody": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "format": "email",
+            "type": "string"
+          },
+          "contactPhoneNumber": {
+            "type": "string"
+          },
+          "jobTitle": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateFullUserResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "contactEmail": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "contactPhoneNumber": {
+                    "type": "string"
+                  },
+                  "jobTitle": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "message"
+                ]
+              }
             ]
           }
         },

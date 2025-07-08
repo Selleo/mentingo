@@ -31,6 +31,8 @@ import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUs
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
 import {
+  UpdateFullUserBody,
+  updateFullUserSchema,
   type UpdateUserBody,
   updateUserSchema,
   UpsertUserDetailsBody,
@@ -159,6 +161,22 @@ export class UserController {
         message: "User details updated successfully",
       });
     }
+  }
+
+  @Patch("profile")
+  @Validate({
+    response: baseResponse(
+      Type.Intersect([updateFullUserSchema, Type.Object({ message: Type.String() })]),
+    ),
+    request: [{ type: "body", schema: updateFullUserSchema }],
+  })
+  async updateFullUser(
+    @Body() data: UpdateFullUserBody,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<BaseResponse<Static<typeof updateFullUserSchema>>> {
+    const updatedUser = await this.usersService.updateFullUser(currentUserId, data);
+
+    return new BaseResponse({ ...updatedUser, message: "User updated successfully" });
   }
 
   @Patch("admin")
