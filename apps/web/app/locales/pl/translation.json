@@ -175,12 +175,38 @@
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
-      "showMore": "Pokaż więcej"
+      "showMore": "Pokaż więcej",
+      "edit": "Edytuj",
+      "share": "Udostępnij profil",
+      "cancel": "Anuluj",
+      "confirm": "Potwierdź"
     },
     "breadcrumbs": {
       "dashboard": "Panel"
     },
+    "field": {
+      "firstName": "Imię",
+      "firstNamePlaceholder": "Wprowadź swoje imię",
+      "lastName": "Nazwisko",
+      "lastNamePlaceholder": "Wprowadź swoje nazwisko",
+      "contactEmail": "Email",
+      "contactEmailPlaceholder": "Wprowadź swój adres email",
+      "contactPhone": "Numer telefonu",
+      "contactPhonePlaceholder": "Wprowadź swój numer telefonu",
+      "jobTitle": "Tytuł",
+      "jobTitlePlaceholder": "Wprowadź swój tytuł",
+      "description": "Twój opis",
+      "descriptionPlaceholder": "Wprowadź krótki opis"
+    },
+    "toast": {
+      "profileLinkCopied": "Link do profilu skopiowany!",
+      "profileLinkCopyError": "Błąd podczas kopiowania linku do profilu!"
+    },
     "other": {
+      "personalInfoTitle": "Dane osobiste",
+      "personalInfoDescription": "Zarządzaj swoimi podstawowymi danymi konta",
+      "aboutTitle": "O mnie",
+      "aboutDescription": "Powiedz więcej o sobie",
       "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",
