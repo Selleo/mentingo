@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 
 import { DatabasePg } from "src/common";
 import { questionAnswerOptions, questions } from "src/storage/schema";
+import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
@@ -11,6 +12,7 @@ import type {
   CreateAiMentorLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
+  UpdateAiMentorLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
@@ -44,17 +46,13 @@ export class AdminLessonService {
     return lesson.id;
   }
 
-  async createAiMentorLesson(data: CreateAiMentorLessonBody, authorId: UUIDType) {
+  async createAiMentorLesson(data: CreateAiMentorLessonBody) {
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
-    if (!data.aiMentorInstructions?.length || !data.completionConditions?.length)
+    if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
 
-    const lesson = await this.createAiMentorLessonWithTransaction(
-      data,
-      authorId,
-      maxDisplayOrder + 1,
-    );
+    const lesson = await this.createAiMentorLessonWithTransaction(data, maxDisplayOrder + 1);
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
@@ -76,13 +74,22 @@ export class AdminLessonService {
 
     return lesson?.id;
   }
+  async updateAiMentorLesson(id: UUIDType, data: UpdateAiMentorLessonBody) {
+    const lesson = await this.lessonRepository.getLesson(id);
+
+    if (!lesson) throw new NotFoundException("Lesson not found");
+
+    if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
+      throw new BadRequestException("Instructions and conditions required");
+
+    const updatedLessonId = await this.updateAiMentorLessonWithTransaction(id, data);
+    return updatedLessonId;
+  }
 
   async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, authorId: UUIDType) {
     const lesson = await this.lessonRepository.getLesson(id);
 
-    if (!lesson) {
-      throw new NotFoundException("Lesson not found");
-    }
+    if (!lesson) throw new NotFoundException("Lesson not found");
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
@@ -143,7 +150,6 @@ export class AdminLessonService {
 
   private async createAiMentorLessonWithTransaction(
     data: CreateAiMentorLessonBody,
-    authorId: UUIDType,
     displayOrder: number,
   ) {
     return await this.db.transaction(async (trx) => {
@@ -159,6 +165,26 @@ export class AdminLessonService {
       );
 
       return lesson;
+    });
+  }
+
+  private async updateAiMentorLessonWithTransaction(id: UUIDType, data: UpdateAiMentorLessonBody) {
+    return await this.db.transaction(async (trx) => {
+      const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, data, trx);
+
+      if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
+        throw new BadRequestException("Instructions and conditions required");
+
+      await this.adminLessonRepository.updateAiMentorLessonData(
+        id,
+        {
+          aiMentorInstructions: data.aiMentorInstructions,
+          completionConditions: data.completionConditions,
+        },
+        trx,
+      );
+
+      return updatedLesson;
     });
   }
 

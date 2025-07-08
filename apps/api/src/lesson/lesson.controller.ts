@@ -28,6 +28,8 @@ import {
   CreateQuizLessonBody,
   createQuizLessonSchema,
   lessonShowSchema,
+  UpdateAiMentorLessonBody,
+  updateAiMentorLessonSchema,
   UpdateLessonBody,
   updateLessonSchema,
   UpdateQuizLessonBody,
@@ -93,13 +95,34 @@ export class LessonController {
   })
   async betaCreateAiMentorLesson(
     @Body() createAiMentorLessonBody: CreateAiMentorLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const id = await this.adminLessonsService.createAiMentorLesson(
-      createAiMentorLessonBody,
-      userId,
-    );
+    const id = await this.adminLessonsService.createAiMentorLesson(createAiMentorLessonBody);
     return new BaseResponse({ id, message: "AI Mentor lesson created successfully" });
+  }
+
+  @Patch("beta-update-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "id",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: updateAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async betaUpdateAiMentorLesson(
+    @Query("id") id: UUIDType,
+    @Body() data: UpdateAiMentorLessonBody,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.adminLessonsService.updateAiMentorLesson(id, data);
+    return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
   }
   @Post("beta-create-lesson/quiz")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)

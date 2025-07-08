@@ -19,6 +19,7 @@ import type {
   CreateAiMentorLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
+  UpdateAiMentorLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
@@ -101,16 +102,36 @@ export class AdminLessonRepository {
     return lesson;
   }
 
+  async updateAiMentorLesson(
+    id: UUIDType,
+    data: UpdateAiMentorLessonBody,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    return dbInstance.update(lessons).set(data).where(eq(lessons.id, id)).returning();
+  }
+  async updateAiMentorLessonData(
+    lessonId: UUIDType,
+    data: {
+      aiMentorInstructions: string;
+      completionConditions: string;
+    },
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    return dbInstance
+      .update(aiMentorLessons)
+      .set(data)
+      .where(eq(aiMentorLessons.lessonId, lessonId));
+  }
+
   async createAiMentorLessonData(
     data: {
       lessonId: UUIDType;
       aiMentorInstructions: string;
       completionConditions: string;
     },
-    trx?: any,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
-    const db = trx || this.db;
-    return await db.insert(aiMentorLessons).values(data).returning();
+    return dbInstance.insert(aiMentorLessons).values(data).returning();
   }
 
   async getQuestions(conditions: any[]) {

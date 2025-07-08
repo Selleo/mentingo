@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useCreateAiMentorLesson } from "~/api/mutations/admin/useCreateAiMentorLesson";
+import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
+import { useUpdateAiMentorLesson } from "~/api/mutations/admin/useUpdateAiMentorLesson";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import {
@@ -39,12 +41,14 @@ export const useAiMentorLessonForm = ({
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState<SuggestionType | null>(null);
   const { mutateAsync: createAiMentorLesson } = useCreateAiMentorLesson();
+  const { mutateAsync: updateAiMentorLesson } = useUpdateAiMentorLesson();
+  const { mutateAsync: deleteAiMentorLesson } = useDeleteLesson();
   const form = useForm<AiMentorLessonFormValues>({
     resolver: zodResolver(aiMentorLessonFormSchema(t)),
     defaultValues: {
       title: lessonToEdit?.title || "",
-      aiMentorInstructions: lessonToEdit?.aiMentorInstructions || "",
-      completionConditions: lessonToEdit?.completionConditions || "",
+      aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
+      completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
     },
   });
 
@@ -54,8 +58,8 @@ export const useAiMentorLessonForm = ({
     if (lessonToEdit) {
       reset({
         title: lessonToEdit.title,
-        aiMentorInstructions: lessonToEdit?.aiMentorInstructions || "",
-        completionConditions: lessonToEdit?.completionConditions || "",
+        aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
+        completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
       });
     }
   }, [lessonToEdit, reset]);
@@ -99,12 +103,12 @@ export const useAiMentorLessonForm = ({
     if (!chapterToEdit) return;
 
     try {
-      // TODO: Implement AI Mentor lesson creation/update API calls
       if (lessonToEdit) {
-        console.log("Update AI Mentor lesson:", values);
-        // await updateAiMentorLesson({ data: { ...values }, lessonId: lessonToEdit.id });
+        await updateAiMentorLesson({
+          data: { ...values },
+          lessonId: lessonToEdit.id,
+        });
       } else {
-        console.log("Create AI Mentor lesson:", values);
         await createAiMentorLesson({
           data: { ...values, chapterId: chapterToEdit.id },
         });
@@ -125,9 +129,7 @@ export const useAiMentorLessonForm = ({
     }
 
     try {
-      // TODO: Implement AI Mentor lesson deletion API call
-      console.log("Delete AI Mentor lesson:", lessonToEdit.id);
-      // await deleteLesson({ chapterId: chapterToEdit?.id, lessonId: lessonToEdit.id });
+      await deleteAiMentorLesson({ chapterId: chapterToEdit?.id, lessonId: lessonToEdit.id });
       await queryClient.invalidateQueries({
         queryKey: [COURSE_QUERY_KEY, { id: courseId }],
       });

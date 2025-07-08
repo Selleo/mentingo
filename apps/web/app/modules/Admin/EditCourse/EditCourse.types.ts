@@ -2,6 +2,12 @@ import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLess
 
 export type NavigationTab = "Settings" | "Curriculum" | "Pricing" | "Status";
 
+type AiMentorType = {
+  id: string;
+  lessonId: string;
+  aiMentorInstructions: string;
+  completionConditions: string;
+};
 export interface Lesson {
   updatedAt: string;
   type: string;
@@ -16,9 +22,7 @@ export interface Lesson {
   questions?: Question[];
   isExternal?: boolean;
   // AI Mentor specific fields
-  aiMentorInstructions?: string;
-  completionConditions?: string;
-  passThreshold?: number;
+  aiMentor?: AiMentorType;
 }
 
 export interface Chapter {
@@ -51,7 +55,7 @@ export const LessonType = {
   TEXT: "text",
   PRESENTATION: "presentation",
   QUIZ: "quiz",
-  AI_MENTOR: "ai",
+  AI_MENTOR: "aiMentor",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

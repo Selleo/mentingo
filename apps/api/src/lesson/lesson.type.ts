@@ -3,7 +3,7 @@ export const LESSON_TYPES = {
   PRESENTATION: "presentation",
   VIDEO: "video",
   QUIZ: "quiz",
-  AI_MENTOR: "ai",
+  AI_MENTOR: "aiMentor",
 } as const;
 
 export type LessonTypes = (typeof LESSON_TYPES)[keyof typeof LESSON_TYPES];

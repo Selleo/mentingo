@@ -48,18 +48,6 @@ export const questionSchema = Type.Object({
   passQuestion: Type.Union([Type.Boolean(), Type.Null()]),
 });
 
-export const lessonSchema = Type.Object({
-  id: UUIDSchema,
-  title: Type.String(),
-  type: Type.Enum(LESSON_TYPES),
-  description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  displayOrder: Type.Number(),
-  fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  questions: Type.Optional(Type.Array(adminQuestionSchema)),
-  updatedAt: Type.Optional(Type.String()),
-});
-
 const lessonQuizSchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
@@ -72,6 +60,13 @@ const lessonQuizSchema = Type.Object({
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
 });
 
+export const aiMentorLessonSchema = Type.Object({
+  id: UUIDSchema,
+  lessonId: UUIDSchema,
+  aiMentorInstructions: Type.String(),
+  completionConditions: Type.String(),
+});
+
 export const adminLessonSchema = Type.Object({
   id: UUIDSchema,
   type: Type.Enum(LESSON_TYPES),
@@ -81,7 +76,35 @@ export const adminLessonSchema = Type.Object({
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
+  aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
 });
+
+export const lessonSchema = Type.Object({
+  id: UUIDSchema,
+  title: Type.String(),
+  type: Type.Enum(LESSON_TYPES),
+  description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  displayOrder: Type.Number(),
+  fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  questions: Type.Optional(Type.Array(adminQuestionSchema)),
+  aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
+  updatedAt: Type.Optional(Type.String()),
+});
+
+export const createAiMentorLessonSchema = Type.Intersect([
+  Type.Omit(lessonSchema, ["id", "displayOrder", "type"]),
+  Type.Object({
+    chapterId: UUIDSchema,
+    displayOrder: Type.Optional(Type.Number()),
+    aiMentorInstructions: Type.String(),
+    completionConditions: Type.String(),
+  }),
+]);
+export const updateAiMentorLessonSchema = Type.Omit(createAiMentorLessonSchema, [
+  "chapterId",
+  "displayOrder",
+]);
 
 export const createLessonSchema = Type.Intersect([
   Type.Omit(lessonSchema, ["id", "displayOrder"]),
@@ -176,22 +199,6 @@ export const nextLessonSchema = Type.Union([
   Type.Null(),
 ]);
 
-export const aiMentorLessonSchema = Type.Object({
-  id: UUIDSchema,
-  lessonId: UUIDSchema,
-  aiMentorInstructions: Type.String(),
-  completionConditions: Type.String(),
-});
-export const createAiMentorLessonSchema = Type.Intersect([
-  Type.Omit(lessonSchema, ["id", "displayOrder", "type"]),
-  Type.Object({
-    chapterId: UUIDSchema,
-    displayOrder: Type.Optional(Type.Number()),
-    aiMentorInstructions: Type.String(),
-    completionConditions: Type.String(),
-  }),
-]);
-
 export type AdminLessonWithContentSchema = Static<typeof adminLessonSchema>;
 export type LessonForChapterSchema = Static<typeof lessonForChapterSchema>;
 export type CreateLessonBody = Static<typeof createLessonSchema>;
@@ -206,6 +213,7 @@ export type QuestionBody = Static<typeof questionSchema>;
 export type LessonShow = Static<typeof lessonShowSchema>;
 export type LessonSchema = Static<typeof lessonSchema>;
 export type AiMentorBody = Static<typeof aiMentorLessonSchema>;
+export type UpdateAiMentorLessonBody = Static<typeof updateAiMentorLessonSchema>;
 export type AnswerQuestionBody = Static<typeof answerQuestionsForLessonBody>;
 export type QuestionDetails = Static<typeof questionDetails>;
 export type NextLesson = Static<typeof nextLessonSchema>;

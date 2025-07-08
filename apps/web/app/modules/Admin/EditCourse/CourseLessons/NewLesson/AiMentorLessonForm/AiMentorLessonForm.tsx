@@ -53,6 +53,7 @@ const AiMentorLessonForm = ({
     lessonToEdit,
     setContentTypeToDisplay,
   });
+
   const { t } = useTranslation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -116,7 +117,6 @@ const AiMentorLessonForm = ({
               id="title"
               placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
               className="mb-4"
-              required
             />
 
             <div className="mb-4 grid grid-cols-1 lg:grid-cols-2">
