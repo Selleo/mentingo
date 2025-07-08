@@ -104,7 +104,7 @@ export class UserService {
         id: users.id,
         description: userDetails.description,
         contactEmail: userDetails.contactEmail,
-        contactPhone: userDetails.contactPhoneNumber, // Map database field to frontend field
+        contactPhone: userDetails.contactPhoneNumber,
         jobTitle: userDetails.jobTitle,
       })
       .from(users)
