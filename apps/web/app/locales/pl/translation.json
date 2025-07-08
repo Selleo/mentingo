@@ -13,7 +13,8 @@
       "goBack": "Wróć",
       "clearAll": "Wyczyść wszystko",
       "ignore": "Ignoruj",
-      "validate": "Popraw błędy"
+      "validate": "Popraw błędy",
+      "continue": "Kontynuuj"
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -31,7 +32,7 @@
       "archived": "Zarchiwizowany",
       "selected": "Wybrany",
       "allStatuses": "Wszystkie statusy",
-      "draft": "Wersja robocza",
+      "draft": "Szkic",
       "all": "Wszystko",
       "search": "Szukaj",
       "published": "Opublikowany",
@@ -192,7 +193,6 @@
       "dashboard": "Panel"
     },
     "other": {
-      "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kursy",
@@ -280,7 +280,7 @@
         "states": "Stany"
       },
       "other": {
-        "draft": "Wersja robocza",
+        "draft": "Szkic",
         "published": "Opublikowane"
       }
     },
@@ -538,6 +538,7 @@
         "removePresentationLesson": "Czy na pewno chcesz usunąć tę lekcję prezentacyjną z rozdziału?",
         "removeTextLesson": "Czy na pewno chcesz usunąć tę lekcję tekstową z rozdziału?",
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
+        "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -582,7 +583,14 @@
           "atLeastOneOptionCorrect": "Przynajmniej jedna opcja musi być oznaczona jako poprawna.",
           "allOptionsCorrect": "Wszystkie opcje muszą być poprawne",
           "titleRequired": "Tytuł jest wymagany",
-          "descriptionRequired": "Opis jest wymagany"
+          "descriptionRequired": "Opis jest wymagany",
+          "aiMentorInstructionsRequired": "Instrukcje AI Mentora są wymagane",
+          "aiMentorInstructionsMaxLength": "Instrukcje AI Mentora są zbyt długie (maks. 2000 znaków)",
+          "completionConditionsRequired": "Warunki zaliczenia są wymagane",
+          "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 1000 znaków)",
+          "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
+          "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
+          "titleMaxLength": "Tytuł jest zbyt długi (maks. 255 znaków)"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -592,6 +600,8 @@
           "fileLessonCreatedSuccessfully": "Plik utworzony pomyślnie",
           "textLessonCreatedSuccessfully": "Lekcja tekstowa utworzona pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
+          "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
+          "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
@@ -608,7 +618,10 @@
           "image": "Obrazek",
           "type": "Typ",
           "words": "Słowa",
-          "sentence": "Zdanie"
+          "sentence": "Zdanie",
+          "aiMentorInstructions": "Instrukcje AI Mentora",
+          "completionConditions": "Warunki zaliczenia",
+          "passThreshold": "Próg zaliczenia"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",
@@ -618,7 +631,10 @@
           "singleChoice": "Pojedynczy wybór",
           "multipleChoice": "Wielokrotny wybór",
           "enterWord": "Wprowadź słowo",
-          "enterURL": "Wpisz link"
+          "enterURL": "Wpisz link",
+          "aiMentorInstructions": "Opisz jak AI Mentor powinien zachowywać się podczas lekcji...",
+          "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
+          "passThreshold": "np. 70%"
         },
         "other": {
           "lessonNumber": "Liczba lekcji",
@@ -626,6 +642,7 @@
           "text": "Tekst",
           "video": "Wideo",
           "quiz": "Quiz",
+          "aiMentor": "AI Mentor",
           "correct": "Poprawna",
           "true": "Prawda",
           "false": "Fałsz",
@@ -646,16 +663,43 @@
           "videoLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki wideo, takie jak MP4.",
           "presentationLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki prezentacji, takie jak PPTX.",
           "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
+          "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
           "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
           "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
-          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu."
+          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
+          "aiMentorInstructionsTooltip": "Opisz, jak AI Mentor powinien zachowywać się podczas lekcji. Uwzględnij kontekst, rolę lub scenariusz, który AI powinien realizować. To określa, jak AI będzie prowadzić rozmowę.",
+          "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
+          "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
+          "suggestedExamples": "Sugerowane przykłady",
+          "charactersLeft": "pozostałe znaki",
+          "optional": "opcjonalnie",
+          "overwriteContent": "Nadpisz treść",
+          "overwriteContentDescription": "To zastąpi aktualną treść wybranym przykładem. Czy na pewno chcesz kontynuować?",
+          "scenarioSimulation": "Symulacja scenariusza",
+          "problemSolving": "Rozwiązywanie problemów",
+          "creativeTask": "Zadanie kreatywne",
+          "knowledgeSharing": "Dialog dzielenia się wiedzą",
+          "aiMentorSuggestionExamples": {
+            "instructions": {
+              "scenarioSimulation": "Wcielasz się w rolę klienta biznesowego, który szuka dostawcy usług tworzenia oprogramowania. Masz konkretne wymagania: aplikacja musi być gotowa w ciągu 3 miesięcy, masz ograniczony budżet i oczekujesz jasnej komunikacji. Student wciela się w rolę przedstawiciela handlowego, który chce pozyskać twój biznes. AI Mentor powinien odpowiadać jako klient, zadając pytania i wyrażając obawy.",
+              "problemSolving": "Wcielasz się w rolę pracownika, który prosi o podwyżkę wynagrodzenia. Uważasz, że na nią zasługujesz ze względu na swoje ostatnie osiągnięcia. Jednak firma obecnie nie ma dostępnego budżetu na podwyżki. Student wciela się w rolę menedżera, który musi konstruktywnie przeprowadzić rozmowę, okazując empatię i próbując znaleźć alternatywne rozwiązanie.",
+              "creativeTask": "Prosisz studenta o zaproponowanie pomysłu na nową usługę, którą firma mogłaby zaoferować swoim klientom. Twoją rolą jest zachęcanie do kreatywności, zadawanie pytań uzupełniających i pomaganie studentowi w udoskonaleniu jego koncepcji.",
+              "knowledgeSharing": "Wcielasz się w rolę doświadczonego mentora, który dzieli się wiedzą na temat technik zarządzania czasem. Rozmowa ma charakter nieformalny: wprowadzasz koncepcje, podajesz przykłady i zachęcasz studenta do refleksji. Czasami zadajesz lekkie, otwarte pytania, aby sprawdzić zrozumienie. Celem jest prowadzenie, a nie testowanie."
+            },
+            "conditions": {
+              "scenarioSimulation": "Student pyta o budżet klienta.\nStudent pyta o harmonogram.\nStudent używa sprzedaży SPIN lub innej techniki sprzedażowej.\nStudent identyfikuje kluczowe problemy klienta.\nStudent składa propozycję, która odpowiada ograniczeniom klienta.\nPróg: co najmniej 3 z 5 warunków musi być spełnionych.",
+              "problemSolving": "Student uznaje wkład pracownika.\nStudent uczciwie wyjaśnia sytuację budżetową.\nStudent proponuje alternatywę niefinansową (np. dodatkowe korzyści, możliwość rozwoju).\nStudent zgadza się wrócić do tematu w późniejszym terminie.\nStudent utrzymuje szanujący, wspierający ton.\nPróg: co najmniej 3 z 5 warunków musi być spełnionych.",
+              "creativeTask": "Student przedstawia oryginalny pomysł.\nStudent wyjaśnia, kto jest grupą docelową.\nStudent opisuje, jak usługa mogłaby zapewnić wartość klientom.\nStudent identyfikuje potencjalne wyzwania.\n(Brak zdefiniowanego progu — wszystkie warunki muszą być spełnione.)",
+              "knowledgeSharing": "Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).\nStudent potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.\nStudent wyraża, jak mógłby zastosować jedną technikę w swojej pracy.\n(Brak zdefiniowanego progu — wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)"
+            }
+          }
         }
       }
     },
     "status": {
       "header": "Status",
       "subHeader": "Ustaw stan kursu",
-      "draftHeader": "Wersja robocza",
+      "draftHeader": "Szkic",
       "draftBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy już się zapisali, kurs nie będzie widoczny na ich liście kursów.",
       "publishedHeader": "Opublikowany",
       "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie."
@@ -832,6 +876,10 @@
       "selectQuestion": "Wybierz pytanie.",
       "trueOrFalseQuestion": "Pytanie prawda/fałsz."
     },
+    "aiMentor": {
+      "title": "Sesja AI Mentora",
+      "description": "To jest sesja mentoringu z AI. AI poprowadzi Cię przez lekcję zgodnie z wytycznymi instruktora."
+    },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
     },
@@ -858,6 +906,7 @@
       "answerCannotBeEmptyForTextQuestion": "Odpowiedź nie może być pusta dla pytania tekstowego {{questionId}}.",
       "invalidSelectionForSingleAnswer": "Nieprawidłowy wybór dla pytania jednokrotnego wyboru.",
       "invalidFormatForMultiAnswer": "Nieprawidłowy format dla pytania wielokrotnego wyboru.",
+      "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
       "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!"
     }
@@ -878,6 +927,7 @@
       "yourAnswer": "Twoja odpowiedź",
       "singleChoice": "Pytanie jednokrotnego wyboru",
       "multipleChoice": "Pytanie wielokrotnego wyboru",
+      "trueOrFalseChoice": "Pytanie prawda fałsz",
       "oneOrTwoWordSentence": "Podaj krótką odpowiedź (1-2 zadań)",
       "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)"
     },

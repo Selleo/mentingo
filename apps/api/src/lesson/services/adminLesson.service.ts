@@ -8,6 +8,7 @@ import { AdminLessonRepository } from "../repositories/adminLesson.repository";
 import { LessonRepository } from "../repositories/lesson.repository";
 
 import type {
+  CreateAiMentorLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
   UpdateLessonBody,
@@ -41,6 +42,23 @@ export class AdminLessonService {
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
 
     return lesson.id;
+  }
+
+  async createAiMentorLesson(data: CreateAiMentorLessonBody, authorId: UUIDType) {
+    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
+
+    if (!data.aiMentorInstructions?.length || !data.completionConditions?.length)
+      throw new BadRequestException("Instructions and conditions required");
+
+    const lesson = await this.createAiMentorLessonWithTransaction(
+      data,
+      authorId,
+      maxDisplayOrder + 1,
+    );
+
+    await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
+
+    return lesson?.id;
   }
 
   async createQuizLesson(data: CreateQuizLessonBody, authorId: UUIDType) {
@@ -121,6 +139,27 @@ export class AdminLessonService {
       lessonObject.displayOrder,
       oldDisplayOrder,
     );
+  }
+
+  private async createAiMentorLessonWithTransaction(
+    data: CreateAiMentorLessonBody,
+    authorId: UUIDType,
+    displayOrder: number,
+  ) {
+    return await this.db.transaction(async (trx) => {
+      const lesson = await this.adminLessonRepository.createAiMentorLesson(data, displayOrder, trx);
+
+      await this.adminLessonRepository.createAiMentorLessonData(
+        {
+          lessonId: lesson.id,
+          aiMentorInstructions: data.aiMentorInstructions,
+          completionConditions: data.completionConditions,
+        },
+        trx,
+      );
+
+      return lesson;
+    });
   }
 
   private async createQuizLessonWithQuestionsAndOptions(

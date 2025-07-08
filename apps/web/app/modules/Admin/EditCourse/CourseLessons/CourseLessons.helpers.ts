@@ -8,6 +8,7 @@ export const mapItemType = (itemType: string | undefined): string =>
     .with("video", () => "Video")
     .with("presentation", () => "Presentation")
     .with("question", () => "Quiz")
+    .with("ai", () => "AiMentor")
     .otherwise(() => "Quiz");
 
 export const mapTypeToIcon = (itemType: string): string =>
@@ -16,6 +17,7 @@ export const mapTypeToIcon = (itemType: string): string =>
     .with("video", () => "Video")
     .with("presentation", () => "Presentation")
     .with("question", () => "Quiz")
+    .with("ai", () => "AiMentor")
     .otherwise(() => "Quiz");
 
 export const mapQuestionTypeToLabel = (questionType: QuestionType): string =>

@@ -176,18 +176,36 @@ export const nextLessonSchema = Type.Union([
   Type.Null(),
 ]);
 
+export const aiMentorLessonSchema = Type.Object({
+  id: UUIDSchema,
+  lessonId: UUIDSchema,
+  aiMentorInstructions: Type.String(),
+  completionConditions: Type.String(),
+});
+export const createAiMentorLessonSchema = Type.Intersect([
+  Type.Omit(lessonSchema, ["id", "displayOrder", "type"]),
+  Type.Object({
+    chapterId: UUIDSchema,
+    displayOrder: Type.Optional(Type.Number()),
+    aiMentorInstructions: Type.String(),
+    completionConditions: Type.String(),
+  }),
+]);
+
 export type AdminLessonWithContentSchema = Static<typeof adminLessonSchema>;
 export type LessonForChapterSchema = Static<typeof lessonForChapterSchema>;
 export type CreateLessonBody = Static<typeof createLessonSchema>;
 export type UpdateLessonBody = Static<typeof updateLessonSchema>;
 export type UpdateQuizLessonBody = Static<typeof updateQuizLessonSchema>;
 export type CreateQuizLessonBody = Static<typeof createQuizLessonSchema>;
+export type CreateAiMentorLessonBody = Static<typeof createAiMentorLessonSchema>;
 export type OptionBody = Static<typeof optionSchema>;
 export type AdminOptionBody = Static<typeof adminOptionSchema>;
 export type AdminQuestionBody = Static<typeof adminQuestionSchema>;
 export type QuestionBody = Static<typeof questionSchema>;
 export type LessonShow = Static<typeof lessonShowSchema>;
 export type LessonSchema = Static<typeof lessonSchema>;
+export type AiMentorBody = Static<typeof aiMentorLessonSchema>;
 export type AnswerQuestionBody = Static<typeof answerQuestionsForLessonBody>;
 export type QuestionDetails = Static<typeof questionDetails>;
 export type NextLesson = Static<typeof nextLessonSchema>;

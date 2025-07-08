@@ -3,6 +3,7 @@ import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
+  aiMentorLessons,
   chapters,
   lessons,
   questionAnswerOptions,
@@ -15,6 +16,7 @@ import { LESSON_TYPES } from "../lesson.type";
 import type {
   AdminOptionBody,
   AdminQuestionBody,
+  CreateAiMentorLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
   UpdateLessonBody,
@@ -78,6 +80,37 @@ export class AdminLessonRepository {
       .returning();
 
     return lesson;
+  }
+
+  async createAiMentorLesson(
+    data: CreateAiMentorLessonBody,
+    displayOrder: number,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    const [lesson] = await dbInstance
+      .insert(lessons)
+      .values({
+        title: data.title,
+        type: LESSON_TYPES.AI_MENTOR,
+        chapterId: data?.chapterId,
+        displayOrder,
+        isExternal: true,
+      })
+      .returning();
+
+    return lesson;
+  }
+
+  async createAiMentorLessonData(
+    data: {
+      lessonId: UUIDType;
+      aiMentorInstructions: string;
+      completionConditions: string;
+    },
+    trx?: any,
+  ) {
+    const db = trx || this.db;
+    return await db.insert(aiMentorLessons).values(data).returning();
   }
 
   async getQuestions(conditions: any[]) {

@@ -21,6 +21,8 @@ import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 import {
   AnswerQuestionBody,
   answerQuestionsForLessonBody,
+  CreateAiMentorLessonBody,
+  createAiMentorLessonSchema,
   CreateLessonBody,
   createLessonSchema,
   CreateQuizLessonBody,
@@ -77,6 +79,28 @@ export class LessonController {
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
 
+  @Post("beta-create-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "body",
+        schema: createAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
+  })
+  async betaCreateAiMentorLesson(
+    @Body() createAiMentorLessonBody: CreateAiMentorLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
+    const id = await this.adminLessonsService.createAiMentorLesson(
+      createAiMentorLessonBody,
+      userId,
+    );
+    return new BaseResponse({ id, message: "AI Mentor lesson created successfully" });
+  }
   @Post("beta-create-lesson/quiz")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({

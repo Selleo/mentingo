@@ -15,6 +15,10 @@ export interface Lesson {
   chapterId?: string;
   questions?: Question[];
   isExternal?: boolean;
+  // AI Mentor specific fields
+  aiMentorInstructions?: string;
+  completionConditions?: string;
+  passThreshold?: number;
 }
 
 export interface Chapter {
@@ -37,15 +41,17 @@ export const ContentTypes = {
   VIDEO_LESSON_FORM: "VIDEO_LESSON_FORM",
   PRESENTATION_FORM: "PRESENTATION_FORM",
   QUIZ_FORM: "QUIZ_FORM",
+  AI_MENTOR_FORM: "AI_MENTOR_FORM",
 };
 
-export type LessonIcons = "Text" | "Video" | "Presentation" | "Quiz";
+export type LessonIcons = "Text" | "Video" | "Presentation" | "Quiz" | "AiMentor";
 
 export const LessonType = {
   VIDEO: "video",
   TEXT: "text",
   PRESENTATION: "presentation",
   QUIZ: "quiz",
+  AI_MENTOR: "ai",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

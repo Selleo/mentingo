@@ -35,6 +35,12 @@ const lessonTypes = [
     title: "adminCourseView.curriculum.lesson.other.quiz",
     description: "adminCourseView.curriculum.lesson.other.quizLessonDescription",
   },
+  {
+    type: ContentTypes.AI_MENTOR_FORM,
+    icon: "AiMentor",
+    title: "adminCourseView.curriculum.lesson.other.aiMentor",
+    description: "adminCourseView.curriculum.lesson.other.aiMentorLessonDescription",
+  },
 ];
 
 const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) => {
