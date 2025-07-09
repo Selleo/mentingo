@@ -162,12 +162,19 @@
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordMinLength": "Hasło musi mieć co najmniej 8 znaków",
       "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "button": {
       "changePassword": "Zmień hasło"
     }
+  },
+  "passwordValidationDisplay": {
+    "header": "Twoje hasło musi zawierać:",
+    "passwordMinLength": "co najmniej 8 znaków",
+    "passwordUppercase": "co najmniej jedną wielką literę",
+    "passwordLowercase": "co najmniej jedną małą literę",
+    "passwordNumber": "co najmniej jedną cyfrę",
+    "passwordSpecial": "co najmniej jeden znak specjalny"
   },
   "changePasswordView": {
     "header": "Zmień hasło",
@@ -178,7 +185,8 @@
     },
     "validation": {
       "oldPassword": "Stare hasło jest wymagane",
-      "newPassword": "Nowe hasło jest wymagane"
+      "newPassword": "Nowe hasło jest wymagane",
+      "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "toast": {
       "passwordChangedSuccessfully": "Hasło zostało zmienione pomyślnie",
