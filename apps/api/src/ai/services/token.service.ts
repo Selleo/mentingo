@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { encoding_for_model } from "tiktoken";
 
-import type { OpenAIModels } from "src/ai/utils/ai.type";
+import type { OpenAIModels } from "src/ai/ai.type";
 
 @Injectable()
 export class TokenService {

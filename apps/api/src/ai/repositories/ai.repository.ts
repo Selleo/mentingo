@@ -1,58 +1,27 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, asc, eq, getTableColumns, inArray, not, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
-import { MESSAGE_ROLE, type MessageRole, type ThreadStatus } from "src/ai/utils/ai.type";
+import { MESSAGE_ROLE, type MessageRole } from "src/ai/ai.type";
 import { DatabasePg } from "src/common";
-import {
-  aiMentorLessons,
-  aiMentorThreadMessages,
-  aiMentorThreads,
-  groups,
-  groupUsers,
-  lessons,
-} from "src/storage/schema";
+import { aiMentorLessons, aiMentorThreadMessages, aiMentorThreads } from "src/storage/schema";
 
-import type {
-  AiMentorGroupsBody,
-  AiMentorLessonBody,
-  ThreadBody,
-  ThreadMessageBody,
-  UpdateThreadBody,
-} from "src/ai/utils/ai.schema";
+import type { ThreadBody, ThreadMessageBody } from "src/ai/ai.schema";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class AiRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  async findAiMentorLessonIdFromLesson(id: UUIDType) {
-    const [aiMentorLessonId] = await this.db
-      .select({ aiMentorLessonId: aiMentorLessons.id })
+  async getLessonIdFromMentorLesson(id: UUIDType) {
+    return this.db
+      .select({ lessonId: aiMentorLessons.lessonId })
       .from(aiMentorLessons)
-      .where(eq(aiMentorLessons.lessonId, id));
-
-    return aiMentorLessonId;
-  }
-
-  async findLessonByThreadId(threadId: UUIDType) {
-    const [lesson] = await this.db
-      .select(getTableColumns(lessons))
-      .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
-      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
-      .where(eq(aiMentorThreads.id, threadId));
-    return lesson;
+      .where(eq(aiMentorLessons.id, id));
   }
 
   async createThread(data: ThreadBody) {
-    const [thread] = await this.db
-      .insert(aiMentorThreads)
-      .values(data)
-      .returning({
-        ...getTableColumns(aiMentorThreads),
-        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
-      });
+    const [thread] = await this.db.insert(aiMentorThreads).values(data).returning();
     return thread;
   }
 
@@ -61,42 +30,13 @@ export class AiRepository {
     return message;
   }
 
-  async findThread(threadId: UUIDType) {
-    const [thread] = await this.db
-      .select({
-        ...getTableColumns(aiMentorThreads),
-        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
-      })
+  async getThreadStatus(threadId: UUIDType) {
+    const [status] = await this.db
+      .select({ status: aiMentorThreads.status })
       .from(aiMentorThreads)
       .where(eq(aiMentorThreads.id, threadId));
-    return thread;
+    return status;
   }
-
-  async findThreadsByLessonId(lessonId: UUIDType) {
-    const threads = await this.db
-      .select({
-        ...getTableColumns(aiMentorThreads),
-        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
-      })
-      .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
-      .where(eq(aiMentorLessons.lessonId, lessonId));
-
-    return threads;
-  }
-  async findThreadsByLessonIdAndUserId(lessonId: UUIDType, userId: UUIDType) {
-    const threads = await this.db
-      .select({
-        ...getTableColumns(aiMentorThreads),
-        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
-      })
-      .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
-      .where(and(eq(aiMentorLessons.lessonId, lessonId), eq(aiMentorThreads.userId, userId)));
-
-    return threads;
-  }
-
   async getTokenSumForThread(threadId: UUIDType, archived: boolean) {
     const [tokens] = await this.db
       .select({
@@ -107,43 +47,39 @@ export class AiRepository {
         and(
           eq(aiMentorThreadMessages.threadId, threadId),
           eq(aiMentorThreadMessages.archived, archived),
-          not(inArray(aiMentorThreadMessages.role, [MESSAGE_ROLE.SYSTEM, MESSAGE_ROLE.SUMMARY])),
         ),
       );
     return tokens;
   }
 
-  async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
+  async getMessageHistory(threadId: UUIDType, archived: boolean, role?: MessageRole) {
     const messages = await this.db
-      .select({
-        role: sql<MessageRole>`${aiMentorThreadMessages.role}`,
-        content: aiMentorThreadMessages.content,
-      })
+      .select()
       .from(aiMentorThreadMessages)
       .where(
         and(
           eq(aiMentorThreadMessages.threadId, threadId),
-          eq(
-            aiMentorThreadMessages.archived,
-            archived ? archived : aiMentorThreadMessages.archived,
-          ),
-          eq(aiMentorThreadMessages.role, role ? role : aiMentorThreadMessages.role),
+          eq(aiMentorThreadMessages.archived, archived),
+          ...(role &&
+          role !== MESSAGE_ROLE.SYSTEM &&
+          role !== MESSAGE_ROLE.TOOL &&
+          role !== MESSAGE_ROLE.SUMMARY
+            ? [eq(aiMentorThreadMessages.role, role)]
+            : []),
         ),
-      )
-      .orderBy(asc(aiMentorThreadMessages.createdAt));
+      );
 
-    return messages;
-  }
-
-  async findThreadLanguage(threadId: UUIDType) {
     const [lang] = await this.db
       .select({ language: aiMentorThreads.userLanguage })
       .from(aiMentorThreads)
       .where(eq(aiMentorThreads.id, threadId));
 
-    return lang;
-  }
+    const messageHistory = messages.map<{ role: MessageRole; content: string }>(
+      ({ role, content }) => ({ role: role as MessageRole, content }),
+    );
 
+    return { data: { messages }, history: messageHistory, language: lang.language };
+  }
   async findFirstMessageByRoleAndThread(threadId: UUIDType, role: MessageRole) {
     const [exists] = await this.db
       .select()
@@ -158,65 +94,28 @@ export class AiRepository {
     const [archived] = await this.db
       .update(aiMentorThreadMessages)
       .set({ archived: true })
-      .where(
-        and(
-          eq(aiMentorThreadMessages.threadId, threadId),
-          not(inArray(aiMentorThreadMessages.role, [MESSAGE_ROLE.SYSTEM, MESSAGE_ROLE.SUMMARY])),
-        ),
-      )
+      .where(eq(aiMentorThreadMessages.threadId, threadId))
       .returning();
     return archived;
   }
 
   async updateSummary(threadId: UUIDType, summary: string, tokenCount: number) {
-    const [newSummary] = await this.db
+    const newSummary = await this.db
       .update(aiMentorThreadMessages)
       .set({ content: summary, tokenCount: tokenCount })
       .where(eq(aiMentorThreadMessages.role, MESSAGE_ROLE.SUMMARY));
     return newSummary;
   }
+  async updateMessageContent(threadMessageId: string, content: string, tokenCount: number) {
+    const newSummary = await this.db
+      .update(aiMentorThreadMessages)
+      .set({ content, tokenCount })
+      .where(eq(aiMentorThreadMessages.id, threadMessageId));
+    return newSummary;
+  }
 
   async insertMessage(data: ThreadMessageBody) {
-    return this.db.insert(aiMentorThreadMessages).values(data).returning();
-  }
-
-  async findMentorLessonByThreadId(threadId: UUIDType): Promise<AiMentorLessonBody> {
-    const [lesson] = await this.db
-      .select({
-        title: lessons.title,
-        instructions: aiMentorLessons.aiMentorInstructions,
-        conditions: aiMentorLessons.completionConditions,
-      })
-      .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
-      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
-      .where(eq(aiMentorThreads.id, threadId));
-    return lesson;
-  }
-
-  async findGroupsByThreadId(threadId: UUIDType): Promise<AiMentorGroupsBody> {
-    const groupCharacteristics = await this.db
-      .select({
-        name: groups.name,
-        characteristic: groups.description,
-      })
-      .from(groups)
-      .innerJoin(groupUsers, eq(groups.id, groupUsers.groupId))
-      .innerJoin(aiMentorThreads, eq(aiMentorThreads.userId, groupUsers.userId))
-      .where(eq(aiMentorThreads.id, threadId));
-
-    return groupCharacteristics;
-  }
-
-  async updateThread(threadId: UUIDType, data: UpdateThreadBody) {
-    const [thread] = await this.db
-      .update(aiMentorThreads)
-      .set(data)
-      .where(eq(aiMentorThreads.id, threadId))
-      .returning({
-        ...getTableColumns(aiMentorThreads),
-        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
-      });
-    return thread;
+    const newMessage = await this.db.insert(aiMentorThreadMessages).values(data).returning();
+    return newMessage;
   }
 }

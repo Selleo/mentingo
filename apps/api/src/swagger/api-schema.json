@@ -578,33 +578,6 @@
         }
       }
     },
-    "/api/user/profile": {
-      "patch": {
-        "operationId": "UserController_updateUserProfile",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserProfileBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserProfileResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/user/admin": {
       "patch": {
         "operationId": "UserController_adminUpdateUser",
@@ -2841,85 +2814,6 @@
             }
           }
         }
-      },
-      "get": {
-        "operationId": "AiController_getThread",
-        "parameters": [
-          {
-            "name": "thread",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/threads": {
-      "get": {
-        "operationId": "AiController_getThreads",
-        "parameters": [
-          {
-            "name": "lesson",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/thread/messages": {
-      "get": {
-        "operationId": "AiController_getThreadMessages",
-        "parameters": [
-          {
-            "name": "thread",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadMessagesResponse"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/ai/chat": {
@@ -2942,33 +2836,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ChatResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/judge/{threadId}": {
-      "post": {
-        "operationId": "AiController_judgeThread",
-        "parameters": [
-          {
-            "name": "threadId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JudgeThreadResponse"
                 }
               }
             }
@@ -3575,49 +3442,6 @@
             },
             "required": [
               "id",
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserProfileBody": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "contactEmail": {
-            "format": "email",
-            "type": "string"
-          },
-          "contactPhone": {
-            "type": "string"
-          },
-          "jobTitle": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateUserProfileResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
               "message"
             ]
           }
@@ -4617,7 +4441,7 @@
                                 "type": "string"
                               },
                               {
-                                "const": "ai_mentor",
+                                "const": "ai",
                                 "type": "string"
                               }
                             ]
@@ -4843,7 +4667,7 @@
                                 "type": "string"
                               },
                               {
-                                "const": "ai_mentor",
+                                "const": "ai",
                                 "type": "string"
                               }
                             ]
@@ -5831,7 +5655,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "ai_mentor",
+                          "const": "ai",
                           "type": "string"
                         }
                       ]
@@ -5973,7 +5797,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "ai_mentor",
+                          "const": "ai",
                           "type": "string"
                         }
                       ]
@@ -6332,7 +6156,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "ai_mentor",
+                          "const": "ai",
                           "type": "string"
                         }
                       ]
@@ -6756,7 +6580,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "ai_mentor",
+                    "const": "ai",
                     "type": "string"
                   }
                 ]
@@ -7088,7 +6912,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "ai_mentor",
+                    "const": "ai",
                     "type": "string"
                   }
                 ]
@@ -8406,7 +8230,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "ai_mentor",
+                    "const": "ai",
                     "type": "string"
                   }
                 ]
@@ -8877,7 +8701,7 @@
                 "name": {
                   "type": "string"
                 },
-                "characteristic": {
+                "description": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8939,7 +8763,7 @@
               "required": [
                 "id",
                 "name",
-                "characteristic"
+                "description"
               ]
             }
           },
@@ -8987,7 +8811,7 @@
               "name": {
                 "type": "string"
               },
-              "characteristic": {
+              "description": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -9049,7 +8873,7 @@
             "required": [
               "id",
               "name",
-              "characteristic"
+              "description"
             ]
           }
         },
@@ -9072,7 +8896,7 @@
                 "name": {
                   "type": "string"
                 },
-                "characteristic": {
+                "description": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -9134,7 +8958,7 @@
               "required": [
                 "id",
                 "name",
-                "characteristic"
+                "description"
               ]
             }
           },
@@ -9175,7 +8999,7 @@
           "name": {
             "type": "string"
           },
-          "characteristic": {
+          "description": {
             "type": "string"
           }
         },
@@ -9213,7 +9037,7 @@
           "name": {
             "type": "string"
           },
-          "characteristic": {
+          "description": {
             "type": "string"
           }
         },
@@ -9230,7 +9054,7 @@
               "name": {
                 "type": "string"
               },
-              "characteristic": {
+              "description": {
                 "type": "string"
               }
             },
@@ -9460,7 +9284,7 @@
       "CreateThreadBody": {
         "type": "object",
         "properties": {
-          "lessonId": {
+          "aiMentorLessonId": {
             "format": "uuid",
             "type": "string"
           },
@@ -9478,7 +9302,7 @@
           }
         },
         "required": [
-          "lessonId",
+          "aiMentorLessonId",
           "userLanguage"
         ]
       },
@@ -9487,264 +9311,62 @@
         "properties": {
           "data": {
             "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "aiMentorLessonId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userLanguage": {
-                "anyOf": [
-                  {
-                    "const": "pl",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "aiMentorLessonId": {
+                    "format": "uuid",
                     "type": "string"
                   },
-                  {
-                    "const": "en",
-                    "type": "string"
+                  "userLanguage": {
+                    "anyOf": [
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "en",
+                        "type": "string"
+                      }
+                    ]
                   }
+                },
+                "required": [
+                  "aiMentorLessonId",
+                  "userLanguage"
                 ]
               },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "active",
+              {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "format": "uuid",
                     "type": "string"
                   },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "abandoned",
-                    "type": "string"
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "abandoned",
+                        "type": "string"
+                      }
+                    ]
                   }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "aiMentorLessonId",
-              "userId",
-              "userLanguage",
-              "createdAt",
-              "updatedAt",
-              "status"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "aiMentorLessonId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userLanguage": {
-                "anyOf": [
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "en",
-                    "type": "string"
-                  }
-                ]
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "active",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "abandoned",
-                    "type": "string"
-                  }
+                },
+                "required": [
+                  "userId",
+                  "status"
                 ]
               }
-            },
-            "required": [
-              "id",
-              "aiMentorLessonId",
-              "userId",
-              "userLanguage",
-              "createdAt",
-              "updatedAt",
-              "status"
             ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "aiMentorLessonId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "userId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "userLanguage": {
-                  "anyOf": [
-                    {
-                      "const": "pl",
-                      "type": "string"
-                    },
-                    {
-                      "const": "en",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "status": {
-                  "anyOf": [
-                    {
-                      "const": "active",
-                      "type": "string"
-                    },
-                    {
-                      "const": "completed",
-                      "type": "string"
-                    },
-                    {
-                      "const": "abandoned",
-                      "type": "string"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "aiMentorLessonId",
-                "userId",
-                "userLanguage",
-                "createdAt",
-                "updatedAt",
-                "status"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadMessagesResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "allOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "content": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "content"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "role": {
-                      "anyOf": [
-                        {
-                          "const": "system",
-                          "type": "string"
-                        },
-                        {
-                          "const": "user",
-                          "type": "string"
-                        },
-                        {
-                          "const": "assistant",
-                          "type": "string"
-                        },
-                        {
-                          "const": "tool",
-                          "type": "string"
-                        },
-                        {
-                          "const": "summary",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "isJudge": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "role"
-                  ]
-                }
-              ]
-            }
           }
         },
         "required": [
@@ -9818,93 +9440,11 @@
                   },
                   "tokenCount": {
                     "type": "integer"
-                  },
-                  "isJudge": {
-                    "type": "boolean"
                   }
                 },
                 "required": [
                   "role",
                   "tokenCount"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "JudgeThreadResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "allOf": [
-              {
-                "type": "object",
-                "allOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "summary": {
-                        "type": "string"
-                      },
-                      "minScore": {
-                        "type": "integer"
-                      },
-                      "score": {
-                        "type": "integer"
-                      },
-                      "maxScore": {
-                        "type": "integer"
-                      }
-                    },
-                    "required": [
-                      "summary",
-                      "minScore",
-                      "score",
-                      "maxScore"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "passed": {
-                        "type": "boolean"
-                      },
-                      "percentage": {
-                        "type": "integer"
-                      }
-                    },
-                    "required": [
-                      "passed",
-                      "percentage"
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "anyOf": [
-                      {
-                        "const": "active",
-                        "type": "string"
-                      },
-                      {
-                        "const": "completed",
-                        "type": "string"
-                      },
-                      {
-                        "const": "abandoned",
-                        "type": "string"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "status"
                 ]
               }
             ]
