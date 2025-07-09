@@ -55,7 +55,7 @@ export const LessonType = {
   TEXT: "text",
   PRESENTATION: "presentation",
   QUIZ: "quiz",
-  AI_MENTOR: "aiMentor",
+  AI_MENTOR: "ai",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

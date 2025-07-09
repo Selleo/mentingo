@@ -4387,7 +4387,7 @@
                                 "type": "string"
                               },
                               {
-                                "const": "aiMentor",
+                                "const": "ai",
                                 "type": "string"
                               }
                             ]
@@ -4613,7 +4613,7 @@
                                 "type": "string"
                               },
                               {
-                                "const": "aiMentor",
+                                "const": "ai",
                                 "type": "string"
                               }
                             ]
@@ -5601,7 +5601,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "aiMentor",
+                          "const": "ai",
                           "type": "string"
                         }
                       ]
@@ -5743,7 +5743,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "aiMentor",
+                          "const": "ai",
                           "type": "string"
                         }
                       ]
@@ -6102,7 +6102,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "aiMentor",
+                          "const": "ai",
                           "type": "string"
                         }
                       ]
@@ -6526,7 +6526,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "aiMentor",
+                    "const": "ai",
                     "type": "string"
                   }
                 ]
@@ -6858,7 +6858,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "aiMentor",
+                    "const": "ai",
                     "type": "string"
                   }
                 ]
@@ -8176,7 +8176,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "aiMentor",
+                    "const": "ai",
                     "type": "string"
                   }
                 ]
