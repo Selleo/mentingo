@@ -128,7 +128,7 @@ const AiMentorLessonForm = ({
                       {t("adminCourseView.curriculum.lesson.field.aiMentorInstructions")}
                     </Label>
                     <Tooltip>
-                      <TooltipTrigger asChild>
+                      <TooltipTrigger>
                         <Icon name="Info" className="h-4 w-4 cursor-help text-neutral-500" />
                       </TooltipTrigger>
                       <TooltipContent>
@@ -169,7 +169,7 @@ const AiMentorLessonForm = ({
                       {t("adminCourseView.curriculum.lesson.field.completionConditions")}
                     </Label>
                     <Tooltip>
-                      <TooltipTrigger asChild>
+                      <TooltipTrigger>
                         <Icon name="Info" className="h-4 w-4 cursor-help text-neutral-500" />
                       </TooltipTrigger>
                       <TooltipContent>
