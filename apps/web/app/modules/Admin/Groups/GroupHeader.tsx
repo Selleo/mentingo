@@ -13,6 +13,7 @@ type CreatePageHeaderProps = {
 
 export const GroupHeader = ({ title, handlePublish, handleCancel }: CreatePageHeaderProps) => {
   const { t } = useTranslation();
+
   return (
     <div className="flex flex-col justify-between gap-2 md:flex-row">
       <h2 className="h5 md:h3">{title}</h2>
@@ -22,14 +23,14 @@ export const GroupHeader = ({ title, handlePublish, handleCancel }: CreatePageHe
           onClick={handleCancel}
           className="flex w-full items-center justify-center gap-2 md:w-fit"
         >
-          <Icon name="X" className={"size-5"} /> {t("adminGroupsView.newGroup.cancel")}
+          <Icon name="X" className="size-5" /> {t("adminGroupsView.newGroup.cancel")}
         </Button>
         <Button
           variant="primary"
           onClick={handlePublish}
           className="flex w-full items-center justify-center gap-2 md:w-fit"
         >
-          <Icon name="Checkmark" className={"size-5"} /> {t("adminGroupsView.newGroup.submit")}
+          <Icon name="Checkmark" className="size-5" /> {t("adminGroupsView.newGroup.submit")}
         </Button>
       </div>
     </div>

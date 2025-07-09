@@ -14,12 +14,13 @@ interface GroupBreadcrumbsProps {
 }
 export const GroupPageBreadcrumbs = ({ name, href }: GroupBreadcrumbsProps) => {
   const { t } = useTranslation();
+
   return (
     <div className="mb-4 bg-primary-50">
       <BreadcrumbList>
         <GroupBreadcrumbsButton />
         <BreadcrumbItem>
-          <BreadcrumbLink href={`/admin/groups`}>{t("navigationSideBar.groups")}</BreadcrumbLink>
+          <BreadcrumbLink href="/admin/groups">{t("navigationSideBar.groups")}</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem className="text-neutral-950">

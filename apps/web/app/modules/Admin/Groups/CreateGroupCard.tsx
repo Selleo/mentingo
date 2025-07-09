@@ -13,7 +13,7 @@ interface CreateGroupProps {
   handleSubmit: (group: GroupFormValues) => Promise<void>;
 }
 const RequiredTick = () => {
-  return <span className={"text-error-600"}>*&nbsp;</span>;
+  return <span className="text-error-600">*&nbsp;</span>;
 };
 
 const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
