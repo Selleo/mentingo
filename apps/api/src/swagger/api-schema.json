@@ -2815,6 +2815,60 @@
           }
         }
       }
+    },
+    "/api/ai/thread": {
+      "post": {
+        "operationId": "AiController_createThread",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateThreadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/chat": {
+      "post": {
+        "operationId": "AiController_chat",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -9290,6 +9344,179 @@
               "version",
               "entryPoint",
               "s3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateThreadBody": {
+        "type": "object",
+        "properties": {
+          "aiMentorLessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "userLanguage": {
+            "anyOf": [
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "en",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "aiMentorLessonId",
+          "userLanguage"
+        ]
+      },
+      "CreateThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "userLanguage": {
+                    "anyOf": [
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "en",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "aiMentorLessonId",
+                  "userLanguage"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "abandoned",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "userId",
+                  "status"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ChatBody": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId",
+          "content"
+        ]
+      },
+      "ChatResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "threadId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "threadId",
+                  "content"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "anyOf": [
+                      {
+                        "const": "system",
+                        "type": "string"
+                      },
+                      {
+                        "const": "user",
+                        "type": "string"
+                      },
+                      {
+                        "const": "assistant",
+                        "type": "string"
+                      },
+                      {
+                        "const": "tool",
+                        "type": "string"
+                      },
+                      {
+                        "const": "summary",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "tokenCount": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "role",
+                  "tokenCount"
+                ]
+              }
             ]
           }
         },

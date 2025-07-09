@@ -127,6 +127,20 @@
       "when": 1752579184297,
       "tag": "0017_added_ai_mentor_lesson_table",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1752066985081,
+      "tag": "0017_created_thread_and_message_thread_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1752075844325,
+      "tag": "0018_added_archived_field_to_thread_messages",
+      "breakpoints": true
     }
   ]
 }
