@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
+import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
@@ -31,6 +32,7 @@ export class StudentLessonProgressService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly certificatesService: CertificatesService,
   ) {}
 
   async markLessonAsCompleted(
@@ -203,7 +205,10 @@ export class StudentLessonProgressService {
         trx,
       );
 
-      return await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId);
+      return (
+        await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId),
+        await this.certificatesService.createCertificate(studentId, courseId)
+      );
     }
 
     if (courseProgress.progress !== PROGRESS_STATUSES.COMPLETED) {

@@ -10,6 +10,7 @@ import { isAdminLike } from "~/utils/userRoles";
 import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 
+import Certificates from "./Certificates/Certificates";
 import { ProfileCard } from "./components";
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
@@ -54,6 +55,8 @@ export default function ProfilePage() {
             </Button>
           </section>
         )}
+        <div></div>
+        <Certificates></Certificates>
       </div>
     </PageWrapper>
   );

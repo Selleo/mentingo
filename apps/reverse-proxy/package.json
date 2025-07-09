@@ -1,7 +1,7 @@
 {
   "name": "guidebook_development_reverse_proxy",
   "scripts": {
-    "dev": "caddy run",
-    "dev:test": "caddy run"
+    "dev": "sudo caddy run",
+    "dev:test": "sudo caddy run"
   }
 }

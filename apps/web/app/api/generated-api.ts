@@ -432,6 +432,23 @@ export interface GetAvailableCoursesResponse {
   appliedFilters?: object;
 }
 
+export interface GetCertificatesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    userId: string;
+    courseId: string;
+    createdAt: string;
+    updatedAt?: string | null;
+    courseTitle?: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+}
+
 export interface GetContentCreatorCoursesResponse {
   data: {
     /** @format uuid */
@@ -1420,6 +1437,7 @@ import type {
   ResponseType,
 } from "axios";
 import axios from "axios";
+import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 export type QueryParamsType = Record<string | number, any>;
 
@@ -2244,6 +2262,30 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetAvailableCoursesResponse, any>({
         path: `/api/course/available-courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificateControllerGetCertificates
+     * @request GET:/api/certificates/all
+     */
+    certificateControllerGetCertificates: (
+      query: {
+        /** @format uuid */
+        userId: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCertificatesResponse, any>({
+        path: `/api/certificates/all`,
         method: "GET",
         query: query,
         format: "json",

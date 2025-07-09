@@ -2234,6 +2234,17 @@
         }
       }
     },
+    "/api/certificates/all": {
+      "get": {
+        "operationId": "CertificatesController_getAllCertificates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/group/all": {
       "get": {
         "operationId": "GroupController_getAllGroups",
