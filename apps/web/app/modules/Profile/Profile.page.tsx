@@ -12,6 +12,7 @@ import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { copyToClipboard } from "~/utils/copyToClipboard";
+import { filterChangedData } from "~/utils/filterChangedData";
 import { isAdminLike } from "~/utils/userRoles";
 
 import Loader from "../common/Loader/Loader";
@@ -27,7 +28,7 @@ const updateUserProfileSchema = z.object({
   lastName: z.string().optional(),
   description: z.string().optional(),
   contactEmail: z.string().email().optional(),
-  contactPhoneNumber: z.string().optional(),
+  contactPhone: z.string().optional(),
   jobTitle: z.string().optional(),
 });
 
@@ -62,22 +63,9 @@ export default function ProfilePage() {
 
   const onSubmit = (data: UpdateUserProfileBody) => {
     if (isDirty) {
-      const filteredData = Object.entries(data).reduce((acc, [key, value]) => {
-        if (
-          value &&
-          value.trim() !== "" &&
-          value !== userDetails?.[key as keyof typeof userDetails]
-        ) {
-          acc[key as keyof UpdateUserProfileBody] = value;
-        }
-        return acc;
-      }, {} as Partial<UpdateUserProfileBody>);
+      const filteredData = filterChangedData(data, userDetails as Partial<UpdateUserProfileBody>);
 
-      if (filteredData["contactPhoneNumber"] === userDetails?.contactPhone) {
-        delete filteredData.contactPhoneNumber;
-      }
-
-      updateUserProfile({ data: filteredData, id: currentUser?.id ?? userDetails?.id ?? "" });
+      updateUserProfile({ data: filteredData, id });
       reset(data);
       setIsEditing(false);
     }
@@ -129,7 +117,7 @@ export default function ProfilePage() {
               description: userDetails?.description || "",
               jobTitle: userDetails?.jobTitle || "",
               contactEmail: userDetails?.contactEmail || "",
-              contactPhoneNumber: userDetails?.contactPhone || "",
+              contactPhone: userDetails?.contactPhone || "",
             }}
             isAdminLike={hasPermission}
           />

@@ -3375,7 +3375,7 @@
             "format": "email",
             "type": "string"
           },
-          "contactPhoneNumber": {
+          "contactPhone": {
             "type": "string"
           },
           "jobTitle": {

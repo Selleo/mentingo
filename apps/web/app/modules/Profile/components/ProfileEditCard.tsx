@@ -10,7 +10,7 @@ const personalInfoFields: EditProfileFieldType[] = [
   { name: "firstName", iconName: "User", type: "text" },
   { name: "lastName", iconName: "User", type: "text" },
   { name: "contactEmail", iconName: "Email", type: "email" },
-  { name: "contactPhoneNumber", iconName: "Phone", type: "text" },
+  { name: "contactPhone", iconName: "Phone", type: "text" },
 ];
 
 const aboutFields: EditProfileFieldType[] = [

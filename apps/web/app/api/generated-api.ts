@@ -201,7 +201,7 @@ export interface UpdateUserProfileBody {
   description?: string;
   /** @format email */
   contactEmail?: string;
-  contactPhoneNumber?: string;
+  contactPhone?: string;
   jobTitle?: string;
 }
 

@@ -162,23 +162,33 @@ export class UserService {
   }
 
   async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody) {
-    if (data.firstName || data.lastName) {
-      await this.updateUser(id, {
-        firstName: data.firstName,
-        lastName: data.lastName,
-      });
+    const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
+
+    if (!existingUser) {
+      throw new NotFoundException("User not found");
     }
 
-    if (data.description || data.contactEmail || data.contactPhoneNumber || data.jobTitle) {
-      const userDetailsToUpdate: Partial<UpsertUserDetailsBody> = {};
+    await this.db.transaction(async (tx) => {
+      const userUpdates = {
+        ...(data.firstName && { firstName: data.firstName }),
+        ...(data.lastName && { lastName: data.lastName }),
+      };
 
-      if (data.description) userDetailsToUpdate.description = data.description;
-      if (data.contactEmail) userDetailsToUpdate.contactEmail = data.contactEmail;
-      if (data.contactPhoneNumber) userDetailsToUpdate.contactPhoneNumber = data.contactPhoneNumber;
-      if (data.jobTitle) userDetailsToUpdate.jobTitle = data.jobTitle;
+      const userDetailsUpdates = {
+        ...(data.description && { description: data.description }),
+        ...(data.contactEmail && { contactEmail: data.contactEmail }),
+        ...(data.contactPhone && { contactPhoneNumber: data.contactPhone }),
+        ...(data.jobTitle && { jobTitle: data.jobTitle }),
+      };
 
-      await this.db.update(userDetails).set(userDetailsToUpdate).where(eq(userDetails.userId, id));
-    }
+      if (Object.keys(userUpdates).length > 0) {
+        await tx.update(users).set(userUpdates).where(eq(users.id, id));
+      }
+
+      if (Object.keys(userDetailsUpdates).length > 0) {
+        await tx.update(userDetails).set(userDetailsUpdates).where(eq(userDetails.userId, id));
+      }
+    });
   }
 
   async changePassword(id: UUIDType, oldPassword: string, newPassword: string) {

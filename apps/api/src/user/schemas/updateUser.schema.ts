@@ -21,7 +21,7 @@ export const updateUserProfileSchema = Type.Object({
   lastName: Type.Optional(Type.String()),
   description: Type.Optional(Type.String()),
   contactEmail: Type.Optional(Type.String({ format: "email" })),
-  contactPhoneNumber: Type.Optional(Type.String()),
+  contactPhone: Type.Optional(Type.String()),
   jobTitle: Type.Optional(Type.String()),
 });
 

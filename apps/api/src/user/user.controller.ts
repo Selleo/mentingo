@@ -32,7 +32,7 @@ import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changeP
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
 import {
   type UpdateUserBody,
-  UpdateUserProfileBody,
+  type UpdateUserProfileBody,
   updateUserProfileSchema,
   updateUserSchema,
   UpsertUserDetailsBody,
