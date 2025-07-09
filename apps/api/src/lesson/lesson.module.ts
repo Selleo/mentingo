@@ -14,6 +14,6 @@ import { LessonService } from "./services/lesson.service";
   imports: [FileModule, QuestionsModule, StudentLessonProgressModule],
   controllers: [LessonController],
   providers: [LessonRepository, AdminLessonService, AdminLessonRepository, LessonService],
-  exports: [AdminLessonService, AdminLessonRepository, LessonRepository],
+  exports: [AdminLessonService, AdminLessonRepository, LessonRepository, LessonService],
 })
 export class LessonModule {}

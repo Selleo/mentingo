@@ -5,6 +5,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { ScheduleModule } from "@nestjs/schedule";
 
+import { AiModule } from "./ai/ai.module";
 import { AuthModule } from "./auth/auth.module";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
@@ -86,6 +87,7 @@ import { UserModule } from "./user/user.module";
     StatisticsModule,
     ScormModule,
     CacheModule,
+    AiModule,
   ],
   controllers: [],
   providers: [
