@@ -23,8 +23,13 @@ export const threadSchema = Type.Object({
 });
 
 export const responseThreadSchema = Type.Object({
+  id: UUIDSchema,
   aiMentorLessonId: UUIDSchema,
+  userId: UUIDSchema,
   userLanguage: Type.Enum(SUPPORTED_LANGUAGES),
+  createdAt: Type.String(),
+  updatedAt: Type.String(),
+  status: Type.Enum(THREAD_STATUS),
 });
 
 export const createThreadMessageSchema = Type.Object({
@@ -39,7 +44,27 @@ export const threadMessageSchema = Type.Intersect([
     tokenCount: Type.Integer(),
   }),
 ]);
+export const responseThreadMessageSchema = Type.Omit(threadMessageSchema, [
+  "tokenCount",
+  "threadId",
+]);
 
+export const aiMentorGroupsSchema = Type.Array(
+  Type.Object({
+    name: Type.String(),
+    characteristic: Type.Union([Type.String(), Type.Null()]),
+  }),
+);
+
+export const aiMentorLessonSchema = Type.Object({
+  title: Type.Optional(Type.String()),
+  instructions: Type.Optional(Type.String()),
+  conditions: Type.Optional(Type.String()),
+});
+
+export type ResponseThreadMessageBody = Static<typeof responseThreadMessageSchema>;
+export type AiMentorGroupsBody = Static<typeof aiMentorGroupsSchema>;
+export type AiMentorLessonBody = Static<typeof aiMentorLessonSchema>;
 export type RequestThreadBody = Static<typeof requestThreadSchema>;
 export type ResponseThreadBody = Static<typeof responseThreadSchema>;
 export type CreateThreadBody = Static<typeof createThreadSchema>;

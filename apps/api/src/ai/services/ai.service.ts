@@ -104,7 +104,7 @@ export class AiService {
 
     delete mentorLesson.conditions;
 
-    const systemPrompt = SYSTEM_PROMPT(mentorLesson, [groups], lang.language);
+    const systemPrompt = SYSTEM_PROMPT(mentorLesson, groups, lang.language);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
     await this.aiRepository.insertMessage({
       threadId,
