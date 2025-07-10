@@ -1,4 +1,5 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -7,6 +8,8 @@ import {
   createThreadMessageSchema,
   requestThreadSchema,
   type ResponseThreadBody,
+  type ResponseThreadMessageBody,
+  responseThreadMessageSchema,
   responseThreadSchema,
   type ThreadMessageBody,
   threadMessageSchema,
@@ -14,7 +17,7 @@ import {
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/ai.type";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
-import { type BaseResponse, baseResponse, UUIDType } from "src/common";
+import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -46,6 +49,29 @@ export class AiController {
       },
       role,
     );
+  }
+  @Get("thread")
+  @Validate({
+    request: [{ type: "query" as const, name: "thread", schema: UUIDSchema }],
+    response: baseResponse(responseThreadSchema),
+  })
+  async getThread(
+    @Query("thread") threadId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<ResponseThreadBody>> {
+    return await this.threadService.findThread(threadId, userId);
+  }
+
+  @Get("thread/messages")
+  @Validate({
+    request: [{ type: "query" as const, name: "thread", schema: UUIDSchema }],
+    response: baseResponse(Type.Array(responseThreadMessageSchema)),
+  })
+  async getThreadMessages(
+    @Query("thread") threadId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<ResponseThreadMessageBody[]>> {
+    return await this.threadService.findAllMessagesByThread(threadId, userId);
   }
 
   @Post("chat")
