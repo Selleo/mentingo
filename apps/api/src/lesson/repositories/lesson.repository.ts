@@ -41,6 +41,7 @@ export class LessonRepository {
         isExternal: sql<boolean>`${lessons.isExternal}`,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,
         isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NULL THEN FALSE ELSE TRUE END`,
+        studentCourses: studentCourses.id,
         nextLessonId: sql<string | null>`
           COALESCE(
             (

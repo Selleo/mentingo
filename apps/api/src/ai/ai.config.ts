@@ -1,21 +1,25 @@
-export const THRESHOLD = 100;
-export const SUMMARY_PROMPT = [
-  "You are an expert conversation summarizer. I will provide you with a full chat transcript.",
-  "Your job is to generate a single summary of up to 4,000 tokens that:",
-  "",
-  "1. Identifies the participants and the conversation’s purpose.",
-  "2. Highlights all major topics discussed and their key insights.",
-  "3. Captures any decisions made, recommendations given, or action items proposed.",
-  "4. Preserves important context (e.g., constraints, goals, open questions).",
-  "5. Presents the result in clear, well-structured sections with headings and bullet points.",
-  "",
-  "Please do not include the verbatim chat—only the distilled summary. Begin your response immediately with the summary in this language: ",
-].join("\n");
+import type { SupportedLanguages } from "src/ai/ai.type";
+
+export const THRESHOLD = 20000;
+
+export const SUMMARY_PROMPT = (content: string, language: SupportedLanguages) => {
+  return `You are an expert conversation summarizer. I will provide you with a full chat transcript.
+  Your job is to generate a single summary of up to 4,000 tokens that:
+  1. Identifies the participants and the conversation’s purpose.
+  2. Highlights all major topics discussed and their key insights.
+  3. Captures any decisions made, recommendations given, or action items proposed.
+  4. Preserves important context (e.g., constraints, goals, open questions).
+  5. Presents the result in clear, well-structured sections with headings and bullet points.
+  "Please do not include the verbatim chat—only the distilled summary. Begin your response immediately with the summary in this language: ${language}"
+  Here is the content you want to summarize: ${content}
+  ,
+  `;
+};
 
 // make better typing
-export const getMainPromptForMentor = (
-  lesson: { title: string; instructions: string },
-  groups: Array<{ name: string; characteristic: string }>,
+export const SYSTEM_PROMPT = (
+  lesson: { title?: string; instructions?: string },
+  groups: Array<{ name?: string; characteristic?: string }>,
   language: string,
 ) => {
   return `You are MentorAI, an adaptive AI mentor for Mentingo.
@@ -49,4 +53,9 @@ export const getMainPromptForMentor = (
     
     Begin each session by greeting the student, stating today's instructions, and inviting them to start teaching.`;
 };
+
 export const getMainPromptForJudge = () => {};
+
+export const WELCOME_MESSAGE_PROMPT = (systemPrompt: string) => {
+  return `This is your system prompt: ${systemPrompt}. Write a short and concise welcome message according to the system prompt`;
+};
