@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  profilePictureS3Key: varchar("profile_picture_s3_key", { length: 200 }),
   role: text("role").notNull().default(USER_ROLES.STUDENT),
   archived,
 });

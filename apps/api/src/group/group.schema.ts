@@ -1,13 +1,13 @@
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
+import { userWithoutProfilePictureKeySchema } from "src/user/schemas/user.schema";
 
 export const groupSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
   characteristic: Type.Union([Type.String(), Type.Null()]),
-  users: Type.Optional(Type.Array(commonUserSchema)),
+  users: Type.Optional(Type.Array(userWithoutProfilePictureKeySchema)),
   createdAt: Type.Optional(Type.String()),
   updatedAt: Type.Optional(Type.String()),
 });

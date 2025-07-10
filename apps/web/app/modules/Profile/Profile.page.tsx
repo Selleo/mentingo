@@ -30,6 +30,8 @@ const updateUserProfileSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().optional(),
   jobTitle: z.string().optional(),
+  profilePictureUrl: z.string().optional(),
+  profilePictureS3Key: z.string().optional(),
 });
 
 export default function ProfilePage() {
@@ -56,16 +58,23 @@ export default function ProfilePage() {
     handleSubmit,
     control,
     reset,
+    setValue,
+    getValues,
     formState: { isDirty },
-  } = useForm<UpdateUserProfileBody>({ resolver: zodResolver(updateUserProfileSchema) });
+  } = useForm<UpdateUserProfileBody>({
+    resolver: zodResolver(updateUserProfileSchema),
+  });
 
   const { mutate: updateUserProfile } = useUpdateUserProfile();
 
   const onSubmit = (data: UpdateUserProfileBody) => {
-    if (isDirty) {
+    if (isDirty || data.profilePictureS3Key) {
       const filteredData = filterChangedData(data, userDetails as Partial<UpdateUserProfileBody>);
 
-      updateUserProfile({ data: filteredData, id });
+      updateUserProfile({
+        data: { ...filteredData, profilePictureS3Key: data.profilePictureS3Key },
+        id,
+      });
       reset(data);
       setIsEditing(false);
     }
@@ -86,6 +95,8 @@ export default function ProfilePage() {
         <Loader />
       </div>
     );
+
+  console.log(getValues());
 
   return (
     <PageWrapper role="main">
@@ -111,6 +122,7 @@ export default function ProfilePage() {
         {isEditing ? (
           <ProfileEditCard
             control={control}
+            setValue={setValue}
             user={{
               firstName: userDetails?.firstName || "",
               lastName: userDetails?.lastName || "",
@@ -119,10 +131,16 @@ export default function ProfilePage() {
               contactEmail: userDetails?.contactEmail || "",
               contactPhone: userDetails?.contactPhone || "",
             }}
+            thumbnailUrl={userDetails?.profilePictureUrl || undefined}
             isAdminLike={hasPermission}
           />
         ) : (
-          <ProfileCard isAdminLike={hasPermission} userDetails={userDetails} />
+          <ProfileCard
+            isAdminLike={hasPermission}
+            userDetails={{
+              ...userDetails,
+            }}
+          />
         )}
         {hasPermission && (
           <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">

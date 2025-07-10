@@ -154,6 +154,7 @@ export interface GetUserDetailsResponse {
     contactPhone: string | null;
     jobTitle: string | null;
     role: "admin" | "student" | "content_creator";
+    profilePictureUrl: string | null;
   };
 }
 
@@ -198,6 +199,7 @@ export interface UpsertUserDetailsResponse {
 export interface UpdateUserProfileBody {
   firstName?: string;
   lastName?: string;
+  profilePictureS3Key?: string;
   description?: string;
   /** @format email */
   contactEmail?: string;

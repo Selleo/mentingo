@@ -3,6 +3,8 @@ import { PassportModule } from "@nestjs/passport";
 
 import { ResendVerificationMailCron } from "src/auth/resend-verification-mail-cron";
 import { EmailModule } from "src/common/emails/emails.module";
+import { FileService } from "src/file/file.service";
+import { S3Service } from "src/s3/s3.service";
 import { UserService } from "src/user/user.service";
 
 import { AuthController } from "./auth.controller";
@@ -25,6 +27,8 @@ import { TokenService } from "./token.service";
     CreatePasswordService,
     ResetPasswordService,
     ResendVerificationMailCron,
+    FileService,
+    S3Service,
   ],
   exports: [],
 })

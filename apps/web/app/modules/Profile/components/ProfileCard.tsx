@@ -19,7 +19,15 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
     <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
         <Avatar className="size-32">
-          <Gravatar email={userDetails?.contactEmail || ""} />
+          {userDetails?.profilePictureUrl ? (
+            <img
+              src={userDetails.profilePictureUrl}
+              alt={`${userDetails.firstName} ${userDetails.lastName} profile`}
+              className="h-full w-full rounded-full object-cover"
+            />
+          ) : (
+            <Gravatar email="email@example.com" />
+          )}
         </Avatar>
         <div className="flex w-full flex-col gap-4">
           <div className="flex flex-col gap-y-2">
