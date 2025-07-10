@@ -9284,7 +9284,7 @@
       "CreateThreadBody": {
         "type": "object",
         "properties": {
-          "aiMentorLessonId": {
+          "lessonId": {
             "format": "uuid",
             "type": "string"
           },
@@ -9302,7 +9302,7 @@
           }
         },
         "required": [
-          "aiMentorLessonId",
+          "lessonId",
           "userLanguage"
         ]
       },
@@ -9311,61 +9311,27 @@
         "properties": {
           "data": {
             "type": "object",
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "aiMentorLessonId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "userLanguage": {
-                    "anyOf": [
-                      {
-                        "const": "pl",
-                        "type": "string"
-                      },
-                      {
-                        "const": "en",
-                        "type": "string"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "aiMentorLessonId",
-                  "userLanguage"
-                ]
+            "properties": {
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
               },
-              {
-                "type": "object",
-                "properties": {
-                  "userId": {
-                    "format": "uuid",
+              "userLanguage": {
+                "anyOf": [
+                  {
+                    "const": "pl",
                     "type": "string"
                   },
-                  "status": {
-                    "anyOf": [
-                      {
-                        "const": "active",
-                        "type": "string"
-                      },
-                      {
-                        "const": "completed",
-                        "type": "string"
-                      },
-                      {
-                        "const": "abandoned",
-                        "type": "string"
-                      }
-                    ]
+                  {
+                    "const": "en",
+                    "type": "string"
                   }
-                },
-                "required": [
-                  "userId",
-                  "status"
                 ]
               }
+            },
+            "required": [
+              "aiMentorLessonId",
+              "userLanguage"
             ]
           }
         },

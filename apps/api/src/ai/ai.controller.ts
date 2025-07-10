@@ -5,10 +5,11 @@ import {
   type CreateThreadBody,
   type CreateThreadMessageBody,
   createThreadMessageSchema,
-  createThreadSchema,
+  requestThreadSchema,
+  type ResponseThreadBody,
+  responseThreadSchema,
   type ThreadMessageBody,
   threadMessageSchema,
-  threadSchema,
 } from "src/ai/ai.schema";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/ai.type";
 import { AiService } from "src/ai/services/ai.service";
@@ -29,14 +30,14 @@ export class AiController {
 
   @Post("thread")
   @Validate({
-    request: [{ type: "body", schema: createThreadSchema }],
-    response: baseResponse(threadSchema),
+    request: [{ type: "body", schema: requestThreadSchema }],
+    response: baseResponse(responseThreadSchema),
   })
   async createThread(
     @Body() data: CreateThreadBody,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
-  ): Promise<BaseResponse<CreateThreadBody>> {
+  ): Promise<BaseResponse<ResponseThreadBody>> {
     return this.threadService.createThread(
       {
         ...data,

@@ -3,18 +3,29 @@ import { type Static, Type } from "@sinclair/typebox";
 import { THREAD_STATUS, SUPPORTED_LANGUAGES, MESSAGE_ROLE } from "src/ai/ai.type";
 import { UUIDSchema } from "src/common";
 
-export const createThreadSchema = Type.Object({
-  aiMentorLessonId: UUIDSchema,
+export const requestThreadSchema = Type.Object({
+  lessonId: UUIDSchema,
   userLanguage: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
-export const threadSchema = Type.Intersect([
-  createThreadSchema,
-  Type.Object({
-    userId: UUIDSchema,
-    status: Type.Enum(THREAD_STATUS),
-  }),
-]);
+export const createThreadSchema = Type.Object({
+  lessonId: UUIDSchema,
+  userLanguage: Type.Enum(SUPPORTED_LANGUAGES),
+  userId: UUIDSchema,
+  status: Type.Enum(THREAD_STATUS),
+});
+
+export const threadSchema = Type.Object({
+  aiMentorLessonId: UUIDSchema,
+  userLanguage: Type.Enum(SUPPORTED_LANGUAGES),
+  userId: UUIDSchema,
+  status: Type.Enum(THREAD_STATUS),
+});
+
+export const responseThreadSchema = Type.Object({
+  aiMentorLessonId: UUIDSchema,
+  userLanguage: Type.Enum(SUPPORTED_LANGUAGES),
+});
 
 export const createThreadMessageSchema = Type.Object({
   threadId: UUIDSchema,
@@ -29,6 +40,8 @@ export const threadMessageSchema = Type.Intersect([
   }),
 ]);
 
+export type RequestThreadBody = Static<typeof requestThreadSchema>;
+export type ResponseThreadBody = Static<typeof responseThreadSchema>;
 export type CreateThreadBody = Static<typeof createThreadSchema>;
 export type ThreadBody = Static<typeof threadSchema>;
 export type CreateThreadMessageBody = Static<typeof createThreadMessageSchema>;

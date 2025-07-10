@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { Injectable } from "@nestjs/common";
 import { generateText, type Message } from "ai";
 
-import type { MessageRole, OpenAIModels } from "src/ai/ai.type";
+import { MESSAGE_ROLE, type MessageRole, type OpenAIModels } from "src/ai/ai.type";
 
 @Injectable()
 export class ChatService {
@@ -37,7 +37,7 @@ export class ChatService {
         model: openai(model),
         messages: messages.map((m) => ({
           ...m,
-          role: m.role === "summary" ? ("system" as const) : m.role,
+          role: this.mapRole(m.role),
         })) as Omit<Message, "id">[],
       });
       return text;
@@ -48,5 +48,9 @@ export class ChatService {
         }`,
       );
     }
+  }
+
+  private mapRole(role: MessageRole) {
+    return role === MESSAGE_ROLE.SUMMARY ? MESSAGE_ROLE.SYSTEM : role;
   }
 }
