@@ -14,14 +14,14 @@ import type { StartedTestContainer } from "testcontainers";
 export interface TestContext {
   module: TestingModule;
   db: DatabasePg;
-  container: StartedTestContainer;
+  pgContainer: StartedTestContainer;
   teardown: () => Promise<void>;
 }
 
 export async function createUnitTest(customProviders: Provider[] = []): Promise<TestContext> {
-  const { db, container, connectionString } = await setupTestDatabase();
+  const { db, pgContainer, pgConnectionString } = await setupTestDatabase();
 
-  process.env.DATABASE_URL = connectionString;
+  process.env.DATABASE_URL = pgConnectionString;
 
   const module: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
@@ -32,15 +32,15 @@ export async function createUnitTest(customProviders: Provider[] = []): Promise<
     .compile();
 
   const teardown = async () => {
-    if (container) {
-      await container.stop();
+    if (pgContainer) {
+      await pgContainer.stop();
     }
   };
 
   return {
     module,
     db,
-    container,
+    pgContainer,
     teardown,
   };
 }

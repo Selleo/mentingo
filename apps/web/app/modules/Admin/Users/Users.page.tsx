@@ -159,6 +159,7 @@ const Users = () => {
   ];
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -176,7 +177,7 @@ const Users = () => {
   const handleDeleteUsers = () => {
     deleteUsers({ data: { userIds: selectedUsers } }).then(() => {
       table.resetRowSelection();
-      queryClient.invalidateQueries(usersQueryOptions());
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     });
   };
 

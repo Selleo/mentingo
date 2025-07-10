@@ -31,7 +31,7 @@
       "archived": "Zarchiwizowany",
       "selected": "Wybrany",
       "allStatuses": "Wszystkie statusy",
-      "draft": "Szkic",
+      "draft": "Wersja robocza",
       "all": "Wszystko",
       "search": "Szukaj",
       "published": "Opublikowany",
@@ -116,6 +116,17 @@
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
   },
+  "changeUserLanguageView": {
+    "header": "Zmień język",
+    "subHeader": "Wybierz preferowany język",
+    "field": {
+      "language": "Język"
+    },
+    "options": {
+      "english": "Angielski",
+      "polish": "Polski"
+    }
+  },
   "changeUserEmailView": {
     "header": "Zmień dane użytkownika",
     "subHeader": "Zaktualizuj swoje dane użytkownika tutaj.",
@@ -130,7 +141,8 @@
     "header": "Najpopularniejsze",
     "subHeader": "Twoje 5 najlepszych kursów",
     "other": {
-      "noData": "Brak dostępnych danych"
+      "noData": "Brak dostępnych danych",
+      "students": "Studentów"
     }
   },
   "enrollmentChartView": {
@@ -181,6 +193,7 @@
       "dashboard": "Panel"
     },
     "other": {
+      "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kursy",
@@ -268,7 +281,7 @@
         "states": "Stany"
       },
       "other": {
-        "draft": "Szkic",
+        "draft": "Wersja robocza",
         "published": "Opublikowane"
       }
     },
@@ -334,6 +347,11 @@
     "toast": {
       "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "createNew": "Utwórz nową kategorię",
+      "back": "Wstecz"
     }
   },
   "adminCategoryView": {
@@ -354,6 +372,11 @@
     "error": {
       "categoryNotFound": "Kategoria nie została znaleziona",
       "categoryIdNotFound": "ID kategorii nie zostało znalezione"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "categoryDetails": "Informacje o kategorii",
+      "back": "Wstecz"
     }
   },
   "adminUsersView": {
@@ -377,6 +400,11 @@
     "button": {
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane"
+    },
+    "breadcrumbs": {
+      "users": "Użytkownicy",
+      "createNew": "Utwórz nowego użytkownika",
+      "back": "Wstecz"
     }
   },
   "adminUserView": {
@@ -401,6 +429,11 @@
     },
     "error": {
       "userNotFound": "Użytkownik nie został znaleziony"
+    },
+    "breadcrumbs": {
+      "users": "Użytkownicy",
+      "userDetails": "Informacje o użytkowniku",
+      "back": "Wstecz"
     }
   },
   "adminGroupsView": {
@@ -439,6 +472,12 @@
       "description": "Czy na pewno chcesz usunąć te grupy?",
       "cancel": "Anuluj",
       "submit": "Usuń"
+    },
+    "breadcrumbs": {
+      "groups": "Grupy",
+      "createNew": "Utwórz nową",
+      "editGroup": "Edytuj grupę",
+      "back": "Wstecz"
     }
   },
   "enrollCourseView": {
@@ -648,7 +687,7 @@
     "status": {
       "header": "Status",
       "subHeader": "Ustaw stan kursu",
-      "draftHeader": "Szkic",
+      "draftHeader": "Wersja robocza",
       "draftBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy już się zapisali, kurs nie będzie widoczny na ich liście kursów.",
       "publishedHeader": "Opublikowany",
       "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie."
@@ -693,6 +732,10 @@
         "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
       },
       "successResponse": "studentów zostało zapisanych do kursu."
+    },
+    "breadcrumbs": {
+      "myCourses": "Moje kursy",
+      "back": "Wstecz"
     }
   },
   "registerView": {
@@ -829,8 +872,9 @@
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
-      "lessonTitle": "Lekcja"
+      "availableCourses": "Dostępne kursy",
+      "yourCourses": "Twoje kursy",
+      "back": "Wstecz"
     },
     "button": {
       "previous": "Poprzedni",
@@ -851,7 +895,6 @@
       "answerCannotBeEmptyForTextQuestion": "Odpowiedź nie może być pusta dla pytania tekstowego {{questionId}}.",
       "invalidSelectionForSingleAnswer": "Nieprawidłowy wybór dla pytania jednokrotnego wyboru.",
       "invalidFormatForMultiAnswer": "Nieprawidłowy format dla pytania wielokrotnego wyboru.",
-      "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
       "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!"
     }
@@ -872,7 +915,6 @@
       "yourAnswer": "Twoja odpowiedź",
       "singleChoice": "Pytanie jednokrotnego wyboru",
       "multipleChoice": "Pytanie wielokrotnego wyboru",
-      "trueOrFalseChoice": "Pytanie prawda fałsz",
       "oneOrTwoWordSentence": "Podaj krótką odpowiedź (1-2 zadań)",
       "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)"
     },
@@ -898,6 +940,11 @@
         "enrollCourse": "Zapisz się na kurs",
         "goToContentCreatorPage": "Przejdź do strony twórcy treści"
       }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Dostępne kursy",
+      "yourCourses": "Twoje kursy",
+      "back": "Wstecz"
     }
   },
   "studentChapterView": {
