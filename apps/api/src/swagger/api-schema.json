@@ -2754,10 +2754,38 @@
             "type": "string"
           },
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -2952,10 +2980,38 @@
         "type": "object",
         "properties": {
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "createToken": {
             "minLength": 1,
@@ -2971,10 +3027,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "resetToken": {
             "minLength": 1,
@@ -3420,10 +3504,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "oldPassword": {
             "minLength": 8,

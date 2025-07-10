@@ -31,6 +31,7 @@ const createNewPasswordSchema = (t: (key: string) => string) =>
 export default function CreateNewPasswordPage() {
   const [searchParams] = useSearchParams();
   const [isPasswordValid, setIsPasswordValid] = useState(false);
+
   const navigate = useNavigate();
   const { toast } = useToast();
   const resetToken = searchParams.get("resetToken");
@@ -50,6 +51,8 @@ export default function CreateNewPasswordPage() {
     resolver: zodResolver(createNewPasswordSchema(t)),
     mode: "onChange",
   });
+
+  const newPassworValue = watch("newPassword") || "";
 
   const onSubmit = (data: ResetPasswordBody) => {
     if (resetToken) {
@@ -93,10 +96,7 @@ export default function CreateNewPasswordPage() {
               className={cn({ "border-red-500": errors.newPassword })}
               {...register("newPassword")}
             />
-            <PasswordValidationDisplay
-              password={watch("newPassword") || ""}
-              onValidationChange={setIsPasswordValid}
-            />
+
             {errors.newPassword && (
               <div className="text-sm text-red-500">{errors.newPassword.message}</div>
             )}
@@ -119,11 +119,18 @@ export default function CreateNewPasswordPage() {
               <div className="text-sm text-red-500">{errors.newPasswordConfirmation.message}</div>
             )}
           </div>
+          <PasswordValidationDisplay
+            password={newPassworValue}
+            onValidationChange={setIsPasswordValid}
+          />
           <Button
             type="submit"
             className={cn(
               "w-full cursor-default",
-              !isPasswordValid && "opacity-50 hover:bg-primary hover:opacity-50",
+              !isPasswordValid ||
+                !!errors.newPasswordConfirmation ||
+                (!watch("newPasswordConfirmation") &&
+                  "opacity-50 hover:bg-primary hover:opacity-50"),
             )}
             disabled={
               !isPasswordValid ||

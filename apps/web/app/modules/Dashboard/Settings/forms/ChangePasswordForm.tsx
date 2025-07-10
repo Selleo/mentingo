@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -23,14 +24,19 @@ import type { ChangePasswordBody } from "~/api/generated-api";
 
 export default function ChangePasswordForm() {
   const { mutate: changePassword } = useChangePassword();
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<ChangePasswordBody>({ resolver: zodResolver(passwordSchema) });
+  } = useForm<ChangePasswordBody>({
+    resolver: zodResolver(passwordSchema),
+  });
 
   const newPasswordValue = watch("newPassword", "");
+  const oldPasswordValue = watch("oldPassword", "");
+  console.log(`Old Password: ${oldPasswordValue}`);
   const { t } = useTranslation();
 
   const onSubmit = (data: ChangePasswordBody) => {
@@ -74,16 +80,20 @@ export default function ChangePasswordForm() {
             />
 
             <div id="password-hints" className="mb-3">
-              <PasswordValidationDisplay password={newPasswordValue} />
+              <PasswordValidationDisplay
+                password={newPasswordValue}
+                onValidationChange={setIsPasswordValid}
+              />
             </div>
           </div>
-
-          {errors.newPassword && (
-            <p className="mt-1 text-xs text-red-500">{errors.newPassword.message}</p>
-          )}
         </CardContent>
         <CardFooter className="border-t px-6 py-4">
-          <Button type="submit">{t("common.button.save")}</Button>
+          <Button
+            disabled={!isPasswordValid || !newPasswordValue || !oldPasswordValue}
+            type="submit"
+          >
+            {t("common.button.save")}
+          </Button>
         </CardFooter>
       </form>
     </Card>
