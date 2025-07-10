@@ -3,6 +3,8 @@ import CreatePasswordEmailTemplate from "./templates/CreatePasswordEmail";
 export const CreatePasswordEmail = emailTemplateFactory(CreatePasswordEmailTemplate);
 import CreatePasswordReminderEmailTemplate from "./templates/CreatePasswordReminderEmail";
 export const CreatePasswordReminderEmail = emailTemplateFactory(CreatePasswordReminderEmailTemplate);
+import NewUserEmailTemplate from "./templates/NewUserEmail";
+export const NewUserEmail = emailTemplateFactory(NewUserEmailTemplate);
 import PasswordRecoveryEmailTemplate from "./templates/PasswordRecoveryEmail";
 export const PasswordRecoveryEmail = emailTemplateFactory(PasswordRecoveryEmailTemplate);
 import WelcomeEmailTemplate from "./templates/WelcomeEmail";

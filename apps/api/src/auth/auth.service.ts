@@ -11,6 +11,7 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
+  NewUserEmail,
   PasswordRecoveryEmail,
   WelcomeEmail,
 } from "@repo/email-templates";
@@ -42,6 +43,28 @@ export class AuthService {
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
   ) {}
+
+  private async notifyAdminsAboutNewUser(firstName: string, lastName: string, email: string) {
+    const { text, html } = new NewUserEmail({
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+    });
+
+    const admins = await this.userService.getAdminsToNotify();
+
+    await Promise.all(
+      admins.map((admin) =>
+        this.emailService.sendEmail({
+          to: admin.email,
+          subject: "A new user has registered on your platform",
+          text,
+          html,
+          from: process.env.SES_EMAIL || "",
+        }),
+      ),
+    );
+  }
 
   public async register({
     email,
@@ -76,6 +99,8 @@ export class AuthService {
         html: emailTemplate.html,
         from: process.env.SES_EMAIL || "",
       });
+
+      await this.notifyAdminsAboutNewUser(firstName, lastName, email);
 
       return newUser;
     });
