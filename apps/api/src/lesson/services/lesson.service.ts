@@ -42,11 +42,15 @@ export class LessonService {
     const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
-
+    console.log(lesson);
     if (isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("You don't have access");
 
-    if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) return lesson;
+    if (
+      (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) ||
+      lesson.type === LESSON_TYPES.AI_MENTOR
+    )
+      return lesson;
 
     if (lesson.type !== LESSON_TYPES.QUIZ) {
       if (!lesson.fileUrl) throw new NotFoundException("Lesson file not found");

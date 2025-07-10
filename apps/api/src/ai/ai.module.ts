@@ -6,10 +6,10 @@ import { AiService } from "src/ai/services/ai.service";
 import { ChatService } from "src/ai/services/chat.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
-// import { LessonModule } from "src/lesson/lesson.module";
-// import { LessonService } from "src/lesson/services/lesson.service";
+import { LessonModule } from "src/lesson/lesson.module";
 
 @Module({
+  imports: [LessonModule],
   controllers: [AiController],
   providers: [AiService, AiRepository, TokenService, ThreadService, ChatService],
 })
