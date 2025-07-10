@@ -407,8 +407,8 @@ export class UserService {
       await this.emailService.sendEmail({
         to: createdUser.email,
         subject: "Welcome to the Platform!",
-        text,
-        html,
+        text: text,
+        html: html,
         from: process.env.SES_EMAIL || "",
       });
 
@@ -456,6 +456,12 @@ export class UserService {
     });
 
     return adminsToNotify;
+  }
+
+  public async getAdminsToNotify() {
+    const admins = await this.db.select().from(users).where(eq(users.role, USER_ROLES.ADMIN));
+
+    return admins;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {
