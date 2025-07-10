@@ -34,23 +34,5 @@
   "packageManager": "pnpm@10.2.1",
   "engines": {
     "node": ">=20"
-  },
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "@nestjs/core",
-      "@sentry-internal/node-cpu-profiler",
-      "@sentry/cli",
-      "@swc/core",
-      "canvas",
-      "core-js",
-      "core-js-pure",
-      "cpu-features",
-      "edgedriver",
-      "esbuild",
-      "geckodriver",
-      "msw",
-      "ssh2",
-      "unrs-resowlver"
-    ]
   }
 }
