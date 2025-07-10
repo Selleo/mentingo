@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useCourse, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
+import { useUserRole } from "~/hooks/useUserRole";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 
@@ -29,6 +30,7 @@ export default function LessonPage() {
   const { courseId = "", lessonId = "" } = useParams();
   const { data: lesson } = useLesson(lessonId);
   const { data: course } = useCourse(courseId);
+  const { isStudent } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -107,8 +109,27 @@ export default function LessonPage() {
     return null;
   }
 
+  const breadcrumbs = [
+    {
+      title: isStudent
+        ? t("studentLessonView.breadcrumbs.yourCourses")
+        : t("studentLessonView.breadcrumbs.availableCourses"),
+      href: "/courses",
+    },
+    { title: course.title, href: `/course/${courseId}` },
+    {
+      title: currentChapter?.title ?? t("studentLessonView.other.chapter"),
+      href: `/course/${courseId}/lesson/${lessonId}`,
+    },
+  ];
+
+  const backButton = {
+    title: t("studentLessonView.breadcrumbs.back"),
+    href: `/course/${courseId}`,
+  };
+
   return (
-    <PageWrapper className="h-auto max-w-full">
+    <PageWrapper className="h-auto max-w-full" breadcrumbs={breadcrumbs} backButton={backButton}>
       <div className="flex h-full w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
         <div className="flex h-full w-full flex-col divide-y rounded-lg bg-white">
           <div className="flex items-center px-12 py-6">
