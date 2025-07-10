@@ -275,6 +275,24 @@ export class CourseController {
     return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
   }
 
+  @Patch("update-has-certificate/:id")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: Type.Object({ hasCertificate: Type.Boolean() }) },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateHasCertificate(
+    @Param("id") id: UUIDType,
+    @Body() body: { hasCertificate: boolean },
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.updateHasCertificate(id, body.hasCertificate);
+
+    return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
+  }
+
   @Post("enroll-course")
   @Roles(USER_ROLES.STUDENT)
   @Validate({

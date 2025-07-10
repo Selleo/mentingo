@@ -85,7 +85,6 @@ export class CertificatesService {
         .from(courses)
         .where(eq(courses.id, courseId));
 
-      // Check if course is completed
       const [courseCompletion] = await this.db
         .select({
           completedAt: studentCourses.completedAt,
@@ -121,7 +120,7 @@ export class CertificatesService {
         ...createdCertificate,
         fullName: `${existingUser.firstName} ${existingUser.lastName}`,
         courseTitle: existingCourse.title,
-        completionDate: courseCompletion.completedAt,
+        completionDate: new Date(courseCompletion.completedAt).toISOString(),
       };
     } catch (error) {
       console.error("Error creating certificate:", error);

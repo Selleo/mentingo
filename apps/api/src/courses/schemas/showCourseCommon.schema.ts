@@ -35,6 +35,7 @@ export const commonShowBetaCourseSchema = Type.Object({
   description: Type.String(),
   enrolled: Type.Optional(Type.Boolean()),
   hasFreeChapter: Type.Optional(Type.Boolean()),
+  hasCertificate: Type.Optional(Type.Boolean()),
   id: Type.String({ format: "uuid" }),
   isPublished: Type.Union([Type.Boolean(), Type.Null()]),
   isScorm: Type.Optional(Type.Boolean()),

@@ -1,20 +1,12 @@
 import { useParams } from "@remix-run/react";
 
-import { useCertificates } from "~/api/queries/useCertificates";
+import { useCertificates, type Certificate } from "~/api/queries/useCertificates";
 
-import Certificate from "./Certificate";
-
-interface CertificateData {
-  id: string;
-  courseTitle?: string | null;
-  completionDate?: string;
-  createdAt: string;
-}
+import CertificateComponent from "./Certificate";
 
 const Certificates = () => {
   const { id = "" } = useParams();
   const { data: certificates, isLoading, error } = useCertificates({ userId: id });
-
   if (isLoading) {
     return (
       <div className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
@@ -49,13 +41,12 @@ const Certificates = () => {
       </div>
     );
   }
-
   return (
     <div className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
       <h5 className="h5">Certificates</h5>
       <div className="flex flex-wrap gap-4">
-        {certificates.map((certificate) => {
-          const cert = certificate as CertificateData;
+        {certificates.map((certificate: Certificate) => {
+          const cert = certificate as Certificate;
           const completionDate = cert.completionDate || cert.createdAt;
           const formattedDate = new Date(completionDate).toLocaleDateString("en-US", {
             year: "numeric",
@@ -64,7 +55,7 @@ const Certificates = () => {
           });
 
           return (
-            <Certificate
+            <CertificateComponent
               key={cert.id}
               courseName={cert.courseTitle || "Unknown Course"}
               courseCompletionDate={formattedDate}

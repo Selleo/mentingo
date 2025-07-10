@@ -1550,6 +1550,43 @@
         }
       }
     },
+    "/api/course/update-has-certificate/{id}": {
+      "patch": {
+        "operationId": "CourseController_updateHasCertificate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHasCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateHasCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/enroll-course": {
       "post": {
         "operationId": "CourseController_enrollCourse",
@@ -2237,10 +2274,51 @@
     "/api/certificates/all": {
       "get": {
         "operationId": "CertificatesController_getAllCertificates",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCertificatesResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -4829,6 +4907,9 @@
               "hasFreeChapter": {
                 "type": "boolean"
               },
+              "hasCertificate": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
@@ -5000,6 +5081,36 @@
         }
       },
       "UpdateCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateHasCertificateBody": {
+        "type": "object",
+        "properties": {
+          "hasCertificate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasCertificate"
+        ]
+      },
+      "UpdateHasCertificateResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -7822,6 +7933,109 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetAllCertificatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "completionDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fullName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "userId",
+                "courseId",
+                "createdAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "GetAllGroupsResponse": {

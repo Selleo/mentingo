@@ -432,23 +432,6 @@ export interface GetAvailableCoursesResponse {
   appliedFilters?: object;
 }
 
-export interface GetCertificatesResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    userId: string;
-    courseId: string;
-    createdAt: string;
-    updatedAt?: string | null;
-    courseTitle?: string | null;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-}
-
 export interface GetContentCreatorCoursesResponse {
   data: {
     /** @format uuid */
@@ -595,6 +578,7 @@ export interface GetBetaCourseByIdResponse {
     description: string;
     enrolled?: boolean;
     hasFreeChapter?: boolean;
+    hasCertificate?: boolean;
     /** @format uuid */
     id: string;
     isPublished: boolean | null;
@@ -643,6 +627,16 @@ export interface UpdateCourseBody {
 }
 
 export interface UpdateCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UpdateHasCertificateBody {
+  hasCertificate: boolean;
+}
+
+export interface UpdateHasCertificateResponse {
   data: {
     message: string;
   };
@@ -1262,6 +1256,29 @@ export interface MarkLessonAsCompletedResponse {
   };
 }
 
+export interface GetAllCertificatesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    userId: string;
+    /** @format uuid */
+    courseId: string;
+    courseTitle?: string | null;
+    completionDate?: string | null;
+    fullName?: string | null;
+    /** @format date-time */
+    createdAt: string;
+    updatedAt?: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetAllGroupsResponse {
   data: {
     /** @format uuid */
@@ -1437,7 +1454,6 @@ import type {
   ResponseType,
 } from "axios";
 import axios from "axios";
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 export type QueryParamsType = Record<string | number, any>;
 
@@ -2271,30 +2287,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CertificateControllerGetCertificates
-     * @request GET:/api/certificates/all
-     */
-    certificateControllerGetCertificates: (
-      query: {
-        /** @format uuid */
-        userId: string;
-        /** @min 1 */
-        page?: number;
-        perPage?: number;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetCertificatesResponse, any>({
-        path: `/api/certificates/all`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CourseControllerGetContentCreatorCourses
      * @request GET:/api/course/content-creator-courses
      */
@@ -2387,6 +2379,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<UpdateCourseResponse, any>({
         path: `/api/course/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUpdateHasCertificate
+     * @request PATCH:/api/course/update-has-certificate/{id}
+     */
+    courseControllerUpdateHasCertificate: (
+      id: string,
+      data: UpdateHasCertificateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateHasCertificateResponse, any>({
+        path: `/api/course/update-has-certificate/${id}`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
@@ -2852,6 +2864,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<MarkLessonAsCompletedResponse, any>({
         path: `/api/studentLessonProgress`,
         method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetAllCertificates
+     * @request GET:/api/certificates/all
+     */
+    certificatesControllerGetAllCertificates: (
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllCertificatesResponse, any>({
+        path: `/api/certificates/all`,
+        method: "GET",
         query: query,
         format: "json",
         ...params,

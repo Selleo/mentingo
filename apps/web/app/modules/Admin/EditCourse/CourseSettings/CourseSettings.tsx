@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
+import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextareaField } from "~/components/Form/FormTextareaFiled";
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Toggle } from "~/components/ui/toggle";
 
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
@@ -29,6 +31,7 @@ type CourseSettingsProps = {
   categoryId?: string;
   thumbnailS3SingedUrl?: string | null;
   thumbnailS3Key?: string;
+  hasCertificate?: boolean;
 };
 const CourseSettings = ({
   courseId,
@@ -37,6 +40,7 @@ const CourseSettings = ({
   categoryId,
   thumbnailS3SingedUrl,
   thumbnailS3Key,
+  hasCertificate = false,
 }: CourseSettingsProps) => {
   const { form, onSubmit } = useCourseSettingsForm({
     title,
@@ -62,6 +66,10 @@ const CourseSettings = ({
 
   const watchedDescriptionLength = watchedDescription.length;
   const descriptionFieldCharactersLeft = maxDescriptionFieldLength - watchedDescriptionLength;
+
+  const [isCertificateEnabled, setIsCertificateEnabled] = useState(hasCertificate);
+
+  const updateHasCertificate = useUpdateHasCertificate();
 
   const categoryName = useMemo(() => {
     return categories.find((category) => category.id === watchedCategoryId)?.title;
@@ -92,12 +100,45 @@ const CourseSettings = ({
     }
   };
 
+  const handleCertificateToggle = (newValue: boolean) => {
+    setIsCertificateEnabled(newValue);
+
+    if (courseId) {
+      console.log(`Updating course ${courseId} certificate to: ${newValue}`);
+
+      updateHasCertificate.mutate(
+        { courseId, data: { hasCertificate: newValue } },
+        {
+          onSuccess: () => {
+            console.log(`Successfully updated certificate to ${newValue}`);
+          },
+          onError: (error) => {
+            console.error(`Error updating certificate:`, error);
+            setIsCertificateEnabled(!newValue);
+          },
+        },
+      );
+    }
+  };
+
   return (
     <div className="flex h-full w-full gap-x-6">
       <div className="w-full basis-full">
         <div className="flex h-full w-full flex-col gap-y-6 overflow-y-auto rounded-lg border border-gray-200 bg-white p-8 shadow-md">
           <div className="flex flex-col gap-y-1">
-            <h5 className="h5 text-neutral-950">{t("adminCourseView.settings.editHeader")}</h5>
+            <div className="flex items-center justify-between">
+              <h5 className="h5 text-neutral-950">{t("adminCourseView.settings.editHeader")}</h5>
+              <Toggle
+                pressed={isCertificateEnabled}
+                onPressedChange={handleCertificateToggle}
+                disabled={updateHasCertificate.isPending}
+                aria-label="Enable certificate"
+              >
+                {isCertificateEnabled ? "Zawiera certyfikat" : "Nie zawiera certyfikatu"}
+                {updateHasCertificate.isPending && " (Zapisywanie...)"}
+              </Toggle>
+            </div>
+            <div className="flex items-center gap-x-2"></div>
             <p className="body-lg-md text-neutral-800">
               {t("adminCourseView.settings.editSubHeader")}
             </p>
