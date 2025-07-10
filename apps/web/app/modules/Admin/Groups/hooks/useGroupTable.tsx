@@ -39,9 +39,11 @@ export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () =>
         ),
       },
       {
-        accessorKey: "description",
+        accessorKey: "characteristic",
         header: ({ column }) => (
-          <SortButton<GroupColumns> column={column}>{t("adminGroupsView.description")}</SortButton>
+          <SortButton<GroupColumns> column={column}>
+            {t("adminGroupsView.characteristic")}
+          </SortButton>
         ),
       },
     ],

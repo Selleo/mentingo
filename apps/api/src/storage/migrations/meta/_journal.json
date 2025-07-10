@@ -113,6 +113,13 @@
       "when": 1751543301194,
       "tag": "0015_change_user_role_from_teacher_to_content_creator",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1751893830304,
+      "tag": "0016_rename_description_to_characteristic_in_groups_table",
+      "breakpoints": true
     }
   ]
 }

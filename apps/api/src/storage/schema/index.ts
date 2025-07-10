@@ -355,7 +355,7 @@ export const groups = pgTable("groups", {
   ...id,
   ...timestamps,
   name: text("name").notNull(),
-  description: text("description"),
+  characteristic: text("characteristic"),
 });
 
 export const groupUsers = pgTable(
