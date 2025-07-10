@@ -33,10 +33,7 @@ export default function PasswordValidationDisplay({
     <div id="password-hints" className="mb-3">
       <PasswordStrengthBars password={password} />
       <div>
-        <span
-          data-hs-strong-password-hints-weakness-text='["Empty", "Weak", "Medium", "Strong", "Very Strong", "Super Strong"]'
-          className="text-sm font-semibold text-gray-800"
-        ></span>
+        <span className="text-sm font-semibold text-gray-800"></span>
       </div>
       <h4 className="my-2 text-sm font-semibold text-gray-800">
         {t("passwordValidationDisplay.header")}

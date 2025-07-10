@@ -5,10 +5,12 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
+import PasswordValidationDisplay from "~/components/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { validatePassword } from "~/modules/Dashboard/Settings/schema/password.schema";
 
 import type { RegisterBody } from "~/api/generated-api";
 
@@ -16,7 +18,7 @@ const registerSchema = z.object({
   firstName: z.string().min(2, { message: "registerView.validation.firstName" }),
   lastName: z.string().min(2, { message: "registerView.validation.lastName" }),
   email: z.string().email({ message: "registerView.validation.email" }),
-  password: z.string().min(8, { message: "registerView.validation.password" }),
+  password: z.string().refine((password) => validatePassword(password), {}),
 });
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
@@ -24,8 +26,24 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterBody>({ resolver: zodResolver(registerSchema) });
+    watch,
+    formState: { errors, isValid },
+    trigger,
+  } = useForm<RegisterBody>({
+    resolver: zodResolver(registerSchema),
+    mode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const passwordValue = watch("password", "");
+  const firstNameValue = watch("firstName", "");
+  const lastNameValue = watch("lastName", "");
+  const emailValue = watch("email");
 
   const onSubmit = async (data: RegisterBody) => {
     registerUser({ data });
@@ -68,14 +86,27 @@ export default function RegisterPage() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">{t("registerView.field.password")}</Label>
-            <Input id="password" type="password" {...register("password")} />
+            <Input
+              id="password"
+              type="password"
+              {...register("password", {
+                onBlur: () => trigger("password"),
+              })}
+            />
+            <PasswordValidationDisplay password={passwordValue} />
             {errors.password && (
               <div className="text-sm text-red-500">
                 {t(errors.password.message ?? "registerView.validation.password")}
               </div>
             )}
           </div>
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={
+              !isValid || !firstNameValue || !lastNameValue || !emailValue || !passwordValue
+            }
+          >
             {t("registerView.button.createAccount")}
           </Button>
         </form>
