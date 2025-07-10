@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useChangePassword } from "~/api/mutations/useChangePassword";
-import PasswordValidationDisplay from "~/components/PasswordValidationDisplay";
+import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import {
   Card,
