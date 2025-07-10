@@ -1,8 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, asc, eq, inArray, not, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, not, sql } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
-import { MESSAGE_ROLE, type MessageRole } from "src/ai/ai.type";
+import { MESSAGE_ROLE, type MessageRole, type ThreadStatus } from "src/ai/ai.type";
 import { DatabasePg } from "src/common";
 import {
   aiMentorLessons,
@@ -13,7 +13,12 @@ import {
   lessons,
 } from "src/storage/schema";
 
-import type { ThreadBody, ThreadMessageBody } from "src/ai/ai.schema";
+import type {
+  AiMentorGroupsBody,
+  AiMentorLessonBody,
+  ThreadBody,
+  ThreadMessageBody,
+} from "src/ai/ai.schema";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -30,7 +35,13 @@ export class AiRepository {
   }
 
   async createThread(data: ThreadBody) {
-    const [thread] = await this.db.insert(aiMentorThreads).values(data).returning();
+    const [thread] = await this.db
+      .insert(aiMentorThreads)
+      .values(data)
+      .returning({
+        ...getTableColumns(aiMentorThreads),
+        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
+      });
     return thread;
   }
 
@@ -41,7 +52,10 @@ export class AiRepository {
 
   async findThread(threadId: UUIDType) {
     const [thread] = await this.db
-      .select()
+      .select({
+        ...getTableColumns(aiMentorThreads),
+        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
+      })
       .from(aiMentorThreads)
       .where(eq(aiMentorThreads.id, threadId));
     return thread;
@@ -62,7 +76,7 @@ export class AiRepository {
     return tokens;
   }
 
-  async findMessageHistory(threadId: UUIDType, archived: boolean) {
+  async findMessageHistory(threadId: UUIDType, archived?: boolean) {
     const messages = await this.db
       .select({
         role: sql<MessageRole>`${aiMentorThreadMessages.role}`,
@@ -72,7 +86,10 @@ export class AiRepository {
       .where(
         and(
           eq(aiMentorThreadMessages.threadId, threadId),
-          eq(aiMentorThreadMessages.archived, archived),
+          eq(
+            aiMentorThreadMessages.archived,
+            archived ? archived : aiMentorThreadMessages.archived,
+          ),
         ),
       )
       .orderBy(asc(aiMentorThreadMessages.createdAt));
@@ -120,21 +137,12 @@ export class AiRepository {
       .where(eq(aiMentorThreadMessages.role, MESSAGE_ROLE.SUMMARY));
     return newSummary;
   }
-  async updateMessageContent(threadMessageId: string, content: string, tokenCount: number) {
-    const [newSummary] = await this.db
-      .update(aiMentorThreadMessages)
-      .set({ content, tokenCount })
-      .where(eq(aiMentorThreadMessages.id, threadMessageId));
-    return newSummary;
-  }
 
   async insertMessage(data: ThreadMessageBody) {
     return this.db.insert(aiMentorThreadMessages).values(data).returning();
   }
 
-  async findMentorLessonByThreadId(
-    threadId: UUIDType,
-  ): Promise<{ title?: string; instructions?: string; conditions?: string }> {
+  async findMentorLessonByThreadId(threadId: UUIDType): Promise<AiMentorLessonBody> {
     const [lesson] = await this.db
       .select({
         title: lessons.title,
@@ -148,12 +156,10 @@ export class AiRepository {
     return lesson;
   }
 
-  async findGroupsByThreadId(
-    threadId: UUIDType,
-  ): Promise<{ title?: string; characteristic?: string }> {
-    const [groupCharacteristics] = await this.db
+  async findGroupsByThreadId(threadId: UUIDType): Promise<AiMentorGroupsBody> {
+    const groupCharacteristics = await this.db
       .select({
-        title: groups.name,
+        name: groups.name,
         characteristic: groups.description,
       })
       .from(groups)
@@ -161,11 +167,15 @@ export class AiRepository {
       .innerJoin(aiMentorThreads, eq(aiMentorThreads.userId, groupUsers.userId))
       .where(eq(aiMentorThreads.id, threadId));
 
-    return groupCharacteristics
-      ? {
-          ...groupCharacteristics,
-          characteristic: groupCharacteristics.characteristic ?? undefined,
-        }
-      : {};
+    return groupCharacteristics;
+  }
+
+  async updateThread(threadId: UUIDType, data: ThreadBody) {
+    const [thread] = await this.db
+      .update(aiMentorThreads)
+      .set(data)
+      .where(eq(aiMentorThreads.id, threadId))
+      .returning();
+    return thread;
   }
 }
