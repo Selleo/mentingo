@@ -25,7 +25,6 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUser.schema";
 
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
@@ -41,9 +40,10 @@ import {
 import {
   type AllUsersResponse,
   allUsersSchema,
-  type UserDetails,
-  userDetailsSchema,
+  type UserDetailsWithProfilePictureUrl,
   type UserResponse,
+  userWithoutProfilePictureKeySchema,
+  userWithProfilePictureUrlSchema,
 } from "./schemas/user.schema";
 import { SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
@@ -95,7 +95,7 @@ export class UserController {
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(userWithoutProfilePictureKeySchema),
   })
   async getUserById(@Query("id") id: UUIDType): Promise<BaseResponse<UserResponse>> {
     const user = await this.usersService.getUserById(id);
@@ -107,13 +107,13 @@ export class UserController {
   @Public()
   @Validate({
     request: [{ type: "query", name: "userId", schema: UUIDSchema, required: true }],
-    response: baseResponse(userDetailsSchema),
+    response: baseResponse(userWithProfilePictureUrlSchema),
   })
   async getUserDetails(
     @Query("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<UserDetails>> {
+  ): Promise<BaseResponse<UserDetailsWithProfilePictureUrl>> {
     const userDetails = await this.usersService.getUserDetails(userId, currentUserId, role);
     return new BaseResponse(userDetails);
   }
@@ -121,7 +121,7 @@ export class UserController {
   @Patch()
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(userWithoutProfilePictureKeySchema),
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
       { type: "body", schema: updateUserSchema },
@@ -131,7 +131,7 @@ export class UserController {
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
     {
       if (currentUserId !== id) {
         throw new ForbiddenException("You can only update your own account");
@@ -182,7 +182,7 @@ export class UserController {
   @Patch("admin")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(userWithoutProfilePictureKeySchema),
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
       { type: "body", schema: updateUserSchema },
@@ -191,7 +191,7 @@ export class UserController {
   async adminUpdateUser(
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
     {
       const updatedUser = await this.usersService.updateUser(id, data);
 

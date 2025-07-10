@@ -191,7 +191,8 @@
       "edit": "Edytuj",
       "share": "Udostępnij profil",
       "cancel": "Anuluj",
-      "confirm": "Potwierdź"
+      "confirm": "Potwierdź",
+      "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
     "breadcrumbs": {
       "dashboard": "Panel"
@@ -208,7 +209,8 @@
       "jobTitle": "Tytuł",
       "jobTitlePlaceholder": "Wprowadź swój tytuł",
       "description": "Twój opis",
-      "descriptionPlaceholder": "Wprowadź krótki opis"
+      "descriptionPlaceholder": "Wprowadź krótki opis",
+      "uploadThumbnailLabel": "Prześlij zdjęcie profilowe"
     },
     "toast": {
       "profileLinkCopied": "Link do profilu skopiowany!",
@@ -219,6 +221,8 @@
       "personalInfoDescription": "Zarządzaj swoimi podstawowymi danymi konta",
       "aboutTitle": "O mnie",
       "aboutDescription": "Powiedz więcej o sobie",
+      "appearanceTitle": "Wygląd",
+      "appearanceDescription": "Zmień swoje zdjęcie profilowe",
       "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",

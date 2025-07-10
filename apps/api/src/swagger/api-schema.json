@@ -3218,6 +3218,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3228,7 +3238,8 @@
               "contactEmail",
               "contactPhone",
               "jobTitle",
-              "role"
+              "role",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3366,6 +3377,9 @@
             "type": "string"
           },
           "lastName": {
+            "type": "string"
+          },
+          "profilePictureS3Key": {
             "type": "string"
           },
           "description": {

@@ -16,6 +16,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { FileService } from "src/file/file.service";
 
 import { createTokens, credentials, userDetails, users } from "../storage/schema";
 
@@ -28,7 +29,10 @@ import {
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
 import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
-import type { UserDetails } from "./schemas/user.schema";
+import type {
+  UserDetailsWithProfilePictureUrl,
+  UserDetailsWithProfilePictureKey,
+} from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
@@ -37,6 +41,7 @@ export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private emailService: EmailService,
+    private fileService: FileService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -95,11 +100,12 @@ export class UserService {
     userId: UUIDType,
     currentUserId: UUIDType,
     userRole: UserRole,
-  ): Promise<UserDetails> {
-    const [userBio]: UserDetails[] = await this.db
+  ): Promise<UserDetailsWithProfilePictureUrl> {
+    const [userBio]: UserDetailsWithProfilePictureKey[] = await this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
+        profilePictureS3Key: users.profilePictureS3Key,
         role: sql<UserRole>`${users.role}`,
         id: users.id,
         description: userDetails.description,
@@ -121,7 +127,17 @@ export class UserService {
     if (!canView) {
       throw new ForbiddenException("Cannot access user details");
     }
-    return userBio;
+
+    const { profilePictureS3Key, ...user } = userBio;
+
+    const profilePictureUrl = profilePictureS3Key
+      ? await this.fileService.getFileUrl(profilePictureS3Key)
+      : null;
+
+    return {
+      ...user,
+      profilePictureUrl,
+    };
   }
 
   public async updateUser(
@@ -172,6 +188,7 @@ export class UserService {
       const userUpdates = {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
+        ...(data.profilePictureS3Key && { profilePictureS3Key: data.profilePictureS3Key }),
       };
 
       const userDetailsUpdates = {
