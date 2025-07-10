@@ -55,6 +55,16 @@ describe("AuthController (e2e)", () => {
 
       await request(app.getHttpServer()).post("/api/auth/register").send(existingUser).expect(409);
     });
+
+    it("should return 400 if password does not match criteria", async () => {
+      const user = await userFactory.withCredentials({ password: "passnotmatchcriteria" }).build();
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/register")
+        .send(user)
+        .expect(400);
+      expect(response.body.message).toEqual("Validation failed (body)");
+    });
   });
 
   describe("POST /api/auth/login", () => {
@@ -265,6 +275,15 @@ describe("AuthController (e2e)", () => {
       expect(response.body.data).toEqual({
         message: "Password reset successfully",
       });
+    });
+
+    it("should return 400 if new password does not match criteria", async () => {
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/reset-password")
+        .send({ resetToken: "valid-token", newPassword: "passwordnotmatchcriteria" })
+        .expect(400);
+
+      expect(response.body.message).toEqual("Validation failed (body)");
     });
 
     it("should return 404 if reset token is missing", async () => {
