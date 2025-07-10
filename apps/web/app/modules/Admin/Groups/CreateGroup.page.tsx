@@ -7,10 +7,10 @@ import { useCreateGroup } from "~/api/mutations/admin/useCreateGroup";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
-import CreateGroupCard from "~/modules/Admin/Groups/CreateGroupCard";
+import CreateGroupCard from "~/modules/Admin/Groups/components/CreateGroupCard";
+import { GroupPageBreadcrumbs } from "~/modules/Admin/Groups/components/GroupBreadcrumbs";
+import { GroupHeader } from "~/modules/Admin/Groups/components/GroupHeader";
 import { groupFormSchema } from "~/modules/Admin/Groups/group.utils";
-import { GroupPageBreadcrumbs } from "~/modules/Admin/Groups/GroupBreadcrumbs";
-import { GroupHeader } from "~/modules/Admin/Groups/GroupHeader";
 
 import type { ReactElement } from "react";
 import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";

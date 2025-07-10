@@ -151,7 +151,7 @@ const Groups = (): ReactElement => {
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow
-              key={row.original.id}
+              key={row.id}
               data-state={row.getIsSelected() && "selected"}
               onClick={handleGroupEdit(row.original?.id)}
               className="cursor-pointer hover:bg-neutral-100"

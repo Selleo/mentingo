@@ -23,7 +23,7 @@ export const GroupHeader = ({ title, handlePublish, handleCancel }: CreatePageHe
           onClick={handleCancel}
           className="flex w-full items-center justify-center gap-2 md:w-fit"
         >
-          <Icon name="X" className="size-5" /> {t("adminGroupsView.newGroup.cancel")}
+          <Icon name="IconX" className="size-5" /> {t("adminGroupsView.newGroup.cancel")}
         </Button>
         <Button
           variant="primary"

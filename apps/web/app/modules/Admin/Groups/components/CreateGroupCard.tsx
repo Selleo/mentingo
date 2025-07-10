@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "~/component
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { RequiredTick } from "~/modules/Admin/Groups/components/RequiredTick";
 
 import type { UseFormReturn } from "react-hook-form";
 import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";
@@ -12,9 +13,6 @@ interface CreateGroupProps {
   form: UseFormReturn<GroupFormValues>;
   handleSubmit: (group: GroupFormValues) => Promise<void>;
 }
-const RequiredTick = () => {
-  return <span className="text-error-600">*&nbsp;</span>;
-};
 
 const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
   const { t } = useTranslation();

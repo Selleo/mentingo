@@ -6,7 +6,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
-import GroupBreadcrumbsButton from "~/modules/Admin/Groups/GroupBreadcrumbsButton";
+import GroupBreadcrumbsButton from "~/modules/Admin/Groups/components/GroupBreadcrumbsButton";
 
 interface GroupBreadcrumbsProps {
   name: string;
