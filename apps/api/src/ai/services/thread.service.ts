@@ -18,9 +18,7 @@ export class ThreadService {
   ) {}
 
   async createThread(data: CreateThreadBody, role: UserRole) {
-    const aiMentorLessonId = await this.aiRepository.getAiMentorLessonIdFromLesson(data.lessonId);
-    if (!aiMentorLessonId) throw new NotFoundException(`Lesson not found`);
-
+    const aiMentorLessonId = await this.findAiMentorLessonIdFromLesson(data.lessonId);
     const lesson = this.lessonService.getLessonById(
       data.lessonId,
       data.userId,
@@ -30,7 +28,7 @@ export class ThreadService {
     if (!lesson) throw new NotFoundException("Lesson not found");
 
     const thread = await this.aiRepository.createThread({
-      aiMentorLessonId: aiMentorLessonId.aiMentorLessonId,
+      aiMentorLessonId: aiMentorLessonId,
       ...data,
     });
 
@@ -54,9 +52,21 @@ export class ThreadService {
     return { data: messages };
   }
 
+  async findAllThreadsByLessonIdAndUserId(lessonId: UUIDType, userId: UUIDType) {
+    const threads = await this.aiRepository.findThreadsByLessonIdAndUserId(lessonId, userId);
+    if (!threads) throw new NotFoundException("No threads found");
+    return { data: threads };
+  }
+
   // will be used in exiting lesson and marking as completed
   async setThreadStatus(threadId: UUIDType, userId: UUIDType, status: ThreadStatus) {
     const thread = await this.findThread(threadId, userId);
     return await this.aiRepository.updateThread(threadId, { ...thread.data, status });
+  }
+
+  private async findAiMentorLessonIdFromLesson(lessonId: UUIDType) {
+    const aiMentorLessonId = await this.aiRepository.getAiMentorLessonIdFromLesson(lessonId);
+    if (!aiMentorLessonId) throw new NotFoundException(`Lesson not found`);
+    return aiMentorLessonId.aiMentorLessonId;
   }
 }

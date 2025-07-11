@@ -60,6 +60,32 @@ export class AiRepository {
       .where(eq(aiMentorThreads.id, threadId));
     return thread;
   }
+
+  async findThreadsByLessonId(lessonId: UUIDType) {
+    const threads = await this.db
+      .select({
+        ...getTableColumns(aiMentorThreads),
+        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
+      })
+      .from(aiMentorThreads)
+      .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
+      .where(eq(aiMentorLessons.lessonId, lessonId));
+
+    return threads;
+  }
+  async findThreadsByLessonIdAndUserId(lessonId: UUIDType, userId: UUIDType) {
+    const threads = await this.db
+      .select({
+        ...getTableColumns(aiMentorThreads),
+        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
+      })
+      .from(aiMentorThreads)
+      .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
+      .where(and(eq(aiMentorLessons.lessonId, lessonId), eq(aiMentorThreads.userId, userId)));
+
+    return threads;
+  }
+
   async getTokenSumForThread(threadId: UUIDType, archived: boolean) {
     const [tokens] = await this.db
       .select({
@@ -76,7 +102,7 @@ export class AiRepository {
     return tokens;
   }
 
-  async findMessageHistory(threadId: UUIDType, archived?: boolean) {
+  async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
     const messages = await this.db
       .select({
         role: sql<MessageRole>`${aiMentorThreadMessages.role}`,
@@ -90,6 +116,7 @@ export class AiRepository {
             aiMentorThreadMessages.archived,
             archived ? archived : aiMentorThreadMessages.archived,
           ),
+          eq(aiMentorThreadMessages.role, role ? role : aiMentorThreadMessages.role),
         ),
       )
       .orderBy(asc(aiMentorThreadMessages.createdAt));
