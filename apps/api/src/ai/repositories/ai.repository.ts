@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, asc, eq, getTableColumns, inArray, not, sql } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
-import { MESSAGE_ROLE, type MessageRole, type ThreadStatus } from "src/ai/ai.type";
+import { MESSAGE_ROLE, type MessageRole, type ThreadStatus } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import {
   aiMentorLessons,
@@ -19,7 +19,7 @@ import type {
   ThreadBody,
   ThreadMessageBody,
   UpdateThreadBody,
-} from "src/ai/ai.schema";
+} from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 
 @Injectable()
