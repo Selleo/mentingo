@@ -199,7 +199,7 @@ export interface UpsertUserDetailsResponse {
 export interface UpdateUserProfileBody {
   firstName?: string;
   lastName?: string;
-  profilePictureS3Key?: string;
+  profilePictureS3Key?: string | null;
   description?: string;
   /** @format email */
   contactEmail?: string;

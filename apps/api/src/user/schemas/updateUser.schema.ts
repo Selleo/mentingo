@@ -19,7 +19,7 @@ export const upsertUserDetailsSchema = Type.Object({
 export const updateUserProfileSchema = Type.Object({
   firstName: Type.Optional(Type.String()),
   lastName: Type.Optional(Type.String()),
-  profilePictureS3Key: Type.Optional(Type.String()),
+  profilePictureS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   description: Type.Optional(Type.String()),
   contactEmail: Type.Optional(Type.String({ format: "email" })),
   contactPhone: Type.Optional(Type.String()),

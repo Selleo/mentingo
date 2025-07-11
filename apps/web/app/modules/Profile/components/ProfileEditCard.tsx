@@ -134,7 +134,7 @@ export const ProfileEditCard = ({
             <div className="mb-4 flex flex-col gap-y-2">
               <Label htmlFor="fileUrl">{t("contentCreatorView.field.uploadThumbnailLabel")}</Label>
               <ImageUploadInput
-                field={field}
+                field={{ ...field, value: field.value ?? undefined }}
                 handleImageUpload={handleImageUpload}
                 isUploading={isUploading}
                 imageUrl={displayThumbnailUrl}

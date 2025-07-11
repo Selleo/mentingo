@@ -3444,7 +3444,14 @@
             "type": "string"
           },
           "profilePictureS3Key": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "description": {
             "type": "string"
