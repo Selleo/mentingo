@@ -11,7 +11,7 @@ import { AiService } from "src/ai/services/ai.service";
 import { LessonService } from "src/lesson/services/lesson.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import type { CreateThreadBody } from "src/ai/ai.schema";
+import type { CreateThreadBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -38,7 +38,10 @@ export class ThreadService {
       ...data,
     });
 
-    const systemPrompt = await this.aiService.setSystemPrompt(thread.id);
+    const systemPrompt = await this.aiService.setSystemPrompt({
+      threadId: thread.id,
+      userId: thread.userId,
+    });
     await this.aiService.sendWelcomeMessage(thread.id, systemPrompt);
 
     return { data: thread };

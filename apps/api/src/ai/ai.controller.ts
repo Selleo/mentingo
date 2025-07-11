@@ -2,6 +2,8 @@ import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/co
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
+import { AiService } from "src/ai/services/ai.service";
+import { ThreadService } from "src/ai/services/thread.service";
 import {
   type CreateThreadBody,
   type CreateThreadMessageBody,
@@ -15,10 +17,8 @@ import {
   responseThreadSchema,
   type ThreadMessageBody,
   threadMessageSchema,
-} from "src/ai/ai.schema";
-import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/ai.type";
-import { AiService } from "src/ai/services/ai.service";
-import { ThreadService } from "src/ai/services/thread.service";
+} from "src/ai/utils/ai.schema";
+import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -94,8 +94,11 @@ export class AiController {
     request: [{ type: "body", schema: createThreadMessageSchema }],
     response: baseResponse(threadMessageSchema),
   })
-  async chat(@Body() data: CreateThreadMessageBody): Promise<BaseResponse<ThreadMessageBody>> {
-    return this.aiService.generateMessage(data, OPENAI_MODELS.BASIC);
+  async chat(
+    @Body() data: CreateThreadMessageBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<ThreadMessageBody>> {
+    return this.aiService.generateMessage(data, OPENAI_MODELS.BASIC, userId);
   }
 
   @Post("judge/:threadId")
