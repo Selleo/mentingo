@@ -1,34 +1,41 @@
-import { BadRequestException, forwardRef, Inject, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from "@nestjs/common";
 
+import { AiRepository } from "src/ai/repositories/ai.repository";
+import { ChatService } from "src/ai/services/chat.service";
+import { ThreadService } from "src/ai/services/thread.service";
+import { TokenService } from "src/ai/services/token.service";
 import {
   SUMMARY_PROMPT,
   SYSTEM_PROMPT_FOR_JUDGE,
   SYSTEM_PROMPT_FOR_MENTOR,
   THRESHOLD,
   WELCOME_MESSAGE_PROMPT,
-} from "src/ai/ai.config";
+} from "src/ai/utils/ai.config";
 import {
   MESSAGE_ROLE,
   type MessageRole,
   OPENAI_MODELS,
   type OpenAIModels,
   THREAD_STATUS,
-} from "src/ai/ai.type";
-import { AiRepository } from "src/ai/repositories/ai.repository";
-import { ChatService } from "src/ai/services/chat.service";
-import { ThreadService } from "src/ai/services/thread.service";
-import { TokenService } from "src/ai/services/token.service";
+} from "src/ai/utils/ai.type";
 
 import type {
   CreateThreadMessageBody,
   ThreadMessageBody,
   ThreadOwnershipBody,
-} from "src/ai/ai.schema";
+} from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class AiService {
   constructor(
+    @Inject(forwardRef(() => ChatService))
     private readonly chatService: ChatService,
     private readonly tokenService: TokenService,
     private readonly aiRepository: AiRepository,
@@ -36,8 +43,11 @@ export class AiService {
     private readonly threadService: ThreadService,
   ) {}
 
-  async generateMessage(data: CreateThreadMessageBody, model: OpenAIModels) {
-    await this.isThreadActive(data.threadId);
+  async generateMessage(data: CreateThreadMessageBody, model: OpenAIModels, userId: UUIDType) {
+    const thread = await this.isThreadActive(data.threadId);
+    if (thread.userId !== userId)
+      throw new ForbiddenException("You don't have access to this thread");
+
     await this.summarizeIfNeeded(data.threadId);
 
     const prompt = await this.getPrompt(data.threadId, data.content);
@@ -116,18 +126,18 @@ export class AiService {
     return { history, language };
   }
 
-  async setSystemPrompt(threadId: UUIDType) {
-    const lang = await this.aiRepository.findThreadLanguage(threadId);
-    const mentorLesson = await this.aiRepository.findMentorLessonByThreadId(threadId);
-    const groups = await this.aiRepository.findGroupsByThreadId(threadId);
+  async setSystemPrompt(data: ThreadOwnershipBody) {
+    const lang = await this.aiRepository.findThreadLanguage(data.threadId);
+    const mentorLesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
+    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
 
     delete mentorLesson.conditions;
 
-    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(mentorLesson, groups, lang.language);
+    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(mentorLesson, groups, data, lang.language);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
     await this.aiRepository.insertMessage({
-      threadId,
       tokenCount,
+      threadId: data.threadId,
       role: MESSAGE_ROLE.SYSTEM,
       content: systemPrompt,
     });
