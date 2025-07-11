@@ -16,5 +16,15 @@ export const upsertUserDetailsSchema = Type.Object({
   jobTitle: Type.Optional(Type.String()),
 });
 
+export const updateUserProfileSchema = Type.Object({
+  firstName: Type.Optional(Type.String()),
+  lastName: Type.Optional(Type.String()),
+  description: Type.Optional(Type.String()),
+  contactEmail: Type.Optional(Type.String({ format: "email" })),
+  contactPhone: Type.Optional(Type.String()),
+  jobTitle: Type.Optional(Type.String()),
+});
+
+export type UpdateUserProfileBody = Static<typeof updateUserProfileSchema>;
 export type UpsertUserDetailsBody = Static<typeof upsertUserDetailsSchema>;
 export type UpdateUserBody = Static<typeof updateUserSchema>;
