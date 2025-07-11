@@ -183,7 +183,7 @@ importers:
         specifier: 0.7.0
         version: 0.7.0
       passport-google-oauth20:
-        specifier: ^2.0.0
+        specifier: 2.0.0
         version: 2.0.0
       passport-jwt:
         specifier: 4.0.1
@@ -259,7 +259,7 @@ importers:
         specifier: 6.4.15
         version: 6.4.15
       '@types/passport-google-oauth20':
-        specifier: ^2.0.16
+        specifier: 2.0.16
         version: 2.0.16
       '@types/passport-jwt':
         specifier: 4.0.1
