@@ -26,7 +26,6 @@ const EditCourse = () => {
 
   if (!id) throw new Error("Course ID not found");
   const { data: course, isLoading, dataUpdatedAt } = useBetaCourseById(id);
-
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
   const handleTabChange = (tabValue: string) => {
     params.set("tab", tabValue);

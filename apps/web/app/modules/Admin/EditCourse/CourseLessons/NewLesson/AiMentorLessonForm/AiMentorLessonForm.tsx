@@ -66,19 +66,6 @@ const AiMentorLessonForm = ({
     setIsModalOpen(true);
   };
 
-  /*
-    const [instructionsValue, completionConditionsValue] = form.watch([
-      "aiMentorInstructions",
-      "completionConditions"
-    ]);
-
-    const _instructionsCharactersLeft = Math.max(0, FORM_LIMITS.MAX_INSTRUCTIONS_LENGTH - instructionsValue?.length);
-    const _completionConditionsCharactersLeft = Math.max(
-      0,
-       FORM_LIMITS.MAX_COMPLETION_CONDITIONS_LENGTH - completionConditionsValue?.length,
-    );
-  */
-
   return (
     <TooltipProvider>
       <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">

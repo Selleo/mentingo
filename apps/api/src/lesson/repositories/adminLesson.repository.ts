@@ -109,6 +109,7 @@ export class AdminLessonRepository {
   ) {
     return dbInstance.update(lessons).set(data).where(eq(lessons.id, id)).returning();
   }
+
   async updateAiMentorLessonData(
     lessonId: UUIDType,
     data: {

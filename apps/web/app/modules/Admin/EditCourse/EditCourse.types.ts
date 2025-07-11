@@ -21,7 +21,6 @@ export interface Lesson {
   chapterId?: string;
   questions?: Question[];
   isExternal?: boolean;
-  // AI Mentor specific fields
   aiMentor?: AiMentorType;
 }
 
@@ -55,7 +54,7 @@ export const LessonType = {
   TEXT: "text",
   PRESENTATION: "presentation",
   QUIZ: "quiz",
-  AI_MENTOR: "ai",
+  AI_MENTOR: "ai_mentor",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

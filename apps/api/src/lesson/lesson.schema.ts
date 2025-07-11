@@ -76,7 +76,7 @@ export const adminLessonSchema = Type.Object({
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
-  aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
+  aiMentor: Type.Union([aiMentorLessonSchema, Type.Null()]),
 });
 
 export const lessonSchema = Type.Object({

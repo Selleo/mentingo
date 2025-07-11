@@ -32,7 +32,7 @@
       "archived": "Zarchiwizowany",
       "selected": "Wybrany",
       "allStatuses": "Wszystkie statusy",
-      "draft": "Szkic",
+      "draft": "Wersja robocza",
       "all": "Wszystko",
       "search": "Szukaj",
       "published": "Opublikowany",
@@ -280,7 +280,7 @@
         "states": "Stany"
       },
       "other": {
-        "draft": "Szkic",
+        "draft": "Wersja robocza",
         "published": "Opublikowane"
       }
     },
@@ -700,7 +700,7 @@
     "status": {
       "header": "Status",
       "subHeader": "Ustaw stan kursu",
-      "draftHeader": "Szkic",
+      "draftHeader": "Wersja robocza",
       "draftBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy już się zapisali, kurs nie będzie widoczny na ich liście kursów.",
       "publishedHeader": "Opublikowany",
       "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie."
