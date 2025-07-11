@@ -24,6 +24,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { SettingsService } from "src/settings/settings.service";
 
 import { createTokens, credentials, resetTokens, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -44,6 +45,7 @@ export class AuthService {
     private emailService: EmailService,
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
+    private settingsService: SettingsService,
   ) {}
 
   private async notifyAdminsAboutNewUser(firstName: string, lastName: string, email: string) {
@@ -102,6 +104,8 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
+      //#TODO end implementing this funcitonality here
+      // await this.settingsService.createSettings(newUser.id)
       await this.notifyAdminsAboutNewUser(firstName, lastName, email);
 
       return newUser;
