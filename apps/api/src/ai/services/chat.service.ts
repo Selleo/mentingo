@@ -1,6 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { Injectable } from "@nestjs/common";
-import { generateObject, generateText, type Message } from "ai";
+import { generateObject, generateText, jsonSchema, type Message } from "ai";
 
 import { MAX_TOKENS } from "src/ai/ai.config";
 import {
@@ -65,14 +65,13 @@ export class ChatService {
     try {
       const result = await generateObject({
         model: openai(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
-        schema: JSON.parse(JSON.stringify(aiJudgeJudgementSchema)),
+        schema: jsonSchema({ ...aiJudgeJudgementSchema, additionalProperties: false }),
         system,
         prompt,
       });
-
       return await this.evaluate(result.object as AiJudgeJudgementBody);
     } catch (error) {
-      throw new Error("Failed to generate result");
+      throw new Error(`Failed to generate result ${error}`);
     }
   }
 

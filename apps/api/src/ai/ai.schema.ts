@@ -21,6 +21,7 @@ export const threadSchema = Type.Object({
   userId: UUIDSchema,
   status: Type.Enum(THREAD_STATUS),
 });
+export const updateThreadSchema = Type.Partial(threadSchema);
 
 export const responseThreadSchema = Type.Object({
   id: UUIDSchema,
@@ -82,6 +83,15 @@ export const threadOwnershipSchema = Type.Object({
   userId: UUIDSchema,
 });
 
+export const responseJudgeSchema = Type.Intersect([
+  responseAiJudgeJudgementSchema,
+  Type.Object({
+    status: Type.Enum(THREAD_STATUS),
+  }),
+]);
+
+export type ResponseJudgeBody = Static<typeof responseJudgeSchema>;
+export type UpdateThreadBody = Static<typeof updateThreadSchema>;
 export type ThreadOwnershipBody = Static<typeof threadOwnershipSchema>;
 export type ResponseAiJudgeJudgementBody = Static<typeof responseAiJudgeJudgementSchema>;
 export type AiJudgeJudgementBody = Static<typeof aiJudgeJudgementSchema>;

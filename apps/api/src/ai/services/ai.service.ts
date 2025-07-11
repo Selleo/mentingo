@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, forwardRef, Inject, Injectable } from "@nestjs/common";
 
 import {
   SUMMARY_PROMPT,
@@ -32,6 +32,7 @@ export class AiService {
     private readonly chatService: ChatService,
     private readonly tokenService: TokenService,
     private readonly aiRepository: AiRepository,
+    @Inject(forwardRef(() => ThreadService))
     private readonly threadService: ThreadService,
   ) {}
 
@@ -146,7 +147,12 @@ export class AiService {
     const content = messages.history.map(({ content }) => content).join("\n");
     const system = SYSTEM_PROMPT_FOR_JUDGE(mentorLesson, messages.language.language);
 
-    return await this.chatService.judge(system, content);
+    const judged = await this.chatService.judge(system, content);
+    const { status } = await this.aiRepository.updateThread(data.threadId, {
+      status: THREAD_STATUS.COMPLETED,
+    });
+
+    return { data: { ...judged, status } };
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
