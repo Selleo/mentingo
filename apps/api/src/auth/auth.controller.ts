@@ -17,6 +17,7 @@ import { baseResponse, BaseResponse, nullResponse, type UUIDType } from "src/com
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { UserActivityEvent } from "src/events";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
@@ -167,5 +168,29 @@ export class AuthController {
   async resetPassword(@Body() data: ResetPasswordBody): Promise<BaseResponse<{ message: string }>> {
     await this.authService.resetPassword(data.resetToken, data.newPassword);
     return new BaseResponse({ message: "Password reset successfully" });
+  }
+
+  @Public()
+  @Get("google")
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth(@Req() _request: Request): Promise<void> {
+    // Initiates the Google OAuth flow
+    // The actual redirection to Google happens in the AuthGuard
+  }
+
+  @Public()
+  @Get("google/callback")
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuthCallback(
+    @Req() request: Request & { user: { email: string; name: string; provider: string } },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const googleUser = request.user;
+
+    const { accessToken, refreshToken } = await this.authService.handleGoogleCallback(googleUser);
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    response.redirect(process.env.APP_URL || "http://localhost:5173");
   }
 }

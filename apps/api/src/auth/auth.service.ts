@@ -22,6 +22,7 @@ import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createTokens, credentials, resetTokens, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -315,5 +316,36 @@ export class AuthService {
         reminderCount + 1,
       );
     });
+  }
+
+  public async handleGoogleCallback(googleUser: { email: string; name: string; provider: string }) {
+    if (!googleUser) {
+      throw new UnauthorizedException("Google user data is missing");
+    }
+
+    if (!googleUser?.email || !googleUser?.name) {
+      throw new BadRequestException("Missing required user information from Google authentication");
+    }
+
+    let [user] = await this.db.select().from(users).where(eq(users.email, googleUser.email));
+
+    if (!user) {
+      const [firstName, ...lastNameParts] = googleUser.name.trim().split(" ");
+      const lastName = lastNameParts.join(" ") || "";
+
+      user = await this.userService.createUser({
+        email: googleUser.email,
+        firstName: firstName || "Firstname",
+        lastName: lastName || "Lastname",
+        role: USER_ROLES.STUDENT,
+      });
+    }
+
+    const tokens = await this.getTokens(user);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
   }
 }

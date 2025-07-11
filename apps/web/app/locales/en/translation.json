@@ -834,11 +834,13 @@
       "password": "Password"
     },
     "other": {
-      "alreadyHaveAccount": "Already have an account?"
+      "alreadyHaveAccount": "Already have an account?",
+      "orContinueWith": "Or continue with"
     },
     "button": {
       "createAccount": "Create an account",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "continueWithGoogle": "Continue with Google"
     },
     "validation": {
       "firstName": "First name is required",
@@ -883,10 +885,12 @@
       "forgotPassword": "Forgot your password?",
       "dontHaveAccount": "Don't have an account?",
       "rememberMe": "Remember me",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "orContinueWith": "Or continue with"
     },
     "button": {
-      "login": "Login"
+      "login": "Login",
+      "continueWithGoogle": "Continue with Google"
     },
     "field": {
       "email": "Email",
