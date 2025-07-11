@@ -2052,6 +2052,70 @@
         }
       }
     },
+    "/api/lesson/beta-create-lesson/ai": {
+      "post": {
+        "operationId": "LessonController_betaCreateAiMentorLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaCreateAiMentorLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaCreateAiMentorLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/beta-update-lesson/ai": {
+      "patch": {
+        "operationId": "LessonController_betaUpdateAiMentorLesson",
+        "parameters": [
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaUpdateAiMentorLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaUpdateAiMentorLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/beta-create-lesson/quiz": {
       "post": {
         "operationId": "LessonController_betaCreateQuizLesson",
@@ -4391,6 +4455,10 @@
                               {
                                 "const": "quiz",
                                 "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
+                                "type": "string"
                               }
                             ]
                           },
@@ -4613,6 +4681,10 @@
                               {
                                 "const": "quiz",
                                 "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
+                                "type": "string"
                               }
                             ]
                           },
@@ -4808,6 +4880,38 @@
                                 "title"
                               ]
                             }
+                          },
+                          "aiMentor": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "lessonId": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "aiMentorInstructions": {
+                                    "type": "string"
+                                  },
+                                  "completionConditions": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "lessonId",
+                                  "aiMentorInstructions",
+                                  "completionConditions"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "updatedAt": {
                             "type": "string"
@@ -5565,6 +5669,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -5703,6 +5811,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -5898,6 +6010,38 @@
                           "title"
                         ]
                       }
+                    },
+                    "aiMentor": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "aiMentorInstructions": {
+                              "type": "string"
+                            },
+                            "completionConditions": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "lessonId",
+                            "aiMentorInstructions",
+                            "completionConditions"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "updatedAt": {
                       "type": "string"
@@ -6026,6 +6170,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -6221,6 +6369,38 @@
                           "title"
                         ]
                       }
+                    },
+                    "aiMentor": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "aiMentorInstructions": {
+                              "type": "string"
+                            },
+                            "completionConditions": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "lessonId",
+                            "aiMentorInstructions",
+                            "completionConditions"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "updatedAt": {
                       "type": "string"
@@ -6413,6 +6593,10 @@
                   },
                   {
                     "const": "quiz",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
                     "type": "string"
                   }
                 ]
@@ -6742,6 +6926,10 @@
                   {
                     "const": "quiz",
                     "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
+                    "type": "string"
                   }
                 ]
               },
@@ -6935,6 +7123,38 @@
                   ]
                 }
               },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "updatedAt": {
                 "type": "string"
               }
@@ -6977,6 +7197,569 @@
             },
             "required": [
               "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BetaCreateAiMentorLessonBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileType": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "const": "brief_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "detailed_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "match_words",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scale_1_5",
+                          "type": "string"
+                        },
+                        {
+                          "const": "single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "true_or_false",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_text",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "photoS3Key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "optionText": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isStudentAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isCorrect": {
+                            "type": "boolean"
+                          },
+                          "questionId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "matchedWord": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "scaleAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "optionText",
+                          "displayOrder",
+                          "isCorrect"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title"
+                  ]
+                }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "chapterId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "displayOrder": {
+                "type": "number"
+              },
+              "aiMentorInstructions": {
+                "type": "string"
+              },
+              "completionConditions": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "chapterId",
+              "aiMentorInstructions",
+              "completionConditions"
+            ]
+          }
+        ]
+      },
+      "BetaCreateAiMentorLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BetaUpdateAiMentorLessonBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileType": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "const": "brief_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "detailed_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "match_words",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scale_1_5",
+                          "type": "string"
+                        },
+                        {
+                          "const": "single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "true_or_false",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_text",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "photoS3Key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "optionText": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isStudentAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isCorrect": {
+                            "type": "boolean"
+                          },
+                          "questionId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "matchedWord": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "scaleAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "optionText",
+                          "displayOrder",
+                          "isCorrect"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title"
+                  ]
+                }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "aiMentorInstructions": {
+                "type": "string"
+              },
+              "completionConditions": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "aiMentorInstructions",
+              "completionConditions"
+            ]
+          }
+        ]
+      },
+      "BetaUpdateAiMentorLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
               "message"
             ]
           }
@@ -7461,6 +8244,10 @@
                   {
                     "const": "quiz",
                     "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
+                    "type": "string"
                   }
                 ]
               },
@@ -7653,6 +8440,38 @@
                     "title"
                   ]
                 }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "updatedAt": {
                 "type": "string"

@@ -3,6 +3,7 @@ import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
+  aiMentorLessons,
   chapters,
   lessons,
   questionAnswerOptions,
@@ -15,8 +16,10 @@ import { LESSON_TYPES } from "../lesson.type";
 import type {
   AdminOptionBody,
   AdminQuestionBody,
+  CreateAiMentorLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
+  UpdateAiMentorLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
@@ -78,6 +81,58 @@ export class AdminLessonRepository {
       .returning();
 
     return lesson;
+  }
+
+  async createAiMentorLesson(
+    data: CreateAiMentorLessonBody,
+    displayOrder: number,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    const [lesson] = await dbInstance
+      .insert(lessons)
+      .values({
+        title: data.title,
+        type: LESSON_TYPES.AI_MENTOR,
+        chapterId: data?.chapterId,
+        displayOrder,
+        isExternal: true,
+      })
+      .returning();
+
+    return lesson;
+  }
+
+  async updateAiMentorLesson(
+    id: UUIDType,
+    data: UpdateAiMentorLessonBody,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    return dbInstance.update(lessons).set(data).where(eq(lessons.id, id)).returning();
+  }
+
+  async updateAiMentorLessonData(
+    lessonId: UUIDType,
+    data: {
+      aiMentorInstructions: string;
+      completionConditions: string;
+    },
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    return dbInstance
+      .update(aiMentorLessons)
+      .set(data)
+      .where(eq(aiMentorLessons.lessonId, lessonId));
+  }
+
+  async createAiMentorLessonData(
+    data: {
+      lessonId: UUIDType;
+      aiMentorInstructions: string;
+      completionConditions: string;
+    },
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    return dbInstance.insert(aiMentorLessons).values(data).returning();
   }
 
   async getQuestions(conditions: any[]) {

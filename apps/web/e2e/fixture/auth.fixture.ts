@@ -10,7 +10,7 @@ export class AuthFixture {
 
   constructor(public page: Page) {
     this.emailInput = page.getByLabel("email");
-    this.passwordInput = page.getByLabel("password");
+    this.passwordInput = page.locator('input[type="password"]');
     this.loginButton = page.getByRole("button", { name: /login/i });
     this.logoutButton = page.getByRole("button", { name: /logout/i }).nth(1);
   }

@@ -162,6 +162,16 @@ export const lessons = pgTable("lessons", {
   isExternal: boolean("is_external").default(false),
 });
 
+export const aiMentorLessons = pgTable("ai_mentor_lessons", {
+  ...id,
+  ...timestamps,
+  lessonId: uuid("lesson_id")
+    .references(() => lessons.id, { onDelete: "cascade" })
+    .notNull(),
+  aiMentorInstructions: text("ai_mentor_instructions").notNull(),
+  completionConditions: text("completion_conditions").notNull(),
+});
+
 export const questions = pgTable("questions", {
   ...id,
   ...timestamps,

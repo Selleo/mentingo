@@ -21,11 +21,15 @@ import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 import {
   AnswerQuestionBody,
   answerQuestionsForLessonBody,
+  CreateAiMentorLessonBody,
+  createAiMentorLessonSchema,
   CreateLessonBody,
   createLessonSchema,
   CreateQuizLessonBody,
   createQuizLessonSchema,
   lessonShowSchema,
+  UpdateAiMentorLessonBody,
+  updateAiMentorLessonSchema,
   UpdateLessonBody,
   updateLessonSchema,
   UpdateQuizLessonBody,
@@ -77,6 +81,49 @@ export class LessonController {
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
 
+  @Post("beta-create-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "body",
+        schema: createAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
+  })
+  async betaCreateAiMentorLesson(
+    @Body() createAiMentorLessonBody: CreateAiMentorLessonBody,
+  ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
+    const id = await this.adminLessonsService.createAiMentorLesson(createAiMentorLessonBody);
+    return new BaseResponse({ id, message: "AI Mentor lesson created successfully" });
+  }
+
+  @Patch("beta-update-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "id",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: updateAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async betaUpdateAiMentorLesson(
+    @Query("id") id: UUIDType,
+    @Body() data: UpdateAiMentorLessonBody,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.adminLessonsService.updateAiMentorLesson(id, data);
+    return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
+  }
   @Post("beta-create-lesson/quiz")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({

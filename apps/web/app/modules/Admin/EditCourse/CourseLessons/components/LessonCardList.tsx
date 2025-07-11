@@ -57,6 +57,9 @@ export const LessonCardList = ({
         case "quiz":
           setContentTypeToDisplay(ContentTypes.QUIZ_FORM);
           break;
+        case "ai_mentor":
+          setContentTypeToDisplay(ContentTypes.AI_MENTOR_FORM);
+          break;
         default:
           setContentTypeToDisplay(ContentTypes.EMPTY);
       }
