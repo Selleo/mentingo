@@ -840,7 +840,8 @@
     },
     "button": {
       "createAccount": "Create an account",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "continueWithGoogle": "Continue with Google"
     },
     "validation": {
       "firstName": "First name is required",
@@ -889,7 +890,8 @@
       "orContinueWith": "Or continue with"
     },
     "button": {
-      "login": "Login"
+      "login": "Login",
+      "continueWithGoogle": "Continue with Google"
     },
     "field": {
       "email": "Email",

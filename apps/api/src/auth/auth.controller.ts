@@ -111,8 +111,9 @@ export class AuthController {
     }
 
     try {
-      const { accessToken, refreshToken: newRefreshToken } =
-        await this.authService.refreshTokens(refreshToken);
+      const { accessToken, refreshToken: newRefreshToken } = await this.authService.refreshTokens(
+        refreshToken,
+      );
 
       this.tokenService.setTokenCookies(response, accessToken, newRefreshToken);
 

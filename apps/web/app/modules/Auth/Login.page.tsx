@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import LogoUrl from "~/assets/menitngo_logo_light_transparent.svg";
+import { GoogleOAuthButton } from "~/components/Auth/GoogleOAuthButton";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
