@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
+import { extractPasswordValidationErrors } from "~/utils/PasswordValidationErrorHandler";
 
 import { ApiClient } from "../api-client";
 import { useCurrentUserSuspense } from "../queries/useCurrentUser";
@@ -24,7 +25,6 @@ export function useChangePassword() {
         { id: currentUser.id },
         options.data,
       );
-
       return response.data;
     },
     onSuccess: () => {
@@ -35,9 +35,10 @@ export function useChangePassword() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
+        const errorMessage = extractPasswordValidationErrors(error);
         return toast({
           variant: "destructive",
-          description: error.response?.data.message,
+          description: errorMessage,
         });
       }
       toast({
