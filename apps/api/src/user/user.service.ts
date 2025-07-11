@@ -96,6 +96,8 @@ export class UserService {
     currentUserId: UUIDType,
     userRole: UserRole,
   ): Promise<UserDetails> {
+    console.log("id:", userId, "currentUserId:", currentUserId, "userRole:", userRole);
+
     const [userBio]: UserDetails[] = await this.db
       .select({
         firstName: users.firstName,
