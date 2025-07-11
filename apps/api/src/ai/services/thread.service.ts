@@ -1,4 +1,10 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { AiService } from "src/ai/services/ai.service";
@@ -6,15 +12,15 @@ import { LessonService } from "src/lesson/services/lesson.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import type { CreateThreadBody } from "src/ai/ai.schema";
-import type { ThreadStatus } from "src/ai/ai.type";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class ThreadService {
   constructor(
-    private aiRepository: AiRepository,
-    private lessonService: LessonService,
-    private aiService: AiService,
+    private readonly aiRepository: AiRepository,
+    private readonly lessonService: LessonService,
+    @Inject(forwardRef(() => AiService))
+    private readonly aiService: AiService,
   ) {}
 
   async createThread(data: CreateThreadBody, role: UserRole) {
@@ -56,12 +62,6 @@ export class ThreadService {
     const threads = await this.aiRepository.findThreadsByLessonIdAndUserId(lessonId, userId);
     if (!threads) throw new NotFoundException("No threads found");
     return { data: threads };
-  }
-
-  // will be used in exiting lesson and marking as completed
-  async setThreadStatus(threadId: UUIDType, userId: UUIDType, status: ThreadStatus) {
-    const thread = await this.findThread(threadId, userId);
-    return await this.aiRepository.updateThread(threadId, { ...thread.data, status });
   }
 
   private async findAiMentorLessonIdFromLesson(lessonId: UUIDType) {
