@@ -18,8 +18,8 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { UserActivityEvent } from "src/events";
+import { userWithoutProfilePictureKeySchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { AuthService } from "./auth.service";
@@ -48,10 +48,12 @@ export class AuthController {
   @Post("register")
   @Validate({
     request: [{ type: "body", schema: createAccountSchema }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(userWithoutProfilePictureKeySchema),
   })
-  async register(data: CreateAccountBody): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
-    const account = await this.authService.register(data);
+  async register(
+    data: CreateAccountBody,
+  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
+    const { profilePictureS3Key: _, ...account } = await this.authService.register(data);
 
     return new BaseResponse(account);
   }
@@ -61,13 +63,18 @@ export class AuthController {
   @Post("login")
   @Validate({
     request: [{ type: "body", schema: loginSchema }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(userWithoutProfilePictureKeySchema),
   })
   async login(
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
-    const { accessToken, refreshToken, ...account } = await this.authService.login(data);
+  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
+    const {
+      accessToken,
+      refreshToken,
+      profilePictureS3Key: _,
+      ...account
+    } = await this.authService.login(data);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
 
@@ -116,11 +123,11 @@ export class AuthController {
 
   @Get("current-user")
   @Validate({
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(userWithoutProfilePictureKeySchema),
   })
   async currentUser(
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
     const account = await this.authService.currentUser(currentUserId);
 
     this.eventBus.publish(new UserActivityEvent(currentUserId, "LOGIN"));

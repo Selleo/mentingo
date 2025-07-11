@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "profile_picture_s3_key" varchar(200);

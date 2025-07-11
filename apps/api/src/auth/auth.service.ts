@@ -137,6 +137,7 @@ export class AuthService {
         updatedAt: users.updatedAt,
         role: users.role,
         archived: users.archived,
+        profilePictureS3Key: users.profilePictureS3Key,
       })
       .from(users)
       .leftJoin(credentials, eq(users.id, credentials.userId))

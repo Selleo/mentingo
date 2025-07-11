@@ -1,3 +1,4 @@
+import isEmpty from "lodash-es/isEmpty";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
@@ -24,7 +25,7 @@ const ImageUploadInput = ({
   return (
     <div className="flex flex-col items-center justify-center gap-y-2">
       <div className="relative flex h-80 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100">
-        {field.value && (
+        {(!isEmpty(imageUrl) || !isEmpty(field.value)) && (
           <img
             src={imageUrl || field.value}
             alt="Uploaded"
