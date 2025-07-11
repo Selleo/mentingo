@@ -46,7 +46,7 @@ importers:
         version: 8.4.1
       '@golevelup/nestjs-stripe':
         specifier: 0.8.2
-        version: 0.8.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(rxjs@7.8.1)(stripe@17.0.0)
+        version: 0.8.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(rxjs@7.8.1)(stripe@17.0.0)
       '@keyv/redis':
         specifier: 4.0.2
         version: 4.0.2
@@ -64,7 +64,7 @@ importers:
         version: 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/cqrs':
         specifier: 10.2.7
-        version: 10.2.7(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)(rxjs@7.8.1)
+        version: 10.2.7(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/jwt':
         specifier: 10.2.0
         version: 10.2.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))
@@ -79,13 +79,13 @@ importers:
         version: 10.4.4(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/websockets@10.4.4)(rxjs@7.8.1)
       '@nestjs/schedule':
         specifier: 4.1.0
-        version: 4.1.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))
+        version: 4.1.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)
       '@nestjs/swagger':
         specifier: 7.4.0
-        version: 7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)
+        version: 7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)
       '@nestjs/terminus':
         specifier: 10.2.3
-        version: 10.2.3(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)(rxjs@7.8.1)
+        version: 10.2.3(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/websockets':
         specifier: 10.4.4
         version: 10.4.4(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/platform-socket.io@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -160,10 +160,10 @@ importers:
         version: 3.3.7
       nestjs-redis:
         specifier: 1.3.3
-        version: 1.3.3(@nestjs/platform-express@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0))(@nestjs/websockets@10.4.4(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/platform-socket.io@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(cache-manager@6.2.0)
+        version: 1.3.3(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(cache-manager@6.2.0)
       nestjs-typebox:
         specifier: 3.0.0-next.8
-        version: 3.0.0-next.8(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/swagger@7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0))(@sinclair/typebox@0.32.34)(rxjs@7.8.1)
+        version: 3.0.0-next.8(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/swagger@7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0))(@sinclair/typebox@0.32.34)(rxjs@7.8.1)
       nodemailer:
         specifier: 6.9.14
         version: 6.9.14
@@ -212,7 +212,7 @@ importers:
         version: 10.0.0(chokidar@3.5.3)(typescript@5.4.5)
       '@nestjs/testing':
         specifier: 10.0.0
-        version: 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0))
+        version: 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/platform-express@10.0.0)
       '@types/adm-zip':
         specifier: 0.5.7
         version: 0.5.7
@@ -524,6 +524,9 @@ importers:
       react-player:
         specifier: 2.16.0
         version: 2.16.0(react@18.3.1)
+      react-to-pdf:
+        specifier: ^2.0.1
+        version: 2.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-use:
         specifier: 17.5.1
         version: 17.5.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1322,6 +1325,10 @@ packages:
 
   '@babel/runtime@7.26.0':
     resolution: {integrity: sha512-FDSOghenHTiToteC/QRlv2q3DhPZ/oOXTBoirfWNx1Cx3TMVcGWQtMMmQcSvb/JjpNeGzx8Pq/b4fKEJuWm1sw==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.27.6':
+    resolution: {integrity: sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.25.9':
@@ -5063,6 +5070,9 @@ packages:
   '@types/qs@6.9.17':
     resolution: {integrity: sha512-rX4/bPcfmvxHDv0XjfJELTTr+iB+tn032nPILqHm5wbthUUUuVtNGGqzhya9XUxjTP8Fpr0qYgSZZKxGY++svQ==}
 
+  '@types/raf@3.4.3':
+    resolution: {integrity: sha512-c4YAvMedbPZ5tEyxzQdMoOhhJ4RD3rngZIdwC2/qDN3d7JpEhB6fiBRKVY1lg5B7Wk+uPBjn5f39j1/2MY1oOw==}
+
   '@types/range-parser@1.2.7':
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
 
@@ -5128,6 +5138,9 @@ packages:
 
   '@types/tough-cookie@4.0.5':
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
+
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
@@ -5747,6 +5760,11 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
+  atob@2.1.2:
+    resolution: {integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==}
+    engines: {node: '>= 4.5.0'}
+    hasBin: true
+
   autoprefixer@10.4.14:
     resolution: {integrity: sha512-FQzyfOsTlwVzjHxKEqRIAdJx9niO6VCBCoEwax/VLSoQF29ggECcPuBqUMZ+u8jCZOPSy8b8/8KnuFbp0SaFZQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -5828,6 +5846,10 @@ packages:
   bare-stream@2.4.2:
     resolution: {integrity: sha512-XZ4ln/KV4KT+PXdIWTKjsLY+quqCaEtqqtgGJVPw9AoM73By03ij64YjepK0aQvHSWDb6AfAZwqKaFu68qkrdA==}
 
+  base64-arraybuffer@1.0.2:
+    resolution: {integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==}
+    engines: {node: '>= 0.6.0'}
+
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
@@ -5899,6 +5921,11 @@ packages:
 
   bser@2.1.1:
     resolution: {integrity: sha512-gQxTNE/GAfIIrmHLUE3oJyp5FO6HRBfhjnw4/wMmA63ZGDJnWBmgY/lyQBpnDUkGmAhbSe39tx2d/iTOAfglwQ==}
+
+  btoa@1.2.1:
+    resolution: {integrity: sha512-SB4/MIGlsiVkMcHmT+pSmIPoNDoHg+7cMzmt3Uxt628MTz2487DKSqK/fuhFBrkuqrYv5UCEnACpF4dTFNKc/g==}
+    engines: {node: '>= 0.4.0'}
+    hasBin: true
 
   buffer-crc32@0.2.13:
     resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
@@ -6007,6 +6034,10 @@ packages:
   canvas@2.11.2:
     resolution: {integrity: sha512-ItanGBMrmRV7Py2Z+Xhs7cT+FNt5K0vPL4p9EZ/UX/Mu7hFbkxSjKF2KVtPwX7UYWp7dRKnrTvReflgrItJbdw==}
     engines: {node: '>=6'}
+
+  canvg@3.0.11:
+    resolution: {integrity: sha512-5ON+q7jCTgMp9cjpu4Jo6XbvfYwSB2Ow3kzHKfIyJfaCAOHLbdKPQqGKgfED/R5B+3TFFfe8pegYA+b423SRyA==}
+    engines: {node: '>=10.0.0'}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -6412,6 +6443,9 @@ packages:
   css-in-js-utils@3.1.0:
     resolution: {integrity: sha512-fJAcud6B3rRu+KHYk+Bwf+WFL2MDCJJ1XG9x137tJQ0xYxor7XziQtuGFbWNdqrvF4Tk26O3H73nfVqXt/fW1A==}
 
+  css-line-break@2.1.0:
+    resolution: {integrity: sha512-FHcKFCZcAha3LwfVBhCQbW2nCNbkZXn7KVUJcsT5/P8YmfsVja0FMPJr0B903j/E69HUphKiV9iQArX8SDYA4w==}
+
   css-shorthand-properties@1.1.2:
     resolution: {integrity: sha512-C2AugXIpRGQTxaCW0N7n5jD/p5irUmCrwl03TrnMFBHDbdq44CFWR2zO7rK9xPN4Eo3pUxC4vQzQgbIpzrD1PQ==}
 
@@ -6750,6 +6784,9 @@ packages:
   domhandler@5.0.3:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
+
+  dompurify@3.2.6:
+    resolution: {integrity: sha512-/2GogDQlohXPZe6D6NOgQvXLPSYBqIWMnZ8zzOhn09REE4eyAzb+Hed3jhoM9OkuaJ8P6ZGTTVWQKAi8ieIzfQ==}
 
   domutils@3.1.0:
     resolution: {integrity: sha512-H78uMmQtI2AhgDJjWeQmHwJJ2bLPD3GMmO7Zja/ZZh84wkm+4ut+IUnUdRa8uCGX88DiVx1j6FRe1XfxEgjEZA==}
@@ -7845,6 +7882,10 @@ packages:
     resolution: {integrity: sha512-qY60FjREgVZL03vJU6IfMV4GDjGBIoOyvuFdpBDIX9yTlDw0TjxVBQp+P8NvpdIXNJvfWBTNul7fsAQJq2FNpg==}
     engines: {node: '>=14'}
 
+  html2canvas@1.4.1:
+    resolution: {integrity: sha512-fPU6BHNpsyIhr8yyMpTLLxAbkaK8ArIBcmZIRiBLiDhjeqvXolaEmDGmELFuX9I4xDcaKKcJl+TKZLqruBbmWA==}
+    engines: {node: '>=8.0.0'}
+
   htmlparser2@8.0.2:
     resolution: {integrity: sha512-GYdjWKDkbRLkZ5geuHs5NY1puJ+PXwP7+fHPRz06Eirsb9ugf6d8kkXav6ADhcODhFFPMIXyxkxSuMf3D6NCFA==}
 
@@ -8509,6 +8550,9 @@ packages:
     resolution: {integrity: sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==}
     engines: {node: '>=12', npm: '>=6'}
 
+  jspdf@3.0.1:
+    resolution: {integrity: sha512-qaGIxqxetdoNnFQQXxTKUD9/Z7AloLaw94fFsOiJMxbfYdBbrBuhWmbzI8TVjrw7s3jBY1PFHofBKMV/wZPapg==}
+
   jsx-ast-utils@3.3.5:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
@@ -9165,6 +9209,7 @@ packages:
   multer@1.4.4-lts.1:
     resolution: {integrity: sha512-WeSGziVj6+Z2/MwQo3GvqzgR+9Uc+qt8SwHKh3gvNPiISKfsMfG4SvCOFYlxxgkXt7yIV2i1yczehm0EOKIxIg==}
     engines: {node: '>= 6.0.0'}
+    deprecated: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
 
   mustache@4.2.0:
     resolution: {integrity: sha512-71ippSywq5Yb7/tVYyGbkBggbU8H3u5Rz56fH60jGFgr8uHwxs+aSKeqmluIVzM0m0kB7xQjKS6qPfd0b2ZoqQ==}
@@ -9254,6 +9299,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-emoji@1.11.0:
     resolution: {integrity: sha512-wo2DpQkQp7Sjm2A0cq+sN7EHKO6Sl0ctXeBdFZrL9T9+UywORbufTcTZxom8YqpLQt/FqNMUkOpkZrJVYSKD3A==}
@@ -9635,6 +9681,9 @@ packages:
 
   pend@1.2.0:
     resolution: {integrity: sha512-F3asv42UuXchdzt+xXqfW1OGlVBe+mxa2mqI0pg5yAHZPvFmY3Y6drSf/GQ1A86WgWEN9Kzh/WrgKa6iGcHXLg==}
+
+  performance-now@2.1.0:
+    resolution: {integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==}
 
   periscopic@3.1.0:
     resolution: {integrity: sha512-vKiQ8RRtkl9P+r/+oefh25C3fhybptkHKCZSPlcXiJux2tJF55GnEj3BVn4A5gKfq9NWWXXrxkHBwVPUfH0opw==}
@@ -10112,6 +10161,9 @@ packages:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
 
+  raf@3.4.1:
+    resolution: {integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==}
+
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
 
@@ -10246,6 +10298,12 @@ packages:
       '@types/react':
         optional: true
 
+  react-to-pdf@2.0.1:
+    resolution: {integrity: sha512-p29QV41TUeg6ttzL4O1sHpbMVOHcIf69sz9p3XpllBqtXk3ydUzMT0OBTzxm/6/RcW1BrpPz2p7q+9ac7gfT4Q==}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
+
   react-transition-group@4.4.5:
     resolution: {integrity: sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g==}
     peerDependencies:
@@ -10335,6 +10393,9 @@ packages:
 
   reftools@1.1.9:
     resolution: {integrity: sha512-OVede/NQE13xBQ+ob5CKd5KyeJYU2YInb1bmV4nRoOfquZPkAkxuOXicSe1PvqIuZZ4kD13sPKBbR7UFDmli6w==}
+
+  regenerator-runtime@0.13.11:
+    resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
 
   regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
@@ -10449,6 +10510,10 @@ packages:
 
   rgb2hex@0.2.5:
     resolution: {integrity: sha512-22MOP1Rh7sAo1BZpDG6R5RFYzR2lYEgwq7HEmyW2qcsOqR2lQKmn+O//xV3YG/0rrhMC6KVX2hU+ZXuaw9a5bw==}
+
+  rgbcolor@1.0.1:
+    resolution: {integrity: sha512-9aZLIrhRaD97sgVhtJOW6ckOEh6/GnvQtdVNfdZ6s67+3/XwLS9lBcQYzEEhYVeUowN7pRzMLsyGhK2i/xvWbw==}
+    engines: {node: '>= 0.8.15'}
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
@@ -10826,6 +10891,10 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
+  stackblur-canvas@2.7.0:
+    resolution: {integrity: sha512-yf7OENo23AGJhBriGx0QivY5JP6Y1HbrrDI6WLt6C5auYZXlQrheoY8hD4ibekFKz1HOfE48Ww8kMWMnJD/zcQ==}
+    engines: {node: '>=0.1.14'}
+
   stackframe@1.3.4:
     resolution: {integrity: sha512-oeVtt7eWQS+Na6F//S4kJ2K2VbRlS9D43mAlMyVpVWovy9o+jfgH8O9agzANzaiLjclA0oYzUXEM4PurhSUChw==}
 
@@ -10999,10 +11068,12 @@ packages:
   superagent@9.0.2:
     resolution: {integrity: sha512-xuW7dzkUpcJq7QnhOsnNUgtYp3xRwpt2F7abdRYIpCsAt0hhUqia0EdxyXZQQpNmGtsCzYHryaKSV3q3GJnq7w==}
     engines: {node: '>=14.18.0'}
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supertest@7.0.0:
     resolution: {integrity: sha512-qlsr7fIC0lSddmA3tzojvzubYxvlGtzumcdHgPwbFWMISQwL22MhM2Y3LNt+6w9Yyx7559VW5ab70dgphm8qQA==}
     engines: {node: '>=14.18.0'}
+    deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -11022,6 +11093,10 @@ packages:
 
   svg-parser@2.0.4:
     resolution: {integrity: sha512-e4hG1hRwoOdRb37cIMSgzNsxyzKfayW6VOflrwvR+/bzrkyxY/31WkbgnQpgtrNp1SdpJvpUAGTa/ZoiPNDuRQ==}
+
+  svg-pathdata@6.0.3:
+    resolution: {integrity: sha512-qsjeeq5YjBZ5eMdFuUa4ZosMLxgr5RZ+F+Y1OrDhuOCEInRMA3x74XdBtggJcj9kOeInz0WE+LgCPDkZFlBYJw==}
+    engines: {node: '>=12.0.0'}
 
   swagger-schema-official@2.0.0-bab6bed:
     resolution: {integrity: sha512-rCC0NWGKr/IJhtRuPq/t37qvZHI/mH4I4sxflVM+qgVe5Z2uOCivzWaVbuioJaB61kvm5UvB7b49E+oBY0M8jA==}
@@ -11130,6 +11205,9 @@ packages:
 
   text-decoder@1.2.1:
     resolution: {integrity: sha512-x9v3H/lTKIJKQQe7RPQkLfKAnc9lUTkWDypIQgTzPJAq+5/GCDHonmshfvlsNSj58yyshbIJJDLmU15qNERrXQ==}
+
+  text-segmentation@1.0.3:
+    resolution: {integrity: sha512-iOiPUo/BGnZ6+54OsWxZidGCsdU8YbE4PSpdPinp7DeMtUJNJBoJ/ouUSTJjHkh1KntHaltHl/gDs2FC4i5+Nw==}
 
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
@@ -11622,6 +11700,9 @@ packages:
   utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+
+  utrie@1.0.2:
+    resolution: {integrity: sha512-1MLa5ouZiOmQzUbjbu9VmjLzn1QLXBhwpUa7kdLUQK+KQ5KA9I1vk5U4YHe/X2Ch7PYnJfWuWT+VbuxbGwljhw==}
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
@@ -13307,6 +13388,8 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
+  '@babel/runtime@7.27.6': {}
+
   '@babel/template@7.25.9':
     dependencies:
       '@babel/code-frame': 7.26.2
@@ -13892,7 +13975,7 @@ snapshots:
       lodash: 4.17.21
       nanoid: 3.3.7
 
-  '@golevelup/nestjs-discovery@4.0.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))':
+  '@golevelup/nestjs-discovery@4.0.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)':
     dependencies:
       '@nestjs/common': 10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/core': 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -13904,10 +13987,10 @@ snapshots:
       lodash: 4.17.21
       rxjs: 7.8.1
 
-  '@golevelup/nestjs-stripe@0.8.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(rxjs@7.8.1)(stripe@17.0.0)':
+  '@golevelup/nestjs-stripe@0.8.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(rxjs@7.8.1)(stripe@17.0.0)':
     dependencies:
       '@golevelup/nestjs-common': 2.0.1(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))
-      '@golevelup/nestjs-discovery': 4.0.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))
+      '@golevelup/nestjs-discovery': 4.0.2(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)
       '@golevelup/nestjs-modules': 0.7.1(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(rxjs@7.8.1)
       stripe: 17.0.0
     transitivePeerDependencies:
@@ -14319,7 +14402,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@nestjs/core@7.6.18(@nestjs/common@7.6.18(cache-manager@6.2.0)(reflect-metadata@0.2.0)(rxjs@6.6.7))(@nestjs/platform-express@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0))(@nestjs/websockets@10.4.4(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/platform-socket.io@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)(rxjs@6.6.7)':
+  '@nestjs/core@7.6.18(@nestjs/common@7.6.18(cache-manager@6.2.0)(reflect-metadata@0.2.0)(rxjs@6.6.7))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@6.6.7)':
     dependencies:
       '@nestjs/common': 7.6.18(cache-manager@6.2.0)(reflect-metadata@0.2.0)(rxjs@6.6.7)
       '@nuxtjs/opencollective': 0.3.2
@@ -14337,7 +14420,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@nestjs/cqrs@10.2.7(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)(rxjs@7.8.1)':
+  '@nestjs/cqrs@10.2.7(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)(rxjs@7.8.1)':
     dependencies:
       '@nestjs/common': 10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/core': 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -14385,7 +14468,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@nestjs/schedule@4.1.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))':
+  '@nestjs/schedule@4.1.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)':
     dependencies:
       '@nestjs/common': 10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/core': 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -14414,7 +14497,7 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@nestjs/swagger@7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)':
+  '@nestjs/swagger@7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)':
     dependencies:
       '@microsoft/tsdoc': 0.15.1
       '@nestjs/common': 10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -14426,7 +14509,7 @@ snapshots:
       reflect-metadata: 0.2.0
       swagger-ui-dist: 5.17.14
 
-  '@nestjs/terminus@10.2.3(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)(rxjs@7.8.1)':
+  '@nestjs/terminus@10.2.3(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)(rxjs@7.8.1)':
     dependencies:
       '@nestjs/common': 10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/core': 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -14435,7 +14518,7 @@ snapshots:
       reflect-metadata: 0.2.0
       rxjs: 7.8.1
 
-  '@nestjs/testing@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0))':
+  '@nestjs/testing@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/platform-express@10.0.0)':
     dependencies:
       '@nestjs/common': 10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/core': 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
@@ -17409,6 +17492,9 @@ snapshots:
 
   '@types/qs@6.9.17': {}
 
+  '@types/raf@3.4.3':
+    optional: true
+
   '@types/range-parser@1.2.7': {}
 
   '@types/react-dom@18.3.1':
@@ -17487,6 +17573,9 @@ snapshots:
   '@types/tinycolor2@1.4.6': {}
 
   '@types/tough-cookie@4.0.5': {}
+
+  '@types/trusted-types@2.0.7':
+    optional: true
 
   '@types/unist@2.0.11': {}
 
@@ -18362,6 +18451,8 @@ snapshots:
 
   asynckit@0.4.0: {}
 
+  atob@2.1.2: {}
+
   autoprefixer@10.4.14(postcss@8.4.38):
     dependencies:
       browserslist: 4.24.2
@@ -18488,6 +18579,8 @@ snapshots:
       streamx: 2.20.2
     optional: true
 
+  base64-arraybuffer@1.0.2: {}
+
   base64-js@1.5.1: {}
 
   base64id@2.0.0: {}
@@ -18608,6 +18701,8 @@ snapshots:
     dependencies:
       node-int64: 0.4.0
 
+  btoa@1.2.1: {}
+
   buffer-crc32@0.2.13: {}
 
   buffer-crc32@1.0.0: {}
@@ -18722,6 +18817,18 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    optional: true
+
+  canvg@3.0.11:
+    dependencies:
+      '@babel/runtime': 7.27.6
+      '@types/raf': 3.4.3
+      core-js: 3.39.0
+      raf: 3.4.1
+      regenerator-runtime: 0.13.11
+      rgbcolor: 1.0.1
+      stackblur-canvas: 2.7.0
+      svg-pathdata: 6.0.3
     optional: true
 
   ccount@2.0.1: {}
@@ -19132,6 +19239,10 @@ snapshots:
     dependencies:
       hyphenate-style-name: 1.1.0
 
+  css-line-break@2.1.0:
+    dependencies:
+      utrie: 1.0.2
+
   css-shorthand-properties@1.1.2: {}
 
   css-to-react-native@3.2.0:
@@ -19413,6 +19524,11 @@ snapshots:
   domhandler@5.0.3:
     dependencies:
       domelementtype: 2.3.0
+
+  dompurify@3.2.6:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
+    optional: true
 
   domutils@3.1.0:
     dependencies:
@@ -19919,7 +20035,7 @@ snapshots:
       debug: 4.3.7
       enhanced-resolve: 5.17.1
       eslint: 8.57.1
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-plugin-import@2.28.1)(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
       fast-glob: 3.3.2
       get-tsconfig: 4.8.1
       is-bun-module: 1.3.0
@@ -19942,7 +20058,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-plugin-import@2.28.1)(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -20000,7 +20116,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-plugin-import@2.28.1)(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
       has: 1.0.4
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -20986,6 +21102,11 @@ snapshots:
       htmlparser2: 8.0.2
       selderee: 0.11.0
 
+  html2canvas@1.4.1:
+    dependencies:
+      css-line-break: 2.1.0
+      text-segmentation: 1.0.3
+
   htmlparser2@8.0.2:
     dependencies:
       domelementtype: 2.3.0
@@ -21908,6 +22029,18 @@ snapshots:
       ms: 2.1.3
       semver: 7.6.3
 
+  jspdf@3.0.1:
+    dependencies:
+      '@babel/runtime': 7.27.6
+      atob: 2.1.2
+      btoa: 1.2.1
+      fflate: 0.8.2
+    optionalDependencies:
+      canvg: 3.0.11
+      core-js: 3.39.0
+      dompurify: 3.2.6
+      html2canvas: 1.4.1
+
   jsx-ast-utils@3.3.5:
     dependencies:
       array-includes: 3.1.8
@@ -22754,10 +22887,10 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  nestjs-redis@1.3.3(@nestjs/platform-express@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0))(@nestjs/websockets@10.4.4(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/platform-socket.io@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(cache-manager@6.2.0):
+  nestjs-redis@1.3.3(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(cache-manager@6.2.0):
     dependencies:
       '@nestjs/common': 7.6.18(cache-manager@6.2.0)(reflect-metadata@0.2.0)(rxjs@6.6.7)
-      '@nestjs/core': 7.6.18(@nestjs/common@7.6.18(cache-manager@6.2.0)(reflect-metadata@0.2.0)(rxjs@6.6.7))(@nestjs/platform-express@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0))(@nestjs/websockets@10.4.4(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/platform-socket.io@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)(rxjs@6.6.7)
+      '@nestjs/core': 7.6.18(@nestjs/common@7.6.18(cache-manager@6.2.0)(reflect-metadata@0.2.0)(rxjs@6.6.7))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@6.6.7)
       '@types/ioredis': 5.0.0
       '@types/uuid': 10.0.0
       ioredis: 4.28.5
@@ -22775,11 +22908,11 @@ snapshots:
       - encoding
       - supports-color
 
-  nestjs-typebox@3.0.0-next.8(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/swagger@7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0))(@sinclair/typebox@0.32.34)(rxjs@7.8.1):
+  nestjs-typebox@3.0.0-next.8(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(@nestjs/swagger@7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0))(@sinclair/typebox@0.32.34)(rxjs@7.8.1):
     dependencies:
       '@nestjs/common': 10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/core': 10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1)
-      '@nestjs/swagger': 7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/platform-express@10.0.0)(@nestjs/websockets@10.4.4)(reflect-metadata@0.2.0)(rxjs@7.8.1))(reflect-metadata@0.2.0)
+      '@nestjs/swagger': 7.4.0(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)
       '@sinclair/typebox': 0.32.34
       rxjs: 7.8.1
 
@@ -23252,6 +23385,9 @@ snapshots:
       through2: 2.0.5
 
   pend@1.2.0: {}
+
+  performance-now@2.1.0:
+    optional: true
 
   periscopic@3.1.0:
     dependencies:
@@ -23731,6 +23867,11 @@ snapshots:
 
   quick-lru@5.1.1: {}
 
+  raf@3.4.1:
+    dependencies:
+      performance-now: 2.1.0
+    optional: true
+
   randombytes@2.1.0:
     dependencies:
       safe-buffer: 5.2.1
@@ -23950,6 +24091,13 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.12
 
+  react-to-pdf@2.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      html2canvas: 1.4.1
+      jspdf: 3.0.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   react-transition-group@4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.26.0
@@ -24082,6 +24230,9 @@ snapshots:
 
   reftools@1.1.9: {}
 
+  regenerator-runtime@0.13.11:
+    optional: true
+
   regenerator-runtime@0.14.1: {}
 
   regexp.prototype.flags@1.5.3:
@@ -24207,6 +24358,9 @@ snapshots:
   rfdc@1.4.1: {}
 
   rgb2hex@0.2.5: {}
+
+  rgbcolor@1.0.1:
+    optional: true
 
   rimraf@3.0.2:
     dependencies:
@@ -24701,6 +24855,9 @@ snapshots:
 
   stackback@0.0.2: {}
 
+  stackblur-canvas@2.7.0:
+    optional: true
+
   stackframe@1.3.4: {}
 
   stacktrace-gps@3.1.2:
@@ -24932,6 +25089,9 @@ snapshots:
 
   svg-parser@2.0.4: {}
 
+  svg-pathdata@6.0.3:
+    optional: true
+
   swagger-schema-official@2.0.0-bab6bed: {}
 
   swagger-typescript-api@13.0.23:
@@ -25159,6 +25319,10 @@ snapshots:
       - supports-color
 
   text-decoder@1.2.1: {}
+
+  text-segmentation@1.0.3:
+    dependencies:
+      utrie: 1.0.2
 
   text-table@0.2.0: {}
 
@@ -25647,6 +25811,10 @@ snapshots:
       which-typed-array: 1.1.15
 
   utils-merge@1.0.1: {}
+
+  utrie@1.0.2:
+    dependencies:
+      base64-arraybuffer: 1.0.2
 
   uuid@10.0.0: {}
 
