@@ -4,6 +4,8 @@ import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurren
 import { queryClient } from "~/api/queryClient";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
 
+import { useSyncUserAfterProviderLogin } from "./hooks/useSyncUserAfterProviderLogin";
+
 export const clientLoader = async () => {
   try {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);
@@ -20,6 +22,8 @@ export const clientLoader = async () => {
 
 export default function UserDashboardLayout() {
   const { data: user } = useCurrentUser();
+
+  useSyncUserAfterProviderLogin(user);
 
   const isAuthenticated = Boolean(user);
 

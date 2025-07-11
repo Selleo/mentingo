@@ -43,6 +43,7 @@ export { default as Eye } from "./eye.svg?react";
 export { default as Enroll } from "./enroll.svg?react";
 export { default as Edit } from "./edit.svg?react";
 export { default as X } from "./x.svg?react";
+export { default as Google } from "./google.svg?react";
 
 export * from "./lesson-types";
 export * from "./question-types";
