@@ -18,6 +18,7 @@ import type {
   AiMentorLessonBody,
   ThreadBody,
   ThreadMessageBody,
+  UpdateThreadBody,
 } from "src/ai/ai.schema";
 import type { UUIDType } from "src/common";
 
@@ -197,12 +198,15 @@ export class AiRepository {
     return groupCharacteristics;
   }
 
-  async updateThread(threadId: UUIDType, data: ThreadBody) {
+  async updateThread(threadId: UUIDType, data: UpdateThreadBody) {
     const [thread] = await this.db
       .update(aiMentorThreads)
       .set(data)
       .where(eq(aiMentorThreads.id, threadId))
-      .returning();
+      .returning({
+        ...getTableColumns(aiMentorThreads),
+        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
+      });
     return thread;
   }
 }

@@ -2921,6 +2921,33 @@
           }
         }
       }
+    },
+    "/api/ai/judge/{threadId}": {
+      "post": {
+        "operationId": "AiController_judgeThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgeThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -9723,6 +9750,85 @@
                 "required": [
                   "role",
                   "tokenCount"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "JudgeThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "summary": {
+                        "type": "string"
+                      },
+                      "minScore": {
+                        "type": "integer"
+                      },
+                      "score": {
+                        "type": "integer"
+                      },
+                      "maxScore": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "summary",
+                      "minScore",
+                      "score",
+                      "maxScore"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "percentage": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "percentage"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "abandoned",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
                 ]
               }
             ]

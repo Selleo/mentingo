@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -7,6 +7,8 @@ import {
   type CreateThreadMessageBody,
   createThreadMessageSchema,
   requestThreadSchema,
+  type ResponseJudgeBody,
+  responseJudgeSchema,
   type ResponseThreadBody,
   type ResponseThreadMessageBody,
   responseThreadMessageSchema,
@@ -94,5 +96,17 @@ export class AiController {
   })
   async chat(@Body() data: CreateThreadMessageBody): Promise<BaseResponse<ThreadMessageBody>> {
     return this.aiService.generateMessage(data, OPENAI_MODELS.BASIC);
+  }
+
+  @Post("judge/:threadId")
+  @Validate({
+    request: [{ type: "param", name: "threadId", schema: UUIDSchema }],
+    response: baseResponse(responseJudgeSchema),
+  })
+  async judgeThread(
+    @Param("threadId") threadId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<ResponseJudgeBody>> {
+    return await this.aiService.runJudge({ threadId, userId });
   }
 }
