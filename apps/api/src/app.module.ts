@@ -28,6 +28,7 @@ import { QuestionsModule } from "./questions/question.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
+import { SettingsModule } from "./settings/settings.module";
 import { StatisticsModule } from "./statistics/statistics.module";
 import * as schema from "./storage/schema";
 import { StripeModule } from "./stripe/stripe.module";
@@ -86,6 +87,7 @@ import { UserModule } from "./user/user.module";
     StatisticsModule,
     ScormModule,
     CacheModule,
+    SettingsModule,
   ],
   controllers: [],
   providers: [

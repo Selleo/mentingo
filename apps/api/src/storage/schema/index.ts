@@ -374,3 +374,16 @@ export const groupUsers = pgTable(
     unq: unique().on(table.userId, table.groupId),
   }),
 );
+
+export const settings = pgTable("settings", {
+  ...id,
+  ...timestamps,
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  settings: jsonb("settings").default({}),
+  createdAt: timestamp("created_at", {
+    mode: "string",
+    withTimezone: true,
+  }).notNull(),
+});
