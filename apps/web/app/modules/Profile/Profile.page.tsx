@@ -30,7 +30,6 @@ const updateUserProfileSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().optional(),
   jobTitle: z.string().optional(),
-  profilePictureUrl: z.string().optional(),
   profilePictureS3Key: z.string().optional(),
 });
 
@@ -59,7 +58,6 @@ export default function ProfilePage() {
     control,
     reset,
     setValue,
-    getValues,
     formState: { isDirty },
   } = useForm<UpdateUserProfileBody>({
     resolver: zodResolver(updateUserProfileSchema),
@@ -68,14 +66,18 @@ export default function ProfilePage() {
   const { mutate: updateUserProfile } = useUpdateUserProfile();
 
   const onSubmit = (data: UpdateUserProfileBody) => {
-    if (isDirty || data.profilePictureS3Key) {
+    if (isDirty || data.profilePictureS3Key !== undefined) {
       const filteredData = filterChangedData(data, userDetails as Partial<UpdateUserProfileBody>);
 
+      if (data.profilePictureS3Key === "") {
+        filteredData.profilePictureS3Key = null;
+      }
+
       updateUserProfile({
-        data: { ...filteredData, profilePictureS3Key: data.profilePictureS3Key },
+        data: { ...filteredData },
         id,
       });
-      reset(data);
+      reset();
       setIsEditing(false);
     }
   };
@@ -95,8 +97,6 @@ export default function ProfilePage() {
         <Loader />
       </div>
     );
-
-  console.log(getValues());
 
   return (
     <PageWrapper role="main">

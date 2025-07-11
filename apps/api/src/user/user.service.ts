@@ -188,7 +188,9 @@ export class UserService {
       const userUpdates = {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
-        ...(data.profilePictureS3Key && { profilePictureS3Key: data.profilePictureS3Key }),
+        ...((data.profilePictureS3Key || data.profilePictureS3Key === null) && {
+          profilePictureS3Key: data.profilePictureS3Key,
+        }),
       };
 
       const userDetailsUpdates = {
