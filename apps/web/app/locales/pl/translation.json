@@ -142,7 +142,8 @@
     "header": "Najpopularniejsze",
     "subHeader": "Twoje 5 najlepszych kursów",
     "other": {
-      "noData": "Brak dostępnych danych"
+      "noData": "Brak dostępnych danych",
+      "students": "Studentów"
     }
   },
   "enrollmentChartView": {
@@ -187,12 +188,39 @@
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
-      "showMore": "Pokaż więcej"
+      "showMore": "Pokaż więcej",
+      "edit": "Edytuj",
+      "share": "Udostępnij profil",
+      "cancel": "Anuluj",
+      "confirm": "Potwierdź"
     },
     "breadcrumbs": {
       "dashboard": "Panel"
     },
+    "field": {
+      "firstName": "Imię",
+      "firstNamePlaceholder": "Wprowadź swoje imię",
+      "lastName": "Nazwisko",
+      "lastNamePlaceholder": "Wprowadź swoje nazwisko",
+      "contactEmail": "Email",
+      "contactEmailPlaceholder": "Wprowadź swój adres email",
+      "contactPhone": "Numer telefonu",
+      "contactPhonePlaceholder": "Wprowadź swój numer telefonu",
+      "jobTitle": "Tytuł",
+      "jobTitlePlaceholder": "Wprowadź swój tytuł",
+      "description": "Twój opis",
+      "descriptionPlaceholder": "Wprowadź krótki opis"
+    },
+    "toast": {
+      "profileLinkCopied": "Link do profilu skopiowany!",
+      "profileLinkCopyError": "Błąd podczas kopiowania linku do profilu!"
+    },
     "other": {
+      "personalInfoTitle": "Dane osobiste",
+      "personalInfoDescription": "Zarządzaj swoimi podstawowymi danymi konta",
+      "aboutTitle": "O mnie",
+      "aboutDescription": "Powiedz więcej o sobie",
+      "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",
       "courses": "Kursy",
@@ -347,6 +375,11 @@
     "toast": {
       "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "createNew": "Utwórz nową kategorię",
+      "back": "Wstecz"
     }
   },
   "adminCategoryView": {
@@ -367,6 +400,11 @@
     "error": {
       "categoryNotFound": "Kategoria nie została znaleziona",
       "categoryIdNotFound": "ID kategorii nie zostało znalezione"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "categoryDetails": "Informacje o kategorii",
+      "back": "Wstecz"
     }
   },
   "adminUsersView": {
@@ -390,6 +428,11 @@
     "button": {
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane"
+    },
+    "breadcrumbs": {
+      "users": "Użytkownicy",
+      "createNew": "Utwórz nowego użytkownika",
+      "back": "Wstecz"
     }
   },
   "adminUserView": {
@@ -414,6 +457,11 @@
     },
     "error": {
       "userNotFound": "Użytkownik nie został znaleziony"
+    },
+    "breadcrumbs": {
+      "users": "Użytkownicy",
+      "userDetails": "Informacje o użytkowniku",
+      "back": "Wstecz"
     }
   },
   "adminGroupsView": {
@@ -447,6 +495,12 @@
       "description": "Czy na pewno chcesz usunąć te grupy?",
       "cancel": "Anuluj",
       "submit": "Usuń"
+    },
+    "breadcrumbs": {
+      "groups": "Grupy",
+      "createNew": "Utwórz nową",
+      "editGroup": "Edytuj grupę",
+      "back": "Wstecz"
     }
   },
   "enrollCourseView": {
@@ -745,6 +799,10 @@
         "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
       },
       "successResponse": "studentów zostało zapisanych do kursu."
+    },
+    "breadcrumbs": {
+      "myCourses": "Moje kursy",
+      "back": "Wstecz"
     }
   },
   "registerView": {
@@ -885,8 +943,9 @@
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
-      "lessonTitle": "Lekcja"
+      "availableCourses": "Dostępne kursy",
+      "yourCourses": "Twoje kursy",
+      "back": "Wstecz"
     },
     "button": {
       "previous": "Poprzedni",
@@ -954,6 +1013,11 @@
         "enrollCourse": "Zapisz się na kurs",
         "goToContentCreatorPage": "Przejdź do strony twórcy treści"
       }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Dostępne kursy",
+      "yourCourses": "Twoje kursy",
+      "back": "Wstecz"
     }
   },
   "studentChapterView": {

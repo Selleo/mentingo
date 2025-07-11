@@ -141,7 +141,8 @@
     "header": "Most Popular",
     "subHeader": "Your top 5 Courses",
     "other": {
-      "noData": "No data available"
+      "noData": "No data available",
+      "students": "Students"
     }
   },
   "enrollmentChartView": {
@@ -186,12 +187,39 @@
   "contentCreatorView": {
     "button": {
       "collapse": "Collapse",
-      "showMore": "Show more"
+      "showMore": "Show more",
+      "edit": "Edit",
+      "share": "Share profile",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard"
     },
+    "field": {
+      "firstName": "Name",
+      "firstNamePlaceholder": "Enter your name",
+      "lastName": "Surname",
+      "lastNamePlaceholder": "Enter your surname",
+      "contactEmail": "Email address",
+      "contactEmailPlaceholder": "Enter your email address",
+      "contactPhone": "Phone number",
+      "contactPhonePlaceholder": "Enter your phone number",
+      "jobTitle": "Title",
+      "jobTitlePlaceholder": "Enter your title",
+      "description": "Bio-note",
+      "descriptionPlaceholder": "Enter a brief bio-note"
+    },
+    "toast": {
+      "profileLinkCopied": "Profile link copied!",
+      "profileLinkCopyError": "Error copying profile link!"
+    },
     "other": {
+      "personalInfoTitle": "Main information",
+      "personalInfoDescription": "Manage your basic account information",
+      "aboutTitle": "About",
+      "aboutDescription": "Tell more about yourself",
+      "pageTitle": "Profile",
       "about": "About",
       "contact": "Contact",
       "courses": "Courses",
@@ -346,6 +374,11 @@
     "toast": {
       "deleteCategorySuccessfully": "Category deleted successfully",
       "deleteCategoryFailed": "Failed to delete category"
+    },
+    "breadcrumbs": {
+      "categories": "Categories",
+      "createNew": "Create new category",
+      "back": "Back"
     }
   },
   "adminCategoryView": {
@@ -366,6 +399,11 @@
     "error": {
       "categoryNotFound": "Category not found",
       "categoryIdNotFound": "Category ID not found"
+    },
+    "breadcrumbs": {
+      "categories": "Categories",
+      "categoryDetails": "Category details",
+      "back": "Back"
     }
   },
   "adminUsersView": {
@@ -389,6 +427,11 @@
     "button": {
       "createNew": "Create new",
       "deleteSelected": "Delete selected"
+    },
+    "breadcrumbs": {
+      "users": "Users",
+      "createNew": "Create new user",
+      "back": "Back"
     }
   },
   "adminUserView": {
@@ -413,6 +456,11 @@
     },
     "error": {
       "userNotFound": "User not found"
+    },
+    "breadcrumbs": {
+      "users": "Users",
+      "userDetails": "User details",
+      "back": "Back"
     }
   },
   "adminGroupsView": {
@@ -446,6 +494,12 @@
       "description": "Are you sure you want to delete these groups?",
       "cancel": "Cancel",
       "submit": "Delete"
+    },
+    "breadcrumbs": {
+      "groups": "Groups",
+      "createNew": "Create new",
+      "editGroup": "Edit group",
+      "back": "Back"
     }
   },
   "enrollCourseView": {
@@ -744,6 +798,10 @@
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
       },
       "successResponse": "students have been assigned to the course."
+    },
+    "breadcrumbs": {
+      "myCourses": "My courses",
+      "back": "Back"
     }
   },
   "registerView": {
@@ -884,8 +942,9 @@
       "openQuestion": "Type your answer here"
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
-      "lessonTitle": "Lesson"
+      "availableCourses": "Available Courses",
+      "yourCourses": "Your Courses",
+      "back": "Back"
     },
     "button": {
       "previous": "Previous",
@@ -953,6 +1012,11 @@
         "enrollCourse": "Enroll to the course",
         "goToContentCreatorPage": "Go to content creator page"
       }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Available courses",
+      "yourCourses": "Your courses",
+      "back": "Back"
     }
   },
   "studentChapterView": {
