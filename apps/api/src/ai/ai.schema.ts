@@ -62,6 +62,29 @@ export const aiMentorLessonSchema = Type.Object({
   conditions: Type.Optional(Type.String()),
 });
 
+export const aiJudgeJudgementSchema = Type.Object({
+  summary: Type.String(),
+  minScore: Type.Integer(),
+  score: Type.Integer(),
+  maxScore: Type.Integer(),
+});
+
+export const responseAiJudgeJudgementSchema = Type.Intersect([
+  aiJudgeJudgementSchema,
+  Type.Object({
+    passed: Type.Boolean(),
+    percentage: Type.Integer(),
+  }),
+]);
+
+export const threadOwnershipSchema = Type.Object({
+  threadId: UUIDSchema,
+  userId: UUIDSchema,
+});
+
+export type ThreadOwnershipBody = Static<typeof threadOwnershipSchema>;
+export type ResponseAiJudgeJudgementBody = Static<typeof responseAiJudgeJudgementSchema>;
+export type AiJudgeJudgementBody = Static<typeof aiJudgeJudgementSchema>;
 export type ResponseThreadMessageBody = Static<typeof responseThreadMessageSchema>;
 export type AiMentorGroupsBody = Static<typeof aiMentorGroupsSchema>;
 export type AiMentorLessonBody = Static<typeof aiMentorLessonSchema>;

@@ -1,12 +1,29 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 
-import { SUMMARY_PROMPT, SYSTEM_PROMPT, THRESHOLD, WELCOME_MESSAGE_PROMPT } from "src/ai/ai.config";
-import { MESSAGE_ROLE, OPENAI_MODELS, type OpenAIModels, THREAD_STATUS } from "src/ai/ai.type";
+import {
+  SUMMARY_PROMPT,
+  SYSTEM_PROMPT_FOR_JUDGE,
+  SYSTEM_PROMPT_FOR_MENTOR,
+  THRESHOLD,
+  WELCOME_MESSAGE_PROMPT,
+} from "src/ai/ai.config";
+import {
+  MESSAGE_ROLE,
+  type MessageRole,
+  OPENAI_MODELS,
+  type OpenAIModels,
+  THREAD_STATUS,
+} from "src/ai/ai.type";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { ChatService } from "src/ai/services/chat.service";
+import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
 
-import type { CreateThreadMessageBody, ThreadMessageBody } from "src/ai/ai.schema";
+import type {
+  CreateThreadMessageBody,
+  ThreadMessageBody,
+  ThreadOwnershipBody,
+} from "src/ai/ai.schema";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -15,6 +32,7 @@ export class AiService {
     private readonly chatService: ChatService,
     private readonly tokenService: TokenService,
     private readonly aiRepository: AiRepository,
+    private readonly threadService: ThreadService,
   ) {}
 
   async generateMessage(data: CreateThreadMessageBody, model: OpenAIModels) {
@@ -22,7 +40,7 @@ export class AiService {
     await this.summarizeIfNeeded(data.threadId);
 
     const prompt = await this.getPrompt(data.threadId, data.content);
-    const mentorResponse = await this.chatService.chat(prompt, model);
+    const mentorResponse = await this.chatService.chatWithMentor(prompt, model);
 
     const mentorTokenCount = this.tokenService.countTokens(model, mentorResponse);
     const tokenCount = this.tokenService.countTokens(model, data.content);
@@ -90,8 +108,8 @@ export class AiService {
     return summarized;
   }
 
-  async findMessageHistory(threadId: UUIDType, archived: boolean) {
-    const history = await this.aiRepository.findMessageHistory(threadId, archived);
+  async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
+    const history = await this.aiRepository.findMessageHistory(threadId, archived, role);
     const language = await this.aiRepository.findThreadLanguage(threadId);
 
     return { history, language };
@@ -104,7 +122,7 @@ export class AiService {
 
     delete mentorLesson.conditions;
 
-    const systemPrompt = SYSTEM_PROMPT(mentorLesson, groups, lang.language);
+    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(mentorLesson, groups, lang.language);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
     await this.aiRepository.insertMessage({
       threadId,
@@ -116,13 +134,28 @@ export class AiService {
     return systemPrompt;
   }
 
+  async runJudge(data: ThreadOwnershipBody) {
+    const thread = await this.threadService.findThread(data.threadId, data.userId);
+    if (thread.data.status !== THREAD_STATUS.ACTIVE)
+      throw new BadRequestException("Thread must be active");
+
+    const mentorLesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
+
+    const messages = await this.findMessageHistory(data.threadId, undefined, MESSAGE_ROLE.USER);
+
+    const content = messages.history.map(({ content }) => content).join("\n");
+    const system = SYSTEM_PROMPT_FOR_JUDGE(mentorLesson, messages.language.language);
+
+    return await this.chatService.judge(system, content);
+  }
+
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
     const welcomeMessagePrompt = WELCOME_MESSAGE_PROMPT(systemPrompt);
     const content = await this.chatService.generatePrompt(
       welcomeMessagePrompt,
       OPENAI_MODELS.BASIC,
     );
-    const tokenCount = await this.tokenService.countTokens(OPENAI_MODELS.BASIC, content);
+    const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, content);
     await this.aiRepository.insertMessage({
       threadId,
       content,
