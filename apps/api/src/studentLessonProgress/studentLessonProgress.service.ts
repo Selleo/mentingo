@@ -210,10 +210,20 @@ export class StudentLessonProgressService {
         trx,
       );
 
-      return (
-        await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId),
-        await this.certificatesService.createCertificate(studentId, courseId)
-      );
+      const dbInstance = trx ?? this.db;
+      const [course] = await dbInstance
+        .select({ hasCertificate: courses.hasCertificate })
+        .from(courses)
+        .where(eq(courses.id, courseId));
+
+      if (course?.hasCertificate) {
+        return (
+          await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId),
+          await this.certificatesService.createCertificate(studentId, courseId, trx)
+        );
+      } else {
+        return await this.statisticsRepository.updatePaidPurchasedCoursesStats(courseId);
+      }
     }
 
     if (courseProgress.progress !== PROGRESS_STATUSES.COMPLETED) {

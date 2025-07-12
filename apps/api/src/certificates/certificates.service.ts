@@ -13,7 +13,9 @@ import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { certificates, users, courses, studentCourses } from "src/storage/schema";
 
 import type { CertificatesQuery, AllCertificatesResponse } from "./certificates.types";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { PaginatedResponse } from "src/common";
+import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class CertificatesService {
@@ -67,9 +69,15 @@ export class CertificatesService {
     }
   }
 
-  async createCertificate(userId: string, courseId: string) {
+  async createCertificate(
+    userId: string,
+    courseId: string,
+    trx?: PostgresJsDatabase<typeof schema>,
+  ) {
     try {
-      const [existingUser] = await this.db
+      const dbInstance = trx || this.db;
+
+      const [existingUser] = await dbInstance
         .select({
           firstName: users.firstName,
           lastName: users.lastName,
@@ -77,7 +85,7 @@ export class CertificatesService {
         .from(users)
         .where(eq(users.id, userId));
 
-      const [existingCourse] = await this.db
+      const [existingCourse] = await dbInstance
         .select({
           title: courses.title,
           certificateEnabled: courses.hasCertificate,
@@ -85,7 +93,7 @@ export class CertificatesService {
         .from(courses)
         .where(eq(courses.id, courseId));
 
-      const [courseCompletion] = await this.db
+      const [courseCompletion] = await dbInstance
         .select({
           completedAt: studentCourses.completedAt,
         })
@@ -96,17 +104,18 @@ export class CertificatesService {
       if (!existingCourse) throw new NotFoundException("Course not found");
       if (!existingCourse.certificateEnabled)
         throw new BadRequestException("Certificates are disabled for this course");
+      console.log("Course completion:", courseCompletion.completedAt);
       if (!courseCompletion?.completedAt)
         throw new BadRequestException("Course must be completed to generate certificate");
 
-      const [existingCertificate] = await this.db
+      const [existingCertificate] = await dbInstance
         .select()
         .from(certificates)
         .where(and(eq(certificates.userId, userId), eq(certificates.courseId, courseId)));
 
       if (existingCertificate) throw new ConflictException("Certificate already exists");
 
-      const [createdCertificate] = await this.db
+      const [createdCertificate] = await dbInstance
         .insert(certificates)
         .values({
           userId: userId,

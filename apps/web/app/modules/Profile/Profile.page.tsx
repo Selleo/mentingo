@@ -1,4 +1,5 @@
 import { Navigate, useParams } from "@remix-run/react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
@@ -10,9 +11,12 @@ import { isAdminLike } from "~/utils/userRoles";
 import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 
+import CertificateToPDF from "./Certificates/CertificatePreview";
 import Certificates from "./Certificates/Certificates";
 import { ProfileCard } from "./components";
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
+
+import type { CertificateType } from "~/types/certificate";
 
 export default function ProfilePage() {
   const { id = "" } = useParams();
@@ -20,6 +24,33 @@ export default function ProfilePage() {
   const hasPermission = isAdminLike(userDetails?.role ?? "");
   const { data: contentCreatorCourses } = useContentCreatorCourses(id, undefined, hasPermission);
   const { t } = useTranslation();
+
+  const [certificatePreview, setCertificatePreview] = useState<{
+    isOpen: boolean;
+    completionDate: string;
+    certData?: CertificateType;
+  }>({
+    isOpen: false,
+    completionDate: "",
+    certData: undefined,
+  });
+
+  const handleOpenCertificatePreview = (data: {
+    completionDate: string;
+    certData?: CertificateType;
+  }) => {
+    setCertificatePreview({
+      isOpen: true,
+      ...data,
+    });
+  };
+
+  const handleCloseCertificatePreview = () => {
+    setCertificatePreview((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
+  };
 
   if (error) return <Navigate to="/" />;
 
@@ -32,6 +63,26 @@ export default function ProfilePage() {
 
   return (
     <PageWrapper role="main">
+      {certificatePreview.isOpen && (
+        <button
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
+          onClick={handleCloseCertificatePreview}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" || e.key === "Enter") {
+              handleCloseCertificatePreview();
+            }
+          }}
+        >
+          <div>
+            <CertificateToPDF
+              studentName={certificatePreview.certData?.fullName || ""}
+              courseName={certificatePreview.certData?.courseTitle || ""}
+              completionDate={certificatePreview.completionDate}
+              onClose={handleCloseCertificatePreview}
+            />
+          </div>
+        </button>
+      )}
       <ProfilePageBreadcrumbs
         id={id}
         username={`${userDetails?.firstName} ${userDetails?.lastName}`}
@@ -55,8 +106,7 @@ export default function ProfilePage() {
             </Button>
           </section>
         )}
-        <div></div>
-        <Certificates></Certificates>
+        <Certificates onOpenCertificatePreview={handleOpenCertificatePreview} />
       </div>
     </PageWrapper>
   );

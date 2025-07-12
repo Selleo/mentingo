@@ -1,4 +1,4 @@
-export type Certificate = {
+export type CertificateType = {
   id: string;
   userId: string;
   courseId: string;
@@ -10,7 +10,7 @@ export type Certificate = {
 };
 
 export type CertificatesResponse = {
-  data: Certificate[];
+  data: CertificateType[];
   pagination: {
     totalItems: number;
     page: number;

@@ -120,7 +120,7 @@ export const courses = pgTable("courses", {
   description: varchar("description", { length: 1000 }),
   thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
   isPublished: boolean("is_published").notNull().default(false),
-  hasCertificate: boolean("has_certificate").notNull().default(false),
+  hasCertificate: boolean("has_certificate").notNull().default(true),
   priceInCents: integer("price_in_cents").notNull().default(0),
   currency: varchar("currency").notNull().default("usd"),
   chapterCount: integer("chapter_count").notNull().default(0),

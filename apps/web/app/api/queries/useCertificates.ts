@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetAllCertificatesResponse } from "../generated-api";
-import type { Certificate } from "~/types/certificate";
+import type { CertificateType } from "~/types/certificate";
 
 type CertificatesParams = {
   userId: string;
@@ -21,7 +21,7 @@ export const certificatesQueryOptions = (params: CertificatesParams) => ({
     });
     return response.data;
   },
-  select: (data: GetAllCertificatesResponse): Certificate[] => data.data,
+  select: (data: GetAllCertificatesResponse): CertificateType[] => data.data,
   enabled: !!params.userId,
 });
 
@@ -29,4 +29,4 @@ export function useCertificates(params: CertificatesParams) {
   return useQuery(certificatesQueryOptions(params));
 }
 
-export type { Certificate };
+export type { CertificateType };
