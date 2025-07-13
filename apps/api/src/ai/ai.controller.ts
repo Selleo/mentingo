@@ -43,7 +43,7 @@ export class AiController {
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<ResponseThreadBody>> {
-    return this.threadService.createThread(
+    return this.aiService.createThreadWithSetup(
       {
         ...data,
         status: THREAD_STATUS.ACTIVE,

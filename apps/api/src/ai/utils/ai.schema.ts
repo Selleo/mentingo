@@ -90,6 +90,14 @@ export const responseJudgeSchema = Type.Intersect([
   }),
 ]);
 
+export const chatMessagesSchema = Type.Array(
+  Type.Object({
+    role: Type.Enum(MESSAGE_ROLE),
+    content: Type.String(),
+  }),
+);
+
+export type ChatMessagesBody = Static<typeof chatMessagesSchema>;
 export type ResponseJudgeBody = Static<typeof responseJudgeSchema>;
 export type UpdateThreadBody = Static<typeof updateThreadSchema>;
 export type ThreadOwnershipBody = Static<typeof threadOwnershipSchema>;

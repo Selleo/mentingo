@@ -1,0 +1,59 @@
+import { Injectable } from "@nestjs/common";
+
+import { AiRepository } from "src/ai/repositories/ai.repository";
+import { MessageService } from "src/ai/services/message.service";
+import { TokenService } from "src/ai/services/token.service";
+import { SYSTEM_PROMPT_FOR_MENTOR } from "src/ai/utils/ai.config";
+import { MESSAGE_ROLE, OPENAI_MODELS } from "src/ai/utils/ai.type";
+
+import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
+import type { UUIDType } from "src/common";
+
+@Injectable()
+export class PromptService {
+  constructor(
+    private readonly aiRepository: AiRepository,
+    private readonly messageService: MessageService,
+    private readonly tokenService: TokenService,
+  ) {}
+
+  async buildPrompt(threadId: UUIDType, content: string) {
+    const { history } = await this.messageService.findMessageHistory(threadId, false);
+
+    const systemPrompt = await this.aiRepository.findFirstMessageByRoleAndThread(
+      threadId,
+      MESSAGE_ROLE.SYSTEM,
+    );
+
+    const summary = await this.aiRepository.findFirstMessageByRoleAndThread(
+      threadId,
+      MESSAGE_ROLE.SUMMARY,
+    );
+
+    if (summary) history.unshift({ role: summary.role, content: summary.content });
+    if (systemPrompt) history.unshift({ role: systemPrompt.role, content: systemPrompt.content });
+
+    history.push({ role: MESSAGE_ROLE.USER, content });
+    return history;
+  }
+
+  async setSystemPrompt(data: ThreadOwnershipBody) {
+    const lang = await this.aiRepository.findThreadLanguage(data.threadId);
+    const mentorLesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
+    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
+
+    delete mentorLesson.conditions;
+
+    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(mentorLesson, groups, data, lang.language);
+    const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
+
+    await this.messageService.insertMessage({
+      tokenCount,
+      threadId: data.threadId,
+      role: MESSAGE_ROLE.SYSTEM,
+      content: systemPrompt,
+    });
+
+    return systemPrompt;
+  }
+}

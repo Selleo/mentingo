@@ -5,8 +5,6 @@ import type {
 } from "src/ai/utils/ai.schema";
 import type { SupportedLanguages } from "src/ai/utils/ai.type";
 
-export const THRESHOLD = 20000;
-export const MAX_TOKENS = 2000;
 export const SUMMARY_PROMPT = (content: string, language: SupportedLanguages) => {
   return `You are an expert conversation summarizer. I will provide you with a full chat transcript.
   Your job is to generate a single summary of up to 4,000 tokens that:

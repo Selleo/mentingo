@@ -1,13 +1,13 @@
 import { openai } from "@ai-sdk/openai";
-import { BadRequestException, forwardRef, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { generateObject, generateText, jsonSchema, type Message } from "ai";
 
-import { AiService } from "src/ai/services/ai.service";
-import { MAX_TOKENS } from "src/ai/utils/ai.config";
+import { MAX_TOKENS } from "src/ai/utils/ai.constants";
 import {
   type AiJudgeJudgementBody,
   aiJudgeJudgementSchema,
   type ResponseAiJudgeJudgementBody,
+  type ChatMessagesBody,
 } from "src/ai/utils/ai.schema";
 import { judge } from "src/ai/utils/ai.tools";
 import {
@@ -17,9 +17,10 @@ import {
   type OpenAIModels,
 } from "src/ai/utils/ai.type";
 
+import type { AiService } from "src/ai/services/ai.service";
+
 @Injectable()
 export class ChatService {
-  constructor(@Inject(forwardRef(() => AiService)) private readonly aiService: AiService) {}
   async generatePrompt(prompt: string, model: OpenAIModels): Promise<string> {
     if (!prompt?.trim()) {
       throw new Error("Prompt cannot be empty");
@@ -39,8 +40,9 @@ export class ChatService {
   }
 
   async chatWithMentor(
-    messages: Array<{ role: MessageRole; content: string }>,
+    messages: ChatMessagesBody,
     model: OpenAIModels,
+    aiService: AiService,
   ): Promise<string> {
     if (!messages?.length) {
       throw new Error("Messages array cannot be empty");
@@ -55,7 +57,7 @@ export class ChatService {
         })) as Omit<Message, "id">[],
         maxTokens: MAX_TOKENS,
         tools: {
-          judge: judge(this.aiService),
+          judge: judge(aiService),
         },
       });
       if (!result.text && result.toolCalls?.length) {

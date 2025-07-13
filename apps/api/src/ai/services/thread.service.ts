@@ -1,13 +1,6 @@
-import {
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
-import { AiService } from "src/ai/services/ai.service";
 import { LessonService } from "src/lesson/services/lesson.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -19,8 +12,6 @@ export class ThreadService {
   constructor(
     private readonly aiRepository: AiRepository,
     private readonly lessonService: LessonService,
-    @Inject(forwardRef(() => AiService))
-    private readonly aiService: AiService,
   ) {}
 
   async createThread(data: CreateThreadBody, role: UserRole) {
@@ -38,13 +29,7 @@ export class ThreadService {
       ...data,
     });
 
-    const systemPrompt = await this.aiService.setSystemPrompt({
-      threadId: thread.id,
-      userId: thread.userId,
-    });
-    await this.aiService.sendWelcomeMessage(thread.id, systemPrompt);
-
-    return { data: thread };
+    return thread;
   }
 
   async findThread(threadId: UUIDType, userId: UUIDType) {
