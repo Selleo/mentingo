@@ -6,6 +6,7 @@ import { createUserFactory, type UserWithCredentials } from "../../../test/facto
 import { truncateTables, cookieFor } from "../../../test/helpers/test-helpers";
 
 import type { DatabasePg } from "../../common";
+import type { SettingsJSONContentSchema } from "../schemas/settings.schema";
 import type { INestApplication } from "@nestjs/common";
 import type { AdminSettings, GlobalSettings, StudentSettings } from "src/common/types";
 
