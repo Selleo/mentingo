@@ -17,4 +17,3 @@ export const settingsSchema = Type.Object({
 
 export type SettingsSchema = Static<typeof settingsSchema>;
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
-export type CreateSettingsBody = Static<typeof settingsJSONContentSchema>;
