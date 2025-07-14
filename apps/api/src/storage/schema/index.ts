@@ -378,12 +378,6 @@ export const groupUsers = pgTable(
 export const settings = pgTable("settings", {
   ...id,
   ...timestamps,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   settings: jsonb("settings").default({}),
-  createdAt: timestamp("created_at", {
-    mode: "string",
-    withTimezone: true,
-  }).notNull(),
 });

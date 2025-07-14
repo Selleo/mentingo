@@ -17,7 +17,7 @@ import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 
-import { createTokens, credentials, userDetails, users } from "../storage/schema";
+import { createTokens, credentials, settings, userDetails, users } from "../storage/schema";
 
 import {
   type UsersFilterSchema,
@@ -273,10 +273,17 @@ export class UserService {
     });
   }
 
-  public async getAdminsToNotify() {
-    const admins = await this.db.select().from(users).where(eq(users.role, USER_ROLES.ADMIN));
+  public async getAdminsWithSettings() {
+    const adminsWithSettings = await this.db
+      .select({
+        user: users,
+        settings: settings,
+      })
+      .from(users)
+      .leftJoin(settings, eq(users.id, settings.userId))
+      .where(and(eq(users.role, USER_ROLES.ADMIN)));
 
-    return admins;
+    return adminsWithSettings;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {

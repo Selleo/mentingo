@@ -1,5 +1,5 @@
 {
-  "id": "fb247ebd-a5c7-41c8-9dff-8995561352df",
+  "id": "1016bbe8-7d21-4238-abf7-5100a94869e0",
   "prevId": "348a83d8-60e7-48c8-91b7-abb5060b1cf2",
   "version": "7",
   "dialect": "postgresql",
@@ -1330,9 +1330,10 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp with time zone",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
         },
         "updated_at": {
           "name": "updated_at",
@@ -1352,7 +1353,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false,
-          "default": "'{\"admin_new_user_notification\":false,\"language\":\"en\"}'::jsonb"
+          "default": "'{}'::jsonb"
         }
       },
       "indexes": {},
