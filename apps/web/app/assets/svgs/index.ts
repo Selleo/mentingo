@@ -45,6 +45,9 @@ export { default as IconX } from "./x-icon.svg?react";
 export { default as Edit } from "./edit.svg?react";
 export { default as X } from "./x.svg?react";
 
+export { default as Smile } from "./smile.svg?react";
+export { default as Send } from "./send.svg?react";
+
 export * from "./lesson-types";
 export * from "./question-types";
 export * from "./arrows";

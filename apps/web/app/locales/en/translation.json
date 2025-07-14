@@ -993,7 +993,15 @@
       "multipleChoice": "Multiple choice question",
       "trueOfFalseChoice": "True or false question",
       "oneOrTwoWordSentence": "Provide a brief response (1-2 sentences).",
-      "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences)."
+      "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences).",
+      "aiMentorLesson": {
+        "sendAMessage": "Write a message...",
+        "check": "Check",
+        "aiMentorName": "AI Mentor",
+        "userName": "User",
+        "typing": "Typing a response...",
+        "send": "Send"
+      }
     },
     "sideSection": {
       "optionHeader": "Option",

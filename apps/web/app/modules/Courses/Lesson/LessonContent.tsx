@@ -14,6 +14,8 @@ import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 
 import Presentation from "../../../components/Presentation/Presentation";
 
+import AiMentorLesson from "./AiMentorLesson";
+
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 
 type LessonContentProps = {
@@ -62,6 +64,7 @@ export const LessonContent = ({
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
+      .with("ai_mentor", () => <AiMentorLesson />)
       .otherwise(() => null);
 
   const handleMarkLessonAsComplete = () => {
