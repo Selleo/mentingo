@@ -19,6 +19,9 @@ const registerSchema = z.object({
   email: z.string().email({ message: "registerView.validation.email" }),
   password: z.string().min(8, { message: "registerView.validation.password" }),
 });
+
+const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
+
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
   const { t } = useTranslation();
@@ -81,20 +84,21 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <div className="mt-4">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+        {isGoogleOAuthEnabled && (
+          <div className="mt-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  {t("registerView.other.orContinueWith")}
+                </span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                {t("registerView.other.orContinueWith")}
-              </span>
-            </div>
+            <GoogleOAuthButton />
           </div>
-
-          <GoogleOAuthButton />
-        </div>
+        )}
 
         <div className="mt-4 text-center text-sm">
           {t("registerView.other.alreadyHaveAccount")}{" "}

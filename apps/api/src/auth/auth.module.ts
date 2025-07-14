@@ -26,7 +26,7 @@ import { TokenService } from "./token.service";
     CreatePasswordService,
     ResetPasswordService,
     ResendVerificationMailCron,
-    GoogleStrategy,
+    ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
   ],
   exports: [],
 })
