@@ -11,15 +11,22 @@ import type { UUIDType } from "src/common";
 export class SettingsService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  public async createSettings(userId: UUIDType, createSettings?: SettingsJSONContentSchema) {
-    const [createdSettings] = await this.db
+  public async createSettings(
+    userId: UUIDType,
+    trx?: any,
+    createSettings?: SettingsJSONContentSchema,
+  ) {
+    const database = trx || this.db;
+
+    const [createdSettings] = await database
       .insert(settings)
       .values({
         userId,
         createdAt: new Date().toISOString(),
-        settings: createSettings ?? {},
+        settings: createSettings,
       })
       .returning();
+
     return createdSettings;
   }
 
