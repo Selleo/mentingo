@@ -2759,6 +2759,31 @@
             }
           }
         }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateUserSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -8456,6 +8481,60 @@
         }
       },
       "CreateUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "admin_new_user_notification": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
+              },
+              "createdAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "userId",
+              "settings",
+              "createdAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUserSettingsBody": {
+        "type": "object",
+        "properties": {
+          "admin_new_user_notification": {
+            "type": "boolean"
+          },
+          "language": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateUserSettingsResponse": {
         "type": "object",
         "properties": {
           "data": {

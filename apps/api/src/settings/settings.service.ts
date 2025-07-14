@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -18,6 +24,15 @@ export class SettingsService {
   ) {
     if (!userId) {
       throw new UnauthorizedException("User not authenticated");
+    }
+
+    const [existingSettings] = await this.db
+      .select()
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (existingSettings) {
+      throw new ConflictException("Settings already exists");
     }
 
     const database = trx || this.db;
