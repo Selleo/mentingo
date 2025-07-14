@@ -1,1 +1,0 @@
-ALTER TABLE "question_answer_options" ALTER COLUMN "option_text" SET DATA TYPE varchar(250);
