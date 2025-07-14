@@ -489,7 +489,7 @@ export interface GetCourseResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz" | "ai";
+        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
         displayOrder: number;
         status: "not_started" | "in_progress" | "completed";
         quizQuestionCount: number | null;
@@ -538,7 +538,7 @@ export interface GetBetaCourseByIdResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz" | "ai";
+        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
@@ -767,7 +767,7 @@ export interface GetChapterWithLessonResponse {
       /** @format uuid */
       id: string;
       title: string;
-      type: "text" | "presentation" | "video" | "quiz" | "ai";
+      type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
       displayOrder: number;
       status: "not_started" | "in_progress" | "completed";
       quizQuestionCount: number | null;
@@ -791,7 +791,7 @@ export type BetaCreateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -865,7 +865,7 @@ export type UpdateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -964,7 +964,7 @@ export interface GetLessonByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
     description: string | null;
     fileType: string | null;
     fileUrl: string | null;
@@ -1016,7 +1016,7 @@ export interface GetLessonByIdResponse {
 
 export type BetaCreateLessonBody = {
   title: string;
-  type: "text" | "presentation" | "video" | "quiz" | "ai";
+  type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
   description?: string | null;
   fileS3Key?: string | null;
   fileType?: string | null;
@@ -1305,7 +1305,7 @@ export interface BetaUpdateQuizLessonResponse {
 
 export type BetaUpdateLessonBody = {
   title?: string;
-  type?: "text" | "presentation" | "video" | "quiz" | "ai";
+  type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
   description?: string | null;
   fileS3Key?: string | null;
   fileType?: string | null;
