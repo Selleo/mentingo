@@ -38,7 +38,8 @@
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
       "copyUrl": "The URL address was copied to the clipboard"
-    }
+    },
+    "continueWithGoogle": "Continue with Google"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -774,8 +775,7 @@
     },
     "button": {
       "createAccount": "Create an account",
-      "signIn": "Sign in",
-      "continueWithGoogle": "Continue with Google"
+      "signIn": "Sign in"
     },
     "validation": {
       "firstName": "First name is required",
@@ -825,8 +825,7 @@
       "orContinueWith": "Or continue with"
     },
     "button": {
-      "login": "Login",
-      "continueWithGoogle": "Continue with Google"
+      "login": "Login"
     },
     "field": {
       "email": "Email",
