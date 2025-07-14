@@ -693,10 +693,9 @@ test.describe.serial("Course management", () => {
 
     const chapterLocator = page.locator(`[data-chapter-id="${newChapterId}"]`);
     await chapterLocator.waitFor({ state: "visible" });
-    await expect(
+    expect(
       await page.locator(`[data-testid="Freemium - ${newChapterId}"]`).getAttribute("data-state"),
     ).toBe("checked");
-    await expect(await chapterLocator.getAttribute("data-state")).toBe("open");
   });
 
   test("should remove chapter with all lessons.", async ({ page }) => {

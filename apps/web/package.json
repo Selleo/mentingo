@@ -57,6 +57,7 @@
     "@tiptap/extension-color": "2.10.3",
     "@tiptap/extension-document": "2.10.3",
     "@tiptap/extension-highlight": "2.10.3",
+    "@tiptap/extension-link": "2.11.5",
     "@tiptap/extension-paragraph": "2.10.3",
     "@tiptap/extension-task-item": "^2.11.3",
     "@tiptap/extension-task-list": "^2.11.3",
@@ -65,7 +66,6 @@
     "@tiptap/pm": "2.9.1",
     "@tiptap/react": "2.9.1",
     "@tiptap/starter-kit": "2.9.1",
-    "@tiptap/extension-link": "2.11.5",
     "@types/crypto-js": "4.2.2",
     "axios": "1.7.2",
     "class-variance-authority": "0.7.0",
@@ -100,7 +100,7 @@
     "zustand": "4.5.4"
   },
   "devDependencies": {
-    "@playwright/test": "^1.45.3",
+    "@playwright/test": "1.54.1",
     "@remix-run/dev": "2.15.0",
     "@remix-run/testing": "2.15.0",
     "@tailwindcss/typography": "^0.5.15",
@@ -130,7 +130,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "jsdom": "^24.1.1",
     "msw": "^2.3.5",
-    "playwright": "^1.45.3",
+    "playwright": "1.54.1",
     "postcss": "^8.4.38",
     "react-router-dom": "^6.25.1",
     "rollup-plugin-visualizer": "^5.14.0",

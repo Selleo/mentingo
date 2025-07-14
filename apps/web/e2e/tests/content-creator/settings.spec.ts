@@ -31,9 +31,9 @@ test.describe("Content creator settings", () => {
 
     await page.getByRole("button", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
-    const paragraph = page.locator("div.flex.flex-col.gap-y-2 p.body-base.mt-2.text-neutral-950");
-    const jobTitle = page.locator("p.body-sm span.font-medium.text-neutral-950");
-    await expect(paragraph).toHaveText(TEST_SETTINGS.description);
-    await expect(jobTitle).toHaveText(TEST_SETTINGS.jobTitle);
+    const paragraph = page.getByText(TEST_SETTINGS.description);
+    const jobTitle = page.getByText(TEST_SETTINGS.jobTitle);
+    await expect(paragraph).toBeVisible();
+    await expect(jobTitle).toBeVisible();
   });
 });
