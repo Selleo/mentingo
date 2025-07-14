@@ -22,6 +22,8 @@ env:
   STRIPE_SECRET_KEY: "test_secret"
   STRIPE_PUBLISHABLE_KEY: "test_secret"
   STRIPE_WEBHOOK_SECRET: "test_secret"
+  GOOGLE_CLIENT_ID: "test_client_id"
+  GOOGLE_CLIENT_SECRET: "test_secret"
 
 on:
   pull_request:
