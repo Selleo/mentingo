@@ -6,6 +6,7 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 
 import type { DatabasePg } from "../../common";
+import type { SettingsJSONContentSchema } from "../schemas/settings.schema";
 import type { INestApplication } from "@nestjs/common";
 
 describe("SettingsController (e2e)", () => {
@@ -42,38 +43,34 @@ describe("SettingsController (e2e)", () => {
     testCookies = testLoginResponse.headers["set-cookie"];
   });
 
-  // TODO - uncommend and finish those tests
-
   describe("POST /settings", () => {
-    // it("should create new settings for a user.", async () => {
+    it("should create new settings for a user.", async () => {
+      const requestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
 
-    //   const response = await request(app.getHttpServer())
-    //     .post("/api/settings")
-    //     .set("Cookie", testCookies)
-    //     .send({
+      const response = await request(app.getHttpServer())
+        .post("/api/settings")
+        .set("Cookie", testCookies)
+        .send(requestBody)
+        .expect(201);
 
-    //     })
-    //     .expect(201);
+      expect(response.body).toBeDefined();
+      expect(response.body.data.userId).toBe(testUser.id);
+      expect(response.body.data.settings).toEqual(requestBody);
+      expect(response.body.data.createdAt).toBeDefined();
 
-    //   expect(response.body).toBeDefined();
-    //   expect(response.body.userId).toBe(testUser.id);
-    //   expect(response.body.settings).toEqual(requestBody);
-    //   expect(response.body.createdAt).toBeDefined();
+      const createdSettingInDb = await db.query.settings.findFirst({
+        where: (s, { eq }) => eq(s.userId, testUser.id),
+      });
 
-    //   const createdSettingInDb = await db.query.settings.findFirst({
-    //     where: (s, { eq }) => eq(s.userId, testUser.id),
-    //   });
+      expect(createdSettingInDb).toBeDefined();
+      expect(createdSettingInDb?.userId).toBe(testUser.id);
+      expect(createdSettingInDb?.settings).toEqual(requestBody);
+    });
 
-    //   expect(createdSettingInDb).toBeDefined();
-    //   expect(createdSettingInDb?.userId).toBe(testUser.id);
-    //   expect(createdSettingInDb?.settings).toEqual(requestBody);
-    // });
-
-    // it("should return 401 if not authenticated", async () => {
-    //   const requestBody: SettingsJSONContentSchema = settingsFactory.build().settings;
-
-    //   await request(app.getHttpServer()).post("/api/settings").send(requestBody).expect(401);
-    // });
+    it("should return 401 if not authenticated", async () => {
+      const requestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
+      await request(app.getHttpServer()).post("/api/settings").send(requestBody).expect(401);
+    });
 
     it("should return 400 if invalid data is provided", async () => {
       const invalidRequestBody = {
