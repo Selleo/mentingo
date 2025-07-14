@@ -426,18 +426,6 @@ export class UserService {
     return await this.s3Service.getSignedUrl(avatarReference);
   };
 
-  async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
-    await this.db.transaction(async (trx) => {
-      await trx
-        .insert(groupUsers)
-        .values(data.userIds.map((userId) => ({ userId, groupId: data.groupId })))
-        .onConflictDoUpdate({
-          target: [groupUsers.userId],
-          set: { groupId: data.groupId },
-        });
-    });
-  }
-
   public async getAdminsToNotifyAboutNewUser() {
     const allAdmins = await this.db
       .select({
@@ -458,10 +446,34 @@ export class UserService {
     return adminsToNotify;
   }
 
-  public async getAdminsToNotify() {
-    const admins = await this.db.select().from(users).where(eq(users.role, USER_ROLES.ADMIN));
+  public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
+    if (!avatarReference) return null;
+    return await this.s3Service.getSignedUrl(avatarReference);
+  };
 
-    return admins;
+  async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
+    await this.db.transaction(async (trx) => {
+      await trx
+        .insert(groupUsers)
+        .values(data.userIds.map((userId) => ({ userId, groupId: data.groupId })))
+        .onConflictDoUpdate({
+          target: [groupUsers.userId],
+          set: { groupId: data.groupId },
+        });
+    });
+  }
+
+  public async getAdminsWithSettings() {
+    const adminsWithSettings = await this.db
+      .select({
+        user: users,
+        settings: settings,
+      })
+      .from(users)
+      .leftJoin(settings, eq(users.id, settings.userId))
+      .where(and(eq(users.role, USER_ROLES.ADMIN)));
+
+    return adminsWithSettings;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {
