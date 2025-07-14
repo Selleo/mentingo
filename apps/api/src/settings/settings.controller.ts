@@ -1,14 +1,12 @@
-import { Controller, Get, Post, Body } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 
-import {
-  CreateSettingsBody,
-  settingsJSONContentSchema,
-  settingsSchema,
-} from "./schemas/settings.schema";
+import { CreateSettingsBody, createSettingsBodySchema } from "./schemas/create-settings.schema";
+import { settingsSchema } from "./schemas/settings.schema";
+import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
 @Controller("settings")
@@ -22,7 +20,7 @@ export class SettingsController {
 
   @Post("")
   @Validate({
-    request: [{ type: "body", schema: settingsJSONContentSchema }],
+    request: [{ type: "body", schema: createSettingsBodySchema }],
     response: baseResponse(settingsSchema),
   })
   async createUserSettings(
@@ -32,11 +30,15 @@ export class SettingsController {
     return new BaseResponse(await this.settingsService.createSettings(userId, createSettings));
   }
 
-  // @Patch("")
-  // async updateUserSettings(
-  //   @CurrentUser("userId") userId: UUIDType,
-  //   @Body() updatedSettings: UserSettings,
-  // ) {
-  //   return await this.settingsService.updateUserSettings(userId, updatedSettings);
-  // }
+  @Patch("")
+  @Validate({
+    request: [{ type: "body", schema: updateSettingsBodySchema }],
+    response: baseResponse(settingsSchema),
+  })
+  async updateUserSettings(
+    @Body() updatedSettings: UpdateSettingsBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ) {
+    return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
+  }
 }

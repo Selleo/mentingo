@@ -84,6 +84,34 @@ describe("SettingsController (e2e)", () => {
         .send(invalidRequestBody)
         .expect(400);
     });
+
+    it("should return 409 if settings for user already exists", async () => {
+      const requestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
+
+      await request(app.getHttpServer())
+        .post("/api/settings")
+        .set("Cookie", testCookies)
+        .send(requestBody)
+        .expect(201);
+
+      const duplicateRequestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
+
+      const response = await request(app.getHttpServer())
+        .post("/api/settings")
+        .set("Cookie", testCookies)
+        .send(duplicateRequestBody)
+        .expect(409);
+
+      expect(response.body.message).toBeDefined();
+      expect(response.body.statusCode).toBe(409);
+
+      const settingsInDb = await db.query.settings.findMany({
+        where: (s, { eq }) => eq(s.userId, testUser.id),
+      });
+
+      expect(settingsInDb).toHaveLength(1);
+      expect(settingsInDb[0].settings).toEqual(requestBody);
+    });
   });
 
   describe("GET /settings", () => {
