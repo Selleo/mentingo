@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS "settings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"created_at" timestamp with time zone NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"user_id" uuid,
-	"settings" jsonb DEFAULT '{"admin_new_user_notification":false,"language":"en"}'::jsonb
+	"settings" jsonb DEFAULT '{}'::jsonb
 );
 --> statement-breakpoint
 DO $$ BEGIN
