@@ -298,6 +298,20 @@ export const studentLessonProgress = pgTable(
   }),
 );
 
+export const aiMentorStudentLessonProgress = pgTable("ai_mentor_student_lesson_progress", {
+  ...id,
+  ...timestamps,
+  studentLessonProgressId: uuid("student_lesson_progress_id")
+    .references(() => studentLessonProgress.id, { onDelete: "cascade" })
+    .notNull(),
+  summary: text("summary"),
+  score: integer("score"),
+  minScore: integer("min_score"),
+  maxScore: integer("max_score"),
+  percentage: integer("percentage"),
+  passed: boolean("passed").default(false),
+});
+
 export const studentChapterProgress = pgTable(
   "student_chapter_progress",
   {

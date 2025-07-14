@@ -11,6 +11,7 @@ import { DatabasePg } from "src/common";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
+  aiMentorStudentLessonProgress,
   chapters,
   courses,
   lessons,
@@ -22,17 +23,13 @@ import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type * as schema from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
 @Injectable()
 export class StudentLessonProgressService {
-  constructor(
-    @Inject("DB") private readonly db: DatabasePg,
-    private readonly statisticsRepository: StatisticsRepository,
-  ) {}
-
   async markLessonAsCompleted(
     id: UUIDType,
     studentId: UUIDType,
@@ -40,6 +37,7 @@ export class StudentLessonProgressService {
     quizCompleted = false,
     completedQuestionCount = 0,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    aiMentorLessonData?: ResponseAiJudgeJudgementBody,
   ) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
@@ -69,6 +67,9 @@ export class StudentLessonProgressService {
     if (lesson.type === LESSON_TYPES.QUIZ && !quizCompleted)
       throw new BadRequestException("Quiz not completed");
 
+    if (lesson.type === LESSON_TYPES.AI_MENTOR && !aiMentorLessonData)
+      throw new BadRequestException("No AI Mentor Lesson Data given");
+
     const [lessonProgress] = await dbInstance
       .select()
       .from(studentLessonProgress)
@@ -76,17 +77,27 @@ export class StudentLessonProgressService {
         and(eq(studentLessonProgress.lessonId, id), eq(studentLessonProgress.studentId, studentId)),
       );
 
+    let currentLessonProgress;
+
     if (!lessonProgress) {
-      await dbInstance.insert(studentLessonProgress).values({
-        studentId,
-        lessonId: lesson.id,
-        chapterId: lesson.chapterId,
-        completedAt: sql`now()`,
-        completedQuestionCount,
-      });
+      [currentLessonProgress] = await dbInstance
+        .insert(studentLessonProgress)
+        .values({
+          studentId,
+          lessonId: lesson.id,
+          chapterId: lesson.chapterId,
+          completedAt: sql`now()`,
+          completedQuestionCount,
+        })
+        .returning();
+    } else {
+      currentLessonProgress = lessonProgress;
     }
 
-    if (!lessonProgress?.completedAt) {
+    const updateConditions =
+      (!lessonProgress?.completedAt && lesson.type !== LESSON_TYPES.AI_MENTOR) ||
+      (LESSON_TYPES.AI_MENTOR && aiMentorLessonData?.passed);
+    if (updateConditions) {
       await dbInstance
         .update(studentLessonProgress)
         .set({ completedAt: sql`now()`, completedQuestionCount })
@@ -96,6 +107,27 @@ export class StudentLessonProgressService {
             eq(studentLessonProgress.studentId, studentId),
           ),
         );
+    }
+
+    if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
+      const [existingAiMentorLesson] = await dbInstance
+        .select()
+        .from(aiMentorStudentLessonProgress)
+        .where(eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id));
+
+      if (!existingAiMentorLesson) {
+        await dbInstance.insert(aiMentorStudentLessonProgress).values({
+          ...aiMentorLessonData,
+          studentLessonProgressId: currentLessonProgress.id,
+        });
+      } else {
+        await dbInstance
+          .update(aiMentorStudentLessonProgress)
+          .set(aiMentorLessonData)
+          .where(
+            eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id),
+          );
+      }
     }
 
     const isCompletedAsFreemium =
@@ -114,6 +146,11 @@ export class StudentLessonProgressService {
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
   }
+
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly statisticsRepository: StatisticsRepository,
+  ) {}
 
   private async updateChapterProgress(
     courseId: UUIDType,

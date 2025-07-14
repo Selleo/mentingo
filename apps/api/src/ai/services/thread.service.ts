@@ -53,7 +53,7 @@ export class ThreadService {
   }
 
   private async findAiMentorLessonIdFromLesson(lessonId: UUIDType) {
-    const aiMentorLessonId = await this.aiRepository.getAiMentorLessonIdFromLesson(lessonId);
+    const aiMentorLessonId = await this.aiRepository.findAiMentorLessonIdFromLesson(lessonId);
     if (!aiMentorLessonId) throw new NotFoundException(`Lesson not found`);
     return aiMentorLessonId.aiMentorLessonId;
   }

@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { ChatService } from "src/ai/services/chat.service";
@@ -15,14 +15,17 @@ import {
   type OpenAIModels,
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
+import { DatabasePg } from "src/common";
+import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
+import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import type {
   CreateThreadBody,
   CreateThreadMessageBody,
+  ResponseAiJudgeJudgementBody,
   ThreadOwnershipBody,
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AiService {
@@ -35,6 +38,8 @@ export class AiService {
     private readonly promptService: PromptService,
     private readonly summaryService: SummaryService,
     private readonly judgeService: JudgeService,
+    private readonly studentLessonProgressService: StudentLessonProgressService,
+    @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
   async createThreadWithSetup(data: CreateThreadBody, role: UserRole) {
@@ -49,6 +54,7 @@ export class AiService {
 
     return { data: thread };
   }
+
   async generateMessage(data: CreateThreadMessageBody, model: OpenAIModels, userId: UUIDType) {
     const thread = await this.isThreadActive(data.threadId);
     if (thread.userId !== userId)
@@ -59,14 +65,17 @@ export class AiService {
     const prompt = await this.promptService.buildPrompt(data.threadId, data.content);
     const mentorResponse = await this.chatService.chatWithMentor(prompt, model, this);
 
-    const mentorTokenCount = this.tokenService.countTokens(model, mentorResponse);
+    const mentorResponseContent = await this.messageService.parseMentorResponse(mentorResponse);
+
+    const mentorTokenCount = this.tokenService.countTokens(model, mentorResponseContent);
     const tokenCount = this.tokenService.countTokens(model, data.content);
 
     const mentorMessage = {
-      content: mentorResponse,
+      content: mentorResponseContent,
       role: MESSAGE_ROLE.MENTOR,
       tokenCount: mentorTokenCount,
       threadId: data.threadId,
+      isJudge: mentorResponse.isJudge,
     };
 
     await this.messageService.createMessages(
@@ -97,7 +106,19 @@ export class AiService {
   }
 
   async runJudge(data: ThreadOwnershipBody) {
-    return this.judgeService.runJudge(data);
+    return await this.db.transaction(async () => {
+      const judged = await this.judgeService.runJudge(data);
+      const lesson = await this.aiRepository.findLessonByThreadId(data.threadId);
+
+      await this.markAsCompletedIfJudge(
+        lesson.id,
+        data.userId,
+        USER_ROLES.STUDENT,
+        judged.data,
+        true,
+      );
+      return judged;
+    });
   }
 
   private async isThreadActive(threadId: UUIDType) {
@@ -106,5 +127,27 @@ export class AiService {
       throw new BadRequestException("Thread must be active");
 
     return thread;
+  }
+
+  private async markAsCompletedIfJudge(
+    lessonId: UUIDType,
+    studentId: UUIDType,
+    userRole: UserRole,
+    message: string | ResponseAiJudgeJudgementBody,
+    isJudge?: boolean,
+  ) {
+    if (!isJudge) return;
+
+    const aiMentorLessonData: ResponseAiJudgeJudgementBody =
+      typeof message === "string" ? JSON.parse(message) : message;
+    await this.studentLessonProgressService.markLessonAsCompleted(
+      lessonId,
+      studentId,
+      userRole,
+      undefined,
+      undefined,
+      undefined,
+      aiMentorLessonData,
+    );
   }
 }

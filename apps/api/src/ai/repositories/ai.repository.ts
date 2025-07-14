@@ -26,13 +26,23 @@ import type { UUIDType } from "src/common";
 export class AiRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  async getAiMentorLessonIdFromLesson(id: UUIDType) {
+  async findAiMentorLessonIdFromLesson(id: UUIDType) {
     const [aiMentorLessonId] = await this.db
       .select({ aiMentorLessonId: aiMentorLessons.id })
       .from(aiMentorLessons)
       .where(eq(aiMentorLessons.lessonId, id));
 
     return aiMentorLessonId;
+  }
+
+  async findLessonByThreadId(threadId: UUIDType) {
+    const [lesson] = await this.db
+      .select(getTableColumns(lessons))
+      .from(aiMentorThreads)
+      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .where(eq(aiMentorThreads.id, threadId));
+    return lesson;
   }
 
   async createThread(data: ThreadBody) {

@@ -141,6 +141,13 @@
       "when": 1752075844325,
       "tag": "0018_added_archived_field_to_thread_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1752483262327,
+      "tag": "0019_added_ai_mentor_lesson_student_progress_table",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ import {
   aiJudgeJudgementSchema,
   type ResponseAiJudgeJudgementBody,
   type ChatMessagesBody,
+  type ResponseChatWithMentorBody,
 } from "src/ai/utils/ai.schema";
 import { judge } from "src/ai/utils/ai.tools";
 import {
@@ -43,7 +44,7 @@ export class ChatService {
     messages: ChatMessagesBody,
     model: OpenAIModels,
     aiService: AiService,
-  ): Promise<string> {
+  ): Promise<ResponseChatWithMentorBody> {
     if (!messages?.length) {
       throw new Error("Messages array cannot be empty");
     }
@@ -65,9 +66,9 @@ export class ChatService {
           ?.map((tr) => JSON.stringify(tr.result.data))
           .join("\n");
 
-        return toolResults;
+        return { content: toolResults, isJudge: true };
       }
-      return result.text;
+      return { content: result.text };
     } catch (error) {
       throw new Error(
         `Failed to generate chat message: ${

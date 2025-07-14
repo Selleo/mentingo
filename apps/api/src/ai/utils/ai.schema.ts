@@ -43,8 +43,10 @@ export const threadMessageSchema = Type.Intersect([
   Type.Object({
     role: Type.Enum(MESSAGE_ROLE),
     tokenCount: Type.Integer(),
+    isJudge: Type.Optional(Type.Boolean()),
   }),
 ]);
+
 export const responseThreadMessageSchema = Type.Omit(threadMessageSchema, [
   "tokenCount",
   "threadId",
@@ -97,6 +99,12 @@ export const chatMessagesSchema = Type.Array(
   }),
 );
 
+export const responseChatWithMentorSchema = Type.Object({
+  content: Type.String(),
+  isJudge: Type.Optional(Type.Boolean()),
+});
+
+export type ResponseChatWithMentorBody = Static<typeof responseChatWithMentorSchema>;
 export type ChatMessagesBody = Static<typeof chatMessagesSchema>;
 export type ResponseJudgeBody = Static<typeof responseJudgeSchema>;
 export type UpdateThreadBody = Static<typeof updateThreadSchema>;

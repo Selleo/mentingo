@@ -9734,6 +9734,9 @@
                           "type": "string"
                         }
                       ]
+                    },
+                    "isJudge": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -9815,6 +9818,9 @@
                   },
                   "tokenCount": {
                     "type": "integer"
+                  },
+                  "isJudge": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
