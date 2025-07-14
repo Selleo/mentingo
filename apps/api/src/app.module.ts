@@ -102,7 +102,7 @@ import { UserModule } from "./user/user.module";
       provide: APP_GUARD,
       useClass: StagingGuard,
     },
-    GoogleStrategy,
+    ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
   ],
 })
 export class AppModule {}

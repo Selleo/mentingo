@@ -30,7 +30,7 @@ import { TokenService } from "./token.service";
     ResendVerificationMailCron,
     FileService,
     S3Service,
-    GoogleStrategy,
+    ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
   ],
   exports: [],
 })
