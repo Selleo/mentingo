@@ -17,7 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "~/component
 import { Label } from "~/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
-import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.helper";
+import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
 
 import { DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
@@ -105,7 +105,6 @@ const AiMentorLessonForm = ({
               placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
               className="mb-4"
             />
-
             <div className="mb-4 grid grid-cols-1 lg:grid-cols-2">
               <div>
                 <div className="flex items-center justify-between">
@@ -226,14 +225,12 @@ const AiMentorLessonForm = ({
             </div>
           </form>
         </Form>
-
         <DeleteConfirmationModal
           open={isModalOpen}
           onClose={onCloseModal}
           onDelete={onDelete}
           contentType={DeleteContentType.AI_MENTOR}
         />
-
         <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
           <DialogContent>
             <DialogHeader>

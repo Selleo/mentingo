@@ -12,7 +12,7 @@ import { queryClient } from "~/api/queryClient";
 import {
   type SuggestionType,
   SUGGESTION_EXAMPLES,
-} from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.helper";
+} from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
 import {
   type Chapter,
   ContentTypes,
