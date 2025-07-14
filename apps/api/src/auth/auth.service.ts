@@ -107,7 +107,7 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
-      await this.settingsService.createSettings(newUser.id, trx);
+      await this.settingsService.createSettings(newUser.id, undefined, trx);
       await this.notifyAdminsAboutNewUser(firstName, lastName, email);
 
       return newUser;

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -13,9 +13,13 @@ export class SettingsService {
 
   public async createSettings(
     userId: UUIDType,
-    trx?: any,
     createSettings?: SettingsJSONContentSchema,
+    trx?: any,
   ) {
+    if (!userId) {
+      throw new UnauthorizedException("User not authenticated");
+    }
+
     const database = trx || this.db;
 
     const [createdSettings] = await database
