@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
-import { Public } from "src/common/decorators/public.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 
 import {
@@ -16,13 +15,11 @@ import { SettingsService } from "./settings.service";
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @Public()
   @Get("")
   async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
     return await this.settingsService.getUserSettings(userId);
   }
 
-  @Public()
   @Post("")
   @Validate({
     request: [{ type: "body", schema: settingsJSONContentSchema }],
