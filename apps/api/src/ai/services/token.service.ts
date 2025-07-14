@@ -17,10 +17,4 @@ export class TokenService {
       return Math.ceil(text.length / 4);
     }
   }
-
-  sumTokens(model: OpenAIModels, messages: Array<string>): number {
-    return messages.reduce((total: number, msg) => {
-      return total + this.countTokens(model, msg);
-    }, 0);
-  }
 }
