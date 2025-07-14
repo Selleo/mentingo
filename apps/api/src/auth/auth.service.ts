@@ -33,6 +33,7 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { AdminSettings } from "src/common/types";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
 
 @Injectable()
@@ -55,18 +56,22 @@ export class AuthService {
       email: email,
     });
 
-    const admins = await this.userService.getAdminsToNotify();
+    const allAdmins = await this.userService.getAdminsWithSettings();
+
+    const adminsToNotify = allAdmins.filter((admin) => {
+      return (admin.settings?.settings as AdminSettings)?.admin_new_user_notification === true;
+    });
 
     await Promise.all(
-      admins.map((admin) =>
-        this.emailService.sendEmail({
-          to: admin.email,
+      adminsToNotify.map((admin) => {
+        return this.emailService.sendEmail({
+          to: admin.user.email,
           subject: "A new user has registered on your platform",
           text,
           html,
           from: process.env.SES_EMAIL || "",
-        }),
-      ),
+        });
+      }),
     );
   }
 
@@ -104,8 +109,7 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
-      //#TODO end implementing this funcitonality here
-      // await this.settingsService.createSettings(newUser.id)
+      await this.settingsService.createSettings(newUser.id, trx);
       await this.notifyAdminsAboutNewUser(firstName, lastName, email);
 
       return newUser;
