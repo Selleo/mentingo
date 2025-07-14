@@ -99,20 +99,19 @@ export default function RegisterPage() {
           </form>
 
           {isGoogleOAuthEnabled && (
-            <div className="mt-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    {t("registerView.other.orContinueWith")}
-                  </span>
-                </div>
+            <div className="relative mt-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
               </div>
-              <GoogleOAuthButton />
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  {t("registerView.other.orContinueWith")}
+                </span>
+              </div>
             </div>
           )}
+
+          {isGoogleOAuthEnabled && <GoogleOAuthButton />}
 
           <div className="mt-4 text-center text-sm">
             {t("registerView.other.alreadyHaveAccount")}{" "}
