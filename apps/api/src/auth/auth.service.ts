@@ -49,7 +49,9 @@ export class AuthService {
     private settingsService: SettingsService,
   ) {}
 
-  private async notifyAdminsAboutNewUser(firstName: string, lastName: string, email: string) {
+  private async notifyAdminsAboutNewUser(user: CommonUser) {
+    const { firstName, lastName, email } = user;
+
     const { text, html } = new NewUserEmail({
       first_name: firstName,
       last_name: lastName,
@@ -110,7 +112,7 @@ export class AuthService {
       });
 
       await this.settingsService.createSettings(newUser.id, undefined, trx);
-      await this.notifyAdminsAboutNewUser(firstName, lastName, email);
+      await this.notifyAdminsAboutNewUser(newUser);
 
       return newUser;
     });
@@ -257,6 +259,8 @@ export class AuthService {
       .insert(credentials)
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(token);
+
+    await this.notifyAdminsAboutNewUser(existingUser);
   }
 
   public async resetPassword(token: string, newPassword: string) {
