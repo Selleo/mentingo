@@ -26,14 +26,14 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { SettingsService } from "src/settings/settings.service";
 
-import { createTokens, credentials, resetTokens, users } from "../storage/schema";
+import { createTokens, credentials, resetTokens, settings, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
-import type { AdminSettings } from "src/common/types";
+import type { UserSettings } from "src/common/types";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
 
 @Injectable()
@@ -49,6 +49,13 @@ export class AuthService {
     private settingsService: SettingsService,
   ) {}
 
+  private ensureUserSettings(user: any): CommonUser {
+    return {
+      ...user,
+      settings: (user.settings as UserSettings) || {},
+    };
+  }
+
   private async notifyAdminsAboutNewUser(user: CommonUser) {
     const { firstName, lastName, email } = user;
 
@@ -61,7 +68,7 @@ export class AuthService {
     const allAdmins = await this.userService.getAdminsWithSettings();
 
     const adminsToNotify = allAdmins.filter((admin) => {
-      return (admin.settings?.settings as AdminSettings)?.admin_new_user_notification === true;
+      return (admin.settings?.settings as UserSettings)?.admin_new_user_notification === true;
     });
 
     await Promise.all(
@@ -89,7 +96,6 @@ export class AuthService {
     password: string;
   }) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.email, email));
-
     if (existingUser) {
       throw new ConflictException("User already exists");
     }
@@ -97,12 +103,34 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     return this.db.transaction(async (trx) => {
-      const [newUser] = await trx.insert(users).values({ email, firstName, lastName }).returning();
+      const [newUser] = await trx
+        .insert(users)
+        .values({
+          email,
+          firstName,
+          lastName,
+        })
+        .returning();
 
-      await trx.insert(credentials).values({ userId: newUser.id, password: hashedPassword });
+      await trx.insert(credentials).values({
+        userId: newUser.id,
+        password: hashedPassword,
+      });
+
+      const defaultSettings = {
+        language: "en",
+      };
+
+      const [createdSettings] = await trx
+        .insert(settings)
+        .values({
+          userId: newUser.id,
+          createdAt: new Date().toISOString(),
+          settings: defaultSettings,
+        })
+        .returning();
 
       const emailTemplate = new WelcomeEmail({ email, name: email });
-
       await this.emailService.sendEmail({
         to: email,
         subject: "Welcome to our platform",
@@ -111,10 +139,13 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
-      await this.settingsService.createSettings(newUser.id, undefined, trx);
-      await this.notifyAdminsAboutNewUser(newUser);
+      const userWithSettings = {
+        ...newUser,
+        settings: createdSettings.settings as UserSettings,
+      };
+      await this.notifyAdminsAboutNewUser(userWithSettings);
 
-      return newUser;
+      return userWithSettings;
     });
   }
 
@@ -126,8 +157,10 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.getTokens(user);
 
+    const userWithSettings = await this.userService.getUserById(user.id);
+
     return {
-      ...user,
+      ...userWithSettings,
       accessToken,
       refreshToken,
     };
@@ -140,7 +173,7 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
-    return user;
+    return { ...user, settings: user.settings || {} };
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -175,8 +208,10 @@ export class AuthService {
         role: users.role,
         archived: users.archived,
         avatarReference: users.avatarReference,
+        settings: settings.settings,
       })
       .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
       .leftJoin(credentials, eq(users.id, credentials.userId))
       .where(eq(users.email, email));
 
@@ -188,7 +223,7 @@ export class AuthService {
 
     const { password: _, ...user } = userWithCredentials;
 
-    return user;
+    return this.ensureUserSettings(user);
   }
 
   private async getTokens(user: CommonUser) {
@@ -247,8 +282,19 @@ export class AuthService {
     const createToken = await this.createPasswordService.getOneByToken(token);
 
     const [existingUser] = await this.db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        role: users.role,
+        archived: users.archived,
+        settings: settings.settings,
+      })
       .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
       .where(eq(users.id, createToken.userId));
 
     if (!existingUser) throw new NotFoundException("User not found");
@@ -260,7 +306,14 @@ export class AuthService {
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(token);
 
-    await this.notifyAdminsAboutNewUser(existingUser);
+    const defaultSettings = {
+      language: "en",
+      ...(existingUser.role === "admin" ? { admin_new_user_notification: false } : {}),
+    };
+
+    await this.settingsService.createSettings(createToken.userId, defaultSettings);
+
+    await this.notifyAdminsAboutNewUser(this.ensureUserSettings(existingUser));
   }
 
   public async resetPassword(token: string, newPassword: string) {

@@ -2,7 +2,9 @@ import { Controller, Get, Post, Body, Patch } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
+import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { CreateSettingsBody, createSettingsBodySchema } from "./schemas/create-settings.schema";
 import { settingsSchema } from "./schemas/settings.schema";
@@ -40,5 +42,11 @@ export class SettingsController {
     @CurrentUser("userId") userId: UUIDType,
   ) {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
+  }
+
+  @Roles(USER_ROLES.ADMIN)
+  @Patch("admin-new-user-notification")
+  async updateAdminNewUserNotification(@CurrentUser("userId") userId: UUIDType) {
+    return new BaseResponse(await this.settingsService.updateAdminNewUserNotification(userId));
   }
 }

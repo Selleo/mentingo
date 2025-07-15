@@ -72,4 +72,26 @@ export class SettingsService {
 
     return updated;
   }
+
+  public async updateAdminNewUserNotification(userId: UUIDType) {
+    const [userSettings] = await this.db.select().from(settings).where(eq(settings.userId, userId));
+
+    if (!userSettings) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    const currentNotificationSetting = userSettings.settings.admin_new_user_notification;
+    const updatedSettings = {
+      ...userSettings.settings,
+      admin_new_user_notification: !currentNotificationSetting,
+    };
+
+    const [updated] = await this.db
+      .update(settings)
+      .set({ settings: updatedSettings })
+      .where(eq(settings.userId, userId))
+      .returning();
+
+    return updated;
+  }
 }
