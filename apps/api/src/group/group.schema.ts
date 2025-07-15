@@ -6,7 +6,7 @@ import { commonUserSchema } from "src/common/schemas/common-user.schema";
 export const groupSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
-  description: Type.Union([Type.String(), Type.Null()]),
+  characteristic: Type.Union([Type.String(), Type.Null()]),
   users: Type.Optional(Type.Array(commonUserSchema)),
   createdAt: Type.Optional(Type.String()),
   updatedAt: Type.Optional(Type.String()),
@@ -14,7 +14,7 @@ export const groupSchema = Type.Object({
 export const allGroupsSchema = Type.Array(groupSchema);
 export const baseGroupSchema = Type.Object({
   name: Type.String(),
-  description: Type.Optional(Type.String()),
+  characteristic: Type.Optional(Type.String()),
 });
 export const bulkDeleteGroupsSchema = Type.Array(UUIDSchema);
 

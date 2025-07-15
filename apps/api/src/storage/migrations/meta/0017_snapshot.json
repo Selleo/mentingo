@@ -1,9 +1,72 @@
 {
-  "id": "0ae71fd6-32cc-48a7-b789-6fee6897d072",
-  "prevId": "348a83d8-60e7-48c8-91b7-abb5060b1cf2",
+  "id": "97922fb2-3698-4e5f-9e8b-f46eea513047",
+  "prevId": "0ae71fd6-32cc-48a7-b789-6fee6897d072",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.ai_mentor_lessons": {
+      "name": "ai_mentor_lessons",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "lesson_id": {
+          "name": "lesson_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ai_mentor_instructions": {
+          "name": "ai_mentor_instructions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completion_conditions": {
+          "name": "completion_conditions",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ai_mentor_lessons_lesson_id_lessons_id_fk": {
+          "name": "ai_mentor_lessons_lesson_id_lessons_id_fk",
+          "tableFrom": "ai_mentor_lessons",
+          "tableTo": "lessons",
+          "columnsFrom": [
+            "lesson_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.categories": {
       "name": "categories",
       "schema": "",
