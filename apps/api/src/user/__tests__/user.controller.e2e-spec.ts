@@ -1,6 +1,8 @@
 import { omit } from "lodash";
 import request from "supertest";
 
+import { DEFAULT_USER_SETTINGS } from "src/settings/constants/settings.constants";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { cookieFor } from "../../../test/helpers/test-helpers";
