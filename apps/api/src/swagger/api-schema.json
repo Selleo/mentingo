@@ -2876,6 +2876,17 @@
           }
         }
       }
+    },
+    "/api/settings/admin-new-user-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -2947,6 +2958,17 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "admin_new_user_notification": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
               }
             },
             "required": [
@@ -2957,7 +2979,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "settings"
             ]
           }
         },
@@ -3015,6 +3038,17 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "admin_new_user_notification": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
               }
             },
             "required": [
@@ -3025,7 +3059,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "settings"
             ]
           }
         },
@@ -3068,6 +3103,17 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "admin_new_user_notification": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
               }
             },
             "required": [
@@ -3078,7 +3124,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "settings"
             ]
           }
         },
@@ -3166,6 +3213,17 @@
                 },
                 "archived": {
                   "type": "boolean"
+                },
+                "settings": {
+                  "type": "object",
+                  "properties": {
+                    "admin_new_user_notification": {
+                      "type": "boolean"
+                    },
+                    "language": {
+                      "type": "string"
+                    }
+                  }
                 }
               },
               "required": [
@@ -3176,7 +3234,8 @@
                 "firstName",
                 "lastName",
                 "role",
-                "archived"
+                "archived",
+                "settings"
               ]
             }
           },
@@ -3240,6 +3299,17 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "admin_new_user_notification": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
               }
             },
             "required": [
@@ -3250,7 +3320,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "settings"
             ]
           }
         },
@@ -3424,6 +3495,17 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "admin_new_user_notification": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
               }
             },
             "required": [
@@ -3434,7 +3516,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "settings"
             ]
           }
         },
@@ -3590,6 +3673,17 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "admin_new_user_notification": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
               }
             },
             "required": [
@@ -3600,7 +3694,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "settings"
             ]
           }
         },
@@ -8816,6 +8911,17 @@
                       },
                       "archived": {
                         "type": "boolean"
+                      },
+                      "settings": {
+                        "type": "object",
+                        "properties": {
+                          "admin_new_user_notification": {
+                            "type": "boolean"
+                          },
+                          "language": {
+                            "type": "string"
+                          }
+                        }
                       }
                     },
                     "required": [
@@ -8826,7 +8932,8 @@
                       "firstName",
                       "lastName",
                       "role",
-                      "archived"
+                      "archived",
+                      "settings"
                     ]
                   }
                 },
@@ -8926,6 +9033,17 @@
                     },
                     "archived": {
                       "type": "boolean"
+                    },
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "admin_new_user_notification": {
+                          "type": "boolean"
+                        },
+                        "language": {
+                          "type": "string"
+                        }
+                      }
                     }
                   },
                   "required": [
@@ -8936,7 +9054,8 @@
                     "firstName",
                     "lastName",
                     "role",
-                    "archived"
+                    "archived",
+                    "settings"
                   ]
                 }
               },
@@ -9011,6 +9130,17 @@
                       },
                       "archived": {
                         "type": "boolean"
+                      },
+                      "settings": {
+                        "type": "object",
+                        "properties": {
+                          "admin_new_user_notification": {
+                            "type": "boolean"
+                          },
+                          "language": {
+                            "type": "string"
+                          }
+                        }
                       }
                     },
                     "required": [
@@ -9021,7 +9151,8 @@
                       "firstName",
                       "lastName",
                       "role",
-                      "archived"
+                      "archived",
+                      "settings"
                     ]
                   }
                 },
