@@ -30,7 +30,13 @@ export class PromptService {
       MESSAGE_ROLE.SUMMARY,
     );
 
-    if (summary) history.unshift({ id: summary.id, role: summary.role, content: summary.content });
+    if (summary)
+      history.unshift({
+        id: summary.id,
+        role: summary.role,
+        content: summary.content,
+      });
+
     if (systemPrompt)
       history.unshift({
         id: systemPrompt.id,
@@ -39,6 +45,7 @@ export class PromptService {
       });
 
     history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, content });
+
     return history;
   }
 
@@ -52,7 +59,7 @@ export class PromptService {
     const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(mentorLesson, groups, data, lang.language);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
 
-    await this.messageService.insertMessage({
+    await this.aiRepository.insertMessage({
       tokenCount,
       threadId: data.threadId,
       role: MESSAGE_ROLE.SYSTEM,

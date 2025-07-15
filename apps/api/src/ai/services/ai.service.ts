@@ -1,4 +1,6 @@
+import { openai } from "@ai-sdk/openai";
 import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import { type Message, streamText } from "ai";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { ChatService } from "src/ai/services/chat.service";
@@ -9,20 +11,23 @@ import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
 import { WELCOME_MESSAGE_PROMPT } from "src/ai/utils/ai.config";
+import { MAX_TOKENS } from "src/ai/utils/ai.constants";
 import {
   MESSAGE_ROLE,
+  type MessageRole,
   OPENAI_MODELS,
   type OpenAIModels,
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { LessonService } from "src/lesson/services/lesson.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import type {
   CreateThreadBody,
-  CreateThreadMessageBody,
   ResponseAiJudgeJudgementBody,
+  StreamChatBody,
   ThreadOwnershipBody,
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
@@ -39,11 +44,12 @@ export class AiService {
     private readonly summaryService: SummaryService,
     private readonly judgeService: JudgeService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
+    private readonly lessonService: LessonService,
     @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
-  async createThreadWithSetup(data: CreateThreadBody, role: UserRole) {
-    const threadData = await this.threadService.createThreadIfNoneExist(data, role);
+  async createThreadWithSetup(data: CreateThreadBody) {
+    const threadData = await this.threadService.createThreadIfNoneExist(data);
 
     if (!threadData.newThread) {
       return { data: threadData.thread };
@@ -59,51 +65,52 @@ export class AiService {
     return { data: threadData.thread };
   }
 
-  async generateMessage(data: CreateThreadMessageBody, model: OpenAIModels, userId: UUIDType) {
+  async streamMessage(data: StreamChatBody, model: OpenAIModels, userId: UUIDType) {
     await this.isThreadActive(data.threadId, userId);
-
     await this.summaryService.summarizeIfNeeded(data.threadId);
 
     const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
-    const mentorResponse = await this.chatService.chatWithMentor(prompt, model, this);
 
-    const mentorResponseContent = await this.messageService.parseMentorResponse(mentorResponse);
+    const result = streamText({
+      model: openai(model),
+      messages: prompt.map((m) => ({
+        content: m.content,
+        role: this.mapRole(m.role),
+      })) as Omit<Message, "id">[],
+      maxTokens: MAX_TOKENS,
+      onFinish: async (event) => {
+        const mentorTokenCount = this.tokenService.countTokens(model, event.text);
+        const userTokenCount = this.tokenService.countTokens(model, data.content);
 
-    const mentorTokenCount = this.tokenService.countTokens(model, mentorResponseContent);
-    const tokenCount = this.tokenService.countTokens(model, data.content);
-
-    const mentorMessage = {
-      content: mentorResponseContent,
-      role: MESSAGE_ROLE.MENTOR,
-      tokenCount: mentorTokenCount,
-      threadId: data.threadId,
-      isJudge: mentorResponse.isJudge,
-    };
-
-    await this.messageService.createMessages(
-      {
-        ...data,
-        tokenCount,
-        role: MESSAGE_ROLE.USER,
+        await this.messageService.createMessages(
+          {
+            ...data,
+            role: MESSAGE_ROLE.USER,
+            tokenCount: userTokenCount,
+          },
+          {
+            content: event.text,
+            role: MESSAGE_ROLE.MENTOR,
+            threadId: data.threadId,
+            tokenCount: mentorTokenCount,
+          },
+        );
       },
-      mentorMessage,
-    );
+    });
 
-    return {
-      message: {
-        content: mentorMessage.content,
-        role: mentorMessage.role,
-      },
-    };
+    return result;
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
     const welcomeMessagePrompt = WELCOME_MESSAGE_PROMPT(systemPrompt);
+
     const content = await this.chatService.generatePrompt(
       welcomeMessagePrompt,
       OPENAI_MODELS.BASIC,
     );
+
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, content);
+
     await this.aiRepository.insertMessage({
       threadId,
       content,
@@ -124,6 +131,7 @@ export class AiService {
         judged.data,
         true,
       );
+
       const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
 
       await this.aiRepository.insertMessage({
@@ -132,12 +140,14 @@ export class AiService {
         role: MESSAGE_ROLE.MENTOR,
         tokenCount,
       });
+
       return judged;
     });
   }
 
   async isThreadActive(threadId: UUIDType, userId?: UUIDType) {
     const thread = await this.aiRepository.findThread(threadId);
+
     if (userId && thread.userId !== userId)
       throw new ForbiddenException("You don't have access to this thread");
 
@@ -168,5 +178,16 @@ export class AiService {
       undefined,
       aiMentorLessonData,
     );
+  }
+
+  async retakeLesson(lessonId: UUIDType, userId: UUIDType) {
+    await this.lessonService.getLessonById(lessonId, userId, true);
+
+    await this.aiRepository.setThreadsToArchived(lessonId, userId);
+    await this.aiRepository.resetStudentProgressForLesson(lessonId, userId);
+  }
+
+  private mapRole(role: MessageRole) {
+    return role === MESSAGE_ROLE.SUMMARY ? MESSAGE_ROLE.SYSTEM : role;
   }
 }

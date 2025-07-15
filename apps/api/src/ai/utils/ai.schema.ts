@@ -55,16 +55,6 @@ export const responseThreadMessageSchema = Type.Intersect([
   }),
 ]);
 
-export const responseChatSchema = Type.Object({
-  message: Type.Object({
-    content: Type.String(),
-    role: Type.Enum(MESSAGE_ROLE),
-  }),
-  threadId: Type.Optional(UUIDSchema),
-  tokenCount: Type.Optional(Type.Integer()),
-  isJudge: Type.Optional(Type.Boolean()),
-});
-
 export const aiMentorGroupsSchema = Type.Array(
   Type.Object({
     name: Type.String(),
@@ -105,18 +95,6 @@ export const responseJudgeSchema = Type.Intersect([
   }),
 ]);
 
-export const chatMessagesSchema = Type.Array(
-  Type.Object({
-    role: Type.Enum(MESSAGE_ROLE),
-    content: Type.String(),
-  }),
-);
-
-export const responseChatWithMentorSchema = Type.Object({
-  content: Type.String(),
-  isJudge: Type.Optional(Type.Boolean()),
-});
-
 export const streamChatSchema = Type.Object({
   threadId: UUIDSchema,
   content: Type.String({ minLength: 1 }),
@@ -124,9 +102,6 @@ export const streamChatSchema = Type.Object({
 });
 
 export type StreamChatBody = Static<typeof streamChatSchema>;
-export type ResponseChatBody = Static<typeof responseChatSchema>;
-export type ResponseChatWithMentorBody = Static<typeof responseChatWithMentorSchema>;
-export type ChatMessagesBody = Static<typeof chatMessagesSchema>;
 export type ResponseJudgeBody = Static<typeof responseJudgeSchema>;
 export type UpdateThreadBody = Static<typeof updateThreadSchema>;
 export type ThreadOwnershipBody = Static<typeof threadOwnershipSchema>;
@@ -135,9 +110,7 @@ export type AiJudgeJudgementBody = Static<typeof aiJudgeJudgementSchema>;
 export type ResponseThreadMessageBody = Static<typeof responseThreadMessageSchema>;
 export type AiMentorGroupsBody = Static<typeof aiMentorGroupsSchema>;
 export type AiMentorLessonBody = Static<typeof aiMentorLessonSchema>;
-export type RequestThreadBody = Static<typeof requestThreadSchema>;
 export type ResponseThreadBody = Static<typeof responseThreadSchema>;
 export type CreateThreadBody = Static<typeof createThreadSchema>;
 export type ThreadBody = Static<typeof threadSchema>;
-export type CreateThreadMessageBody = Static<typeof createThreadMessageSchema>;
 export type ThreadMessageBody = Static<typeof threadMessageSchema>;

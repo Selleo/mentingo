@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 
-import type { ResponseChatWithMentorBody, ThreadMessageBody } from "src/ai/utils/ai.schema";
+import type { ThreadMessageBody } from "src/ai/utils/ai.schema";
 import type { MessageRole } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 
@@ -19,13 +19,5 @@ export class MessageService {
     const history = await this.aiRepository.findMessageHistory(threadId, archived, role);
     const language = await this.aiRepository.findThreadLanguage(threadId);
     return { history, language };
-  }
-
-  async insertMessage(messageData: ThreadMessageBody) {
-    return this.aiRepository.insertMessage(messageData);
-  }
-
-  async parseMentorResponse(data: ResponseChatWithMentorBody): Promise<string> {
-    return data.isJudge ? JSON.parse(data.content)["summary"] : data.content;
   }
 }

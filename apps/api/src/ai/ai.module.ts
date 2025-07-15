@@ -7,7 +7,6 @@ import { ChatService } from "src/ai/services/chat.service";
 import { JudgeService } from "src/ai/services/judge.service";
 import { MessageService } from "src/ai/services/message.service";
 import { PromptService } from "src/ai/services/prompt.service";
-import { StreamingService } from "src/ai/services/streaming.service";
 import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
@@ -27,7 +26,6 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     PromptService,
     JudgeService,
     SummaryService,
-    StreamingService,
   ],
 })
 export class AiModule {}

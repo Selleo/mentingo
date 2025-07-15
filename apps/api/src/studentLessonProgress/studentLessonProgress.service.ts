@@ -86,7 +86,6 @@ export class StudentLessonProgressService {
           studentId,
           lessonId: lesson.id,
           chapterId: lesson.chapterId,
-          completedAt: sql`now()`,
           completedQuestionCount,
         })
         .returning();
@@ -96,7 +95,8 @@ export class StudentLessonProgressService {
 
     const updateConditions =
       (!lessonProgress?.completedAt && lesson.type !== LESSON_TYPES.AI_MENTOR) ||
-      (LESSON_TYPES.AI_MENTOR && aiMentorLessonData?.passed);
+      (LESSON_TYPES.AI_MENTOR && !!aiMentorLessonData?.passed);
+
     if (updateConditions) {
       await dbInstance
         .update(studentLessonProgress)

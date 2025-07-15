@@ -1651,26 +1651,13 @@ export interface GetThreadMessagesResponse {
   })[];
 }
 
-export interface ChatBody {
-  id?: string;
+export interface StreamChatBody {
   /** @format uuid */
   threadId: string;
+  /** @minLength 1 */
   content: string;
-}
-
-export interface ChatResponse {
-  data: {
-    choices: {
-      message: {
-        content: string;
-        role: "system" | "user" | "assistant" | "tool" | "summary";
-      };
-    }[];
-    /** @format uuid */
-    threadId?: string;
-    tokenCount?: number;
-    isJudge?: boolean;
-  };
+  /** @format uuid */
+  id?: string;
 }
 
 export interface JudgeThreadResponse {
@@ -3504,16 +3491,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name AiControllerChat
+     * @name AiControllerStreamChat
      * @request POST:/api/ai/chat
      */
-    aiControllerChat: (data: ChatBody, params: RequestParams = {}) =>
-      this.request<ChatResponse, any>({
+    aiControllerStreamChat: (data: StreamChatBody, params: RequestParams = {}) =>
+      this.request<void, any>({
         path: `/api/ai/chat`,
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
         ...params,
       }),
 
@@ -3528,6 +3514,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/ai/judge/${threadId}`,
         method: "POST",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerRetakeLesson
+     * @request POST:/api/ai/retake/{lessonId}
+     */
+    aiControllerRetakeLesson: (lessonId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ai/retake/${lessonId}`,
+        method: "POST",
         ...params,
       }),
   };

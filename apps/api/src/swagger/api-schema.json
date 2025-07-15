@@ -578,6 +578,33 @@
         }
       }
     },
+    "/api/user/profile": {
+      "patch": {
+        "operationId": "UserController_updateUserProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserProfileBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/admin": {
       "patch": {
         "operationId": "UserController_adminUpdateUser",
@@ -2897,27 +2924,21 @@
     },
     "/api/ai/chat": {
       "post": {
-        "operationId": "AiController_chat",
+        "operationId": "AiController_streamChat",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChatBody"
+                "$ref": "#/components/schemas/StreamChatBody"
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChatResponse"
-                }
-              }
-            }
+          "201": {
+            "description": ""
           }
         }
       }
@@ -2945,6 +2966,27 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/ai/retake/{lessonId}": {
+      "post": {
+        "operationId": "AiController_retakeLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
           }
         }
       }
@@ -3548,6 +3590,49 @@
             },
             "required": [
               "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUserProfileBody": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "format": "email",
+            "type": "string"
+          },
+          "contactPhone": {
+            "type": "string"
+          },
+          "jobTitle": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateUserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
               "message"
             ]
           }
@@ -4547,7 +4632,7 @@
                                 "type": "string"
                               },
                               {
-                                "const": "ai",
+                                "const": "ai_mentor",
                                 "type": "string"
                               }
                             ]
@@ -4773,7 +4858,7 @@
                                 "type": "string"
                               },
                               {
-                                "const": "ai",
+                                "const": "ai_mentor",
                                 "type": "string"
                               }
                             ]
@@ -5761,7 +5846,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "ai",
+                          "const": "ai_mentor",
                           "type": "string"
                         }
                       ]
@@ -5903,7 +5988,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "ai",
+                          "const": "ai_mentor",
                           "type": "string"
                         }
                       ]
@@ -6262,7 +6347,7 @@
                           "type": "string"
                         },
                         {
-                          "const": "ai",
+                          "const": "ai_mentor",
                           "type": "string"
                         }
                       ]
@@ -6686,7 +6771,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "ai",
+                    "const": "ai_mentor",
                     "type": "string"
                   }
                 ]
@@ -7018,7 +7103,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "ai",
+                    "const": "ai_mentor",
                     "type": "string"
                   }
                 ]
@@ -8336,7 +8421,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "ai",
+                    "const": "ai_mentor",
                     "type": "string"
                   }
                 ]
@@ -9459,7 +9544,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "abandoned",
+                    "const": "archived",
                     "type": "string"
                   }
                 ]
@@ -9527,7 +9612,7 @@
                     "type": "string"
                   },
                   {
-                    "const": "abandoned",
+                    "const": "archived",
                     "type": "string"
                   }
                 ]
@@ -9597,7 +9682,7 @@
                       "type": "string"
                     },
                     {
-                      "const": "abandoned",
+                      "const": "archived",
                       "type": "string"
                     }
                   ]
@@ -9625,49 +9710,67 @@
           "data": {
             "type": "array",
             "items": {
-              "type": "object",
               "allOf": [
                 {
                   "type": "object",
-                  "properties": {
-                    "content": {
-                      "type": "string"
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "content"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "anyOf": [
+                            {
+                              "const": "system",
+                              "type": "string"
+                            },
+                            {
+                              "const": "user",
+                              "type": "string"
+                            },
+                            {
+                              "const": "assistant",
+                              "type": "string"
+                            },
+                            {
+                              "const": "tool",
+                              "type": "string"
+                            },
+                            {
+                              "const": "summary",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "isJudge": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "role"
+                      ]
                     }
-                  },
-                  "required": [
-                    "content"
                   ]
                 },
                 {
                   "type": "object",
                   "properties": {
-                    "role": {
-                      "anyOf": [
-                        {
-                          "const": "system",
-                          "type": "string"
-                        },
-                        {
-                          "const": "user",
-                          "type": "string"
-                        },
-                        {
-                          "const": "assistant",
-                          "type": "string"
-                        },
-                        {
-                          "const": "tool",
-                          "type": "string"
-                        },
-                        {
-                          "const": "summary",
-                          "type": "string"
-                        }
-                      ]
+                    "id": {
+                      "type": "string"
                     }
                   },
                   "required": [
-                    "role"
+                    "id"
                   ]
                 }
               ]
@@ -9678,7 +9781,7 @@
           "data"
         ]
       },
-      "ChatBody": {
+      "StreamChatBody": {
         "type": "object",
         "properties": {
           "threadId": {
@@ -9686,77 +9789,17 @@
             "type": "string"
           },
           "content": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
             "type": "string"
           }
         },
         "required": [
           "threadId",
           "content"
-        ]
-      },
-      "ChatResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "threadId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "content": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "threadId",
-                  "content"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "role": {
-                    "anyOf": [
-                      {
-                        "const": "system",
-                        "type": "string"
-                      },
-                      {
-                        "const": "user",
-                        "type": "string"
-                      },
-                      {
-                        "const": "assistant",
-                        "type": "string"
-                      },
-                      {
-                        "const": "tool",
-                        "type": "string"
-                      },
-                      {
-                        "const": "summary",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "tokenCount": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "role",
-                  "tokenCount"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
         ]
       },
       "JudgeThreadResponse": {
@@ -9821,7 +9864,7 @@
                         "type": "string"
                       },
                       {
-                        "const": "abandoned",
+                        "const": "archived",
                         "type": "string"
                       }
                     ]

@@ -12,6 +12,7 @@ export class TokenService {
   countTokens(model: OpenAIModels, text: string): number {
     try {
       const tokens = this.getEncoder(model).encode(text);
+
       return tokens.length;
     } catch (error) {
       return Math.ceil(text.length / 4);

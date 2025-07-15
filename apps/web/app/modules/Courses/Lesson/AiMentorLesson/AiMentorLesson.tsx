@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useJudgeLesson } from "~/api/mutations/useJudgeLesson";
+import { useRetakeLesson } from "~/api/mutations/useRetakeLesson";
 import { useCurrentThread } from "~/api/queries/useCurrentThread";
 import { useCurrentThreadMessages } from "~/api/queries/useCurrentThreadMessages";
 import { queryClient } from "~/api/queryClient";
@@ -23,12 +24,14 @@ const AiMentorLesson = ({ lesson }: AiMentorLessonProps) => {
 
   const { language } = useLanguageStore();
 
-  const { mutate: judgeLesson, isPending } = useJudgeLesson();
+  const { mutateAsync: judgeLesson, isPending } = useJudgeLesson();
+  const { mutateAsync: retakeLesson } = useRetakeLesson();
+
   const { data: currentThread } = useCurrentThread(lesson.id, language);
   const { data: currentThreadMessages } = useCurrentThreadMessages(currentThread?.data.id ?? "");
 
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
-    api: "/api/ai/chat/stream",
+    api: "/api/ai/chat",
     initialMessages:
       currentThreadMessages?.data?.map((msg, index) => ({
         id: msg.id || `temp-${index}`,
@@ -49,10 +52,31 @@ const AiMentorLesson = ({ lesson }: AiMentorLessonProps) => {
       });
     },
   });
+
   const isThreadActive = currentThread?.data.status === "active";
-  const handleJudge = () => {
-    judgeLesson(
+
+  const handleJudge = async () => {
+    await judgeLesson(
       { threadId: currentThread?.data.id ?? "" },
+      {
+        onSuccess: () => {
+          queryClient
+            .invalidateQueries({
+              queryKey: ["threadMessages", { threadId: currentThread?.data.id }],
+            })
+            .then(() =>
+              queryClient.invalidateQueries({ queryKey: ["thread", { lessonId: lesson.id }] }),
+            );
+        },
+      },
+    );
+  };
+
+  const handleRetakeLesson = async () => {
+    await retakeLesson(
+      {
+        lessonId: lesson.id,
+      },
       {
         onSuccess: () => {
           queryClient
@@ -154,7 +178,7 @@ const AiMentorLesson = ({ lesson }: AiMentorLessonProps) => {
             size="lg"
             className="gap-2"
             style={{ maxWidth: 220 }}
-            onClick={handleJudge}
+            onClick={handleRetakeLesson}
           >
             Retake
             <Icon name="ArrowRight" className="size-5" />

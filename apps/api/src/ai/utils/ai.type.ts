@@ -17,7 +17,7 @@ export const MESSAGE_ROLE = {
   USER: "user",
   MENTOR: "assistant",
   TOOL: "tool",
-  SUMMARY: "summary", // summary is not a role supported by OpenAI, but it's mapped to system later on
+  SUMMARY: "summary",
 } as const;
 
 export type MessageRole = (typeof MESSAGE_ROLE)[keyof typeof MESSAGE_ROLE];

@@ -2,7 +2,12 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, asc, eq, getTableColumns, inArray, not, sql } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
-import { MESSAGE_ROLE, type MessageRole, type ThreadStatus } from "src/ai/utils/ai.type";
+import {
+  MESSAGE_ROLE,
+  type MessageRole,
+  THREAD_STATUS,
+  type ThreadStatus,
+} from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import {
   aiMentorLessons,
@@ -11,6 +16,7 @@ import {
   groups,
   groupUsers,
   lessons,
+  studentLessonProgress,
 } from "src/storage/schema";
 
 import type {
@@ -242,5 +248,32 @@ export class AiRepository {
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       });
     return thread;
+  }
+
+  async setThreadsToArchived(lessonId: UUIDType, userId: UUIDType) {
+    await this.db
+      .update(aiMentorThreads)
+      .set({ status: THREAD_STATUS.ARCHIVED })
+      .where(
+        inArray(
+          aiMentorThreads.aiMentorLessonId,
+          this.db
+            .select({ id: aiMentorLessons.id })
+            .from(aiMentorLessons)
+            .innerJoin(lessons, eq(aiMentorLessons.lessonId, lessons.id))
+            .where(and(eq(aiMentorLessons.lessonId, lessonId), eq(aiMentorThreads.userId, userId))),
+        ),
+      );
+  }
+
+  async resetStudentProgressForLesson(lessonId: UUIDType, userId: UUIDType) {
+    await this.db
+      .delete(studentLessonProgress)
+      .where(
+        and(
+          eq(studentLessonProgress.lessonId, lessonId),
+          eq(studentLessonProgress.studentId, userId),
+        ),
+      );
   }
 }
