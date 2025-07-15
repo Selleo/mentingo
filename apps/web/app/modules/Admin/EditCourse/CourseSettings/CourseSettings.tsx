@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
+import { queryClient } from "~/api/queryClient";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextareaField } from "~/components/Form/FormTextareaFiled";
 import { FormTextField } from "~/components/Form/FormTextField";
@@ -104,13 +105,11 @@ const CourseSettings = ({
     setIsCertificateEnabled(newValue);
 
     if (courseId) {
-      console.log(`Updating course ${courseId} certificate to: ${newValue}`);
-
       updateHasCertificate.mutate(
         { courseId, data: { hasCertificate: newValue } },
         {
           onSuccess: () => {
-            console.log(`Successfully updated certificate to ${newValue}`);
+            queryClient.refetchQueries({ queryKey: ["courses", courseId] });
           },
           onError: (error) => {
             console.error(`Error updating certificate:`, error);
@@ -134,7 +133,9 @@ const CourseSettings = ({
                 disabled={updateHasCertificate.isPending}
                 aria-label="Enable certificate"
               >
-                {isCertificateEnabled ? "Zawiera certyfikat" : "Nie zawiera certyfikatu"}
+                {isCertificateEnabled
+                  ? t("adminCourseView.settings.button.includesCertificate")
+                  : t("adminCourseView.settings.button.doesNotIncludeCertificate")}
                 {updateHasCertificate.isPending && " (Zapisywanie...)"}
               </Toggle>
             </div>

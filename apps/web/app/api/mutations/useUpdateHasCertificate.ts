@@ -27,7 +27,7 @@ export function useUpdateHasCertificate() {
       queryClient.invalidateQueries({ queryKey: ["available-courses"] });
       toast({
         variant: "default",
-        description: t("editCourseView.toast.updateHasCertificateSuccessfully"),
+        description: t("adminCourseView.toast.certificateUpdatedSuccessfully"),
       });
     },
     onError: (error) => {

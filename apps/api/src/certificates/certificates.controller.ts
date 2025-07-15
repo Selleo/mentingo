@@ -39,4 +39,20 @@ export class CertificatesController {
     });
     return new PaginatedResponse(data);
   }
+
+  @Get("certificate")
+  @Validate({
+    request: [
+      { type: "query", name: "userId", schema: UUIDSchema },
+      { type: "query", name: "courseId", schema: UUIDSchema },
+    ],
+    response: allCertificatesSchema,
+  })
+  async getCertificate(
+    @Query("userId") userId: string,
+    @Query("courseId") courseId: string,
+  ): Promise<AllCertificatesResponse> {
+    const certificate = await this.certificatesService.getCertificate(userId, courseId);
+    return [certificate];
+  }
 }

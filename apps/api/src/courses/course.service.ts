@@ -431,6 +431,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
+        hasCertificate: courses.hasCertificate,
         hasFreeChapter: sql<boolean>`
           EXISTS (
             SELECT 1

@@ -106,6 +106,7 @@
     "close": "Close",
     "profile": "Profile",
     "dashboard": "Dashboard",
+    "organizationSettings": "Organization settings",
     "courses": "Courses",
     "myCourses": "My courses",
     "categories": "Categories",
@@ -476,7 +477,8 @@
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
-      "courseUpdatedSuccessfully": "Course updated successfully"
+      "courseUpdatedSuccessfully": "Course updated successfully",
+      "certificateUpdatedSuccessfully": "Certificate updated successfully"
     },
     "settings": {
       "breadcrumbs": {
@@ -485,7 +487,9 @@
         "createNew": "Create new"
       },
       "button": {
-        "removeThumbnail": "Remove Thumbnail"
+        "removeThumbnail": "Remove Thumbnail",
+        "includesCertificate": "Includes certificate",
+        "doesNotIncludeCertificate": "Does not include certificate"
       },
       "selectButton": {
         "uploadFile": "Upload file",
@@ -910,6 +914,26 @@
     "chapterProgress": {
       "header": "Table of content:",
       "courseProgress": "Course progress"
+    }
+  },
+  "studentCertificateView": {
+    "header": "Certificates",
+    "informations": {
+      "loading": "Loading certificates...",
+      "noCertificates": "No certificates available yet. Complete courses to earn certificates.",
+      "failedToLoad": "Failed to load certificates. Please try again later."
+    },
+    "button": {
+      "download": "Download",
+      "preview": "Preview"
+    }
+  },
+  "organizationSettingsView": {
+    "header": "Organization Settings",
+    "subHeader": "Upload certificate background image (PNG or SVG)",
+    "other": {
+      "fileExtension": "PNG or SVG files only",
+      "selected": "Selected: "
     }
   }
 }

@@ -1,12 +1,12 @@
 import { Eye, Download } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { CertificateTrophy } from "~/assets/svgs";
 
 import useCertificatePDF from "./useCertificatePDF";
 
-import type { CertificateType } from "~/api/queries/useCertificates";
-
+import type { CertificateType } from "~/types/certificate";
 interface CertificateProps {
   courseName: string;
   courseCompletionDate: string;
@@ -25,17 +25,20 @@ interface OptionsProps {
 }
 
 const Options = ({ handlePreviewClick, handleDownloadClick }: OptionsProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="absolute right-5 top-5 z-10 w-60 rounded-md border bg-white shadow-xl">
       <ul className="py-1">
         <button onClick={handlePreviewClick} className="w-full">
           <li className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-100">
-            <Eye className="size-6 text-blue-800" /> Preview
+            <Eye className="size-6 text-blue-800" /> {t("studentCertificateView.button.preview")}
           </li>
         </button>
         <button onClick={handleDownloadClick} className="w-full">
           <li className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-100">
-            <Download className="size-6 text-blue-800" /> Download
+            <Download className="size-6 text-blue-800" />{" "}
+            {t("studentCertificateView.button.download")}
           </li>
         </button>
       </ul>
@@ -106,8 +109,8 @@ const Certificate = ({
               ⋯
             </button>
           </div>
-          <div className="border-black/60 flex max-h-24 items-center gap-2 rounded-2xl border-2 p-3">
-            <CertificateTrophy className="min-h-12 min-w-12" />
+          <div className="border-black/60 flex min-h-24 items-center gap-2 rounded-2xl border-2 p-3">
+            <CertificateTrophy className="min-h-10 min-w-10" />
             <div className="flex flex-col pl-2">
               <h3 className="body-sm-md font-semibold">{displayCourseName}</h3>
               <h4 className="details">{courseCompletionDate}</h4>

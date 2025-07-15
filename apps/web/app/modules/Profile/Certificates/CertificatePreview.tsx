@@ -3,19 +3,19 @@ import { X, Download } from "lucide-react";
 import CertificateContent from "./CertificateContent";
 import useCertificatePDF from "./useCertificatePDF";
 
-interface CertificateToPDFProps {
+interface CertificatePreviewProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
   onClose?: () => void;
 }
 
-const CertificateToPDF = ({
+const CertificatePreview = ({
   studentName,
   courseName,
   completionDate,
   onClose,
-}: CertificateToPDFProps) => {
+}: CertificatePreviewProps) => {
   const { downloadCertificatePdf, HiddenCertificate } = useCertificatePDF();
 
   const handleDownload = () => {
@@ -58,10 +58,11 @@ const CertificateToPDF = ({
           studentName={studentName}
           courseName={courseName}
           completionDate={completionDate}
+          hasBottomMargin={true}
         />
       </div>
     </>
   );
 };
 
-export default CertificateToPDF;
+export default CertificatePreview;

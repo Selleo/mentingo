@@ -106,6 +106,7 @@
     "close": "Zamknij",
     "profile": "Profil",
     "dashboard": "Pulpit",
+    "organizationSettings": "Ustawienia organizacji",
     "courses": "Kursy",
     "myCourses": "Moje kursy",
     "categories": "Kategorie",
@@ -476,7 +477,8 @@
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
-      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie"
+      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
+      "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie"
     },
     "settings": {
       "breadcrumbs": {
@@ -485,7 +487,9 @@
         "createNew": "Utwórz nowy"
       },
       "button": {
-        "removeThumbnail": "Usuń miniaturę"
+        "removeThumbnail": "Usuń miniaturę",
+        "includesCertificate": "Zawiera certyfikat",
+        "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
       },
       "selectButton": {
         "uploadFile": "Plik",
@@ -910,6 +914,26 @@
     "chapterProgress": {
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
+    }
+  },
+  "studentCertificateView": {
+    "header": "Certyfikaty",
+    "informations": {
+      "loading": "Ładowanie certyfikatów...",
+      "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
+      "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później."
+    },
+    "button": {
+      "download": "Pobierz",
+      "preview": "Podgląd"
+    }
+  },
+  "organizationSettingsView": {
+    "header": "Ustawienia organizacji",
+    "subHeader": "Prześlij tło certyfikatu (PNG lub SVG)",
+    "other": {
+      "fileExtension": "Tylko pliki PNG lub SVG",
+      "selected": "Wybrano:"
     }
   }
 }

@@ -11,7 +11,7 @@ import { isAdminLike } from "~/utils/userRoles";
 import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 
-import CertificateToPDF from "./Certificates/CertificatePreview";
+import CertificatePreview from "./Certificates/CertificatePreview";
 import Certificates from "./Certificates/Certificates";
 import { ProfileCard } from "./components";
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
@@ -74,7 +74,7 @@ export default function ProfilePage() {
           }}
         >
           <div>
-            <CertificateToPDF
+            <CertificatePreview
               studentName={certificatePreview.certData?.fullName || ""}
               courseName={certificatePreview.certData?.courseTitle || ""}
               completionDate={certificatePreview.completionDate}

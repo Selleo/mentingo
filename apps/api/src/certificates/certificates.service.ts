@@ -104,7 +104,6 @@ export class CertificatesService {
       if (!existingCourse) throw new NotFoundException("Course not found");
       if (!existingCourse.certificateEnabled)
         throw new BadRequestException("Certificates are disabled for this course");
-      console.log("Course completion:", courseCompletion.completedAt);
       if (!courseCompletion?.completedAt)
         throw new BadRequestException("Course must be completed to generate certificate");
 
@@ -133,6 +132,42 @@ export class CertificatesService {
       };
     } catch (error) {
       console.error("Error creating certificate:", error);
+      throw error;
+    }
+  }
+
+  async getCertificate(userId: string, courseId: string) {
+    try {
+      const [certificate] = await this.db
+        .select({
+          id: certificates.id,
+          courseId: certificates.courseId,
+          courseTitle: courses.title,
+          completionDate: studentCourses.completedAt,
+          fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+          userId: certificates.userId,
+          createdAt: certificates.createdAt,
+          updatedAt: certificates.updatedAt,
+        })
+        .from(certificates)
+        .innerJoin(courses, eq(courses.id, certificates.courseId))
+        .innerJoin(users, eq(users.id, certificates.userId))
+        .leftJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.studentId, certificates.userId),
+            eq(studentCourses.courseId, certificates.courseId),
+          ),
+        )
+        .where(and(eq(certificates.userId, userId), eq(certificates.courseId, courseId)));
+
+      if (!certificate) {
+        throw new NotFoundException("Certificate not found");
+      }
+
+      return certificate;
+    } catch (error) {
+      console.error("Error fetching certificate:", error);
       throw error;
     }
   }

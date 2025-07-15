@@ -31,6 +31,10 @@ export const routes: (
       route("beta-courses/new", "modules/Admin/AddCourse/AddCourse.tsx");
       route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
       route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
+      route(
+        "organization-settings",
+        "modules/Admin/OrganizationSettings/OrganizationSettings.page.tsx",
+      );
       route("users", "modules/Admin/Users/Users.page.tsx");
       route("users/:id", "modules/Admin/Users/User.page.tsx");
       route("users/new", "modules/Admin/Users/CreateNewUser.page.tsx");

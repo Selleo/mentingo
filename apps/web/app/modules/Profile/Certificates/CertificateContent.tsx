@@ -9,15 +9,21 @@ interface CertificateContentProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
+  hasBottomMargin?: boolean;
 }
 
 const CertificateContent = ({
   studentName,
   courseName,
   completionDate,
+  hasBottomMargin,
 }: CertificateContentProps) => {
   return (
-    <div className="mb-24 flex max-h-[76vh] min-w-[110vb] flex-col items-center gap-4 overflow-hidden bg-white px-32 py-12">
+    <div
+      className={`${
+        hasBottomMargin ? "mb-24" : ""
+      } flex max-h-[76vh] min-w-[110vb] flex-col items-center gap-4 overflow-hidden bg-white px-32 py-12`}
+    >
       <div className="flex flex-col items-center gap-2">
         <AppLogo className="h-24" />
         <h1 className="text-center text-6xl font-bold">CERTIFICATE</h1>

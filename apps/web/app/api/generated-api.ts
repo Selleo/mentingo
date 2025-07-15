@@ -495,6 +495,7 @@ export interface GetCourseResponse {
     description: string;
     enrolled?: boolean;
     hasFreeChapter?: boolean;
+    hasCertificate?: boolean;
     /** @format uuid */
     id: string;
     isPublished: boolean | null;
@@ -1267,7 +1268,6 @@ export interface GetAllCertificatesResponse {
     courseTitle?: string | null;
     completionDate?: string | null;
     fullName?: string | null;
-    /** @format date-time */
     createdAt: string;
     updatedAt?: string | null;
   }[];
@@ -1278,6 +1278,20 @@ export interface GetAllCertificatesResponse {
   };
   appliedFilters?: object;
 }
+
+export type GetCertificateResponse = {
+  /** @format uuid */
+  id: string;
+  /** @format uuid */
+  userId: string;
+  /** @format uuid */
+  courseId: string;
+  courseTitle?: string | null;
+  completionDate?: string | null;
+  fullName?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+}[];
 
 export interface GetAllGroupsResponse {
   data: {
@@ -2888,6 +2902,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetAllCertificatesResponse, any>({
         path: `/api/certificates/all`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificate
+     * @request GET:/api/certificates/certificate
+     */
+    certificatesControllerGetCertificate: (
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @format uuid */
+        courseId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCertificateResponse, any>({
+        path: `/api/certificates/certificate`,
         method: "GET",
         query: query,
         format: "json",
