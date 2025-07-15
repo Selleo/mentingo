@@ -115,7 +115,7 @@ const AiMentorLessonForm = ({
                     </Label>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Icon name="Info" className="h-4 w-4 cursor-help text-neutral-500" />
+                        <Icon name="Info" className="size-4 cursor-help text-neutral-500" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="max-w-xs text-sm">
@@ -156,7 +156,7 @@ const AiMentorLessonForm = ({
                     </Label>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Icon name="Info" className="h-4 w-4 cursor-help text-neutral-500" />
+                        <Icon name="Info" className="size-4 cursor-help text-neutral-500" />
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="max-w-xs text-sm">
@@ -178,7 +178,7 @@ const AiMentorLessonForm = ({
                             "adminCourseView.curriculum.lesson.placeholder.completionConditions",
                           )}
                           className="h-48 grow resize-none overflow-y-auto"
-                          parentClassName={"lg:rounded-l-none lg:border-l-0"}
+                          parentClassName="lg:rounded-l-none lg:border-l-0"
                           {...field}
                         />
                       </FormControl>
