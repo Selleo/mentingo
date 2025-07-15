@@ -116,7 +116,7 @@ export class UserService {
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(eq(users.id, id));
 
-    if (!user) {
+    if (!result) {
       throw new NotFoundException("User not found");
     }
 

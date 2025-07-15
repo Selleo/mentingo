@@ -29,7 +29,7 @@ import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import { createTokens, credentials, resetTokens, users } from "../storage/schema";
+import { createTokens, credentials, resetTokens, settings, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
@@ -140,7 +140,7 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
-    return user;
+    return { ...user, settings: user.settings || {} };
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -177,6 +177,7 @@ export class AuthService {
         avatarReference: users.avatarReference,
       })
       .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
       .leftJoin(credentials, eq(users.id, credentials.userId))
       .where(eq(users.email, email));
 
@@ -188,7 +189,7 @@ export class AuthService {
 
     const { password: _, ...user } = userWithCredentials;
 
-    return user;
+    return this.ensureUserSettings(user);
   }
 
   private async getTokens(user: CommonUser | UserResponse) {
@@ -259,6 +260,7 @@ export class AuthService {
         avatarReference: users.avatarReference,
       })
       .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
       .where(eq(users.id, createToken.userId));
 
     if (!existingUser) throw new NotFoundException("User not found");
