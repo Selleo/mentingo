@@ -11,7 +11,7 @@ import { createUnitTest, type TestContext } from "test/create-unit-test";
 import { createUserFactory } from "test/factory/user.factory";
 import { truncateAllTables } from "test/helpers/test-helpers";
 
-import { credentials, resetTokens, users } from "../../storage/schema";
+import { credentials, resetTokens, settings, users } from "../../storage/schema";
 
 import type { DatabasePg } from "src/common";
 import type { EmailTestingAdapter } from "test/helpers/test-email.adapter";
@@ -150,6 +150,13 @@ describe("AuthService", () => {
       const password = "password123";
 
       await userFactory.withCredentials({ password }).create({ email });
+
+      await db.insert(settings).values({
+        userId: user.id,
+        settings: { language: "en" },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
 
       const result = await authService.validateUser(email, password);
 

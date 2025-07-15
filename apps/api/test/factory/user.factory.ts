@@ -4,7 +4,7 @@ import { Factory } from "fishery";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import hashPassword from "../../src/common/helpers/hashPassword";
-import { credentials, users } from "../../src/storage/schema";
+import { credentials, users, settings } from "../../src/storage/schema";
 
 import { createSettingsFactory } from "./settings.factory";
 
@@ -72,6 +72,15 @@ export const createUserFactory = (db: DatabasePg) => {
           })
           .returning();
 
+        await db.insert(settings).values({
+          userId: inserted.id,
+          settings: {
+            language: "en",
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
         return {
           ...inserted,
           credentials: {
@@ -80,6 +89,14 @@ export const createUserFactory = (db: DatabasePg) => {
           },
         };
       }
+      await db.insert(settings).values({
+        userId: inserted.id,
+        settings: {
+          language: "en",
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
 
       return inserted;
     });

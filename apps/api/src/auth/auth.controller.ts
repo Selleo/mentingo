@@ -80,7 +80,6 @@ export class AuthController {
     const { accessToken, refreshToken, ...account } = await this.authService.login(data);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
-
     return new BaseResponse(account);
   }
 

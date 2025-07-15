@@ -68,6 +68,7 @@ export class UserService {
         avatarReference: users.avatarReference,
       })
       .from(users)
+      .innerJoin(settings, eq(settings.userId, users.id))
       .where(and(...conditions))
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
 
@@ -98,10 +99,17 @@ export class UserService {
     };
   }
 
-  public async getUserById(id: UUIDType) {
-    const [user] = await this.db.select().from(users).where(eq(users.id, id));
+  public async getUserById(id: UUIDType): Promise<CommonUser> {
+    const [result] = await this.db
+      .select({
+        users,
+        settings: settings.settings,
+      })
+      .from(users)
+      .innerJoin(settings, eq(settings.userId, users.id))
+      .where(eq(users.id, id));
 
-    if (!user) {
+    if (!result) {
       throw new NotFoundException("User not found");
     }
 
