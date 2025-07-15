@@ -156,7 +156,7 @@ importers:
         specifier: link:@types/@faker-js/faker
         version: link:@types/@faker-js/faker
       html-entities:
-        specifier: ^2.6.0
+        specifier: 2.6.0
         version: 2.6.0
       jsdom:
         specifier: 24.1.1
