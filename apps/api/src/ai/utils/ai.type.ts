@@ -7,7 +7,7 @@ export type OpenAIModels = (typeof OPENAI_MODELS)[keyof typeof OPENAI_MODELS];
 export const THREAD_STATUS = {
   ACTIVE: "active",
   COMPLETED: "completed",
-  ABANDONED: "abandoned",
+  ARCHIVED: "archived",
 } as const;
 
 export type ThreadStatus = (typeof THREAD_STATUS)[keyof typeof THREAD_STATUS];

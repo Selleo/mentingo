@@ -17,7 +17,7 @@ export class PromptService {
     private readonly tokenService: TokenService,
   ) {}
 
-  async buildPrompt(threadId: UUIDType, content: string) {
+  async buildPrompt(threadId: UUIDType, content: string, tempMessageId?: string) {
     const { history } = await this.messageService.findMessageHistory(threadId, false);
 
     const systemPrompt = await this.aiRepository.findFirstMessageByRoleAndThread(
@@ -30,10 +30,15 @@ export class PromptService {
       MESSAGE_ROLE.SUMMARY,
     );
 
-    if (summary) history.unshift({ role: summary.role, content: summary.content });
-    if (systemPrompt) history.unshift({ role: systemPrompt.role, content: systemPrompt.content });
+    if (summary) history.unshift({ id: summary.id, role: summary.role, content: summary.content });
+    if (systemPrompt)
+      history.unshift({
+        id: systemPrompt.id,
+        role: systemPrompt.role,
+        content: systemPrompt.content,
+      });
 
-    history.push({ role: MESSAGE_ROLE.USER, content });
+    history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, content });
     return history;
   }
 

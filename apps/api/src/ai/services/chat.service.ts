@@ -50,7 +50,7 @@ export class ChatService {
       const result = await generateText({
         model: openai(model),
         messages: messages.map((m) => ({
-          ...m,
+          content: m.content,
           role: this.mapRole(m.role),
         })) as Omit<Message, "id">[],
         maxTokens: MAX_TOKENS,
@@ -58,6 +58,7 @@ export class ChatService {
           judge: judge(this.aiService),
         },
       });
+
       if (!result.text && result.toolCalls?.length) {
         const toolResults = result.toolResults
           ?.map((tr) => JSON.stringify(tr.result.data))
@@ -100,7 +101,7 @@ export class ChatService {
     return { ...result, percentage, passed };
   }
 
-  private mapRole(role: MessageRole) {
+  mapRole(role: MessageRole) {
     return role === MESSAGE_ROLE.SUMMARY ? MESSAGE_ROLE.SYSTEM : role;
   }
 }

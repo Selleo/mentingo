@@ -995,7 +995,7 @@
       "oneOrTwoWordSentence": "Provide a brief response (1-2 sentences).",
       "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences).",
       "aiMentorLesson": {
-        "sendAMessage": "Write a message...",
+        "sendMessage": "Write a message...",
         "check": "Check",
         "aiMentorName": "AI Mentor",
         "userName": "User",

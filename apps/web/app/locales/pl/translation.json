@@ -996,7 +996,7 @@
       "oneOrTwoWordSentence": "Podaj krótką odpowiedź (1-2 zadań)",
       "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)",
       "aiMentorLesson": {
-        "sendAMessage": "Napisz wiadomość...",
+        "sendMessage": "Napisz wiadomość...",
         "check": "Sprawdź",
         "aiMentorName": "AI Mentor",
         "userName": "Użytkownik",

@@ -10,8 +10,9 @@ import type { UUIDType } from "src/common";
 export class MessageService {
   constructor(private readonly aiRepository: AiRepository) {}
   async createMessages(studentMessage: ThreadMessageBody, mentorMessage: ThreadMessageBody) {
-    await this.aiRepository.createMessage(studentMessage);
-    await this.aiRepository.createMessage(mentorMessage);
+    const studentMessageWithId = await this.aiRepository.createMessage(studentMessage);
+    const mentorMessageWithId = await this.aiRepository.createMessage(mentorMessage);
+    return { studentMessageWithId, mentorMessageWithId };
   }
 
   async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {

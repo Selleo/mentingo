@@ -43,16 +43,20 @@ export class AiService {
   ) {}
 
   async createThreadWithSetup(data: CreateThreadBody, role: UserRole) {
-    const thread = await this.threadService.createThread(data, role);
+    const threadData = await this.threadService.createThreadIfNoneExist(data, role);
+
+    if (!threadData.newThread) {
+      return { data: threadData.thread };
+    }
 
     const systemPrompt = await this.promptService.setSystemPrompt({
-      threadId: thread.id,
-      userId: thread.userId,
+      threadId: threadData.thread.id,
+      userId: threadData.thread.userId,
     });
 
-    await this.sendWelcomeMessage(thread.id, systemPrompt);
+    await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
 
-    return { data: thread };
+    return { data: threadData.thread };
   }
 
   async generateMessage(data: CreateThreadMessageBody, model: OpenAIModels, userId: UUIDType) {
@@ -60,7 +64,7 @@ export class AiService {
 
     await this.summaryService.summarizeIfNeeded(data.threadId);
 
-    const prompt = await this.promptService.buildPrompt(data.threadId, data.content);
+    const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
     const mentorResponse = await this.chatService.chatWithMentor(prompt, model, this);
 
     const mentorResponseContent = await this.messageService.parseMentorResponse(mentorResponse);
@@ -85,7 +89,12 @@ export class AiService {
       mentorMessage,
     );
 
-    return { data: mentorMessage };
+    return {
+      message: {
+        content: mentorMessage.content,
+        role: mentorMessage.role,
+      },
+    };
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
@@ -115,11 +124,19 @@ export class AiService {
         judged.data,
         true,
       );
+      const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
+
+      await this.aiRepository.insertMessage({
+        threadId: data.threadId,
+        content: judged.data.summary,
+        role: MESSAGE_ROLE.MENTOR,
+        tokenCount,
+      });
       return judged;
     });
   }
 
-  private async isThreadActive(threadId: UUIDType, userId?: UUIDType) {
+  async isThreadActive(threadId: UUIDType, userId?: UUIDType) {
     const thread = await this.aiRepository.findThread(threadId);
     if (userId && thread.userId !== userId)
       throw new ForbiddenException("You don't have access to this thread");
@@ -130,7 +147,7 @@ export class AiService {
     return thread;
   }
 
-  private async markAsCompletedIfJudge(
+  async markAsCompletedIfJudge(
     lessonId: UUIDType,
     studentId: UUIDType,
     userRole: UserRole,

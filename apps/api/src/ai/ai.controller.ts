@@ -1,22 +1,26 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { AiService } from "src/ai/services/ai.service";
+import { StreamingService } from "src/ai/services/streaming.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import {
   type CreateThreadBody,
   type CreateThreadMessageBody,
   createThreadMessageSchema,
   requestThreadSchema,
+  type ResponseChatBody,
+  responseChatSchema,
   type ResponseJudgeBody,
   responseJudgeSchema,
   type ResponseThreadBody,
   type ResponseThreadMessageBody,
   responseThreadMessageSchema,
   responseThreadSchema,
-  type ThreadMessageBody,
-  threadMessageSchema,
+  StreamChatBody,
+  streamChatSchema,
 } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
@@ -31,6 +35,7 @@ export class AiController {
   constructor(
     private readonly threadService: ThreadService,
     private readonly aiService: AiService,
+    private readonly streamingService: StreamingService,
   ) {}
 
   @Post("thread")
@@ -92,13 +97,27 @@ export class AiController {
   @Roles(USER_ROLES.STUDENT)
   @Validate({
     request: [{ type: "body", schema: createThreadMessageSchema }],
-    response: baseResponse(threadMessageSchema),
+    response: responseChatSchema,
   })
   async chat(
     @Body() data: CreateThreadMessageBody,
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<ThreadMessageBody>> {
+  ): Promise<ResponseChatBody> {
     return this.aiService.generateMessage(data, OPENAI_MODELS.BASIC, userId);
+  }
+
+  @Post("chat/stream")
+  @Roles(USER_ROLES.STUDENT)
+  @Validate({
+    request: [{ type: "body", schema: streamChatSchema }],
+  })
+  async streamChat(
+    @Body() data: StreamChatBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @Res() res: Response,
+  ) {
+    const response = await this.streamingService.streamMessage(data, OPENAI_MODELS.BASIC, userId);
+    return response.pipeDataStreamToResponse(res);
   }
 
   @Post("judge/:threadId")

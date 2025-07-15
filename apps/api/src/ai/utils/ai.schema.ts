@@ -34,12 +34,13 @@ export const responseThreadSchema = Type.Object({
 });
 
 export const createThreadMessageSchema = Type.Object({
+  id: Type.Optional(Type.String()),
   threadId: UUIDSchema,
   content: Type.String(),
 });
 
 export const threadMessageSchema = Type.Intersect([
-  createThreadMessageSchema,
+  Type.Omit(createThreadMessageSchema, ["id"]),
   Type.Object({
     role: Type.Enum(MESSAGE_ROLE),
     tokenCount: Type.Integer(),
@@ -47,10 +48,22 @@ export const threadMessageSchema = Type.Intersect([
   }),
 ]);
 
-export const responseThreadMessageSchema = Type.Omit(threadMessageSchema, [
-  "tokenCount",
-  "threadId",
+export const responseThreadMessageSchema = Type.Intersect([
+  Type.Omit(threadMessageSchema, ["tokenCount", "threadId"]),
+  Type.Object({
+    id: Type.String(),
+  }),
 ]);
+
+export const responseChatSchema = Type.Object({
+  message: Type.Object({
+    content: Type.String(),
+    role: Type.Enum(MESSAGE_ROLE),
+  }),
+  threadId: Type.Optional(UUIDSchema),
+  tokenCount: Type.Optional(Type.Integer()),
+  isJudge: Type.Optional(Type.Boolean()),
+});
 
 export const aiMentorGroupsSchema = Type.Array(
   Type.Object({
@@ -104,6 +117,14 @@ export const responseChatWithMentorSchema = Type.Object({
   isJudge: Type.Optional(Type.Boolean()),
 });
 
+export const streamChatSchema = Type.Object({
+  threadId: UUIDSchema,
+  content: Type.String({ minLength: 1 }),
+  id: Type.Optional(UUIDSchema),
+});
+
+export type StreamChatBody = Static<typeof streamChatSchema>;
+export type ResponseChatBody = Static<typeof responseChatSchema>;
 export type ResponseChatWithMentorBody = Static<typeof responseChatWithMentorSchema>;
 export type ChatMessagesBody = Static<typeof chatMessagesSchema>;
 export type ResponseJudgeBody = Static<typeof responseJudgeSchema>;

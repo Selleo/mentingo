@@ -1,13 +1,7 @@
-import {
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
-import { AiService } from "src/ai/services/ai.service";
+import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { LessonService } from "src/lesson/services/lesson.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -19,11 +13,9 @@ export class ThreadService {
   constructor(
     private readonly aiRepository: AiRepository,
     private readonly lessonService: LessonService,
-    @Inject(forwardRef(() => AiService))
-    private readonly aiService: AiService,
   ) {}
 
-  async createThread(data: CreateThreadBody, role: UserRole) {
+  async createThreadIfNoneExist(data: CreateThreadBody, role: UserRole) {
     const aiMentorLessonId = await this.findAiMentorLessonIdFromLesson(data.lessonId);
     const lesson = this.lessonService.getLessonById(
       data.lessonId,
@@ -33,18 +25,20 @@ export class ThreadService {
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 
-    const thread = await this.aiRepository.createThread({
+    const thread = await this.aiRepository.findThreadByStatusAndAiMentorLessonIdAndUserId(
+      [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED],
+      aiMentorLessonId,
+      data.userId,
+    );
+
+    if (thread) return { thread, newThread: false };
+
+    const newThread = await this.aiRepository.createThread({
       aiMentorLessonId: aiMentorLessonId,
       ...data,
     });
 
-    const systemPrompt = await this.aiService.setSystemPrompt({
-      threadId: thread.id,
-      userId: thread.userId,
-    });
-    await this.aiService.sendWelcomeMessage(thread.id, systemPrompt);
-
-    return { data: thread };
+    return { thread: newThread, newThread: true };
   }
 
   async findThread(threadId: UUIDType, userId: UUIDType) {
@@ -68,7 +62,7 @@ export class ThreadService {
   }
 
   private async findAiMentorLessonIdFromLesson(lessonId: UUIDType) {
-    const aiMentorLessonId = await this.aiRepository.getAiMentorLessonIdFromLesson(lessonId);
+    const aiMentorLessonId = await this.aiRepository.findAiMentorLessonIdFromLesson(lessonId);
     if (!aiMentorLessonId) throw new NotFoundException(`Lesson not found`);
     return aiMentorLessonId.aiMentorLessonId;
   }
