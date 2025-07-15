@@ -15,7 +15,13 @@ import {
 } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  TooltipArrow,
+} from "~/components/ui/tooltip";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
 
@@ -67,7 +73,7 @@ const AiMentorLessonForm = ({
   };
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
       <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
         <div className="flex flex-col gap-y-1">
           {!lessonToEdit && (
@@ -114,13 +120,21 @@ const AiMentorLessonForm = ({
                       {t("adminCourseView.curriculum.lesson.field.aiMentorInstructions")}
                     </Label>
                     <Tooltip>
-                      <TooltipTrigger>
-                        <Icon name="Info" className="h-4 w-4 cursor-help text-neutral-500" />
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Icon
+                            name="Info"
+                            className="h-auto w-6 cursor-default text-neutral-800"
+                          />
+                        </span>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-xs text-sm">
-                          {t("adminCourseView.curriculum.lesson.other.aiMentorInstructionsTooltip")}
-                        </p>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {t("adminCourseView.curriculum.lesson.other.aiMentorInstructionsTooltip")}
+                        <TooltipArrow className="fill-black" />
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -155,13 +169,21 @@ const AiMentorLessonForm = ({
                       {t("adminCourseView.curriculum.lesson.field.completionConditions")}
                     </Label>
                     <Tooltip>
-                      <TooltipTrigger>
-                        <Icon name="Info" className="h-4 w-4 cursor-help text-neutral-500" />
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Icon
+                            name="Info"
+                            className="h-auto w-6 cursor-default text-neutral-800"
+                          />
+                        </span>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-xs text-sm">
-                          {t("adminCourseView.curriculum.lesson.other.completionConditionsTooltip")}
-                        </p>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {t("adminCourseView.curriculum.lesson.other.completionConditionsTooltip")}
+                        <TooltipArrow className="fill-black" />
                       </TooltipContent>
                     </Tooltip>
                   </div>
