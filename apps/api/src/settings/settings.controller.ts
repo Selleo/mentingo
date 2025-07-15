@@ -16,12 +16,12 @@ import { SettingsService } from "./settings.service";
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @Get("")
+  @Get()
   async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
     return await this.settingsService.getUserSettings(userId);
   }
 
-  @Patch("")
+  @Patch()
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
     response: baseResponse(settingsSchema),
