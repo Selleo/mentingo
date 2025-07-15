@@ -19,7 +19,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { UserActivityEvent } from "src/events";
-import { userWithoutProfilePictureKeySchema } from "src/user/schemas/user.schema";
+import { baseUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { AuthService } from "./auth.service";
@@ -48,11 +48,11 @@ export class AuthController {
   @Post("register")
   @Validate({
     request: [{ type: "body", schema: createAccountSchema }],
-    response: baseResponse(userWithoutProfilePictureKeySchema),
+    response: baseResponse(baseUserResponseSchema),
   })
   async register(
     data: CreateAccountBody,
-  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     const { profilePictureS3Key: _, ...account } = await this.authService.register(data);
 
     return new BaseResponse(account);
@@ -63,12 +63,12 @@ export class AuthController {
   @Post("login")
   @Validate({
     request: [{ type: "body", schema: loginSchema }],
-    response: baseResponse(userWithoutProfilePictureKeySchema),
+    response: baseResponse(baseUserResponseSchema),
   })
   async login(
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     const {
       accessToken,
       refreshToken,
@@ -123,11 +123,11 @@ export class AuthController {
 
   @Get("current-user")
   @Validate({
-    response: baseResponse(userWithoutProfilePictureKeySchema),
+    response: baseResponse(baseUserResponseSchema),
   })
   async currentUser(
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     const account = await this.authService.currentUser(currentUserId);
 
     this.eventBus.publish(new UserActivityEvent(currentUserId, "LOGIN"));

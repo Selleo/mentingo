@@ -29,10 +29,7 @@ import {
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
 import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
-import type {
-  UserDetailsWithProfilePictureUrl,
-  UserDetailsWithProfilePictureKey,
-} from "./schemas/user.schema";
+import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
@@ -100,8 +97,8 @@ export class UserService {
     userId: UUIDType,
     currentUserId: UUIDType,
     userRole: UserRole,
-  ): Promise<UserDetailsWithProfilePictureUrl> {
-    const [userBio]: UserDetailsWithProfilePictureKey[] = await this.db
+  ): Promise<UserDetailsResponse> {
+    const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,

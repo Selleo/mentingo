@@ -40,10 +40,10 @@ import {
 import {
   type AllUsersResponse,
   allUsersSchema,
-  type UserDetailsWithProfilePictureUrl,
+  type UserDetailsResponse,
   type UserResponse,
-  userWithoutProfilePictureKeySchema,
-  userWithProfilePictureUrlSchema,
+  baseUserResponseSchema,
+  userDetailsResponseSchema,
 } from "./schemas/user.schema";
 import { SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
@@ -95,7 +95,7 @@ export class UserController {
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
-    response: baseResponse(userWithoutProfilePictureKeySchema),
+    response: baseResponse(baseUserResponseSchema),
   })
   async getUserById(@Query("id") id: UUIDType): Promise<BaseResponse<UserResponse>> {
     const user = await this.usersService.getUserById(id);
@@ -107,13 +107,13 @@ export class UserController {
   @Public()
   @Validate({
     request: [{ type: "query", name: "userId", schema: UUIDSchema, required: true }],
-    response: baseResponse(userWithProfilePictureUrlSchema),
+    response: baseResponse(userDetailsResponseSchema),
   })
   async getUserDetails(
     @Query("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<UserDetailsWithProfilePictureUrl>> {
+  ): Promise<BaseResponse<UserDetailsResponse>> {
     const userDetails = await this.usersService.getUserDetails(userId, currentUserId, role);
     return new BaseResponse(userDetails);
   }
@@ -121,7 +121,7 @@ export class UserController {
   @Patch()
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    response: baseResponse(userWithoutProfilePictureKeySchema),
+    response: baseResponse(baseUserResponseSchema),
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
       { type: "body", schema: updateUserSchema },
@@ -131,7 +131,7 @@ export class UserController {
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
       if (currentUserId !== id) {
         throw new ForbiddenException("You can only update your own account");
@@ -182,7 +182,7 @@ export class UserController {
   @Patch("admin")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    response: baseResponse(userWithoutProfilePictureKeySchema),
+    response: baseResponse(baseUserResponseSchema),
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
       { type: "body", schema: updateUserSchema },
@@ -191,7 +191,7 @@ export class UserController {
   async adminUpdateUser(
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
-  ): Promise<BaseResponse<Static<typeof userWithoutProfilePictureKeySchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
       const updatedUser = await this.usersService.updateUser(id, data);
 

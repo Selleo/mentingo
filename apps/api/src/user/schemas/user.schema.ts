@@ -14,28 +14,18 @@ export const userDetailsSchema = Type.Object({
   role: Type.Enum(USER_ROLES),
 });
 
-export const userWithoutProfilePictureKeySchema = Type.Omit(commonUserSchema, [
-  "profilePictureS3Key",
-]);
+export const baseUserResponseSchema = Type.Omit(commonUserSchema, ["profilePictureS3Key"]);
 
-export const userWithProfilePictureUrlSchema = Type.Object({
-  firstName: Type.Union([Type.String(), Type.Null()]),
-  lastName: Type.Union([Type.String(), Type.Null()]),
-  id: Type.String({ format: "uuid" }),
-  description: Type.Union([Type.String(), Type.Null()]),
-  contactEmail: Type.Union([Type.String(), Type.Null()]),
-  contactPhone: Type.Union([Type.String(), Type.Null()]),
-  jobTitle: Type.Union([Type.String(), Type.Null()]),
-  role: Type.Enum(USER_ROLES),
+export const userDetailsResponseSchema = Type.Object({
+  ...userDetailsSchema.properties,
   profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
 });
 
-export const allUsersSchema = Type.Array(userWithoutProfilePictureKeySchema);
+export const allUsersSchema = Type.Array(baseUserResponseSchema);
 
-export type UserDetails = Static<typeof userDetailsSchema>;
-export type UserDetailsWithProfilePictureKey = Static<typeof userDetailsSchema> & {
+export type UserDetailsWithAvatarKey = Static<typeof userDetailsSchema> & {
   profilePictureS3Key: string | null;
 };
-export type UserDetailsWithProfilePictureUrl = Static<typeof userWithProfilePictureUrlSchema>;
-export type UserResponse = Static<typeof userWithoutProfilePictureKeySchema>;
+export type UserDetailsResponse = Static<typeof userDetailsResponseSchema>;
+export type UserResponse = Static<typeof baseUserResponseSchema>;
 export type AllUsersResponse = Static<typeof allUsersSchema>;
