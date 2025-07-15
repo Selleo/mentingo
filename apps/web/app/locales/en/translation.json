@@ -187,12 +187,38 @@
   "contentCreatorView": {
     "button": {
       "collapse": "Collapse",
-      "showMore": "Show more"
+      "showMore": "Show more",
+      "edit": "Edit",
+      "share": "Share profile",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard"
     },
+    "field": {
+      "firstName": "Name",
+      "firstNamePlaceholder": "Enter your name",
+      "lastName": "Surname",
+      "lastNamePlaceholder": "Enter your surname",
+      "contactEmail": "Email address",
+      "contactEmailPlaceholder": "Enter your email address",
+      "contactPhone": "Phone number",
+      "contactPhonePlaceholder": "Enter your phone number",
+      "jobTitle": "Title",
+      "jobTitlePlaceholder": "Enter your title",
+      "description": "Bio-note",
+      "descriptionPlaceholder": "Enter a brief bio-note"
+    },
+    "toast": {
+      "profileLinkCopied": "Profile link copied!",
+      "profileLinkCopyError": "Error copying profile link!"
+    },
     "other": {
+      "personalInfoTitle": "Main information",
+      "personalInfoDescription": "Manage your basic account information",
+      "aboutTitle": "About",
+      "aboutDescription": "Tell more about yourself",
       "pageTitle": "Profile",
       "about": "About",
       "contact": "Contact",

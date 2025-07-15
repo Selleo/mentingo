@@ -27,7 +27,7 @@ import {
 } from "./schemas/userQuery";
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
-import type { UpsertUserDetailsBody } from "./schemas/updateUser.schema";
+import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
 import type { UserDetails } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
@@ -159,6 +159,36 @@ export class UserService {
       .returning();
 
     return updatedUserDetails;
+  }
+
+  async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody) {
+    const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
+
+    if (!existingUser) {
+      throw new NotFoundException("User not found");
+    }
+
+    await this.db.transaction(async (tx) => {
+      const userUpdates = {
+        ...(data.firstName && { firstName: data.firstName }),
+        ...(data.lastName && { lastName: data.lastName }),
+      };
+
+      const userDetailsUpdates = {
+        ...(data.description && { description: data.description }),
+        ...(data.contactEmail && { contactEmail: data.contactEmail }),
+        ...(data.contactPhone && { contactPhoneNumber: data.contactPhone }),
+        ...(data.jobTitle && { jobTitle: data.jobTitle }),
+      };
+
+      if (Object.keys(userUpdates).length > 0) {
+        await tx.update(users).set(userUpdates).where(eq(users.id, id));
+      }
+
+      if (Object.keys(userDetailsUpdates).length > 0) {
+        await tx.update(userDetails).set(userDetailsUpdates).where(eq(userDetails.userId, id));
+      }
+    });
   }
 
   async changePassword(id: UUIDType, oldPassword: string, newPassword: string) {
