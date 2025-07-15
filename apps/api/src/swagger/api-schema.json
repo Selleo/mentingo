@@ -8717,7 +8717,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8779,7 +8779,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -8827,7 +8827,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -8889,7 +8889,7 @@
             "required": [
               "id",
               "name",
-              "description"
+              "characteristic"
             ]
           }
         },
@@ -8912,7 +8912,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8974,7 +8974,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -9015,7 +9015,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -9053,7 +9053,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -9070,7 +9070,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "type": "string"
               }
             },

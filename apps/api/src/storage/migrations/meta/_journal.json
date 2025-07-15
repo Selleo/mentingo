@@ -117,8 +117,15 @@
     {
       "idx": 16,
       "version": "7",
-      "when": 1751974353403,
-      "tag": "0016_added_ai_mentor_lesson_table",
+      "when": 1751893830304,
+      "tag": "0016_rename_description_to_characteristic_in_groups_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1752579184297,
+      "tag": "0017_added_ai_mentor_lesson_table",
       "breakpoints": true
     }
   ]

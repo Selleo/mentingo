@@ -1427,7 +1427,7 @@ export interface GetAllGroupsResponse {
     /** @format uuid */
     id: string;
     name: string;
-    description: string | null;
+    characteristic: string | null;
     users?: {
       id: string;
       createdAt: string;
@@ -1454,7 +1454,7 @@ export interface GetGroupByIdResponse {
     /** @format uuid */
     id: string;
     name: string;
-    description: string | null;
+    characteristic: string | null;
     users?: {
       id: string;
       createdAt: string;
@@ -1475,7 +1475,7 @@ export interface GetUserGroupsResponse {
     /** @format uuid */
     id: string;
     name: string;
-    description: string | null;
+    characteristic: string | null;
     users?: {
       id: string;
       createdAt: string;
@@ -1499,7 +1499,7 @@ export interface GetUserGroupsResponse {
 
 export interface CreateGroupBody {
   name: string;
-  description?: string;
+  characteristic?: string;
 }
 
 export interface CreateGroupResponse {
@@ -1512,13 +1512,13 @@ export interface CreateGroupResponse {
 
 export interface UpdateGroupBody {
   name: string;
-  description?: string;
+  characteristic?: string;
 }
 
 export interface UpdateGroupResponse {
   data: {
     name: string;
-    description?: string;
+    characteristic?: string;
   };
 }
 

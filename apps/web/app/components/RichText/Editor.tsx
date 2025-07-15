@@ -49,7 +49,10 @@ const Editor = ({
 
   return (
     <div
-      className={`prose w-full max-w-none overflow-hidden rounded-lg border border-neutral-300 bg-background dark:prose-invert [&_.ProseMirror]:leading-tight ${parentClassName}`}
+      className={cn(
+        "prose w-full max-w-none overflow-hidden rounded-lg border border-neutral-300 bg-background dark:prose-invert [&_.ProseMirror]:leading-tight",
+        parentClassName,
+      )}
     >
       <EditorToolbar editor={editor} />
       <div

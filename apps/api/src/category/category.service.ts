@@ -143,7 +143,9 @@ export class CategoryService {
 
       if (coursesWithCategory.length > 0) {
         throw new UnprocessableEntityException(
-          `Cannot delete category. It is assigned to ${coursesWithCategory.length} course(s): ${coursesWithCategory.map((c) => c.title).join(", ")}`,
+          `Cannot delete category. It is assigned to ${
+            coursesWithCategory.length
+          } course(s): ${coursesWithCategory.map((c) => c.title).join(", ")}`,
         );
       }
       await this.db.delete(categories).where(eq(categories.id, id));
