@@ -407,8 +407,8 @@ export class UserService {
       await this.emailService.sendEmail({
         to: createdUser.email,
         subject: "Welcome to the Platform!",
-        text: text,
-        html: html,
+        text,
+        html,
         from: process.env.SES_EMAIL || "",
       });
 

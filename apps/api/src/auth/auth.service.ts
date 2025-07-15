@@ -189,7 +189,7 @@ export class AuthService {
 
     const { password: _, ...user } = userWithCredentials;
 
-    return this.ensureUserSettings(user);
+    return user;
   }
 
   private async getTokens(user: CommonUser | UserResponse) {
