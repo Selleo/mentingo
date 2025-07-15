@@ -1,6 +1,8 @@
 import { omit } from "lodash";
 import request from "supertest";
 
+import { DEFAULT_USER_SETTINGS } from "src/settings/constants/settings.constants";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { AuthService } from "../../auth/auth.service";
@@ -65,7 +67,16 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
-      expect(response.body.data).toStrictEqual(omit(testUser, "credentials"));
+
+      expect(response.body.data).toStrictEqual(
+        omit(
+          {
+            ...testUser,
+            settings: DEFAULT_USER_SETTINGS,
+          },
+          "credentials",
+        ),
+      );
     });
 
     it("should return 404 for non-existent user", async () => {

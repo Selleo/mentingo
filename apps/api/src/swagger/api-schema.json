@@ -2856,31 +2856,6 @@
           }
         }
       },
-      "post": {
-        "operationId": "SettingsController_createUserSettings",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserSettingsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
       "patch": {
         "operationId": "SettingsController_updateUserSettings",
         "parameters": [],
@@ -9596,60 +9571,6 @@
               "version",
               "entryPoint",
               "s3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CreateUserSettingsBody": {
-        "type": "object",
-        "properties": {
-          "admin_new_user_notification": {
-            "type": "boolean"
-          },
-          "language": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "admin_new_user_notification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  }
-                }
-              },
-              "createdAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
             ]
           }
         },

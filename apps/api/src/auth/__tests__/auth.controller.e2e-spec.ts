@@ -2,6 +2,8 @@ import * as cookie from "cookie";
 import { isArray, omit } from "lodash";
 import request from "supertest";
 
+import { DEFAULT_USER_SETTINGS } from "src/settings/constants/settings.constants";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { AuthService } from "../auth.service";
@@ -218,7 +220,15 @@ describe("AuthController (e2e)", () => {
         .set("Cookie", `access_token=${accessToken};`)
         .expect(200);
 
-      expect(response.body.data).toStrictEqual(omit(user, "credentials"));
+      expect(response.body.data).toStrictEqual(
+        omit(
+          {
+            ...user,
+            settings: DEFAULT_USER_SETTINGS,
+          },
+          "credentials",
+        ),
+      );
     });
 
     it("should return 401 for unauthenticated request", async () => {
