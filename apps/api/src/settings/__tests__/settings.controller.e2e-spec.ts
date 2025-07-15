@@ -5,7 +5,6 @@ import { createUserFactory, type UserWithCredentials } from "../../../test/facto
 import { truncateTables, cookieFor } from "../../../test/helpers/test-helpers";
 
 import type { DatabasePg } from "../../common";
-import type { SettingsJSONContentSchema } from "../schemas/settings.schema";
 import type { INestApplication } from "@nestjs/common";
 import type { AdminSettings } from "src/common/types";
 
@@ -63,8 +62,9 @@ describe("SettingsController (e2e)", () => {
     });
 
     it("should return 400 if invalid data is provided", async () => {
-      const invalidUpdatePayload = {
-        language: 12345,
+      const invalidRequestBody = {
+        admin_new_user_notification: "not_a_boolean",
+        language: 123,
       };
 
       await request(app.getHttpServer())

@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
 
+import { DEFAULT_USER_SETTINGS } from "src/settings/constants/settings.constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import hashPassword from "../../src/common/helpers/hashPassword";
@@ -74,9 +75,7 @@ export const createUserFactory = (db: DatabasePg) => {
 
         await db.insert(settings).values({
           userId: inserted.id,
-          settings: {
-            language: "en",
-          },
+          settings: DEFAULT_USER_SETTINGS,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
