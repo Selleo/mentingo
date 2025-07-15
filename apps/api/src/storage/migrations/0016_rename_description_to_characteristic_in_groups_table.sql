@@ -1,0 +1,1 @@
+ALTER TABLE "groups" RENAME COLUMN "description" TO "characteristic";
