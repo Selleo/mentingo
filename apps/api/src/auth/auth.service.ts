@@ -24,6 +24,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
 import { SettingsService } from "src/settings/settings.service";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createTokens, credentials, resetTokens, settings, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -46,13 +47,6 @@ export class AuthService {
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
   ) {}
-
-  private ensureUserSettings(user: any): CommonUser {
-    return {
-      ...user,
-      settings: (user.settings as UserSettings) || {},
-    };
-  }
 
   private async notifyAdminsAboutNewUser(user: CommonUser) {
     const { firstName, lastName, email } = user;
@@ -220,7 +214,7 @@ export class AuthService {
 
     const { password: _, ...user } = userWithCredentials;
 
-    return this.ensureUserSettings(user);
+    return user;
   }
 
   private async getTokens(user: CommonUser) {
@@ -305,12 +299,12 @@ export class AuthService {
 
     const defaultSettings = {
       language: "en",
-      ...(existingUser.role === "admin" ? { admin_new_user_notification: false } : {}),
+      ...(existingUser.role === USER_ROLES.ADMIN ? { admin_new_user_notification: false } : {}),
     };
 
     await this.settingsService.createSettings(createToken.userId, defaultSettings);
 
-    await this.notifyAdminsAboutNewUser(this.ensureUserSettings(existingUser));
+    return existingUser;
   }
 
   public async resetPassword(token: string, newPassword: string) {

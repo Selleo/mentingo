@@ -7,6 +7,10 @@ import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import {
+  DEFAULT_USER_ADMIN_SETTINGS,
+  DEFAULT_USER_SETTINGS,
+} from "src/settings/constants/settings.constants";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -18,6 +22,7 @@ import {
   lessons,
   questions,
   quizAttempts,
+  settings,
   studentCourses,
   studentLessonProgress,
   userDetails,
@@ -58,6 +63,8 @@ async function createUsers(users: UsersSeed, password = faker.internet.password(
 
       const user = await createOrFindUser(userToCreate.email, password, userToCreate);
 
+      await insertUserSettings(user.id, user.role === USER_ROLES.ADMIN);
+
       return user;
     }),
   );
@@ -95,6 +102,15 @@ async function insertUserDetails(userId: UUIDType) {
     contactEmail: faker.internet.email(),
     contactPhoneNumber: faker.phone.number(),
     jobTitle: faker.person.jobTitle(),
+  });
+}
+
+async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
+  await db.insert(settings).values({
+    userId: userId,
+    settings: isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
 }
 
