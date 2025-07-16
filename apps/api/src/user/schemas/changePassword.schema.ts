@@ -1,7 +1,9 @@
 import { type Static, Type } from "@sinclair/typebox";
 
+import { passwordSchema } from "src/auth/schemas/password.schema";
+
 export const changePasswordSchema = Type.Object({
-  newPassword: Type.String({ minLength: 8, maxLength: 64 }),
+  newPassword: passwordSchema,
   oldPassword: Type.String({ minLength: 8, maxLength: 64 }),
 });
 
