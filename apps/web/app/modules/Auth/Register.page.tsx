@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import { GoogleOAuthButton } from "~/components/Auth/GoogleOAuthButton";
+import { MicrosoftOAuthButton } from "~/components/Auth/MicrosoftOauthButton";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -21,6 +22,7 @@ const registerSchema = z.object({
 });
 
 const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
+const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
@@ -84,7 +86,7 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        {isGoogleOAuthEnabled && (
+        {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
           <div className="relative mt-4">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -98,6 +100,7 @@ export default function RegisterPage() {
         )}
 
         {isGoogleOAuthEnabled && <GoogleOAuthButton />}
+        {isMicrosoftOAuthEnabled && <MicrosoftOAuthButton />}
 
         <div className="mt-4 text-center text-sm">
           {t("registerView.other.alreadyHaveAccount")}{" "}
