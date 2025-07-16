@@ -26,11 +26,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     issuer: string,
     sub: string,
     profile: any,
-  ): Promise<{ email: string; name: string; provider: string }> {
+  ): Promise<{ email: string; firstName: string; lastName: string }> {
     return {
       email: profile._json.email,
-      name: profile._json.name || profile._json.given_name,
-      provider: "google",
+      firstName: profile._json.given_name,
+      lastName: profile._json.family_name || "Lastname",
     };
   }
 }
