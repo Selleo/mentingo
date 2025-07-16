@@ -4,5 +4,5 @@ export const DEFAULT_USER_SETTINGS = {
 
 export const DEFAULT_USER_ADMIN_SETTINGS = {
   ...DEFAULT_USER_SETTINGS,
-  admin_new_user_notification: false,
+  adminNewUserNotification: false,
 };

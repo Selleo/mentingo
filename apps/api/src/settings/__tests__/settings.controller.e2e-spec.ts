@@ -112,13 +112,13 @@ describe("SettingsController (e2e)", () => {
         .expect(200);
 
       expect(response.body).toBeDefined();
-      expect(response.body.data.settings.admin_new_user_notification).toBe(true);
+      expect(response.body.data.settings.adminNewUserNotification).toBe(true);
 
       const updatedSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, adminUser.id),
       });
 
-      expect(updatedSettingInDb?.settings.admin_new_user_notification).toBe(true);
+      expect(updatedSettingInDb?.settings.adminNewUserNotification).toBe(true);
 
       await request(app.getHttpServer())
         .patch("/api/settings/admin-new-user-notification")
@@ -128,7 +128,7 @@ describe("SettingsController (e2e)", () => {
       const toggledBackSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, adminUser.id),
       });
-      expect(toggledBackSettingInDb?.settings.admin_new_user_notification).toBe(false);
+      expect(toggledBackSettingInDb?.settings.adminNewUserNotification).toBe(false);
     });
 
     it("should return 403 if user is not an admin", async () => {

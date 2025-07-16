@@ -5,7 +5,7 @@ import { UUIDSchema } from "src/common";
 import type { Static } from "@sinclair/typebox";
 
 export const settingsJSONContentSchema = Type.Object({
-  admin_new_user_notification: Type.Optional(Type.Boolean()),
+  adminNewUserNotification: Type.Optional(Type.Boolean()),
   language: Type.Optional(Type.String()),
 });
 
