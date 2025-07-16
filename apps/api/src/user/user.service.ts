@@ -276,6 +276,7 @@ export class UserService {
         userId: createdUser.id,
         createToken: token,
         expiryDate,
+        reminderCount: 0,
       });
 
       const url = `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`;
