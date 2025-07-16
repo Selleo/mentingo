@@ -3,6 +3,7 @@ import { useUserRole } from "~/hooks/useUserRole";
 
 import LanguageSelect from "./components/LanguageSelect";
 import ChangePasswordForm from "./forms/ChangePasswordForm";
+import NotificationPreferencesForm from "./forms/NotificationPreferencesForm";
 import UserDetailsForm from "./forms/UserDetailsForm";
 import UserForm from "./forms/UserForm";
 
@@ -15,6 +16,7 @@ export default function SettingsPage() {
       <UserForm />
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
+      {isAdmin && <NotificationPreferencesForm />}
     </PageWrapper>
   );
 }

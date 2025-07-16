@@ -1056,5 +1056,18 @@
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
     }
+  },
+
+  "adminPreferences": {
+    "header": "Preferencje administratora",
+    "subHeader": "Zarządzaj swoimi preferencjami powiadomień",
+    "notificationSettings": "Ustawienia powiadomień",
+    "field": {
+      "newUserNotifications": "Powiadomienia o nowych użytkownikach",
+      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień zostały pomyślnie zaktualizowane"
+    }
   }
 }
