@@ -165,7 +165,6 @@
     "validation": {
       "passwordsDontMatch": "Passwords do not match"
     },
-
     "button": {
       "changePassword": "Create password"
     }
@@ -650,6 +649,20 @@
         "breadcrumbs": {
           "back": "Back"
         },
+        "settings": {
+          "title": "Settings",
+          "passingThreshold": "Passing threshold (%)",
+          "attemptsLimit": "Attempts limit",
+          "quizCooldown": "Time lock after failed attempts (in hours)",
+          "numberOfQuestions": "{{count1}} of {{count2}} questions",
+          "noQuestions": "No questions"
+        },
+        "tooltip": {
+          "switch": "If enabled, the student has a limited number of quiz attempts.",
+          "passingThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
+          "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
+          "quizCooldown": "Duration of the quiz lock after all attempts are used."
+        },
         "validation": {
           "optionTextRequired": "Option text is required",
           "atLeastOneOptionRequired": "At least one option is required",
@@ -964,7 +977,9 @@
       "selectQuestion": "select question.",
       "trueOrFalseQuestion": "True or false question.",
       "multipleChoice": "Multiple choice question.",
-      "singleChoice": "Single choice question"
+      "singleChoice": "Single choice question",
+      "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
+      "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -972,6 +987,11 @@
     },
     "placeholder": {
       "openQuestion": "Type your answer here"
+    },
+    "tooltip": {
+      "retakeAvailableIn": "Locked for {{time}} hours after last retake.",
+      "cooldown": "Quiz will be locked for {{time}} hours after the last attempt.",
+      "noCooldown": "No cooldown period."
     },
     "breadcrumbs": {
       "availableCourses": "Available Courses",
@@ -982,7 +1002,8 @@
       "previous": "Previous",
       "complete": "Complete",
       "next": "Next",
-      "submit": "Submit"
+      "submit": "Submit",
+      "retake": "Retake"
     },
     "sideSection": {
       "header": "Table of content:",

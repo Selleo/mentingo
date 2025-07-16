@@ -15,6 +15,7 @@ import { queryClient } from "~/api/queryClient";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
 import { QuestionType } from "../QuizLessonForm.types";
 import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
 
@@ -26,12 +27,14 @@ type QuizLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
+  isAttemptsLimitEnabled: boolean;
 };
 
 export const useQuizLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setContentTypeToDisplay,
+  isAttemptsLimitEnabled,
 }: QuizLessonFormProps) => {
   const { mutateAsync: createQuizLesson } = useCreateQuizLesson();
   const { mutateAsync: updateQuizLesson } = useUpdateQuizLesson();
@@ -43,6 +46,9 @@ export const useQuizLessonForm = ({
     resolver: zodResolver(quizLessonFormSchema(t)),
     defaultValues: {
       title: "",
+      thresholdScore: null,
+      attemptsLimit: null,
+      quizCooldown: null,
       questions: [],
     },
   });
@@ -53,6 +59,9 @@ export const useQuizLessonForm = ({
     if (lessonToEdit) {
       const mappedData: QuizLessonFormValues = {
         title: lessonToEdit.title,
+        thresholdScore: null,
+        attemptsLimit: null,
+        quizCooldown: null,
         questions:
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
@@ -132,6 +141,20 @@ export const useQuizLessonForm = ({
             );
           }
         });
+      }
+
+      values.thresholdScore =
+        values.thresholdScore ??
+        lessonToEdit?.thresholdScore ??
+        defaultQuizLessonValues.thresholdScore;
+
+      if (isAttemptsLimitEnabled) {
+        values.attemptsLimit =
+          values.attemptsLimit ??
+          lessonToEdit?.attemptsLimit ??
+          defaultQuizLessonValues.attemptsLimit;
+        values.quizCooldown =
+          values.quizCooldown ?? lessonToEdit?.quizCooldown ?? defaultQuizLessonValues.quizCooldown;
       }
 
       if (

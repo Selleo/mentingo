@@ -22,6 +22,7 @@ import MatchWordsQuestion from "./components/MatchWordsQuestion";
 import PhotoQuestion from "./components/PhotoQuestion";
 import QuestionSelector from "./components/QuestionSelector";
 import QuestionWrapper from "./components/QuestionWrapper";
+import QuizSettingsSection from "./components/QuizSettingsSection";
 import ScaleQuestion from "./components/ScaleQuestion";
 import TrueOrFalseQuestion from "./components/TrueOrFalseQuestion";
 import { useQuizLessonForm } from "./hooks/useQuizLessonForm";
@@ -44,10 +45,15 @@ const QuizLessonForm = ({
   lessonToEdit,
   setSelectedLesson,
 }: QuizLessonProps) => {
+  const [isAttemptsLimitEnabled, setIsAttemptsLimitEnabled] = useState(
+    lessonToEdit ? lessonToEdit.attemptsLimit !== null : false,
+  );
+
   const { form, onSubmit, onDelete } = useQuizLessonForm({
     setContentTypeToDisplay,
     chapterToEdit,
     lessonToEdit,
+    isAttemptsLimitEnabled,
   });
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -259,6 +265,19 @@ const QuizLessonForm = ({
     [lessonToEdit, openQuestionIndexes],
   );
 
+  useEffect(() => {
+    setIsAttemptsLimitEnabled(lessonToEdit ? lessonToEdit.attemptsLimit !== null : false);
+  }, [lessonToEdit]);
+
+  const onSwitchChange = (checked: boolean) => {
+    setIsAttemptsLimitEnabled(checked);
+
+    if (!checked) {
+      form.setValue("attemptsLimit", null);
+      form.setValue("quizCooldown", null);
+    }
+  };
+
   return (
     <div className="w-full max-w-full">
       <div className="w-full max-w-full rounded-lg bg-white p-8 shadow-lg">
@@ -299,6 +318,15 @@ const QuizLessonForm = ({
                 </FormItem>
               )}
             />
+
+            <QuizSettingsSection
+              form={form}
+              lessonToEdit={lessonToEdit}
+              questionsCount={questions?.length || 0}
+              isAttemptsLimitEnabled={isAttemptsLimitEnabled}
+              onSwitchChange={onSwitchChange}
+            />
+
             <div className="mt-5">
               <Label className="body-base-md">
                 <span className="body-base-md mr-1 text-red-500">*</span>{" "}

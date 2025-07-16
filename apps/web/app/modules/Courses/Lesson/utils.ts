@@ -215,3 +215,24 @@ export const parseQuizFormData = (input: QuizForm) => {
 
   return result;
 };
+
+export const leftAttemptsToDisplay = (
+  attempts: number | null,
+  attemptsLimit: number | null,
+  canRetake: boolean,
+  cooldownTimeLeft: number | null,
+) => {
+  if (attemptsLimit === null) return "";
+  const leftAttempts = attemptsLimit - (attempts ?? 1);
+  return `(${
+    !canRetake && cooldownTimeLeft !== null
+      ? 0
+      : attemptsLimit !== null
+        ? leftAttempts > 0
+          ? leftAttempts
+          : attemptsLimit === 1
+            ? "0"
+            : attemptsLimit
+        : ""
+  })`;
+};

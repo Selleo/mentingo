@@ -2341,6 +2341,33 @@
         }
       }
     },
+    "/api/lesson/delete-student-quiz-answers": {
+      "delete": {
+        "operationId": "LessonController_deleteStudentQuizAnswers",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteStudentQuizAnswersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/update-lesson-display-order": {
       "patch": {
         "operationId": "LessonController_updateLessonDisplayOrder",
@@ -7616,6 +7643,76 @@
               "lessonCompleted": {
                 "type": "boolean"
               },
+              "thresholdScore": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "attemptsLimit": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quizCooldown": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "isQuizPassed": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "attempts": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "isAnswered": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "displayOrder": {
                 "type": "number"
               },
@@ -7673,6 +7770,13 @@
               "description",
               "fileType",
               "fileUrl",
+              "thresholdScore",
+              "attemptsLimit",
+              "quizCooldown",
+              "isQuizPassed",
+              "attempts",
+              "isAnswered",
+              "updatedAt",
               "displayOrder",
               "nextLessonId"
             ]
@@ -8269,6 +8373,29 @@
               "fileType": {
                 "type": "string"
               },
+              "thresholdScore": {
+                "type": "number"
+              },
+              "attemptsLimit": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quizCooldown": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "questions": {
                 "type": "array",
                 "items": {
@@ -8432,7 +8559,10 @@
             },
             "required": [
               "title",
-              "type"
+              "type",
+              "thresholdScore",
+              "attemptsLimit",
+              "quizCooldown"
             ]
           },
           {
@@ -8499,6 +8629,29 @@
               },
               "fileType": {
                 "type": "string"
+              },
+              "thresholdScore": {
+                "type": "number"
+              },
+              "attemptsLimit": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quizCooldown": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "questions": {
                 "type": "array",
@@ -9118,6 +9271,25 @@
             "required": [
               "message",
               "data"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteStudentQuizAnswersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
             ]
           }
         },
