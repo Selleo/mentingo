@@ -25,7 +25,7 @@ describe("AuthController (e2e)", () => {
 
   describe("POST /api/auth/register", () => {
     it("should register a new user", async () => {
-      const user = await userFactory.withCredentials({ password: "password123" }).build();
+      const user = await userFactory.withCredentials({ password: "Password123!!" }).build();
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/register")
@@ -46,7 +46,7 @@ describe("AuthController (e2e)", () => {
     it("should return 409 if user already exists", async () => {
       const existingUser = {
         email: "existing@example.com",
-        password: "password123",
+        password: "Password123!",
         firstName: "Tyler",
         lastName: "Durden",
       };
@@ -61,7 +61,7 @@ describe("AuthController (e2e)", () => {
     it("should login and return user data with cookies", async () => {
       const user = await userFactory
         .withCredentials({
-          password: "password123",
+          password: "Password123!",
         })
         .create({
           email: "test@example.com",
@@ -95,7 +95,7 @@ describe("AuthController (e2e)", () => {
       let accessToken = "";
 
       const user = userFactory.build();
-      const password = "password123";
+      const password = "Password123!";
       await authService.register({
         email: user.email,
         firstName: user.firstName,
@@ -137,7 +137,7 @@ describe("AuthController (e2e)", () => {
   describe("POST /api/auth/refresh", () => {
     it("should refresh tokens", async () => {
       const user = await userFactory.build();
-      const password = "password123";
+      const password = "Password123!";
       await authService.register({
         email: user.email,
         firstName: user.firstName,
@@ -185,11 +185,11 @@ describe("AuthController (e2e)", () => {
     it("should return current user data for authenticated user", async () => {
       let accessToken = "";
 
-      const user = await userFactory.withCredentials({ password: "password123" }).create();
+      const user = await userFactory.withCredentials({ password: "Password123!" }).create();
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
         email: user.email,
-        password: "password123",
+        password: "Password123!",
       });
 
       const cookies = loginResponse.headers["set-cookie"];
@@ -220,7 +220,7 @@ describe("AuthController (e2e)", () => {
     it("should send a password reset link if email exists", async () => {
       const user = await userFactory
         .withCredentials({
-          password: "password123",
+          password: "Password123!",
         })
         .create({
           email: "test_2@example.com",
@@ -239,7 +239,7 @@ describe("AuthController (e2e)", () => {
     it("should return 404 if email is empty", async () => {
       await userFactory
         .withCredentials({
-          password: "password123",
+          password: "Password123!",
         })
         .create({
           email: "test_3@example.com",
@@ -259,7 +259,7 @@ describe("AuthController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "valid-token", newPassword: "newpassword123" })
+        .send({ resetToken: "valid-token", newPassword: "NewPassword123!!" })
         .expect(201);
 
       expect(response.body.data).toEqual({
@@ -270,7 +270,7 @@ describe("AuthController (e2e)", () => {
     it("should return 404 if reset token is missing", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "", newPassword: "newpassword123" })
+        .send({ resetToken: "", newPassword: "newPassword123!" })
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");

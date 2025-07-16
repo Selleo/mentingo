@@ -2855,6 +2855,7 @@
           "password": {
             "minLength": 8,
             "maxLength": 64,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
             "type": "string"
           }
         },
@@ -3052,6 +3053,7 @@
           "password": {
             "minLength": 8,
             "maxLength": 64,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
             "type": "string"
           },
           "createToken": {
@@ -3070,6 +3072,7 @@
           "newPassword": {
             "minLength": 8,
             "maxLength": 64,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
             "type": "string"
           },
           "resetToken": {
@@ -3529,6 +3532,7 @@
           "newPassword": {
             "minLength": 8,
             "maxLength": 64,
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?]).+$",
             "type": "string"
           },
           "oldPassword": {
