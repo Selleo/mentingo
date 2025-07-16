@@ -182,7 +182,7 @@ export class AuthController {
   @Get("google/callback")
   @UseGuards(GoogleOAuthGuard)
   async googleAuthCallback(
-    @Req() request: Request & { user: { email: string; name: string; provider: string } },
+    @Req() request: Request & { user: { email: string; firstName: string; lastName: string } },
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const googleUser = request.user;

@@ -318,25 +318,22 @@ export class AuthService {
     });
   }
 
-  public async handleGoogleCallback(googleUser: { email: string; name: string; provider: string }) {
+  public async handleGoogleCallback(googleUser: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }) {
     if (!googleUser) {
       throw new UnauthorizedException("Google user data is missing");
-    }
-
-    if (!googleUser?.email || !googleUser?.name) {
-      throw new BadRequestException("Missing required user information from Google authentication");
     }
 
     let [user] = await this.db.select().from(users).where(eq(users.email, googleUser.email));
 
     if (!user) {
-      const [firstName, ...lastNameParts] = googleUser.name.trim().split(" ");
-      const lastName = lastNameParts.join(" ") || "";
-
       user = await this.userService.createUser({
         email: googleUser.email,
-        firstName: firstName || "Firstname",
-        lastName: lastName || "Lastname",
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
         role: USER_ROLES.STUDENT,
       });
     }
