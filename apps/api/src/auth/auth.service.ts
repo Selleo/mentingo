@@ -391,12 +391,6 @@ export class AuthService {
       throw new UnauthorizedException("Microsoft user data is missing");
     }
 
-    if (!microsoftUser?.email || !microsoftUser?.firstName || !microsoftUser?.lastName) {
-      throw new BadRequestException(
-        "Missing required user information from Microsoft authentication",
-      );
-    }
-
     let [user] = await this.db.select().from(users).where(eq(users.email, microsoftUser.email));
 
     if (!user) {
