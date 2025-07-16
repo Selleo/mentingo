@@ -62,7 +62,7 @@ export class AuthService {
     const allAdmins = await this.userService.getAdminsWithSettings();
 
     const adminsToNotify = allAdmins.filter((admin) => {
-      return (admin.settings?.settings as UserSettings)?.admin_new_user_notification === true;
+      return (admin.settings?.settings as UserSettings)?.adminNewUserNotification === true;
     });
 
     await Promise.all(
@@ -302,7 +302,7 @@ export class AuthService {
 
     const defaultSettings = {
       language: "en",
-      ...(existingUser.role === USER_ROLES.ADMIN ? { admin_new_user_notification: false } : {}),
+      ...(existingUser.role === USER_ROLES.ADMIN ? { adminNewUserNotification: false } : {}),
     };
 
     await this.settingsService.createSettings(createToken.userId, defaultSettings);

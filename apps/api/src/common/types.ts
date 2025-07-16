@@ -3,7 +3,7 @@ export type ActivityHistory = {
 };
 
 export type UserSettings = {
-  admin_new_user_notification?: boolean;
+  adminNewUserNotification?: boolean;
   language?: string;
   [key: string]: any;
 };

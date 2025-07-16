@@ -2996,7 +2996,7 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
+                  "adminNewUserNotification": {
                     "type": "boolean"
                   },
                   "language": {
@@ -3076,7 +3076,7 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
+                  "adminNewUserNotification": {
                     "type": "boolean"
                   },
                   "language": {
@@ -3141,7 +3141,7 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
+                  "adminNewUserNotification": {
                     "type": "boolean"
                   },
                   "language": {
@@ -3309,7 +3309,7 @@
                 "settings": {
                   "type": "object",
                   "properties": {
-                    "admin_new_user_notification": {
+                    "adminNewUserNotification": {
                       "type": "boolean"
                     },
                     "language": {
@@ -3395,7 +3395,7 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
+                  "adminNewUserNotification": {
                     "type": "boolean"
                   },
                   "language": {
@@ -3602,7 +3602,7 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
+                  "adminNewUserNotification": {
                     "type": "boolean"
                   },
                   "language": {
@@ -3737,7 +3737,7 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
+                  "adminNewUserNotification": {
                     "type": "boolean"
                   },
                   "language": {
@@ -9004,7 +9004,7 @@
                       "settings": {
                         "type": "object",
                         "properties": {
-                          "admin_new_user_notification": {
+                          "adminNewUserNotification": {
                             "type": "boolean"
                           },
                           "language": {
@@ -9126,7 +9126,7 @@
                     "settings": {
                       "type": "object",
                       "properties": {
-                        "admin_new_user_notification": {
+                        "adminNewUserNotification": {
                           "type": "boolean"
                         },
                         "language": {
@@ -9223,7 +9223,7 @@
                       "settings": {
                         "type": "object",
                         "properties": {
-                          "admin_new_user_notification": {
+                          "adminNewUserNotification": {
                             "type": "boolean"
                           },
                           "language": {
@@ -9581,7 +9581,7 @@
       "UpdateUserSettingsBody": {
         "type": "object",
         "properties": {
-          "admin_new_user_notification": {
+          "adminNewUserNotification": {
             "type": "boolean"
           },
           "language": {
@@ -9602,7 +9602,7 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
+                  "adminNewUserNotification": {
                     "type": "boolean"
                   },
                   "language": {

@@ -80,10 +80,10 @@ export class SettingsService {
       throw new NotFoundException("User settings not found");
     }
 
-    const currentNotificationSetting = userSettings.settings.admin_new_user_notification;
+    const currentNotificationSetting = userSettings.settings.adminNewUserNotification;
     const updatedSettings = {
       ...userSettings.settings,
-      admin_new_user_notification: !currentNotificationSetting,
+      adminNewUserNotification: !currentNotificationSetting,
     };
 
     const [updated] = await this.db
