@@ -23,6 +23,7 @@ import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { DEFAULT_USER_SETTINGS } from "src/settings/constants/settings.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -109,16 +110,12 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      const defaultSettings = {
-        language: "en",
-      };
-
       const [createdSettings] = await trx
         .insert(settings)
         .values({
           userId: newUser.id,
           createdAt: new Date().toISOString(),
-          settings: defaultSettings,
+          settings: DEFAULT_USER_SETTINGS,
         })
         .returning();
 
