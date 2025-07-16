@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "@remix-run/react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -23,11 +24,13 @@ const registerSchema = z.object({
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
   const { t } = useTranslation();
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isValid },
+    formState: { errors },
     trigger,
   } = useForm<RegisterBody>({
     resolver: zodResolver(registerSchema),
@@ -93,7 +96,10 @@ export default function RegisterPage() {
                 onBlur: () => trigger("password"),
               })}
             />
-            <PasswordValidationDisplay password={passwordValue} />
+            <PasswordValidationDisplay
+              password={passwordValue}
+              onValidationChange={setIsPasswordValid}
+            />
             {errors.password && (
               <div className="text-sm text-red-500">
                 {t(errors.password.message ?? "registerView.validation.password")}
@@ -104,7 +110,7 @@ export default function RegisterPage() {
             type="submit"
             className="w-full"
             disabled={
-              !isValid || !firstNameValue || !lastNameValue || !emailValue || !passwordValue
+              !isPasswordValid || !firstNameValue || !lastNameValue || !emailValue || !passwordValue
             }
           >
             {t("registerView.button.createAccount")}
