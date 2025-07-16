@@ -121,6 +121,7 @@ export default function LessonPage() {
           </div>
           <LessonContent
             lesson={lesson}
+            courseId={course.id}
             lessonsAmount={currentChapter?.lessons.length ?? 0}
             handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
             handleNext={() => handleNextLesson(lessonId, course.chapters)}

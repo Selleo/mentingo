@@ -9,6 +9,7 @@ export const baseCourseSchema = Type.Object({
   currency: Type.Optional(Type.String()),
   categoryId: Type.String({ format: "uuid" }),
   isScorm: Type.Optional(Type.Boolean()),
+  hasCertificate: Type.Optional(Type.Boolean()),
 });
 
 export const createCourseSchema = Type.Intersect([

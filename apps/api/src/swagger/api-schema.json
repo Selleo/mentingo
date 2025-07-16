@@ -5036,6 +5036,9 @@
               },
               "isScorm": {
                 "type": "boolean"
+              },
+              "hasCertificate": {
+                "type": "boolean"
               }
             },
             "required": [

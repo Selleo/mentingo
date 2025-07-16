@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
+import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import { queryClient } from "~/api/queryClient";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
@@ -108,8 +109,8 @@ const CourseSettings = ({
       updateHasCertificate.mutate(
         { courseId, data: { hasCertificate: newValue } },
         {
-          onSuccess: () => {
-            queryClient.refetchQueries({ queryKey: ["courses", courseId] });
+          onSuccess: async () => {
+            await queryClient.invalidateQueries(courseQueryOptions(courseId));
           },
           onError: (error) => {
             console.error(`Error updating certificate:`, error);

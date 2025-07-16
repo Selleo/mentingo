@@ -55,6 +55,7 @@ export async function createNiceCourses(
         isPublished: courseData.isPublished,
         priceInCents: courseData.priceInCents,
         chapterCount: courseData.chapters.length,
+        hasCertificate: courseData.hasCertificate,
         authorId: creatorUserId,
         categoryId: category.id,
         createdAt: createdAt,

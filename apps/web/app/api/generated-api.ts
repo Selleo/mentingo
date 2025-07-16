@@ -602,6 +602,7 @@ export type CreateCourseBody = {
   /** @format uuid */
   categoryId: string;
   isScorm?: boolean;
+  hasCertificate?: boolean;
 } & {
   chapters?: string[];
 };

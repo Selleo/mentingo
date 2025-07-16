@@ -17,6 +17,7 @@ export const niceCourses: NiceCourseData[] = [
     priceInCents: 0,
     category: "Data Science",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Understanding Data and Its Importance",
@@ -764,6 +765,7 @@ export const niceCourses: NiceCourseData[] = [
     priceInCents: 0,
     category: "Mobile Development",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Getting Started with Kotlin Programming",
@@ -1076,6 +1078,7 @@ export const niceCourses: NiceCourseData[] = [
     priceInCents: 0,
     category: "Language Learning",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Mastering Basic Grammar Rules",
@@ -1362,6 +1365,7 @@ export const niceCourses: NiceCourseData[] = [
     priceInCents: 0,
     category: "Language Learning",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Elevate Your Writing: Advanced Clause Strategies",

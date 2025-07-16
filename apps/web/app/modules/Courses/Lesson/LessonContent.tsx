@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
+import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
@@ -23,6 +24,7 @@ type LessonContentProps = {
   handleNext: () => void;
   isFirstLesson: boolean;
   isLastLesson: boolean;
+  courseId: string;
 };
 
 export const LessonContent = ({
@@ -32,9 +34,14 @@ export const LessonContent = ({
   handleNext,
   isFirstLesson,
   isLastLesson,
+  courseId,
 }: LessonContentProps) => {
+  const { data: user } = useCurrentUser();
   const [isNextDisabled, setIsNextDisabled] = useState(false);
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(
+    user?.id || "",
+    courseId || "",
+  );
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
 
