@@ -35,9 +35,16 @@ export class LessonRepository {
         description: sql<string>`${lessons.description}`,
         fileUrl: lessons.fileS3Key,
         fileType: lessons.fileType,
+        thresholdScore: lessons.thresholdScore,
+        attemptsLimit: lessons.attemptsLimit,
+        quizCooldown: lessons.quizCooldown,
         displayOrder: sql<number>`${lessons.displayOrder}`,
         lessonCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
         quizScore: sql<number | null>`${studentLessonProgress.quizScore}`,
+        isQuizPassed: sql<boolean>`${studentLessonProgress.isQuizPassed}`,
+        attempts: sql<number | null>`${studentLessonProgress.attempts}`,
+        updatedAt: studentLessonProgress.updatedAt,
+        isThereStudentAnswer: sql<boolean>`${studentLessonProgress.isThereStudentAnswer}`,
         isExternal: sql<boolean>`${lessons.isExternal}`,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,
         isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NULL THEN FALSE ELSE TRUE END`,
@@ -146,6 +153,22 @@ export class LessonRepository {
       .orderBy(lessons.displayOrder);
   }
 
+  async getLessonSettings(lessonId: UUIDType) {
+    const [lessonSettings] = await this.db
+      .select({
+        id: lessons.id,
+        title: lessons.title,
+        type: sql<LessonTypes>`${lessons.type}`,
+        thresholdScore: lessons.thresholdScore,
+        attemptsLimit: lessons.attemptsLimit,
+        quizCooldown: lessons.quizCooldown,
+      })
+      .from(lessons)
+      .where(eq(lessons.id, lessonId))
+      .limit(1);
+    return lessonSettings;
+  }
+
   async completeQuiz(
     chapterId: UUIDType,
     lessonId: UUIDType,
@@ -225,6 +248,10 @@ export class LessonRepository {
       .select({
         isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
+        updatedAt: studentLessonProgress.updatedAt,
+        attempts: studentLessonProgress.attempts,
+        isQuizPassed: studentLessonProgress.isQuizPassed,
+        isThereStudentAnswer: studentLessonProgress.isThereStudentAnswer,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,

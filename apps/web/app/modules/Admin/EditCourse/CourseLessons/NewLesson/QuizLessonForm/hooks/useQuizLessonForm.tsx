@@ -26,12 +26,14 @@ type QuizLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
+  isAttemptsLimitEnabled: boolean;
 };
 
 export const useQuizLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setContentTypeToDisplay,
+  isAttemptsLimitEnabled,
 }: QuizLessonFormProps) => {
   const { mutateAsync: createQuizLesson } = useCreateQuizLesson();
   const { mutateAsync: updateQuizLesson } = useUpdateQuizLesson();
@@ -43,6 +45,7 @@ export const useQuizLessonForm = ({
     resolver: zodResolver(quizLessonFormSchema(t)),
     defaultValues: {
       title: "",
+      passingThreshold: "",
       questions: [],
     },
   });
@@ -132,6 +135,14 @@ export const useQuizLessonForm = ({
             );
           }
         });
+      }
+      if (isAttemptsLimitEnabled) {
+        if (values.attemptsLimit === undefined) {
+          values.attemptsLimit = lessonToEdit?.attemptsLimit ? lessonToEdit.attemptsLimit : 1;
+        }
+        if (values.quizCooldown === undefined) {
+          values.quizCooldown = lessonToEdit?.quizCooldown ? lessonToEdit.quizCooldown : 24;
+        }
       }
 
       if (

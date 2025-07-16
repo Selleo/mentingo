@@ -31,7 +31,6 @@ export const LessonContent = ({
   handlePrevious,
   handleNext,
   isFirstLesson,
-  isLastLesson,
 }: LessonContentProps) => {
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
@@ -89,21 +88,16 @@ export const LessonContent = ({
             {!isFirstLesson && (
               <Button variant="outline" className="gap-x-1" onClick={handlePrevious}>
                 <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                <span>{t("studentLessonView.button.previous")}</span>
               </Button>
             )}
 
             <Button
+              variant="outline"
               disabled={isNextDisabled}
               className="gap-x-1"
               onClick={handleMarkLessonAsComplete}
             >
               <Icon name="ArrowRight" className="h-auto w-4" />
-              <span>
-                {isLastLesson
-                  ? t("studentLessonView.button.complete")
-                  : t("studentLessonView.button.next")}
-              </span>
             </Button>
           </div>
         </div>

@@ -64,7 +64,7 @@ export class LessonService {
 
     const questionList = await this.questionRepository.getQuestionsForLesson(
       lesson.id,
-      lesson.lessonCompleted,
+      lesson.isThereStudentAnswer,
       userId,
     );
 
@@ -83,6 +83,7 @@ export class LessonService {
       }),
     );
 
+    // zmienic bo lekcja moze by ukonczone i mzoe ni
     if (isStudent && lesson.lessonCompleted && isNumber(lesson.quizScore)) {
       const [quizResult] = await this.lessonRepository.getQuizResult(
         lesson.id,
@@ -112,6 +113,34 @@ export class LessonService {
     return { ...lesson, quizDetails };
   }
 
+  private checkIfQuizCanBeSubmitted(
+    attempts: number | null,
+    attemptsLimit: number | null,
+    lastUpdate: string | null,
+    quizCooldown: number | null,
+  ): boolean {
+    if (attemptsLimit === null || attempts === null) {
+      return true;
+    }
+
+    if (attempts <= attemptsLimit) {
+      return true;
+    }
+
+    if (lastUpdate && quizCooldown) {
+      const lastUpdateDate = new Date(lastUpdate);
+
+      const cooldownEnd = new Date(lastUpdateDate.getTime() + quizCooldown * 60 * 60 * 1000);
+      const now = new Date();
+
+      if (now < cooldownEnd) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     userId: UUIDType,
@@ -126,11 +155,29 @@ export class LessonService {
       userId,
     );
 
+    if (accessCourseLessonWithDetails.isThereStudentAnswer) {
+      throw new ConflictException("You have already answered this quiz");
+    }
+
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (accessCourseLessonWithDetails.lessonIsCompleted)
+    if (accessCourseLessonWithDetails.isQuizPassed) {
       throw new ConflictException("Quiz already finished");
+    }
+
+    const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
+
+    if (
+      !this.checkIfQuizCanBeSubmitted(
+        accessCourseLessonWithDetails.attempts,
+        quizSettings?.attemptsLimit,
+        accessCourseLessonWithDetails.updatedAt,
+        quizSettings?.quizCooldown,
+      )
+    ) {
+      throw new ConflictException("Quiz cannot be submitted due to attempts limit or cooldown");
+    }
 
     const correctAnswersForQuizQuestions =
       await this.questionRepository.getQuizQuestionsToEvaluation(studentQuizAnswers.lessonId);
@@ -154,12 +201,19 @@ export class LessonService {
             100,
         );
 
-        await this.lessonRepository.completeQuiz(
+        const isQuizPassed = quizSettings?.thresholdScore
+          ? quizScore >= quizSettings.thresholdScore
+          : true;
+
+        await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,
           studentQuizAnswers.lessonId,
           userId,
           evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
           quizScore,
+          accessCourseLessonWithDetails.attempts ?? 1,
+          isQuizPassed,
+          true,
           trx,
         );
 
@@ -198,6 +252,59 @@ export class LessonService {
         );
       }
     });
+  }
+
+  async deleteStudentQuizAnswers(lessonId: UUIDType, userId: UUIDType): Promise<void> {
+    const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
+      lessonId,
+      userId,
+    );
+
+    if (accessCourseLessonWithDetails.isQuizPassed) {
+      throw new ConflictException("Quiz already finished");
+    }
+
+    if (accessCourseLessonWithDetails.isThereStudentAnswer === false) {
+      throw new ConflictException("You have not answered this quiz yet");
+    }
+
+    const quizSettings = await this.lessonRepository.getLessonSettings(lessonId);
+
+    let attempts = accessCourseLessonWithDetails.attempts ?? 1;
+    attempts += 1;
+    if (
+      !this.checkIfQuizCanBeSubmitted(
+        attempts,
+        quizSettings?.attemptsLimit,
+        accessCourseLessonWithDetails.updatedAt,
+        quizSettings?.quizCooldown,
+      )
+    ) {
+      throw new ConflictException("Quiz cannot be submitted due to attempts limit or cooldown");
+    }
+
+    if (attempts > (quizSettings?.attemptsLimit ?? 0)) {
+      attempts = 1;
+    }
+
+    const questions = await this.questionRepository.getQuestionsIdsByLessonId(lessonId);
+    if (questions.length === 0) {
+      return;
+    }
+
+    await this.questionRepository.deleteStudentQuizAnswers(questions, userId);
+
+    await this.studentLessonProgressService.updateQuizProgress(
+      accessCourseLessonWithDetails.chapterId,
+      lessonId,
+      userId,
+      0,
+      0,
+      attempts,
+      false,
+      false,
+      this.db,
+    );
   }
 
   // async studentAnswerOnQuestion(

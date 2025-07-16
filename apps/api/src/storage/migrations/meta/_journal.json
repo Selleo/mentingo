@@ -113,6 +113,27 @@
       "when": 1751543301194,
       "tag": "0015_change_user_role_from_teacher_to_content_creator",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1752490409391,
+      "tag": "0016_add_attempts_and_isQuizPassed_in_student_lesson_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1752490437081,
+      "tag": "0017_add_thresholdScore_attemptsLimit_quizCooldown",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1752607338646,
+      "tag": "0018_add_isThereStudentAnswer_in_studentProgress",
+      "breakpoints": true
     }
   ]
 }

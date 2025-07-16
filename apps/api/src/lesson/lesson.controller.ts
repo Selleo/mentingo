@@ -201,6 +201,20 @@ export class LessonController {
     });
   }
 
+  @Delete("delete-student-quiz-answers")
+  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async deleteStudentQuizAnswers(
+    @Query("lessonId") lessonId: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUserId);
+    return new BaseResponse({ message: "Evaluation quiz answers removed successfully" });
+  }
+
   //   @Delete("clear-quiz-progress")
   //   @Roles(USER_ROLES.STUDENT)
   //   @Validate({

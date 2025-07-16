@@ -115,6 +115,60 @@ export class StudentLessonProgressService {
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
   }
 
+  async markIfUserHaveAnsweredQuiz(lessonId: UUIDType, userId: UUIDType) {
+    return this.db
+      .update(studentLessonProgress)
+      .set({ isThereStudentAnswer: false })
+      .where(
+        and(
+          eq(studentLessonProgress.lessonId, lessonId),
+          eq(studentLessonProgress.studentId, userId),
+        ),
+      );
+  }
+
+  async updateQuizProgress(
+    chapterId: UUIDType,
+    lessonId: UUIDType,
+    userId: UUIDType,
+    completedQuestionCount: number,
+    quizScore: number,
+    attempts: number,
+    isQuizPassed = false,
+    isThereStudentAnswer = false,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    return trx
+      .insert(studentLessonProgress)
+      .values({
+        lessonId,
+        chapterId,
+        studentId: userId,
+        attempts: 1,
+        isQuizPassed,
+        completedAt: sql`now()`,
+        completedQuestionCount,
+        quizScore,
+        isThereStudentAnswer,
+      })
+      .onConflictDoUpdate({
+        target: [
+          studentLessonProgress.studentId,
+          studentLessonProgress.lessonId,
+          studentLessonProgress.chapterId,
+        ],
+        set: {
+          completedAt: sql`now()`,
+          attempts,
+          isQuizPassed,
+          completedQuestionCount,
+          quizScore,
+          isThereStudentAnswer,
+        },
+      })
+      .returning();
+  }
+
   private async updateChapterProgress(
     courseId: UUIDType,
     chapterId: UUIDType,

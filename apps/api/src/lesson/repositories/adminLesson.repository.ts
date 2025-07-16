@@ -57,6 +57,9 @@ export class AdminLessonRepository {
         type: LESSON_TYPES.QUIZ,
         description: data.description,
         chapterId: data.chapterId,
+        thresholdScore: data.thresholdScore,
+        attemptsLimit: data.attemptsLimit,
+        quizCooldown: data.quizCooldown,
       })
       .where(eq(lessons.id, id));
   }
@@ -74,6 +77,9 @@ export class AdminLessonRepository {
         description: data.description,
         chapterId: data?.chapterId,
         displayOrder,
+        thresholdScore: data.thresholdScore ?? 0,
+        attemptsLimit: data.attemptsLimit ?? null,
+        quizCooldown: data.quizCooldown ?? null,
       })
       .returning();
 
