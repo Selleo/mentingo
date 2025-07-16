@@ -191,6 +191,9 @@ importers:
       passport-local:
         specifier: 1.0.0
         version: 1.0.0
+      passport-microsoft:
+        specifier: 2.1.0
+        version: 2.1.0
       postgres:
         specifier: 3.4.4
         version: 3.4.4
@@ -267,6 +270,9 @@ importers:
       '@types/passport-local':
         specifier: 1.0.38
         version: 1.0.38
+      '@types/passport-microsoft':
+        specifier: 2.1.0
+        version: 2.1.0
       '@types/supertest':
         specifier: 6.0.2
         version: 6.0.2
@@ -5101,6 +5107,9 @@ packages:
   '@types/passport-local@1.0.38':
     resolution: {integrity: sha512-nsrW4A963lYE7lNTv9cr5WmiUD1ibYJvWrpE13oxApFsRt77b0RdtZvKbCdNIY4v/QZ6TRQWaDDEwV1kCTmcXg==}
 
+  '@types/passport-microsoft@2.1.0':
+    resolution: {integrity: sha512-wAhVpA7MosymqLkT9SeX9qKS1LNJjxRm20Z4/fE9NCRcnznzoqPnPEwNwM6UIa+UhngNCRsCRZyz4HjPgsRpBA==}
+
   '@types/passport-oauth2@1.8.0':
     resolution: {integrity: sha512-6//z+4orIOy/g3zx17HyQ71GSRK4bs7Sb+zFasRoc2xzlv7ZCJ+vkDBYFci8U6HY+or6Zy7ajf4mz4rK7nsWJQ==}
 
@@ -9673,6 +9682,10 @@ packages:
 
   passport-local@1.0.0:
     resolution: {integrity: sha512-9wCE6qKznvf9mQYYbgJ3sVOHmCWoUNMVFoZzNoznmISbhnNNPhN9xfY3sLmScHMetEJeoY7CXwfhCe7argfQow==}
+    engines: {node: '>= 0.4.0'}
+
+  passport-microsoft@2.1.0:
+    resolution: {integrity: sha512-7bOcjEmZCHg5qD55iHaMD/mgBxPtXLbqAwmKox5IsqOSEU50WJk5nQKK4lxKdBHLZ0hf+gzrFgDsTybJP18/JA==}
     engines: {node: '>= 0.4.0'}
 
   passport-oauth2@1.8.0:
@@ -17577,6 +17590,10 @@ snapshots:
       '@types/passport': 1.0.17
       '@types/passport-strategy': 0.2.38
 
+  '@types/passport-microsoft@2.1.0':
+    dependencies:
+      '@types/passport-oauth2': 1.8.0
+
   '@types/passport-oauth2@1.8.0':
     dependencies:
       '@types/express': 4.17.21
@@ -18306,7 +18323,7 @@ snapshots:
 
   agent-base@7.1.1:
     dependencies:
-      debug: 4.3.7
+      debug: 4.4.0
     transitivePeerDependencies:
       - supports-color
 
@@ -19585,7 +19602,7 @@ snapshots:
 
   docker-modem@3.0.8:
     dependencies:
-      debug: 4.3.7
+      debug: 4.4.0
       readable-stream: 3.6.2
       split-ca: 1.0.1
       ssh2: 1.16.0
@@ -20649,7 +20666,7 @@ snapshots:
 
   extract-zip@2.0.1:
     dependencies:
-      debug: 4.3.4
+      debug: 4.4.0
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -23348,7 +23365,7 @@ snapshots:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
       agent-base: 7.1.1
-      debug: 4.3.7
+      debug: 4.4.0
       get-uri: 6.0.3
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
@@ -23426,6 +23443,10 @@ snapshots:
   passport-local@1.0.0:
     dependencies:
       passport-strategy: 1.0.0
+
+  passport-microsoft@2.1.0:
+    dependencies:
+      passport-oauth2: 1.8.0
 
   passport-oauth2@1.8.0:
     dependencies:
@@ -23886,7 +23907,7 @@ snapshots:
   proxy-agent@6.3.1:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.4
+      debug: 4.4.0
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.5
       lru-cache: 7.18.3
@@ -24857,7 +24878,7 @@ snapshots:
   socks-proxy-agent@8.0.4:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.7
+      debug: 4.4.0
       socks: 2.8.3
     transitivePeerDependencies:
       - supports-color

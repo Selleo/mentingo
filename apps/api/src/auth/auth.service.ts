@@ -381,4 +381,38 @@ export class AuthService {
       refreshToken: tokens.refreshToken,
     };
   }
+
+  public async handleMicrosoftCallback(microsoftUser: {
+    email: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    if (!microsoftUser) {
+      throw new UnauthorizedException("Microsoft user data is missing");
+    }
+
+    if (!microsoftUser?.email || !microsoftUser?.firstName || !microsoftUser?.lastName) {
+      throw new BadRequestException(
+        "Missing required user information from Microsoft authentication",
+      );
+    }
+
+    let [user] = await this.db.select().from(users).where(eq(users.email, microsoftUser.email));
+
+    if (!user) {
+      user = await this.userService.createUser({
+        email: microsoftUser.email,
+        firstName: microsoftUser.firstName,
+        lastName: microsoftUser.lastName,
+        role: USER_ROLES.STUDENT,
+      });
+    }
+
+    const tokens = await this.getTokens(user);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
 }

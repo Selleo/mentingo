@@ -18,6 +18,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
+import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { UserActivityEvent } from "src/events";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
@@ -190,6 +191,30 @@ export class AuthController {
     const googleUser = request.user;
 
     const { accessToken, refreshToken } = await this.authService.handleGoogleCallback(googleUser);
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    response.redirect(process.env.APP_URL || "http://localhost:5173");
+  }
+
+  @Public()
+  @Get("microsoft")
+  @UseGuards(MicrosoftOAuthGuard)
+  async microsoftAuth() {
+    // Initiates the Microsoft OAuth flow
+  }
+
+  @Public()
+  @Get("microsoft/callback")
+  @UseGuards(MicrosoftOAuthGuard)
+  async microsoftAuthCallback(
+    @Req() request: Request & { user: { email: string; firstName: string; lastName: string } },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const microsoftUser = request.user;
+
+    const { accessToken, refreshToken } =
+      await this.authService.handleMicrosoftCallback(microsoftUser);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
