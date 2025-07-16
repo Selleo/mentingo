@@ -1000,7 +1000,9 @@
         "aiMentorName": "AI Mentor",
         "userName": "User",
         "typing": "Typing a response...",
-        "send": "Send"
+        "send": "Send",
+        "retakeModalTitle": "Are you sure you want to retake the lesson?",
+        "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone."
       }
     },
     "sideSection": {

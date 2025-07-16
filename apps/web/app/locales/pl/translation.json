@@ -1001,7 +1001,9 @@
         "aiMentorName": "AI Mentor",
         "userName": "Użytkownik",
         "typing": "Pisze odpowiedź...",
-        "send": "Wyślij"
+        "send": "Wyślij",
+        "retakeModalTitle": "Czy na pewno chcesz powtórzyć lekcję?",
+        "retakeModalDescription": "Spowoduje to zresetowanie Twoich postępów w tej lekcji. Tej akcji nie można cofnąć."
       }
     },
     "sideSection": {
