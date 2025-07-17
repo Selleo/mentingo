@@ -489,7 +489,7 @@ export interface GetCourseResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz";
+        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
         displayOrder: number;
         status: "not_started" | "in_progress" | "completed";
         quizQuestionCount: number | null;
@@ -538,7 +538,7 @@ export interface GetBetaCourseByIdResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz";
+        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
@@ -576,6 +576,14 @@ export interface GetBetaCourseByIdResponse {
             scaleAnswer?: number | null;
           }[];
         }[];
+        aiMentor?: {
+          /** @format uuid */
+          id: string;
+          /** @format uuid */
+          lessonId: string;
+          aiMentorInstructions: string;
+          completionConditions: string;
+        } | null;
         updatedAt?: string;
       }[];
       completedLessonCount?: number;
@@ -759,7 +767,7 @@ export interface GetChapterWithLessonResponse {
       /** @format uuid */
       id: string;
       title: string;
-      type: "text" | "presentation" | "video" | "quiz";
+      type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
       displayOrder: number;
       status: "not_started" | "in_progress" | "completed";
       quizQuestionCount: number | null;
@@ -783,7 +791,7 @@ export type BetaCreateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -821,6 +829,14 @@ export type BetaCreateChapterBody = {
         scaleAnswer?: number | null;
       }[];
     }[];
+    aiMentor?: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      lessonId: string;
+      aiMentorInstructions: string;
+      completionConditions: string;
+    } | null;
     updatedAt?: string;
   }[];
   chapterProgress?: "not_started" | "in_progress" | "completed";
@@ -849,7 +865,7 @@ export type UpdateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -887,6 +903,14 @@ export type UpdateChapterBody = {
         scaleAnswer?: number | null;
       }[];
     }[];
+    aiMentor?: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      lessonId: string;
+      aiMentorInstructions: string;
+      completionConditions: string;
+    } | null;
     updatedAt?: string;
   }[];
   chapterProgress?: "not_started" | "in_progress" | "completed";
@@ -940,7 +964,7 @@ export interface GetLessonByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
     description: string | null;
     fileType: string | null;
     fileUrl: string | null;
@@ -992,7 +1016,7 @@ export interface GetLessonByIdResponse {
 
 export type BetaCreateLessonBody = {
   title: string;
-  type: "text" | "presentation" | "video" | "quiz";
+  type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
   description?: string | null;
   fileS3Key?: string | null;
   fileType?: string | null;
@@ -1029,6 +1053,14 @@ export type BetaCreateLessonBody = {
       scaleAnswer?: number | null;
     }[];
   }[];
+  aiMentor?: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    lessonId: string;
+    aiMentorInstructions: string;
+    completionConditions: string;
+  } | null;
   updatedAt?: string;
 } & {
   /** @format uuid */
@@ -1040,6 +1072,127 @@ export interface BetaCreateLessonResponse {
   data: {
     /** @format uuid */
     id: string;
+    message: string;
+  };
+}
+
+export type BetaCreateAiMentorLessonBody = {
+  title: string;
+  description?: string | null;
+  fileS3Key?: string | null;
+  fileType?: string | null;
+  questions?: {
+    /** @format uuid */
+    id?: string;
+    type:
+      | "brief_response"
+      | "detailed_response"
+      | "match_words"
+      | "scale_1_5"
+      | "single_choice"
+      | "multiple_choice"
+      | "true_or_false"
+      | "photo_question_single_choice"
+      | "photo_question_multiple_choice"
+      | "fill_in_the_blanks_text"
+      | "fill_in_the_blanks_dnd";
+    description?: string | null;
+    title: string;
+    displayOrder?: number;
+    solutionExplanation?: string;
+    photoS3Key?: string | null;
+    options?: {
+      /** @format uuid */
+      id?: string;
+      optionText: string;
+      displayOrder: number | null;
+      isStudentAnswer?: boolean | null;
+      isCorrect: boolean;
+      /** @format uuid */
+      questionId?: string;
+      matchedWord?: string | null;
+      scaleAnswer?: number | null;
+    }[];
+  }[];
+  aiMentor?: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    lessonId: string;
+    aiMentorInstructions: string;
+    completionConditions: string;
+  } | null;
+  updatedAt?: string;
+} & {
+  /** @format uuid */
+  chapterId: string;
+  displayOrder?: number;
+  aiMentorInstructions: string;
+  completionConditions: string;
+};
+
+export interface BetaCreateAiMentorLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export type BetaUpdateAiMentorLessonBody = {
+  title: string;
+  description?: string | null;
+  fileS3Key?: string | null;
+  fileType?: string | null;
+  questions?: {
+    /** @format uuid */
+    id?: string;
+    type:
+      | "brief_response"
+      | "detailed_response"
+      | "match_words"
+      | "scale_1_5"
+      | "single_choice"
+      | "multiple_choice"
+      | "true_or_false"
+      | "photo_question_single_choice"
+      | "photo_question_multiple_choice"
+      | "fill_in_the_blanks_text"
+      | "fill_in_the_blanks_dnd";
+    description?: string | null;
+    title: string;
+    displayOrder?: number;
+    solutionExplanation?: string;
+    photoS3Key?: string | null;
+    options?: {
+      /** @format uuid */
+      id?: string;
+      optionText: string;
+      displayOrder: number | null;
+      isStudentAnswer?: boolean | null;
+      isCorrect: boolean;
+      /** @format uuid */
+      questionId?: string;
+      matchedWord?: string | null;
+      scaleAnswer?: number | null;
+    }[];
+  }[];
+  aiMentor?: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    lessonId: string;
+    aiMentorInstructions: string;
+    completionConditions: string;
+  } | null;
+  updatedAt?: string;
+} & {
+  aiMentorInstructions: string;
+  completionConditions: string;
+};
+
+export interface BetaUpdateAiMentorLessonResponse {
+  data: {
     message: string;
   };
 }
@@ -1152,7 +1305,7 @@ export interface BetaUpdateQuizLessonResponse {
 
 export type BetaUpdateLessonBody = {
   title?: string;
-  type?: "text" | "presentation" | "video" | "quiz";
+  type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
   description?: string | null;
   fileS3Key?: string | null;
   fileType?: string | null;
@@ -1189,6 +1342,14 @@ export type BetaUpdateLessonBody = {
       scaleAnswer?: number | null;
     }[];
   }[];
+  aiMentor?: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    lessonId: string;
+    aiMentorInstructions: string;
+    completionConditions: string;
+  } | null;
   updatedAt?: string;
 } & {
   /** @format uuid */
@@ -2697,6 +2858,49 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<BetaCreateLessonResponse, any>({
         path: `/api/lesson/beta-create-lesson`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerBetaCreateAiMentorLesson
+     * @request POST:/api/lesson/beta-create-lesson/ai
+     */
+    lessonControllerBetaCreateAiMentorLesson: (
+      data: BetaCreateAiMentorLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<BetaCreateAiMentorLessonResponse, any>({
+        path: `/api/lesson/beta-create-lesson/ai`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerBetaUpdateAiMentorLesson
+     * @request PATCH:/api/lesson/beta-update-lesson/ai
+     */
+    lessonControllerBetaUpdateAiMentorLesson: (
+      data: BetaUpdateAiMentorLessonBody,
+      query?: {
+        /** @format uuid */
+        id?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<BetaUpdateAiMentorLessonResponse, any>({
+        path: `/api/lesson/beta-update-lesson/ai`,
+        method: "PATCH",
+        query: query,
         body: data,
         type: ContentType.Json,
         format: "json",

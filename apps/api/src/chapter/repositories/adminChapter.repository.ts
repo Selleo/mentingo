@@ -2,11 +2,22 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
+import {
+  aiMentorLessons,
+  chapters,
+  courses,
+  lessons,
+  questionAnswerOptions,
+  questions,
+} from "src/storage/schema";
 
 import type { UpdateChapterBody } from "../schemas/chapter.schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { AdminLessonWithContentSchema, AdminQuestionBody } from "src/lesson/lesson.schema";
+import type {
+  AdminLessonWithContentSchema,
+  AdminQuestionBody,
+  AiMentorBody,
+} from "src/lesson/lesson.schema";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type * as schema from "src/storage/schema";
 
@@ -110,9 +121,23 @@ export class AdminChapterRepository {
             )
             FROM ${questions}
             WHERE ${questions.lessonId} = lessons.id
-            ORDER BY ${questions.displayOrder} 
+            ORDER BY ${questions.displayOrder}
           )
-        )`,
+        )
+      `,
+        aiMentor: sql<AiMentorBody>`
+        (
+          SELECT json_build_object(
+            'id', aml.id,
+            'lessonId', aml.lesson_id,
+            'aiMentorInstructions', aml.ai_mentor_instructions,
+            'completionConditions', aml.completion_conditions
+          )
+          FROM ${aiMentorLessons} aml
+          WHERE lessons.id = aml.lesson_id 
+          LIMIT 1
+        )
+      `,
       })
       .from(lessons)
       .where(and(eq(lessons.chapterId, chapterId)))

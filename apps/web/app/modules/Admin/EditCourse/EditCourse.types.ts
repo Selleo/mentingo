@@ -2,6 +2,12 @@ import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLess
 
 export type NavigationTab = "Settings" | "Curriculum" | "Pricing" | "Status";
 
+type AiMentorType = {
+  id: string;
+  lessonId: string;
+  aiMentorInstructions: string;
+  completionConditions: string;
+};
 export interface Lesson {
   updatedAt: string;
   type: string;
@@ -15,6 +21,7 @@ export interface Lesson {
   chapterId?: string;
   questions?: Question[];
   isExternal?: boolean;
+  aiMentor?: AiMentorType;
 }
 
 export interface Chapter {
@@ -37,15 +44,17 @@ export const ContentTypes = {
   VIDEO_LESSON_FORM: "VIDEO_LESSON_FORM",
   PRESENTATION_FORM: "PRESENTATION_FORM",
   QUIZ_FORM: "QUIZ_FORM",
+  AI_MENTOR_FORM: "AI_MENTOR_FORM",
 };
 
-export type LessonIcons = "Text" | "Video" | "Presentation" | "Quiz";
+export type LessonIcons = "Text" | "Video" | "Presentation" | "Quiz" | "AiMentor";
 
 export const LessonType = {
   VIDEO: "video",
   TEXT: "text",
   PRESENTATION: "presentation",
   QUIZ: "quiz",
+  AI_MENTOR: "ai_mentor",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];
