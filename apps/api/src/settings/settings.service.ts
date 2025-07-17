@@ -5,17 +5,54 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
+import { NewUserEmail } from "@repo/email-templates";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { EmailService } from "src/common/emails/emails.service";
 import { settings } from "src/storage/schema";
+import { UserService } from "src/user/user.service";
 
 import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
 import type { UUIDType } from "src/common";
+import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { UserSettings } from "src/common/types";
 
 @Injectable()
 export class SettingsService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private userService: UserService,
+    private emailService: EmailService,
+  ) {}
+
+  public async notifyAdminsAboutNewUser(user: CommonUser) {
+    const { firstName, lastName, email } = user;
+
+    const { text, html } = new NewUserEmail({
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+    });
+
+    const allAdmins = await this.userService.getAdminsWithSettings();
+
+    const adminsToNotify = allAdmins.filter((admin) => {
+      return (admin.settings?.settings as UserSettings)?.adminNewUserNotification === true;
+    });
+
+    await Promise.all(
+      adminsToNotify.map((admin) => {
+        return this.emailService.sendEmail({
+          to: admin.user.email,
+          subject: "A new user has registered on your platform",
+          text,
+          html,
+          from: process.env.SES_EMAIL || "",
+        });
+      }),
+    );
+  }
 
   public async createSettings(
     userId: UUIDType,
