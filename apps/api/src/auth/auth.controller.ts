@@ -36,6 +36,7 @@ import {
 import { TokenService } from "./token.service";
 
 import type { Static } from "@sinclair/typebox";
+import type { GoogleUserType } from "src/utils/types/google-user.type";
 
 @Controller("auth")
 export class AuthController {
@@ -182,7 +183,7 @@ export class AuthController {
   @Get("google/callback")
   @UseGuards(GoogleOAuthGuard)
   async googleAuthCallback(
-    @Req() request: Request & { user: { email: string; firstName: string; lastName: string } },
+    @Req() request: Request & { user: GoogleUserType },
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const googleUser = request.user;

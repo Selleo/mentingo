@@ -31,6 +31,7 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { GoogleUserType } from "src/utils/types/google-user.type";
 
 @Injectable()
 export class AuthService {
@@ -318,11 +319,7 @@ export class AuthService {
     });
   }
 
-  public async handleGoogleCallback(googleUser: {
-    email: string;
-    firstName: string;
-    lastName: string;
-  }) {
+  public async handleGoogleCallback(googleUser: GoogleUserType) {
     if (!googleUser) {
       throw new UnauthorizedException("Google user data is missing");
     }
