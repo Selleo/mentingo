@@ -12,7 +12,6 @@ import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
-  NewUserEmail,
   PasswordRecoveryEmail,
   WelcomeEmail,
 } from "@repo/email-templates";
