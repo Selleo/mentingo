@@ -998,6 +998,7 @@
       "aiMentorLesson": {
         "sendMessage": "Napisz wiadomość...",
         "check": "Sprawdź",
+        "retake": "Powtórz",
         "aiMentorName": "AI Mentor",
         "userName": "Użytkownik",
         "typing": "Pisze odpowiedź...",

@@ -19,7 +19,7 @@ export class SummaryService {
     private readonly messageService: MessageService,
   ) {}
 
-  async summarizeIfNeeded(threadId: UUIDType) {
+  async summarizeThreadOnTokenThreshold(threadId: UUIDType) {
     const tokens = await this.aiRepository.getTokenSumForThread(threadId, false);
 
     if (Number(tokens.total) > THRESHOLD) {
@@ -52,7 +52,7 @@ export class SummaryService {
       .map((msg: { role: MessageRole; content: string }) => `${msg.role}: ${msg.content}`)
       .join("\n");
 
-    const summaryPrompt = SUMMARY_PROMPT(mappedHistory, language.language);
+    const summaryPrompt = SUMMARY_PROMPT(mappedHistory, language);
     const summarized = await this.chatService.generatePrompt(summaryPrompt, OPENAI_MODELS.BASIC);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, summarized);
 

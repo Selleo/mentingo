@@ -998,6 +998,7 @@
         "sendMessage": "Write a message...",
         "check": "Check",
         "aiMentorName": "AI Mentor",
+        "retake": "Retake",
         "userName": "User",
         "typing": "Typing a response...",
         "send": "Send",

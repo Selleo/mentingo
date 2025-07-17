@@ -17,14 +17,8 @@ const ChatLoader = () => {
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <div className="flex animate-pulse space-x-1">
             <div className="size-2 animate-bounce rounded-full bg-gray-400"></div>
-            <div
-              className="size-2 animate-bounce rounded-full bg-gray-400"
-              style={{ animationDelay: "0.1s" }}
-            ></div>
-            <div
-              className="size-2 animate-bounce rounded-full bg-gray-400"
-              style={{ animationDelay: "0.2s" }}
-            ></div>
+            <div className="size-2 animate-bounce rounded-full bg-gray-400 delay-100"></div>
+            <div className="size-2 animate-bounce rounded-full bg-gray-400 delay-200"></div>
           </div>
           <span>{t("studentCourseView.lesson.aiMentorLesson.typing")}</span>
         </div>

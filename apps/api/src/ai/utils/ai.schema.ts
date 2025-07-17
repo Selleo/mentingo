@@ -69,10 +69,17 @@ export const aiMentorLessonSchema = Type.Object({
 });
 
 export const aiJudgeJudgementSchema = Type.Object({
-  summary: Type.String(),
-  minScore: Type.Integer(),
-  score: Type.Integer(),
-  maxScore: Type.Integer(),
+  summary: Type.String({
+    description:
+      "Supportive overview of what was done well, and how to improve — but NEVER mention grading rules, criteria, numbers, or conditions.",
+  }),
+  minScore: Type.Integer({
+    description: "Minimum score required to pass implied from the lesson conditions",
+  }),
+  score: Type.Integer({ description: "Score implied from the user conversation" }),
+  maxScore: Type.Integer({
+    description: "Maximum score possible to get implied from the lesson conditions",
+  }),
 });
 
 export const responseAiJudgeJudgementSchema = Type.Intersect([
@@ -88,12 +95,10 @@ export const threadOwnershipSchema = Type.Object({
   userId: UUIDSchema,
 });
 
-export const responseJudgeSchema = Type.Intersect([
-  responseAiJudgeJudgementSchema,
-  Type.Object({
-    status: Type.Enum(THREAD_STATUS),
-  }),
-]);
+export const responseJudgeSchema = Type.Object({
+  summary: Type.String(),
+  passed: Type.Boolean(),
+});
 
 export const streamChatSchema = Type.Object({
   threadId: UUIDSchema,

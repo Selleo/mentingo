@@ -17,6 +17,7 @@ const ChatMessage = (message: ChatMessageProps) => {
 
   const isAI = message.role === "assistant";
   let userName = t("studentCourseView.lesson.aiMentorLesson.aiMentorName");
+
   if (!isAI) {
     userName =
       message.user?.name ||
@@ -24,6 +25,7 @@ const ChatMessage = (message: ChatMessageProps) => {
       `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim() ||
       t("studentCourseView.lesson.aiMentorLesson.userName");
   }
+
   return (
     <div key={message.id} className="flex items-start gap-x-3">
       <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full">

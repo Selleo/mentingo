@@ -1661,16 +1661,9 @@ export interface StreamChatBody {
 }
 
 export interface JudgeThreadResponse {
-  data: ({
+  data: {
     summary: string;
-    minScore: number;
-    score: number;
-    maxScore: number;
-  } & {
     passed: boolean;
-    percentage: number;
-  }) & {
-    status: "active" | "completed" | "archived";
   };
 }
 

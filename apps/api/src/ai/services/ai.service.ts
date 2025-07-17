@@ -67,7 +67,7 @@ export class AiService {
 
   async streamMessage(data: StreamChatBody, model: OpenAIModels, userId: UUIDType) {
     await this.isThreadActive(data.threadId, userId);
-    await this.summaryService.summarizeIfNeeded(data.threadId);
+    await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
 
     const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
 
@@ -141,7 +141,7 @@ export class AiService {
         tokenCount,
       });
 
-      return judged;
+      return { data: { summary: judged.data.summary, passed: judged.data.passed } };
     });
   }
 

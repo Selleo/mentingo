@@ -14,7 +14,7 @@ import {
   type ResponseThreadMessageBody,
   responseThreadMessageSchema,
   responseThreadSchema,
-  StreamChatBody,
+  type StreamChatBody,
   streamChatSchema,
 } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";

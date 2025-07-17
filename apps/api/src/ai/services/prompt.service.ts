@@ -51,12 +51,17 @@ export class PromptService {
 
   async setSystemPrompt(data: ThreadOwnershipBody) {
     const lang = await this.aiRepository.findThreadLanguage(data.threadId);
-    const mentorLesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
+    const { title, instructions } = await this.aiRepository.findMentorLessonByThreadId(
+      data.threadId,
+    );
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
 
-    delete mentorLesson.conditions;
-
-    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(mentorLesson, groups, data, lang.language);
+    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(
+      { title, instructions },
+      groups,
+      data,
+      lang.language,
+    );
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
 
     await this.aiRepository.insertMessage({

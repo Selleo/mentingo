@@ -17,7 +17,7 @@ export class MessageService {
 
   async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
     const history = await this.aiRepository.findMessageHistory(threadId, archived, role);
-    const language = await this.aiRepository.findThreadLanguage(threadId);
+    const { language } = await this.aiRepository.findThreadLanguage(threadId);
     return { history, language };
   }
 }

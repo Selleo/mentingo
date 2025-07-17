@@ -68,7 +68,7 @@ export const LessonContent = ({
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
-      .with("ai_mentor", () => <AiMentorLesson lesson={lesson} />)
+      .with("ai_mentor", () => <AiMentorLesson />)
       .otherwise(() => null);
 
   const handleMarkLessonAsComplete = () => {

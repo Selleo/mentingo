@@ -2,18 +2,31 @@ import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 
 import { ApiClient } from "~/api/api-client";
 
-export const currentThreadQueryOptions = (threadId: string) =>
+export const currentThreadQueryOptions = (
+  lessonId: string,
+  isThreadLoading: boolean,
+  threadId?: string,
+) =>
   queryOptions({
-    queryKey: ["threadMessages", { threadId }],
+    enabled: !!threadId && !isThreadLoading,
+    queryKey: ["threadMessages", { lessonId }],
     queryFn: async () => {
       const response = await ApiClient.api.aiControllerGetThreadMessages({ thread: threadId });
       return response.data;
     },
   });
 
-export function useCurrentThreadMessages(threadId: string) {
-  return useQuery(currentThreadQueryOptions(threadId));
+export function useCurrentThreadMessages(
+  lessonId: string,
+  isThreadLoading: boolean,
+  threadId?: string,
+) {
+  return useQuery(currentThreadQueryOptions(lessonId, isThreadLoading, threadId));
 }
-export function useSuspenseCurrentThreadMessages(threadId: string) {
-  return useSuspenseQuery(currentThreadQueryOptions(threadId));
+export function useSuspenseCurrentThreadMessages(
+  lessonId: string,
+  isThreadLoading: boolean,
+  threadId?: string,
+) {
+  return useSuspenseQuery(currentThreadQueryOptions(lessonId, isThreadLoading, threadId));
 }
