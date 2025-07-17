@@ -1,28 +1,31 @@
 import { z } from "zod";
 
-export const passwordValidationRules = {
-  minLength: 8,
-  hasUpperCase: /[A-Z]/,
-  hasLowerCase: /[a-z]/,
-  hasNumber: /\d/,
-  hasSpecialChar: /[!@#$%^&*()_+\-=[\]{};:'",.<>?]/,
-};
+import { passwordValidationRules } from "~/modules/Auth/constants";
 
-export const validatePassword = (password: string) => ({
+export const passwordSchema = z
+  .string()
+  .min(passwordValidationRules.minLength, "passwordValidation.minLength")
+  .refine(
+    (password) => passwordValidationRules.hasUpperCase.test(password),
+    "passwordValidation.hasUpperCase",
+  )
+  .refine(
+    (password) => passwordValidationRules.hasLowerCase.test(password),
+    "passwordValidation.hasLowerCase",
+  )
+  .refine(
+    (password) => passwordValidationRules.hasNumber.test(password),
+    "passwordValidation.hasNumber",
+  )
+  .refine(
+    (password) => passwordValidationRules.hasSpecialChar.test(password),
+    "passwordValidation.hasSpecialChar",
+  );
+
+export const validatePasswordStrength = (password: string) => ({
   minLength: password.length >= passwordValidationRules.minLength,
   hasUpperCase: passwordValidationRules.hasUpperCase.test(password),
   hasLowerCase: passwordValidationRules.hasLowerCase.test(password),
   hasNumber: passwordValidationRules.hasNumber.test(password),
   hasSpecialChar: passwordValidationRules.hasSpecialChar.test(password),
-});
-
-export const passwordSchema = z.object({
-  oldPassword: z
-    .string()
-    .min(passwordValidationRules.minLength)
-    .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:'",.<>?]).+$/),
-  newPassword: z
-    .string()
-    .min(passwordValidationRules.minLength)
-    .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:'",.<>?]).+$/),
 });

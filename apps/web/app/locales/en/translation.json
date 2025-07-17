@@ -160,7 +160,9 @@
       "password": "Password",
       "confirmPassword": "Confirm password"
     },
-    "validation": {},
+    "validation": {
+      "passwordsDontMatch": "Passwords do not match"
+    },
 
     "button": {
       "changePassword": "Change password"
@@ -840,8 +842,7 @@
     "validation": {
       "firstName": "First name is required",
       "lastName": "Last name is required",
-      "email": "Invalid email",
-      "password": "Password must be at least 8 characters"
+      "email": "Invalid email"
     }
   },
   "courseChapterView": {

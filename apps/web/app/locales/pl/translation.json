@@ -842,8 +842,7 @@
     "validation": {
       "firstName": "Imię jest wymagane",
       "lastName": "Nazwisko jest wymagane",
-      "email": "Nieprawidłowy email",
-      "password": "Hasło musi mieć co najmniej 8 znaków"
+      "email": "Nieprawidłowy email"
     }
   },
   "courseChapterView": {

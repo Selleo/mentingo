@@ -38,7 +38,7 @@ describe.skip("Register page", () => {
     await user.type(screen.getByLabelText("First name"), "Name");
     await user.type(screen.getByLabelText("Last name"), "Surname");
     await user.type(screen.getByLabelText("Email"), "test@example.com");
-    await user.type(screen.getByLabelText("Password"), "password123");
+    await user.type(screen.getByLabelText("Password"), "Password123@");
 
     await user.click(screen.getByRole("button", { name: "Create an account" }));
 
