@@ -6,13 +6,14 @@ import { z } from "zod";
 
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import LogoUrl from "~/assets/menitngo_logo_light_transparent.svg";
-import { GoogleOAuthButton } from "~/components/Auth/GoogleOAuthButton";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
+
+import { SocialLogin } from "./components";
 
 import type { LoginBody } from "~/api/generated-api";
 
@@ -92,20 +93,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {isGoogleOAuthEnabled && (
-          <div className="relative mt-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                {t("loginView.other.orContinueWith")}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {isGoogleOAuthEnabled && <GoogleOAuthButton />}
+        {isGoogleOAuthEnabled && <SocialLogin isGoogleOAuthEnabled={isGoogleOAuthEnabled} />}
 
         <div className="mt-4 text-center text-sm">
           {t("loginView.other.dontHaveAccount")}{" "}
