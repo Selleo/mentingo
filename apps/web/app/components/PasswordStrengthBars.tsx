@@ -1,38 +1,29 @@
-import { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
 
-import { validatePassword } from "../modules/Dashboard/Settings/schema/password.schema";
+import { getBarColor } from "~/modules/Auth/utils";
+import { validatePasswordStrength } from "~/modules/Dashboard/Settings/schema/password.schema";
 
 import type React from "react";
 
 interface PasswordStrengthBarsProps {
-  password: string;
+  fieldName: string;
 }
 
-const PasswordStrengthBars: React.FC<PasswordStrengthBarsProps> = ({ password }) => {
-  const [passwordScore, setPasswordScore] = useState(0);
+const PasswordStrengthBars: React.FC<PasswordStrengthBarsProps> = ({ fieldName }) => {
+  const { watch } = useFormContext();
+  const password = watch(fieldName) || "";
 
-  useEffect(() => {
-    const validation = validatePassword(password);
-    const score = Object.values(validation).filter(Boolean).length;
-    setPasswordScore(score);
-  }, [password]);
+  const validation = validatePasswordStrength(password);
+  const passwordStrength = Object.values(validation).filter(Boolean).length;
 
   return (
     <div className="mb-3">
       <div className="-mx-1 flex">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="w-1/5 px-1">
+        {[...Array(5)].map((_, index) => (
+          <div key={index} className="w-1/5 px-1">
             <div
-              className={`h-2 rounded-xl transition-colors ${
-                i < passwordScore
-                  ? passwordScore <= 2
-                    ? "bg-red-400"
-                    : passwordScore <= 4
-                      ? "bg-yellow-400"
-                      : "bg-teal-500"
-                  : "bg-gray-200"
-              }`}
-            ></div>
+              className={`h-2 rounded-xl transition-colors ${getBarColor(index, passwordStrength)}`}
+            />
           </div>
         ))}
       </div>

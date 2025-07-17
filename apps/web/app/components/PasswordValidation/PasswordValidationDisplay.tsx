@@ -1,33 +1,23 @@
-import { useEffect } from "react";
+import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import {
-  validatePassword,
-  passwordValidationRules,
-} from "../../modules/Dashboard/Settings/schema/password.schema";
+import { passwordValidationRules } from "~/modules/Auth/constants";
+
+import { validatePasswordStrength } from "../../modules/Dashboard/Settings/schema/password.schema";
 import PasswordStrengthBars from "../PasswordStrengthBars";
 
 import { PasswordValidationRuleItem } from "./PasswordValidationRuleItem";
 
 interface PasswordValidationDisplayProps {
-  password: string;
-  onValidationChange?: (allValidationPassed: boolean) => void;
+  fieldName: string;
 }
 
-export default function PasswordValidationDisplay({
-  password,
-  onValidationChange,
-}: PasswordValidationDisplayProps) {
+export default function PasswordValidationDisplay({ fieldName }: PasswordValidationDisplayProps) {
   const { t } = useTranslation();
+  const { watch } = useFormContext();
 
-  const validationResult = validatePassword(password);
-  const allValidationPassed = Object.values(validationResult).every(Boolean);
-
-  useEffect(() => {
-    if (onValidationChange) {
-      onValidationChange(allValidationPassed);
-    }
-  }, [allValidationPassed, onValidationChange]);
+  const password = watch(fieldName) || "";
+  const validationResult = validatePasswordStrength(password);
 
   const validationRulesConfig = [
     {
@@ -57,8 +47,7 @@ export default function PasswordValidationDisplay({
 
   return (
     <div id="password-hints" className="mb-3">
-      <PasswordStrengthBars password={password} />
-      <div></div>
+      <PasswordStrengthBars fieldName={fieldName} />
       <h4 className="my-2 text-sm font-semibold text-gray-800">
         {t("passwordValidationDisplay.header")}
       </h4>

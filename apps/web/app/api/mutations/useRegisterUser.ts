@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
-import { extractPasswordValidationErrors } from "~/utils/PasswordValidationErrorHandler";
 
 import { ApiClient } from "../api-client";
 
@@ -27,10 +26,9 @@ export function useRegisterUser() {
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
-        const errorMessage = extractPasswordValidationErrors(error);
         return toast({
           variant: "destructive",
-          description: errorMessage,
+          description: error.response?.data.message,
         });
       }
       toast({
