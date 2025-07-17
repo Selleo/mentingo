@@ -174,19 +174,28 @@ export class UserService {
     return updatedUserDetails;
   }
 
-  async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody) {
+  async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody, file?: Express.Multer.File) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
     }
 
+    if (!data && !file) {
+      throw new NotFoundException("No data provided for user profile update");
+    }
+
+    if (file && !data.file) {
+      const { fileKey } = await this.fileService.uploadFile(file, "user");
+      data.file = fileKey;
+    }
+
     await this.db.transaction(async (tx) => {
       const userUpdates = {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
-        ...((data.profilePictureS3Key || data.profilePictureS3Key === null) && {
-          profilePictureS3Key: data.profilePictureS3Key,
+        ...((data.file || data.file === null) && {
+          profilePictureS3Key: data.file,
         }),
       };
 

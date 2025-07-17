@@ -21,7 +21,7 @@ import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
-import type { UpdateUserProfileBody } from "~/api/generated-api";
+import type { UpdateUserProfileBody } from "./types";
 
 const updateUserProfileSchema = z.object({
   firstName: z.string().optional(),
@@ -30,7 +30,7 @@ const updateUserProfileSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().optional(),
   jobTitle: z.string().optional(),
-  profilePictureS3Key: z.string().optional(),
+  file: z.instanceof(File).nullable().optional(),
 });
 
 export default function ProfilePage() {
@@ -66,17 +66,19 @@ export default function ProfilePage() {
   const { mutate: updateUserProfile } = useUpdateUserProfile();
 
   const onSubmit = (data: UpdateUserProfileBody) => {
-    if (isDirty || data.profilePictureS3Key !== undefined) {
+    if (isDirty || data.file || data.file === null) {
       const filteredData = filterChangedData(data, userDetails as Partial<UpdateUserProfileBody>);
 
-      if (data.profilePictureS3Key === "") {
-        filteredData.profilePictureS3Key = null;
+      if (data.file === null) {
+        filteredData.file = null;
       }
 
       updateUserProfile({
         data: { ...filteredData },
         id,
+        file: data.file || undefined,
       });
+
       reset();
       setIsEditing(false);
     }
@@ -131,7 +133,7 @@ export default function ProfilePage() {
               contactEmail: userDetails?.contactEmail || "",
               contactPhone: userDetails?.contactPhone || "",
             }}
-            thumbnailUrl={userDetails?.profilePictureUrl || undefined}
+            thumbnailUrl={userDetails?.profilePictureUrl}
             isAdminLike={hasPermission}
           />
         ) : (

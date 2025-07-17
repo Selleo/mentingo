@@ -4,8 +4,8 @@ import { EditModeActionButtons } from "./EditModeActionButtons";
 import { OwnerViewActionButtons } from "./OwnerViewActionButtons";
 import { VisitorViewActionButtons } from "./VisitorViewActionButtons";
 
+import type { UpdateUserProfileBody } from "../types";
 import type { UseFormHandleSubmit, UseFormReset } from "react-hook-form";
-import type { UpdateUserProfileBody } from "~/api/generated-api";
 
 type ProfileActionButtonsProps = {
   isEditing: boolean;

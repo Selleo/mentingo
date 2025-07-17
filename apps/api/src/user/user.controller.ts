@@ -7,8 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
+import { ApiBody } from "@nestjs/swagger";
+import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -26,6 +31,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUser.schema";
+import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
@@ -164,15 +170,34 @@ export class UserController {
   }
 
   @Patch("profile")
-  @Validate({
-    response: baseResponse(Type.Object({ message: Type.String() })),
-    request: [{ type: "body", schema: updateUserProfileSchema }],
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      anyOf: [
+        {
+          type: "object",
+          properties: {
+            file: {
+              type: "string",
+              format: "binary",
+            },
+            data: {
+              format: "string",
+              type: "string",
+            },
+          },
+        },
+      ],
+    },
   })
   async updateUserProfile(
-    @Body() data: UpdateUserProfileBody,
+    @Body(new ValidateMultipartPipe(updateUserProfileSchema))
+    userInfo: { data: UpdateUserProfileBody },
     @CurrentUser("userId") currentUserId: UUIDType,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.usersService.updateUserProfile(currentUserId, data);
+    await this.usersService.updateUserProfile(currentUserId, userInfo.data, file);
 
     return new BaseResponse({
       message: "User profile updated successfully",

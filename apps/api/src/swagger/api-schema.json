@@ -585,22 +585,30 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateUserProfileBody"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "format": "binary"
+                      },
+                      "data": {
+                        "format": "string",
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserProfileResponse"
-                }
-              }
-            }
+            "description": ""
           }
         }
       }
@@ -3426,59 +3434,6 @@
             },
             "required": [
               "id",
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserProfileBody": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "profilePictureS3Key": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "description": {
-            "type": "string"
-          },
-          "contactEmail": {
-            "format": "email",
-            "type": "string"
-          },
-          "contactPhone": {
-            "type": "string"
-          },
-          "jobTitle": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateUserProfileResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
               "message"
             ]
           }

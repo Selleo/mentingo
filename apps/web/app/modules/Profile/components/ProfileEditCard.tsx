@@ -2,7 +2,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Controller, type Control, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
@@ -10,7 +9,7 @@ import { Label } from "~/components/ui/label";
 
 import { type EditProfileFieldType, ProfileEditFieldRenderer } from "./ProfileEditFieldRenderer";
 
-import type { UpdateUserProfileBody } from "~/api/generated-api";
+import type { UpdateUserProfileBody } from "../types";
 
 const personalInfoFields: EditProfileFieldType[] = [
   { name: "firstName", iconName: "User", type: "text" },
@@ -28,7 +27,7 @@ type ProfileEditCardProps = {
   user: UpdateUserProfileBody;
   setValue: UseFormSetValue<UpdateUserProfileBody>;
   control: Control<UpdateUserProfileBody>;
-  thumbnailUrl?: string;
+  thumbnailUrl: string | null;
   isAdminLike: boolean;
 };
 
@@ -39,33 +38,30 @@ export const ProfileEditCard = ({
   setValue,
   thumbnailUrl,
 }: ProfileEditCardProps) => {
-  const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(thumbnailUrl);
+  const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | null>(thumbnailUrl);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { t } = useTranslation();
 
-  const { mutateAsync: uploadFile } = useUploadFile();
-
   const handleImageUpload = useCallback(
     async (file: File) => {
       setIsUploading(true);
       try {
-        const result = await uploadFile({ file, resource: "user" });
-        setValue("profilePictureS3Key", result.fileKey, { shouldValidate: true });
-        setDisplayThumbnailUrl(result.fileUrl);
+        setDisplayThumbnailUrl(URL.createObjectURL(file));
+        setValue("file", file);
       } catch (error) {
         console.error("Error uploading image:", error);
       } finally {
         setIsUploading(false);
       }
     },
-    [setValue, uploadFile],
+    [setValue],
   );
 
   const removeThumbnail = () => {
-    setValue("profilePictureS3Key", "");
-    setDisplayThumbnailUrl(undefined);
+    setDisplayThumbnailUrl(null);
+    setValue("file", null);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -127,14 +123,17 @@ export const ProfileEditCard = ({
           {t("contentCreatorView.other.appearanceDescription")}
         </p>
         <Controller
-          key="profilePictureS3Key"
-          name="profilePictureS3Key"
+          key="file"
+          name="file"
           control={control}
           render={({ field }) => (
             <div className="mb-4 flex flex-col gap-y-2">
               <Label htmlFor="fileUrl">{t("contentCreatorView.field.uploadThumbnailLabel")}</Label>
               <ImageUploadInput
-                field={{ ...field, value: field.value ?? undefined }}
+                field={{
+                  ...field,
+                  value: displayThumbnailUrl || undefined,
+                }}
                 handleImageUpload={handleImageUpload}
                 isUploading={isUploading}
                 imageUrl={displayThumbnailUrl}
