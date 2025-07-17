@@ -6,6 +6,7 @@ import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { useToast } from "~/components/ui/use-toast";
 
 import { type EditProfileFieldType, ProfileEditFieldRenderer } from "./ProfileEditFieldRenderer";
 
@@ -43,6 +44,7 @@ export const ProfileEditCard = ({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   const handleImageUpload = useCallback(
     async (file: File) => {
@@ -51,12 +53,12 @@ export const ProfileEditCard = ({
         setDisplayThumbnailUrl(URL.createObjectURL(file));
         setValue("file", file);
       } catch (error) {
-        console.error("Error uploading image:", error);
+        toast({ description: `Error uploading image: ${error}`, variant: "destructive" });
       } finally {
         setIsUploading(false);
       }
     },
-    [setValue],
+    [setValue, toast],
   );
 
   const removeThumbnail = () => {
