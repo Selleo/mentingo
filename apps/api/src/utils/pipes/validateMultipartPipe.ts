@@ -17,7 +17,7 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
       throw new BadRequestException("Invalid multipart form data");
     }
 
-    const parsedData = this.parseMultipartToJson(value);
+    const parsedData = this.parseMultipartToJSON(value);
 
     if (this.validator.Check(parsedData)) {
       return parsedData as Static<T>;
@@ -33,7 +33,7 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     }
   }
 
-  private parseMultipartToJson(data: any): Record<string, any> {
+  private parseMultipartToJSON(data: any): Record<string, any> {
     const result: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(data)) {
@@ -57,7 +57,7 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
       return value;
     }
 
-    if (this.isJsonString(value)) {
+    if (this.isJSONString(value)) {
       try {
         const parsed = JSON.parse(value);
         if (typeof parsed === "object" && parsed !== null) {
@@ -96,7 +96,7 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     return obj;
   }
 
-  private isJsonString(value: string): boolean {
+  private isJSONString(value: string): boolean {
     const trimmed = value.trim();
     return (
       (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
