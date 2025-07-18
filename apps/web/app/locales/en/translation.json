@@ -191,7 +191,8 @@
       "edit": "Edit",
       "share": "Share profile",
       "cancel": "Cancel",
-      "confirm": "Confirm"
+      "confirm": "Confirm",
+      "deleteProfilePicture": "Delete profile picture"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard"
@@ -208,7 +209,8 @@
       "jobTitle": "Title",
       "jobTitlePlaceholder": "Enter your title",
       "description": "Bio-note",
-      "descriptionPlaceholder": "Enter a brief bio-note"
+      "descriptionPlaceholder": "Enter a brief bio-note",
+      "uploadThumbnailLabel": "Upload Thumbnail"
     },
     "toast": {
       "profileLinkCopied": "Profile link copied!",
@@ -219,6 +221,8 @@
       "personalInfoDescription": "Manage your basic account information",
       "aboutTitle": "About",
       "aboutDescription": "Tell more about yourself",
+      "appearanceTitle": "Appearance",
+      "appearanceDescription": "Upload your profile picture",
       "pageTitle": "Profile",
       "about": "About",
       "contact": "Contact",

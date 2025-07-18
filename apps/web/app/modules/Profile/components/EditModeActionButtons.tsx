@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 
+import type { UpdateUserProfileBody } from "../types";
 import type { UseFormHandleSubmit, UseFormReset } from "react-hook-form";
-import type { UpdateUserProfileBody } from "~/api/generated-api";
 
 type EditModeActionButtonsProps = {
   handleSubmit: UseFormHandleSubmit<UpdateUserProfileBody, undefined>;
