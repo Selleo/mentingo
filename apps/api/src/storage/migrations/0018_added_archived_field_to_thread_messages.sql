@@ -1,1 +1,0 @@
-ALTER TABLE "ai_mentor_thread_messages" ADD COLUMN "archived" boolean DEFAULT false;

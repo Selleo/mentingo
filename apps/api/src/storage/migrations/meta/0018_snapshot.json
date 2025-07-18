@@ -1,6 +1,6 @@
 {
-  "id": "744b1ae6-36d7-4fb6-88e5-da4ded1bba32",
-  "prevId": "e57d19d5-6921-421f-82f5-4fbb49a5dfba",
+  "id": "abe95183-f4c0-4304-827d-5023cb95955b",
+  "prevId": "0ae71fd6-32cc-48a7-b789-6fee6897d072",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -56,6 +56,94 @@
           "tableTo": "lessons",
           "columnsFrom": [
             "lesson_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ai_mentor_student_lesson_progress": {
+      "name": "ai_mentor_student_lesson_progress",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "student_lesson_progress_id": {
+          "name": "student_lesson_progress_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "min_score": {
+          "name": "min_score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_score": {
+          "name": "max_score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "passed": {
+          "name": "passed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ai_mentor_student_lesson_progress_student_lesson_progress_id_student_lesson_progress_id_fk": {
+          "name": "ai_mentor_student_lesson_progress_student_lesson_progress_id_student_lesson_progress_id_fk",
+          "tableFrom": "ai_mentor_student_lesson_progress",
+          "tableTo": "student_lesson_progress",
+          "columnsFrom": [
+            "student_lesson_progress_id"
           ],
           "columnsTo": [
             "id"
@@ -941,8 +1029,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "description": {
-          "name": "description",
+        "characteristic": {
+          "name": "characteristic",
           "type": "text",
           "primaryKey": false,
           "notNull": false

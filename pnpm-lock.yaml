@@ -204,7 +204,7 @@ importers:
         specifier: 17.0.0
         version: 17.0.0
       tiktoken:
-        specifier: ^1.0.21
+        specifier: 1.0.21
         version: 1.0.21
       ts-pattern:
         specifier: 5.2.0

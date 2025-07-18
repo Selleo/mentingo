@@ -228,7 +228,7 @@ export class AiRepository {
     const groupCharacteristics = await this.db
       .select({
         name: groups.name,
-        characteristic: groups.description,
+        characteristic: groups.characteristic,
       })
       .from(groups)
       .innerJoin(groupUsers, eq(groups.id, groupUsers.groupId))
