@@ -32,6 +32,7 @@ import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
+import type { AdminSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
 @Injectable()
@@ -344,17 +345,24 @@ export class UserService {
     });
   }
 
-  public async getAdminsWithSettings() {
-    const adminsWithSettings = await this.db
+  public async getAdminsToNotifyAboutNewUser() {
+    const allAdmins = await this.db
       .select({
         user: users,
         settings: settings,
       })
       .from(users)
       .leftJoin(settings, eq(users.id, settings.userId))
-      .where(and(eq(users.role, USER_ROLES.ADMIN)));
+      .where(eq(users.role, USER_ROLES.ADMIN));
 
-    return adminsWithSettings;
+    const adminsToNotify = allAdmins.filter((admin) => {
+      return (
+        (admin.settings?.settings as AdminSettingsJSONContentSchema)?.adminNewUserNotification ===
+        true
+      );
+    });
+
+    return adminsToNotify;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {

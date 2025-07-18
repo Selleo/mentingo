@@ -5,61 +5,27 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { NewUserEmail } from "@repo/email-templates";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { EmailService } from "src/common/emails/emails.service";
 import { settings } from "src/storage/schema";
-import { UserService } from "src/user/user.service";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
-import type { CommonUser } from "src/common/schemas/common-user.schema";
-import type { UserSettings } from "src/common/types";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class SettingsService {
-  constructor(
-    @Inject("DB") private readonly db: DatabasePg,
-    private userService: UserService,
-    private emailService: EmailService,
-  ) {}
-
-  public async notifyAdminsAboutNewUser(user: CommonUser) {
-    const { firstName, lastName, email } = user;
-
-    const { text, html } = new NewUserEmail({
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-    });
-
-    const allAdmins = await this.userService.getAdminsWithSettings();
-
-    const adminsToNotify = allAdmins.filter((admin) => {
-      return (admin.settings?.settings as UserSettings)?.adminNewUserNotification === true;
-    });
-
-    await Promise.all(
-      adminsToNotify.map((admin) => {
-        return this.emailService.sendEmail({
-          to: admin.user.email,
-          subject: "A new user has registered on your platform",
-          text,
-          html,
-          from: process.env.SES_EMAIL || "",
-        });
-      }),
-    );
-  }
+  constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
   public async createSettings(
     userId: UUIDType,
-    createSettings?: SettingsJSONContentSchema,
+    userRole: UserRole,
+    customSettings?: Partial<SettingsJSONContentSchema>,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     if (!userId) {
@@ -75,12 +41,19 @@ export class SettingsService {
       throw new ConflictException("Settings already exists");
     }
 
+    const defaultSettings = this.getDefaultSettingsForRole(userRole);
+
+    const finalSettings = {
+      ...defaultSettings,
+      ...customSettings,
+    };
+
     const [createdSettings] = await dbInstance
       .insert(settings)
       .values({
         userId,
         createdAt: new Date().toISOString(),
-        settings: createSettings ?? {},
+        settings: finalSettings,
       })
       .returning();
 
@@ -131,5 +104,23 @@ export class SettingsService {
       .returning();
 
     return updated;
+  }
+
+  private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
+    switch (role) {
+      case USER_ROLES.ADMIN:
+        return {
+          language: "en",
+          adminNewUserNotification: false,
+        };
+      case USER_ROLES.STUDENT:
+        return {
+          language: "en",
+        };
+      default:
+        return {
+          language: "en",
+        };
+    }
   }
 }
