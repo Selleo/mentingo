@@ -574,6 +574,20 @@
         "breadcrumbs": {
           "back": "Back"
         },
+        "settings": {
+          "title": "Settings",
+          "passingtThreshold": "Passing threshold (%)",
+          "attemptsLimit": "Attempts limit",
+          "quizCooldown": "Time lock after failed attempts (in hours)",
+          "numberOfQuestions": "{{count1}} of {{count2}} questions",
+          "noQuestions": "No questions"
+        },
+        "toolTip": {
+          "switch": "If enabled, the student has a limited number of quiz attempts.",
+          "passingtThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
+          "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
+          "quizCooldown": "Duration of the quiz lock after all attempts are used."
+        },
         "validation": {
           "optionTextRequired": "Option text is required",
           "atLeastOneOptionRequired": "At least one option is required",
@@ -831,10 +845,17 @@
       "multiple": "Multiple",
       "fillInTheBlanks": "Fill in the blanks.",
       "selectQuestion": "select question.",
-      "trueOrFalseQuestion": "True or false question."
+      "trueOrFalseQuestion": "True or false question.",
+      "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
+      "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)"
     },
     "placeholder": {
       "openQuestion": "Type your answer here"
+    },
+    "tooltip": {
+      "retakeAvailableIn": "Locked for {{time}} hours after last retake.",
+      "cooldown": "Quiz will be locked for {{time}} hours after the last attempt.",
+      "noCooldown": "No cooldown period."
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
@@ -844,7 +865,8 @@
       "previous": "Previous",
       "complete": "Complete",
       "next": "Next",
-      "submit": "Submit"
+      "submit": "Submit",
+      "retake": "Retake"
     },
     "sideSection": {
       "header": "Table of content:",

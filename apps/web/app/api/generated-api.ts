@@ -973,7 +973,7 @@ export interface GetLessonByIdResponse {
     quizCooldown: number | null;
     isQuizPassed: boolean | null;
     attempts: number | null;
-    isThereStudentAnswer: boolean | null;
+    isAnswered: boolean | null;
     updatedAt: string | null;
     displayOrder: number;
     isExternal?: boolean;

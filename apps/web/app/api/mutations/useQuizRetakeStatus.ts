@@ -6,7 +6,7 @@ export function useQuizRetakeStatus(
   lastUpdate: string | null,
   quizCooldown: number | null,
 ) {
-  const [cooldownTimeLeft, setCooldownTimeLeft] = useState<number | null>(null);
+  const [hoursLeft, setHoursLeft] = useState<number | null>(null);
 
   useEffect(() => {
     if (
@@ -19,34 +19,43 @@ export function useQuizRetakeStatus(
       const cooldownEnd = new Date(lastUpdateDate.getTime() + quizCooldown * 60 * 60 * 1000);
       const now = new Date();
 
-      const secondsLeft = Math.max(0, Math.floor((cooldownEnd.getTime() - now.getTime()) / 1000));
-      if (secondsLeft > 0) {
-        setCooldownTimeLeft(secondsLeft);
+      const hoursRemaining = Math.max(
+        0,
+        Math.ceil((cooldownEnd.getTime() - now.getTime()) / (1000 * 60 * 60)),
+      );
+      if (hoursRemaining > 0) {
+        setHoursLeft(hoursRemaining);
       } else {
-        setCooldownTimeLeft(null);
+        setHoursLeft(null);
       }
     }
   }, [attempts, attemptsLimit, lastUpdate, quizCooldown]);
 
   useEffect(() => {
-    if (cooldownTimeLeft === null) return;
-    const interval = setInterval(() => {
-      setCooldownTimeLeft((prev) => {
-        if (prev === null) return null;
-        if (prev <= 1) {
-          clearInterval(interval);
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (hoursLeft === null) return;
+
+    const interval = setInterval(
+      () => {
+        const lastUpdateDate = new Date(lastUpdate!);
+        const cooldownEnd = new Date(lastUpdateDate.getTime() + quizCooldown! * 60 * 60 * 1000);
+        const now = new Date();
+
+        const updatedHoursLeft = Math.max(
+          0,
+          Math.ceil((cooldownEnd.getTime() - now.getTime()) / (1000 * 60 * 60)),
+        );
+
+        setHoursLeft(updatedHoursLeft > 0 ? updatedHoursLeft : null);
+      },
+      60 * 60 * 1000,
+    );
 
     return () => clearInterval(interval);
-  }, [cooldownTimeLeft]);
+  }, [hoursLeft, lastUpdate, quizCooldown]);
 
   const canRetake = (() => {
     if (attemptsLimit === null || attempts === null) return true;
-    if (attempts <= attemptsLimit) return true;
+    if (attempts < attemptsLimit) return true;
     if (lastUpdate && quizCooldown) {
       const lastUpdateDate = new Date(lastUpdate);
       const cooldownEnd = new Date(lastUpdateDate.getTime() + quizCooldown * 60 * 60 * 1000);
@@ -55,5 +64,5 @@ export function useQuizRetakeStatus(
     return true;
   })();
 
-  return { cooldownTimeLeft, canRetake };
+  return { hoursLeft, canRetake };
 }

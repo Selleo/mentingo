@@ -19,7 +19,7 @@ import { useUserRole } from "~/hooks/useUserRole";
 
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
-import { formatTime, getUserAnswers, parseQuizFormData } from "./utils";
+import { leftAttemptsToDisplay, getUserAnswers, parseQuizFormData } from "./utils";
 
 import type { QuizForm } from "./types";
 import type { GetLessonByIdResponse } from "~/api/generated-api";
@@ -34,7 +34,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
   const { isAdminLike } = useUserRole();
 
   const questions = lesson.quizDetails?.questions;
-  const isUserSubmittedAnswer = Boolean(lesson.isThereStudentAnswer);
+  const isUserSubmittedAnswer = Boolean(lesson.isAnswered);
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
@@ -54,10 +54,8 @@ export const Quiz = ({ lesson }: QuizProps) => {
     },
   });
 
-  const attempts = lesson.attempts ?? 1;
-
-  const { cooldownTimeLeft, canRetake } = useQuizRetakeStatus(
-    attempts + 1,
+  const { hoursLeft, canRetake } = useQuizRetakeStatus(
+    lesson.attempts ?? 1,
     lesson.attemptsLimit,
     lesson.updatedAt,
     lesson.quizCooldown,
@@ -73,8 +71,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
     retakeQuiz.mutate();
   };
 
-  const threshold = lesson.thresholdScore ?? 0;
-  const requiredCorrect = Math.ceil((threshold * questions?.length) / 100);
+  const requiredCorrect = Math.ceil(((lesson.thresholdScore ?? 0) * questions?.length) / 100);
 
   return (
     <FormProvider {...methods}>
@@ -87,14 +84,21 @@ export const Quiz = ({ lesson }: QuizProps) => {
           });
         })}
       >
-        <div className="flex gap-x-2 self-end">
-          <div className="group relative">
-            <span> </span>
-            <span>
-              Próg zaliczenia: {lesson.thresholdScore}% ({requiredCorrect} of {questions.length}{" "}
-              questions)
-            </span>
-          </div>
+        <div className="flex w-full justify-between">
+          <span className="group relative">
+            {t("studentLessonView.other.score", {
+              score: lesson.quizDetails?.score ?? 0,
+              correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+              questionsNumber: questions.length,
+            })}
+          </span>
+          <span>
+            {t("studentLessonView.other.passingThreshold", {
+              threshold: lesson.thresholdScore,
+              correct: requiredCorrect,
+              questionsNumber: questions.length,
+            })}
+          </span>
         </div>
 
         <Questions questions={questions} isQuizCompleted={isUserSubmittedAnswer} />
@@ -117,15 +121,12 @@ export const Quiz = ({ lesson }: QuizProps) => {
                       }
                     >
                       <span>
-                        retake (
-                        {!canRetake && cooldownTimeLeft !== null
-                          ? 0
-                          : lesson.attemptsLimit !== null
-                            ? lesson.attemptsLimit - (lesson.attempts ?? 1) > 0
-                              ? lesson.attemptsLimit - (lesson.attempts ?? 1)
-                              : lesson.attemptsLimit
-                            : ""}
-                        )
+                        {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
+                          lesson.attempts,
+                          lesson.attemptsLimit,
+                          canRetake,
+                          hoursLeft,
+                        )}`}
                       </span>
                     </Button>
                   </div>
@@ -135,25 +136,16 @@ export const Quiz = ({ lesson }: QuizProps) => {
                   align="center"
                   className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                 >
-                  {!canRetake && cooldownTimeLeft !== null
-                    ? `Retake available in ${formatTime(cooldownTimeLeft)}`
-                    : `cooldown = ${lesson.quizCooldown ?? 0}`}
+                  {isUserSubmittedAnswer && !canRetake && hoursLeft !== null
+                    ? t("studentLessonView.tooltip.retakeAvailableIn", { time: hoursLeft })
+                    : lesson.quizCooldown
+                      ? t("studentLessonView.tooltip.cooldown", { time: lesson.quizCooldown })
+                      : t("studentLessonView.tooltip.noCooldown")}
                   <TooltipArrow className="fill-black" />
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          {!canRetake && cooldownTimeLeft !== null ? (
-            <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-              Retake available in {formatTime(cooldownTimeLeft)}
-            </div>
-          ) : (
-            <div className="absolute left-1/2 top-full mt-1 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100">
-              {" "}
-              cooldown = {lesson.quizCooldown ?? 0}
-            </div>
-          )}
-
           <Button
             type="submit"
             className="flex items-center gap-x-2"
@@ -162,9 +154,6 @@ export const Quiz = ({ lesson }: QuizProps) => {
             <span>{t("studentLessonView.button.submit")}</span>
             <Icon name="ArrowRight" className="h-auto w-4" />
           </Button>
-          <span>Próg zaliczenia: {lesson.thresholdScore ?? 0}%</span>
-          <span>Wynik {lesson.quizDetails?.score}</span>
-          <span>{lesson.isQuizPassed && "passed"}</span>
         </div>
       </form>
     </FormProvider>

@@ -1,4 +1,3 @@
-import * as Switch from "@radix-ui/react-switch";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
@@ -6,18 +5,10 @@ import { match } from "ts-pattern";
 import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList";
 import { Button } from "~/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  FormDescription,
-} from "~/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useLeaveModal } from "~/context/LeaveModalContext";
-import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
@@ -31,6 +22,7 @@ import MatchWordsQuestion from "./components/MatchWordsQuestion";
 import PhotoQuestion from "./components/PhotoQuestion";
 import QuestionSelector from "./components/QuestionSelector";
 import QuestionWrapper from "./components/QuestionWrapper";
+import QuizSettingsSection from "./components/QuizSettingsSection";
 import ScaleQuestion from "./components/ScaleQuestion";
 import TrueOrFalseQuestion from "./components/TrueOrFalseQuestion";
 import { useQuizLessonForm } from "./hooks/useQuizLessonForm";
@@ -327,181 +319,13 @@ const QuizLessonForm = ({
               )}
             />
 
-            <div className="mt-5">
-              <Label className="body-base-md">
-                <span className="body-base-md mr-1 text-red-500">*</span> Ustawienia
-              </Label>
-            </div>
-
-            <div className="mx-l grid max-w-md grid-cols-1 gap-4 px-4 pt-2">
-              {/* Pole progu zaliczenia */}
-              <FormField
-                control={form.control}
-                name="thresholdScore"
-                render={({ field }) => {
-                  const threshold = field.value ?? lessonToEdit?.thresholdScore ?? 0;
-                  const requiredCorrect = Math.ceil((threshold * questions?.length) / 100);
-
-                  return (
-                    <FormItem>
-                      <Label htmlFor="thresholdScore" className="body-base-md text-sm">
-                        Próg zaliczenia %
-                      </Label>
-                      <FormControl>
-                        <Input
-                          id="thresholdScore"
-                          {...field}
-                          inputMode="decimal"
-                          type="number"
-                          placeholder={
-                            lessonToEdit?.thresholdScore ? String(lessonToEdit.thresholdScore) : "0"
-                          }
-                          value={
-                            field.value === null || field.value === undefined ? "" : field.value
-                          }
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const numValue = Number(value);
-                            if (numValue > 100) {
-                              field.onChange(100);
-                            } else if (numValue < 0) {
-                              field.onChange(0);
-                            } else if (value === "") {
-                              field.onChange(null);
-                            } else {
-                              field.onChange(numValue);
-                            }
-                          }}
-                          className="w-full"
-                        />
-                      </FormControl>
-                      <FormDescription className="ml-1 text-xs text-muted-foreground">
-                        {questions?.length > 0
-                          ? `(${requiredCorrect} z ${questions.length} pytań)`
-                          : "Brak pytań w quizie"}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
-
-              {/* Sekcja limitu prób z przełącznikiem */}
-              <div className="space-y-2">
-                <Label className="body-base-md flex items-center gap-2 text-sm">
-                  <span>Limit prób</span>
-                  <Switch.Root
-                    checked={isAttemptsLimitEnabled}
-                    onCheckedChange={onSwitchChange}
-                    className={cn("relative h-6 w-11 rounded-full transition-colors", {
-                      "bg-blue-500": isAttemptsLimitEnabled,
-                      "bg-gray-200": !isAttemptsLimitEnabled,
-                    })}
-                  >
-                    <Switch.Thumb
-                      className={cn(
-                        "block size-4 translate-x-1 transform rounded-full bg-white transition-transform",
-                        isAttemptsLimitEnabled ? "translate-x-6" : "",
-                      )}
-                    />
-                  </Switch.Root>
-                </Label>
-
-                <FormField
-                  control={form.control}
-                  name="attemptsLimit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          id="attemptsLimit"
-                          disabled={!isAttemptsLimitEnabled}
-                          {...field}
-                          inputMode="decimal"
-                          type="number"
-                          placeholder={
-                            isAttemptsLimitEnabled
-                              ? lessonToEdit?.attemptsLimit
-                                ? String(lessonToEdit.attemptsLimit)
-                                : "1"
-                              : ""
-                          }
-                          value={
-                            field.value === null || field.value === undefined ? "" : field.value
-                          }
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const numValue = Number(value);
-                            if (numValue < 0) {
-                              if (isAttemptsLimitEnabled) {
-                                field.onChange(lessonToEdit?.attemptsLimit ?? 1);
-                              } else {
-                                field.onChange(0);
-                              }
-                            } else if (value === "") {
-                              field.onChange(null);
-                            } else {
-                              field.onChange(numValue);
-                            }
-                          }}
-                          className="w-full"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Label className="body-base-md flex items-center gap-2 text-sm">
-                  <span>Czas blokady</span>
-                </Label>
-
-                <FormField
-                  control={form.control}
-                  name="quizCooldown"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          id="quizCooldown"
-                          disabled={!isAttemptsLimitEnabled}
-                          {...field}
-                          inputMode="decimal"
-                          type="number"
-                          placeholder={
-                            isAttemptsLimitEnabled
-                              ? lessonToEdit?.quizCooldown
-                                ? String(lessonToEdit.quizCooldown)
-                                : "24"
-                              : ""
-                          }
-                          value={
-                            field.value === null || field.value === undefined ? "" : field.value
-                          }
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const numValue = Number(value);
-                            if (numValue < 0) {
-                              if (isAttemptsLimitEnabled) {
-                                field.onChange(lessonToEdit?.quizCooldown ?? 24);
-                              } else {
-                                field.onChange(0);
-                              }
-                            } else if (value === "") {
-                              field.onChange(null);
-                            } else {
-                              field.onChange(numValue);
-                            }
-                          }}
-                          className="w-full"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
+            <QuizSettingsSection
+              form={form}
+              lessonToEdit={lessonToEdit}
+              questionsCount={questions?.length || 0}
+              isAttemptsLimitEnabled={isAttemptsLimitEnabled}
+              onSwitchChange={onSwitchChange}
+            />
 
             <div className="mt-5">
               <Label className="body-base-md">

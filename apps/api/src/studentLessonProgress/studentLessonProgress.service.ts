@@ -118,7 +118,7 @@ export class StudentLessonProgressService {
   async markIfUserHaveAnsweredQuiz(lessonId: UUIDType, userId: UUIDType) {
     return this.db
       .update(studentLessonProgress)
-      .set({ isThereStudentAnswer: false })
+      .set({ isAnswered: false })
       .where(
         and(
           eq(studentLessonProgress.lessonId, lessonId),
@@ -135,7 +135,7 @@ export class StudentLessonProgressService {
     quizScore: number,
     attempts: number,
     isQuizPassed = false,
-    isThereStudentAnswer = false,
+    isAnswered = false,
     trx: PostgresJsDatabase<typeof schema>,
   ) {
     return trx
@@ -149,7 +149,7 @@ export class StudentLessonProgressService {
         completedAt: sql`now()`,
         completedQuestionCount,
         quizScore,
-        isThereStudentAnswer,
+        isAnswered,
       })
       .onConflictDoUpdate({
         target: [
@@ -163,7 +163,7 @@ export class StudentLessonProgressService {
           isQuizPassed,
           completedQuestionCount,
           quizScore,
-          isThereStudentAnswer,
+          isAnswered,
         },
       })
       .returning();

@@ -22,7 +22,7 @@ export class QuestionRepository {
 
   async getQuestionsForLesson(
     lessonId: UUIDType,
-    isCompleted: boolean,
+    isAnswered: boolean,
     userId: UUIDType,
   ): Promise<QuestionBody[]> {
     return this.db
@@ -32,18 +32,18 @@ export class QuestionRepository {
         title: questions.title,
         description: sql<string>`${questions.description}`,
         solutionExplanation: sql<string | null>`CASE
-              WHEN ${isCompleted} THEN ${questions.solutionExplanation} 
+              WHEN ${isAnswered} THEN ${questions.solutionExplanation} 
               ELSE NULL 
             END`,
         photoS3Key: sql<string>`${questions.photoS3Key}`,
         passQuestion: sql<boolean | null>`CASE
-              WHEN ${isCompleted} THEN ${studentQuestionAnswers.isCorrect}
+              WHEN ${isAnswered} THEN ${studentQuestionAnswers.isCorrect}
               ELSE NULL END`,
         displayOrder: sql<number>`${questions.displayOrder}`,
         options: sql<OptionBody[]>`CASE
             WHEN ${questions.type} in (${QUESTION_TYPE.BRIEF_RESPONSE}, ${
               QUESTION_TYPE.DETAILED_RESPONSE
-            }) AND ${isCompleted} THEN
+            }) AND ${isAnswered} THEN
               ARRAY[json_build_object(
                 'id', ${studentQuestionAnswers.id},
                 'optionText', '',
@@ -59,15 +59,15 @@ export class QuestionRepository {
                   'id', qao.id,
                   'optionText',  
                     CASE 
-                      WHEN ${!isCompleted} AND ${questions.type} = ${
+                      WHEN ${!isAnswered} AND ${questions.type} = ${
                         QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT
                       } THEN NULL
                       ELSE qao.option_text
                     END,
-                  'isCorrect', CASE WHEN ${isCompleted} THEN qao.is_correct ELSE NULL END,
+                  'isCorrect', CASE WHEN ${isAnswered} THEN qao.is_correct ELSE NULL END,
                   'displayOrder',
                     CASE
-                      WHEN ${isCompleted} THEN qao.display_order
+                      WHEN ${isAnswered} THEN qao.display_order
                       ELSE NULL
                     END,
                     'isStudentAnswer',
@@ -107,7 +107,7 @@ export class QuestionRepository {
                   CASE
                     WHEN ${questions.type} in (${
                       QUESTION_TYPE.FILL_IN_THE_BLANKS_DND
-                    }) AND ${!isCompleted}
+                    }) AND ${!isAnswered}
                       THEN random()
                     ELSE qao.display_order
                   END
@@ -302,8 +302,12 @@ export class QuestionRepository {
       });
   }
 
-  async deleteStudentQuizAnswers(questionsId: UUIDType[], studentId: UUIDType) {
-    return this.db
+  async deleteStudentQuizAnswers(
+    questionsId: UUIDType[],
+    studentId: UUIDType,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    return trx
       .delete(studentQuestionAnswers)
       .where(
         and(

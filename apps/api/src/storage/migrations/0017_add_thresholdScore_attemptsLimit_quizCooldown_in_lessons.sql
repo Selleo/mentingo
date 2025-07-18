@@ -17,4 +17,4 @@ ALTER TABLE lessons
     (type <> 'quiz' AND threshold_score IS NULL)
   );
 
-COMMIT;
+COMMIT;	 

@@ -15,6 +15,7 @@ import { queryClient } from "~/api/queryClient";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
 import { QuestionType } from "../QuizLessonForm.types";
 import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
 
@@ -45,7 +46,9 @@ export const useQuizLessonForm = ({
     resolver: zodResolver(quizLessonFormSchema(t)),
     defaultValues: {
       title: "",
-      passingThreshold: "",
+      thresholdScore: null,
+      attemptsLimit: null,
+      quizCooldown: null,
       questions: [],
     },
   });
@@ -56,6 +59,9 @@ export const useQuizLessonForm = ({
     if (lessonToEdit) {
       const mappedData: QuizLessonFormValues = {
         title: lessonToEdit.title,
+        thresholdScore: null,
+        attemptsLimit: null,
+        quizCooldown: null,
         questions:
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
@@ -136,13 +142,19 @@ export const useQuizLessonForm = ({
           }
         });
       }
+
+      values.thresholdScore =
+        values.thresholdScore ??
+        lessonToEdit?.thresholdScore ??
+        defaultQuizLessonValues.thresholdScore;
+
       if (isAttemptsLimitEnabled) {
-        if (values.attemptsLimit === undefined) {
-          values.attemptsLimit = lessonToEdit?.attemptsLimit ? lessonToEdit.attemptsLimit : 1;
-        }
-        if (values.quizCooldown === undefined) {
-          values.quizCooldown = lessonToEdit?.quizCooldown ? lessonToEdit.quizCooldown : 24;
-        }
+        values.attemptsLimit =
+          values.attemptsLimit ??
+          lessonToEdit?.attemptsLimit ??
+          defaultQuizLessonValues.attemptsLimit;
+        values.quizCooldown =
+          values.quizCooldown ?? lessonToEdit?.quizCooldown ?? defaultQuizLessonValues.quizCooldown;
       }
 
       if (

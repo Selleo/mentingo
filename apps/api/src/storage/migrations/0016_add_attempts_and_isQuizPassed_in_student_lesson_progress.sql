@@ -1,3 +1,0 @@
-ALTER TABLE student_lesson_progress
-ADD COLUMN attempts INTEGER NULL DEFAULT NULL,
-ADD COLUMN is_quiz_passed BOOLEAN NULL DEFAULT NULL;

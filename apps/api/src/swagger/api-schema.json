@@ -6689,7 +6689,7 @@
                   }
                 ]
               },
-              "isThereStudentAnswer": {
+              "isAnswered": {
                 "anyOf": [
                   {
                     "type": "boolean"
@@ -6739,7 +6739,7 @@
               "quizCooldown",
               "isQuizPassed",
               "attempts",
-              "isThereStudentAnswer",
+              "isAnswered",
               "updatedAt",
               "displayOrder",
               "nextLessonId"

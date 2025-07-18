@@ -64,7 +64,7 @@ export class LessonService {
 
     const questionList = await this.questionRepository.getQuestionsForLesson(
       lesson.id,
-      lesson.isThereStudentAnswer,
+      lesson.isAnswered,
       userId,
     );
 
@@ -83,8 +83,7 @@ export class LessonService {
       }),
     );
 
-    // zmienic bo lekcja moze by ukonczone i mzoe ni
-    if (isStudent && lesson.lessonCompleted && isNumber(lesson.quizScore)) {
+    if (isStudent && lesson.isAnswered && isNumber(lesson.quizScore)) {
       const [quizResult] = await this.lessonRepository.getQuizResult(
         lesson.id,
         lesson.quizScore,
@@ -113,7 +112,7 @@ export class LessonService {
     return { ...lesson, quizDetails };
   }
 
-  private checkIfQuizCanBeSubmitted(
+  private isQuizAccessAllowed(
     attempts: number | null,
     attemptsLimit: number | null,
     lastUpdate: string | null,
@@ -155,7 +154,7 @@ export class LessonService {
       userId,
     );
 
-    if (accessCourseLessonWithDetails.isThereStudentAnswer) {
+    if (accessCourseLessonWithDetails.isAnswered) {
       throw new ConflictException("You have already answered this quiz");
     }
 
@@ -169,7 +168,7 @@ export class LessonService {
     const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
 
     if (
-      !this.checkIfQuizCanBeSubmitted(
+      !this.isQuizAccessAllowed(
         accessCourseLessonWithDetails.attempts,
         quizSettings?.attemptsLimit,
         accessCourseLessonWithDetails.updatedAt,
@@ -195,14 +194,20 @@ export class LessonService {
           trx,
         );
 
-        const quizScore = Math.round(
+        const requiredCorrect = Math.ceil(
+          ((quizSettings?.thresholdScore ?? 0) *
+            (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) /
+            100,
+        );
+
+        const quizScore = Math.floor(
           (evaluationResult.correctAnswerCount /
             (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) *
             100,
         );
 
         const isQuizPassed = quizSettings?.thresholdScore
-          ? quizScore >= quizSettings.thresholdScore
+          ? requiredCorrect <= evaluationResult.correctAnswerCount
           : true;
 
         await this.studentLessonProgressService.updateQuizProgress(
@@ -264,7 +269,7 @@ export class LessonService {
       throw new ConflictException("Quiz already finished");
     }
 
-    if (accessCourseLessonWithDetails.isThereStudentAnswer === false) {
+    if (accessCourseLessonWithDetails.isAnswered === false) {
       throw new ConflictException("You have not answered this quiz yet");
     }
 
@@ -272,8 +277,9 @@ export class LessonService {
 
     let attempts = accessCourseLessonWithDetails.attempts ?? 1;
     attempts += 1;
+
     if (
-      !this.checkIfQuizCanBeSubmitted(
+      !this.isQuizAccessAllowed(
         attempts,
         quizSettings?.attemptsLimit,
         accessCourseLessonWithDetails.updatedAt,
@@ -288,23 +294,30 @@ export class LessonService {
     }
 
     const questions = await this.questionRepository.getQuestionsIdsByLessonId(lessonId);
+
     if (questions.length === 0) {
       return;
     }
 
-    await this.questionRepository.deleteStudentQuizAnswers(questions, userId);
+    return await this.db.transaction(async (trx) => {
+      try {
+        await this.questionRepository.deleteStudentQuizAnswers(questions, userId, trx);
 
-    await this.studentLessonProgressService.updateQuizProgress(
-      accessCourseLessonWithDetails.chapterId,
-      lessonId,
-      userId,
-      0,
-      0,
-      attempts,
-      false,
-      false,
-      this.db,
-    );
+        await this.studentLessonProgressService.updateQuizProgress(
+          accessCourseLessonWithDetails.chapterId,
+          lessonId,
+          userId,
+          0,
+          0,
+          attempts,
+          false,
+          false,
+          trx,
+        );
+      } catch (error) {
+        throw new ConflictException("Failed to delete student quiz answers: " + error.message);
+      }
+    });
   }
 
   // async studentAnswerOnQuestion(
