@@ -34,7 +34,7 @@ importers:
     dependencies:
       '@ai-sdk/openai':
         specifier: 1.3.23
-        version: 1.3.23(zod@3.23.8)
+        version: 1.3.23(zod@3.24.3)
       '@aws-sdk/client-s3':
         specifier: 3.658.1
         version: 3.658.1
@@ -121,7 +121,7 @@ importers:
         version: 0.5.16
       ai:
         specifier: 4.3.17
-        version: 4.3.17(react@18.3.1)(zod@3.23.8)
+        version: 4.3.17(react@18.3.1)(zod@3.24.3)
       axios:
         specifier: 1.7.2
         version: 1.7.2
@@ -178,7 +178,7 @@ importers:
         version: 6.9.14
       openai:
         specifier: 5.8.2
-        version: 5.8.2(ws@8.18.0)(zod@3.23.8)
+        version: 5.8.2(ws@8.18.0)(zod@3.24.3)
       passport:
         specifier: 0.7.0
         version: 0.7.0
@@ -569,7 +569,7 @@ importers:
     devDependencies:
       '@playwright/test':
         specifier: ^1.45.3
-        version: 1.54.1
+        version: 1.49.0
       '@remix-run/dev':
         specifier: 2.15.0
         version: 2.15.0(@remix-run/react@2.15.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5))(@types/node@20.17.6)(terser@5.36.0)(ts-node@10.9.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(@types/node@20.17.6)(typescript@5.4.5))(typescript@5.4.5)(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))
@@ -623,7 +623,7 @@ importers:
         version: 4.3.4(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))
       '@vitest/browser':
         specifier: ^2.0.4
-        version: 2.1.6(@types/node@20.17.6)(playwright@1.54.1)(typescript@5.4.5)(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))(vitest@2.1.6)(webdriverio@8.40.6)
+        version: 2.1.6(@types/node@20.17.6)(playwright@1.49.0)(typescript@5.4.5)(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))(vitest@2.1.6)(webdriverio@8.40.6)
       '@vitest/ui':
         specifier: ^2.0.4
         version: 2.1.6(vitest@2.1.6)
@@ -659,7 +659,7 @@ importers:
         version: 2.6.6(@types/node@20.17.6)(typescript@5.4.5)
       playwright:
         specifier: ^1.45.3
-        version: 1.54.1
+        version: 1.49.0
       postcss:
         specifier: ^8.4.38
         version: 8.4.49
@@ -3061,8 +3061,8 @@ packages:
     resolution: {integrity: sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
-  '@playwright/test@1.54.1':
-    resolution: {integrity: sha512-FS8hQ12acieG2dYSksmLOF7BNxnVf2afRJdCuM1eMSxj6QTSE6G4InGF7oApGgDb65MX7AwMVlIkpru0yZA4Xw==}
+  '@playwright/test@1.49.0':
+    resolution: {integrity: sha512-DMulbwQURa8rNIQrf94+jPJQ4FmOVdpE5ZppRNvWVjvhC+6sOeo28r8MgIpQRYouXRtt/FCCXU7zn20jnHR4Qw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -5600,8 +5600,9 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ajv-formats@2.1.1:
-    resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+  ai@4.3.17:
+    resolution: {integrity: sha512-uWqIQ94Nb1GTYtYElGHegJMOzv3r2mCKNFlKrqkft9xrfvIahTI5OdcnD5U9612RFGuUNGmSDTO1/YRNFXobaQ==}
+    engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ^19 || ^19.0.0-rc
       zod: ^3.23.8
@@ -5609,8 +5610,8 @@ packages:
       react:
         optional: true
 
-  ajv-formats@3.0.1:
-    resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
+  ajv-formats@2.1.1:
+    resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
     peerDependencies:
       ajv: ^8.0.0
     peerDependenciesMeta:
@@ -9235,6 +9236,7 @@ packages:
   multer@1.4.4-lts.1:
     resolution: {integrity: sha512-WeSGziVj6+Z2/MwQo3GvqzgR+9Uc+qt8SwHKh3gvNPiISKfsMfG4SvCOFYlxxgkXt7yIV2i1yczehm0EOKIxIg==}
     engines: {node: '>= 6.0.0'}
+    deprecated: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
 
   mustache@4.2.0:
     resolution: {integrity: sha512-71ippSywq5Yb7/tVYyGbkBggbU8H3u5Rz56fH60jGFgr8uHwxs+aSKeqmluIVzM0m0kB7xQjKS6qPfd0b2ZoqQ==}
@@ -9258,6 +9260,11 @@ packages:
     peerDependencies:
       react: '*'
       react-dom: '*'
+
+  nanoid@3.3.11:
+    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
 
   nanoid@3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
@@ -9324,6 +9331,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-emoji@1.11.0:
     resolution: {integrity: sha512-wo2DpQkQp7Sjm2A0cq+sN7EHKO6Sl0ctXeBdFZrL9T9+UywORbufTcTZxom8YqpLQt/FqNMUkOpkZrJVYSKD3A==}
@@ -9763,13 +9771,13 @@ packages:
   pkg-types@1.2.1:
     resolution: {integrity: sha512-sQoqa8alT3nHjGuTjuKgOnvjo4cljkufdtLMnO2LBP/wRwuDlo1tkaEdMxCRhyGRPacv/ztlZgDPm2b7FAmEvw==}
 
-  playwright-core@1.54.1:
-    resolution: {integrity: sha512-Nbjs2zjj0htNhzgiy5wu+3w09YetDx5pkrpI/kZotDlDUaYk0HVA5xrBVPdow4SAUIlhgKcJeJg4GRKW6xHusA==}
+  playwright-core@1.49.0:
+    resolution: {integrity: sha512-R+3KKTQF3npy5GTiKH/T+kdhoJfJojjHESR1YEWhYuEKRVfVaxH3+4+GvXE5xyCngCxhxnykk0Vlah9v8fs3jA==}
     engines: {node: '>=18'}
     hasBin: true
 
-  playwright@1.54.1:
-    resolution: {integrity: sha512-peWpSwIBmSLi6aW2auvrUtf2DqY16YYcCMO8rTVx486jKmDTJg7UAhyrraP98GB8BoPURZP8+nxO7TSd4cPr5g==}
+  playwright@1.49.0:
+    resolution: {integrity: sha512-eKpmys0UFDnfNb3vfsf8Vx2LEOtflgRebl0Im2eQQnYMA4Aqd+Zw8bEOB+7ZKvN76901mRnqdsiOGKxzVTbi7A==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -11084,6 +11092,7 @@ packages:
   superagent@9.0.2:
     resolution: {integrity: sha512-xuW7dzkUpcJq7QnhOsnNUgtYp3xRwpt2F7abdRYIpCsAt0hhUqia0EdxyXZQQpNmGtsCzYHryaKSV3q3GJnq7w==}
     engines: {node: '>=14.18.0'}
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supertest@7.0.0:
     resolution: {integrity: sha512-qlsr7fIC0lSddmA3tzojvzubYxvlGtzumcdHgPwbFWMISQwL22MhM2Y3LNt+6w9Yyx7559VW5ab70dgphm8qQA==}
@@ -11699,15 +11708,15 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  use-sync-external-store@1.5.0:
-    resolution: {integrity: sha512-Rb46I4cGGVBmjamjphe8L/UnvJD+uPPtTkNvX5mZgqdbavhI4EbgIWJiIHXJ8bc/i9EQGPRh4DwEURJ552Do0A==}
+  use-sync-external-store@1.2.2:
+    resolution: {integrity: sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
   use-sync-external-store@1.5.0:
     resolution: {integrity: sha512-Rb46I4cGGVBmjamjphe8L/UnvJD+uPPtTkNvX5mZgqdbavhI4EbgIWJiIHXJ8bc/i9EQGPRh4DwEURJ552Do0A==}
     peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   userhome@1.0.1:
     resolution: {integrity: sha512-5cnLm4gseXjAclKowC4IjByaGsjtAoV6PrOQOljplNB54ReUYJP8HdAFq2muHinSDAh09PPX/uXDPfdxRHvuSA==}
@@ -12182,8 +12191,8 @@ packages:
     peerDependencies:
       zod: ^3.24.1
 
-  zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+  zod@3.24.3:
+    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
 
   zustand@4.5.4:
     resolution: {integrity: sha512-/BPMyLKJPtFEvVL0E9E9BTUM63MNyhPGlvxk1XjrfWTUlV+BR8jufjsovHzrtR6YNcBEcL7cMHovL1n9xHawEg==}
@@ -12207,39 +12216,39 @@ snapshots:
 
   '@adobe/css-tools@4.4.1': {}
 
-  '@ai-sdk/openai@1.3.23(zod@3.23.8)':
+  '@ai-sdk/openai@1.3.23(zod@3.24.3)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.23.8)
-      zod: 3.23.8
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.3)
+      zod: 3.24.3
 
-  '@ai-sdk/provider-utils@2.2.8(zod@3.23.8)':
+  '@ai-sdk/provider-utils@2.2.8(zod@3.24.3)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
       nanoid: 3.3.11
       secure-json-parse: 2.7.0
-      zod: 3.23.8
+      zod: 3.24.3
 
   '@ai-sdk/provider@1.1.3':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@1.2.12(react@18.3.1)(zod@3.23.8)':
+  '@ai-sdk/react@1.2.12(react@18.3.1)(zod@3.24.3)':
     dependencies:
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.23.8)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.23.8)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.3)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.24.3)
       react: 18.3.1
       swr: 2.3.4(react@18.3.1)
       throttleit: 2.1.0
     optionalDependencies:
-      zod: 3.23.8
+      zod: 3.24.3
 
-  '@ai-sdk/ui-utils@1.2.11(zod@3.23.8)':
+  '@ai-sdk/ui-utils@1.2.11(zod@3.24.3)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.23.8)
-      zod: 3.23.8
-      zod-to-json-schema: 3.24.6(zod@3.23.8)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.3)
+      zod: 3.24.3
+      zod-to-json-schema: 3.24.6(zod@3.24.3)
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -14945,9 +14954,9 @@ snapshots:
 
   '@pkgr/core@0.1.1': {}
 
-  '@playwright/test@1.54.1':
+  '@playwright/test@1.49.0':
     dependencies:
-      playwright: 1.54.1
+      playwright: 1.49.0
 
   '@polka/url@1.0.0-next.28': {}
 
@@ -17987,7 +17996,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/browser@2.1.6(@types/node@20.17.6)(playwright@1.54.1)(typescript@5.4.5)(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))(vitest@2.1.6)(webdriverio@8.40.6)':
+  '@vitest/browser@2.1.6(@types/node@20.17.6)(playwright@1.49.0)(typescript@5.4.5)(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))(vitest@2.1.6)(webdriverio@8.40.6)':
     dependencies:
       '@testing-library/dom': 10.4.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
@@ -18000,7 +18009,7 @@ snapshots:
       vitest: 2.1.6(@types/node@20.17.6)(@vitest/browser@2.1.6)(@vitest/ui@2.1.6)(jsdom@24.1.3(canvas@2.11.2))(msw@2.6.6(@types/node@20.17.6)(typescript@5.4.5))(terser@5.36.0)
       ws: 8.18.0
     optionalDependencies:
-      playwright: 1.54.1
+      playwright: 1.49.0
       webdriverio: 8.40.6
     transitivePeerDependencies:
       - '@types/node'
@@ -18257,15 +18266,15 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@4.3.17(react@18.3.1)(zod@3.23.8):
+  ai@4.3.17(react@18.3.1)(zod@3.24.3):
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.23.8)
-      '@ai-sdk/react': 1.2.12(react@18.3.1)(zod@3.23.8)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.23.8)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.3)
+      '@ai-sdk/react': 1.2.12(react@18.3.1)(zod@3.24.3)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.24.3)
       '@opentelemetry/api': 1.9.0
       jsondiffpatch: 0.6.0
-      zod: 3.23.8
+      zod: 3.24.3
     optionalDependencies:
       react: 18.3.1
 
@@ -23202,10 +23211,10 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  openai@5.8.2(ws@8.18.0)(zod@3.23.8):
+  openai@5.8.2(ws@8.18.0)(zod@3.24.3):
     optionalDependencies:
       ws: 8.18.0
-      zod: 3.23.8
+      zod: 3.24.3
 
   optionator@0.9.4:
     dependencies:
@@ -23465,11 +23474,11 @@ snapshots:
       mlly: 1.7.3
       pathe: 1.1.2
 
-  playwright-core@1.54.1: {}
+  playwright-core@1.49.0: {}
 
-  playwright@1.54.1:
+  playwright@1.49.0:
     dependencies:
-      playwright-core: 1.54.1
+      playwright-core: 1.49.0
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -26005,7 +26014,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.17.6
-      '@vitest/browser': 2.1.6(@types/node@20.17.6)(playwright@1.54.1)(typescript@5.4.5)(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))(vitest@2.1.6)(webdriverio@8.40.6)
+      '@vitest/browser': 2.1.6(@types/node@20.17.6)(playwright@1.49.0)(typescript@5.4.5)(vite@5.4.11(@types/node@20.17.6)(terser@5.36.0))(vitest@2.1.6)(webdriverio@8.40.6)
       '@vitest/ui': 2.1.6(vitest@2.1.6)
       jsdom: 24.1.3(canvas@2.11.2)
     transitivePeerDependencies:
@@ -26382,9 +26391,13 @@ snapshots:
       compress-commons: 6.0.2
       readable-stream: 4.5.2
 
+  zod-to-json-schema@3.24.6(zod@3.24.3):
+    dependencies:
+      zod: 3.24.3
+
   zod@3.24.3: {}
 
-  zustand@4.5.4(@types/react@18.3.23)(react@18.3.1):
+  zustand@4.5.4(@types/react@18.3.12)(react@18.3.1):
     dependencies:
       use-sync-external-store: 1.2.0(react@18.3.1)
     optionalDependencies:
