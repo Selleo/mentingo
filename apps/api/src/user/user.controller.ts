@@ -99,6 +99,7 @@ export class UserController {
     const query = { filters, page, perPage, sort };
 
     const users = await this.usersService.getUsers(query);
+
     return new PaginatedResponse(users);
   }
 

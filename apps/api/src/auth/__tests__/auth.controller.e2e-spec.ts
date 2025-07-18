@@ -2,8 +2,6 @@ import * as cookie from "cookie";
 import { isArray, omit } from "lodash";
 import request from "supertest";
 
-import { DEFAULT_USER_SETTINGS } from "src/settings/constants/settings.constants";
-
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { AuthService } from "../auth.service";

@@ -68,7 +68,7 @@ export class SettingsService {
       throw new UnauthorizedException("User not authenticated");
     }
 
-    const [existingSettings] = await this.db
+    const [existingSettings] = await dbInstance
       .select()
       .from(settings)
       .where(eq(settings.userId, userId));

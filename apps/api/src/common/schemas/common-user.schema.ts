@@ -1,7 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import { createSelectSchema } from "drizzle-typebox";
 
-import { settingsSchema } from "src/settings/schemas/settings.schema";
 import { users } from "src/storage/schema";
 
 import type { Static } from "@sinclair/typebox";
