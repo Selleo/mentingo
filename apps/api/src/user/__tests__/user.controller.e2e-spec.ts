@@ -105,7 +105,7 @@ describe("UsersController (e2e)", () => {
 
   describe("PATCH /user/change-password?id=:id", () => {
     it("should change password when old password is correct", async () => {
-      const newPassword = "newPassword123";
+      const newPassword = "newPassword123@";
 
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${testUser.id}`)
@@ -126,7 +126,7 @@ describe("UsersController (e2e)", () => {
 
     it("should return 401 when old password is incorrect", async () => {
       const incorrectOldPassword = "wrongPassword";
-      const newPassword = "newPassword123";
+      const newPassword = "newPassword123@";
 
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${testUser.id}`)
@@ -138,7 +138,7 @@ describe("UsersController (e2e)", () => {
     it("should return 403 when changing another user's password", async () => {
       const anotherUser = await authService.register({
         email: "another2@example.com",
-        password: "password123",
+        password: "Password123@",
         firstName: "Another",
         lastName: "User",
       });
@@ -146,7 +146,7 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
-        .send({ oldPassword: "password123", newPassword: "newpassword" })
+        .send({ oldPassword: "Password123@", newPassword: "Password2137@" })
         .expect(403);
     });
   });

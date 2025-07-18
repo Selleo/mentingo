@@ -25,6 +25,7 @@ export interface RegisterBody {
   /**
    * @minLength 8
    * @maxLength 64
+   * @pattern ^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:'",.<>?]).+$
    */
   password: string;
 }
@@ -95,6 +96,7 @@ export interface CreatePasswordBody {
   /**
    * @minLength 8
    * @maxLength 64
+   * @pattern ^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:'",.<>?]).+$
    */
   password: string;
   /** @minLength 1 */
@@ -105,6 +107,7 @@ export interface ResetPasswordBody {
   /**
    * @minLength 8
    * @maxLength 64
+   * @pattern ^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:'",.<>?]).+$
    */
   newPassword: string;
   /** @minLength 1 */
@@ -237,6 +240,7 @@ export interface ChangePasswordBody {
   /**
    * @minLength 8
    * @maxLength 64
+   * @pattern ^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:'",.<>?]).+$
    */
   newPassword: string;
   /**
