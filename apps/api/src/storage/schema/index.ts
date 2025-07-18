@@ -390,5 +390,5 @@ export const settings = pgTable("settings", {
   ...id,
   ...timestamps,
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-  settings: jsonb("settings").$type<UserSettings>().notNull().default({}),
+  settings: jsonb("settings").$type<UserSettings>().notNull(),
 });

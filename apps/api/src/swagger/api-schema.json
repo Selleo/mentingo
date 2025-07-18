@@ -2933,17 +2933,6 @@
               },
               "archived": {
                 "type": "boolean"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  }
-                }
               }
             },
             "required": [
@@ -2954,8 +2943,7 @@
               "firstName",
               "lastName",
               "role",
-              "archived",
-              "settings"
+              "archived"
             ]
           }
         },
@@ -3013,17 +3001,6 @@
               },
               "archived": {
                 "type": "boolean"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  }
-                }
               }
             },
             "required": [
@@ -3034,8 +3011,7 @@
               "firstName",
               "lastName",
               "role",
-              "archived",
-              "settings"
+              "archived"
             ]
           }
         },
@@ -3078,17 +3054,6 @@
               },
               "archived": {
                 "type": "boolean"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  }
-                }
               }
             },
             "required": [
@@ -3099,8 +3064,7 @@
               "firstName",
               "lastName",
               "role",
-              "archived",
-              "settings"
+              "archived"
             ]
           }
         },
@@ -3188,17 +3152,6 @@
                 },
                 "archived": {
                   "type": "boolean"
-                },
-                "settings": {
-                  "type": "object",
-                  "properties": {
-                    "adminNewUserNotification": {
-                      "type": "boolean"
-                    },
-                    "language": {
-                      "type": "string"
-                    }
-                  }
                 }
               },
               "required": [
@@ -3209,8 +3162,7 @@
                 "firstName",
                 "lastName",
                 "role",
-                "archived",
-                "settings"
+                "archived"
               ]
             }
           },
@@ -3274,17 +3226,6 @@
               },
               "archived": {
                 "type": "boolean"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  }
-                }
               }
             },
             "required": [
@@ -3295,8 +3236,7 @@
               "firstName",
               "lastName",
               "role",
-              "archived",
-              "settings"
+              "archived"
             ]
           }
         },
@@ -3470,17 +3410,6 @@
               },
               "archived": {
                 "type": "boolean"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  }
-                }
               }
             },
             "required": [
@@ -3491,8 +3420,7 @@
               "firstName",
               "lastName",
               "role",
-              "archived",
-              "settings"
+              "archived"
             ]
           }
         },
@@ -3648,17 +3576,6 @@
               },
               "archived": {
                 "type": "boolean"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  }
-                }
               }
             },
             "required": [
@@ -3669,8 +3586,7 @@
               "firstName",
               "lastName",
               "role",
-              "archived",
-              "settings"
+              "archived"
             ]
           }
         },
@@ -8886,17 +8802,6 @@
                       },
                       "archived": {
                         "type": "boolean"
-                      },
-                      "settings": {
-                        "type": "object",
-                        "properties": {
-                          "adminNewUserNotification": {
-                            "type": "boolean"
-                          },
-                          "language": {
-                            "type": "string"
-                          }
-                        }
                       }
                     },
                     "required": [
@@ -8907,8 +8812,7 @@
                       "firstName",
                       "lastName",
                       "role",
-                      "archived",
-                      "settings"
+                      "archived"
                     ]
                   }
                 },
@@ -9008,17 +8912,6 @@
                     },
                     "archived": {
                       "type": "boolean"
-                    },
-                    "settings": {
-                      "type": "object",
-                      "properties": {
-                        "adminNewUserNotification": {
-                          "type": "boolean"
-                        },
-                        "language": {
-                          "type": "string"
-                        }
-                      }
                     }
                   },
                   "required": [
@@ -9029,8 +8922,7 @@
                     "firstName",
                     "lastName",
                     "role",
-                    "archived",
-                    "settings"
+                    "archived"
                   ]
                 }
               },
@@ -9105,17 +8997,6 @@
                       },
                       "archived": {
                         "type": "boolean"
-                      },
-                      "settings": {
-                        "type": "object",
-                        "properties": {
-                          "adminNewUserNotification": {
-                            "type": "boolean"
-                          },
-                          "language": {
-                            "type": "string"
-                          }
-                        }
                       }
                     },
                     "required": [
@@ -9126,8 +9007,7 @@
                       "firstName",
                       "lastName",
                       "role",
-                      "archived",
-                      "settings"
+                      "archived"
                     ]
                   }
                 },

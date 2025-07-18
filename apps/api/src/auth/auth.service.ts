@@ -22,7 +22,6 @@ import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
-import { DEFAULT_USER_SETTINGS } from "src/settings/constants/settings.constants";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -33,7 +32,6 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
-import type { UserSettings } from "src/common/types";
 
 @Injectable()
 export class AuthService {
@@ -81,14 +79,7 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      const [createdSettings] = await trx
-        .insert(settings)
-        .values({
-          userId: newUser.id,
-          createdAt: new Date().toISOString(),
-          settings: DEFAULT_USER_SETTINGS,
-        })
-        .returning();
+      await this.settingsService.createSettings(newUser.id, undefined, trx);
 
       const emailTemplate = new WelcomeEmail({ email, name: email });
       await this.emailService.sendEmail({
@@ -99,13 +90,9 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
-      const userWithSettings = {
-        ...newUser,
-        settings: createdSettings.settings as UserSettings,
-      };
-      await this.settingsService.notifyAdminsAboutNewUser(userWithSettings);
+      await this.settingsService.notifyAdminsAboutNewUser(newUser);
 
-      return userWithSettings;
+      return newUser;
     });
   }
 
@@ -117,10 +104,8 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.getTokens(user);
 
-    const userWithSettings = await this.userService.getUserById(user.id);
-
     return {
-      ...userWithSettings,
+      ...user,
       accessToken,
       refreshToken,
     };
@@ -133,7 +118,7 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
-    return { ...user, settings: user.settings || {} };
+    return user;
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -167,10 +152,8 @@ export class AuthService {
         updatedAt: users.updatedAt,
         role: users.role,
         archived: users.archived,
-        settings: settings.settings,
       })
       .from(users)
-      .innerJoin(settings, eq(users.id, settings.userId))
       .leftJoin(credentials, eq(users.id, credentials.userId))
       .where(eq(users.email, email));
 

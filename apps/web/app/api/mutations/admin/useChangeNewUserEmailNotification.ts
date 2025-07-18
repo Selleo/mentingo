@@ -16,7 +16,7 @@ export function useChangeNewUserEmailNotification() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["userSettings"] });
       toast({
         variant: "default",
         description: t("adminPreferences.toast.newUserNotificationsPreferenceChangeSuccess"),

@@ -1,9 +1,9 @@
 import request from "supertest";
 
-import { settings } from "../../../src/storage/schema";
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
+import { truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { DatabasePg } from "../../common";
 import type { INestApplication } from "@nestjs/common";
@@ -15,14 +15,12 @@ describe("SettingsController (e2e)", () => {
   const testPassword = "Password123@@";
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
-  let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     db = app.get("DB");
     userFactory = createUserFactory(db);
-    settingsFactory = createSettingsFactory(db);
   }, 10000);
 
   afterAll(async () => {
@@ -30,7 +28,7 @@ describe("SettingsController (e2e)", () => {
   }, 10000);
 
   beforeEach(async () => {
-    await db.delete(settings);
+    await truncateTables(db, ["settings"]);
 
     testUser = await userFactory.withCredentials({ password: testPassword }).create();
 
@@ -141,7 +139,8 @@ describe("SettingsController (e2e)", () => {
 
   describe("GET /settings", () => {
     it("should return user settings", async () => {
-      const existingSettings = await settingsFactory.create({ userId: testUser.id });
+      const settingsFactory = createSettingsFactory(db, testUser.id);
+      const existingSettings = await settingsFactory.create();
 
       const response = await request(app.getHttpServer())
         .get("/api/settings")
@@ -149,9 +148,9 @@ describe("SettingsController (e2e)", () => {
         .expect(200);
 
       expect(response.body).toBeDefined();
-      expect(response.body.userId).toBe(testUser.id);
-      expect(response.body.settings).toEqual(existingSettings.settings);
-      expect(response.body.createdAt).toBeDefined();
+      expect(response.body.data.userId).toBe(testUser.id);
+      expect(response.body.data.settings).toEqual(existingSettings.settings);
+      expect(response.body.data.createdAt).toBeDefined();
     });
   });
 });

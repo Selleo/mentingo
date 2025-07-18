@@ -30,7 +30,6 @@ import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
 import type { UserDetails } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
-import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
 @Injectable()
@@ -61,10 +60,8 @@ export class UserService {
         archived: users.archived,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
-        settings: settings.settings,
       })
       .from(users)
-      .innerJoin(settings, eq(settings.userId, users.id))
       .where(and(...conditions))
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
 
@@ -83,24 +80,14 @@ export class UserService {
     };
   }
 
-  public async getUserById(id: UUIDType): Promise<CommonUser> {
-    const [result] = await this.db
-      .select({
-        users,
-        settings: settings.settings,
-      })
-      .from(users)
-      .innerJoin(settings, eq(settings.userId, users.id))
-      .where(eq(users.id, id));
+  public async getUserById(id: UUIDType) {
+    const [user] = await this.db.select().from(users).where(eq(users.id, id));
 
-    if (!result) {
+    if (!user) {
       throw new NotFoundException("User not found");
     }
 
-    return {
-      ...result.users,
-      settings: result.settings,
-    } as CommonUser;
+    return user;
   }
 
   public async getUserByEmail(email: string) {
