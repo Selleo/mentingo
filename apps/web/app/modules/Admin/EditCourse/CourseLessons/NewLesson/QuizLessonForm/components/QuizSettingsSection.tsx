@@ -73,11 +73,11 @@ const QuizSettingsSection = ({
                     {...field}
                     inputMode="decimal"
                     type="number"
-                    placeholder={
+                    placeholder={String(
                       lessonToEdit?.thresholdScore
-                        ? String(lessonToEdit.thresholdScore)
-                        : defaultQuizLessonValues.thresholdScore
-                    }
+                        ? lessonToEdit.thresholdScore
+                        : defaultQuizLessonValues.thresholdScore,
+                    )}
                     value={field.value === null || field.value === undefined ? "" : field.value}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -148,13 +148,13 @@ const QuizSettingsSection = ({
                     {...field}
                     inputMode="decimal"
                     type="number"
-                    placeholder={
+                    placeholder={String(
                       isAttemptsLimitEnabled
                         ? lessonToEdit?.attemptsLimit
                           ? String(lessonToEdit.attemptsLimit)
                           : defaultQuizLessonValues.attemptsLimit
-                        : ""
-                    }
+                        : "",
+                    )}
                     value={field.value === null || field.value === undefined ? "" : field.value}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -196,13 +196,13 @@ const QuizSettingsSection = ({
                     {...field}
                     inputMode="decimal"
                     type="number"
-                    placeholder={
+                    placeholder={String(
                       isAttemptsLimitEnabled
                         ? lessonToEdit?.quizCooldown
                           ? String(lessonToEdit.quizCooldown)
                           : defaultQuizLessonValues.quizCooldown
-                        : ""
-                    }
+                        : "",
+                    )}
                     value={field.value === null || field.value === undefined ? "" : field.value}
                     onChange={(e) => {
                       const value = e.target.value;

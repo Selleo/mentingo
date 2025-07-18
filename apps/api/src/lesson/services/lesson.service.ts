@@ -14,6 +14,7 @@ import { FileService } from "src/file/file.service";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
+import { isQuizAccessAllowed } from "src/utils/isQuizAccesAllowed";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
@@ -112,34 +113,6 @@ export class LessonService {
     return { ...lesson, quizDetails };
   }
 
-  private isQuizAccessAllowed(
-    attempts: number | null,
-    attemptsLimit: number | null,
-    lastUpdate: string | null,
-    quizCooldown: number | null,
-  ): boolean {
-    if (attemptsLimit === null || attempts === null) {
-      return true;
-    }
-
-    if (attempts <= attemptsLimit) {
-      return true;
-    }
-
-    if (lastUpdate && quizCooldown) {
-      const lastUpdateDate = new Date(lastUpdate);
-
-      const cooldownEnd = new Date(lastUpdateDate.getTime() + quizCooldown * 60 * 60 * 1000);
-      const now = new Date();
-
-      if (now < cooldownEnd) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     userId: UUIDType,
@@ -168,7 +141,7 @@ export class LessonService {
     const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
 
     if (
-      !this.isQuizAccessAllowed(
+      !isQuizAccessAllowed(
         accessCourseLessonWithDetails.attempts,
         quizSettings?.attemptsLimit,
         accessCourseLessonWithDetails.updatedAt,
@@ -279,7 +252,7 @@ export class LessonService {
     attempts += 1;
 
     if (
-      !this.isQuizAccessAllowed(
+      !isQuizAccessAllowed(
         attempts,
         quizSettings?.attemptsLimit,
         accessCourseLessonWithDetails.updatedAt,

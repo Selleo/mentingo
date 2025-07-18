@@ -1,11 +1,11 @@
 type QuizLessonProps = {
-  thresholdScore: string;
-  attemptsLimit: string;
-  quizCooldown: string;
+  thresholdScore: number;
+  attemptsLimit: number;
+  quizCooldown: number;
 };
 
 export const defaultQuizLessonValues: QuizLessonProps = {
-  thresholdScore: "0",
-  attemptsLimit: "1",
-  quizCooldown: "24",
+  thresholdScore: 0,
+  attemptsLimit: 1,
+  quizCooldown: 24,
 };
