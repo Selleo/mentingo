@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
@@ -22,6 +23,9 @@ import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
+import { UserRegisteredEvent } from "src/events/user/user-registered.event";
+import { SettingsService } from "src/settings/settings.service";
 
 import { createTokens, credentials, resetTokens, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -30,6 +34,7 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AuthService {
@@ -41,6 +46,8 @@ export class AuthService {
     private emailService: EmailService,
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
+    private settingsService: SettingsService,
+    private eventBus: EventBus,
   ) {}
 
   public async register({
@@ -55,7 +62,6 @@ export class AuthService {
     password: string;
   }) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.email, email));
-
     if (existingUser) {
       throw new ConflictException("User already exists");
     }
@@ -63,12 +69,28 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     return this.db.transaction(async (trx) => {
-      const [newUser] = await trx.insert(users).values({ email, firstName, lastName }).returning();
+      const [newUser] = await trx
+        .insert(users)
+        .values({
+          email,
+          firstName,
+          lastName,
+        })
+        .returning();
 
-      await trx.insert(credentials).values({ userId: newUser.id, password: hashedPassword });
+      await trx.insert(credentials).values({
+        userId: newUser.id,
+        password: hashedPassword,
+      });
+
+      await this.settingsService.createSettings(
+        newUser.id,
+        newUser.role as UserRole,
+        undefined,
+        trx,
+      );
 
       const emailTemplate = new WelcomeEmail({ email, name: email });
-
       await this.emailService.sendEmail({
         to: email,
         subject: "Welcome to our platform",
@@ -76,6 +98,8 @@ export class AuthService {
         html: emailTemplate.html,
         from: process.env.SES_EMAIL || "",
       });
+
+      this.eventBus.publish(new UserRegisteredEvent(newUser));
 
       return newUser;
     });
@@ -209,7 +233,16 @@ export class AuthService {
     const createToken = await this.createPasswordService.getOneByToken(token);
 
     const [existingUser] = await this.db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        role: users.role,
+        archived: users.archived,
+      })
       .from(users)
       .where(eq(users.id, createToken.userId));
 
@@ -221,6 +254,12 @@ export class AuthService {
       .insert(credentials)
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(token);
+
+    await this.settingsService.createSettings(createToken.userId, existingUser.role as UserRole);
+
+    this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
+
+    return existingUser;
   }
 
   public async resetPassword(token: string, newPassword: string) {

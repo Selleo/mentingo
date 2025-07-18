@@ -134,6 +134,13 @@
       "when": 1752838260504,
       "tag": "0018_add_reminder_count_to_create_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1752841433132,
+      "tag": "0019_create_settings_table",
+      "breakpoints": true
     }
   ]
 }
