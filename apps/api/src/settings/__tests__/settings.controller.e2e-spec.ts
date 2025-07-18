@@ -3,7 +3,7 @@ import request from "supertest";
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
-import { truncateTables } from "../../../test/helpers/test-helpers";
+import { truncateTables, cookieFor } from "../../../test/helpers/test-helpers";
 
 import type { DatabasePg } from "../../common";
 import type { INestApplication } from "@nestjs/common";
@@ -32,12 +32,7 @@ describe("SettingsController (e2e)", () => {
 
     testUser = await userFactory.withCredentials({ password: testPassword }).create();
 
-    const testLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-      email: testUser.email,
-      password: testUser.credentials?.password,
-    });
-
-    testCookies = testLoginResponse.headers["set-cookie"];
+    testCookies = await cookieFor(testUser, app);
   });
 
   describe("PATCH /api/settings/admin-new-user-notification", () => {
