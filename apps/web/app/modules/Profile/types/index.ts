@@ -5,5 +5,5 @@ export type UpdateUserProfileBody = {
   contactEmail?: string;
   contactPhone?: string;
   jobTitle?: string;
-  file?: File | null;
+  userAvatar?: File | null;
 };

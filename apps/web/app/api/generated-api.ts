@@ -2074,7 +2074,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     userControllerUpdateUserProfile: (
       data: {
         /** @format binary */
-        file?: File;
+        userAvatar?: File;
         /** @format string */
         data?: string;
       },

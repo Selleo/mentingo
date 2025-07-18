@@ -51,7 +51,7 @@ export const ProfileEditCard = ({
       setIsUploading(true);
       try {
         setDisplayThumbnailUrl(URL.createObjectURL(file));
-        setValue("file", file);
+        setValue("userAvatar", file);
       } catch (error) {
         toast({ description: `Error uploading image: ${error}`, variant: "destructive" });
       } finally {
@@ -63,7 +63,7 @@ export const ProfileEditCard = ({
 
   const removeThumbnail = () => {
     setDisplayThumbnailUrl(null);
-    setValue("file", null);
+    setValue("userAvatar", null);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -125,8 +125,8 @@ export const ProfileEditCard = ({
           {t("contentCreatorView.other.appearanceDescription")}
         </p>
         <Controller
-          key="file"
-          name="file"
+          key="userAvatar"
+          name="userAvatar"
           control={control}
           render={({ field }) => (
             <div className="mb-4 flex flex-col gap-y-2">

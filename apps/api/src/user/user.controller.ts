@@ -170,7 +170,7 @@ export class UserController {
   }
 
   @Patch("profile")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("userAvatar"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
@@ -178,7 +178,7 @@ export class UserController {
         {
           type: "object",
           properties: {
-            file: {
+            userAvatar: {
               type: "string",
               format: "binary",
             },
@@ -195,9 +195,9 @@ export class UserController {
     @Body(new ValidateMultipartPipe(updateUserProfileSchema))
     userInfo: { data: UpdateUserProfileBody },
     @CurrentUser("userId") currentUserId: UUIDType,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() userAvatar?: Express.Multer.File,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.usersService.updateUserProfile(currentUserId, userInfo.data, file);
+    await this.usersService.updateUserProfile(currentUserId, userInfo.data, userAvatar);
 
     return new BaseResponse({
       message: "User profile updated successfully",

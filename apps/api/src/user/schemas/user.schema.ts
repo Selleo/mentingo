@@ -14,7 +14,7 @@ export const userDetailsSchema = Type.Object({
   role: Type.Enum(USER_ROLES),
 });
 
-export const baseUserResponseSchema = Type.Omit(commonUserSchema, ["profilePictureS3Key"]);
+export const baseUserResponseSchema = Type.Omit(commonUserSchema, ["avatarReference"]);
 
 export const userDetailsResponseSchema = Type.Object({
   ...userDetailsSchema.properties,
@@ -24,7 +24,7 @@ export const userDetailsResponseSchema = Type.Object({
 export const allUsersSchema = Type.Array(baseUserResponseSchema);
 
 export type UserDetailsWithAvatarKey = Static<typeof userDetailsSchema> & {
-  profilePictureS3Key: string | null;
+  avatarReference: string | null;
 };
 export type UserDetailsResponse = Static<typeof userDetailsResponseSchema>;
 export type UserResponse = Static<typeof baseUserResponseSchema>;

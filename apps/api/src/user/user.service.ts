@@ -17,6 +17,7 @@ import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
+import { S3Service } from "src/s3/s3.service";
 
 import { createTokens, credentials, userDetails, users } from "../storage/schema";
 
@@ -39,6 +40,7 @@ export class UserService {
     @Inject("DB") private readonly db: DatabasePg,
     private emailService: EmailService,
     private fileService: FileService,
+    private s3Service: S3Service,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -102,7 +104,7 @@ export class UserService {
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
-        profilePictureS3Key: users.profilePictureS3Key,
+        avatarReference: users.avatarReference,
         role: sql<UserRole>`${users.role}`,
         id: users.id,
         description: userDetails.description,
@@ -125,10 +127,10 @@ export class UserService {
       throw new ForbiddenException("Cannot access user details");
     }
 
-    const { profilePictureS3Key, ...user } = userBio;
+    const { avatarReference, ...user } = userBio;
 
-    const profilePictureUrl = profilePictureS3Key
-      ? await this.fileService.getFileUrl(profilePictureS3Key)
+    const profilePictureUrl = avatarReference
+      ? await this.s3Service.getSignedUrl(avatarReference)
       : null;
 
     return {
@@ -174,28 +176,32 @@ export class UserService {
     return updatedUserDetails;
   }
 
-  async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody, file?: Express.Multer.File) {
+  async updateUserProfile(
+    id: UUIDType,
+    data: UpdateUserProfileBody,
+    userAvatar?: Express.Multer.File,
+  ) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
     }
 
-    if (!data && !file) {
+    if (!data && !userAvatar) {
       throw new NotFoundException("No data provided for user profile update");
     }
 
-    if (file && !data.file) {
-      const { fileKey } = await this.fileService.uploadFile(file, "user");
-      data.file = fileKey;
+    if (userAvatar && !data.userAvatar) {
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars");
+      data.userAvatar = fileKey;
     }
 
     await this.db.transaction(async (tx) => {
       const userUpdates = {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
-        ...((data.file || data.file === null) && {
-          profilePictureS3Key: data.file,
+        ...((data.userAvatar || data.userAvatar === null) && {
+          avatarReference: data.userAvatar,
         }),
       };
 

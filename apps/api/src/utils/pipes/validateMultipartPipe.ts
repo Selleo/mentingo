@@ -24,7 +24,7 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     const parsedData = this.parseMultipartToJSON(value);
 
     if (this.validator.Check(parsedData)) {
-      return parsedData as Static<T>;
+      return { ...parsedData } as Static<T>;
     } else {
       const errors = [...this.validator.Errors(parsedData)];
       const errorMessages = errors.map((error) => `${error.path}: ${error.message}`);

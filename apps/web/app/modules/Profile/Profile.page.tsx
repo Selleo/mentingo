@@ -30,7 +30,7 @@ const updateUserProfileSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().optional(),
   jobTitle: z.string().optional(),
-  file: z.instanceof(File).nullable().optional(),
+  userAvatar: z.instanceof(File).nullable().optional(),
 });
 
 export default function ProfilePage() {
@@ -66,17 +66,17 @@ export default function ProfilePage() {
   const { mutate: updateUserProfile } = useUpdateUserProfile();
 
   const onSubmit = (data: UpdateUserProfileBody) => {
-    if (isDirty || data.file || data.file === null) {
+    if (isDirty || data.userAvatar || data.userAvatar === null) {
       const filteredData = filterChangedData(data, userDetails as Partial<UpdateUserProfileBody>);
 
-      if (data.file === null) {
-        filteredData.file = null;
+      if (data.userAvatar === null) {
+        filteredData.userAvatar = null;
       }
 
       updateUserProfile({
         data: { ...filteredData },
         id,
-        file: data.file || undefined,
+        userAvatar: data.userAvatar || undefined,
       });
 
       reset();

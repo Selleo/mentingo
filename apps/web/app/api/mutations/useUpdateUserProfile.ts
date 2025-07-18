@@ -13,7 +13,7 @@ import type { UpdateUserProfileBody } from "~/modules/Profile/types";
 type UpdateUserProfileOptions = {
   data: UpdateUserProfileBody;
   id: string;
-  file?: File;
+  userAvatar?: File;
 };
 
 export function useUpdateUserProfile() {
@@ -22,19 +22,19 @@ export function useUpdateUserProfile() {
   return useMutation({
     mutationFn: async (options: UpdateUserProfileOptions) => {
       const formData: {
-        file?: File;
+        userAvatar?: File;
         data?: string;
       } = {};
 
-      if (options.file) {
-        formData.file = options.file;
+      if (options.userAvatar) {
+        formData.userAvatar = options.userAvatar;
       }
 
       if (options.data && Object.keys(options.data).length > 0) {
-        const { file, ...updateData } = options.data;
+        const { userAvatar, ...updateData } = options.data;
         formData.data = JSON.stringify({
           ...updateData,
-          ...(!options.file && file === null && { file: null }),
+          ...(!options.userAvatar && userAvatar === null && { userAvatar: null }),
         });
       }
 

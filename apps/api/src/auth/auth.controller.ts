@@ -53,7 +53,7 @@ export class AuthController {
   async register(
     data: CreateAccountBody,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
-    const { profilePictureS3Key: _, ...account } = await this.authService.register(data);
+    const { avatarReference: _, ...account } = await this.authService.register(data);
 
     return new BaseResponse(account);
   }
@@ -72,7 +72,7 @@ export class AuthController {
     const {
       accessToken,
       refreshToken,
-      profilePictureS3Key: _,
+      avatarReference: _,
       ...account
     } = await this.authService.login(data);
 
