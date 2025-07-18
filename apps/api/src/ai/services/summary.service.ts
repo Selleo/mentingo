@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
 
+import { THRESHOLD } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { ChatService } from "src/ai/services/chat.service";
 import { MessageService } from "src/ai/services/message.service";
 import { TokenService } from "src/ai/services/token.service";
 import { SUMMARY_PROMPT } from "src/ai/utils/ai.config";
-import { THRESHOLD } from "src/ai/utils/ai.constants";
 import { MESSAGE_ROLE, type MessageRole, OPENAI_MODELS } from "src/ai/utils/ai.type";
 
 import type { UUIDType } from "src/common";

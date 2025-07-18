@@ -41,7 +41,7 @@ export class AiRepository {
     return aiMentorLessonId;
   }
 
-  async findThreadByStatusAndAiMentorLessonIdAndUserId(
+  async findThreadByStatusLessonAndUser(
     status: ThreadStatus[],
     aiMentorLessonId: UUIDType,
     userId: UUIDType,

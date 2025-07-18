@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { type Message, streamText } from "ai";
 
+import { MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { ChatService } from "src/ai/services/chat.service";
 import { JudgeService } from "src/ai/services/judge.service";
@@ -11,7 +12,6 @@ import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
 import { WELCOME_MESSAGE_PROMPT } from "src/ai/utils/ai.config";
-import { MAX_TOKENS } from "src/ai/utils/ai.constants";
 import {
   MESSAGE_ROLE,
   type MessageRole,

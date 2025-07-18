@@ -18,7 +18,7 @@ export class ThreadService {
     const aiMentorLessonId = await this.findAiMentorLessonIdFromLesson(data.lessonId);
     await this.lessonService.getLessonById(data.lessonId, data.userId, true);
 
-    const thread = await this.aiRepository.findThreadByStatusAndAiMentorLessonIdAndUserId(
+    const thread = await this.aiRepository.findThreadByStatusLessonAndUser(
       [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED],
       aiMentorLessonId,
       data.userId,

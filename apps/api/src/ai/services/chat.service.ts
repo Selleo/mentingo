@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { generateObject, generateText, jsonSchema } from "ai";
 
-import { MAX_TOKENS } from "src/ai/utils/ai.constants";
+import { MAX_TOKENS } from "src/ai/ai.constants";
 import {
   type AiJudgeJudgementBody,
   aiJudgeJudgementSchema,
