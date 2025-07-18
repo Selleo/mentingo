@@ -4,6 +4,10 @@ import { TypeCompiler } from "@sinclair/typebox/compiler";
 import type { PipeTransform } from "@nestjs/common";
 import type { TObject, Static } from "@sinclair/typebox";
 
+type MultipartValue = string | Buffer | File | undefined;
+type ParsedValue = string | number | boolean | object | null;
+type MultipartData = Record<string, MultipartValue | MultipartValue[]>;
+
 @Injectable()
 export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
   private readonly validator: ReturnType<typeof TypeCompiler.Compile<T>>;
@@ -12,7 +16,7 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     this.validator = TypeCompiler.Compile(schema);
   }
 
-  transform(value: any): Static<T> {
+  transform(value: MultipartData): Static<T> {
     if (!value || typeof value !== "object") {
       throw new BadRequestException("Invalid multipart form data");
     }
@@ -33,8 +37,8 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     }
   }
 
-  private parseMultipartToJSON(data: any): Record<string, any> {
-    const result: Record<string, any> = {};
+  private parseMultipartToJSON(data: MultipartData): Record<string, ParsedValue> {
+    const result: Record<string, ParsedValue> = {};
 
     for (const [key, value] of Object.entries(data)) {
       if (value === undefined) {
@@ -52,9 +56,9 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     return result;
   }
 
-  private parseValue(value: any): any {
+  private parseValue(value: MultipartValue): ParsedValue {
     if (typeof value !== "string") {
-      return value;
+      return value as ParsedValue;
     }
 
     if (this.isJSONString(value)) {
@@ -80,20 +84,40 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     return value;
   }
 
-  private parseNestedObject(obj: any): any {
+  private parseNestedObject(obj: unknown): ParsedValue {
     if (Array.isArray(obj)) {
-      return obj.map((item) => this.parseValue(item));
+      return obj.map((item) => this.parseNestedValue(item));
     }
 
     if (obj && typeof obj === "object") {
-      const result: Record<string, any> = {};
+      const result: Record<string, ParsedValue> = {};
       for (const [key, value] of Object.entries(obj)) {
-        result[key] = this.parseValue(value);
+        result[key] = this.parseNestedValue(value);
       }
       return result;
     }
 
-    return obj;
+    return obj as ParsedValue;
+  }
+
+  private parseNestedValue(value: unknown): ParsedValue {
+    if (typeof value === "string") {
+      return this.parseValue(value);
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((item) => this.parseNestedValue(item));
+    }
+
+    if (value && typeof value === "object") {
+      const result: Record<string, ParsedValue> = {};
+      for (const [key, val] of Object.entries(value)) {
+        result[key] = this.parseNestedValue(val);
+      }
+      return result;
+    }
+
+    return value as ParsedValue;
   }
 
   private isJSONString(value: string): boolean {
