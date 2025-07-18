@@ -3,29 +3,30 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
+import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { requestManager, ApiClient } from "../api-client";
-import { currentUserQueryOptions } from "../queries";
-import { queryClient } from "../queryClient";
 
 import { useAuthStore } from "./../../modules/Auth/authStore";
 
 export function useLogoutUser() {
   const { toast } = useToast();
   const { setLoggedIn } = useAuthStore();
+  const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
   const navigate = useNavigate();
 
   return useMutation({
     mutationFn: async () => {
-      requestManager.abortAll();
-
       const response = await ApiClient.api.authControllerLogout();
+
+      setCurrentUser(undefined);
       setLoggedIn(false);
+
       return response.data;
     },
     onSuccess: () => {
-      queryClient.cancelQueries(currentUserQueryOptions);
-      queryClient.clear();
+      requestManager.abortAll();
+
       navigate("/auth/login");
     },
     onError: (error) => {

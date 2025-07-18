@@ -38,7 +38,9 @@
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
       "copyUrl": "The URL address was copied to the clipboard"
-    }
+    },
+    "continueWithGoogle": "Continue with Google",
+    "continueWithMicrosoft": "Continue with Microsoft"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -819,7 +821,8 @@
       "password": "Password"
     },
     "other": {
-      "alreadyHaveAccount": "Already have an account?"
+      "alreadyHaveAccount": "Already have an account?",
+      "orContinueWith": "Or continue with"
     },
     "button": {
       "createAccount": "Create an account",
@@ -869,7 +872,8 @@
       "forgotPassword": "Forgot your password?",
       "dontHaveAccount": "Don't have an account?",
       "rememberMe": "Remember me",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "orContinueWith": "Or continue with"
     },
     "button": {
       "login": "Login"

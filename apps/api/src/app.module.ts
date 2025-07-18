@@ -6,6 +6,8 @@ import { JwtModule } from "@nestjs/jwt";
 import { ScheduleModule } from "@nestjs/schedule";
 
 import { AuthModule } from "./auth/auth.module";
+import { GoogleStrategy } from "./auth/strategy/google.strategy";
+import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
 import awsConfig from "./common/configuration/aws";
@@ -101,6 +103,8 @@ import { UserModule } from "./user/user.module";
       provide: APP_GUARD,
       useClass: StagingGuard,
     },
+    ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
+    ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
   ],
 })
 export class AppModule {}
