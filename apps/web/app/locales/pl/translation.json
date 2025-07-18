@@ -255,7 +255,8 @@
       "continue": "Kontynuuj",
       "start": "Rozpocznij",
       "readMore": "Czytaj więcej",
-      "tryAgain": "Spróbuj ponownie"
+      "tryAgain": "Spróbuj ponownie",
+      "view": "Zobacz"
     },
     "other": {
       "completedCourses": "Zakończone kursy",
@@ -904,7 +905,15 @@
           "title": "Szukaj po tytule...",
           "categories": "Kategorie",
           "sort": "Sortuj"
-        }
+        },
+        "options": {}
+      },
+      "headerOptions": {
+        "image": "Zdjęcie",
+        "title": "Nazwa Kursu",
+        "category": "Kategoria",
+        "description": "Opis",
+        "author": "Autor"
       }
     }
   },
