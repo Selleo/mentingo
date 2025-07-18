@@ -127,6 +127,13 @@
       "when": 1752579184297,
       "tag": "0017_added_ai_mentor_lesson_table",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1752759867561,
+      "tag": "0018_added_ai_student_interaction_tables",
+      "breakpoints": true
     }
   ]
 }

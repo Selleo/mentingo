@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Language = "en" | "pl";
+export type Language = "en" | "pl";
 
 type LanguageStore = {
   language: Language;

@@ -14,6 +14,8 @@ import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 
 import Presentation from "../../../components/Presentation/Presentation";
 
+import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
+
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 
 type LessonContentProps = {
@@ -41,7 +43,11 @@ export const LessonContent = ({
   useEffect(() => {
     if (isAdminLike) return;
 
-    if (lesson.type == LessonType.QUIZ || lesson.type == LessonType.VIDEO) {
+    if (
+      lesson.type == LessonType.QUIZ ||
+      lesson.type == LessonType.VIDEO ||
+      lesson.type == LessonType.AI_MENTOR
+    ) {
       return setIsNextDisabled(!lesson.lessonCompleted);
     }
 
@@ -62,12 +68,14 @@ export const LessonContent = ({
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
+      .with("ai_mentor", () => <AiMentorLesson />)
       .otherwise(() => null);
 
   const handleMarkLessonAsComplete = () => {
     handleNext();
 
     if (isAdminLike) return;
+    if (lesson.type == LessonType.AI_MENTOR) return;
 
     markLessonAsCompleted({ lessonId: lesson.id });
   };
