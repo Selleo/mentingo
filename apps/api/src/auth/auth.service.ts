@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
@@ -22,6 +23,8 @@ import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
+import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -46,6 +49,7 @@ export class AuthService {
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
+    private eventBus: EventBus,
   ) {}
 
   public async register({
@@ -92,7 +96,7 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
-      await this.settingsService.notifyAdminsAboutNewUser(newUser);
+      this.eventBus.publish(new UserRegisteredEvent(newUser));
 
       return newUser;
     });
@@ -258,6 +262,8 @@ export class AuthService {
     };
 
     await this.settingsService.createSettings(createToken.userId, defaultSettings);
+
+    this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
 
     return existingUser;
   }
