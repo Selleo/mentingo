@@ -3649,26 +3649,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/settings
      */
     settingsControllerGetUserSettings: (params: RequestParams = {}) =>
-      this.request<GetUserSettingsResponse, any>({
+      this.request<void, any>({
         path: `/api/settings`,
         method: "GET",
-        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @name SettingsControllerUpdateUserSettings
-     * @request PUT:/api/settings
+     * @name SettingsControllerCreateUserSettings
+     * @request POST:/api/settings
      */
-    settingsControllerUpdateUserSettings: (
-      data: UpdateUserSettingsBody,
+    settingsControllerCreateUserSettings: (
+      data: CreateUserSettingsBody,
       params: RequestParams = {},
     ) =>
-      this.request<UpdateUserSettingsResponse, any>({
+      this.request<CreateUserSettingsResponse, any>({
         path: `/api/settings`,
-        method: "PUT",
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",

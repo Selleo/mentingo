@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
+import { Controller, Get, Body, Patch, UseGuards, Put, Post } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -21,6 +21,10 @@ import type {
   GlobalSettingsJSONContentSchema,
   SettingsJSONContentSchema,
 } from "./schemas/settings.schema";
+import {
+  CompanyInformationBody,
+  companyInformationBodySchema,
+} from "./schemas/company-information.schema";
 
 @Controller("settings")
 @UseGuards(RolesGuard)
@@ -80,5 +84,31 @@ export class SettingsController {
   > {
     const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
+  }
+
+  @Get("company-information")
+  @Public()
+  async getCompanyInformation() {
+    return await this.settingsService.getCompanyInformation();
+  }
+
+  @Post("company-information")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: companyInformationBodySchema }],
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async createCompanyInformation(@Body() companyInfo: CompanyInformationBody) {
+    return new BaseResponse(await this.settingsService.createCompanyInformation(companyInfo));
+  }
+
+  @Patch("company-information")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: companyInformationBodySchema }],
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateCompanyInformation(@Body() companyInfo: CompanyInformationBody) {
+    return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
   }
 }
