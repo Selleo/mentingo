@@ -10447,15 +10447,27 @@
                 "type": "string"
               },
               "settings": {
-                "type": "object",
-                "properties": {
-                  "adminNewUserNotification": {
-                    "type": "boolean"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      }
+                    }
                   },
-                  "language": {
-                    "type": "string"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      }
+                    }
                   }
-                }
+                ]
               },
               "createdAt": {
                 "anyOf": [
