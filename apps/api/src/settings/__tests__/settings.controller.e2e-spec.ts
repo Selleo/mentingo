@@ -32,12 +32,7 @@ describe("SettingsController (e2e)", () => {
 
     testUser = await userFactory.withCredentials({ password: testPassword }).create();
 
-    const testLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-      email: testUser.email,
-      password: testUser.credentials?.password,
-    });
-
-    testCookies = testLoginResponse.headers["set-cookie"];
+    testCookies = await cookieFor(testUser, app);
   });
 
   describe("PATCH /api/settings/admin-new-user-notification", () => {
