@@ -1,5 +1,6 @@
 import { useFormContext } from "react-hook-form";
 
+import { cn } from "~/lib/utils";
 import { getBarColor } from "~/modules/Auth/utils";
 import { validatePasswordStrength } from "~/modules/Dashboard/Settings/schema/password.schema";
 
@@ -22,7 +23,10 @@ const PasswordStrengthBars: React.FC<PasswordStrengthBarsProps> = ({ fieldName }
         {[...Array(5)].map((_, index) => (
           <div key={index} className="w-1/5 px-1">
             <div
-              className={`h-2 rounded-xl transition-colors ${getBarColor(index, passwordStrength)}`}
+              className={cn(
+                "h-2 rounded-xl transition-colors",
+                getBarColor(index, passwordStrength),
+              )}
             />
           </div>
         ))}
