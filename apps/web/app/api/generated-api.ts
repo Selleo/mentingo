@@ -1412,6 +1412,68 @@ export interface GetScormMetadataResponse {
   };
 }
 
+export interface CreateUserSettingsBody {
+  admin_new_user_notification?: boolean;
+  language?: string;
+  company_information?: {
+    company_name?: string;
+    registered_address?: string;
+    tax_number?: string;
+    email_address?: string;
+    court_register_number?: string;
+  };
+}
+
+export interface CreateUserSettingsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    settings: {
+      admin_new_user_notification?: boolean;
+      language?: string;
+      company_information?: {
+        company_name?: string;
+        registered_address?: string;
+        tax_number?: string;
+        email_address?: string;
+        court_register_number?: string;
+      };
+    };
+    createdAt: string | null;
+  };
+}
+
+export interface UpdateUserSettingsBody {
+  admin_new_user_notification?: boolean;
+  language?: string;
+  company_information?: {
+    company_name?: string;
+    registered_address?: string;
+    tax_number?: string;
+    email_address?: string;
+    court_register_number?: string;
+  };
+}
+
+export interface UpdateUserSettingsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    settings: {
+      admin_new_user_notification?: boolean;
+      language?: string;
+      company_information?: {
+        company_name?: string;
+        registered_address?: string;
+        tax_number?: string;
+        email_address?: string;
+        court_register_number?: string;
+      };
+    };
+    createdAt: string | null;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -3084,6 +3146,57 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetScormMetadataResponse, any>({
         path: `/api/scorm/${courseId}/metadata`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetUserSettings
+     * @request GET:/api/settings
+     */
+    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerCreateUserSettings
+     * @request POST:/api/settings
+     */
+    settingsControllerCreateUserSettings: (
+      data: CreateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUserSettings
+     * @request PATCH:/api/settings
+     */
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
