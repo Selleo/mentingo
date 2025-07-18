@@ -141,7 +141,7 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
-    return { ...user, settings: user.settings || {} };
+    return user;
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -178,7 +178,6 @@ export class AuthService {
         avatarReference: users.avatarReference,
       })
       .from(users)
-      .innerJoin(settings, eq(users.id, settings.userId))
       .leftJoin(credentials, eq(users.id, credentials.userId))
       .where(eq(users.email, email));
 

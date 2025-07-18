@@ -27,7 +27,23 @@ describe("SettingsController (e2e)", () => {
     await app.close();
   }, 10000);
 
-  describe("PUT /api/settings", () => {
+  beforeEach(async () => {
+    await db.delete(settings);
+
+    testUser = await userFactory.withCredentials({ password: testPassword }).create();
+
+    const testLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+      email: testUser.email,
+      password: testUser.credentials?.password,
+    });
+
+    testCookies = testLoginResponse.headers["set-cookie"];
+  });
+
+  describe("PATCH /api/settings/admin-new-user-notification", () => {
+    let adminUser: UserWithCredentials;
+    let adminCookies: string;
+
     beforeEach(async () => {
       await truncateTables(db, ["settings"]);
 
