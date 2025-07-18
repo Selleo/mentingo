@@ -15,7 +15,7 @@ import {
   WelcomeEmail,
 } from "@repo/email-templates";
 import * as bcrypt from "bcryptjs";
-import { and, eq, isNull, lte, sql } from "drizzle-orm";
+import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { CORS_ORIGIN } from "src/auth/consts";
@@ -237,6 +237,7 @@ export class AuthService {
         email: users.email,
         oldCreateToken: createTokens.createToken,
         tokenExpiryDate: createTokens.expiryDate,
+        reminderCount: createTokens.reminderCount,
       })
       .from(createTokens)
       .leftJoin(credentials, eq(createTokens.userId, credentials.userId))
@@ -245,6 +246,7 @@ export class AuthService {
         and(
           isNull(credentials.userId),
           lte(sql`DATE(${createTokens.expiryDate})`, sql`CURRENT_DATE`),
+          lt(createTokens.reminderCount, 3),
         ),
       );
   }
@@ -265,6 +267,7 @@ export class AuthService {
     createToken: string,
     emailTemplate: { text: string; html: string },
     expiryDate: Date,
+    reminderCount: number,
   ) {
     await this.db.transaction(async (transaction) => {
       try {
@@ -272,6 +275,7 @@ export class AuthService {
           userId,
           createToken,
           expiryDate,
+          reminderCount,
         });
 
         await this.emailService.sendEmail({
@@ -297,7 +301,7 @@ export class AuthService {
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 24);
 
-    expiryTokens.map(async ({ userId, email, oldCreateToken }) => {
+    expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
       const { createToken, emailTemplate } = this.generateNewTokenAndEmail(email);
 
       await this.sendEmailAndUpdateDatabase(
@@ -307,6 +311,7 @@ export class AuthService {
         createToken,
         emailTemplate,
         expiryDate,
+        reminderCount + 1,
       );
     });
   }

@@ -1,0 +1,1 @@
+ALTER TABLE "create_tokens" ADD COLUMN "reminder_count" integer DEFAULT 0 NOT NULL;

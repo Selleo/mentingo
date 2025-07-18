@@ -98,6 +98,7 @@ export const createTokens = pgTable("create_tokens", {
     precision: 3,
     withTimezone: true,
   }).notNull(),
+  reminderCount: integer("reminder_count").notNull().default(0),
 });
 
 export const resetTokens = pgTable("reset_tokens", {
