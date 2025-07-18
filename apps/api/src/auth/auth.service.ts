@@ -274,6 +274,8 @@ export class AuthService {
 
     this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
 
+    this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
+
     return existingUser;
   }
 
