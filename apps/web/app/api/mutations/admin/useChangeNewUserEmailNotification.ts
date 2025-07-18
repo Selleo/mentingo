@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { userSettingsQueryOptions } from "~/api/queries/useUserSettings";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -16,7 +17,7 @@ export function useChangeNewUserEmailNotification() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userSettings"] });
+      queryClient.invalidateQueries(userSettingsQueryOptions);
       toast({
         variant: "default",
         description: t("adminPreferences.toast.newUserNotificationsPreferenceChangeSuccess"),

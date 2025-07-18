@@ -7,7 +7,6 @@ import { UserRegisteredEvent } from "../../events/user/user-registered.event";
 import { UserService } from "../user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
-import type { UserSettings } from "src/common/types";
 
 @EventsHandler(UserRegisteredEvent)
 export class NotifyAdminsHandler implements IEventHandler<UserRegisteredEvent> {
@@ -26,11 +25,7 @@ export class NotifyAdminsHandler implements IEventHandler<UserRegisteredEvent> {
       email: email,
     });
 
-    const allAdmins = await this.userService.getAdminsWithSettings();
-
-    const adminsToNotify = allAdmins.filter((admin) => {
-      return (admin.settings?.settings as UserSettings)?.adminNewUserNotification === true;
-    });
+    const adminsToNotify = await this.userService.getAdminsToNotifyAboutNewUser();
 
     await Promise.all(
       adminsToNotify.map((admin) => {
