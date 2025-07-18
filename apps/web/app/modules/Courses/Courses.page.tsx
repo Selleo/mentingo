@@ -29,7 +29,7 @@ import {
 import { CourseList } from "~/modules/Courses/components/CourseList";
 import { StudentsCurses } from "~/modules/Courses/components/StudentsCurses";
 import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
-import { SORT_OPTIONS, type SortOption } from "~/types/sorting";
+import { createSortOptions, type SortOption } from "~/types/sorting";
 
 import type { MetaFunction } from "@remix-run/node";
 
@@ -129,7 +129,7 @@ export default function CoursesPage() {
       name: "sort",
       type: "select",
       placeholder: t("studentCoursesView.availableCourses.filters.placeholder.sort"),
-      options: SORT_OPTIONS,
+      options: createSortOptions(t),
     },
   ];
 
