@@ -9499,7 +9499,10 @@
                       "language": {
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "language"
+                    ]
                   },
                   {
                     "type": "object",
@@ -9510,7 +9513,11 @@
                       "adminNewUserNotification": {
                         "type": "boolean"
                       }
-                    }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
                   }
                 ]
               },
