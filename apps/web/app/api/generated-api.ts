@@ -79,6 +79,16 @@ export interface UserSettings extends AdminSettings {
   language: string;
 }
 
+export interface SettingsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    settings: UserSettings;
+  };
+}
+
 export interface CurrentUserResponse {
   data: {
     id: string;
@@ -89,7 +99,6 @@ export interface CurrentUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
-    settings: UserSettings;
   };
 }
 
@@ -3321,6 +3330,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     scormControllerGetScormMetadata: (courseId: string, params: RequestParams = {}) =>
       this.request<GetScormMetadataResponse, any>({
         path: `/api/scorm/${courseId}/metadata`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerGetUserDetails
+     * @request GET:/api/user/details
+     */
+    userSettings: (params: RequestParams = {}) =>
+      this.request<SettingsResponse, any>({
+        path: `/api/settings`,
         method: "GET",
         format: "json",
         ...params,

@@ -18,7 +18,7 @@ export class SettingsController {
 
   @Get()
   async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
-    return await this.settingsService.getUserSettings(userId);
+    return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
   @Patch()

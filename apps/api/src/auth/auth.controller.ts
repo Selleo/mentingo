@@ -79,6 +79,7 @@ export class AuthController {
     } = await this.authService.login(data);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
+
     return new BaseResponse(account);
   }
 

@@ -14,6 +14,9 @@ import { settings } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
 import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
+import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
+import type * as schema from "../storage/schema";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { UserSettings } from "src/common/types";
@@ -57,13 +60,13 @@ export class SettingsService {
   public async createSettings(
     userId: UUIDType,
     createSettings?: SettingsJSONContentSchema,
-    trx?: any,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     if (!userId) {
       throw new UnauthorizedException("User not authenticated");
     }
 
-    const [existingSettings] = await this.db
+    const [existingSettings] = await dbInstance
       .select()
       .from(settings)
       .where(eq(settings.userId, userId));
@@ -72,14 +75,12 @@ export class SettingsService {
       throw new ConflictException("Settings already exists");
     }
 
-    const database = trx || this.db;
-
-    const [createdSettings] = await database
+    const [createdSettings] = await dbInstance
       .insert(settings)
       .values({
         userId,
         createdAt: new Date().toISOString(),
-        settings: createSettings,
+        settings: createSettings ?? {},
       })
       .returning();
 
@@ -96,7 +97,7 @@ export class SettingsService {
     return userSettings;
   }
 
-  public async updateUserSettings(userId: UUIDType, updatedSettings: SettingsJSONContentSchema) {
+  public async updateUserSettings(userId: UUIDType, updatedSettings: UpdateSettingsBody) {
     const [updated] = await this.db
       .update(settings)
       .set({ settings: updatedSettings })

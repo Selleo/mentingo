@@ -1,15 +1,21 @@
 import { useTranslation } from "react-i18next";
 
 import { useChangeNewUserEmailNotification } from "~/api/mutations/admin/useChangeNewUserEmailNotification";
-import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 
-export default function NotificationPreferencesForm() {
+import type { UserSettings } from "~/api/generated-api";
+
+interface NotificationPreferencesFormProps {
+  settings: UserSettings;
+}
+
+export default function NotificationPreferencesForm({
+  settings,
+}: NotificationPreferencesFormProps) {
   const { t } = useTranslation();
   const { mutate: changeNewUserEmailNotification } = useChangeNewUserEmailNotification();
-  const { data: currentUser } = useCurrentUserSuspense();
 
   const handleNotificationChange = () => {
     changeNewUserEmailNotification();
@@ -36,7 +42,7 @@ export default function NotificationPreferencesForm() {
               </div>
               <Switch
                 id="newUserNotifications"
-                checked={currentUser.settings.adminNewUserNotification}
+                checked={settings.adminNewUserNotification}
                 onCheckedChange={handleNotificationChange}
               />
             </div>
