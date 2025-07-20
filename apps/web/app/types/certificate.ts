@@ -1,4 +1,4 @@
-export type CertificateType = {
+export interface CertificateType {
   id: string;
   userId: string;
   courseId: string;
@@ -7,9 +7,9 @@ export type CertificateType = {
   fullName?: string | null;
   createdAt: string;
   updatedAt?: string | null;
-};
+}
 
-export type CertificatesResponse = {
+export interface CertificatesResponse {
   data: CertificateType[];
   pagination: {
     totalItems: number;
@@ -17,4 +17,7 @@ export type CertificatesResponse = {
     perPage: number;
   };
   appliedFilters?: object;
-};
+}
+export interface UpdateHasCertificateBody {
+  hasCertificate: boolean;
+}
