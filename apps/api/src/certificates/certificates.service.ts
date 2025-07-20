@@ -1,16 +1,14 @@
 import {
   Injectable,
-  Inject,
   NotFoundException,
   ConflictException,
   BadRequestException,
 } from "@nestjs/common";
-import { eq, and, countDistinct, sql } from "drizzle-orm";
 
-import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
-import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { certificates, users, courses, studentCourses } from "src/storage/schema";
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+
+import { CertificateRepository } from "./certificate.repository";
 
 import type { CertificatesQuery, AllCertificatesResponse } from "./certificates.types";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -19,7 +17,7 @@ import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class CertificatesService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(private readonly certificateRepository: CertificateRepository) {}
 
   async getAllCertificates(
     query: CertificatesQuery,
@@ -28,38 +26,16 @@ export class CertificatesService {
     const { sortOrder } = getSortOptions(sort);
 
     try {
-      return this.db.transaction(async (trx) => {
-        const queryDB = trx
-          .select({
-            id: certificates.id,
-            courseId: certificates.courseId,
-            courseTitle: courses.title,
-            completionDate: studentCourses.completedAt,
-            fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-            userId: certificates.userId,
-            createdAt: certificates.createdAt,
-            updatedAt: certificates.updatedAt,
-          })
-          .from(certificates)
-          .innerJoin(courses, eq(courses.id, certificates.courseId))
-          .innerJoin(users, eq(users.id, certificates.userId))
-          .leftJoin(
-            studentCourses,
-            and(
-              eq(studentCourses.studentId, certificates.userId),
-              eq(studentCourses.courseId, certificates.courseId),
-            ),
-          )
-          .where(eq(certificates.userId, userId))
-          .orderBy(sortOrder(certificates.createdAt));
+      return await this.certificateRepository.transaction(async (trx) => {
+        const data = await this.certificateRepository.findCertificatesByUserId(
+          userId,
+          page,
+          perPage,
+          sortOrder,
+          trx,
+        );
 
-        const paginatedQuery = addPagination(queryDB.$dynamic(), page, perPage);
-        const data = await paginatedQuery;
-
-        const [{ totalItems }] = await trx
-          .select({ totalItems: countDistinct(certificates.id) })
-          .from(certificates)
-          .where(eq(certificates.userId, userId));
+        const totalItems = await this.certificateRepository.countByUserId(userId, trx);
 
         return { data, pagination: { totalItems, page, perPage } };
       });
@@ -75,61 +51,72 @@ export class CertificatesService {
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     try {
-      const dbInstance = trx || this.db;
+      const executeInTransaction = async (
+        transactionInstance: PostgresJsDatabase<typeof schema>,
+      ) => {
+        const existingUser = await this.certificateRepository.findUserById(
+          userId,
+          transactionInstance,
+        );
+        const existingCourse = await this.certificateRepository.findCourseById(
+          courseId,
+          transactionInstance,
+        );
+        const courseCompletion = await this.certificateRepository.findCourseCompletion(
+          userId,
+          courseId,
+          transactionInstance,
+        );
 
-      const [existingUser] = await dbInstance
-        .select({
-          firstName: users.firstName,
-          lastName: users.lastName,
-        })
-        .from(users)
-        .where(eq(users.id, userId));
+        if (!existingUser) {
+          throw new NotFoundException("User not found");
+        }
 
-      const [existingCourse] = await dbInstance
-        .select({
-          title: courses.title,
-          certificateEnabled: courses.hasCertificate,
-        })
-        .from(courses)
-        .where(eq(courses.id, courseId));
+        if (!existingCourse) {
+          throw new NotFoundException("Course not found");
+        }
 
-      const [courseCompletion] = await dbInstance
-        .select({
-          completedAt: studentCourses.completedAt,
-        })
-        .from(studentCourses)
-        .where(and(eq(studentCourses.studentId, userId), eq(studentCourses.courseId, courseId)));
+        if (!existingCourse.certificateEnabled) {
+          throw new BadRequestException("Certificates are disabled for this course");
+        }
 
-      if (!existingUser) throw new NotFoundException("User not found");
-      if (!existingCourse) throw new NotFoundException("Course not found");
-      if (!existingCourse.certificateEnabled)
-        throw new BadRequestException("Certificates are disabled for this course");
-      if (!courseCompletion?.completedAt)
-        throw new BadRequestException("Course must be completed to generate certificate");
+        if (!courseCompletion?.completedAt) {
+          throw new BadRequestException("Course must be completed to generate certificate");
+        }
 
-      const [existingCertificate] = await dbInstance
-        .select()
-        .from(certificates)
-        .where(and(eq(certificates.userId, userId), eq(certificates.courseId, courseId)));
+        const existingCertificate = await this.certificateRepository.findExistingCertificate(
+          userId,
+          courseId,
+          transactionInstance,
+        );
 
-      if (existingCertificate) throw new ConflictException("Certificate already exists");
+        if (existingCertificate) {
+          throw new ConflictException("Certificate already exists");
+        }
 
-      const [createdCertificate] = await dbInstance
-        .insert(certificates)
-        .values({
-          userId: userId,
-          courseId: courseId,
-        })
-        .returning();
+        const createdCertificate = await this.certificateRepository.create(
+          userId,
+          courseId,
+          transactionInstance,
+        );
 
-      if (!createdCertificate) throw new ConflictException("Unable to create certificate");
+        if (!createdCertificate) {
+          throw new ConflictException("Unable to create certificate");
+        }
 
-      return {
-        ...createdCertificate,
-        fullName: `${existingUser.firstName} ${existingUser.lastName}`,
-        courseTitle: existingCourse.title,
-        completionDate: new Date(courseCompletion.completedAt).toISOString(),
+        return {
+          ...createdCertificate,
+          fullName: `${existingUser.firstName} ${existingUser.lastName}`,
+          courseTitle: existingCourse.title,
+          completionDate: new Date(courseCompletion.completedAt).toISOString(),
+        };
       };
+
+      if (trx) {
+        return await executeInTransaction(trx);
+      } else {
+        return await this.certificateRepository.transaction(executeInTransaction);
+      }
     } catch (error) {
       console.error("Error creating certificate:", error);
       throw error;
@@ -138,28 +125,10 @@ export class CertificatesService {
 
   async getCertificate(userId: string, courseId: string) {
     try {
-      const [certificate] = await this.db
-        .select({
-          id: certificates.id,
-          courseId: certificates.courseId,
-          courseTitle: courses.title,
-          completionDate: studentCourses.completedAt,
-          fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-          userId: certificates.userId,
-          createdAt: certificates.createdAt,
-          updatedAt: certificates.updatedAt,
-        })
-        .from(certificates)
-        .innerJoin(courses, eq(courses.id, certificates.courseId))
-        .innerJoin(users, eq(users.id, certificates.userId))
-        .leftJoin(
-          studentCourses,
-          and(
-            eq(studentCourses.studentId, certificates.userId),
-            eq(studentCourses.courseId, certificates.courseId),
-          ),
-        )
-        .where(and(eq(certificates.userId, userId), eq(certificates.courseId, courseId)));
+      const certificate = await this.certificateRepository.findCertificateByUserAndCourse(
+        userId,
+        courseId,
+      );
 
       if (!certificate) {
         throw new NotFoundException("Certificate not found");
