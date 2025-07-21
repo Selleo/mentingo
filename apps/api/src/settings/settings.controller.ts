@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, UseGuards } from "@nestjs/common";
+import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -21,7 +21,7 @@ export class SettingsController {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
-  @Patch()
+  @Put()
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
     response: baseResponse(settingsSchema),

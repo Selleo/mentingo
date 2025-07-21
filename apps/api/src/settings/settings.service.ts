@@ -10,6 +10,7 @@ import { eq, sql } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
 import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
@@ -53,7 +54,7 @@ export class SettingsService {
       .values({
         userId,
         createdAt: new Date().toISOString(),
-        settings: sql.raw(`'${JSON.stringify(finalSettings).replace(/'/g, "''")}'::jsonb`),
+        settings: settingsToJsonBuildObject(finalSettings),
       })
       .returning();
 
@@ -74,7 +75,7 @@ export class SettingsService {
     const [updated] = await this.db
       .update(settings)
       .set({
-        settings: sql.raw(`'${JSON.stringify(updatedSettings).replace(/'/g, "''")}'::jsonb`),
+        settings: settingsToJsonBuildObject(updatedSettings),
       })
       .where(eq(settings.userId, userId))
       .returning();

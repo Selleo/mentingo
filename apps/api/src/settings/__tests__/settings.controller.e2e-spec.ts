@@ -44,7 +44,7 @@ describe("SettingsController (e2e)", () => {
       };
 
       const response = await request(app.getHttpServer())
-        .patch("/api/settings")
+        .put("/api/settings")
         .set("Cookie", testCookies)
         .send(updatePayload)
         .expect(200);
@@ -67,7 +67,7 @@ describe("SettingsController (e2e)", () => {
       };
 
       await request(app.getHttpServer())
-        .patch("/api/settings")
+        .put("/api/settings")
         .set("Cookie", testCookies)
         .send(invalidUpdatePayload)
         .expect(400);
@@ -78,7 +78,7 @@ describe("SettingsController (e2e)", () => {
         language: "de",
       };
 
-      await request(app.getHttpServer()).patch("/api/settings").send(updatePayload).expect(401);
+      await request(app.getHttpServer()).put("/api/settings").send(updatePayload).expect(401);
     });
   });
 

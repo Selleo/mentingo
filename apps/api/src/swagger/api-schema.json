@@ -2856,7 +2856,7 @@
           }
         }
       },
-      "patch": {
+      "put": {
         "operationId": "SettingsController_updateUserSettings",
         "parameters": [],
         "requestBody": {
