@@ -22,7 +22,6 @@ import {
   lessons,
   questions,
   quizAttempts,
-  settings,
   studentCourses,
   studentLessonProgress,
   userDetails,
@@ -106,12 +105,21 @@ async function insertUserDetails(userId: UUIDType) {
 }
 
 async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
-  await db.insert(settings).values({
-    userId: userId,
-    settings: isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  });
+  const settingsObject = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
+
+  const settingsJSON = JSON.stringify(settingsObject).replace(/'/g, "''");
+
+  await db.execute(
+    sql`
+      INSERT INTO settings (user_id, settings, created_at, updated_at)
+      VALUES (
+        ${userId},
+        '${sql.raw(settingsJSON)}'::jsonb,
+        ${new Date().toISOString()},
+        ${new Date().toISOString()}
+      )
+    `,
+  );
 }
 
 async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {

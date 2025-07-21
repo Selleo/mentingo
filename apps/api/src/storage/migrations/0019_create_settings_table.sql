@@ -17,6 +17,10 @@ EXCEPTION
 END $$;
 
 INSERT INTO settings (user_id, settings)
+SELECT NULL, '{}'::JSONB
+WHERE NOT EXISTS (SELECT 1 FROM settings WHERE user_id IS NULL);
+
+INSERT INTO settings (user_id, settings)
 SELECT u.id, 
        CASE 
            WHEN u.role = 'admin' THEN '{"language": "en","adminNewUserNotification": true}'::JSONB

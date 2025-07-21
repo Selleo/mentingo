@@ -4,16 +4,12 @@ import { UUIDSchema } from "src/common";
 
 import type { Static } from "@sinclair/typebox";
 
-export const baseSettingsJSONContentSchema = Type.Object({
+export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.String(),
 });
 
-export const studentSettingsJSONContentSchema = Type.Object({
-  ...baseSettingsJSONContentSchema.properties,
-});
-
 export const adminSettingsJSONContentSchema = Type.Object({
-  ...baseSettingsJSONContentSchema.properties,
+  ...studentSettingsJSONContentSchema.properties,
   adminNewUserNotification: Type.Boolean(),
 });
 
@@ -24,7 +20,7 @@ export const settingsJSONContentSchema = Type.Union([
 
 export const settingsSchema = Type.Object({
   userId: UUIDSchema,
-  settings: settingsJSONContentSchema,
+  settings: Type.Union([studentSettingsJSONContentSchema, adminSettingsJSONContentSchema]),
   createdAt: Type.Union([Type.String(), Type.Null()]),
 });
 

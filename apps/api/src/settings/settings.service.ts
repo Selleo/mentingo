@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { settings } from "src/storage/schema";
@@ -53,7 +53,7 @@ export class SettingsService {
       .values({
         userId,
         createdAt: new Date().toISOString(),
-        settings: finalSettings,
+        settings: sql.raw(`'${JSON.stringify(finalSettings).replace(/'/g, "''")}'::jsonb`),
       })
       .returning();
 
@@ -73,7 +73,9 @@ export class SettingsService {
   public async updateUserSettings(userId: UUIDType, updatedSettings: UpdateSettingsBody) {
     const [updated] = await this.db
       .update(settings)
-      .set({ settings: updatedSettings })
+      .set({
+        settings: sql.raw(`'${JSON.stringify(updatedSettings).replace(/'/g, "''")}'::jsonb`),
+      })
       .where(eq(settings.userId, userId))
       .returning();
 
@@ -85,21 +87,31 @@ export class SettingsService {
   }
 
   public async updateAdminNewUserNotification(userId: UUIDType) {
-    const [userSettings] = await this.db.select().from(settings).where(eq(settings.userId, userId));
+    const [res] = await this.db
+      .select({
+        adminNewUserNotification: sql`settings.settings->>'adminNewUserNotification'`,
+      })
+      .from(settings)
+      .where(eq(settings.userId, userId));
 
-    if (!userSettings) {
+    if (!res) {
       throw new NotFoundException("User settings not found");
     }
 
-    const currentNotificationSetting = userSettings.settings.adminNewUserNotification;
-    const updatedSettings = {
-      ...userSettings.settings,
-      adminNewUserNotification: !currentNotificationSetting,
-    };
+    const current = res.adminNewUserNotification === "true";
 
     const [updated] = await this.db
       .update(settings)
-      .set({ settings: updatedSettings })
+      .set({
+        settings: sql`
+        jsonb_set(
+          settings.settings,
+          '{adminNewUserNotification}',
+          to_jsonb(${!current}),
+          true
+        )
+      `,
+      })
       .where(eq(settings.userId, userId))
       .returning();
 

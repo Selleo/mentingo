@@ -11,7 +11,6 @@ import UserForm from "./forms/UserForm";
 export default function SettingsPage() {
   const { isContentCreator, isAdmin } = useUserRole();
   const { data: settings } = useUserSettings();
-  console.log("settings", settings);
 
   return (
     <PageWrapper className="flex flex-col gap-6 *:h-min">
