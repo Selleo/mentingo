@@ -36,6 +36,11 @@ export class SettingsController {
   @Patch("admin-new-user-notification")
   @Roles(USER_ROLES.ADMIN)
   async updateAdminNewUserNotification(@CurrentUser("userId") userId: UUIDType) {
-    return new BaseResponse(await this.settingsService.updateAdminNewUserNotification(userId));
+    try {
+      const result = await this.settingsService.updateAdminNewUserNotification(userId);
+      return new BaseResponse(result);
+    } catch (error) {
+      throw error;
+    }
   }
 }
