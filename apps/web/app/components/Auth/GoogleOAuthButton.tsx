@@ -18,7 +18,7 @@ export function GoogleOAuthButton({ text, className = "mt-4 w-full" }: GoogleOAu
 
   return (
     <Button type="button" variant="outline" className={className} onClick={handleGoogleSignIn}>
-      <Icon name="Google" className="mr-2 h-4 w-4" />
+      <Icon name="Google" className="mr-2 size-4" />
       {text || t("common.continueWithGoogle")}
     </Button>
   );
