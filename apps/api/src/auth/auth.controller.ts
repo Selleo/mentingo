@@ -38,6 +38,7 @@ import { TokenService } from "./token.service";
 
 import type { Static } from "@sinclair/typebox";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
+import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Controller("auth")
 export class AuthController {
@@ -208,7 +209,7 @@ export class AuthController {
   @Get("microsoft/callback")
   @UseGuards(MicrosoftOAuthGuard)
   async microsoftAuthCallback(
-    @Req() request: Request & { user: { email: string; firstName: string; lastName: string } },
+    @Req() request: Request & { user: MicrosoftUserType },
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const microsoftUser = request.user;

@@ -94,7 +94,12 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {isGoogleOAuthEnabled && <SocialLogin isGoogleOAuthEnabled={isGoogleOAuthEnabled} />}
+        {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
+          <SocialLogin
+            isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+            isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+          />
+        )}
 
         <div className="mt-4 text-center text-sm">
           {t("loginView.other.dontHaveAccount")}{" "}

@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-microsoft";
 
+import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
+
 @Injectable()
 export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
   constructor() {
@@ -22,7 +24,11 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any): Promise<any> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+  ): Promise<MicrosoftUserType> {
     return {
       email: profile.userPrincipalName,
       firstName: profile.name.givenName,

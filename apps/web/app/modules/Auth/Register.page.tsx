@@ -6,8 +6,6 @@ import { z } from "zod";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
-import { MicrosoftOAuthButton } from "~/components/Auth/MicrosoftOauthButton";
-import { GoogleOAuthButton } from "~/components/Auth/GoogleOAuthButton";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { FormValidationError } from "~/components/ui/form-validation-error";
@@ -103,20 +101,11 @@ export default function RegisterPage() {
           </form>
 
           {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
-            <div className="relative mt-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  {t("registerView.other.orContinueWith")}
-                </span>
-              </div>
-            </div>
+            <SocialLogin
+              isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+              isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+            />
           )}
-
-          {isGoogleOAuthEnabled && <GoogleOAuthButton />}
-          {isMicrosoftOAuthEnabled && <MicrosoftOAuthButton />}
 
           <div className="mt-4 text-center text-sm">
             {t("registerView.other.alreadyHaveAccount")}{" "}

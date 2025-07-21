@@ -21,7 +21,7 @@ export function MicrosoftOAuthButton({
 
   return (
     <Button type="button" variant="outline" className={className} onClick={handleMicrosoftSignIn}>
-      <Icon name="Microsoft" className="mr-2 h-4 w-4" />
+      <Icon name="Microsoft" className="mr-2 size-4" />
       {text || t("common.continueWithMicrosoft")}
     </Button>
   );

@@ -1,12 +1,14 @@
 import { useTranslation } from "react-i18next";
 
 import { GoogleOAuthButton } from "~/components/Auth/GoogleOAuthButton";
+import { MicrosoftOAuthButton } from "~/components/Auth/MicrosoftOauthButton";
 
 interface SocialLoginProps {
   isGoogleOAuthEnabled?: boolean;
+  isMicrosoftOAuthEnabled?: boolean;
 }
 
-export function SocialLogin({ isGoogleOAuthEnabled }: SocialLoginProps) {
+export function SocialLogin({ isGoogleOAuthEnabled, isMicrosoftOAuthEnabled }: SocialLoginProps) {
   const { t } = useTranslation();
 
   return (
@@ -23,6 +25,7 @@ export function SocialLogin({ isGoogleOAuthEnabled }: SocialLoginProps) {
       </div>
 
       {isGoogleOAuthEnabled && <GoogleOAuthButton />}
+      {isMicrosoftOAuthEnabled && <MicrosoftOAuthButton />}
     </>
   );
 }
