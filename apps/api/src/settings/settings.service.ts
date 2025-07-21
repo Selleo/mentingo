@@ -44,15 +44,6 @@ export class SettingsService {
       throw new ConflictException("Settings already exists");
     }
 
-    const [existingSettings] = await dbInstance
-      .select()
-      .from(settings)
-      .where(eq(settings.userId, userId));
-
-    if (existingSettings) {
-      throw new ConflictException("Settings already exists");
-    }
-
     const defaultSettings = this.getDefaultSettingsForRole(userRole);
 
     const finalSettings = {

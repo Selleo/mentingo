@@ -2370,33 +2370,6 @@
         }
       }
     },
-    "/api/lesson/delete-student-quiz-answers": {
-      "delete": {
-        "operationId": "LessonController_deleteStudentQuizAnswers",
-        "parameters": [
-          {
-            "name": "lessonId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteStudentQuizAnswersResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/lesson/update-lesson-display-order": {
       "patch": {
         "operationId": "LessonController_updateLessonDisplayOrder",
@@ -3065,19 +3038,24 @@
         }
       }
     },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings": {
       "get": {
         "operationId": "SettingsController_getUserSettings",
         "parameters": [],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserSettingsResponse"
-                }
-              }
-            }
+            "description": ""
           }
         }
       },
@@ -3105,36 +3083,22 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/settings/admin/new-user-notification": {
       "patch": {
-        "operationId": "SettingsController_updateUserSettings",
+        "operationId": "SettingsController_updateAdminNewUserNotification",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserSettingsBody"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
-                }
-              }
-            }
+            "description": ""
           }
         }
       }
     },
-    "/api/settings/admin-new-user-notification": {
+    "/api/settings/admin/unregistered-user-courses-accessibility": {
       "patch": {
-        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
         "parameters": [],
         "responses": {
           "200": {
@@ -7812,66 +7776,6 @@
               "lessonCompleted": {
                 "type": "boolean"
               },
-              "thresholdScore": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "attemptsLimit": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "quizCooldownInHours": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "isQuizPassed": {
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "attempts": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "updatedAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "displayOrder": {
                 "type": "number"
               },
@@ -7929,12 +7833,6 @@
               "description",
               "fileType",
               "fileUrl",
-              "thresholdScore",
-              "attemptsLimit",
-              "quizCooldownInHours",
-              "isQuizPassed",
-              "attempts",
-              "updatedAt",
               "displayOrder",
               "nextLessonId"
             ]
@@ -8531,29 +8429,6 @@
               "fileType": {
                 "type": "string"
               },
-              "thresholdScore": {
-                "type": "number"
-              },
-              "attemptsLimit": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "quizCooldownInHours": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "questions": {
                 "type": "array",
                 "items": {
@@ -8717,10 +8592,7 @@
             },
             "required": [
               "title",
-              "type",
-              "thresholdScore",
-              "attemptsLimit",
-              "quizCooldownInHours"
+              "type"
             ]
           },
           {
@@ -8787,29 +8659,6 @@
               },
               "fileType": {
                 "type": "string"
-              },
-              "thresholdScore": {
-                "type": "number"
-              },
-              "attemptsLimit": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "quizCooldownInHours": {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
               },
               "questions": {
                 "type": "array",
@@ -9429,25 +9278,6 @@
             "required": [
               "message",
               "data"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "DeleteStudentQuizAnswersResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
             ]
           }
         },
@@ -10326,44 +10156,6 @@
           "data"
         ]
       },
-      "GetUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "language"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "adminNewUserNotification"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "UpdateUserSettingsBody": {
         "anyOf": [
           {
@@ -10391,55 +10183,6 @@
         "type": "object",
         "properties": {
           "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "language"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "adminNewUserNotification"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserSettingsBody": {
-        "type": "object",
-        "properties": {
-          "adminNewUserNotification": {
-            "type": "boolean"
-          },
-          "language": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
             "type": "object",
             "properties": {
               "userId": {
@@ -10454,7 +10197,10 @@
                       "language": {
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "language"
+                    ]
                   },
                   {
                     "type": "object",
@@ -10465,7 +10211,11 @@
                       "adminNewUserNotification": {
                         "type": "boolean"
                       }
-                    }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
                   }
                 ]
               },
