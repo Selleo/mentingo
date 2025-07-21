@@ -8,7 +8,6 @@ import { nanoid } from "nanoid";
 import { AuthService } from "src/auth/auth.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { createUnitTest, type TestContext } from "test/create-unit-test";
-import { createSettingsFactory } from "test/factory/settings.factory";
 import { createUserFactory } from "test/factory/user.factory";
 import { truncateAllTables } from "test/helpers/test-helpers";
 
