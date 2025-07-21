@@ -16,6 +16,8 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { FileService } from "src/file/file.service";
+import { S3Service } from "src/s3/s3.service";
 
 import { createTokens, credentials, userDetails, users } from "../storage/schema";
 
@@ -28,7 +30,7 @@ import {
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
 import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
-import type { UserDetails } from "./schemas/user.schema";
+import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
@@ -37,6 +39,8 @@ export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private emailService: EmailService,
+    private fileService: FileService,
+    private s3Service: S3Service,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -95,11 +99,12 @@ export class UserService {
     userId: UUIDType,
     currentUserId: UUIDType,
     userRole: UserRole,
-  ): Promise<UserDetails> {
-    const [userBio]: UserDetails[] = await this.db
+  ): Promise<UserDetailsResponse> {
+    const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
+        avatarReference: users.avatarReference,
         role: sql<UserRole>`${users.role}`,
         id: users.id,
         description: userDetails.description,
@@ -121,7 +126,17 @@ export class UserService {
     if (!canView) {
       throw new ForbiddenException("Cannot access user details");
     }
-    return userBio;
+
+    const { avatarReference, ...user } = userBio;
+
+    const profilePictureUrl = avatarReference
+      ? await this.s3Service.getSignedUrl(avatarReference)
+      : null;
+
+    return {
+      ...user,
+      profilePictureUrl,
+    };
   }
 
   public async updateUser(
@@ -161,17 +176,33 @@ export class UserService {
     return updatedUserDetails;
   }
 
-  async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody) {
+  async updateUserProfile(
+    id: UUIDType,
+    data: UpdateUserProfileBody,
+    userAvatar?: Express.Multer.File,
+  ) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
     }
 
+    if (!data && !userAvatar) {
+      throw new NotFoundException("No data provided for user profile update");
+    }
+
+    if (userAvatar) {
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars");
+      data.userAvatar = fileKey;
+    }
+
     await this.db.transaction(async (tx) => {
       const userUpdates = {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
+        ...((data.userAvatar || data.userAvatar === null) && {
+          avatarReference: data.userAvatar,
+        }),
       };
 
       const userDetailsUpdates = {

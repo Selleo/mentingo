@@ -154,6 +154,7 @@ export interface GetUserDetailsResponse {
     contactPhone: string | null;
     jobTitle: string | null;
     role: "admin" | "student" | "content_creator";
+    profilePictureUrl: string | null;
   };
 }
 
@@ -191,22 +192,6 @@ export interface UpsertUserDetailsResponse {
   data: {
     /** @format uuid */
     id: string;
-    message: string;
-  };
-}
-
-export interface UpdateUserProfileBody {
-  firstName?: string;
-  lastName?: string;
-  description?: string;
-  /** @format email */
-  contactEmail?: string;
-  contactPhone?: string;
-  jobTitle?: string;
-}
-
-export interface UpdateUserProfileResponse {
-  data: {
     message: string;
   };
 }
@@ -2086,13 +2071,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UserControllerUpdateUserProfile
      * @request PATCH:/api/user/profile
      */
-    userControllerUpdateUserProfile: (data: UpdateUserProfileBody, params: RequestParams = {}) =>
-      this.request<UpdateUserProfileResponse, any>({
+    userControllerUpdateUserProfile: (
+      data: {
+        /** @format binary */
+        userAvatar?: File;
+        /** @format string */
+        data?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
         path: `/api/user/profile`,
         method: "PATCH",
         body: data,
-        type: ContentType.Json,
-        format: "json",
+        type: ContentType.FormData,
         ...params,
       }),
 

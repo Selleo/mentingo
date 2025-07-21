@@ -75,6 +75,7 @@ export const createUserFactory = (db: DatabasePg) => {
       updatedAt: new Date().toISOString(),
       role: USER_ROLES.STUDENT,
       archived: false,
+      avatarReference: null,
     };
   });
 };

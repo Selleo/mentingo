@@ -21,7 +21,7 @@ import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
 import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
-import type { UpdateUserProfileBody } from "~/api/generated-api";
+import type { UpdateUserProfileBody } from "./types";
 
 const updateUserProfileSchema = z.object({
   firstName: z.string().optional(),
@@ -30,6 +30,7 @@ const updateUserProfileSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().optional(),
   jobTitle: z.string().optional(),
+  userAvatar: z.instanceof(File).nullable().optional(),
 });
 
 export default function ProfilePage() {
@@ -56,17 +57,29 @@ export default function ProfilePage() {
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { isDirty },
-  } = useForm<UpdateUserProfileBody>({ resolver: zodResolver(updateUserProfileSchema) });
+  } = useForm<UpdateUserProfileBody>({
+    resolver: zodResolver(updateUserProfileSchema),
+  });
 
   const { mutate: updateUserProfile } = useUpdateUserProfile();
 
   const onSubmit = (data: UpdateUserProfileBody) => {
-    if (isDirty) {
+    if (isDirty || data.userAvatar || data.userAvatar === null) {
       const filteredData = filterChangedData(data, userDetails as Partial<UpdateUserProfileBody>);
 
-      updateUserProfile({ data: filteredData, id });
-      reset(data);
+      if (data.userAvatar === null) {
+        filteredData.userAvatar = null;
+      }
+
+      updateUserProfile({
+        data: { ...filteredData },
+        id,
+        userAvatar: data.userAvatar || undefined,
+      });
+
+      reset();
       setIsEditing(false);
     }
   };
@@ -111,6 +124,7 @@ export default function ProfilePage() {
         {isEditing ? (
           <ProfileEditCard
             control={control}
+            setValue={setValue}
             user={{
               firstName: userDetails?.firstName || "",
               lastName: userDetails?.lastName || "",
@@ -119,10 +133,16 @@ export default function ProfilePage() {
               contactEmail: userDetails?.contactEmail || "",
               contactPhone: userDetails?.contactPhone || "",
             }}
+            userAvatarUrl={userDetails?.profilePictureUrl}
             isAdminLike={hasPermission}
           />
         ) : (
-          <ProfileCard isAdminLike={hasPermission} userDetails={userDetails} />
+          <ProfileCard
+            isAdminLike={hasPermission}
+            userDetails={{
+              ...userDetails,
+            }}
+          />
         )}
         {hasPermission && (
           <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
