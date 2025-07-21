@@ -1,36 +1,49 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { useToast } from "~/components/ui/use-toast";
 
-import type { UseFormSetValue, FieldValues, Path } from "react-hook-form";
-
-type UseHandleImageUpload<T extends FieldValues> = {
-  fieldName: Path<T>;
-  setValue: UseFormSetValue<T>;
-  setDisplayThumbnailUrl: (url: string | null) => void;
-  setIsUploading: (isUploading: boolean) => void;
+type UseHandleImageUploadOptions = {
+  onUpload: (file: File) => void | Promise<void>;
+  onRemove?: () => void | Promise<void>;
+  initialImageUrl: string | null;
 };
 
-export function useHandleImageUpload<T extends FieldValues>({
-  fieldName,
-  setValue,
-  setDisplayThumbnailUrl,
-  setIsUploading,
-}: UseHandleImageUpload<T>) {
+export function useHandleImageUpload({
+  onUpload,
+  onRemove,
+  initialImageUrl,
+}: UseHandleImageUploadOptions) {
   const { toast } = useToast();
 
-  return useCallback(
+  const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageUpload = useCallback(
     async (file: File) => {
       setIsUploading(true);
       try {
-        setDisplayThumbnailUrl(URL.createObjectURL(file));
-        setValue(fieldName, file as T[typeof fieldName]);
+        setImageUrl(URL.createObjectURL(file));
+        await onUpload(file);
       } catch (error) {
         toast({ description: `Error uploading image: ${error}`, variant: "destructive" });
       } finally {
         setIsUploading(false);
       }
     },
-    [fieldName, setDisplayThumbnailUrl, setIsUploading, setValue, toast],
+    [onUpload, toast],
   );
+
+  const removeImage = useCallback(async () => {
+    setImageUrl(null);
+    if (onRemove) {
+      await onRemove();
+    }
+  }, [onRemove]);
+
+  return {
+    imageUrl,
+    isUploading,
+    handleImageUpload,
+    removeImage,
+  };
 }

@@ -133,7 +133,7 @@ export default function ProfilePage() {
               contactEmail: userDetails?.contactEmail || "",
               contactPhone: userDetails?.contactPhone || "",
             }}
-            thumbnailUrl={userDetails?.profilePictureUrl}
+            userAvatarUrl={userDetails?.profilePictureUrl}
             isAdminLike={hasPermission}
           />
         ) : (

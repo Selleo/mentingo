@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { Controller, type Control, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +28,7 @@ type ProfileEditCardProps = {
   user: UpdateUserProfileBody;
   setValue: UseFormSetValue<UpdateUserProfileBody>;
   control: Control<UpdateUserProfileBody>;
-  thumbnailUrl: string | null;
+  userAvatarUrl: string | null;
   isAdminLike: boolean;
 };
 
@@ -37,29 +37,29 @@ export const ProfileEditCard = ({
   control,
   isAdminLike,
   setValue,
-  thumbnailUrl,
+  userAvatarUrl: initialUserAvatarUrl,
 }: ProfileEditCardProps) => {
-  const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | null>(thumbnailUrl);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
   const { t } = useTranslation();
 
-  const handleImageUpload = useHandleImageUpload({
-    fieldName: "userAvatar",
-    setValue,
-    setDisplayThumbnailUrl,
-    setIsUploading,
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const {
+    imageUrl: userAvatarUrl,
+    isUploading,
+    handleImageUpload,
+    removeImage,
+  } = useHandleImageUpload({
+    onUpload: (file) => {
+      setValue("userAvatar", file);
+    },
+    onRemove: () => {
+      setValue("userAvatar", null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    },
+    initialImageUrl: initialUserAvatarUrl,
   });
-
-  const removeThumbnail = () => {
-    setDisplayThumbnailUrl(null);
-    setValue("userAvatar", null);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
 
   const visiblePersonalFields = useMemo(
     () => personalInfoFields.filter(({ name }) => user[name as keyof UpdateUserProfileBody]),
@@ -125,21 +125,20 @@ export const ProfileEditCard = ({
               <ImageUploadInput
                 field={{
                   ...field,
-                  value: displayThumbnailUrl || undefined,
+                  value: userAvatarUrl || undefined,
                 }}
                 handleImageUpload={handleImageUpload}
                 isUploading={isUploading}
-                imageUrl={displayThumbnailUrl}
+                imageUrl={userAvatarUrl}
                 fileInputRef={fileInputRef}
               />
-
               {isUploading && <p>{t("common.other.uploadingImage")}</p>}
             </div>
           )}
         />
-        {displayThumbnailUrl && (
+        {userAvatarUrl && (
           <Button
-            onClick={removeThumbnail}
+            onClick={removeImage}
             className="mb-4 mt-4 rounded bg-red-500 px-6 py-2 text-white"
           >
             <Icon name="TrashIcon" className="mr-2" />
