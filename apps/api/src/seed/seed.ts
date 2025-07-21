@@ -22,7 +22,6 @@ import {
   lessons,
   questions,
   quizAttempts,
-  settings,
   studentCourses,
   studentLessonProgress,
   userDetails,
