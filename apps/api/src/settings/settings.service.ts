@@ -99,19 +99,18 @@ export class SettingsService {
   }
 
   public async updateAdminNewUserNotification(userId: UUIDType) {
-    try {
-      const [res] = await this.db
-        .select({
-          adminNewUserNotification: sql`settings.settings->>'adminNewUserNotification'`,
-        })
-        .from(settings)
-        .where(eq(settings.userId, userId));
+    const [res] = await this.db
+      .select({
+        adminNewUserNotification: sql`settings.settings->>'adminNewUserNotification'`,
+      })
+      .from(settings)
+      .where(eq(settings.userId, userId));
 
-      if (!res) {
-        throw new NotFoundException("User settings not found");
-      }
+    if (!res) {
+      throw new NotFoundException("User settings not found");
+    }
 
-      const current = res.adminNewUserNotification === "true";
+    const current = res.adminNewUserNotification === "true";
 
     const [updated] = await this.db
       .update(settings)
@@ -128,10 +127,7 @@ export class SettingsService {
       .where(eq(settings.userId, userId))
       .returning();
 
-      return updated;
-    } catch (error) {
-      throw error;
-    }
+    return updated;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
