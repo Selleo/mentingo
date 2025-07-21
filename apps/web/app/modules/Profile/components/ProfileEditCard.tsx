@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Controller, type Control, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -6,7 +6,7 @@ import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { useToast } from "~/components/ui/use-toast";
+import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 
 import { type EditProfileFieldType, ProfileEditFieldRenderer } from "./ProfileEditFieldRenderer";
 
@@ -44,22 +44,13 @@ export const ProfileEditCard = ({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { t } = useTranslation();
-  const { toast } = useToast();
 
-  const handleImageUpload = useCallback(
-    async (file: File) => {
-      setIsUploading(true);
-      try {
-        setDisplayThumbnailUrl(URL.createObjectURL(file));
-        setValue("userAvatar", file);
-      } catch (error) {
-        toast({ description: `Error uploading image: ${error}`, variant: "destructive" });
-      } finally {
-        setIsUploading(false);
-      }
-    },
-    [setValue, toast],
-  );
+  const handleImageUpload = useHandleImageUpload({
+    fieldName: "userAvatar",
+    setValue,
+    setDisplayThumbnailUrl,
+    setIsUploading,
+  });
 
   const removeThumbnail = () => {
     setDisplayThumbnailUrl(null);

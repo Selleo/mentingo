@@ -191,7 +191,7 @@ export class UserService {
       throw new NotFoundException("No data provided for user profile update");
     }
 
-    if (userAvatar && !data.userAvatar) {
+    if (userAvatar) {
       const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars");
       data.userAvatar = fileKey;
     }

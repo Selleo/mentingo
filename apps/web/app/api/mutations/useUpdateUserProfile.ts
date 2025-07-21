@@ -30,7 +30,7 @@ export function useUpdateUserProfile() {
         formData.userAvatar = options.userAvatar;
       }
 
-      if (options.data && Object.keys(options.data).length > 0) {
+      if (options.data && Object.keys(options.data).length) {
         const { userAvatar, ...updateData } = options.data;
         formData.data = JSON.stringify({
           ...updateData,
