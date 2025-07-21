@@ -258,7 +258,8 @@
       "continue": "Continue",
       "start": "Start",
       "readMore": "Read More",
-      "tryAgain": "Try again"
+      "tryAgain": "Try again",
+      "view": "View"
     },
     "other": {
       "completedCourses": "Completed Courses",
@@ -469,7 +470,7 @@
   },
   "adminGroupsView": {
     "name": "Group name",
-    "characteristic": "Charakterystyka",
+    "characteristic": "Characteristic",
     "buttons": {
       "create": "Create new",
       "deleteSelected": "Delete selected"
@@ -908,6 +909,13 @@
           "categories": "Categories",
           "sort": "Sort"
         }
+      },
+      "headerOptions": {
+        "image": "Image",
+        "title": "Course Name",
+        "category": "Category",
+        "description": "Description",
+        "author": "Author"
       }
     }
   },
