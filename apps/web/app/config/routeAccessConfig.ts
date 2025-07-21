@@ -112,4 +112,5 @@ export const routeAccessConfig = createRouteConfig({
   "admin/lesson-items/new-text-block": ADMIN_AND_CONTENT_CREATOR,
   "admin/lesson-items/new-question": ADMIN_AND_CONTENT_CREATOR,
   "admin/lesson-items/:id": ADMIN_AND_CONTENT_CREATOR,
+  "provider-information": ALL_ROLES,
 });

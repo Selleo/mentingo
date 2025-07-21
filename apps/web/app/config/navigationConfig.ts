@@ -107,7 +107,6 @@ export const findMatchingRoute = (path: string) => {
     const pathParts = path.split("/");
 
     if (routeParts.length !== pathParts.length) continue;
-
     const matches = routeParts.every((part, index) => {
       if (part.startsWith(":")) return true;
       return part === pathParts[index];

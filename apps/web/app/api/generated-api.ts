@@ -1474,6 +1474,58 @@ export interface UpdateUserSettingsResponse {
   };
 }
 
+export interface CreateCompanyInformationBody {
+  company_name?: string;
+  registered_address?: string;
+  tax_number?: string;
+  email_address?: string;
+  court_register_number?: string;
+}
+
+export interface CreateCompanyInformationResponse {
+  data: {
+    userId: string | null;
+    settings: {
+      admin_new_user_notification?: boolean;
+      language?: string;
+      company_information?: {
+        company_name?: string;
+        registered_address?: string;
+        tax_number?: string;
+        email_address?: string;
+        court_register_number?: string;
+      };
+    };
+    createdAt: string | null;
+  };
+}
+
+export interface UpdateCompanyInformationBody {
+  company_name?: string;
+  registered_address?: string;
+  tax_number?: string;
+  email_address?: string;
+  court_register_number?: string;
+}
+
+export interface UpdateCompanyInformationResponse {
+  data: {
+    userId: string | null;
+    settings: {
+      admin_new_user_notification?: boolean;
+      language?: string;
+      company_information?: {
+        company_name?: string;
+        registered_address?: string;
+        tax_number?: string;
+        email_address?: string;
+        court_register_number?: string;
+      };
+    };
+    createdAt: string | null;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -3194,6 +3246,57 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<UpdateUserSettingsResponse, any>({
         path: `/api/settings`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetCompanyInformation
+     * @request GET:/api/settings/company-information
+     */
+    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/company-information`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerCreateCompanyInformation
+     * @request POST:/api/settings/company-information
+     */
+    settingsControllerCreateCompanyInformation: (
+      data: CreateCompanyInformationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCompanyInformation
+     * @request PATCH:/api/settings/company-information
+     */
+    settingsControllerUpdateCompanyInformation: (
+      data: UpdateCompanyInformationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
