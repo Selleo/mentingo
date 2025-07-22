@@ -26,6 +26,7 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
+import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { createTokens, credentials, resetTokens, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -35,7 +36,6 @@ import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
-import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AuthService {
@@ -163,7 +163,6 @@ export class AuthService {
         role: users.role,
         archived: users.archived,
         avatarReference: users.avatarReference,
-        settings: settings.settings,
       })
       .from(users)
       .leftJoin(credentials, eq(users.id, credentials.userId))
@@ -245,6 +244,7 @@ export class AuthService {
         updatedAt: users.updatedAt,
         role: users.role,
         archived: users.archived,
+        avatarReference: users.avatarReference,
       })
       .from(users)
       .where(eq(users.id, createToken.userId));

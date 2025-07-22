@@ -47,7 +47,9 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data).toEqual(
-        expect.arrayContaining([expect.objectContaining(omit(testUser, "credentials"))]),
+        expect.arrayContaining([
+          expect.objectContaining(omit(testUser, "credentials", "avatarReference")),
+        ]),
       );
       expect(Array.isArray(response.body.data)).toBe(true);
     });
