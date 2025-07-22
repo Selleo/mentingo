@@ -190,7 +190,8 @@ export class AuthController {
   ): Promise<void> {
     const googleUser = request.user;
 
-    const { accessToken, refreshToken } = await this.authService.handleGoogleCallback(googleUser);
+    const { accessToken, refreshToken } =
+      await this.authService.handleProviderLoginCallback(googleUser);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
@@ -214,7 +215,7 @@ export class AuthController {
     const microsoftUser = request.user;
 
     const { accessToken, refreshToken } =
-      await this.authService.handleMicrosoftCallback(microsoftUser);
+      await this.authService.handleProviderLoginCallback(microsoftUser);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 

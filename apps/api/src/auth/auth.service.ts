@@ -359,42 +359,18 @@ export class AuthService {
     });
   }
 
-  public async handleGoogleCallback(googleUser: GoogleUserType) {
-    if (!googleUser) {
-      throw new UnauthorizedException("Google user data is missing");
+  public async handleProviderLoginCallback(userCallback: MicrosoftUserType | GoogleUserType) {
+    if (!userCallback) {
+      throw new UnauthorizedException("User data is missing");
     }
 
-    let [user] = await this.db.select().from(users).where(eq(users.email, googleUser.email));
+    let [user] = await this.db.select().from(users).where(eq(users.email, userCallback.email));
 
     if (!user) {
       user = await this.userService.createUser({
-        email: googleUser.email,
-        firstName: googleUser.firstName,
-        lastName: googleUser.lastName,
-        role: USER_ROLES.STUDENT,
-      });
-    }
-
-    const tokens = await this.getTokens(user);
-
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    };
-  }
-
-  public async handleMicrosoftCallback(microsoftUser: MicrosoftUserType) {
-    if (!microsoftUser) {
-      throw new UnauthorizedException("Microsoft user data is missing");
-    }
-
-    let [user] = await this.db.select().from(users).where(eq(users.email, microsoftUser.email));
-
-    if (!user) {
-      user = await this.userService.createUser({
-        email: microsoftUser.email,
-        firstName: microsoftUser.firstName,
-        lastName: microsoftUser.lastName,
+        email: userCallback.email,
+        firstName: userCallback.firstName,
+        lastName: userCallback.lastName,
         role: USER_ROLES.STUDENT,
       });
     }
