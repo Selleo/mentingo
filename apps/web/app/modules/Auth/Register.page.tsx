@@ -12,9 +12,9 @@ import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-import { SocialLogin } from "./components";
-
 import { passwordSchema } from "../Dashboard/Settings/schema/password.schema";
+
+import { SocialLogin } from "./components";
 
 import type { RegisterBody } from "~/api/generated-api";
 
