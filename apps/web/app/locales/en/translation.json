@@ -1134,12 +1134,12 @@
     "field": {
       "newUserNotifications": "New User Notifications",
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
-      "coursesAccessibility": "Courses Accessibility",
+      "coursesAccessibility": "Course availability for unauthenticated users",
       "coursesAccessibilityDescription": "Manage course accessibility settings and permissions"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
-      "coursesAccessibilityPreferenceChangeSuccess": "Courses accessibility preferences have been successfully updated"
+      "coursesAccessibilityPreferenceChangeSuccess": "Course accessibility preferences for unauthenticated users have been updated successfully"
     }
   }
 }

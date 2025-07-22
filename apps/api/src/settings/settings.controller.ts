@@ -38,12 +38,20 @@ export class SettingsController {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
-  @Patch("admin-new-user-notification")
+  @Patch("admin/new-user-notification")
   @Roles(USER_ROLES.ADMIN)
   async updateAdminNewUserNotification(
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<SettingsResponse>> {
     const result = await this.settingsService.updateAdminNewUserNotification(userId);
+    return new BaseResponse(result);
+  }
+
+  @Patch("admin/unregistered-user-courses-accessibility")
+  @Roles(USER_ROLES.ADMIN)
+  async updateUnregisteredUserCoursesAccessibility(@CurrentUser("userId") userId: UUIDType) {
+    const result =
+      await this.settingsService.updateAdminUnregisteredUserCoursesAccessibility(userId);
     return new BaseResponse(result);
   }
 }

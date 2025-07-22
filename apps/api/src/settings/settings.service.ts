@@ -102,6 +102,38 @@ export class SettingsService {
     return newSettings;
   }
 
+  public async updateAdminUnregisteredUserCoursesAccessibility(userId: UUIDType) {
+    const [res] = await this.db
+      .select({
+        adminUnregisteredUserCoursesAccessibility: sql`settings.settings->>'adminUnregisteredUserCoursesAccessibility'`,
+      })
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (!res) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    const current = res.adminUnregisteredUserCoursesAccessibility === "true";
+
+    const [updated] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{adminUnregisteredUserCoursesAccessibility}',
+            to_jsonb(${!current}),
+            true
+          )
+        `,
+      })
+      .where(eq(settings.userId, userId))
+      .returning();
+
+    return updated;
+  }
+
   public async updateAdminNewUserNotification(userId: UUIDType) {
     const [res] = await this.db
       .select({

@@ -9,6 +9,7 @@ export const studentSettingsJSONContentSchema = Type.Object({
 export const adminSettingsJSONContentSchema = Type.Object({
   ...studentSettingsJSONContentSchema.properties,
   adminNewUserNotification: Type.Boolean(),
+  adminUnregisteredUserCoursesAccessibility: Type.Boolean(),
 });
 
 export const settingsJSONContentSchema = Type.Union([

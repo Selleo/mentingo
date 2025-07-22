@@ -68,6 +68,25 @@ export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
 
+export interface AdminSettings {
+  adminNewUserNotification: boolean;
+  adminUnregisteredUserCoursesAccessibility: boolean;
+}
+
+export interface UserSettings extends AdminSettings {
+  language: string;
+}
+
+export interface SettingsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    settings: UserSettings;
+  };
+}
+
 export interface CurrentUserResponse {
   data: {
     id: string;
@@ -3626,31 +3645,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerUpdateUserSettings
-     * @request PUT:/api/settings
+     * @name BaseResponse
+     * @request GET:/api/settings/admin/new-user-notification
      */
-    settingsControllerUpdateUserSettings: (
-      data: UpdateUserSettingsBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateUserSettingsResponse, any>({
-        path: `/api/settings`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
+    settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
+      this.request<any>({
+        path: `/api/settings/admin/new-user-notification`,
+        method: "PATCH",
         format: "json",
         ...params,
       }),
 
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateAdminNewUserNotification
-     * @request PATCH:/api/settings/admin-new-user-notification
-     */
-    settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/settings/admin-new-user-notification`,
+    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
+      this.request<any>({
+        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
         ...params,
       }),

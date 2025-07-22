@@ -1140,12 +1140,12 @@
     "field": {
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
       "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
-      "coursesAccessibility": "Dostępność kursów",
+      "coursesAccessibility": "Dostępność kursów dla niezalogowanych użytkowników",
       "coursesAccessibilityDescription": "Zarządzaj ustawieniami dostępności kursów i uprawnieniami"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
-      "coursesAccessibilityPreferenceChangeSuccess": "Preferencje dostępności kursów zostały pomyślnie zaktualizowane"
+      "coursesAccessibilityPreferenceChangeSuccess": "Preferencje dostępności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     }
   }
 }
