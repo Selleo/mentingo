@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
 import { SettingItem } from "./SettingItem";
@@ -16,12 +16,11 @@ export default function CoursesAccessibilityPreferences({
 }: CoursesAccessibilityPreferencesProps) {
   const { t } = useTranslation();
 
-  settings;
-
-  const [mockchecked, setMockChecked] = useState(true);
+  const { mutate: changeUnregisteredUserCoursesAccessibility } =
+    useUnregisteredUserCoursesAccessibility();
 
   const changeCoursesAccessibility = () => {
-    setMockChecked(!mockchecked);
+    changeUnregisteredUserCoursesAccessibility();
   };
 
   const handleCoursesAccessibilityChange = () => {
@@ -40,7 +39,7 @@ export default function CoursesAccessibilityPreferences({
               id="coursesAccessibility"
               label={t("adminPreferences.field.coursesAccessibility")}
               description={t("adminPreferences.field.coursesAccessibilityDescription")}
-              checked={mockchecked}
+              checked={settings.adminUnregisteredUserCoursesAccessibility}
               onCheckedChange={handleCoursesAccessibilityChange}
             />
           </div>

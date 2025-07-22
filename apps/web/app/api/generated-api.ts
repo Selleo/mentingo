@@ -75,6 +75,7 @@ export type RefreshTokensResponse = null;
 
 export interface AdminSettings {
   adminNewUserNotification: boolean;
+  adminUnregisteredUserCoursesAccessibility: boolean;
 }
 
 export interface UserSettings extends AdminSettings {
@@ -3504,12 +3505,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name BaseResponse
-     * @request GET:/api/settings/admin-new-user-notification
+     * @request GET:/api/settings/admin/new-user-notification
      */
 
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
       this.request<any>({
-        path: `/api/settings/admin-new-user-notification`,
+        path: `/api/settings/admin/new-user-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
+      this.request<any>({
+        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
         format: "json",
         ...params,

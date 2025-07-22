@@ -95,7 +95,7 @@ describe("SettingsController (e2e)", () => {
     });
   });
 
-  describe("PATCH /api/settings/admin-new-user-notification", () => {
+  describe("PATCH /api/settings/admin/new-user-notification", () => {
     let adminUser: UserWithCredentials;
     let adminCookies: string;
 
@@ -112,7 +112,7 @@ describe("SettingsController (e2e)", () => {
 
     it("should toggle the notification setting (as Admin)", async () => {
       const response = await request(app.getHttpServer())
-        .patch("/api/settings/admin-new-user-notification")
+        .patch("/api/settings/admin/new-user-notification")
         .set("Cookie", adminCookies)
         .expect(200);
 
@@ -150,7 +150,7 @@ describe("SettingsController (e2e)", () => {
       const nonAdminCookies = await cookieFor(nonAdminUser, app);
 
       await request(app.getHttpServer())
-        .patch("/api/settings/admin-new-user-notification")
+        .patch("/api/settings/admin/new-user-notification")
         .set("Cookie", nonAdminCookies)
         .expect(403);
     });
