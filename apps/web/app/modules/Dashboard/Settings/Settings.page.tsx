@@ -5,9 +5,9 @@ import { isAdminSettings } from "~/utils/isAdminSettings";
 
 import LanguageSelect from "./components/LanguageSelect";
 import ChangePasswordForm from "./forms/ChangePasswordForm";
-import NotificationPreferencesForm from "./forms/NotificationPreferencesForm";
 import UserDetailsForm from "./forms/UserDetailsForm";
 import UserForm from "./forms/UserForm";
+import NotificationPreferencesForm from "./forms/NotificationPreferencesForm";
 
 export default function SettingsPage() {
   const { isContentCreator, isAdmin } = useUserRole();

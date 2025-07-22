@@ -1134,14 +1134,18 @@
   },
   "adminPreferences": {
     "header": "Preferencje administratora",
-    "subHeader": "Zarządzaj swoimi preferencjami powiadomień",
+    "subHeader": "Zarządzaj swoimi preferencjami i ustawieniami administratora",
     "notificationSettings": "Ustawienia powiadomień",
+    "courseSettings": "Ustawienia kursów",
     "field": {
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
-      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik"
+      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
+      "coursesAccessibility": "Dostępność kursów",
+      "coursesAccessibilityDescription": "Zarządzaj ustawieniami dostępności kursów i uprawnieniami"
     },
     "toast": {
-      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień zostały pomyślnie zaktualizowane"
+      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
+      "coursesAccessibilityPreferenceChangeSuccess": "Preferencje dostępności kursów zostały pomyślnie zaktualizowane"
     }
   }
 }

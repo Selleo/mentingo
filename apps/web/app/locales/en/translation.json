@@ -1128,14 +1128,18 @@
   },
   "adminPreferences": {
     "header": "Administrator Preferences",
-    "subHeader": "Manage your notification preferences",
+    "subHeader": "Manage your administrative preferences and settings",
     "notificationSettings": "Notification Settings",
+    "courseSettings": "Course Settings",
     "field": {
       "newUserNotifications": "New User Notifications",
-      "newUserNotificationsDescription": "Receive notifications when a new user is created"
+      "newUserNotificationsDescription": "Receive notifications when a new user is created",
+      "coursesAccessibility": "Courses Accessibility",
+      "coursesAccessibilityDescription": "Manage course accessibility settings and permissions"
     },
     "toast": {
-      "newUserNotificationsPreferenceChangeSuccess": "Notification preferences have been successfully updated"
+      "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
+      "coursesAccessibilityPreferenceChangeSuccess": "Courses accessibility preferences have been successfully updated"
     }
   }
 }
