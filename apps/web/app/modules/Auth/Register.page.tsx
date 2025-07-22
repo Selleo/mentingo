@@ -8,6 +8,7 @@ import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
@@ -59,20 +60,16 @@ export default function RegisterPage() {
             <div className="grid gap-2">
               <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
               <Input id="firstName" type="text" placeholder="John" {...register("firstName")} />
-              {errors.firstName && (
-                <div className="text-sm text-red-500">
-                  {t(errors.firstName.message ?? "registerView.validation.firstName")}
-                </div>
+              {errors.firstName?.message && (
+                <FormValidationError message={t(errors.firstName.message)} />
               )}
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="lastName">{t("registerView.field.lastName")}</Label>
               <Input id="lastName" type="text" placeholder="Doe" {...register("lastName")} />
-              {errors.lastName && (
-                <div className="text-sm text-red-500">
-                  {t(errors.lastName.message ?? "registerView.validation.lastName")}
-                </div>
+              {errors.lastName?.message && (
+                <FormValidationError message={t(errors.lastName.message)} />
               )}
             </div>
 
@@ -84,11 +81,7 @@ export default function RegisterPage() {
                 placeholder="user@example.com"
                 {...register("email")}
               />
-              {errors.email && (
-                <div className="text-sm text-red-500">
-                  {t(errors.email.message ?? "registerView.validation.email")}
-                </div>
-              )}
+              {errors.email?.message && <FormValidationError message={t(errors.email.message)} />}
             </div>
 
             <div className="grid gap-2">

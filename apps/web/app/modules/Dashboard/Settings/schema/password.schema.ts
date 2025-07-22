@@ -4,7 +4,7 @@ import { passwordValidationRules } from "~/modules/Auth/constants";
 
 export const passwordSchema = z
   .string()
-  .min(passwordValidationRules.minLength, "passwordValidation.minLength")
+  .min(passwordValidationRules.minLength, "passwordValidation.passwordMinLength")
   .refine(
     (password) => passwordValidationRules.hasUpperCase.test(password),
     "passwordValidation.hasUpperCase",

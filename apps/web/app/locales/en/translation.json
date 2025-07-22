@@ -185,6 +185,7 @@
     }
   },
   "passwordValidationDisplay": {
+    "title": "Password requirements",
     "header": "Your password must contain:",
     "passwordMinLength": "at least 8 characters",
     "passwordUppercase": "at least one uppercase letter",

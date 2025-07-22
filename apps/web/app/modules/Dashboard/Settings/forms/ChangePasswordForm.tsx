@@ -14,6 +14,7 @@ import {
   CardContent,
   CardFooter,
 } from "~/components/ui/card";
+import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
@@ -70,10 +71,8 @@ export default function ChangePasswordForm() {
               })}
               {...register("oldPassword")}
             />
-            {errors.oldPassword && (
-              <p className="mt-1 text-xs text-red-500">
-                {t(errors.oldPassword.message ?? "changePasswordView.validation.oldPassword")}
-              </p>
+            {errors.oldPassword?.message && (
+              <FormValidationError message={t(errors.oldPassword.message)} />
             )}
 
             <div className="space-y-2">

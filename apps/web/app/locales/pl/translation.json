@@ -169,6 +169,7 @@
     }
   },
   "passwordValidationDisplay": {
+    "title": "Wymagania dotyczące hasła",
     "header": "Twoje hasło musi zawierać:",
     "passwordMinLength": "co najmniej 8 znaków",
     "passwordUppercase": "co najmniej jedną wielką literę",
