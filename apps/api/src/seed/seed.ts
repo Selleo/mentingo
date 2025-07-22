@@ -8,9 +8,11 @@ import postgres from "postgres";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
+  DEFAULT_GLOBAL_SETTINGS,
   DEFAULT_USER_ADMIN_SETTINGS,
   DEFAULT_USER_SETTINGS,
 } from "src/settings/constants/settings.constants";
+import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -104,17 +106,30 @@ async function insertUserDetails(userId: UUIDType) {
   });
 }
 
+async function insertGlobalSettings() {
+  const settingsSQL = settingsToJsonBuildObject(DEFAULT_GLOBAL_SETTINGS);
+  await db.execute(
+    sql`
+      INSERT INTO settings (settings, created_at, updated_at)
+      VALUES (
+        ${settingsSQL},
+        ${new Date().toISOString()},
+        ${new Date().toISOString()}
+      )
+    `,
+  );
+}
+
 async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
   const settingsObject = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
-
-  const settingsJSON = JSON.stringify(settingsObject).replace(/'/g, "''");
+  const settingsSQL = settingsToJsonBuildObject(settingsObject);
 
   await db.execute(
     sql`
       INSERT INTO settings (user_id, settings, created_at, updated_at)
       VALUES (
         ${userId},
-        '${sql.raw(settingsJSON)}'::jsonb,
+        ${settingsSQL},
         ${new Date().toISOString()},
         ${new Date().toISOString()}
       )
@@ -255,6 +270,9 @@ async function seed() {
   await seedTruncateAllTables(db);
 
   try {
+    await insertGlobalSettings();
+    console.log("✨ Created global settings");
+
     const createdStudents = await createUsers(students, "password");
     const [createdAdmin] = await createUsers(admin, "password");
     const createdContentCreators = await createUsers(contentCreators, "password");

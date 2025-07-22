@@ -1,3 +1,7 @@
+export const DEFAULT_GLOBAL_SETTINGS = {
+  unregisteredUserCoursesAccessibility: true,
+};
+
 export const DEFAULT_USER_SETTINGS = {
   language: "en",
 };
