@@ -3009,6 +3009,17 @@
         }
       }
     },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings": {
       "get": {
         "operationId": "SettingsController_getUserSettings",
@@ -10050,9 +10061,6 @@
               },
               "adminNewUserNotification": {
                 "type": "boolean"
-              },
-              "adminUnregisteredUserCoursesAccessibility": {
-                "type": "boolean"
               }
             }
           }
@@ -10089,15 +10097,11 @@
                       },
                       "adminNewUserNotification": {
                         "type": "boolean"
-                      },
-                      "adminUnregisteredUserCoursesAccessibility": {
-                        "type": "boolean"
                       }
                     },
                     "required": [
                       "language",
-                      "adminNewUserNotification",
-                      "adminUnregisteredUserCoursesAccessibility"
+                      "adminNewUserNotification"
                     ]
                   }
                 ]

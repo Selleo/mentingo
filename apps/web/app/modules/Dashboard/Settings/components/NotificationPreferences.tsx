@@ -8,10 +8,10 @@ import { SettingItem } from "./SettingItem";
 import type { UserSettings } from "~/api/generated-api";
 
 interface NotificationPreferencesProps {
-  settings: UserSettings;
+  userSettings: UserSettings;
 }
 
-export default function NotificationPreferences({ settings }: NotificationPreferencesProps) {
+export default function NotificationPreferences({ userSettings }: NotificationPreferencesProps) {
   const { t } = useTranslation();
   const { mutate: changeNewUserEmailNotification } = useChangeNewUserEmailNotification();
 
@@ -31,7 +31,7 @@ export default function NotificationPreferences({ settings }: NotificationPrefer
               id="newUserNotifications"
               label={t("adminPreferences.field.newUserNotifications")}
               description={t("adminPreferences.field.newUserNotificationsDescription")}
-              checked={settings.adminNewUserNotification}
+              checked={userSettings.adminNewUserNotification}
               onCheckedChange={handleNotificationChange}
             />
           </div>

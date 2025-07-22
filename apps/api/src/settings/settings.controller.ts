@@ -16,6 +16,11 @@ import { SettingsService } from "./settings.service";
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
+  @Get("global")
+  async getPublicGlobalSettings() {
+    return new BaseResponse(await this.settingsService.getGlobalSettings());
+  }
+
   @Get()
   async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
@@ -42,9 +47,8 @@ export class SettingsController {
 
   @Patch("admin/unregistered-user-courses-accessibility")
   @Roles(USER_ROLES.ADMIN)
-  async updateUnregisteredUserCoursesAccessibility(@CurrentUser("userId") userId: UUIDType) {
-    const result =
-      await this.settingsService.updateAdminUnregisteredUserCoursesAccessibility(userId);
+  async updateUnregisteredUserCoursesAccessibility() {
+    const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
   }
 }

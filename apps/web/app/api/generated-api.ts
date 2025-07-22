@@ -75,11 +75,24 @@ export type RefreshTokensResponse = null;
 
 export interface AdminSettings {
   adminNewUserNotification: boolean;
-  adminUnregisteredUserCoursesAccessibility: boolean;
 }
 
 export interface UserSettings extends AdminSettings {
   language: string;
+}
+
+export interface GlobalSettings {
+  unregisteredUserCoursesAccessibility: boolean;
+}
+
+export interface GlobalSettingsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: null;
+    settings: GlobalSettings;
+  };
 }
 
 export interface SettingsResponse {
@@ -3496,6 +3509,14 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     userSettings: (params: RequestParams = {}) =>
       this.request<SettingsResponse, any>({
         path: `/api/settings`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    globalSettings: (params: RequestParams = {}) =>
+      this.request<GlobalSettingsResponse, any>({
+        path: `/api/settings/global`,
         method: "GET",
         format: "json",
         ...params,
