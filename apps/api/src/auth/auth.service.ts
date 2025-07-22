@@ -36,6 +36,7 @@ import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
+import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Injectable()
 export class AuthService {
@@ -382,11 +383,7 @@ export class AuthService {
     };
   }
 
-  public async handleMicrosoftCallback(microsoftUser: {
-    email: string;
-    firstName: string;
-    lastName: string;
-  }) {
+  public async handleMicrosoftCallback(microsoftUser: MicrosoftUserType) {
     if (!microsoftUser) {
       throw new UnauthorizedException("Microsoft user data is missing");
     }
