@@ -22,6 +22,7 @@ import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createTokens, credentials, resetTokens, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -30,6 +31,7 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { GoogleUserType } from "src/utils/types/google-user.type";
 
 @Injectable()
 export class AuthService {
@@ -315,5 +317,29 @@ export class AuthService {
         reminderCount + 1,
       );
     });
+  }
+
+  public async handleGoogleCallback(googleUser: GoogleUserType) {
+    if (!googleUser) {
+      throw new UnauthorizedException("Google user data is missing");
+    }
+
+    let [user] = await this.db.select().from(users).where(eq(users.email, googleUser.email));
+
+    if (!user) {
+      user = await this.userService.createUser({
+        email: googleUser.email,
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
+        role: USER_ROLES.STUDENT,
+      });
+    }
+
+    const tokens = await this.getTokens(user);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
   }
 }

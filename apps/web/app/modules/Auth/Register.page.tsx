@@ -14,6 +14,8 @@ import { Label } from "~/components/ui/label";
 
 import { passwordSchema } from "../Dashboard/Settings/schema/password.schema";
 
+import { SocialLogin } from "./components";
+
 import type { RegisterBody } from "~/api/generated-api";
 
 const registerSchema = z.object({
@@ -22,6 +24,8 @@ const registerSchema = z.object({
   email: z.string().email({ message: "registerView.validation.email" }),
   password: passwordSchema,
 });
+
+const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
 
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
@@ -94,6 +98,8 @@ export default function RegisterPage() {
               {t("registerView.button.createAccount")}
             </Button>
           </form>
+
+          {isGoogleOAuthEnabled && <SocialLogin isGoogleOAuthEnabled={isGoogleOAuthEnabled} />}
 
           <div className="mt-4 text-center text-sm">
             {t("registerView.other.alreadyHaveAccount")}{" "}

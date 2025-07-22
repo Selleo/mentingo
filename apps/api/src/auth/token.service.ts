@@ -17,16 +17,18 @@ export class TokenService {
     const accessTokenMaxAge = rememberMe ? oneMonthExpirationTime : ACCESS_TOKEN_EXPIRATION_TIME;
     const refreshTokenMaxAge = rememberMe ? oneMonthExpirationTime : REFRESH_TOKEN_EXPIRATION_TIME;
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     response.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: true,
+      secure: isProduction,
       sameSite: "strict",
       maxAge: accessTokenMaxAge,
     });
 
     response.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: isProduction,
       sameSite: "strict",
       maxAge: refreshTokenMaxAge,
       path: "/api/auth/refresh",

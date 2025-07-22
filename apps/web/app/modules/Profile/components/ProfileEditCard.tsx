@@ -61,10 +61,13 @@ export const ProfileEditCard = ({
     initialImageUrl: initialUserAvatarUrl,
   });
 
-  const visiblePersonalFields = useMemo(
-    () => personalInfoFields.filter(({ name }) => user[name as keyof UpdateUserProfileBody]),
-    [user],
-  );
+  const visiblePersonalFields = useMemo(() => {
+    return isAdminLike
+      ? personalInfoFields
+      : personalInfoFields.filter(
+          (field) => field.name === "firstName" || field.name === "lastName",
+        );
+  }, [isAdminLike]);
 
   return (
     <section className="flex w-full max-w-[720px] flex-col gap-y-8 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">

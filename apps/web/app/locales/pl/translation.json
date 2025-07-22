@@ -39,7 +39,8 @@
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka"
-    }
+    },
+    "continueWithGoogle": "Kontynuuj z użyciem Google"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -834,7 +835,8 @@
       "password": "Hasło"
     },
     "other": {
-      "alreadyHaveAccount": "Masz już konto?"
+      "alreadyHaveAccount": "Masz już konto?",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "createAccount": "Utwórz konto",
@@ -883,7 +885,8 @@
       "forgotPassword": "Zapomniałeś hasła?",
       "dontHaveAccount": "Nie masz konta?",
       "rememberMe": "Zapamiętaj mnie",
-      "signUp": "Zarejestruj się"
+      "signUp": "Zarejestruj się",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "login": "Zaloguj się"
