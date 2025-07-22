@@ -161,9 +161,9 @@
       "confirmPassword": "Confirm password"
     },
     "validation": {
-      "passwordMinLength": "Password must be at least 8 characters",
-      "passwordsDontMatch": "Passwords don't match"
+      "passwordsDontMatch": "Passwords do not match"
     },
+
     "button": {
       "changePassword": "Change password"
     }
@@ -184,7 +184,17 @@
       "passwordCreatedSuccessfully": "Password created successfully"
     }
   },
-  "contentCreatorView": {
+  "passwordValidationDisplay": {
+    "title": "Password requirements",
+    "header": "Your password must contain:",
+    "passwordMinLength": "at least 8 characters",
+    "passwordUppercase": "at least one uppercase letter",
+    "passwordLowercase": "at least one lowercase letter",
+    "passwordNumber": "at least one number",
+    "passwordSpecial": "at least one special character",
+    "passwordsDontMatch": "Passwords do not match"
+  },
+  "teacherView": {
     "button": {
       "collapse": "Collapse",
       "showMore": "Show more",
@@ -833,8 +843,7 @@
     "validation": {
       "firstName": "First name is required",
       "lastName": "Last name is required",
-      "email": "Invalid email",
-      "password": "Password must be at least 8 characters"
+      "email": "Invalid email"
     }
   },
   "courseChapterView": {
