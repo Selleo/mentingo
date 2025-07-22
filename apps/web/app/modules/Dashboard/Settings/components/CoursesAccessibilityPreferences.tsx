@@ -5,26 +5,22 @@ import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
 import { SettingItem } from "./SettingItem";
 
-import type { UserSettings } from "~/api/generated-api";
+import type { GlobalSettings } from "~/api/generated-api";
 
 interface CoursesAccessibilityPreferencesProps {
-  settings: UserSettings;
+  globalSettings: GlobalSettings;
 }
 
 export default function CoursesAccessibilityPreferences({
-  settings,
+  globalSettings,
 }: CoursesAccessibilityPreferencesProps) {
   const { t } = useTranslation();
 
   const { mutate: changeUnregisteredUserCoursesAccessibility } =
     useUnregisteredUserCoursesAccessibility();
 
-  const changeCoursesAccessibility = () => {
-    changeUnregisteredUserCoursesAccessibility();
-  };
-
   const handleCoursesAccessibilityChange = () => {
-    changeCoursesAccessibility();
+    changeUnregisteredUserCoursesAccessibility();
   };
 
   return (
@@ -39,7 +35,7 @@ export default function CoursesAccessibilityPreferences({
               id="coursesAccessibility"
               label={t("adminPreferences.field.coursesAccessibility")}
               description={t("adminPreferences.field.coursesAccessibilityDescription")}
-              checked={settings.adminUnregisteredUserCoursesAccessibility}
+              checked={globalSettings.unregisteredUserCoursesAccessibility}
               onCheckedChange={handleCoursesAccessibilityChange}
             />
           </div>

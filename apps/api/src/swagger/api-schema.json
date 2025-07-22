@@ -3065,6 +3065,17 @@
         }
       }
     },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings": {
       "get": {
         "operationId": "SettingsController_getUserSettings",
@@ -3110,17 +3121,6 @@
     "/api/settings/admin/new-user-notification": {
       "patch": {
         "operationId": "SettingsController_updateAdminNewUserNotification",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/settings/admin/unregistered-user-courses-accessibility": {
-      "patch": {
-        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
         "parameters": [],
         "responses": {
           "200": {
@@ -10347,15 +10347,11 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
-                  },
-                  "adminUnregisteredUserCoursesAccessibility": {
-                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
-                  "adminNewUserNotification",
-                  "adminUnregisteredUserCoursesAccessibility"
+                  "adminNewUserNotification"
                 ]
               }
             ]
@@ -10382,9 +10378,6 @@
                 "type": "string"
               },
               "adminNewUserNotification": {
-                "type": "boolean"
-              },
-              "adminUnregisteredUserCoursesAccessibility": {
                 "type": "boolean"
               }
             }
@@ -10415,15 +10408,11 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
-                  },
-                  "adminUnregisteredUserCoursesAccessibility": {
-                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
-                  "adminNewUserNotification",
-                  "adminUnregisteredUserCoursesAccessibility"
+                  "adminNewUserNotification"
                 ]
               }
             ]
