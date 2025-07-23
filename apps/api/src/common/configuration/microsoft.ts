@@ -19,8 +19,8 @@ const validateMicrosoftConfig = configValidator(schema);
 
 export default registerAs("microsoft_authorization", (): MicrosoftConfigSchema => {
   const values = {
-    MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID,
-    MICROSOFT_CLIENT_SECRET: process.env.MICROSOFT_CLIENT_SECRET,
+    MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID || "",
+    MICROSOFT_CLIENT_SECRET: process.env.MICROSOFT_CLIENT_SECRET || "",
     callbackURL: microsoftAuthCallbackURL,
   };
 
