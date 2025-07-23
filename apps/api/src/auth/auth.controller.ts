@@ -42,11 +42,15 @@ import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Controller("auth")
 export class AuthController {
+  private APP_URL: string;
+
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
     private readonly eventBus: EventBus,
-  ) {}
+  ) {
+    this.APP_URL = process.env.APP_URL || "http://localhost:5173";
+  }
 
   @Public()
   @Post("register")
@@ -195,7 +199,7 @@ export class AuthController {
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-    response.redirect(process.env.APP_URL || "http://localhost:5173");
+    response.redirect(this.APP_URL);
   }
 
   @Public()
@@ -219,6 +223,6 @@ export class AuthController {
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-    response.redirect(process.env.APP_URL || "http://localhost:5173");
+    response.redirect(this.APP_URL);
   }
 }
