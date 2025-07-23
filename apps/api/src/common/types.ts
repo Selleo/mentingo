@@ -2,6 +2,10 @@ export type ActivityHistory = {
   [date: string]: boolean;
 };
 
+export type GlobalSettings = {
+  unregisteredUserCoursesAccessibility: boolean;
+};
+
 export type UserSettings = {
   language: string;
 };

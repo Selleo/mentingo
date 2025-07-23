@@ -5,14 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import CoursesAccessibilityPreferences from "./CoursesAccessibilityPreferences";
 import NotificationPreferences from "./NotificationPreferences";
 
-import type { GlobalSettings, UserSettings } from "~/api/generated-api";
+import type { GlobalSettings, AdminSettings } from "~/api/generated-api";
 
 interface AdminPreferencesProps {
-  userSettings: UserSettings;
+  settings: AdminSettings;
   globalSettings: GlobalSettings;
 }
 
-export default function AdminPreferences({ userSettings, globalSettings }: AdminPreferencesProps) {
+export default function AdminPreferences({ settings, globalSettings }: AdminPreferencesProps) {
   const { t } = useTranslation();
 
   return (
@@ -22,7 +22,7 @@ export default function AdminPreferences({ userSettings, globalSettings }: Admin
         <CardDescription>{t("adminPreferences.subHeader")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <NotificationPreferences userSettings={userSettings} />
+        <NotificationPreferences adminSettings={settings} />
         <CoursesAccessibilityPreferences globalSettings={globalSettings} />
       </CardContent>
     </Card>

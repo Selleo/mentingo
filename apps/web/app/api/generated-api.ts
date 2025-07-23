@@ -68,12 +68,12 @@ export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
 
-export interface AdminSettings {
-  adminNewUserNotification: boolean;
+export interface UserSettings {
+  language: string;
 }
 
-export interface UserSettings extends AdminSettings {
-  language: string;
+export interface AdminSettings extends UserSettings {
+  adminNewUserNotification: boolean;
 }
 
 export interface GlobalSettings {
@@ -96,7 +96,7 @@ export interface SettingsResponse {
     createdAt: string;
     updatedAt: string;
     userId: string;
-    settings: UserSettings;
+    settings: UserSettings | AdminSettings;
   };
 }
 
