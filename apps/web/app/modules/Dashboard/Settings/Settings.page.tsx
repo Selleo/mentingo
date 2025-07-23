@@ -9,6 +9,8 @@ import ChangePasswordForm from "./forms/ChangePasswordForm";
 import UserDetailsForm from "./forms/UserDetailsForm";
 import UserForm from "./forms/UserForm";
 
+import type { AdminSettings } from "~/api/generated-api";
+
 export default function SettingsPage() {
   const { isContentCreator, isAdmin } = useUserRole();
   const { data: userSettings } = useUserSettings();
@@ -21,7 +23,10 @@ export default function SettingsPage() {
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
       {isAdmin && userSettings && globalSettings && (
-        <AdminPreferences userSettings={userSettings} globalSettings={globalSettings} />
+        <AdminPreferences
+          settings={userSettings as AdminSettings}
+          globalSettings={globalSettings}
+        />
       )}
     </PageWrapper>
   );

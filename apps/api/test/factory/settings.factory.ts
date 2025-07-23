@@ -1,11 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
 import {
+  DEFAULT_GLOBAL_SETTINGS,
   DEFAULT_USER_ADMIN_SETTINGS,
   DEFAULT_USER_SETTINGS,
 } from "src/settings/constants/settings.constants";
+import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { settings } from "../../src/storage/schema";
 
@@ -16,23 +17,27 @@ type SettingsTest = InferSelectModel<typeof settings>;
 
 export const createSettingsFactory = (
   db: DatabasePg,
-  userId: UUIDType,
+  userId: UUIDType | null = null,
   isAdmin: boolean = false,
 ) => {
   return Factory.define<SettingsTest>(({ onCreate }) => {
     onCreate(async () => {
-      const defaultSettings = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
+      const defaultSettings =
+        (userId === null && DEFAULT_GLOBAL_SETTINGS) ||
+        (isAdmin && DEFAULT_USER_ADMIN_SETTINGS) ||
+        DEFAULT_USER_SETTINGS;
 
       const finalSettings = {
         ...defaultSettings,
       };
+      const settingsSQL = settingsToJsonBuildObject(finalSettings);
 
       const [inserted] = await db
         .insert(settings)
         .values({
           userId: userId,
           createdAt: new Date().toISOString(),
-          settings: sql.raw(`'${JSON.stringify(finalSettings).replace(/'/g, "''")}'::jsonb`),
+          settings: settingsSQL,
         })
         .returning();
 

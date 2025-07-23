@@ -5,13 +5,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
 import { SettingItem } from "./SettingItem";
 
-import type { UserSettings } from "~/api/generated-api";
+import type { AdminSettings } from "~/api/generated-api";
 
 interface NotificationPreferencesProps {
-  userSettings: UserSettings;
+  adminSettings: AdminSettings;
 }
 
-export default function NotificationPreferences({ userSettings }: NotificationPreferencesProps) {
+export default function NotificationPreferences({ adminSettings }: NotificationPreferencesProps) {
   const { t } = useTranslation();
   const { mutate: changeNewUserEmailNotification } = useChangeNewUserEmailNotification();
 
@@ -31,7 +31,7 @@ export default function NotificationPreferences({ userSettings }: NotificationPr
               id="newUserNotifications"
               label={t("adminPreferences.field.newUserNotifications")}
               description={t("adminPreferences.field.newUserNotificationsDescription")}
-              checked={userSettings.adminNewUserNotification}
+              checked={adminSettings.adminNewUserNotification}
               onCheckedChange={handleNotificationChange}
             />
           </div>

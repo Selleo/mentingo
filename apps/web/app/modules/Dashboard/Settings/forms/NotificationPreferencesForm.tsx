@@ -5,14 +5,14 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "~/com
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 
-import type { UserSettings } from "~/api/generated-api";
+import type { AdminSettings } from "~/api/generated-api";
 
 interface NotificationPreferencesFormProps {
-  settings: UserSettings;
+  adminSettings: AdminSettings;
 }
 
 export default function NotificationPreferencesForm({
-  settings,
+  adminSettings,
 }: NotificationPreferencesFormProps) {
   const { t } = useTranslation();
   const { mutate: changeNewUserEmailNotification } = useChangeNewUserEmailNotification();
@@ -42,7 +42,7 @@ export default function NotificationPreferencesForm({
               </div>
               <Switch
                 id="newUserNotifications"
-                checked={settings.adminNewUserNotification}
+                checked={adminSettings.adminNewUserNotification}
                 onCheckedChange={handleNotificationChange}
               />
             </div>
