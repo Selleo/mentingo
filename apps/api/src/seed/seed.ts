@@ -169,7 +169,6 @@ async function createLessonProgress(userId: UUIDType) {
       quizScore: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 0 : null,
       attempts: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 1 : null,
       isQuizPassed: courseLesson.lessonType === LESSON_TYPES.QUIZ ? false : null,
-      isAnswered: courseLesson.lessonType === LESSON_TYPES.QUIZ ? false : null,
     };
   });
 

@@ -166,7 +166,7 @@ export class StudentLessonProgressService {
     quizScore: number,
     attempts: number,
     isQuizPassed: boolean,
-    isAnswered: boolean,
+    isCompleted: boolean,
     trx: PostgresJsDatabase<typeof schema>,
   ) {
     return trx
@@ -180,7 +180,6 @@ export class StudentLessonProgressService {
         completedAt: sql`now()`,
         completedQuestionCount,
         quizScore,
-        isAnswered,
       })
       .onConflictDoUpdate({
         target: [
@@ -193,7 +192,7 @@ export class StudentLessonProgressService {
           isQuizPassed,
           completedQuestionCount,
           quizScore,
-          isAnswered,
+          completedAt: isCompleted ? sql`now()` : null,
         },
       });
   }

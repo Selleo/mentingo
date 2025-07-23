@@ -19,7 +19,12 @@ import { useUserRole } from "~/hooks/useUserRole";
 
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
-import { leftAttemptsToDisplay, getUserAnswers, parseQuizFormData } from "./utils";
+import {
+  leftAttemptsToDisplay,
+  getQuizTooltipText,
+  getUserAnswers,
+  parseQuizFormData,
+} from "./utils";
 
 import type { QuizForm } from "./types";
 import type { GetLessonByIdResponse } from "~/api/generated-api";
@@ -34,7 +39,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
   const { isAdminLike } = useUserRole();
 
   const questions = lesson.quizDetails?.questions;
-  const isUserSubmittedAnswer = Boolean(lesson.isAnswered);
+  const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted);
 
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
@@ -136,11 +141,12 @@ export const Quiz = ({ lesson }: QuizProps) => {
                   align="center"
                   className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                 >
-                  {isUserSubmittedAnswer && !canRetake && hoursLeft !== null
-                    ? t("studentLessonView.tooltip.retakeAvailableIn", { time: hoursLeft })
-                    : lesson.quizCooldown
-                      ? t("studentLessonView.tooltip.cooldown", { time: lesson.quizCooldown })
-                      : t("studentLessonView.tooltip.noCooldown")}
+                  {getQuizTooltipText(
+                    isUserSubmittedAnswer,
+                    canRetake,
+                    hoursLeft,
+                    lesson.quizCooldown,
+                  )}
                   <TooltipArrow className="fill-black" />
                 </TooltipContent>
               </Tooltip>

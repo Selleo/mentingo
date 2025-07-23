@@ -1090,7 +1090,6 @@ export interface GetLessonByIdResponse {
     quizCooldown: number | null;
     isQuizPassed: boolean | null;
     attempts: number | null;
-    isAnswered: boolean | null;
     updatedAt: string | null;
     displayOrder: number;
     isExternal?: boolean;

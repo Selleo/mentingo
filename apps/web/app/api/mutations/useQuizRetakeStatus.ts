@@ -56,11 +56,15 @@ export function useQuizRetakeStatus(
 
   const canRetake = (() => {
     if (attemptsLimit === null || attempts === null) return true;
-    if (attempts < attemptsLimit) return true;
+    if (attempts % attemptsLimit !== 0) return true;
     if (lastUpdate && quizCooldown) {
       const lastUpdateDate = new Date(lastUpdate);
       const cooldownEnd = new Date(lastUpdateDate.getTime() + quizCooldown * 60 * 60 * 1000);
-      return new Date() >= cooldownEnd;
+      const now = new Date();
+
+      if (now < cooldownEnd) {
+        return false;
+      }
     }
     return true;
   })();

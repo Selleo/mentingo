@@ -294,7 +294,6 @@ export const studentLessonProgress = pgTable(
     quizScore: integer("quiz_score"),
     attempts: integer("attempts"),
     isQuizPassed: boolean("is_quiz_passed"),
-    isAnswered: boolean("is_answered"),
     completedAt: timestamp("completed_at", {
       mode: "string",
       withTimezone: true,

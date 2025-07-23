@@ -22,7 +22,7 @@ export class QuestionRepository {
 
   async getQuestionsForLesson(
     lessonId: UUIDType,
-    isAnswered: boolean,
+    isCompleted: boolean,
     userId: UUIDType,
   ): Promise<QuestionBody[]> {
     return this.db
@@ -32,18 +32,18 @@ export class QuestionRepository {
         title: questions.title,
         description: sql<string>`${questions.description}`,
         solutionExplanation: sql<string | null>`CASE
-              WHEN ${isAnswered} THEN ${questions.solutionExplanation} 
+              WHEN ${isCompleted} THEN ${questions.solutionExplanation} 
               ELSE NULL 
             END`,
         photoS3Key: sql<string>`${questions.photoS3Key}`,
         passQuestion: sql<boolean | null>`CASE
-              WHEN ${isAnswered} THEN ${studentQuestionAnswers.isCorrect}
+              WHEN ${isCompleted} THEN ${studentQuestionAnswers.isCorrect}
               ELSE NULL END`,
         displayOrder: sql<number>`${questions.displayOrder}`,
         options: sql<OptionBody[]>`CASE
             WHEN ${questions.type} in (${QUESTION_TYPE.BRIEF_RESPONSE}, ${
               QUESTION_TYPE.DETAILED_RESPONSE
-            }) AND ${isAnswered} THEN
+            }) AND ${isCompleted} THEN
               ARRAY[json_build_object(
                 'id', ${studentQuestionAnswers.id},
                 'optionText', '',
@@ -59,15 +59,15 @@ export class QuestionRepository {
                   'id', qao.id,
                   'optionText',  
                     CASE 
-                      WHEN ${!isAnswered} AND ${questions.type} = ${
+                      WHEN ${!isCompleted} AND ${questions.type} = ${
                         QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT
                       } THEN NULL
                       ELSE qao.option_text
                     END,
-                  'isCorrect', CASE WHEN ${isAnswered} THEN qao.is_correct ELSE NULL END,
+                  'isCorrect', CASE WHEN ${isCompleted} THEN qao.is_correct ELSE NULL END,
                   'displayOrder',
                     CASE
-                      WHEN ${isAnswered} THEN qao.display_order
+                      WHEN ${isCompleted} THEN qao.display_order
                       ELSE NULL
                     END,
                     'isStudentAnswer',
@@ -107,7 +107,7 @@ export class QuestionRepository {
                   CASE
                     WHEN ${questions.type} in (${
                       QUESTION_TYPE.FILL_IN_THE_BLANKS_DND
-                    }) AND ${!isAnswered}
+                    }) AND ${!isCompleted}
                       THEN random()
                     ELSE qao.display_order
                   END

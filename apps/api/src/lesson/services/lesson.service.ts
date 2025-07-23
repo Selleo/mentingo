@@ -89,7 +89,7 @@ export class LessonService {
 
     const questionList = await this.questionRepository.getQuestionsForLesson(
       lesson.id,
-      Boolean(lesson.isAnswered),
+      lesson.lessonCompleted,
       userId,
     );
 
@@ -108,7 +108,7 @@ export class LessonService {
       }),
     );
 
-    if (isStudent && lesson.isAnswered && isNumber(lesson.quizScore)) {
+    if (isStudent && lesson.lessonCompleted && isNumber(lesson.quizScore)) {
       const [quizResult] = await this.lessonRepository.getQuizResult(
         lesson.id,
         lesson.quizScore,
@@ -151,7 +151,7 @@ export class LessonService {
       userId,
     );
 
-    if (accessCourseLessonWithDetails.isAnswered) {
+    if (accessCourseLessonWithDetails.lessonIsCompleted) {
       throw new ConflictException("You have already answered this quiz");
     }
 
@@ -163,19 +163,6 @@ export class LessonService {
     }
 
     const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
-
-    if (
-      !isQuizAccessAllowed(
-        accessCourseLessonWithDetails.attempts,
-        quizSettings?.attemptsLimit,
-        accessCourseLessonWithDetails.updatedAt,
-        quizSettings?.quizCooldown,
-      )
-    ) {
-      throw new ConflictException(
-        "Quiz answers cannot be submitted due to attempts limit or cooldown",
-      );
-    }
 
     const correctAnswersForQuizQuestions =
       await this.questionRepository.getQuizQuestionsToEvaluation(studentQuizAnswers.lessonId);
@@ -268,14 +255,13 @@ export class LessonService {
       throw new ConflictException("Quiz already finished");
     }
 
-    if (!accessCourseLessonWithDetails.isAnswered) {
+    if (!accessCourseLessonWithDetails.lessonIsCompleted) {
       throw new ConflictException("You have not answered this quiz yet");
     }
 
     const quizSettings = await this.lessonRepository.getLessonSettings(lessonId);
 
     let attempts = accessCourseLessonWithDetails.attempts ?? 1;
-    attempts += 1;
 
     if (
       !isQuizAccessAllowed(
@@ -290,9 +276,7 @@ export class LessonService {
       );
     }
 
-    if (attempts > (quizSettings?.attemptsLimit ?? 0)) {
-      attempts = 1;
-    }
+    attempts += 1;
 
     const questions = await this.questionRepository.getQuestionsIdsByLessonId(lessonId);
 

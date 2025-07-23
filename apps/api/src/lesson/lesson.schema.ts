@@ -151,7 +151,6 @@ export const lessonShowSchema = Type.Object({
   quizCooldown: Type.Union([Type.Number(), Type.Null()]),
   isQuizPassed: Type.Union([Type.Boolean(), Type.Null()]),
   attempts: Type.Union([Type.Number(), Type.Null()]),
-  isAnswered: Type.Union([Type.Boolean(), Type.Null()]),
   updatedAt: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Number(),
   isExternal: Type.Optional(Type.Boolean()),

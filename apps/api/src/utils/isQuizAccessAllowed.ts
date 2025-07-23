@@ -7,10 +7,7 @@ export const isQuizAccessAllowed = (
   if (attemptsLimit === null || attempts === null) {
     return true;
   }
-
-  if (attempts <= attemptsLimit) {
-    return true;
-  }
+  if (attempts % attemptsLimit !== 0) return true;
 
   if (lastUpdate && quizCooldown) {
     const lastUpdateDate = new Date(lastUpdate);

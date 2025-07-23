@@ -7693,16 +7693,6 @@
                   }
                 ]
               },
-              "isAnswered": {
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "updatedAt": {
                 "anyOf": [
                   {
@@ -7775,7 +7765,6 @@
               "quizCooldown",
               "isQuizPassed",
               "attempts",
-              "isAnswered",
               "updatedAt",
               "displayOrder",
               "nextLessonId"
