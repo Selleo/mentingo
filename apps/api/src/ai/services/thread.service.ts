@@ -1,28 +1,25 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { eq, inArray } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
-import { LessonService } from "src/lesson/services/lesson.service";
+import { aiMentorLessons, aiMentorThreads } from "src/storage/schema";
 
 import type { CreateThreadBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class ThreadService {
-  constructor(
-    private readonly aiRepository: AiRepository,
-    private readonly lessonService: LessonService,
-  ) {}
+  constructor(private readonly aiRepository: AiRepository) {}
 
   async createThreadIfNoneExist(data: CreateThreadBody) {
     const aiMentorLessonId = await this.findAiMentorLessonIdFromLesson(data.lessonId);
-    await this.lessonService.getLessonById(data.lessonId, data.userId, true);
 
-    const thread = await this.aiRepository.findThreadByStatusLessonAndUser(
-      [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED],
-      aiMentorLessonId,
-      data.userId,
-    );
+    const thread = await this.aiRepository.findThread([
+      eq(aiMentorThreads.aiMentorLessonId, aiMentorLessonId),
+      inArray(aiMentorThreads.status, [THREAD_STATUS.ACTIVE, THREAD_STATUS.COMPLETED]),
+      eq(aiMentorThreads.userId, data.userId),
+    ]);
 
     if (thread) return { thread, newThread: false };
 
@@ -35,7 +32,7 @@ export class ThreadService {
   }
 
   async findThread(threadId: UUIDType, userId: UUIDType) {
-    const thread = await this.aiRepository.findThread(threadId);
+    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
 
     if (!thread) throw new NotFoundException("Thread not found");
 
@@ -53,7 +50,11 @@ export class ThreadService {
   }
 
   async findAllThreadsByLessonIdAndUserId(lessonId: UUIDType, userId: UUIDType) {
-    const threads = await this.aiRepository.findThreadsByLessonIdAndUserId(lessonId, userId);
+    const threads = await this.aiRepository.findThreads([
+      eq(aiMentorLessons.lessonId, lessonId),
+      eq(aiMentorThreads.userId, userId),
+    ]);
+
     if (!threads) throw new NotFoundException("No threads found");
 
     return { data: threads };

@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 
 import { useJudgeLesson } from "~/api/mutations/useJudgeLesson";
 import { useRetakeLesson } from "~/api/mutations/useRetakeLesson";
-import { useCurrentThread } from "~/api/queries/useCurrentThread";
 import { useCurrentThreadMessages } from "~/api/queries/useCurrentThreadMessages";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
@@ -14,12 +13,17 @@ import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatL
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
 import RetakeModal from "~/modules/Courses/Lesson/AiMentorLesson/components/RetakeModal";
-import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-const AiMentorLesson = () => {
+import type { GetLessonByIdResponse } from "~/api/generated-api";
+
+interface AiMentorLessonProps {
+  lesson: GetLessonByIdResponse["data"];
+  lessonLoading: boolean;
+}
+
+const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { lessonId = "", courseId = "" } = useParams();
-  const { language } = useLanguageStore();
 
   const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(
     lessonId,
@@ -27,12 +31,10 @@ const AiMentorLesson = () => {
   );
   const { mutateAsync: retakeLesson } = useRetakeLesson(lessonId, courseId);
 
-  const { data: currentThread, isFetching: isThreadLoading } = useCurrentThread(lessonId, language);
-
   const { data: currentThreadMessages } = useCurrentThreadMessages(
     lessonId,
-    isThreadLoading,
-    currentThread?.data.id,
+    lessonLoading,
+    lesson.threadId,
   );
 
   const [showRetakeModal, setShowRetakeModal] = useState(false);
@@ -40,7 +42,7 @@ const AiMentorLesson = () => {
   const { messages, input, setMessages, handleInputChange, handleSubmit, status } = useChat({
     api: "/api/ai/chat",
     body: {
-      threadId: currentThread?.data.id ?? "",
+      threadId: lesson.threadId ?? "",
     },
     fetch: async (url, options) => {
       const body = JSON.parse(options?.body as string);
@@ -48,7 +50,7 @@ const AiMentorLesson = () => {
         ...options,
         body: JSON.stringify({
           content: body.messages[body.messages.length - 1]?.content || "",
-          threadId: currentThread?.data.id ?? "",
+          threadId: lesson.threadId ?? "",
         }),
       });
     },
@@ -59,21 +61,20 @@ const AiMentorLesson = () => {
   }, [currentThreadMessages, setMessages]);
 
   const handleJudge = async () => {
-    if (!currentThread?.data.id) return;
-    await judgeLesson({ threadId: currentThread.data.id });
+    if (!lesson.threadId) return;
+    await judgeLesson({ threadId: lesson.threadId });
   };
 
   const handleRetakeLesson = async () => {
-    if (!currentThread?.data.id) return;
+    if (!lesson.threadId) return;
 
-    setMessages([]);
     setShowRetakeModal(false);
 
     await retakeLesson({ lessonId });
   };
 
   const isSubmitted = status === "submitted";
-  const isThreadActive = currentThread?.data.status === "active";
+  const isThreadActive = lesson.status === "active";
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -90,11 +91,9 @@ const AiMentorLesson = () => {
         onCancel={() => setShowRetakeModal(false)}
       />
 
-      {isThreadLoading && <Loader />}
+      {lessonLoading && <Loader />}
       <div className="flex w-full grow flex-col gap-y-4 overflow-y-auto">
-        {messages.map((messages, idx) => (
-          <ChatMessage key={idx} {...messages} />
-        ))}
+        {!lessonLoading && messages.map((messages, idx) => <ChatMessage key={idx} {...messages} />)}
 
         {isSubmitted || (isJudgePending && <ChatLoader />)}
         <div ref={messagesEndRef} />

@@ -1011,6 +1011,10 @@ export interface GetLessonByIdResponse {
     displayOrder: number;
     isExternal?: boolean;
     nextLessonId: string | null;
+    userLanguage?: "pl" | "en";
+    status?: "active" | "completed" | "archived";
+    /** @format uuid */
+    threadId?: string;
   };
 }
 
@@ -1422,6 +1426,84 @@ export interface MarkLessonAsCompletedResponse {
   };
 }
 
+export interface GetThreadWithSetupBody {
+  /** @format uuid */
+  lessonId: string;
+  userLanguage: "pl" | "en";
+}
+
+export interface GetThreadWithSetupResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    /** @format uuid */
+    userId: string;
+    userLanguage: "pl" | "en";
+    createdAt: string;
+    updatedAt: string;
+    status: "active" | "completed" | "archived";
+  };
+}
+
+export interface GetThreadResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    /** @format uuid */
+    userId: string;
+    userLanguage: "pl" | "en";
+    createdAt: string;
+    updatedAt: string;
+    status: "active" | "completed" | "archived";
+  };
+}
+
+export interface GetThreadsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    /** @format uuid */
+    userId: string;
+    userLanguage: "pl" | "en";
+    createdAt: string;
+    updatedAt: string;
+    status: "active" | "completed" | "archived";
+  }[];
+}
+
+export interface GetThreadMessagesResponse {
+  data: (({
+    content: string;
+  } & {
+    role: "system" | "user" | "assistant" | "tool" | "summary";
+    isJudge?: boolean;
+  }) & {
+    id: string;
+  })[];
+}
+
+export interface StreamChatBody {
+  /** @format uuid */
+  threadId: string;
+  /** @minLength 1 */
+  content: string;
+  /** @format uuid */
+  id?: string;
+}
+
+export interface JudgeThreadResponse {
+  data: {
+    summary: string;
+    passed: boolean;
+  };
+}
+
 export interface GetAllGroupsResponse {
   data: {
     /** @format uuid */
@@ -1586,84 +1668,6 @@ export interface GetScormMetadataResponse {
     version: string;
     entryPoint: string;
     s3Key: string;
-  };
-}
-
-export interface CreateThreadBody {
-  /** @format uuid */
-  lessonId: string;
-  userLanguage: "pl" | "en";
-}
-
-export interface CreateThreadResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    aiMentorLessonId: string;
-    /** @format uuid */
-    userId: string;
-    userLanguage: "pl" | "en";
-    createdAt: string;
-    updatedAt: string;
-    status: "active" | "completed" | "archived";
-  };
-}
-
-export interface GetThreadResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    aiMentorLessonId: string;
-    /** @format uuid */
-    userId: string;
-    userLanguage: "pl" | "en";
-    createdAt: string;
-    updatedAt: string;
-    status: "active" | "completed" | "archived";
-  };
-}
-
-export interface GetThreadsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    aiMentorLessonId: string;
-    /** @format uuid */
-    userId: string;
-    userLanguage: "pl" | "en";
-    createdAt: string;
-    updatedAt: string;
-    status: "active" | "completed" | "archived";
-  }[];
-}
-
-export interface GetThreadMessagesResponse {
-  data: (({
-    content: string;
-  } & {
-    role: "system" | "user" | "assistant" | "tool" | "summary";
-    isJudge?: boolean;
-  }) & {
-    id: string;
-  })[];
-}
-
-export interface StreamChatBody {
-  /** @format uuid */
-  threadId: string;
-  /** @minLength 1 */
-  content: string;
-  /** @format uuid */
-  id?: string;
-}
-
-export interface JudgeThreadResponse {
-  data: {
-    summary: string;
-    passed: boolean;
   };
 }
 
@@ -2916,11 +2920,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name LessonControllerGetLessonById
-     * @request GET:/api/lesson/{id}
+     * @request GET:/api/lesson/{id}/{userLanguage}
      */
-    lessonControllerGetLessonById: (id: string, params: RequestParams = {}) =>
+    lessonControllerGetLessonById: (id: string, userLanguage: string, params: RequestParams = {}) =>
       this.request<GetLessonByIdResponse, any>({
-        path: `/api/lesson/${id}`,
+        path: `/api/lesson/${id}/${userLanguage}`,
         method: "GET",
         format: "json",
         ...params,
@@ -3126,6 +3130,127 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetThreadWithSetup
+     * @request POST:/api/ai/thread
+     */
+    aiControllerGetThreadWithSetup: (data: GetThreadWithSetupBody, params: RequestParams = {}) =>
+      this.request<GetThreadWithSetupResponse, any>({
+        path: `/api/ai/thread`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetThread
+     * @request GET:/api/ai/thread
+     */
+    aiControllerGetThread: (
+      query?: {
+        /** @format uuid */
+        thread?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThreadResponse, any>({
+        path: `/api/ai/thread`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetThreads
+     * @request GET:/api/ai/threads
+     */
+    aiControllerGetThreads: (
+      query?: {
+        /** @format uuid */
+        lesson?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThreadsResponse, any>({
+        path: `/api/ai/threads`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetThreadMessages
+     * @request GET:/api/ai/thread/messages
+     */
+    aiControllerGetThreadMessages: (
+      query?: {
+        /** @format uuid */
+        thread?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThreadMessagesResponse, any>({
+        path: `/api/ai/thread/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerStreamChat
+     * @request POST:/api/ai/chat
+     */
+    aiControllerStreamChat: (data: StreamChatBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ai/chat`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerJudgeThread
+     * @request POST:/api/ai/judge/{threadId}
+     */
+    aiControllerJudgeThread: (threadId: string, params: RequestParams = {}) =>
+      this.request<JudgeThreadResponse, any>({
+        path: `/api/ai/judge/${threadId}`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerRetakeLesson
+     * @request POST:/api/ai/retake/{lessonId}
+     */
+    aiControllerRetakeLesson: (lessonId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ai/retake/${lessonId}`,
+        method: "POST",
         ...params,
       }),
 
@@ -3399,127 +3524,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/scorm/${courseId}/metadata`,
         method: "GET",
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerCreateThread
-     * @request POST:/api/ai/thread
-     */
-    aiControllerCreateThread: (data: CreateThreadBody, params: RequestParams = {}) =>
-      this.request<CreateThreadResponse, any>({
-        path: `/api/ai/thread`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerGetThread
-     * @request GET:/api/ai/thread
-     */
-    aiControllerGetThread: (
-      query?: {
-        /** @format uuid */
-        thread?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetThreadResponse, any>({
-        path: `/api/ai/thread`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerGetThreads
-     * @request GET:/api/ai/threads
-     */
-    aiControllerGetThreads: (
-      query?: {
-        /** @format uuid */
-        lesson?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetThreadsResponse, any>({
-        path: `/api/ai/threads`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerGetThreadMessages
-     * @request GET:/api/ai/thread/messages
-     */
-    aiControllerGetThreadMessages: (
-      query?: {
-        /** @format uuid */
-        thread?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetThreadMessagesResponse, any>({
-        path: `/api/ai/thread/messages`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerStreamChat
-     * @request POST:/api/ai/chat
-     */
-    aiControllerStreamChat: (data: StreamChatBody, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/ai/chat`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerJudgeThread
-     * @request POST:/api/ai/judge/{threadId}
-     */
-    aiControllerJudgeThread: (threadId: string, params: RequestParams = {}) =>
-      this.request<JudgeThreadResponse, any>({
-        path: `/api/ai/judge/${threadId}`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerRetakeLesson
-     * @request POST:/api/ai/retake/{lessonId}
-     */
-    aiControllerRetakeLesson: (lessonId: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/ai/retake/${lessonId}`,
-        method: "POST",
         ...params,
       }),
   };

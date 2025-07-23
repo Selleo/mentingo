@@ -1,6 +1,12 @@
 import { openai } from "@ai-sdk/openai";
-import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { type Message, streamText } from "ai";
+import { eq } from "drizzle-orm";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -19,8 +25,7 @@ import {
   type OpenAIModels,
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
-import { DatabasePg } from "src/common";
-import { LessonService } from "src/lesson/services/lesson.service";
+import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -44,11 +49,9 @@ export class AiService {
     private readonly summaryService: SummaryService,
     private readonly judgeService: JudgeService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
-    private readonly lessonService: LessonService,
-    @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
-  async createThreadWithSetup(data: CreateThreadBody) {
+  async getThreadWithSetup(data: CreateThreadBody) {
     const threadData = await this.threadService.createThreadIfNoneExist(data);
 
     if (!threadData.newThread) {
@@ -120,33 +123,31 @@ export class AiService {
   }
 
   async runJudge(data: ThreadOwnershipBody) {
-    return await this.db.transaction(async () => {
-      const judged = await this.judgeService.runJudge(data);
-      const lesson = await this.aiRepository.findLessonByThreadId(data.threadId);
+    const judged = await this.judgeService.runJudge(data);
+    const lesson = await this.aiRepository.findLessonByThreadId(data.threadId);
 
-      await this.markAsCompletedIfJudge(
-        lesson.id,
-        data.userId,
-        USER_ROLES.STUDENT,
-        judged.data,
-        true,
-      );
+    await this.markAsCompletedIfJudge(
+      lesson.id,
+      data.userId,
+      USER_ROLES.STUDENT,
+      judged.data,
+      true,
+    );
 
-      const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
+    const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
 
-      await this.aiRepository.insertMessage({
-        threadId: data.threadId,
-        content: judged.data.summary,
-        role: MESSAGE_ROLE.MENTOR,
-        tokenCount,
-      });
-
-      return { data: { summary: judged.data.summary, passed: judged.data.passed } };
+    await this.aiRepository.insertMessage({
+      threadId: data.threadId,
+      content: judged.data.summary,
+      role: MESSAGE_ROLE.MENTOR,
+      tokenCount,
     });
+
+    return { data: { summary: judged.data.summary, passed: judged.data.passed } };
   }
 
   async isThreadActive(threadId: UUIDType, userId?: UUIDType) {
-    const thread = await this.aiRepository.findThread(threadId);
+    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, threadId)]);
 
     if (userId && thread.userId !== userId)
       throw new ForbiddenException("You don't have access to this thread");
@@ -181,7 +182,10 @@ export class AiService {
   }
 
   async retakeLesson(lessonId: UUIDType, userId: UUIDType) {
-    await this.lessonService.getLessonById(lessonId, userId, true);
+    const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
+
+    if (!lesson.isAssigned && !lesson.isFreemium)
+      throw new UnauthorizedException("You are not assigned to this lesson");
 
     await this.aiRepository.setThreadsToArchived(lessonId, userId);
     await this.aiRepository.resetStudentProgressForLesson(lessonId, userId);

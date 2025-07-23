@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
+import { eq } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { MessageService } from "src/ai/services/message.service";
 import { TokenService } from "src/ai/services/token.service";
 import { SYSTEM_PROMPT_FOR_MENTOR } from "src/ai/utils/ai.config";
 import { MESSAGE_ROLE, OPENAI_MODELS } from "src/ai/utils/ai.type";
+import { aiMentorThreads } from "src/storage/schema";
 
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
@@ -50,17 +52,21 @@ export class PromptService {
   }
 
   async setSystemPrompt(data: ThreadOwnershipBody) {
-    const lang = await this.aiRepository.findThreadLanguage(data.threadId);
+    const { userLanguage } = await this.aiRepository.findThread([
+      eq(aiMentorThreads.id, data.threadId),
+    ]);
+
     const { title, instructions } = await this.aiRepository.findMentorLessonByThreadId(
       data.threadId,
     );
+
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
 
     const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(
       { title, instructions },
       groups,
       data,
-      lang.language,
+      userLanguage,
     );
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
 
@@ -72,5 +78,11 @@ export class PromptService {
     });
 
     return systemPrompt;
+  }
+
+  async isNotEmpty(prompt: string) {
+    if (!prompt?.trim()) {
+      throw new Error("Prompt cannot be empty");
+    }
   }
 }

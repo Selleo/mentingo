@@ -1999,12 +1999,20 @@
         }
       }
     },
-    "/api/lesson/{id}": {
+    "/api/lesson/{id}/{userLanguage}": {
       "get": {
         "operationId": "LessonController_getLessonById",
         "parameters": [
           {
             "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userLanguage",
             "required": true,
             "in": "path",
             "schema": {
@@ -2321,6 +2329,181 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/ai/thread": {
+      "post": {
+        "operationId": "AiController_getThreadWithSetup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetThreadWithSetupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadWithSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "AiController_getThread",
+        "parameters": [
+          {
+            "name": "thread",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/threads": {
+      "get": {
+        "operationId": "AiController_getThreads",
+        "parameters": [
+          {
+            "name": "lesson",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/thread/messages": {
+      "get": {
+        "operationId": "AiController_getThreadMessages",
+        "parameters": [
+          {
+            "name": "thread",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadMessagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/chat": {
+      "post": {
+        "operationId": "AiController_streamChat",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamChatBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ai/judge/{threadId}": {
+      "post": {
+        "operationId": "AiController_judgeThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgeThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/retake/{lessonId}": {
+      "post": {
+        "operationId": "AiController_retakeLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
           }
         }
       }
@@ -2812,181 +2995,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/ai/thread": {
-      "post": {
-        "operationId": "AiController_createThread",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateThreadBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateThreadResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "operationId": "AiController_getThread",
-        "parameters": [
-          {
-            "name": "thread",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/threads": {
-      "get": {
-        "operationId": "AiController_getThreads",
-        "parameters": [
-          {
-            "name": "lesson",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/thread/messages": {
-      "get": {
-        "operationId": "AiController_getThreadMessages",
-        "parameters": [
-          {
-            "name": "thread",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadMessagesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/chat": {
-      "post": {
-        "operationId": "AiController_streamChat",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StreamChatBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/ai/judge/{threadId}": {
-      "post": {
-        "operationId": "AiController_judgeThread",
-        "parameters": [
-          {
-            "name": "threadId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JudgeThreadResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/retake/{lessonId}": {
-      "post": {
-        "operationId": "AiController_retakeLesson",
-        "parameters": [
-          {
-            "name": "lessonId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
           }
         }
       }
@@ -7057,6 +7065,38 @@
                     "type": "null"
                   }
                 ]
+              },
+              "userLanguage": {
+                "anyOf": [
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "en",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  }
+                ]
+              },
+              "threadId": {
+                "format": "uuid",
+                "type": "string"
               }
             },
             "required": [
@@ -8877,6 +8917,359 @@
           "data"
         ]
       },
+      "GetThreadWithSetupBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "userLanguage": {
+            "anyOf": [
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "en",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "userLanguage"
+        ]
+      },
+      "GetThreadWithSetupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userLanguage": {
+                "anyOf": [
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "en",
+                    "type": "string"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "userId",
+              "userLanguage",
+              "createdAt",
+              "updatedAt",
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userLanguage": {
+                "anyOf": [
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "en",
+                    "type": "string"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "userId",
+              "userLanguage",
+              "createdAt",
+              "updatedAt",
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetThreadsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "aiMentorLessonId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userLanguage": {
+                  "anyOf": [
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "en",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "completed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "archived",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "aiMentorLessonId",
+                "userId",
+                "userLanguage",
+                "createdAt",
+                "updatedAt",
+                "status"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetThreadMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "content"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "anyOf": [
+                            {
+                              "const": "system",
+                              "type": "string"
+                            },
+                            {
+                              "const": "user",
+                              "type": "string"
+                            },
+                            {
+                              "const": "assistant",
+                              "type": "string"
+                            },
+                            {
+                              "const": "tool",
+                              "type": "string"
+                            },
+                            {
+                              "const": "summary",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "isJudge": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "role"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "StreamChatBody": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "content": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId",
+          "content"
+        ]
+      },
+      "JudgeThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
+              },
+              "passed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "summary",
+              "passed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetAllGroupsResponse": {
         "type": "object",
         "properties": {
@@ -9465,359 +9858,6 @@
               "version",
               "entryPoint",
               "s3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CreateThreadBody": {
-        "type": "object",
-        "properties": {
-          "lessonId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "userLanguage": {
-            "anyOf": [
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "en",
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "required": [
-          "lessonId",
-          "userLanguage"
-        ]
-      },
-      "CreateThreadResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "aiMentorLessonId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userLanguage": {
-                "anyOf": [
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "en",
-                    "type": "string"
-                  }
-                ]
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "active",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "archived",
-                    "type": "string"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "aiMentorLessonId",
-              "userId",
-              "userLanguage",
-              "createdAt",
-              "updatedAt",
-              "status"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "aiMentorLessonId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userLanguage": {
-                "anyOf": [
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "en",
-                    "type": "string"
-                  }
-                ]
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "active",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "archived",
-                    "type": "string"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "aiMentorLessonId",
-              "userId",
-              "userLanguage",
-              "createdAt",
-              "updatedAt",
-              "status"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "aiMentorLessonId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "userId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "userLanguage": {
-                  "anyOf": [
-                    {
-                      "const": "pl",
-                      "type": "string"
-                    },
-                    {
-                      "const": "en",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "status": {
-                  "anyOf": [
-                    {
-                      "const": "active",
-                      "type": "string"
-                    },
-                    {
-                      "const": "completed",
-                      "type": "string"
-                    },
-                    {
-                      "const": "archived",
-                      "type": "string"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "aiMentorLessonId",
-                "userId",
-                "userLanguage",
-                "createdAt",
-                "updatedAt",
-                "status"
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadMessagesResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "allOf": [
-                {
-                  "type": "object",
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "content": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "content"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "role": {
-                          "anyOf": [
-                            {
-                              "const": "system",
-                              "type": "string"
-                            },
-                            {
-                              "const": "user",
-                              "type": "string"
-                            },
-                            {
-                              "const": "assistant",
-                              "type": "string"
-                            },
-                            {
-                              "const": "tool",
-                              "type": "string"
-                            },
-                            {
-                              "const": "summary",
-                              "type": "string"
-                            }
-                          ]
-                        },
-                        "isJudge": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [
-                        "role"
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id"
-                  ]
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "StreamChatBody": {
-        "type": "object",
-        "properties": {
-          "threadId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "content": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "threadId",
-          "content"
-        ]
-      },
-      "JudgeThreadResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "summary": {
-                "type": "string"
-              },
-              "passed": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "summary",
-              "passed"
             ]
           }
         },

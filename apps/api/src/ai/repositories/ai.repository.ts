@@ -13,12 +13,15 @@ import {
   aiMentorLessons,
   aiMentorThreadMessages,
   aiMentorThreads,
+  chapters,
   groups,
   groupUsers,
   lessons,
+  studentCourses,
   studentLessonProgress,
 } from "src/storage/schema";
 
+import type { SQL } from "drizzle-orm";
 import type {
   AiMentorGroupsBody,
   AiMentorLessonBody,
@@ -41,24 +44,14 @@ export class AiRepository {
     return aiMentorLessonId;
   }
 
-  async findThreadByStatusLessonAndUser(
-    status: ThreadStatus[],
-    aiMentorLessonId: UUIDType,
-    userId: UUIDType,
-  ) {
+  async findThread(conditions: SQL<unknown>[]) {
     const [thread] = await this.db
       .select({
         ...getTableColumns(aiMentorThreads),
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       })
       .from(aiMentorThreads)
-      .where(
-        and(
-          eq(aiMentorThreads.aiMentorLessonId, aiMentorLessonId),
-          inArray(aiMentorThreads.status, status),
-          eq(aiMentorThreads.userId, userId),
-        ),
-      );
+      .where(and(...conditions));
 
     return thread;
   }
@@ -70,6 +63,7 @@ export class AiRepository {
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
       .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .where(eq(aiMentorThreads.id, threadId));
+
     return lesson;
   }
 
@@ -81,48 +75,25 @@ export class AiRepository {
         ...getTableColumns(aiMentorThreads),
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       });
+
     return thread;
   }
 
   async createMessage(data: ThreadMessageBody) {
     const [message] = await this.db.insert(aiMentorThreadMessages).values(data).returning();
+
     return message;
   }
 
-  async findThread(threadId: UUIDType) {
-    const [thread] = await this.db
-      .select({
-        ...getTableColumns(aiMentorThreads),
-        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
-      })
-      .from(aiMentorThreads)
-      .where(eq(aiMentorThreads.id, threadId));
-    return thread;
-  }
-
-  async findThreadsByLessonId(lessonId: UUIDType) {
-    const threads = await this.db
+  async findThreads(conditions: SQL<unknown>[]) {
+    return this.db
       .select({
         ...getTableColumns(aiMentorThreads),
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
-      .where(eq(aiMentorLessons.lessonId, lessonId));
-
-    return threads;
-  }
-  async findThreadsByLessonIdAndUserId(lessonId: UUIDType, userId: UUIDType) {
-    const threads = await this.db
-      .select({
-        ...getTableColumns(aiMentorThreads),
-        status: sql<ThreadStatus>`${aiMentorThreads.status}`,
-      })
-      .from(aiMentorThreads)
-      .innerJoin(aiMentorLessons, eq(aiMentorLessons.id, aiMentorThreads.aiMentorLessonId))
-      .where(and(eq(aiMentorLessons.lessonId, lessonId), eq(aiMentorThreads.userId, userId)));
-
-    return threads;
+      .where(and(...conditions));
   }
 
   async getTokenSumForThread(threadId: UUIDType, archived: boolean) {
@@ -138,11 +109,12 @@ export class AiRepository {
           not(inArray(aiMentorThreadMessages.role, [MESSAGE_ROLE.SYSTEM, MESSAGE_ROLE.SUMMARY])),
         ),
       );
+
     return tokens;
   }
 
   async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
-    const messages = await this.db
+    return this.db
       .select({
         id: aiMentorThreadMessages.id,
         role: sql<MessageRole>`${aiMentorThreadMessages.role}`,
@@ -161,17 +133,6 @@ export class AiRepository {
         ),
       )
       .orderBy(asc(aiMentorThreadMessages.createdAt));
-
-    return messages;
-  }
-
-  async findThreadLanguage(threadId: UUIDType) {
-    const [lang] = await this.db
-      .select({ language: aiMentorThreads.userLanguage })
-      .from(aiMentorThreads)
-      .where(eq(aiMentorThreads.id, threadId));
-
-    return lang;
   }
 
   async findFirstMessageByRoleAndThread(threadId: UUIDType, role: MessageRole) {
@@ -182,8 +143,10 @@ export class AiRepository {
         and(eq(aiMentorThreadMessages.role, role), eq(aiMentorThreadMessages.threadId, threadId)),
       )
       .limit(1);
+
     return exists ? { ...exists, role: exists.role as MessageRole } : undefined;
   }
+
   async archiveMessages(threadId: UUIDType) {
     const [archived] = await this.db
       .update(aiMentorThreadMessages)
@@ -195,6 +158,7 @@ export class AiRepository {
         ),
       )
       .returning();
+
     return archived;
   }
 
@@ -202,7 +166,13 @@ export class AiRepository {
     const [newSummary] = await this.db
       .update(aiMentorThreadMessages)
       .set({ content: summary, tokenCount: tokenCount })
-      .where(eq(aiMentorThreadMessages.role, MESSAGE_ROLE.SUMMARY));
+      .where(
+        and(
+          eq(aiMentorThreadMessages.role, MESSAGE_ROLE.SUMMARY),
+          eq(aiMentorThreads.id, threadId),
+        ),
+      );
+
     return newSummary;
   }
 
@@ -221,11 +191,12 @@ export class AiRepository {
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
       .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .where(eq(aiMentorThreads.id, threadId));
+
     return lesson;
   }
 
   async findGroupsByThreadId(threadId: UUIDType): Promise<AiMentorGroupsBody> {
-    const groupCharacteristics = await this.db
+    return this.db
       .select({
         name: groups.name,
         characteristic: groups.characteristic,
@@ -234,8 +205,6 @@ export class AiRepository {
       .innerJoin(groupUsers, eq(groups.id, groupUsers.groupId))
       .innerJoin(aiMentorThreads, eq(aiMentorThreads.userId, groupUsers.userId))
       .where(eq(aiMentorThreads.id, threadId));
-
-    return groupCharacteristics;
   }
 
   async updateThread(threadId: UUIDType, data: UpdateThreadBody) {
@@ -247,6 +216,7 @@ export class AiRepository {
         ...getTableColumns(aiMentorThreads),
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       });
+
     return thread;
   }
 
@@ -275,5 +245,30 @@ export class AiRepository {
           eq(studentLessonProgress.studentId, userId),
         ),
       );
+  }
+
+  async checkLessonAssignment(id: UUIDType, userId: UUIDType) {
+    return this.db
+      .select({
+        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
+        lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        chapterId: sql<string>`${chapters.id}`,
+        courseId: sql<string>`${chapters.courseId}`,
+      })
+      .from(lessons)
+      .leftJoin(
+        studentLessonProgress,
+        and(
+          eq(studentLessonProgress.lessonId, lessons.id),
+          eq(studentLessonProgress.studentId, userId),
+        ),
+      )
+      .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
+      )
+      .where(eq(lessons.id, id));
   }
 }

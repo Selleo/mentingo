@@ -1,8 +1,9 @@
 import { openai } from "@ai-sdk/openai";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { generateObject, generateText, jsonSchema } from "ai";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
+import { PromptService } from "src/ai/services/prompt.service";
 import {
   type AiJudgeJudgementBody,
   aiJudgeJudgementSchema,
@@ -12,10 +13,10 @@ import { OPENAI_MODELS, type OpenAIModels } from "src/ai/utils/ai.type";
 
 @Injectable()
 export class ChatService {
+  constructor(private readonly promptService: PromptService) {}
   async generatePrompt(prompt: string, model: OpenAIModels): Promise<string> {
-    if (!prompt?.trim()) {
-      throw new Error("Prompt cannot be empty");
-    }
+    await this.promptService.isNotEmpty(prompt);
+
     try {
       const { text } = await generateText({
         model: openai(model),
@@ -31,9 +32,7 @@ export class ChatService {
   }
 
   async judge(system: string, prompt: string) {
-    if (!prompt?.length) {
-      throw new BadRequestException("Prompt cannot be empty");
-    }
+    await this.promptService.isNotEmpty(prompt);
 
     try {
       const result = await generateObject({

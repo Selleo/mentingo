@@ -38,11 +38,11 @@ export class AiController {
     request: [{ type: "body", schema: requestThreadSchema }],
     response: baseResponse(responseThreadSchema),
   })
-  async createThread(
+  async getThreadWithSetup(
     @Body() data: CreateThreadBody,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<ResponseThreadBody>> {
-    return this.aiService.createThreadWithSetup({
+    return this.aiService.getThreadWithSetup({
       ...data,
       status: THREAD_STATUS.ACTIVE,
       userId: userId,

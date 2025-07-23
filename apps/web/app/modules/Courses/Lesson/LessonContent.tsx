@@ -25,6 +25,7 @@ type LessonContentProps = {
   handleNext: () => void;
   isFirstLesson: boolean;
   isLastLesson: boolean;
+  lessonLoading: boolean;
 };
 
 export const LessonContent = ({
@@ -34,6 +35,7 @@ export const LessonContent = ({
   handleNext,
   isFirstLesson,
   isLastLesson,
+  lessonLoading,
 }: LessonContentProps) => {
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
@@ -68,7 +70,7 @@ export const LessonContent = ({
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
-      .with("ai_mentor", () => <AiMentorLesson />)
+      .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
       .otherwise(() => null);
 
   const handleMarkLessonAsComplete = () => {

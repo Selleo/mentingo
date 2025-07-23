@@ -27,7 +27,11 @@ export class SummaryService {
     }
   }
 
-  private async upsertSummary(threadId: UUIDType, content: string, tokenCount: number) {
+  private async upsertThreadSummaryMessage(
+    threadId: UUIDType,
+    content: string,
+    tokenCount: number,
+  ) {
     const exists = await this.aiRepository.findFirstMessageByRoleAndThread(
       threadId,
       MESSAGE_ROLE.SUMMARY,
@@ -46,18 +50,18 @@ export class SummaryService {
   }
 
   private async summarize(threadId: UUIDType) {
-    const { history, language } = await this.messageService.findMessageHistory(threadId, false);
+    const { history, userLanguage } = await this.messageService.findMessageHistory(threadId, false);
 
     const mappedHistory = history
       .map((msg: { role: MessageRole; content: string }) => `${msg.role}: ${msg.content}`)
       .join("\n");
 
-    const summaryPrompt = SUMMARY_PROMPT(mappedHistory, language);
+    const summaryPrompt = SUMMARY_PROMPT(mappedHistory, userLanguage);
     const summarized = await this.chatService.generatePrompt(summaryPrompt, OPENAI_MODELS.BASIC);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, summarized);
 
     await this.aiRepository.archiveMessages(threadId);
-    await this.upsertSummary(threadId, summarized, tokenCount);
+    await this.upsertThreadSummaryMessage(threadId, summarized, tokenCount);
 
     return summarized;
   }

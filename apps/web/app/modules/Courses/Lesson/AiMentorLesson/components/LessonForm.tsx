@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 
 import type { ChangeEvent } from "react";
 
@@ -20,7 +21,7 @@ export const LessonForm = ({ handleSubmit, input, handleInputChange }: LessonFor
         <div className="flex w-full flex-col gap-y-4 rounded-2xl border border-[#E4E6EB] bg-[#F5F6F7] px-6 py-4">
           <div className="flex w-full items-end">
             <div className="flex grow flex-col">
-              <input
+              <Input
                 type="text"
                 value={input}
                 onChange={handleInputChange}
@@ -28,18 +29,12 @@ export const LessonForm = ({ handleSubmit, input, handleInputChange }: LessonFor
                 className="w-full border-none bg-transparent py-2 text-base font-normal text-gray-500 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
               />
               <div className="mt-5 flex items-center gap-x-2">
-                <button
-                  type="button"
-                  className="flex size-8 items-center justify-center rounded-full border-none bg-white shadow-sm disabled:opacity-50"
-                >
+                <Button className="flex size-8 items-center justify-center rounded-full border-none bg-white p-0 shadow-sm disabled:opacity-50">
                   <Icon name="Plus" className="size-5 text-gray-700" />
-                </button>
-                <button
-                  type="button"
-                  className="flex size-8 items-center justify-center rounded-full border-none bg-white shadow-sm disabled:opacity-50"
-                >
+                </Button>
+                <Button className="flex size-8 items-center justify-center rounded-full border-none bg-white p-0 shadow-sm disabled:opacity-50">
                   <Icon name="Smile" className="size-5 text-gray-700" />
-                </button>
+                </Button>
               </div>
             </div>
             <div className="ml-4 flex-shrink-0">

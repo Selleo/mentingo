@@ -33,7 +33,7 @@ export class JudgeService {
 
     const content = messages.history.map(({ content }) => content).join("\n");
 
-    const system = SYSTEM_PROMPT_FOR_JUDGE(mentorLesson, messages.language);
+    const system = SYSTEM_PROMPT_FOR_JUDGE(mentorLesson, messages.userLanguage);
 
     const judged = await this.chatService.judge(system, content);
     const { status } = await this.aiRepository.updateThread(data.threadId, {

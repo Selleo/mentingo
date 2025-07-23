@@ -24,13 +24,11 @@ export const useRetakeLesson = (lessonId: string, courseId: string) => {
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["thread", { lessonId }] });
+      await queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
       await queryClient.invalidateQueries({
         queryKey: ["threadMessages", { lessonId }],
       });
-
       await queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
-      await queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
     },
   });
 };
