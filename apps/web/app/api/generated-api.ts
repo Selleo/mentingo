@@ -254,6 +254,10 @@ export interface AdminUpdateUserResponse {
   };
 }
 
+export interface ChangeLanguageBody {
+  language: string;
+}
+
 export interface ChangePasswordBody {
   newPassword: string;
   /**
@@ -2324,6 +2328,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<ChangePasswordResponse, any>({
         path: `/api/user/change-password`,
         method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerChangeLanguage
+     * @request PATCH:/api/settings
+     */
+
+    settingsControllerChangeLanguage: (
+      query: {
+        /** @format uuid */
+        id: string;
+      },
+      data: ChangeLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
         query: query,
         body: data,
         type: ContentType.Json,

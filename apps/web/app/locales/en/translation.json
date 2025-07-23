@@ -1126,6 +1126,7 @@
       "courseProgress": "Course progress"
     }
   },
+
   "adminPreferences": {
     "header": "Administrator Preferences",
     "subHeader": "Manage your administrative preferences and settings",
