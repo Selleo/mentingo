@@ -14,7 +14,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, id, timestamps } from "./utils";
 
-import type { ActivityHistory } from "src/common/types";
+import type { ActivityHistory, AllSettings } from "src/common/types";
 
 export const users = pgTable("users", {
   ...id,
@@ -386,3 +386,10 @@ export const groupUsers = pgTable(
     unq: unique().on(table.userId, table.groupId),
   }),
 );
+
+export const settings = pgTable("settings", {
+  ...id,
+  ...timestamps,
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  settings: jsonb("settings").$type<AllSettings>().notNull(),
+});

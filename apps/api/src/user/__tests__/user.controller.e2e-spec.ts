@@ -3,6 +3,7 @@ import request from "supertest";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
+import { cookieFor } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../../auth/auth.service";
 
 import type { DatabasePg } from "../../common";
@@ -35,12 +36,7 @@ describe("UsersController (e2e)", () => {
       .withAdminRole()
       .create();
 
-    const testLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-      email: testUser.email,
-      password: testUser.credentials?.password,
-    });
-
-    testCookies = testLoginResponse.headers["set-cookie"];
+    testCookies = await cookieFor(testUser, app);
   });
 
   describe("GET /user/all", () => {
@@ -51,7 +47,9 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data).toEqual(
-        expect.arrayContaining([expect.objectContaining(omit(testUser, "credentials"))]),
+        expect.arrayContaining([
+          expect.objectContaining(omit(testUser, "credentials", "avatarReference")),
+        ]),
       );
       expect(Array.isArray(response.body.data)).toBe(true);
     });
@@ -65,6 +63,7 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
+
       expect(response.body.data).toStrictEqual(omit(testUser, "credentials"));
     });
 

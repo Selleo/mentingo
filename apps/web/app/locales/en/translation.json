@@ -1055,5 +1055,17 @@
       "header": "Table of content:",
       "courseProgress": "Course progress"
     }
+  },
+  "adminPreferences": {
+    "header": "Administrator Preferences",
+    "subHeader": "Manage your notification preferences",
+    "notificationSettings": "Notification Settings",
+    "field": {
+      "newUserNotifications": "New User Notifications",
+      "newUserNotificationsDescription": "Receive notifications when a new user is created"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Notification preferences have been successfully updated"
+    }
   }
 }

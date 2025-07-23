@@ -19,7 +19,7 @@ import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 
-import { createTokens, credentials, userDetails, users } from "../storage/schema";
+import { createTokens, credentials, settings, userDetails, users } from "../storage/schema";
 
 import {
   type UsersFilterSchema,
@@ -32,6 +32,7 @@ import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
+import type { AdminSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
 @Injectable()
@@ -55,7 +56,16 @@ export class UserService {
     const conditions = this.getFiltersConditions(filters);
 
     const usersData = await this.db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: users.role,
+        archived: users.archived,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
       .from(users)
       .where(and(...conditions))
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
@@ -333,6 +343,26 @@ export class UserService {
 
       return createdUser;
     });
+  }
+
+  public async getAdminsToNotifyAboutNewUser() {
+    const allAdmins = await this.db
+      .select({
+        user: users,
+        settings: settings,
+      })
+      .from(users)
+      .leftJoin(settings, eq(users.id, settings.userId))
+      .where(eq(users.role, USER_ROLES.ADMIN));
+
+    const adminsToNotify = allAdmins.filter((admin) => {
+      return (
+        (admin.settings?.settings as AdminSettingsJSONContentSchema)?.adminNewUserNotification ===
+        true
+      );
+    });
+
+    return adminsToNotify;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {

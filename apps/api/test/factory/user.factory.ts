@@ -6,6 +6,8 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 import hashPassword from "../../src/common/helpers/hashPassword";
 import { credentials, users } from "../../src/storage/schema";
 
+import { createSettingsFactory } from "./settings.factory";
+
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";
 
@@ -35,6 +37,22 @@ class UserFactory extends Factory<UserWithCredentials> {
   withAdminRole() {
     return this.associations({
       role: USER_ROLES.ADMIN,
+    });
+  }
+
+  withAdminSettings(db: DatabasePg) {
+    return this.associations({ role: USER_ROLES.ADMIN }).afterCreate(async (user) => {
+      const settingsFactory = createSettingsFactory(db, user.id, true);
+      await settingsFactory.create();
+      return user;
+    });
+  }
+
+  withUserSettings(db: DatabasePg) {
+    return this.associations({ role: USER_ROLES.STUDENT }).afterCreate(async (user) => {
+      const settingsFactory = createSettingsFactory(db, user.id, false);
+      await settingsFactory.create();
+      return user;
     });
   }
 }

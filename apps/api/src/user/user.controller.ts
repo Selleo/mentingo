@@ -143,7 +143,8 @@ export class UserController {
         throw new ForbiddenException("You can only update your own account");
       }
 
-      const updatedUser = await this.usersService.updateUser(id, data);
+      await this.usersService.updateUser(id, data);
+      const updatedUser = await this.usersService.getUserById(id);
 
       return new BaseResponse(updatedUser);
     }
@@ -218,7 +219,8 @@ export class UserController {
     @Body() data: UpdateUserBody,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
-      const updatedUser = await this.usersService.updateUser(id, data);
+      await this.usersService.updateUser(id, data);
+      const updatedUser = await this.usersService.getUserById(id);
 
       return new BaseResponse(updatedUser);
     }

@@ -5,6 +5,7 @@ import { ResendVerificationMailCron } from "src/auth/resend-verification-mail-cr
 import { EmailModule } from "src/common/emails/emails.module";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
+import { SettingsService } from "src/settings/settings.service";
 import { UserService } from "src/user/user.service";
 
 import { AuthController } from "./auth.controller";
@@ -31,6 +32,7 @@ import { TokenService } from "./token.service";
     FileService,
     S3Service,
     ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
+    SettingsService,
   ],
   exports: [],
 })

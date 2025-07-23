@@ -63,12 +63,31 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    settings: UserSettings;
   };
 }
 
 export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
+
+export interface AdminSettings {
+  adminNewUserNotification: boolean;
+}
+
+export interface UserSettings extends AdminSettings {
+  language: string;
+}
+
+export interface SettingsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    settings: UserSettings;
+  };
+}
 
 export interface CurrentUserResponse {
   data: {
@@ -3312,6 +3331,35 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetScormMetadataResponse, any>({
         path: `/api/scorm/${courseId}/metadata`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerGetUserDetails
+     * @request GET:/api/user/details
+     */
+    userSettings: (params: RequestParams = {}) =>
+      this.request<SettingsResponse, any>({
+        path: `/api/settings`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name BaseResponse
+     * @request GET:/api/settings/admin-new-user-notification
+     */
+
+    settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
+      this.request<any>({
+        path: `/api/settings/admin-new-user-notification`,
+        method: "PATCH",
         format: "json",
         ...params,
       }),
