@@ -12,6 +12,8 @@ import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
+import { DEFAULT_USER_ADMIN_SETTINGS, DEFAULT_USER_SETTINGS } from "./constants/settings.constants";
+
 import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
@@ -122,18 +124,11 @@ export class SettingsService {
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
     switch (role) {
       case USER_ROLES.ADMIN:
-        return {
-          language: "en",
-          adminNewUserNotification: false,
-        };
+        return DEFAULT_USER_ADMIN_SETTINGS;
       case USER_ROLES.STUDENT:
-        return {
-          language: "en",
-        };
+        return DEFAULT_USER_SETTINGS;
       default:
-        return {
-          language: "en",
-        };
+        return DEFAULT_USER_SETTINGS;
     }
   }
 }
