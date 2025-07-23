@@ -30,7 +30,6 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUser.schema";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
@@ -50,7 +49,6 @@ import {
   type AllUsersResponse,
   allUsersSchema,
   type UserDetailsResponse,
-  type UserResponseBody,
   type UserResponse,
   baseUserResponseSchema,
   userDetailsResponseSchema,
