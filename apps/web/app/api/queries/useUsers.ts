@@ -10,6 +10,7 @@ type UsersParams = {
   role?: UserRole;
   archived?: boolean;
   sort?: string;
+  groupId?: string;
 };
 
 export const usersQueryOptions = (searchParams?: UsersParams) => ({
@@ -23,6 +24,7 @@ export const usersQueryOptions = (searchParams?: UsersParams) => ({
       ...(searchParams?.archived !== undefined && {
         archived: String(searchParams.archived),
       }),
+      ...(searchParams?.groupId && { groupId: searchParams.groupId }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
     });
     return response.data;

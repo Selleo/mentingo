@@ -11,7 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import Loader from "~/modules/common/Loader/Loader";
 
-import { UserInfo } from "./UserInfo";
+import { UserInfo } from "./components/UserInfo";
 
 import type { UpdateUserBody } from "~/api/generated-api";
 
@@ -20,6 +20,7 @@ const displayedFields: Array<keyof UpdateUserBody> = [
   "lastName",
   "email",
   "role",
+  "groupId",
   "archived",
 ];
 

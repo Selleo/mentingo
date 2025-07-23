@@ -31,9 +31,9 @@
       "active": "Aktywny",
       "archived": "Zarchiwizowany",
       "selected": "Wybrany",
-      "allStatuses": "Wszystkie statusy",
+      "allStatuses": "Wszystkie Statusy",
       "draft": "Wersja robocza",
-      "all": "Wszystko",
+      "all": "Wszystkie",
       "search": "Szukaj",
       "published": "Opublikowany",
       "publish": "Publikuj",
@@ -248,6 +248,7 @@
     "toast": {
       "userUpdatedSuccessfully": "Użytkownik zaktualizowany pomyślnie",
       "userDetailsUpdatedSuccessfully": "Szczegóły użytkownika zaktualizowane pomyślnie",
+      "updatedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie zaktualizowani",
       "deletedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie usunięci"
     },
     "field": {
@@ -427,7 +428,8 @@
     "filters": {
       "placeholder": {
         "searchByKeyword": "Szukaj po słowie kluczowym...",
-        "roles": "Role"
+        "roles": "Role",
+        "groups": "Grupy"
       }
     },
     "field": {
@@ -436,14 +438,46 @@
       "email": "Email",
       "role": "Rola",
       "status": "Status",
-      "createdAt": "Utworzono"
+      "createdAt": "Utworzono",
+      "group": "Grupa"
     },
     "other": {
       "selected": "Wybrany"
     },
     "button": {
       "createNew": "Utwórz nowego",
-      "deleteSelected": "Usuń wybrane"
+      "deleteSelected": "Usuń wybrane",
+      "edit": "Edytuj"
+    },
+    "dropdown": {
+      "changeRole": "Zmień role",
+      "changeGroup": "Zmień grupy",
+      "delete": "Usuń"
+    },
+    "modal": {
+      "title": {
+        "delete": "Czy chcesz usunąć te konta?",
+        "role": "Modyfikuj role",
+        "group": "Modyfikuj grupy",
+        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?"
+      },
+      "button": {
+        "delete": "Usuń",
+        "role": "Zapisz",
+        "group": "Zapisz",
+        "continue": "Zatwierdź"
+      },
+      "description": {
+        "delete": "Czy na pewno chcesz usunąć te konta? Ta operacja jest nieodwracalna.",
+        "confirmationForGroupSingular": "Zmienisz grupę na {{ group }} dla 1 użytkownika",
+        "confirmationForGroupPlural": "Zmienisz grupę na {{ group }} dla {{ number }} użytkowników",
+        "confirmationForRoleSingular": "Zmienisz rolę na {{ role }} dla 1 użytkownika.",
+        "confirmationForRolePlural": "Zmienisz rolę na {{ role }} dla {{ number }} użytkowników"
+      },
+      "placeholder": {
+        "group": "Wybierz grupę",
+        "role": "Wybierz rolę"
+      }
     },
     "breadcrumbs": {
       "users": "Użytkownicy",
@@ -456,14 +490,16 @@
     "subHeader": "Wypełnij dane, aby utworzyć nowego użytkownika. Kliknij zapisz, gdy skończysz.",
     "editUserHeader": "Informacje o użytkowniku",
     "placeholder": {
-      "role": "Wybierz rolę"
+      "role": "Wybierz rolę",
+      "groupId": "Wybierz grupę"
     },
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
       "email": "Email",
       "role": "Rola",
-      "status": "Status"
+      "status": "Status",
+      "groupId": "Grupa"
     },
     "toast": {
       "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie"

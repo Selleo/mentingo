@@ -30,6 +30,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUser.schema";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
@@ -42,14 +43,18 @@ import {
   updateUserSchema,
   UpsertUserDetailsBody,
   upsertUserDetailsSchema,
+  BulkAssignUserGroups,
+  bulkAssignUsersGroupsSchema,
 } from "./schemas/updateUser.schema";
 import {
   type AllUsersResponse,
   allUsersSchema,
   type UserDetailsResponse,
+  type UserResponseBody,
   type UserResponse,
   baseUserResponseSchema,
   userDetailsResponseSchema,
+  userSchema,
 } from "./schemas/user.schema";
 import { SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
@@ -73,6 +78,7 @@ export class UserController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: Type.String() },
+      { type: "query", name: "groupId", schema: Type.String() },
     ],
     response: paginatedResponse(allUsersSchema),
   })
@@ -83,11 +89,13 @@ export class UserController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortUserFieldsOptions,
+    @Query("groupId") groupId: string,
   ): Promise<PaginatedResponse<AllUsersResponse>> {
     const filters: UsersFilterSchema = {
       keyword,
       role,
       archived: archived === "true",
+      groupId,
     };
 
     const query = { filters, page, perPage, sort };
@@ -101,7 +109,7 @@ export class UserController {
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
-    response: baseResponse(baseUserResponseSchema),
+    response: baseResponse(userSchema),
   })
   async getUserById(@Query("id") id: UUIDType): Promise<BaseResponse<UserResponse>> {
     const user = await this.usersService.getUserById(id);
@@ -276,6 +284,19 @@ export class UserController {
     await this.usersService.deleteBulkUsers(data.userIds);
 
     return null;
+  }
+
+  @Patch("bulk/groups")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: bulkAssignUsersGroupsSchema }],
+  })
+  async bulkAssignUsersToGroup(@Body() data: BulkAssignUserGroups) {
+    await this.usersService.bulkAssignUsersToGroup(data);
+
+    return new BaseResponse({
+      message: "User groups upserted successfully",
+    });
   }
 
   @Post()

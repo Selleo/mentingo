@@ -27,6 +27,7 @@ export const usersFilterSchema = Type.Object({
   keyword: Type.Optional(Type.String()),
   archived: Type.Optional(Type.Boolean()),
   role: Type.Optional(Type.Enum(USER_ROLES)),
+  groupId: Type.Optional(Type.String()),
 });
 
 export type UsersFilterSchema = Static<typeof usersFilterSchema>;
