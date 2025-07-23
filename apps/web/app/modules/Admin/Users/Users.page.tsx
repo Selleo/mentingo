@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { camelCase } from "lodash-es";
-import { Trash } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

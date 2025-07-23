@@ -19,7 +19,6 @@ import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 
-
 import {
   createTokens,
   credentials,
@@ -27,7 +26,7 @@ import {
   groupUsers,
   userDetails,
   users,
-  settings
+  settings,
 } from "../storage/schema";
 
 import {
@@ -43,11 +42,9 @@ import type {
   UpsertUserDetailsBody,
   BulkAssignUserGroups,
 } from "./schemas/updateUser.schema";
-
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { AdminSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
-
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
 @Injectable()
@@ -467,6 +464,10 @@ export class UserService {
     }
     if (filters.role) {
       conditions.push(eq(users.role, filters.role));
+    }
+
+    if (filters.groupId) {
+      conditions.push(eq(groupUsers.groupId, filters.groupId));
     }
 
     return conditions.length ? conditions : [sql`1=1`];
