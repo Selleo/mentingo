@@ -1426,27 +1426,6 @@ export interface MarkLessonAsCompletedResponse {
   };
 }
 
-export interface GetThreadWithSetupBody {
-  /** @format uuid */
-  lessonId: string;
-  userLanguage: "pl" | "en";
-}
-
-export interface GetThreadWithSetupResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    aiMentorLessonId: string;
-    /** @format uuid */
-    userId: string;
-    userLanguage: "pl" | "en";
-    createdAt: string;
-    updatedAt: string;
-    status: "active" | "completed" | "archived";
-  };
-}
-
 export interface GetThreadResponse {
   data: {
     /** @format uuid */
@@ -3129,22 +3108,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/studentLessonProgress`,
         method: "POST",
         query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerGetThreadWithSetup
-     * @request POST:/api/ai/thread
-     */
-    aiControllerGetThreadWithSetup: (data: GetThreadWithSetupBody, params: RequestParams = {}) =>
-      this.request<GetThreadWithSetupResponse, any>({
-        path: `/api/ai/thread`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),

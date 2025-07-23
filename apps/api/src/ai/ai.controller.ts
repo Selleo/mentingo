@@ -6,8 +6,6 @@ import { Validate } from "nestjs-typebox";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import {
-  type CreateThreadBody,
-  requestThreadSchema,
   type ResponseJudgeBody,
   responseJudgeSchema,
   type ResponseThreadBody,
@@ -17,7 +15,7 @@ import {
   type StreamChatBody,
   streamChatSchema,
 } from "src/ai/utils/ai.schema";
-import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
+import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -31,23 +29,6 @@ export class AiController {
     private readonly threadService: ThreadService,
     private readonly aiService: AiService,
   ) {}
-
-  @Post("thread")
-  @Roles(USER_ROLES.STUDENT)
-  @Validate({
-    request: [{ type: "body", schema: requestThreadSchema }],
-    response: baseResponse(responseThreadSchema),
-  })
-  async getThreadWithSetup(
-    @Body() data: CreateThreadBody,
-    @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<ResponseThreadBody>> {
-    return this.aiService.getThreadWithSetup({
-      ...data,
-      status: THREAD_STATUS.ACTIVE,
-      userId: userId,
-    });
-  }
 
   @Get("thread")
   @Roles(USER_ROLES.STUDENT)

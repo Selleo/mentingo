@@ -2334,31 +2334,6 @@
       }
     },
     "/api/ai/thread": {
-      "post": {
-        "operationId": "AiController_getThreadWithSetup",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetThreadWithSetupBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadWithSetupResponse"
-                }
-              }
-            }
-          }
-        }
-      },
       "get": {
         "operationId": "AiController_getThread",
         "parameters": [
@@ -8910,99 +8885,6 @@
             },
             "required": [
               "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadWithSetupBody": {
-        "type": "object",
-        "properties": {
-          "lessonId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "userLanguage": {
-            "anyOf": [
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "en",
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "required": [
-          "lessonId",
-          "userLanguage"
-        ]
-      },
-      "GetThreadWithSetupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "aiMentorLessonId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userLanguage": {
-                "anyOf": [
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "en",
-                    "type": "string"
-                  }
-                ]
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "active",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "archived",
-                    "type": "string"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "aiMentorLessonId",
-              "userId",
-              "userLanguage",
-              "createdAt",
-              "updatedAt",
-              "status"
             ]
           }
         },
