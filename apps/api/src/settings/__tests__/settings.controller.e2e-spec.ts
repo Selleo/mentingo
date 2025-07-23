@@ -6,6 +6,7 @@ import { truncateTables, cookieFor } from "../../../test/helpers/test-helpers";
 
 import type { DatabasePg } from "../../common";
 import type { INestApplication } from "@nestjs/common";
+import type { AdminSettings } from "src/common/types";
 
 describe("SettingsController (e2e)", () => {
   let app: INestApplication;
@@ -26,7 +27,7 @@ describe("SettingsController (e2e)", () => {
     await app.close();
   }, 10000);
 
-  describe("PATCH /api/settings", () => {
+  describe("PUT /api/settings", () => {
     beforeEach(async () => {
       await truncateTables(db, ["settings"]);
 
@@ -94,12 +95,7 @@ describe("SettingsController (e2e)", () => {
         .withAdminSettings(db)
         .create();
 
-      const adminLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: adminUser.email,
-        password: adminUser.credentials?.password,
-      });
-
-      adminCookies = adminLoginResponse.headers["set-cookie"];
+      adminCookies = await cookieFor(adminUser, app);
     });
 
     it("should toggle the notification setting (as Admin)", async () => {
@@ -115,17 +111,22 @@ describe("SettingsController (e2e)", () => {
         where: (s, { eq }) => eq(s.userId, adminUser.id),
       });
 
-      expect(updatedSettingInDb?.settings.adminNewUserNotification).toBe(true);
+      const adminSettings = updatedSettingInDb?.settings as AdminSettings;
+      expect(adminSettings?.adminNewUserNotification).toBe(true);
 
-      await request(app.getHttpServer())
+      const secondResponse = await request(app.getHttpServer())
         .patch("/api/settings/admin-new-user-notification")
         .set("Cookie", adminCookies)
         .expect(200);
 
+      expect(secondResponse.body.data.settings.adminNewUserNotification).toBe(false);
+
       const toggledBackSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, adminUser.id),
       });
-      expect(toggledBackSettingInDb?.settings.adminNewUserNotification).toBe(false);
+
+      const toggledAdminSettings = toggledBackSettingInDb?.settings as AdminSettings;
+      expect(toggledAdminSettings?.adminNewUserNotification).toBe(false);
     });
 
     it("should return 403 if user is not an admin", async () => {
@@ -143,7 +144,7 @@ describe("SettingsController (e2e)", () => {
     });
   });
 
-  describe("GET /settings", () => {
+  describe("GET /api/settings", () => {
     beforeEach(async () => {
       await truncateTables(db, ["settings"]);
 
