@@ -8,7 +8,7 @@ import { Switch } from "~/components/ui/switch";
 import type { AdminSettings } from "../types";
 
 interface NotificationPreferencesFormProps {
-  settings: AdminSettings;
+  adminSettings: AdminSettings;
 }
 
 export default function NotificationPreferencesForm({

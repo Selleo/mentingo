@@ -2,8 +2,9 @@ import { useTranslation } from "react-i18next";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
-import CoursesAccessibilityPreferences from "./CoursesAccessibilityPreferences";
-import NotificationPreferences from "./NotificationPreferences";
+import NotificationPreferences from "../NotificationPreferences";
+
+import { GlobalPreferences } from "./GlobalPreferences";
 
 import type { GlobalSettings, AdminSettings } from "~/api/generated-api";
 
@@ -23,7 +24,7 @@ export default function AdminPreferences({ settings, globalSettings }: AdminPref
       </CardHeader>
       <CardContent className="space-y-6">
         <NotificationPreferences adminSettings={settings} />
-        <CoursesAccessibilityPreferences globalSettings={globalSettings} />
+        <GlobalPreferences globalSettings={globalSettings} />
       </CardContent>
     </Card>
   );

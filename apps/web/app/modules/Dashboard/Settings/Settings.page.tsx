@@ -8,7 +8,7 @@ import LanguageSelect from "./components/LanguageSelect";
 import ChangePasswordForm from "./forms/ChangePasswordForm";
 import UserDetailsForm from "./forms/UserDetailsForm";
 import UserForm from "./forms/UserForm";
-import AdminPreferences from "./components/AdminPreferences";
+import AdminPreferences from "./components/admin/Preferences";
 
 export default function SettingsPage() {
   const { isContentCreator, isAdmin } = useUserRole();
@@ -22,7 +22,7 @@ export default function SettingsPage() {
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
       {isAdmin && userSettings && isAdminSettings(userSettings) && globalSettings && (
-        <AdminPreferences userSettings={userSettings} globalSettings={globalSettings} />
+        <AdminPreferences settings={userSettings} globalSettings={globalSettings} />
       )}
     </PageWrapper>
   );

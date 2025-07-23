@@ -1138,6 +1138,7 @@
       "coursesAccessibility": "Course availability for unauthenticated users",
       "coursesAccessibilityDescription": "Manage course accessibility settings and permissions"
     },
+    "globalActionWarning": "  This action has global influence on the application. It will change the behavior for all users.",
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesAccessibilityPreferenceChangeSuccess": "Course accessibility preferences for unauthenticated users have been updated successfully"
