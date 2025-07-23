@@ -3,19 +3,22 @@ import { NewUserEmail } from "@repo/email-templates";
 
 import { EmailService } from "src/common/emails/emails.service";
 
+import { UserPasswordCreatedEvent } from "../../events/user/user-password-created.event";
 import { UserRegisteredEvent } from "../../events/user/user-registered.event";
 import { UserService } from "../user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
 
-@EventsHandler(UserRegisteredEvent)
-export class NotifyAdminsHandler implements IEventHandler<UserRegisteredEvent> {
+@EventsHandler(UserRegisteredEvent, UserPasswordCreatedEvent)
+export class NotifyAdminsHandler
+  implements IEventHandler<UserRegisteredEvent | UserPasswordCreatedEvent>
+{
   constructor(
     private userService: UserService,
     private emailService: EmailService,
   ) {}
 
-  async handle(event: UserRegisteredEvent) {
+  async handle(event: UserRegisteredEvent | UserPasswordCreatedEvent) {
     const { user } = event;
     const { firstName, lastName, email } = user;
 
