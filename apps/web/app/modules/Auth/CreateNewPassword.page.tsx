@@ -97,10 +97,6 @@ export default function CreateNewPasswordPage() {
                 className={cn({ "border-red-500": errors.newPassword })}
                 {...register("newPassword")}
               />
-
-              {errors.newPassword && (
-                <div className="text-sm text-red-500">{errors.newPassword.message}</div>
-              )}
             </div>
 
             <div className="grid gap-2">

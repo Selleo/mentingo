@@ -166,7 +166,7 @@
       "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "button": {
-      "changePassword": "Zmień hasło"
+      "changePassword": "Utwórz hasło"
     }
   },
   "passwordValidationDisplay": {

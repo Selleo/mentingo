@@ -166,7 +166,7 @@
     },
 
     "button": {
-      "changePassword": "Change password"
+      "changePassword": "Create password"
     }
   },
   "changePasswordView": {
