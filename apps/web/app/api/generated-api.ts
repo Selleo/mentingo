@@ -959,65 +959,6 @@ export interface UpdateFreemiumStatusResponse {
   };
 }
 
-export interface GetLessonByIdResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
-    description: string | null;
-    fileType: string | null;
-    fileUrl: string | null;
-    quizDetails?: {
-      questions: {
-        /** @format uuid */
-        id: string;
-        type:
-          | "brief_response"
-          | "detailed_response"
-          | "match_words"
-          | "scale_1_5"
-          | "single_choice"
-          | "multiple_choice"
-          | "true_or_false"
-          | "photo_question_single_choice"
-          | "photo_question_multiple_choice"
-          | "fill_in_the_blanks_text"
-          | "fill_in_the_blanks_dnd";
-        description?: string | null;
-        title: string;
-        displayOrder?: number;
-        solutionExplanation: string | null;
-        photoS3Key?: string | null;
-        options?: {
-          /** @format uuid */
-          id: string;
-          optionText: string | null;
-          displayOrder: number | null;
-          isStudentAnswer: boolean | null;
-          studentAnswer: string | null;
-          isCorrect: boolean | null;
-          /** @format uuid */
-          questionId?: string;
-        }[];
-        passQuestion: boolean | null;
-      }[];
-      questionCount: number;
-      correctAnswerCount: number | null;
-      wrongAnswerCount: number | null;
-      score: number | null;
-    };
-    lessonCompleted?: boolean;
-    displayOrder: number;
-    isExternal?: boolean;
-    nextLessonId: string | null;
-    userLanguage?: "pl" | "en";
-    status?: "active" | "completed" | "archived";
-    /** @format uuid */
-    threadId?: string;
-  };
-}
-
 export type BetaCreateLessonBody = {
   title: string;
   type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
@@ -1077,6 +1018,65 @@ export interface BetaCreateLessonResponse {
     /** @format uuid */
     id: string;
     message: string;
+  };
+}
+
+export interface GetLessonByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+    description: string | null;
+    fileType: string | null;
+    fileUrl: string | null;
+    quizDetails?: {
+      questions: {
+        /** @format uuid */
+        id: string;
+        type:
+          | "brief_response"
+          | "detailed_response"
+          | "match_words"
+          | "scale_1_5"
+          | "single_choice"
+          | "multiple_choice"
+          | "true_or_false"
+          | "photo_question_single_choice"
+          | "photo_question_multiple_choice"
+          | "fill_in_the_blanks_text"
+          | "fill_in_the_blanks_dnd";
+        description?: string | null;
+        title: string;
+        displayOrder?: number;
+        solutionExplanation: string | null;
+        photoS3Key?: string | null;
+        options?: {
+          /** @format uuid */
+          id: string;
+          optionText: string | null;
+          displayOrder: number | null;
+          isStudentAnswer: boolean | null;
+          studentAnswer: string | null;
+          isCorrect: boolean | null;
+          /** @format uuid */
+          questionId?: string;
+        }[];
+        passQuestion: boolean | null;
+      }[];
+      questionCount: number;
+      correctAnswerCount: number | null;
+      wrongAnswerCount: number | null;
+      score: number | null;
+    };
+    lessonCompleted?: boolean;
+    displayOrder: number;
+    isExternal?: boolean;
+    nextLessonId: string | null;
+    userLanguage?: "pl" | "en";
+    status?: "active" | "completed" | "archived";
+    /** @format uuid */
+    threadId?: string;
   };
 }
 
@@ -2898,20 +2898,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LessonControllerGetLessonById
-     * @request GET:/api/lesson/{id}/{userLanguage}
-     */
-    lessonControllerGetLessonById: (id: string, userLanguage: string, params: RequestParams = {}) =>
-      this.request<GetLessonByIdResponse, any>({
-        path: `/api/lesson/${id}/${userLanguage}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name LessonControllerBetaCreateLesson
      * @request POST:/api/lesson/beta-create-lesson
      */
@@ -2921,6 +2907,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerGetLessonById
+     * @request GET:/api/lesson/{id}
+     */
+    lessonControllerGetLessonById: (
+      id: string,
+      query?: {
+        userLanguage?: "pl" | "en";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLessonByIdResponse, any>({
+        path: `/api/lesson/${id}`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

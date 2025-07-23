@@ -10,7 +10,7 @@ const ChatLoader = () => {
       <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-600">
         <Icon name="AiMentor" className="size-5 text-blue-600" />
       </div>
-      <div className="flex max-w-[80%] flex-col">
+      <div className="max-w-4/5 flex flex-col">
         <span className="mb-1 text-sm font-semibold text-blue-900">
           {t("studentCourseView.lesson.aiMentorLesson.aiMentorName")}
         </span>

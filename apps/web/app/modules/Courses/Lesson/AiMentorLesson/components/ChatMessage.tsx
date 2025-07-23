@@ -39,7 +39,7 @@ const ChatMessage = (message: ChatMessageProps) => {
           </div>
         )}
       </div>
-      <div className="flex max-w-[80%] flex-col">
+      <div className="max-w-4/5 flex flex-col">
         <span className="mb-1 text-sm font-semibold text-blue-900">{userName}</span>
         <p className="break-words text-sm leading-relaxed text-gray-800">{message.content}</p>
       </div>

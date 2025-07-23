@@ -124,15 +124,9 @@ export class AiService {
 
   async runJudge(data: ThreadOwnershipBody) {
     const judged = await this.judgeService.runJudge(data);
-    const lesson = await this.aiRepository.findLessonByThreadId(data.threadId);
+    const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
 
-    await this.markAsCompletedIfJudge(
-      lesson.id,
-      data.userId,
-      USER_ROLES.STUDENT,
-      judged.data,
-      true,
-    );
+    await this.markAsCompletedIfJudge(lessonId, data.userId, USER_ROLES.STUDENT, judged.data, true);
 
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
 

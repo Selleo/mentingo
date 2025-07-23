@@ -14,7 +14,7 @@ import { OPENAI_MODELS, type OpenAIModels } from "src/ai/utils/ai.type";
 @Injectable()
 export class ChatService {
   constructor(private readonly promptService: PromptService) {}
-  async generatePrompt(prompt: string, model: OpenAIModels): Promise<string> {
+  async generatePrompt(prompt: string, model: OpenAIModels = OPENAI_MODELS.BASIC): Promise<string> {
     await this.promptService.isNotEmpty(prompt);
 
     try {

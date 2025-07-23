@@ -44,7 +44,7 @@ export class AiRepository {
     return aiMentorLessonId;
   }
 
-  async findThread(conditions: SQL<unknown>[]) {
+  async findThread(conditions: SQL[]) {
     const [thread] = await this.db
       .select({
         ...getTableColumns(aiMentorThreads),
@@ -56,15 +56,15 @@ export class AiRepository {
     return thread;
   }
 
-  async findLessonByThreadId(threadId: UUIDType) {
-    const [lesson] = await this.db
-      .select(getTableColumns(lessons))
+  async findLessonIdByThreadId(threadId: UUIDType) {
+    const [lessonId] = await this.db
+      .select({ lessonId: lessons.id })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
       .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .where(eq(aiMentorThreads.id, threadId));
 
-    return lesson;
+    return lessonId;
   }
 
   async createThread(data: ThreadBody) {
@@ -85,7 +85,7 @@ export class AiRepository {
     return message;
   }
 
-  async findThreads(conditions: SQL<unknown>[]) {
+  async findThreads(conditions: SQL[]) {
     return this.db
       .select({
         ...getTableColumns(aiMentorThreads),

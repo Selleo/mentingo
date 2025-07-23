@@ -77,21 +77,19 @@ export class StudentLessonProgressService {
         and(eq(studentLessonProgress.lessonId, id), eq(studentLessonProgress.studentId, studentId)),
       );
 
-    let currentLessonProgress;
-
-    if (!lessonProgress) {
-      [currentLessonProgress] = await dbInstance
-        .insert(studentLessonProgress)
-        .values({
-          studentId,
-          lessonId: lesson.id,
-          chapterId: lesson.chapterId,
-          completedQuestionCount,
-        })
-        .returning();
-    } else {
-      currentLessonProgress = lessonProgress;
-    }
+    const currentLessonProgress = !lessonProgress
+      ? (
+          await dbInstance
+            .insert(studentLessonProgress)
+            .values({
+              studentId,
+              lessonId: lesson.id,
+              chapterId: lesson.chapterId,
+              completedQuestionCount,
+            })
+            .returning()
+        )[0]
+      : lessonProgress;
 
     const updateConditions =
       (!lessonProgress?.completedAt && lesson.type !== LESSON_TYPES.AI_MENTOR) ||
