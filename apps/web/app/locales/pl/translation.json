@@ -1069,7 +1069,6 @@
       "courseProgress": "Postęp kursu"
     }
   },
-
   "adminPreferences": {
     "header": "Preferencje administratora",
     "subHeader": "Zarządzaj swoimi preferencjami i ustawieniami administratora",
@@ -1084,6 +1083,7 @@
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
       "coursesAccessibilityPreferenceChangeSuccess": "Preferencje dostępności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
-    }
+    },
+    "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   }
 }

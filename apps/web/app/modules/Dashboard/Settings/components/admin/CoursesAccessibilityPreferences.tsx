@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
-import { SettingItem } from "./SettingItem";
+import { SettingItem } from "../SettingItem";
+
+import { GlobalSetting } from "./GlobalSetting";
 
 import type { GlobalSettings } from "~/api/generated-api";
 
@@ -37,6 +39,7 @@ export default function CoursesAccessibilityPreferences({
               description={t("adminPreferences.field.coursesAccessibilityDescription")}
               checked={globalSettings.unregisteredUserCoursesAccessibility}
               onCheckedChange={handleCoursesAccessibilityChange}
+              icon={<GlobalSetting />}
             />
           </div>
         </div>
