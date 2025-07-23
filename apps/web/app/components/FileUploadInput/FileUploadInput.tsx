@@ -97,6 +97,7 @@ const FileUploadInput = ({
               variant="destructive"
               className="mt-2 gap-x-1"
               onClick={() => {
+                // remove video from storage
                 setFile(null);
                 setVideoPreview(null);
               }}
