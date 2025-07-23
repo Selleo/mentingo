@@ -8,18 +8,20 @@ import type { MicrosoftProfile, MicrosoftUserType } from "src/utils/types/micros
 @Injectable()
 export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
   constructor(private readonly configService: ConfigService) {
-    if (
-      !configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_ID") ||
-      !configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_SECRET")
-    ) {
+    const clientID = configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_ID");
+    const clientSecret = configService.get<string>(
+      "microsoft_authorization.MICROSOFT_CLIENT_SECRET",
+    );
+
+    if (!clientID || !clientSecret) {
       console.error(
         "Microsoft OAuth credentials are not set. Please check your environment variables.",
       );
     }
 
     super({
-      clientID: configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_ID"),
-      clientSecret: configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_SECRET"),
+      clientID,
+      clientSecret,
       callbackURL: configService.get<string>("microsoft_authorization.callbackURL"),
       scope: ["user.read"],
       tenant: "common",
