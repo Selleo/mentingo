@@ -120,6 +120,13 @@
       "when": 1752053777749,
       "tag": "0016_add_certificates_table_and_course_certificate_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1753096859191,
+      "tag": "0017_add_certificateBackgroundS3Key_to_courses",
+      "breakpoints": true
     }
   ]
 }

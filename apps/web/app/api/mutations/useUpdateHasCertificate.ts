@@ -6,7 +6,7 @@ import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
-import type { UpdateHasCertificateBody } from "~/api/generated-api";
+import type { UpdateHasCertificateBody } from "~/types/certificate";
 
 type UpdateCertificateParams = {
   courseId: string;

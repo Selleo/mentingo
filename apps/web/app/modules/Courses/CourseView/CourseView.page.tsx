@@ -49,6 +49,7 @@ export default function CourseViewPage() {
                 studentName={studentName}
                 courseName={courseName}
                 completionDate={formattedDate}
+                courseId={course.id}
                 hasBottomMargin={false}
               />
             </div>

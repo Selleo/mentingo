@@ -7,6 +7,7 @@ interface CertificatePreviewProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
+  courseId?: string;
   onClose?: () => void;
 }
 
@@ -14,6 +15,7 @@ const CertificatePreview = ({
   studentName,
   courseName,
   completionDate,
+  courseId,
   onClose,
 }: CertificatePreviewProps) => {
   const { downloadCertificatePdf, HiddenCertificate } = useCertificatePDF();
@@ -27,6 +29,7 @@ const CertificatePreview = ({
         studentName={studentName}
         courseName={courseName}
         completionDate={completionDate}
+        courseId={courseId}
       />
 
       <div className="m-4 w-full rounded-t-lg bg-white">
@@ -58,6 +61,7 @@ const CertificatePreview = ({
           studentName={studentName}
           courseName={courseName}
           completionDate={completionDate}
+          courseId={courseId}
           hasBottomMargin={true}
         />
       </div>

@@ -55,7 +55,6 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
       </div>
     );
   }
-
   return (
     <div className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
       <h5 className="h5">{t("studentCertificateView.header")}</h5>

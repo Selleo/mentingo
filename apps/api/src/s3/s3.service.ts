@@ -15,14 +15,14 @@ export class S3Service {
 
   constructor(private configService: ConfigService) {
     this.s3Client = new S3Client({
-      endpoint: this.configService.get<string>("s3.S3_ENDPOINT") || "",
-      region: this.configService.get<string>("s3.S3_REGION") || "us-east-1",
+      // endpoint: this.configService.get<string>("s3.S3_ENDPOINT") || "",
+      region: this.configService.get<string>("aws.AWS_REGION") || "us-east-1",
       credentials: {
-        accessKeyId: this.configService.get<string>("s3.S3_ACCESS_KEY_ID") || "",
-        secretAccessKey: this.configService.get<string>("s3.S3_SECRET_ACCESS_KEY") || "",
+        accessKeyId: this.configService.get<string>("aws.AWS_ACCESS_KEY_ID") || "",
+        secretAccessKey: this.configService.get<string>("aws.AWS_SECRET_ACCESS_KEY") || "",
       },
     });
-    this.bucketName = this.configService.get<string>("s3.S3_BUCKET_NAME") || "";
+    this.bucketName = this.configService.get<string>("aws.AWS_BUCKET_NAME") || "";
   }
 
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {

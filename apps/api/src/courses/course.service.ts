@@ -116,7 +116,9 @@ export class CourseService {
         title: courses.title,
         description: sql<string>`${courses.description}`,
         thumbnailUrl: courses.thumbnailS3Key,
+        certificateBackgroundImageUrl: courses.certificateBackgroundS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+        authorId: courses.authorId,
         category: sql<string>`${categories.title}`,
         enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
         courseChapterCount: courses.chapterCount,
@@ -135,6 +137,7 @@ export class CourseService {
         courses.title,
         courses.description,
         courses.thumbnailS3Key,
+        courses.certificateBackgroundS3Key,
         users.firstName,
         users.lastName,
         categories.title,
@@ -1266,5 +1269,35 @@ export class CourseService {
     `);
 
     return availableCourses.map(({ courseId }) => courseId);
+  }
+
+  async uploadCertificateBackgroundImage(
+    courseId: UUIDType,
+    file: Express.Multer.File,
+  ): Promise<void> {
+    const resource = "certificates";
+    const { fileKey } = await this.fileService.uploadFile(file, resource);
+
+    const [updatedCourse] = await this.db
+      .update(courses)
+      .set({ certificateBackgroundS3Key: fileKey })
+      .where(eq(courses.id, courseId))
+      .returning();
+
+    if (!updatedCourse) {
+      throw new ConflictException("Failed to update certificate background image");
+    }
+  }
+
+  async getCertificateBackgroundImage(courseId: UUIDType): Promise<string> {
+    const [course] = await this.db
+      .select({ certificateBackgroundImage: courses.certificateBackgroundS3Key })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course || !course.certificateBackgroundImage) {
+      throw new NotFoundException("Certificate background image not found");
+    }
+    return await this.fileService.getFileUrl(course.certificateBackgroundImage);
   }
 }

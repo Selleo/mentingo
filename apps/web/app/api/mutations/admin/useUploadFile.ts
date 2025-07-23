@@ -7,7 +7,7 @@ import { ApiClient } from "../../api-client";
 
 interface UploadFileOptions {
   file: File;
-  resource?: "lesson" | "lessonItem" | "file" | "course" | "user" | "category" | "certificate";
+  resource?: "lesson" | "lessonItem" | "file" | "course" | "user" | "category" | "certificates";
 }
 
 export function useUploadFile() {

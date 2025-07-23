@@ -5,6 +5,7 @@ export const baseCourseSchema = Type.Object({
   description: Type.String(),
   isPublished: Type.Optional(Type.Boolean()),
   thumbnailS3Key: Type.Optional(Type.String()),
+  certificateBackgroundS3Key: Type.Optional(Type.String()),
   priceInCents: Type.Optional(Type.Integer()),
   currency: Type.Optional(Type.String()),
   categoryId: Type.String({ format: "uuid" }),

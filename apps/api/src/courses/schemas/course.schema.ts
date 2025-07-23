@@ -6,6 +6,7 @@ export const courseSchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
   thumbnailUrl: Type.Union([Type.String(), Type.Null()]),
+  certificateBackgroundUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   description: Type.String(),
   authorId: Type.Optional(UUIDSchema),
   author: Type.String(),

@@ -931,6 +931,10 @@
   "organizationSettingsView": {
     "header": "Ustawienia organizacji",
     "subHeader": "Prześlij tło certyfikatu (PNG lub SVG)",
+    "toast": {
+      "uploadedSuccessfully": "Tło certyfikatu zostało pomyślnie zaktualizowane",
+      "failedToUpload": "Aktualizacja tła certyfikatu nie powiodła się"
+    },
     "other": {
       "fileExtension": "Tylko pliki PNG lub SVG",
       "selected": "Wybrano:"

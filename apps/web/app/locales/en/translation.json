@@ -931,6 +931,10 @@
   "organizationSettingsView": {
     "header": "Organization Settings",
     "subHeader": "Upload certificate background image (PNG or SVG)",
+    "toast": {
+      "uploadedSuccessfully": "Certificate background uploaded successfully.",
+      "failedToUpload": "Failed to upload certificate background."
+    },
     "other": {
       "fileExtension": "PNG or SVG files only",
       "selected": "Selected: "

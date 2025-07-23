@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useChangeCertificateBackground } from "~/api/mutations/admin/useChangeCertificateBackground";
+import { useCourses } from "~/api/queries/useCourses";
+import { useCurrentUser } from "~/api/queries/useCurrentUser";
+import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { toast } from "~/components/ui/use-toast";
 
 const OrganizationSettings = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-
   const { t } = useTranslation();
+  const changeCertificateBackgroundMutation = useChangeCertificateBackground();
+  const { data: currentUser } = useCurrentUser();
+  const { data } = useCourses();
+  const courses = (data ?? []).filter((course) => course.authorId === currentUser?.id);
+  const isUploading = changeCertificateBackgroundMutation.isPending;
 
   const handleFileSelect = (file: File) => {
     if (file.type === "image/png" || file.type === "image/svg+xml") {
@@ -17,37 +25,34 @@ const OrganizationSettings = () => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileSelect(file);
+  const handleBulkUpload = async () => {
+    if (!selectedFile) {
+      console.error("No file selected.");
+      return;
+    }
+    if (!courses || courses.length === 0) {
+      console.error("No courses found.");
+      return;
+    }
+    try {
+      for (const course of courses) {
+        await changeCertificateBackgroundMutation.mutateAsync({
+          id: course.id,
+          image: selectedFile,
+        });
+      }
+      toast({
+        variant: "default",
+        description: t("organizationSettingsView.toast.uploadedSuccessfully"),
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: t("organizationSettingsView.toast.failedToUpload"),
+      });
+      console.error("Error uploading certificate background:", error);
+    }
   };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFileSelect(file);
-  };
-
-  const handleDivClick = () => {
-    document.getElementById("file-upload")?.click();
-  };
-
-  // TODO implement file upload logic when aws s3 resource is ready
-
-  // const handleUpload = () => {
-  //   if (selectedFile) {
-  //   }
-  // };
 
   return (
     <div className="p-6">
@@ -55,60 +60,26 @@ const OrganizationSettings = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("")}</CardTitle>
+          <CardTitle></CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full">
-            <label className="mb-4 block text-sm font-medium">
+          <div className="h-screen w-full">
+            <label className="mb-4 block font-medium">
               {t("organizationSettingsView.subHeader")}
             </label>
-
-            <div
-              className={`size-full cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
-                isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-              }`}
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onClick={handleDivClick}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleDivClick();
-                }
-              }}
-            >
-              <input
-                type="file"
-                accept=".png,.svg"
-                onChange={handleInputChange}
-                className="hidden"
-                id="file-upload"
-              />
-
-              <div className="space-y-2">
-                <div className="text-gray-500">
-                  {selectedFile ? (
-                    <p>
-                      {t("organizationSettingsView.other.selected")} {selectedFile.name}
-                    </p>
-                  ) : (
-                    <>
-                      <p>{t("adminScorm.other.uploadFileHeader")}</p>
-                      <p className="text-xs">{t("organizationSettingsView.other.fileExtension")}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
+            <ImageUploadInput
+              field={{ value: selectedFile?.name }}
+              handleImageUpload={handleFileSelect}
+              isUploading={isUploading}
+              imageUrl={selectedFile ? URL.createObjectURL(selectedFile) : undefined}
+            />
             {selectedFile && (
               <button
-                // onClick={handleUpload}
-                className="mt-4 rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+                onClick={handleBulkUpload}
+                disabled={isUploading || !courses || courses.length === 0}
+                className="mt-4 rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {t("uploadFile.header")}
+                {t("common.other.uploadingImage")}
               </button>
             )}
           </div>

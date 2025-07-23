@@ -1,0 +1,1 @@
+ALTER TABLE "courses" ADD COLUMN "certificate_background_s3_key" varchar(200);

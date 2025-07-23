@@ -13,6 +13,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -49,6 +50,7 @@ import {
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
+import { ValidateMultipartPipe } from "src/utils/pipes/apps/api/src/utils/pipes/validateMultipartPipe";
 
 import {
   CreateCoursesEnrollment,
@@ -254,6 +256,34 @@ export class CourseController {
     return new BaseResponse({ id, message: "Pomyślnie utworzono kurs" });
   }
 
+  @Patch("update-certificate-background")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @UseInterceptors(FileInterceptor("image"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      anyOf: [
+        {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            image: { type: "string", format: "binary" },
+          },
+        },
+      ],
+    },
+  })
+  async updateCertificateBackground(
+    @Body(new ValidateMultipartPipe(Type.Object({ id: Type.Optional(Type.String()) })))
+    body: { id: string },
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<void> {
+    await this.courseService.uploadCertificateBackgroundImage(
+      body.id as unknown as UUIDType,
+      image,
+    );
+  }
+
   @Patch(":id")
   @UseInterceptors(FileInterceptor("image"))
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
@@ -275,17 +305,29 @@ export class CourseController {
     return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
   }
 
+  @Get("certificate-background/:id")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(Type.Object({ url: Type.String() })),
+  })
+  async getCertificateBackground(
+    @Param("id") id: UUIDType,
+  ): Promise<BaseResponse<{ url: string }>> {
+    const url = await this.courseService.getCertificateBackgroundImage(id);
+    return new BaseResponse({ url });
+  }
+
   @Patch("update-has-certificate/:id")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [
-      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", name: "id", schema: UUIDSchema },
       { type: "body", schema: Type.Object({ hasCertificate: Type.Boolean() }) },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async updateHasCertificate(
-    @Param("id") id: UUIDType,
+    @Body() id: UUIDType,
     @Body() body: { hasCertificate: boolean },
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.updateHasCertificate(id, body.hasCertificate);

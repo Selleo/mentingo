@@ -60,7 +60,6 @@ export default function ProfilePage() {
         <Loader />
       </div>
     );
-
   return (
     <PageWrapper role="main">
       {certificatePreview.isOpen && (
@@ -73,14 +72,13 @@ export default function ProfilePage() {
             }
           }}
         >
-          <div>
-            <CertificatePreview
-              studentName={certificatePreview.certData?.fullName || ""}
-              courseName={certificatePreview.certData?.courseTitle || ""}
-              completionDate={certificatePreview.completionDate}
-              onClose={handleCloseCertificatePreview}
-            />
-          </div>
+          <CertificatePreview
+            studentName={certificatePreview.certData?.fullName || ""}
+            courseName={certificatePreview.certData?.courseTitle || ""}
+            completionDate={certificatePreview.completionDate}
+            courseId={certificatePreview.certData?.courseId}
+            onClose={handleCloseCertificatePreview}
+          />
         </button>
       )}
       <ProfilePageBreadcrumbs

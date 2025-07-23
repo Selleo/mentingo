@@ -92,6 +92,7 @@ const Certificate = ({
         studentName={certData?.fullName || ""}
         courseName={certData?.courseTitle || courseName}
         completionDate={courseCompletionDate}
+        courseId={certData?.courseId}
       />
       <div className="grid grid-cols-1 gap-4">
         <div className="relative">

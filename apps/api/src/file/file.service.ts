@@ -46,9 +46,7 @@ export class FileService {
     try {
       const fileExtension = file.originalname.split(".").pop();
       const fileKey = `${resource}/${crypto.randomUUID()}.${fileExtension}`;
-
       await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
-
       const fileUrl = await this.s3Service.getSignedUrl(fileKey);
 
       return { fileKey, fileUrl };

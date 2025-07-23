@@ -339,6 +339,7 @@ export interface GetAllCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    certificateBackgroundUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -367,6 +368,7 @@ export interface GetStudentCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    certificateBackgroundUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -408,6 +410,7 @@ export interface GetAvailableCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    certificateBackgroundUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId?: string;
@@ -438,6 +441,7 @@ export interface GetContentCreatorCoursesResponse {
     id: string;
     title: string;
     thumbnailUrl: string | null;
+    certificateBackgroundUrl?: string | null;
     description: string;
     /** @format uuid */
     authorId: string;
@@ -597,6 +601,7 @@ export type CreateCourseBody = {
   description: string;
   isPublished?: boolean;
   thumbnailS3Key?: string;
+  certificateBackgroundS3Key?: string;
   priceInCents?: number;
   currency?: string;
   /** @format uuid */
@@ -634,9 +639,14 @@ export interface UpdateCourseResponse {
   };
 }
 
-export interface UpdateHasCertificateBody {
-  hasCertificate: boolean;
+export interface GetCertificateBackgroundResponse {
+  data: {
+    url: string;
+  };
 }
+
+/** @format uuid */
+export type Id = string;
 
 export interface UpdateHasCertificateResponse {
   data: {
@@ -2384,6 +2394,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerUpdateCertificateBackground
+     * @request PATCH:/api/course/update-certificate-background
+     */
+    courseControllerUpdateCertificateBackground: (
+      data: {
+        /** @format uuid */
+        id?: string;
+        /** @format binary */
+        image?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/update-certificate-background`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerUpdateCourse
      * @request PATCH:/api/course/{id}
      */
@@ -2404,12 +2437,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerGetCertificateBackground
+     * @request GET:/api/course/certificate-background/{id}
+     */
+    courseControllerGetCertificateBackground: (id: string, params: RequestParams = {}) =>
+      this.request<GetCertificateBackgroundResponse, any>({
+        path: `/api/course/certificate-background/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerUpdateHasCertificate
      * @request PATCH:/api/course/update-has-certificate/{id}
      */
     courseControllerUpdateHasCertificate: (
       id: string,
-      data: UpdateHasCertificateBody,
+      data: {
+        hasCertificate: boolean;
+      },
       params: RequestParams = {},
     ) =>
       this.request<UpdateHasCertificateResponse, any>({

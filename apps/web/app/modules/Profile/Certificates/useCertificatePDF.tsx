@@ -8,6 +8,7 @@ interface CertificateToPDFProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
+  courseId?: string;
 }
 
 const useCertificatePDF = () => {
@@ -38,17 +39,30 @@ const useCertificatePDF = () => {
     studentName,
     courseName,
     completionDate,
-  }: CertificateToPDFProps) => (
-    <div style={{ position: "fixed", top: 0, left: 0, opacity: 0, pointerEvents: "none" }}>
-      <div ref={targetRef}>
-        <CertificateContent
-          studentName={studentName}
-          courseName={courseName}
-          completionDate={completionDate}
-        />
+    courseId,
+  }: CertificateToPDFProps) => {
+    if (!studentName || !courseName || !completionDate || !courseId) {
+      throw new Error("Missing required information for Certificate");
+    }
+
+    return (
+      <div
+        className="certificate-background"
+        style={{ position: "fixed", top: 0, left: 0, opacity: 0, pointerEvents: "none" }}
+      >
+        <div style={{ position: "relative" }} ref={targetRef}>
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <CertificateContent
+              studentName={studentName}
+              courseName={courseName}
+              completionDate={completionDate}
+              courseId={courseId}
+            />
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
   return { downloadCertificatePdf, HiddenCertificate };
 };
 export default useCertificatePDF;

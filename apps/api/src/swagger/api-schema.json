@@ -1513,6 +1513,41 @@
         }
       }
     },
+    "/api/course/update-certificate-background": {
+      "patch": {
+        "operationId": "CourseController_updateCertificateBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "image": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -1550,9 +1585,9 @@
         }
       }
     },
-    "/api/course/update-has-certificate/{id}": {
-      "patch": {
-        "operationId": "CourseController_updateHasCertificate",
+    "/api/course/certificate-background/{id}": {
+      "get": {
+        "operationId": "CourseController_getCertificateBackground",
         "parameters": [
           {
             "name": "id",
@@ -1564,12 +1599,29 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateBackgroundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/update-has-certificate/{id}": {
+      "patch": {
+        "operationId": "CourseController_updateHasCertificate",
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateHasCertificateBody"
+                "$ref": "#/components/schemas/id"
               }
             }
           }
@@ -3932,6 +3984,16 @@
                     }
                   ]
                 },
+                "certificateBackgroundUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "description": {
                   "type": "string"
                 },
@@ -4031,6 +4093,16 @@
                   "type": "string"
                 },
                 "thumbnailUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "certificateBackgroundUrl": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -4201,6 +4273,16 @@
                     }
                   ]
                 },
+                "certificateBackgroundUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "description": {
                   "type": "string"
                 },
@@ -4307,6 +4389,16 @@
                   "type": "string"
                 },
                 "thumbnailUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "certificateBackgroundUrl": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -5024,6 +5116,9 @@
               "thumbnailS3Key": {
                 "type": "string"
               },
+              "certificateBackgroundS3Key": {
+                "type": "string"
+              },
               "priceInCents": {
                 "type": "integer"
               },
@@ -5141,16 +5236,28 @@
           "data"
         ]
       },
-      "UpdateHasCertificateBody": {
+      "GetCertificateBackgroundResponse": {
         "type": "object",
         "properties": {
-          "hasCertificate": {
-            "type": "boolean"
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ]
           }
         },
         "required": [
-          "hasCertificate"
+          "data"
         ]
+      },
+      "id": {
+        "format": "uuid",
+        "type": "string"
       },
       "UpdateHasCertificateResponse": {
         "type": "object",

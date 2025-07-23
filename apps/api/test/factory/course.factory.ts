@@ -69,6 +69,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       title: faker.commerce.department() + randomHex,
       description: faker.commerce.productDescription(),
       thumbnailS3Key: faker.system.directoryPath(),
+      certificateBackgroundS3Key: faker.system.directoryPath(),
       isPublished: true,
       hasCertificate: false,
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
