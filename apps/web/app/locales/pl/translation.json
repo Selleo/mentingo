@@ -40,7 +40,8 @@
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka"
     },
-    "continueWithGoogle": "Kontynuuj z użyciem Google"
+    "continueWithGoogle": "Kontynuuj z użyciem Google",
+    "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",

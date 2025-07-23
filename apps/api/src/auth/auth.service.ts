@@ -36,6 +36,7 @@ import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
+import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Injectable()
 export class AuthService {
@@ -358,18 +359,18 @@ export class AuthService {
     });
   }
 
-  public async handleGoogleCallback(googleUser: GoogleUserType) {
-    if (!googleUser) {
-      throw new UnauthorizedException("Google user data is missing");
+  public async handleProviderLoginCallback(userCallback: MicrosoftUserType | GoogleUserType) {
+    if (!userCallback) {
+      throw new UnauthorizedException("User data is missing");
     }
 
-    let [user] = await this.db.select().from(users).where(eq(users.email, googleUser.email));
+    let [user] = await this.db.select().from(users).where(eq(users.email, userCallback.email));
 
     if (!user) {
       user = await this.userService.createUser({
-        email: googleUser.email,
-        firstName: googleUser.firstName,
-        lastName: googleUser.lastName,
+        email: userCallback.email,
+        firstName: userCallback.firstName,
+        lastName: userCallback.lastName,
         role: USER_ROLES.STUDENT,
       });
     }

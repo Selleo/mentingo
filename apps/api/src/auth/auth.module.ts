@@ -15,6 +15,7 @@ import { ResetPasswordService } from "./reset-password.service";
 import { GoogleStrategy } from "./strategy/google.strategy";
 import { JwtStrategy } from "./strategy/jwt.strategy";
 import { LocalStrategy } from "./strategy/local.strategy";
+import { MicrosoftStrategy } from "./strategy/microsoft.strategy";
 import { TokenService } from "./token.service";
 
 @Module({
@@ -32,6 +33,7 @@ import { TokenService } from "./token.service";
     FileService,
     S3Service,
     ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
+    ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
     SettingsService,
   ],
   exports: [],

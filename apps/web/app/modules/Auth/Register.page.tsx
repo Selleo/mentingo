@@ -26,6 +26,7 @@ const registerSchema = z.object({
 });
 
 const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
+const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
@@ -99,7 +100,12 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          {isGoogleOAuthEnabled && <SocialLogin isGoogleOAuthEnabled={isGoogleOAuthEnabled} />}
+          {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
+            <SocialLogin
+              isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+              isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+            />
+          )}
 
           <div className="mt-4 text-center text-sm">
             {t("registerView.other.alreadyHaveAccount")}{" "}

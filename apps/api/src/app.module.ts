@@ -7,12 +7,14 @@ import { ScheduleModule } from "@nestjs/schedule";
 
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
+import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
 import awsConfig from "./common/configuration/aws";
 import database from "./common/configuration/database";
 import emailConfig from "./common/configuration/email";
 import jwtConfig from "./common/configuration/jwt";
+import microsoftConfig from "./common/configuration/microsoft";
 import redisConfig from "./common/configuration/redis";
 import s3Config from "./common/configuration/s3";
 import stripeConfig from "./common/configuration/stripe";
@@ -40,7 +42,16 @@ import { UserModule } from "./user/user.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [database, jwtConfig, emailConfig, awsConfig, s3Config, stripeConfig, redisConfig],
+      load: [
+        database,
+        jwtConfig,
+        emailConfig,
+        awsConfig,
+        s3Config,
+        microsoftConfig,
+        stripeConfig,
+        redisConfig,
+      ],
       isGlobal: true,
     }),
     DrizzlePostgresModule.registerAsync({
@@ -105,6 +116,7 @@ import { UserModule } from "./user/user.module";
       useClass: StagingGuard,
     },
     ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
+    ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
   ],
 })
 export class AppModule {}

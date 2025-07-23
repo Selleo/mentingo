@@ -191,6 +191,28 @@
         }
       }
     },
+    "/api/auth/microsoft": {
+      "get": {
+        "operationId": "AuthController_microsoftAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/microsoft/callback": {
+      "get": {
+        "operationId": "AuthController_microsoftAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",

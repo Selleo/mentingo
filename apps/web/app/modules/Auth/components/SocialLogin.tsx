@@ -1,13 +1,20 @@
 import { useTranslation } from "react-i18next";
 
-import { GoogleOAuthButton } from "~/components/Auth/GoogleOAuthButton";
+import { ProviderOAuthLoginButton } from "~/components/Auth/ProviderOAuthLoginButton";
 
 interface SocialLoginProps {
   isGoogleOAuthEnabled?: boolean;
+  isMicrosoftOAuthEnabled?: boolean;
 }
 
-export function SocialLogin({ isGoogleOAuthEnabled }: SocialLoginProps) {
+export function SocialLogin({ isGoogleOAuthEnabled, isMicrosoftOAuthEnabled }: SocialLoginProps) {
   const { t } = useTranslation();
+
+  const handleGoogleSignIn = () =>
+    (window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`);
+
+  const handleMicrosoftSignIn = () =>
+    (window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/microsoft`);
 
   return (
     <>
@@ -22,7 +29,20 @@ export function SocialLogin({ isGoogleOAuthEnabled }: SocialLoginProps) {
         </div>
       </div>
 
-      {isGoogleOAuthEnabled && <GoogleOAuthButton />}
+      {isGoogleOAuthEnabled && (
+        <ProviderOAuthLoginButton
+          iconName="Google"
+          buttonTextTranslationKey="common.continueWithGoogle"
+          handleSignIn={handleGoogleSignIn}
+        />
+      )}
+      {isMicrosoftOAuthEnabled && (
+        <ProviderOAuthLoginButton
+          iconName="Microsoft"
+          buttonTextTranslationKey="common.continueWithMicrosoft"
+          handleSignIn={handleMicrosoftSignIn}
+        />
+      )}
     </>
   );
 }
