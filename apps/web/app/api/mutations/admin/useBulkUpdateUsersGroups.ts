@@ -2,37 +2,38 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
-import { ApiClient } from "~/api/api-client";
-import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
-import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
-type GroupBody = {
-  name: string;
-  description?: string;
+import { ApiClient } from "../../api-client";
+import { queryClient } from "../../queryClient";
+
+import type { BulkAssignUsersToGroupBody } from "../../generated-api";
+
+type BulkAssignUsersToGroups = {
+  data: BulkAssignUsersToGroupBody;
 };
 
-export function useUpdateGroup(groupId: string) {
-  const { t } = useTranslation();
+export function useBulkUpdateUsersGroups() {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (input: GroupBody) => {
-      const { data } = await ApiClient.api.groupControllerUpdateGroup(groupId, input);
+    mutationFn: async (options: BulkAssignUsersToGroups) => {
+      const response = await ApiClient.api.userControllerBulkAssignUsersToGroup({
+        userIds: options.data.userIds,
+        groupId: options.data.groupId,
+      });
 
-      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: ["users"] });
 
-      return data;
+      return response.data;
     },
-
     onSuccess: () => {
       toast({
         variant: "default",
-        description: t("adminGroupsView.updateGroup.groupUpdatedSuccessfully"),
+        description: t("changeUserInformationView.toast.updatedSelectedUsersSuccessfully"),
       });
     },
-
     onError: (error) => {
       if (error instanceof AxiosError) {
         return toast({

@@ -13,6 +13,8 @@ export const enrolledStudentSchema = Type.Object({
   lastName: Type.String(),
   email: Type.String(),
   enrolledAt: Type.Union([Type.String(), Type.Null()]),
+  groupId: Type.Union([UUIDSchema, Type.Null()]),
+  groupName: Type.Union([Type.String(), Type.Null()]),
   id: UUIDSchema,
 });
 

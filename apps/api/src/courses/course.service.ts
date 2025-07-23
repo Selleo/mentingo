@@ -39,6 +39,8 @@ import {
   chapters,
   courses,
   coursesSummaryStats,
+  groups,
+  groupUsers,
   lessons,
   questions,
   quizAttempts,
@@ -301,12 +303,16 @@ export class CourseService {
         email: users.email,
         id: users.id,
         enrolledAt: studentCourses.createdAt,
+        groupId: groups.id,
+        groupName: groups.name,
       })
       .from(users)
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
       )
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT)))
       .orderBy(sortOrder(studentCourses.createdAt));
 

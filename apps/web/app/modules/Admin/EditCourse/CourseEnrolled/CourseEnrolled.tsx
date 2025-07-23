@@ -108,6 +108,13 @@ export const CourseEnrolled = (): ReactElement => {
       ),
     },
     {
+      accessorKey: "groupName",
+      header: ({ column }) => (
+        <SortButton column={column}>{t("adminUsersView.field.group")}</SortButton>
+      ),
+      cell: ({ row }) => row.original.groupName,
+    },
+    {
       accessorKey: "enrolledAt",
       header: ({ column }) => (
         <SortButton<EnrolledStudent> column={column}>
