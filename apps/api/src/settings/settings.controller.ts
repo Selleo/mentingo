@@ -11,13 +11,20 @@ import { settingsSchema } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
+import type { SettingsResponse } from "./schemas/settings.schema";
+
 @Controller("settings")
 @UseGuards(RolesGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Get()
-  async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
+  @Validate({
+    response: baseResponse(settingsSchema),
+  })
+  async getUserSettings(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<SettingsResponse>> {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
@@ -29,13 +36,15 @@ export class SettingsController {
   async updateUserSettings(
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
-  ) {
+  ): Promise<BaseResponse<SettingsResponse>> {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
   @Patch("admin-new-user-notification")
   @Roles(USER_ROLES.ADMIN)
-  async updateAdminNewUserNotification(@CurrentUser("userId") userId: UUIDType) {
+  async updateAdminNewUserNotification(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<SettingsResponse>> {
     const result = await this.settingsService.updateAdminNewUserNotification(userId);
     return new BaseResponse(result);
   }

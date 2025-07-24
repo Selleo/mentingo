@@ -19,12 +19,12 @@ export const settingsJSONContentSchema = Type.Union([
 ]);
 
 export const settingsSchema = Type.Object({
-  userId: UUIDSchema,
+  userId: Type.Union([UUIDSchema, Type.Null()]),
   settings: Type.Union([studentSettingsJSONContentSchema, adminSettingsJSONContentSchema]),
   createdAt: Type.Union([Type.String(), Type.Null()]),
 });
 
-export type SettingsSchema = Static<typeof settingsSchema>;
+export type SettingsResponse = Static<typeof settingsSchema>;
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;

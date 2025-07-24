@@ -3015,7 +3015,13 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserSettingsResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -9996,6 +10002,75 @@
           "data"
         ]
       },
+      "GetUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "settings": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
+                  }
+                ]
+              },
+              "createdAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "userId",
+              "settings",
+              "createdAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UpdateUserSettingsBody": {
         "anyOf": [
           {
@@ -10026,8 +10101,15 @@
             "type": "object",
             "properties": {
               "userId": {
-                "format": "uuid",
-                "type": "string"
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "settings": {
                 "anyOf": [

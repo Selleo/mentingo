@@ -1,4 +1,4 @@
-import { useUserSettings } from "~/api/queries/useUserSettings";
+import { useAdminSettings } from "~/api/queries/useAdminSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
 
@@ -10,7 +10,7 @@ import UserForm from "./forms/UserForm";
 
 export default function SettingsPage() {
   const { isContentCreator, isAdmin } = useUserRole();
-  const { data: settings } = useUserSettings();
+  const { data: adminSettings } = useAdminSettings();
 
   return (
     <PageWrapper className="flex flex-col gap-6 *:h-min">
@@ -18,7 +18,7 @@ export default function SettingsPage() {
       <UserForm />
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
-      {isAdmin && settings && <NotificationPreferencesForm settings={settings} />}
+      {isAdmin && adminSettings && <NotificationPreferencesForm settings={adminSettings} />}
     </PageWrapper>
   );
 }
