@@ -22,6 +22,7 @@ export class S3Service {
         accessKeyId: config.accessKeyId,
         secretAccessKey: config.secretAccessKey,
       },
+      forcePathStyle: true,
       ...(config.endpoint && { endpoint: config.endpoint }),
     });
 
