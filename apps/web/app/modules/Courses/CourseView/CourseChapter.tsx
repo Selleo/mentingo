@@ -1,3 +1,5 @@
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { Link, useNavigate } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { CardBadge } from "~/components/CardBadge";
@@ -8,6 +10,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipTrigger, TooltipContent } from "~/components/ui/tooltip";
 import { formatWithPlural } from "~/lib/utils";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
@@ -17,9 +21,11 @@ import type { GetCourseResponse } from "~/api/generated-api";
 type CourseChapterProps = {
   chapter: GetCourseResponse["data"]["chapters"][0];
   enrolled: GetCourseResponse["data"]["enrolled"];
+  course: GetCourseResponse["data"];
 };
 
-export const CourseChapter = ({ chapter }: CourseChapterProps) => {
+export const CourseChapter = ({ chapter, enrolled, course }: CourseChapterProps) => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
@@ -31,6 +37,11 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
     t("courseChapterView.other.quiz"),
     t("courseChapterView.other.quizzes"),
   );
+
+  const isAllLessonsCompleted = chapter.completedLessonCount === chapter.lessonCount;
+  const isAllLessonsNotStarted = chapter.completedLessonCount === 0;
+  const firstInProgressLesson = chapter.lessons.find((lesson) => lesson.status === "in_progress");
+  const firstNotStartedLesson = chapter.lessons.find((lesson) => lesson.status === "not_started");
 
   return (
     <Accordion type="single" collapsible>
@@ -86,12 +97,82 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="divide-y divide-neutral-200 rounded-b-lg border-x border-b border-primary-500 pb-4 pl-14 pt-3">
+              <div className="divide-y divide-neutral-200 rounded-b-lg border-x border-b border-primary-500">
                 {chapter?.lessons?.map((lesson) => {
                   if (!lesson) return null;
-
-                  return <CourseChapterLesson key={lesson.id} lesson={lesson} />;
+                  if (enrolled || chapter.isFreemium) {
+                    return (
+                      <Link to={`/course/${course.id}/lesson/${lesson.id}`} key={lesson.id}>
+                        <div className="pb-4 pl-14 pt-3 hover:bg-neutral-50">
+                          <CourseChapterLesson lesson={lesson} />
+                        </div>
+                      </Link>
+                    );
+                  } else {
+                    const tooltipMessage =
+                      !enrolled && course.priceInCents === 0
+                        ? t("studentChapterView.other.enrollmentRequired")
+                        : t("studentChapterView.other.purchaseRequired");
+                    return (
+                      <TooltipProvider key={lesson.id}>
+                        <Tooltip key={lesson.id}>
+                          <TooltipTrigger asChild>
+                            <div className="cursor-not-allowed pb-4 pl-14 pt-3 opacity-60">
+                              <CourseChapterLesson lesson={lesson} />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>{tooltipMessage}</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    );
+                  }
                 })}
+                {course.enrolled ||
+                  (chapter.isFreemium && (
+                    <>
+                      {isAllLessonsCompleted && (
+                        <Button
+                          className="my-3 ml-14 flex gap-2 px-5"
+                          onClick={() => {
+                            navigate(
+                              `/course/${course.id}/lesson/${course.chapters[chapter.displayOrder].lessons[0].id}`,
+                            );
+                          }}
+                        >
+                          <Icon name="Play" className="size-4 h-auto" />
+                          {t("studentChapterView.button.open")}
+                        </Button>
+                      )}
+                      {(firstInProgressLesson ||
+                        (firstNotStartedLesson && (chapter.completedLessonCount ?? 0) > 0)) && (
+                        <Button
+                          className="my-3 ml-14 flex gap-2 px-5"
+                          onClick={() => {
+                            const targetLesson = firstInProgressLesson || firstNotStartedLesson;
+                            if (targetLesson) {
+                              navigate(`/course/${course.id}/lesson/${targetLesson.id}`);
+                            }
+                          }}
+                        >
+                          <Icon name="Play" className="size-4 h-auto" />
+                          {t("studentChapterView.button.continue")}
+                        </Button>
+                      )}
+                      {isAllLessonsNotStarted && (
+                        <Button
+                          className="my-3 ml-14 flex gap-2 px-5"
+                          onClick={() => {
+                            navigate(
+                              `/course/${course.id}/lesson/${course.chapters[chapter.displayOrder].lessons[0].id}`,
+                            );
+                          }}
+                        >
+                          <Icon name="Play" className="size-4 h-auto" />
+                          {t("studentChapterView.button.playChapter")}
+                        </Button>
+                      )}
+                    </>
+                  ))}
               </div>
             </AccordionContent>
           </div>

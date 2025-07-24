@@ -44,7 +44,12 @@ export default function CourseViewPage() {
               if (!chapter) return null;
 
               return (
-                <CourseChapter chapter={chapter} key={chapter.id} enrolled={course.enrolled} />
+                <CourseChapter
+                  chapter={chapter}
+                  key={chapter.id}
+                  course={course}
+                  enrolled={course.enrolled}
+                />
               );
             })}
           </div>

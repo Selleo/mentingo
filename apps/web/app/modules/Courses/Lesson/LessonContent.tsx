@@ -16,10 +16,11 @@ import Presentation from "../../../components/Presentation/Presentation";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 
-import type { GetLessonByIdResponse } from "~/api/generated-api";
+import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
 
 type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
+  course: GetCourseResponse["data"];
   lessonsAmount: number;
   handlePrevious: () => void;
   handleNext: () => void;
@@ -30,16 +31,31 @@ type LessonContentProps = {
 
 export const LessonContent = ({
   lesson,
+  course,
   lessonsAmount,
   handlePrevious,
   handleNext,
   isFirstLesson,
   lessonLoading,
+  isLastLesson
 }: LessonContentProps) => {
+  const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
+
+  const currentChapterIndex = course.chapters.findIndex((chapter) =>
+    chapter.lessons.some((l) => l.id === lesson.id),
+  );
+  const currentLessonIndex = course.chapters[currentChapterIndex]?.lessons.findIndex(
+    (l) => l.id === lesson.id,
+  );
+
+  const currentChapter = course.chapters[currentChapterIndex];
+  const nextChapter = course.chapters[currentChapterIndex + 1];
+  const prevChapter = course.chapters[currentChapterIndex - 1];
+  const totalLessons = currentChapter.lessons.length;
 
   useEffect(() => {
     if (isAdminLike) return;
@@ -72,7 +88,6 @@ export const LessonContent = ({
       ))
       .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
       .otherwise(() => null);
-
   const handleMarkLessonAsComplete = () => {
     handleNext();
 
@@ -80,8 +95,30 @@ export const LessonContent = ({
     if (lesson.type == LessonType.AI_MENTOR) return;
 
     markLessonAsCompleted({ lessonId: lesson.id });
+    if (!course.enrolled && course.priceInCents !== 0) {
+      setIsNextDisabled(true);
+    }
   };
-
+  useEffect(() => {
+    if (currentLessonIndex === totalLessons - 1) {
+      if (!nextChapter?.isFreemium) {
+        setIsNextDisabled(true);
+      }
+      if (currentLessonIndex === 0) {
+        if (!prevChapter?.isFreemium) {
+          setIsPreviousDisabled(true);
+        }
+      }
+    }
+  }, [
+    nextChapter?.isFreemium,
+    prevChapter?.isFreemium,
+    totalLessons,
+    currentLessonIndex,
+    currentChapterIndex,
+    course,
+    isLastLesson,
+  ]);
   return (
     <div className="flex size-full flex-col items-center py-10">
       <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
@@ -100,6 +137,7 @@ export const LessonContent = ({
               <Button
                 variant="outline"
                 className="w-full gap-x-1 sm:w-auto"
+                disabled={isPreviousDisabled}
                 onClick={handlePrevious}
               >
                 <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />

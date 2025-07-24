@@ -5234,6 +5234,10 @@
                               {
                                 "const": "completed",
                                 "type": "string"
+                              },
+                              {
+                                "const": "blocked",
+                                "type": "string"
                               }
                             ]
                           },
@@ -5276,6 +5280,10 @@
                         },
                         {
                           "const": "completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "blocked",
                           "type": "string"
                         }
                       ]
@@ -5696,6 +5704,10 @@
                         },
                         {
                           "const": "completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "blocked",
                           "type": "string"
                         }
                       ]
@@ -6208,6 +6220,10 @@
                           {
                             "const": "completed",
                             "type": "string"
+                          },
+                          {
+                            "const": "blocked",
+                            "type": "string"
                           }
                         ]
                       },
@@ -6433,6 +6449,10 @@
                         {
                           "const": "completed",
                           "type": "string"
+                        },
+                        {
+                          "const": "blocked",
+                          "type": "string"
                         }
                       ]
                     },
@@ -6475,6 +6495,10 @@
                   },
                   {
                     "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "blocked",
                     "type": "string"
                   }
                 ]
@@ -6808,6 +6832,10 @@
                   },
                   {
                     "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "blocked",
                     "type": "string"
                   }
                 ]
@@ -7167,6 +7195,10 @@
                   },
                   {
                     "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "blocked",
                     "type": "string"
                   }
                 ]

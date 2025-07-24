@@ -22,6 +22,7 @@ const buttonVariants = cva("w-full transition", {
       not_started: "border-primary-200 hover:border-primary-500",
       in_progress: "border-secondary-200 hover:border-secondary-500",
       completed: "border-success-500",
+      blocked: "border-neutral-200 hover:border-neutral-500",
     },
   },
 });
@@ -40,6 +41,7 @@ const cardBadgeIcon = {
   completed: "InputRoundedMarkerSuccess",
   in_progress: "InProgress",
   not_started: "NotStartedRounded",
+  blocked: "Blocked",
 } as const;
 
 const cardBadgeVariant: Record<string, "successOutlined" | "secondary" | "default"> = {

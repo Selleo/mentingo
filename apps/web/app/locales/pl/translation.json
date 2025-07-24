@@ -1145,6 +1145,15 @@
     "chapterProgress": {
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
+    },
+    "button": {
+      "open": "Otwórz",
+      "continue": "Kontynuuj",
+      "playChapter": "Odtwórz rozdział"
+    },
+    "other": {
+      "enrollmentRequired": "Zapisz się na kurs, aby otworzyć.",
+      "purchaseRequired": "Odblokuj tę lekcję, kupując kurs."
     }
   },
 

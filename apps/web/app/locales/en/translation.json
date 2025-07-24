@@ -1139,6 +1139,15 @@
     "chapterProgress": {
       "header": "Table of content:",
       "courseProgress": "Course progress"
+    },
+    "button": {
+      "open": "Open",
+      "continue": "Continue",
+      "playChapter": "Play chapter"
+    },
+    "other": {
+      "enrollmentRequired": "Enroll in the course to open.",
+      "purchaseRequired": "Unlock this lesson by purchasing the course."
     }
   },
 
