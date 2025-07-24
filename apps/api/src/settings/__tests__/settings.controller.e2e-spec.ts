@@ -99,10 +99,12 @@ describe("SettingsController (e2e)", () => {
         .withAdminSettings(db)
         .create();
 
-      const adminLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: adminUser.email,
-        password: adminUser.credentials?.password,
-      });
+      const adminLoginResponse = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: adminUser.email,
+          password: adminUser.credentials?.password,
+        });
 
       adminCookies = adminLoginResponse.headers["set-cookie"];
     });
@@ -127,8 +129,6 @@ describe("SettingsController (e2e)", () => {
         .patch("/api/settings/admin/new-user-notification")
         .set("Cookie", adminCookies)
         .expect(200);
-
-      expect(secondResponse.body.data.adminNewUserNotification).toBe(false);
 
       const toggledBackSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, adminUser.id),

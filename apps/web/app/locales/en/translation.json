@@ -1127,6 +1127,18 @@
     }
   },
 
+  "settings": {
+    "title": "Settings",
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "tabs": {
+      "account": "Account",
+      "organization": "Organization"
+    }
+  },
+
   "adminPreferences": {
     "header": "Administrator Preferences",
     "subHeader": "Manage your administrative preferences and settings",
