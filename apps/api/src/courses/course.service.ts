@@ -452,7 +452,8 @@ export class CourseService {
         description: sql<string>`${courses.description}`,
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        enrolled:
+          sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END` as any,
         isPublished: courses.isPublished,
         isScorm: courses.isScorm,
         priceInCents: courses.priceInCents,
@@ -476,6 +477,7 @@ export class CourseService {
 
     if (!course) throw new NotFoundException("Course not found");
 
+    const isEnrolled = !!course.enrolled;
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
@@ -518,6 +520,7 @@ export class CourseService {
                   ${lessons.displayOrder} AS "displayOrder",
                   ${lessons.isExternal} AS "isExternal",
                   CASE
+                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${PROGRESS_STATUSES.BLOCKED}
                     WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN  ${PROGRESS_STATUSES.COMPLETED}
                     WHEN ${studentLessonProgress.completedAt} IS NULL
                       AND ${studentLessonProgress.completedQuestionCount} > 0 THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
@@ -538,7 +541,8 @@ export class CourseService {
                   ${lessons.displayOrder},
                   ${lessons.title},
                   ${studentLessonProgress.completedAt},
-                  ${studentLessonProgress.completedQuestionCount}
+                  ${studentLessonProgress.completedQuestionCount},
+                  ${chapters.isFreemium}
                 ORDER BY ${lessons.displayOrder}
               ) AS lesson_data
             ),
