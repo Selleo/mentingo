@@ -13,9 +13,14 @@ export const adminSettingsJSONContentSchema = Type.Object({
   adminNewUserNotification: Type.Boolean(),
 });
 
+export const globalSettingsJSONContentSchema = Type.Object({
+  platformLogoS3Key: Type.Optional(Type.String()),
+});
+
 export const settingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
+  globalSettingsJSONContentSchema,
 ]);
 
 export const settingsSchema = Type.Object({
@@ -28,3 +33,4 @@ export type SettingsSchema = Static<typeof settingsSchema>;
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;
+export type GlobalSettingsJSONContentSchema = Static<typeof globalSettingsJSONContentSchema>;

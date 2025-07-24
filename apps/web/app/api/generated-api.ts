@@ -22,10 +22,6 @@ export interface RegisterBody {
    * @maxLength 64
    */
   lastName: string;
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   password: string;
 }
 
@@ -63,31 +59,12 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     archived: boolean;
-    settings: UserSettings;
   };
 }
 
 export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
-
-export interface AdminSettings {
-  adminNewUserNotification: boolean;
-}
-
-export interface UserSettings extends AdminSettings {
-  language: string;
-}
-
-export interface SettingsResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
-    settings: UserSettings;
-  };
-}
 
 export interface CurrentUserResponse {
   data: {
@@ -111,20 +88,12 @@ export interface ForgotPasswordBody {
 }
 
 export interface CreatePasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   password: string;
   /** @minLength 1 */
   createToken: string;
 }
 
 export interface ResetPasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   newPassword: string;
   /** @minLength 1 */
   resetToken: string;
@@ -238,10 +207,6 @@ export interface AdminUpdateUserResponse {
 }
 
 export interface ChangePasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   newPassword: string;
   /**
    * @minLength 8
@@ -282,6 +247,11 @@ export interface CreateUserResponse {
     id: string;
     message: string;
   };
+}
+
+export interface FileUploadResponse {
+  fileKey: string;
+  fileUrl: string;
 }
 
 export interface GetAllCategoriesResponse {
@@ -684,11 +654,6 @@ export interface DeleteManyCoursesBody {
 export type DeleteManyCoursesResponse = null;
 
 export type UnenrollCourseResponse = null;
-
-export interface FileUploadResponse {
-  fileKey: string;
-  fileUrl: string;
-}
 
 export interface GetUserStatisticsResponse {
   data: {
@@ -1593,6 +1558,53 @@ export interface GetScormMetadataResponse {
   };
 }
 
+export interface GetUserSettingsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    settings:
+      | {
+          language: string;
+        }
+      | {
+          language: string;
+          adminNewUserNotification: boolean;
+        };
+    createdAt: string | null;
+  };
+}
+
+export type UpdateUserSettingsBody =
+  | {
+      language?: string;
+    }
+  | {
+      language?: string;
+      adminNewUserNotification?: boolean;
+    };
+
+export interface UpdateUserSettingsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    settings:
+      | {
+          language: string;
+        }
+      | {
+          language: string;
+          adminNewUserNotification: boolean;
+        };
+    createdAt: string | null;
+  };
+}
+
+export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -1870,6 +1882,58 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerGoogleAuth
+     * @request GET:/api/auth/google
+     */
+    authControllerGoogleAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/google`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerGoogleAuthCallback
+     * @request GET:/api/auth/google/callback
+     */
+    authControllerGoogleAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/google/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMicrosoftAuth
+     * @request GET:/api/auth/microsoft
+     */
+    authControllerMicrosoftAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMicrosoftAuthCallback
+     * @request GET:/api/auth/microsoft/callback
+     */
+    authControllerMicrosoftAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft/callback`,
+        method: "GET",
         ...params,
       }),
 
@@ -2173,6 +2237,50 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerUploadFile
+     * @request POST:/api/file
+     */
+    fileControllerUploadFile: (
+      data: {
+        /** @format binary */
+        file?: File;
+        /** Optional resource type */
+        resource?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FileUploadResponse, any>({
+        path: `/api/file`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerDeleteFile
+     * @request DELETE:/api/file
+     */
+    fileControllerDeleteFile: (
+      query: {
+        /** Key of the file to delete */
+        fileKey: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file`,
+        method: "DELETE",
+        query: query,
         ...params,
       }),
 
@@ -2645,50 +2753,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerUploadFile
-     * @request POST:/api/file
-     */
-    fileControllerUploadFile: (
-      data: {
-        /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FileUploadResponse, any>({
-        path: `/api/file`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
         ...params,
       }),
 
@@ -3338,11 +3402,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UserControllerGetUserDetails
-     * @request GET:/api/user/details
+     * @name SettingsControllerGetUserSettings
+     * @request GET:/api/settings
      */
-    userSettings: (params: RequestParams = {}) =>
-      this.request<SettingsResponse, any>({
+    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
+      this.request<GetUserSettingsResponse, any>({
         path: `/api/settings`,
         method: "GET",
         format: "json",
@@ -3352,15 +3416,59 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name BaseResponse
-     * @request GET:/api/settings/admin-new-user-notification
+     * @name SettingsControllerUpdateUserSettings
+     * @request PUT:/api/settings
      */
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminNewUserNotification
+     * @request PATCH:/api/settings/admin-new-user-notification
+     */
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<any>({
+      this.request<void, any>({
         path: `/api/settings/admin-new-user-notification`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPlatformLogo
+     * @request GET:/api/settings/platform-logo
+     */
+    settingsControllerGetPlatformLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformLogoResponse, any>({
+        path: `/api/settings/platform-logo`,
+        method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformLogo
+     * @request PATCH:/api/settings/platform-logo
+     */
+    settingsControllerUpdatePlatformLogo: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-logo`,
+        method: "PATCH",
         ...params,
       }),
   };
