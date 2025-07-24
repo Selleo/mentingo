@@ -14,7 +14,12 @@ export const userDetailsSchema = Type.Object({
   role: Type.Enum(USER_ROLES),
 });
 
-export const baseUserResponseSchema = Type.Omit(commonUserSchema, ["avatarReference"]);
+export const baseUserResponseSchema = Type.Composite([
+  Type.Omit(commonUserSchema, ["avatarReference"]),
+  Type.Object({
+    profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+  }),
+]);
 
 export const userDetailsResponseSchema = Type.Object({
   ...userDetailsSchema.properties,

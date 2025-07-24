@@ -39,6 +39,7 @@ export interface RegisterResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    profilePictureUrl: string | null;
   };
 }
 
@@ -63,6 +64,7 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    profilePictureUrl: string | null;
     settings: UserSettings;
   };
 }
@@ -99,6 +101,7 @@ export interface CurrentUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    profilePictureUrl: string | null;
   };
 }
 
@@ -140,6 +143,7 @@ export interface GetUsersResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    profilePictureUrl: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -159,6 +163,7 @@ export interface GetUserByIdResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    profilePictureUrl: string | null;
   };
 }
 
@@ -196,6 +201,7 @@ export interface UpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    profilePictureUrl: string | null;
   };
 }
 
@@ -234,6 +240,7 @@ export interface AdminUpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    profilePictureUrl: string | null;
   };
 }
 
@@ -282,6 +289,11 @@ export interface CreateUserResponse {
     id: string;
     message: string;
   };
+}
+
+export interface FileUploadResponse {
+  fileKey: string;
+  fileUrl: string;
 }
 
 export interface GetAllCategoriesResponse {
@@ -364,6 +376,7 @@ export interface GetAllCoursesResponse {
     authorId?: string;
     author: string;
     authorEmail?: string;
+    authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
     enrolledParticipantCount: number;
@@ -392,6 +405,7 @@ export interface GetStudentCoursesResponse {
     authorId?: string;
     author: string;
     authorEmail?: string;
+    authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
     enrolledParticipantCount: number;
@@ -433,6 +447,7 @@ export interface GetAvailableCoursesResponse {
     authorId?: string;
     author: string;
     authorEmail?: string;
+    authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
     enrolledParticipantCount: number;
@@ -463,6 +478,7 @@ export interface GetContentCreatorCoursesResponse {
     authorId: string;
     author: string;
     authorEmail: string;
+    authorAvatarUrl: string | null;
     category: string;
     courseChapterCount: number;
     enrolledParticipantCount: number;
@@ -684,11 +700,6 @@ export interface DeleteManyCoursesBody {
 export type DeleteManyCoursesResponse = null;
 
 export type UnenrollCourseResponse = null;
-
-export interface FileUploadResponse {
-  fileKey: string;
-  fileUrl: string;
-}
 
 export interface GetUserStatisticsResponse {
   data: {
@@ -1441,6 +1452,7 @@ export interface GetAllGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      profilePictureUrl: string | null;
     }[];
     createdAt?: string;
     updatedAt?: string;
@@ -1468,6 +1480,7 @@ export interface GetGroupByIdResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      profilePictureUrl: string | null;
     }[];
     createdAt?: string;
     updatedAt?: string;
@@ -1489,6 +1502,7 @@ export interface GetUserGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      profilePictureUrl: string | null;
     }[];
     createdAt?: string;
     updatedAt?: string;
@@ -2179,6 +2193,50 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name FileControllerUploadFile
+     * @request POST:/api/file
+     */
+    fileControllerUploadFile: (
+      data: {
+        /** @format binary */
+        file?: File;
+        /** Optional resource type */
+        resource?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FileUploadResponse, any>({
+        path: `/api/file`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerDeleteFile
+     * @request DELETE:/api/file
+     */
+    fileControllerDeleteFile: (
+      query: {
+        /** Key of the file to delete */
+        fileKey: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name TestConfigControllerSetup
      * @request POST:/api/test-config/setup
      */
@@ -2645,50 +2703,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerUploadFile
-     * @request POST:/api/file
-     */
-    fileControllerUploadFile: (
-      data: {
-        /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FileUploadResponse, any>({
-        path: `/api/file`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
         ...params,
       }),
 

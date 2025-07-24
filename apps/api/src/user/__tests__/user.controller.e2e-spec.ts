@@ -48,7 +48,10 @@ describe("UsersController (e2e)", () => {
 
       expect(response.body.data).toEqual(
         expect.arrayContaining([
-          expect.objectContaining(omit(testUser, "credentials", "avatarReference")),
+          expect.objectContaining({
+            ...omit(testUser, "credentials", "avatarReference"),
+            profilePictureUrl: null,
+          }),
         ]),
       );
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -63,8 +66,10 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
-
-      expect(response.body.data).toStrictEqual(omit(testUser, "credentials"));
+      expect(response.body.data).toStrictEqual({
+        ...omit(testUser, "credentials", "avatarReference"),
+        profilePictureUrl: null,
+      });
     });
 
     it("should return 404 for non-existent user", async () => {

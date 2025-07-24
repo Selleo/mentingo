@@ -65,10 +65,23 @@ export class UserService {
         archived: users.archived,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
+        avatarReference: users.avatarReference,
       })
       .from(users)
       .where(and(...conditions))
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
+
+    const usersWithProfilePictures = await Promise.all(
+      usersData.map(async (user) => {
+        const { avatarReference, ...userWithoutAvatar } = user;
+        const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
+
+        return {
+          ...userWithoutAvatar,
+          profilePictureUrl: usersProfilePictureUrl,
+        };
+      }),
+    );
 
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
@@ -76,7 +89,7 @@ export class UserService {
       .where(and(...conditions));
 
     return {
-      data: usersData,
+      data: usersWithProfilePictures,
       pagination: {
         totalItems,
         page,
@@ -92,7 +105,10 @@ export class UserService {
       throw new NotFoundException("User not found");
     }
 
-    return user;
+    const { avatarReference, ...userWithoutAvatar } = user;
+    const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
+
+    return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
   }
 
   public async getUserByEmail(email: string) {
@@ -167,7 +183,10 @@ export class UserService {
 
     const [updatedUser] = await this.db.update(users).set(data).where(eq(users.id, id)).returning();
 
-    return updatedUser;
+    const { avatarReference, ...userWithoutAvatar } = updatedUser;
+    const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
+
+    return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
   }
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
@@ -344,6 +363,11 @@ export class UserService {
       return createdUser;
     });
   }
+
+  public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
+    if (!avatarReference) return null;
+    return await this.s3Service.getSignedUrl(avatarReference);
+  };
 
   public async getAdminsToNotifyAboutNewUser() {
     const allAdmins = await this.db

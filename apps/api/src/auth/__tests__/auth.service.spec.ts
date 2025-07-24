@@ -112,9 +112,12 @@ describe("AuthService", () => {
 
       const decodedToken = await jwtService.verifyAsync(result.accessToken);
 
+      const { avatarReference: _, ...userWithoutAvatar } = user;
+
       expect(decodedToken.userId).toBe(user.id);
       expect(result).toMatchObject({
-        ...omit(user, "credentials"),
+        ...omit(userWithoutAvatar, "credentials"),
+        profilePictureUrl: null,
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
       });

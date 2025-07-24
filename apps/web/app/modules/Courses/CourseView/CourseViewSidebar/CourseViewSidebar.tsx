@@ -2,9 +2,8 @@ import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useUserDetails } from "~/api/queries/useUserDetails";
-import { Gravatar } from "~/components/Gravatar";
-import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
 import { CourseOptions } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseOptions";
 import { CourseProgress } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseProgress";
@@ -33,9 +32,11 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
         {t("studentCourseView.sideSection.other.author")}
       </h4>
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
-        <Avatar className="size-20">
-          <Gravatar email={userDetails?.contactEmail || ""} />
-        </Avatar>
+        <UserAvatar
+          className="size-20"
+          userName={`${userDetails?.firstName} ${userDetails?.lastName}`}
+          profilePictureUrl={userDetails?.profilePictureUrl}
+        />
         <div className="flex flex-col">
           <h2 className="h6 text-neutral-950">
             {userDetails?.firstName} {userDetails?.lastName}

@@ -77,10 +77,12 @@ describe("AuthController (e2e)", () => {
           email: "test@example.com",
         });
 
-      const response = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: user.email,
-        password: user.credentials?.password,
-      });
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: user.email,
+          password: user.credentials?.password,
+        });
 
       expect(response.status).toEqual(201);
       expect(response.body.data).toHaveProperty("id");
@@ -218,7 +220,10 @@ describe("AuthController (e2e)", () => {
         .set("Cookie", `access_token=${accessToken};`)
         .expect(200);
 
-      expect(response.body.data).toStrictEqual(omit(user, "credentials"));
+      expect(response.body.data).toStrictEqual({
+        ...omit(user, "credentials", "avatarReference"),
+        profilePictureUrl: null,
+      });
     });
 
     it("should return 401 for unauthenticated request", async () => {
