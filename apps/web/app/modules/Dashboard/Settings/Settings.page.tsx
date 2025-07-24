@@ -1,4 +1,4 @@
-import { useUserSettings } from "~/api/queries/useUserSettings";
+import { useUserSettings } from "~/api/queries/useAdminSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
 import { isAdminSettings } from "~/utils/isAdminSettings";
