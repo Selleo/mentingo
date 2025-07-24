@@ -11,6 +11,8 @@ import { settingsJSONContentSchema, type SettingsResponse } from "./schemas/sett
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
+import type { SettingsResponse } from "./schemas/settings.schema";
+
 @Controller("settings")
 @UseGuards(RolesGuard)
 export class SettingsController {
