@@ -12,4 +12,4 @@ export type UserSettings = {
 
 export type AdminSettings = UserSettings & { adminNewUserNotification: boolean };
 
-export type AllSettings = UserSettings | AdminSettings;
+export type AllSettings = UserSettings | AdminSettings | GlobalSettings;

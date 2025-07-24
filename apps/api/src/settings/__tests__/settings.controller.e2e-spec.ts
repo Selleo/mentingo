@@ -30,18 +30,7 @@ describe("SettingsController (e2e)", () => {
     await app.close();
   }, 10000);
 
-  beforeEach(async () => {
-    await db.delete(settings);
-
-    testUser = await userFactory.withCredentials({ password: testPassword }).create();
-
-    testCookies = await cookieFor(testUser, app);
-  });
-
-  describe("PATCH /api/settings/admin-new-user-notification", () => {
-    let adminUser: UserWithCredentials;
-    let adminCookies: string;
-
+  describe("PATCH /api/settings", () => {
     beforeEach(async () => {
       await truncateTables(db, ["settings"]);
 
@@ -78,9 +67,8 @@ describe("SettingsController (e2e)", () => {
     });
 
     it("should return 400 if invalid data is provided", async () => {
-      const invalidRequestBody = {
-        admin_new_user_notification: "not_a_boolean",
-        language: 123,
+      const invalidUpdatePayload = {
+        language: 12345,
       };
 
       await request(app.getHttpServer())
@@ -111,7 +99,12 @@ describe("SettingsController (e2e)", () => {
         .withAdminSettings(db)
         .create();
 
-      adminCookies = await cookieFor(adminUser, app);
+      const adminLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: adminUser.email,
+        password: adminUser.credentials?.password,
+      });
+
+      adminCookies = adminLoginResponse.headers["set-cookie"];
     });
 
     it("should toggle the notification setting (as Admin)", async () => {
@@ -130,8 +123,8 @@ describe("SettingsController (e2e)", () => {
       const adminSettings = updatedSettingInDb?.settings as AdminSettings;
       expect(adminSettings?.adminNewUserNotification).toBe(true);
 
-      const secondResponse = await request(app.getHttpServer())
-        .patch("/api/settings/admin-new-user-notification")
+      await request(app.getHttpServer())
+        .patch("/api/settings/admin/new-user-notification")
         .set("Cookie", adminCookies)
         .expect(200);
 
@@ -160,7 +153,7 @@ describe("SettingsController (e2e)", () => {
     });
   });
 
-  describe("GET /api/settings", () => {
+  describe("GET /settings", () => {
     beforeEach(async () => {
       await truncateTables(db, ["settings"]);
 

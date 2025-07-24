@@ -8,8 +8,6 @@ import { credentials, users } from "../../src/storage/schema";
 
 import { createSettingsFactory } from "./settings.factory";
 
-import { createSettingsFactory } from "./settings.factory";
-
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";
 

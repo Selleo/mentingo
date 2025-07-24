@@ -151,13 +151,6 @@ describe("AuthService", () => {
 
       await userFactory.withCredentials({ password }).create({ email });
 
-      await db.insert(settings).values({
-        userId: user.id,
-        settings: { language: "en" },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-
       const result = await authService.validateUser(email, password);
 
       expect(result).toBeDefined();
