@@ -2,18 +2,15 @@ import { useTranslation } from "react-i18next";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
-import NotificationPreferences from "../NotificationPreferences";
-
 import { GlobalPreferences } from "./GlobalPreferences";
 
-import type { GlobalSettings, AdminSettings } from "~/api/generated-api";
+import type { GlobalSettings } from "~/api/generated-api";
 
 interface AdminPreferencesProps {
-  settings: AdminSettings;
   globalSettings: GlobalSettings;
 }
 
-export default function AdminPreferences({ settings, globalSettings }: AdminPreferencesProps) {
+export default function AdminPreferences({ globalSettings }: AdminPreferencesProps) {
   const { t } = useTranslation();
 
   return (
@@ -23,7 +20,6 @@ export default function AdminPreferences({ settings, globalSettings }: AdminPref
         <CardDescription>{t("adminPreferences.subHeader")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <NotificationPreferences adminSettings={settings} />
         <GlobalPreferences globalSettings={globalSettings} />
       </CardContent>
     </Card>

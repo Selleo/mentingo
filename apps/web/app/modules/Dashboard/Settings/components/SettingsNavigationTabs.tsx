@@ -29,9 +29,7 @@ export function SettingsNavigationTabs({
     <Card className="w-full">
       <CardContent className="p-6">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="rounded bg-yellow-200 px-2 py-1 text-2xl font-bold">
-            {t("settings.title")}
-          </h1>
+          <h1 className="rounded px-2 py-1 text-2xl font-bold">{t("settings.title")}</h1>
           <div className="flex gap-2">
             <Button variant="outline" onClick={onCancel}>
               {t("settings.buttons.cancel")}

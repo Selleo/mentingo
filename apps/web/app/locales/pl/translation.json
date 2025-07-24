@@ -1132,6 +1132,18 @@
       "courseProgress": "Postęp kursu"
     }
   },
+
+  "settings": {
+    "title": "Ustawienia",
+    "buttons": {
+      "cancel": "Odrzuć",
+      "save": "Zapisz"
+    },
+    "tabs": {
+      "account": "Konto",
+      "organization": "Organizacja"
+    }
+  },
   "adminPreferences": {
     "header": "Preferencje administratora",
     "subHeader": "Zarządzaj swoimi preferencjami i ustawieniami administratora",
