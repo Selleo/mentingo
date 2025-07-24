@@ -13,3 +13,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   unregisteredUserCoursesAccessibility: false,
   platformLogoS3Key: null,
 };
+
+export const DEFAULT_GLOBAL_SETTINGS = {
+  platformLogoS3Key: null,
+};

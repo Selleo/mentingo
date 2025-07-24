@@ -25,6 +25,7 @@ import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseModule } from "./courses/course.module";
 import { EventsModule } from "./events/events.module";
+import { MULTER_FILE_SIZE } from "./file/file.constants";
 import { FileModule } from "./file/files.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";

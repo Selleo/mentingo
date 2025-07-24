@@ -14,6 +14,7 @@
       "clearAll": "Wyczyść wszystko",
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
+      "uploading": "Wgrywanie...",
       "continue": "Kontynuuj"
     },
     "tooltip": {
@@ -1159,6 +1160,19 @@
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     },
-    "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+    "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników.",
+    "platformLogo": {
+    "header": "Logo Platformy",
+    "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, SVG",
+    "field": {
+      "uploadLabel": "Obraz Logo"
+    },
+    "button": {
+      "removeLogo": "Usuń Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Logo platformy zostało pomyślnie wgrane"
+    }
+    }
   }
 }

@@ -13,7 +13,8 @@
       "goBack": "Go back",
       "ignore": "Ignore",
       "clearAll": "Clear All",
-      "validate": "Validate"
+      "validate": "Validate",
+      "uploading": "Uploading..."
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -1153,6 +1154,19 @@
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
+    }
+  },
+  "platformLogo": {
+    "header": "Platform Logo",
+    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logo Image"
+    },
+    "button": {
+      "removeLogo": "Remove Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Platform logo uploaded successfully"
     }
   }
 }

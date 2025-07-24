@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 
 import type { SQL } from "drizzle-orm";
 
-export const settingsToJsonBuildObject = (settingsObject: Record<string, any>): SQL<unknown> => {
+export const settingsToJSONBuildObject = (settingsObject: Record<string, any>): SQL<unknown> => {
   const convertValueWithType = (value: any): SQL<unknown> => {
     if (value === null || value === undefined) {
       return sql`NULL`;

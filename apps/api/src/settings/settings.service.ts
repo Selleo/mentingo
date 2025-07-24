@@ -12,7 +12,7 @@ import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
-import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
+import { settingsToJSONBuildObject } from "src/utils/settingsToJSONBuildObject";
 
 import { DEFAULT_ADMIN_SETTINGS, DEFAULT_STUDENT_SETTINGS } from "./constants/settings.constants";
 
@@ -78,7 +78,7 @@ export class SettingsService {
       .values({
         userId,
         createdAt: new Date().toISOString(),
-        settings: settingsToJsonBuildObject(finalSettings),
+        settings: settingsToJSONBuildObject(finalSettings),
       })
       .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
@@ -121,7 +121,7 @@ export class SettingsService {
     const [{ settings: newUserSettings }] = await this.db
       .update(settings)
       .set({
-        settings: settingsToJsonBuildObject(mergedSettings),
+        settings: settingsToJSONBuildObject(mergedSettings),
       })
       .where(eq(settings.userId, userId))
       .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });

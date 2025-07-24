@@ -1668,6 +1668,9 @@ export interface GetUserSettingsResponse {
     | {
         language: string;
         adminNewUserNotification: boolean;
+      }
+    | {
+        platformLogoS3Key: string | null;
       };
 }
 
