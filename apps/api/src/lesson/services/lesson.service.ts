@@ -187,14 +187,14 @@ export class LessonService {
           trx,
         );
 
-        await this.studentLessonProgressService.markLessonAsCompleted(
-          studentQuizAnswers.lessonId,
-          userId,
-          undefined,
-          true,
-          evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
-          trx,
-        );
+        await this.studentLessonProgressService.markLessonAsCompleted({
+          id: studentQuizAnswers.lessonId,
+          studentId: userId,
+          quizCompleted: true,
+          completedQuestionCount:
+            evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
+          dbInstance: trx,
+        });
 
         this.eventBus.publish(
           new QuizCompletedEvent(

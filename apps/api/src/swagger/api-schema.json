@@ -2370,33 +2370,6 @@
         }
       }
     },
-    "/api/ai/threads": {
-      "get": {
-        "operationId": "AiController_getThreads",
-        "parameters": [
-          {
-            "name": "lesson",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/ai/thread/messages": {
       "get": {
         "operationId": "AiController_getThreadMessages",
@@ -8964,77 +8937,6 @@
               "updatedAt",
               "status"
             ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "aiMentorLessonId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "userId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "userLanguage": {
-                  "anyOf": [
-                    {
-                      "const": "pl",
-                      "type": "string"
-                    },
-                    {
-                      "const": "en",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "status": {
-                  "anyOf": [
-                    {
-                      "const": "active",
-                      "type": "string"
-                    },
-                    {
-                      "const": "completed",
-                      "type": "string"
-                    },
-                    {
-                      "const": "archived",
-                      "type": "string"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "id",
-                "aiMentorLessonId",
-                "userId",
-                "userLanguage",
-                "createdAt",
-                "updatedAt",
-                "status"
-              ]
-            }
           }
         },
         "required": [

@@ -30,15 +30,28 @@ import type { ProgressStatus } from "src/utils/types/progress.type";
 
 @Injectable()
 export class StudentLessonProgressService {
-  async markLessonAsCompleted(
-    id: UUIDType,
-    studentId: UUIDType,
-    userRole?: UserRole,
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly statisticsRepository: StatisticsRepository,
+  ) {}
+
+  async markLessonAsCompleted({
+    id,
+    studentId,
+    userRole,
     quizCompleted = false,
     completedQuestionCount = 0,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-    aiMentorLessonData?: ResponseAiJudgeJudgementBody,
-  ) {
+    dbInstance = this.db,
+    aiMentorLessonData,
+  }: {
+    id: UUIDType;
+    studentId: UUIDType;
+    userRole?: UserRole;
+    quizCompleted?: boolean;
+    completedQuestionCount?: number;
+    dbInstance?: PostgresJsDatabase<typeof schema>;
+    aiMentorLessonData?: ResponseAiJudgeJudgementBody;
+  }) {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
     if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
@@ -144,11 +157,6 @@ export class StudentLessonProgressService {
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
   }
-
-  constructor(
-    @Inject("DB") private readonly db: DatabasePg,
-    private readonly statisticsRepository: StatisticsRepository,
-  ) {}
 
   private async updateChapterProgress(
     courseId: UUIDType,

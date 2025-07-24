@@ -1441,21 +1441,6 @@ export interface GetThreadResponse {
   };
 }
 
-export interface GetThreadsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    aiMentorLessonId: string;
-    /** @format uuid */
-    userId: string;
-    userLanguage: "pl" | "en";
-    createdAt: string;
-    updatedAt: string;
-    status: "active" | "completed" | "archived";
-  }[];
-}
-
 export interface GetThreadMessagesResponse {
   data: (({
     content: string;
@@ -3134,27 +3119,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetThreadResponse, any>({
         path: `/api/ai/thread`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AiControllerGetThreads
-     * @request GET:/api/ai/threads
-     */
-    aiControllerGetThreads: (
-      query?: {
-        /** @format uuid */
-        lesson?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetThreadsResponse, any>({
-        path: `/api/ai/threads`,
         method: "GET",
         query: query,
         format: "json",

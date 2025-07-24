@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -25,6 +26,7 @@ import {
   type OpenAIModels,
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
+import { DatabasePg } from "src/common";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
@@ -49,6 +51,8 @@ export class AiService {
     private readonly summaryService: SummaryService,
     private readonly judgeService: JudgeService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
+    @Inject("DB")
+    private readonly db: DatabasePg,
   ) {}
 
   async getThreadWithSetup(data: CreateThreadBody) {
@@ -164,15 +168,12 @@ export class AiService {
     const aiMentorLessonData: ResponseAiJudgeJudgementBody =
       typeof message === "string" ? JSON.parse(message) : message;
 
-    await this.studentLessonProgressService.markLessonAsCompleted(
-      lessonId,
+    await this.studentLessonProgressService.markLessonAsCompleted({
+      id: lessonId,
       studentId,
       userRole,
-      undefined,
-      undefined,
-      undefined,
       aiMentorLessonData,
-    );
+    });
   }
 
   async retakeLesson(lessonId: UUIDType, userId: UUIDType) {
@@ -181,8 +182,10 @@ export class AiService {
     if (!lesson.isAssigned && !lesson.isFreemium)
       throw new UnauthorizedException("You are not assigned to this lesson");
 
-    await this.aiRepository.setThreadsToArchived(lessonId, userId);
-    await this.aiRepository.resetStudentProgressForLesson(lessonId, userId);
+    await this.db.transaction(async (trx) => {
+      await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
+      await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
+    });
   }
 
   private mapRole(role: MessageRole) {

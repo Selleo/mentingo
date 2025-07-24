@@ -22,7 +22,7 @@ export class SummaryService {
   async summarizeThreadOnTokenThreshold(threadId: UUIDType) {
     const tokens = await this.aiRepository.getTokenSumForThread(threadId, false);
 
-    if (Number(tokens.total) > THRESHOLD) {
+    if (Number(tokens) > THRESHOLD) {
       await this.summarize(threadId);
     }
   }

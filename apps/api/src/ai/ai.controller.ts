@@ -43,19 +43,6 @@ export class AiController {
     return await this.threadService.findThread(threadId, userId);
   }
 
-  @Get("threads")
-  @Roles(USER_ROLES.STUDENT)
-  @Validate({
-    request: [{ type: "query" as const, name: "lesson", schema: UUIDSchema }],
-    response: baseResponse(Type.Array(responseThreadSchema)),
-  })
-  async getThreads(
-    @Query("lesson") lessonId: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<ResponseThreadBody[]>> {
-    return await this.threadService.findAllThreadsByLessonIdAndUserId(lessonId, userId);
-  }
-
   @Get("thread/messages")
   @Roles(USER_ROLES.STUDENT)
   @Validate({

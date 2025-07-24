@@ -3,7 +3,7 @@ import { eq, inArray } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
-import { aiMentorLessons, aiMentorThreads } from "src/storage/schema";
+import { aiMentorThreads } from "src/storage/schema";
 
 import type { CreateThreadBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
@@ -47,17 +47,6 @@ export class ThreadService {
     const messages = await this.aiRepository.findMessageHistory(threadId);
 
     return { data: messages };
-  }
-
-  async findAllThreadsByLessonIdAndUserId(lessonId: UUIDType, userId: UUIDType) {
-    const threads = await this.aiRepository.findThreads([
-      eq(aiMentorLessons.lessonId, lessonId),
-      eq(aiMentorThreads.userId, userId),
-    ]);
-
-    if (!threads) throw new NotFoundException("No threads found");
-
-    return { data: threads };
   }
 
   private async findAiMentorLessonIdFromLesson(lessonId: UUIDType) {

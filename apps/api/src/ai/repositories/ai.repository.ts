@@ -22,6 +22,7 @@ import {
 } from "src/storage/schema";
 
 import type { SQL } from "drizzle-orm";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
   AiMentorGroupsBody,
   AiMentorLessonBody,
@@ -30,6 +31,7 @@ import type {
   UpdateThreadBody,
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
+import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class AiRepository {
@@ -110,7 +112,7 @@ export class AiRepository {
         ),
       );
 
-    return tokens;
+    return tokens.total;
   }
 
   async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
@@ -220,8 +222,12 @@ export class AiRepository {
     return thread;
   }
 
-  async setThreadsToArchived(lessonId: UUIDType, userId: UUIDType) {
-    await this.db
+  async setThreadsToArchived(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    await dbInstance
       .update(aiMentorThreads)
       .set({ status: THREAD_STATUS.ARCHIVED })
       .where(
@@ -236,8 +242,12 @@ export class AiRepository {
       );
   }
 
-  async resetStudentProgressForLesson(lessonId: UUIDType, userId: UUIDType) {
-    await this.db
+  async resetStudentProgressForLesson(
+    lessonId: UUIDType,
+    userId: UUIDType,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    await dbInstance
       .delete(studentLessonProgress)
       .where(
         and(
