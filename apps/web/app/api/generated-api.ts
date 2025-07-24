@@ -491,12 +491,12 @@ export interface GetCourseResponse {
         title: string;
         type: "text" | "presentation" | "video" | "quiz";
         displayOrder: number;
-        status: "not_started" | "in_progress" | "completed";
+        status: "not_started" | "in_progress" | "completed" | "blocked";
         quizQuestionCount: number | null;
         isExternal?: boolean;
       }[];
       completedLessonCount?: number;
-      chapterProgress?: "not_started" | "in_progress" | "completed";
+      chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
       isFreemium?: boolean;
       enrolled?: boolean;
       isSubmitted?: boolean;
@@ -579,7 +579,7 @@ export interface GetBetaCourseByIdResponse {
         updatedAt?: string;
       }[];
       completedLessonCount?: number;
-      chapterProgress?: "not_started" | "in_progress" | "completed";
+      chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
       isFreemium?: boolean;
       enrolled?: boolean;
       isSubmitted?: boolean;
@@ -716,7 +716,7 @@ export interface GetUserStatisticsResponse {
       /** @format uuid */
       lessonId: string;
       chapterTitle: string;
-      chapterProgress: "not_started" | "in_progress" | "completed";
+      chapterProgress: "not_started" | "in_progress" | "completed" | "blocked";
       completedLessonCount: number;
       lessonCount: number;
       chapterDisplayOrder: number;
@@ -761,12 +761,12 @@ export interface GetChapterWithLessonResponse {
       title: string;
       type: "text" | "presentation" | "video" | "quiz";
       displayOrder: number;
-      status: "not_started" | "in_progress" | "completed";
+      status: "not_started" | "in_progress" | "completed" | "blocked";
       quizQuestionCount: number | null;
       isExternal?: boolean;
     }[];
     completedLessonCount?: number;
-    chapterProgress?: "not_started" | "in_progress" | "completed";
+    chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
     isFreemium?: boolean;
     enrolled?: boolean;
     isSubmitted?: boolean;
@@ -823,7 +823,7 @@ export type BetaCreateChapterBody = {
     }[];
     updatedAt?: string;
   }[];
-  chapterProgress?: "not_started" | "in_progress" | "completed";
+  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
   isFreemium?: boolean;
   enrolled?: boolean;
   isSubmitted?: boolean;
@@ -889,7 +889,7 @@ export type UpdateChapterBody = {
     }[];
     updatedAt?: string;
   }[];
-  chapterProgress?: "not_started" | "in_progress" | "completed";
+  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
   isFreemium?: boolean;
   enrolled?: boolean;
   isSubmitted?: boolean;
