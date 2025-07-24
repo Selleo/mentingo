@@ -38,7 +38,9 @@
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
       "copyUrl": "The URL address was copied to the clipboard"
-    }
+    },
+    "continueWithGoogle": "Continue with Google",
+    "continueWithMicrosoft": "Continue with Microsoft"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -161,11 +163,11 @@
       "confirmPassword": "Confirm password"
     },
     "validation": {
-      "passwordMinLength": "Password must be at least 8 characters",
-      "passwordsDontMatch": "Passwords don't match"
+      "passwordsDontMatch": "Passwords do not match"
     },
+
     "button": {
-      "changePassword": "Change password"
+      "changePassword": "Create password"
     }
   },
   "changePasswordView": {
@@ -184,14 +186,25 @@
       "passwordCreatedSuccessfully": "Password created successfully"
     }
   },
-  "contentCreatorView": {
+  "passwordValidationDisplay": {
+    "title": "Password requirements",
+    "header": "Your password must contain:",
+    "passwordMinLength": "at least 8 characters",
+    "passwordUppercase": "at least one uppercase letter",
+    "passwordLowercase": "at least one lowercase letter",
+    "passwordNumber": "at least one number",
+    "passwordSpecial": "at least one special character",
+    "passwordsDontMatch": "Passwords do not match"
+  },
+  "teacherView": {
     "button": {
       "collapse": "Collapse",
       "showMore": "Show more",
       "edit": "Edit",
       "share": "Share profile",
       "cancel": "Cancel",
-      "confirm": "Confirm"
+      "confirm": "Confirm",
+      "deleteProfilePicture": "Delete profile picture"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard"
@@ -208,7 +221,8 @@
       "jobTitle": "Title",
       "jobTitlePlaceholder": "Enter your title",
       "description": "Bio-note",
-      "descriptionPlaceholder": "Enter a brief bio-note"
+      "descriptionPlaceholder": "Enter a brief bio-note",
+      "uploadThumbnailLabel": "Upload Thumbnail"
     },
     "toast": {
       "profileLinkCopied": "Profile link copied!",
@@ -219,6 +233,8 @@
       "personalInfoDescription": "Manage your basic account information",
       "aboutTitle": "About",
       "aboutDescription": "Tell more about yourself",
+      "appearanceTitle": "Appearance",
+      "appearanceDescription": "Upload your profile picture",
       "pageTitle": "Profile",
       "about": "About",
       "contact": "Contact",
@@ -254,7 +270,8 @@
       "continue": "Continue",
       "start": "Start",
       "readMore": "Read More",
-      "tryAgain": "Try again"
+      "tryAgain": "Try again",
+      "view": "View"
     },
     "other": {
       "completedCourses": "Completed Courses",
@@ -465,7 +482,7 @@
   },
   "adminGroupsView": {
     "name": "Group name",
-    "characteristic": "Charakterystyka",
+    "characteristic": "Characteristic",
     "buttons": {
       "create": "Create new",
       "deleteSelected": "Delete selected"
@@ -819,7 +836,8 @@
       "password": "Password"
     },
     "other": {
-      "alreadyHaveAccount": "Already have an account?"
+      "alreadyHaveAccount": "Already have an account?",
+      "orContinueWith": "Or continue with"
     },
     "button": {
       "createAccount": "Create an account",
@@ -828,8 +846,7 @@
     "validation": {
       "firstName": "First name is required",
       "lastName": "Last name is required",
-      "email": "Invalid email",
-      "password": "Password must be at least 8 characters"
+      "email": "Invalid email"
     }
   },
   "courseChapterView": {
@@ -869,7 +886,8 @@
       "forgotPassword": "Forgot your password?",
       "dontHaveAccount": "Don't have an account?",
       "rememberMe": "Remember me",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "orContinueWith": "Or continue with"
     },
     "button": {
       "login": "Login"
@@ -904,6 +922,13 @@
           "categories": "Categories",
           "sort": "Sort"
         }
+      },
+      "headerOptions": {
+        "image": "Image",
+        "title": "Course Name",
+        "category": "Category",
+        "description": "Description",
+        "author": "Author"
       }
     }
   },
@@ -937,7 +962,9 @@
       "multiple": "Multiple",
       "fillInTheBlanks": "Fill in the blanks.",
       "selectQuestion": "select question.",
-      "trueOrFalseQuestion": "True or false question."
+      "trueOrFalseQuestion": "True or false question.",
+      "multipleChoice": "Multiple choice question.",
+      "singleChoice": "Single choice question"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -1039,6 +1066,18 @@
     "chapterProgress": {
       "header": "Table of content:",
       "courseProgress": "Course progress"
+    }
+  },
+  "adminPreferences": {
+    "header": "Administrator Preferences",
+    "subHeader": "Manage your notification preferences",
+    "notificationSettings": "Notification Settings",
+    "field": {
+      "newUserNotifications": "New User Notifications",
+      "newUserNotificationsDescription": "Receive notifications when a new user is created"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Notification preferences have been successfully updated"
     }
   }
 }

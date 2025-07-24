@@ -16,8 +16,10 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { FileService } from "src/file/file.service";
+import { S3Service } from "src/s3/s3.service";
 
-import { createTokens, credentials, userDetails, users } from "../storage/schema";
+import { createTokens, credentials, settings, userDetails, users } from "../storage/schema";
 
 import {
   type UsersFilterSchema,
@@ -28,8 +30,9 @@ import {
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
 import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
-import type { UserDetails } from "./schemas/user.schema";
+import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
+import type { AdminSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
 @Injectable()
@@ -37,6 +40,8 @@ export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private emailService: EmailService,
+    private fileService: FileService,
+    private s3Service: S3Service,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -51,7 +56,16 @@ export class UserService {
     const conditions = this.getFiltersConditions(filters);
 
     const usersData = await this.db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: users.role,
+        archived: users.archived,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
       .from(users)
       .where(and(...conditions))
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
@@ -95,11 +109,12 @@ export class UserService {
     userId: UUIDType,
     currentUserId: UUIDType,
     userRole: UserRole,
-  ): Promise<UserDetails> {
-    const [userBio]: UserDetails[] = await this.db
+  ): Promise<UserDetailsResponse> {
+    const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
         firstName: users.firstName,
         lastName: users.lastName,
+        avatarReference: users.avatarReference,
         role: sql<UserRole>`${users.role}`,
         id: users.id,
         description: userDetails.description,
@@ -121,7 +136,17 @@ export class UserService {
     if (!canView) {
       throw new ForbiddenException("Cannot access user details");
     }
-    return userBio;
+
+    const { avatarReference, ...user } = userBio;
+
+    const profilePictureUrl = avatarReference
+      ? await this.s3Service.getSignedUrl(avatarReference)
+      : null;
+
+    return {
+      ...user,
+      profilePictureUrl,
+    };
   }
 
   public async updateUser(
@@ -161,17 +186,33 @@ export class UserService {
     return updatedUserDetails;
   }
 
-  async updateUserProfile(id: UUIDType, data: UpdateUserProfileBody) {
+  async updateUserProfile(
+    id: UUIDType,
+    data: UpdateUserProfileBody,
+    userAvatar?: Express.Multer.File,
+  ) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
     }
 
+    if (!data && !userAvatar) {
+      throw new NotFoundException("No data provided for user profile update");
+    }
+
+    if (userAvatar) {
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars");
+      data.userAvatar = fileKey;
+    }
+
     await this.db.transaction(async (tx) => {
       const userUpdates = {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
+        ...((data.userAvatar || data.userAvatar === null) && {
+          avatarReference: data.userAvatar,
+        }),
       };
 
       const userDetailsUpdates = {
@@ -276,6 +317,7 @@ export class UserService {
         userId: createdUser.id,
         createToken: token,
         expiryDate,
+        reminderCount: 0,
       });
 
       const url = `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`;
@@ -301,6 +343,26 @@ export class UserService {
 
       return createdUser;
     });
+  }
+
+  public async getAdminsToNotifyAboutNewUser() {
+    const allAdmins = await this.db
+      .select({
+        user: users,
+        settings: settings,
+      })
+      .from(users)
+      .leftJoin(settings, eq(users.id, settings.userId))
+      .where(eq(users.role, USER_ROLES.ADMIN));
+
+    const adminsToNotify = allAdmins.filter((admin) => {
+      return (
+        (admin.settings?.settings as AdminSettingsJSONContentSchema)?.adminNewUserNotification ===
+        true
+      );
+    });
+
+    return adminsToNotify;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {

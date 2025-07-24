@@ -131,8 +131,29 @@
     {
       "idx": 18,
       "version": "7",
-      "when": 1752759867561,
-      "tag": "0018_added_ai_student_interaction_tables",
+      "when": 1752838260504,
+      "tag": "0018_add_reminder_count_to_create_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1752851872430,
+      "tag": "0019_add_avatar_refence_to_user",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1753182955757,
+      "tag": "0020_create_settings_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1753354688438,
+      "tag": "0021_added_ai_student_interaction_tables",
       "breakpoints": true
     }
   ]

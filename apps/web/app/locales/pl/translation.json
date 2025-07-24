@@ -39,7 +39,9 @@
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka"
-    }
+    },
+    "continueWithGoogle": "Kontynuuj z użyciem Google",
+    "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -162,12 +164,20 @@
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordMinLength": "Hasło musi mieć co najmniej 8 znaków",
       "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "button": {
-      "changePassword": "Zmień hasło"
+      "changePassword": "Utwórz hasło"
     }
+  },
+  "passwordValidationDisplay": {
+    "title": "Wymagania dotyczące hasła",
+    "header": "Twoje hasło musi zawierać:",
+    "passwordMinLength": "co najmniej 8 znaków",
+    "passwordUppercase": "co najmniej jedną wielką literę",
+    "passwordLowercase": "co najmniej jedną małą literę",
+    "passwordNumber": "co najmniej jedną cyfrę",
+    "passwordSpecial": "co najmniej jeden znak specjalny"
   },
   "changePasswordView": {
     "header": "Zmień hasło",
@@ -178,7 +188,8 @@
     },
     "validation": {
       "oldPassword": "Stare hasło jest wymagane",
-      "newPassword": "Nowe hasło jest wymagane"
+      "newPassword": "Nowe hasło jest wymagane",
+      "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "toast": {
       "passwordChangedSuccessfully": "Hasło zostało zmienione pomyślnie",
@@ -192,7 +203,8 @@
       "edit": "Edytuj",
       "share": "Udostępnij profil",
       "cancel": "Anuluj",
-      "confirm": "Potwierdź"
+      "confirm": "Potwierdź",
+      "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
     "breadcrumbs": {
       "dashboard": "Panel"
@@ -209,7 +221,8 @@
       "jobTitle": "Tytuł",
       "jobTitlePlaceholder": "Wprowadź swój tytuł",
       "description": "Twój opis",
-      "descriptionPlaceholder": "Wprowadź krótki opis"
+      "descriptionPlaceholder": "Wprowadź krótki opis",
+      "uploadThumbnailLabel": "Prześlij zdjęcie profilowe"
     },
     "toast": {
       "profileLinkCopied": "Link do profilu skopiowany!",
@@ -220,6 +233,8 @@
       "personalInfoDescription": "Zarządzaj swoimi podstawowymi danymi konta",
       "aboutTitle": "O mnie",
       "aboutDescription": "Powiedz więcej o sobie",
+      "appearanceTitle": "Wygląd",
+      "appearanceDescription": "Zmień swoje zdjęcie profilowe",
       "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",
@@ -255,7 +270,8 @@
       "continue": "Kontynuuj",
       "start": "Rozpocznij",
       "readMore": "Czytaj więcej",
-      "tryAgain": "Spróbuj ponownie"
+      "tryAgain": "Spróbuj ponownie",
+      "view": "Zobacz"
     },
     "other": {
       "completedCourses": "Zakończone kursy",
@@ -820,7 +836,8 @@
       "password": "Hasło"
     },
     "other": {
-      "alreadyHaveAccount": "Masz już konto?"
+      "alreadyHaveAccount": "Masz już konto?",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "createAccount": "Utwórz konto",
@@ -829,8 +846,7 @@
     "validation": {
       "firstName": "Imię jest wymagane",
       "lastName": "Nazwisko jest wymagane",
-      "email": "Nieprawidłowy email",
-      "password": "Hasło musi mieć co najmniej 8 znaków"
+      "email": "Nieprawidłowy email"
     }
   },
   "courseChapterView": {
@@ -870,7 +886,8 @@
       "forgotPassword": "Zapomniałeś hasła?",
       "dontHaveAccount": "Nie masz konta?",
       "rememberMe": "Zapamiętaj mnie",
-      "signUp": "Zarejestruj się"
+      "signUp": "Zarejestruj się",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "login": "Zaloguj się"
@@ -904,7 +921,15 @@
           "title": "Szukaj po tytule...",
           "categories": "Kategorie",
           "sort": "Sortuj"
-        }
+        },
+        "options": {}
+      },
+      "headerOptions": {
+        "image": "Zdjęcie",
+        "title": "Nazwa Kursu",
+        "category": "Kategoria",
+        "description": "Opis",
+        "author": "Autor"
       }
     }
   },
@@ -938,7 +963,9 @@
       "multiple": "Wielokrotna",
       "fillInTheBlanks": "Uzupełnij luki.",
       "selectQuestion": "Wybierz pytanie.",
-      "trueOrFalseQuestion": "Pytanie prawda/fałsz."
+      "trueOrFalseQuestion": "Pytanie prawda/fałsz.",
+      "multipleChoice": "Pytanie wielokrotnego wyboru.",
+      "singleChoice": "Pytanie jednokrotnego wyboru."
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -1040,6 +1067,19 @@
     "chapterProgress": {
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
+    }
+  },
+
+  "adminPreferences": {
+    "header": "Preferencje administratora",
+    "subHeader": "Zarządzaj swoimi preferencjami powiadomień",
+    "notificationSettings": "Ustawienia powiadomień",
+    "field": {
+      "newUserNotifications": "Powiadomienia o nowych użytkownikach",
+      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień zostały pomyślnie zaktualizowane"
     }
   }
 }

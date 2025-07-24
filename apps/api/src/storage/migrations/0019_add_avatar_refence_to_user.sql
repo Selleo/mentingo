@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "avatar_reference" varchar(200);

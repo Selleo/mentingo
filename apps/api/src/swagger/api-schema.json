@@ -169,6 +169,50 @@
         }
       }
     },
+    "/api/auth/google": {
+      "get": {
+        "operationId": "AuthController_googleAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/google/callback": {
+      "get": {
+        "operationId": "AuthController_googleAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/microsoft": {
+      "get": {
+        "operationId": "AuthController_microsoftAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/microsoft/callback": {
+      "get": {
+        "operationId": "AuthController_microsoftAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",
@@ -585,22 +629,30 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateUserProfileBody"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "userAvatar": {
+                        "type": "string",
+                        "format": "binary"
+                      },
+                      "data": {
+                        "format": "string",
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserProfileResponse"
-                }
-              }
-            }
+            "description": ""
           }
         }
       }
@@ -702,6 +754,63 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/file": {
+      "post": {
+        "operationId": "FileController_uploadFile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "description": "Optional resource type"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "FileController_deleteFile",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "required": true,
+            "in": "query",
+            "description": "Key of the file to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File deleted successfully"
           }
         }
       }
@@ -1726,63 +1835,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/file": {
-      "post": {
-        "operationId": "FileController_uploadFile",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "resource": {
-                    "type": "string",
-                    "description": "Optional resource type"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "File uploaded successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileUploadResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
           }
         }
       }
@@ -2956,6 +3008,53 @@
           }
         }
       }
+    },
+    "/api/settings": {
+      "get": {
+        "operationId": "SettingsController_getUserSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "SettingsController_updateUserSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin-new-user-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -2986,9 +3085,38 @@
             "type": "string"
           },
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -3183,9 +3311,38 @@
         "type": "object",
         "properties": {
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "createToken": {
             "minLength": 1,
@@ -3201,9 +3358,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "resetToken": {
             "minLength": 1,
@@ -3423,6 +3609,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3433,7 +3629,8 @@
               "contactEmail",
               "contactPhone",
               "jobTitle",
-              "role"
+              "role",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3564,49 +3761,6 @@
           "data"
         ]
       },
-      "UpdateUserProfileBody": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "contactEmail": {
-            "format": "email",
-            "type": "string"
-          },
-          "contactPhone": {
-            "type": "string"
-          },
-          "jobTitle": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateUserProfileResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "AdminUpdateUserBody": {
         "type": "object",
         "properties": {
@@ -3692,9 +3846,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "oldPassword": {
             "minLength": 8,
@@ -3793,6 +3976,21 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileKey",
+          "fileUrl"
         ]
       },
       "GetAllCategoriesResponse": {
@@ -5398,21 +5596,6 @@
       },
       "UnenrollCourseResponse": {
         "type": "null"
-      },
-      "FileUploadResponse": {
-        "type": "object",
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "fileUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fileKey",
-          "fileUrl"
-        ]
       },
       "GetUserStatisticsResponse": {
         "type": "object",
@@ -9652,6 +9835,91 @@
               "version",
               "entryPoint",
               "s3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUserSettingsBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "settings": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
+                  }
+                ]
+              },
+              "createdAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "userId",
+              "settings",
+              "createdAt"
             ]
           }
         },

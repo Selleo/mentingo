@@ -13,6 +13,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
+import { SocialLogin } from "./components";
+
 import type { LoginBody } from "~/api/generated-api";
 
 const loginSchema = (t: (key: string) => string) =>
@@ -21,6 +23,9 @@ const loginSchema = (t: (key: string) => string) =>
     password: z.string().min(1, { message: t("loginView.validation.password") }),
     rememberMe: z.boolean().optional(),
   });
+
+const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
+const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -88,6 +93,14 @@ export default function LoginPage() {
             {t("loginView.button.login")}
           </Button>
         </form>
+
+        {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
+          <SocialLogin
+            isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+            isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+          />
+        )}
+
         <div className="mt-4 text-center text-sm">
           {t("loginView.other.dontHaveAccount")}{" "}
           <Link to="/auth/register" className="underline">

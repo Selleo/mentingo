@@ -7,8 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
+import { ApiBody } from "@nestjs/swagger";
+import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -25,8 +30,8 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUser.schema";
+import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
@@ -41,9 +46,10 @@ import {
 import {
   type AllUsersResponse,
   allUsersSchema,
-  type UserDetails,
-  userDetailsSchema,
+  type UserDetailsResponse,
   type UserResponse,
+  baseUserResponseSchema,
+  userDetailsResponseSchema,
 } from "./schemas/user.schema";
 import { SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
@@ -95,7 +101,7 @@ export class UserController {
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(baseUserResponseSchema),
   })
   async getUserById(@Query("id") id: UUIDType): Promise<BaseResponse<UserResponse>> {
     const user = await this.usersService.getUserById(id);
@@ -107,13 +113,13 @@ export class UserController {
   @Public()
   @Validate({
     request: [{ type: "query", name: "userId", schema: UUIDSchema, required: true }],
-    response: baseResponse(userDetailsSchema),
+    response: baseResponse(userDetailsResponseSchema),
   })
   async getUserDetails(
     @Query("userId") userId: UUIDType,
     @CurrentUser("role") role: UserRole,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<UserDetails>> {
+  ): Promise<BaseResponse<UserDetailsResponse>> {
     const userDetails = await this.usersService.getUserDetails(userId, currentUserId, role);
     return new BaseResponse(userDetails);
   }
@@ -121,7 +127,7 @@ export class UserController {
   @Patch()
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(baseUserResponseSchema),
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
       { type: "body", schema: updateUserSchema },
@@ -131,13 +137,14 @@ export class UserController {
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
       if (currentUserId !== id) {
         throw new ForbiddenException("You can only update your own account");
       }
 
-      const updatedUser = await this.usersService.updateUser(id, data);
+      await this.usersService.updateUser(id, data);
+      const updatedUser = await this.usersService.getUserById(id);
 
       return new BaseResponse(updatedUser);
     }
@@ -164,15 +171,34 @@ export class UserController {
   }
 
   @Patch("profile")
-  @Validate({
-    response: baseResponse(Type.Object({ message: Type.String() })),
-    request: [{ type: "body", schema: updateUserProfileSchema }],
+  @UseInterceptors(FileInterceptor("userAvatar"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      anyOf: [
+        {
+          type: "object",
+          properties: {
+            userAvatar: {
+              type: "string",
+              format: "binary",
+            },
+            data: {
+              format: "string",
+              type: "string",
+            },
+          },
+        },
+      ],
+    },
   })
   async updateUserProfile(
-    @Body() data: UpdateUserProfileBody,
+    @Body(new ValidateMultipartPipe(updateUserProfileSchema))
+    userInfo: { data: UpdateUserProfileBody },
     @CurrentUser("userId") currentUserId: UUIDType,
+    @UploadedFile() userAvatar?: Express.Multer.File,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.usersService.updateUserProfile(currentUserId, data);
+    await this.usersService.updateUserProfile(currentUserId, userInfo.data, userAvatar);
 
     return new BaseResponse({
       message: "User profile updated successfully",
@@ -182,7 +208,7 @@ export class UserController {
   @Patch("admin")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(baseUserResponseSchema),
     request: [
       { type: "query", name: "id", schema: UUIDSchema, required: true },
       { type: "body", schema: updateUserSchema },
@@ -191,9 +217,10 @@ export class UserController {
   async adminUpdateUser(
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
-      const updatedUser = await this.usersService.updateUser(id, data);
+      await this.usersService.updateUser(id, data);
+      const updatedUser = await this.usersService.getUserById(id);
 
       return new BaseResponse(updatedUser);
     }

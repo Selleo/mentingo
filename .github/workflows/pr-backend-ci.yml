@@ -22,6 +22,8 @@ env:
   STRIPE_SECRET_KEY: "test_secret"
   STRIPE_PUBLISHABLE_KEY: "test_secret"
   STRIPE_WEBHOOK_SECRET: "test_secret"
+  GOOGLE_OAUTH_ENABLED: "false"
+  MICROSOFT_OAUTH_ENABLED: "false"
 
 on:
   pull_request:

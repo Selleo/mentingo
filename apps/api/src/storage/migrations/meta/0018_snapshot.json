@@ -1,6 +1,6 @@
 {
-  "id": "abe95183-f4c0-4304-827d-5023cb95955b",
-  "prevId": "0ae71fd6-32cc-48a7-b789-6fee6897d072",
+  "id": "08826f11-ec4c-4e84-bffb-7208ae0375b2",
+  "prevId": "97922fb2-3698-4e5f-9e8b-f46eea513047",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -56,255 +56,6 @@
           "tableTo": "lessons",
           "columnsFrom": [
             "lesson_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.ai_mentor_student_lesson_progress": {
-      "name": "ai_mentor_student_lesson_progress",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "student_lesson_progress_id": {
-          "name": "student_lesson_progress_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "summary": {
-          "name": "summary",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "score": {
-          "name": "score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "min_score": {
-          "name": "min_score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_score": {
-          "name": "max_score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "percentage": {
-          "name": "percentage",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "passed": {
-          "name": "passed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "ai_mentor_student_lesson_progress_student_lesson_progress_id_student_lesson_progress_id_fk": {
-          "name": "ai_mentor_student_lesson_progress_student_lesson_progress_id_student_lesson_progress_id_fk",
-          "tableFrom": "ai_mentor_student_lesson_progress",
-          "tableTo": "student_lesson_progress",
-          "columnsFrom": [
-            "student_lesson_progress_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.ai_mentor_thread_messages": {
-      "name": "ai_mentor_thread_messages",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "thread_id": {
-          "name": "thread_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token_count": {
-          "name": "token_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "archived": {
-          "name": "archived",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "ai_mentor_thread_messages_thread_id_ai_mentor_threads_id_fk": {
-          "name": "ai_mentor_thread_messages_thread_id_ai_mentor_threads_id_fk",
-          "tableFrom": "ai_mentor_thread_messages",
-          "tableTo": "ai_mentor_threads",
-          "columnsFrom": [
-            "thread_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.ai_mentor_threads": {
-      "name": "ai_mentor_threads",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ai_mentor_lesson_id": {
-          "name": "ai_mentor_lesson_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "user_language": {
-          "name": "user_language",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en'"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "ai_mentor_threads_user_id_users_id_fk": {
-          "name": "ai_mentor_threads_user_id_users_id_fk",
-          "tableFrom": "ai_mentor_threads",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "ai_mentor_threads_ai_mentor_lesson_id_ai_mentor_lessons_id_fk": {
-          "name": "ai_mentor_threads_ai_mentor_lesson_id_ai_mentor_lessons_id_fk",
-          "tableFrom": "ai_mentor_threads",
-          "tableTo": "ai_mentor_lessons",
-          "columnsFrom": [
-            "ai_mentor_lesson_id"
           ],
           "columnsTo": [
             "id"
@@ -841,6 +592,13 @@
           "type": "timestamp (3) with time zone",
           "primaryKey": false,
           "notNull": true
+        },
+        "reminder_count": {
+          "name": "reminder_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         }
       },
       "indexes": {},

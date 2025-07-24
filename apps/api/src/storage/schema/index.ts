@@ -14,7 +14,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, id, timestamps } from "./utils";
 
-import type { ActivityHistory } from "src/common/types";
+import type { ActivityHistory, AllSettings } from "src/common/types";
 
 export const users = pgTable("users", {
   ...id,
@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  avatarReference: varchar("avatar_reference", { length: 200 }),
   role: text("role").notNull().default(USER_ROLES.STUDENT),
   archived,
 });
@@ -98,6 +99,7 @@ export const createTokens = pgTable("create_tokens", {
     precision: 3,
     withTimezone: true,
   }).notNull(),
+  reminderCount: integer("reminder_count").notNull().default(0),
 });
 
 export const resetTokens = pgTable("reset_tokens", {
@@ -423,3 +425,10 @@ export const groupUsers = pgTable(
     unq: unique().on(table.userId, table.groupId),
   }),
 );
+
+export const settings = pgTable("settings", {
+  ...id,
+  ...timestamps,
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  settings: jsonb("settings").$type<AllSettings>().notNull(),
+});
