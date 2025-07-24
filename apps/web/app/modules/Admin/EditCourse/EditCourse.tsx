@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from "@remix-run/react";
+import { Link, useParams, useSearchParams, Navigate } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
@@ -26,7 +26,8 @@ const EditCourse = () => {
   const courseTabs = useEditCourseTabs();
 
   if (!id) throw new Error("Course ID not found");
-  const { data: course, isLoading, dataUpdatedAt } = useBetaCourseById(id);
+  const { data: course, isLoading, dataUpdatedAt, error } = useBetaCourseById(id);
+
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
   const handleTabChange = (tabValue: string) => {
     params.set("tab", tabValue);
@@ -43,6 +44,8 @@ const EditCourse = () => {
       </div>
     );
   }
+
+  if (error) return <Navigate to={"/"} />;
 
   const breadcrumbs = [
     { title: t("adminCourseView.breadcrumbs.myCourses"), href: "/admin/courses" },

@@ -2,8 +2,10 @@ export type ActivityHistory = {
   [date: string]: boolean;
 };
 
-export type AdminSettings = {
-  admin_new_user_notification: boolean;
+export type UserSettings = {
   language: string;
-  [key: string]: any;
 };
+
+export type AdminSettings = UserSettings & { adminNewUserNotification: boolean };
+
+export type AllSettings = UserSettings | AdminSettings;

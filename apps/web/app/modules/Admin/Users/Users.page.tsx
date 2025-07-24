@@ -9,7 +9,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { isEmpty } from "lodash-es";
+import { camelCase, isEmpty } from "lodash-es";
 import { Trash } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -135,7 +135,7 @@ const Users = () => {
     {
       accessorKey: "role",
       header: t("adminUsersView.field.role"),
-      cell: ({ row }) => t(`common.roles.${row.original.role}`),
+      cell: ({ row }) => t(`common.roles.${camelCase(row.original.role)}`),
     },
     {
       accessorKey: "archived",

@@ -10,6 +10,7 @@ import { ContentTypes } from "../EditCourse.types";
 import ChaptersList from "./components/ChaptersList";
 import CourseLessonEmptyState from "./components/CourseLessonEmptyState";
 import NewChapter from "./NewChapter/NewChapter";
+import AiMentorLessonForm from "./NewLesson/AiMentorLessonForm/AiMentorLessonForm";
 import SelectLessonType from "./NewLesson/components/SelectLessonType";
 import FileLessonForm from "./NewLesson/FileLessonForm/FileLessonForm";
 import QuizLessonForm from "./NewLesson/QuizLessonForm/QuizLessonForm";
@@ -93,6 +94,14 @@ const CourseLessons = ({ chapters, canRefetchChapterList }: CourseLessonsProps) 
       ),
       [ContentTypes.QUIZ_FORM]: (
         <QuizLessonForm
+          setContentTypeToDisplay={setContentTypeToDisplay}
+          chapterToEdit={selectedChapter}
+          lessonToEdit={selectedLesson}
+          setSelectedLesson={setSelectedLesson}
+        />
+      ),
+      [ContentTypes.AI_MENTOR_FORM]: (
+        <AiMentorLessonForm
           setContentTypeToDisplay={setContentTypeToDisplay}
           chapterToEdit={selectedChapter}
           lessonToEdit={selectedLesson}

@@ -169,6 +169,28 @@
         }
       }
     },
+    "/api/auth/google": {
+      "get": {
+        "operationId": "AuthController_googleAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/google/callback": {
+      "get": {
+        "operationId": "AuthController_googleAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",
@@ -578,6 +600,41 @@
         }
       }
     },
+    "/api/user/profile": {
+      "patch": {
+        "operationId": "UserController_updateUserProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "userAvatar": {
+                        "type": "string",
+                        "format": "binary"
+                      },
+                      "data": {
+                        "format": "string",
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/user/admin": {
       "patch": {
         "operationId": "UserController_adminUpdateUser",
@@ -675,6 +732,63 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/file": {
+      "post": {
+        "operationId": "FileController_uploadFile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "description": "Optional resource type"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "FileController_deleteFile",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "required": true,
+            "in": "query",
+            "description": "Key of the file to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File deleted successfully"
           }
         }
       }
@@ -1703,63 +1817,6 @@
         }
       }
     },
-    "/api/file": {
-      "post": {
-        "operationId": "FileController_uploadFile",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "resource": {
-                    "type": "string",
-                    "description": "Optional resource type"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "File uploaded successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileUploadResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
-          }
-        }
-      }
-    },
     "/api/statistics/user-stats": {
       "get": {
         "operationId": "StatisticsController_getUserStatistics",
@@ -2018,6 +2075,70 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BetaCreateLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/beta-create-lesson/ai": {
+      "post": {
+        "operationId": "LessonController_betaCreateAiMentorLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaCreateAiMentorLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaCreateAiMentorLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/beta-update-lesson/ai": {
+      "patch": {
+        "operationId": "LessonController_betaUpdateAiMentorLesson",
+        "parameters": [
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaUpdateAiMentorLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaUpdateAiMentorLessonResponse"
                 }
               }
             }
@@ -2735,32 +2856,7 @@
           }
         }
       },
-      "post": {
-        "operationId": "SettingsController_createUserSettings",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserSettingsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
+      "put": {
         "operationId": "SettingsController_updateUserSettings",
         "parameters": [],
         "requestBody": {
@@ -2782,6 +2878,17 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/settings/admin-new-user-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -2876,9 +2983,38 @@
             "type": "string"
           },
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -3073,9 +3209,38 @@
         "type": "object",
         "properties": {
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "createToken": {
             "minLength": 1,
@@ -3091,9 +3256,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "resetToken": {
             "minLength": 1,
@@ -3313,6 +3507,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3323,7 +3527,8 @@
               "contactEmail",
               "contactPhone",
               "jobTitle",
-              "role"
+              "role",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3539,9 +3744,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "oldPassword": {
             "minLength": 8,
@@ -3640,6 +3874,21 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileKey",
+          "fileUrl"
         ]
       },
       "GetAllCategoriesResponse": {
@@ -4443,6 +4692,10 @@
                               {
                                 "const": "quiz",
                                 "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
+                                "type": "string"
                               }
                             ]
                           },
@@ -4665,6 +4918,10 @@
                               {
                                 "const": "quiz",
                                 "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
+                                "type": "string"
                               }
                             ]
                           },
@@ -4860,6 +5117,38 @@
                                 "title"
                               ]
                             }
+                          },
+                          "aiMentor": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "lessonId": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "aiMentorInstructions": {
+                                    "type": "string"
+                                  },
+                                  "completionConditions": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "lessonId",
+                                  "aiMentorInstructions",
+                                  "completionConditions"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "updatedAt": {
                             "type": "string"
@@ -5205,21 +5494,6 @@
       },
       "UnenrollCourseResponse": {
         "type": "null"
-      },
-      "FileUploadResponse": {
-        "type": "object",
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "fileUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fileKey",
-          "fileUrl"
-        ]
       },
       "GetUserStatisticsResponse": {
         "type": "object",
@@ -5617,6 +5891,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -5755,6 +6033,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -5950,6 +6232,38 @@
                           "title"
                         ]
                       }
+                    },
+                    "aiMentor": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "aiMentorInstructions": {
+                              "type": "string"
+                            },
+                            "completionConditions": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "lessonId",
+                            "aiMentorInstructions",
+                            "completionConditions"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "updatedAt": {
                       "type": "string"
@@ -6078,6 +6392,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -6273,6 +6591,38 @@
                           "title"
                         ]
                       }
+                    },
+                    "aiMentor": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "aiMentorInstructions": {
+                              "type": "string"
+                            },
+                            "completionConditions": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "lessonId",
+                            "aiMentorInstructions",
+                            "completionConditions"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "updatedAt": {
                       "type": "string"
@@ -6465,6 +6815,10 @@
                   },
                   {
                     "const": "quiz",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
                     "type": "string"
                   }
                 ]
@@ -6794,6 +7148,10 @@
                   {
                     "const": "quiz",
                     "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
+                    "type": "string"
                   }
                 ]
               },
@@ -6987,6 +7345,38 @@
                   ]
                 }
               },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "updatedAt": {
                 "type": "string"
               }
@@ -7029,6 +7419,569 @@
             },
             "required": [
               "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BetaCreateAiMentorLessonBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileType": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "const": "brief_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "detailed_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "match_words",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scale_1_5",
+                          "type": "string"
+                        },
+                        {
+                          "const": "single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "true_or_false",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_text",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "photoS3Key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "optionText": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isStudentAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isCorrect": {
+                            "type": "boolean"
+                          },
+                          "questionId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "matchedWord": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "scaleAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "optionText",
+                          "displayOrder",
+                          "isCorrect"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title"
+                  ]
+                }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "chapterId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "displayOrder": {
+                "type": "number"
+              },
+              "aiMentorInstructions": {
+                "type": "string"
+              },
+              "completionConditions": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "chapterId",
+              "aiMentorInstructions",
+              "completionConditions"
+            ]
+          }
+        ]
+      },
+      "BetaCreateAiMentorLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BetaUpdateAiMentorLessonBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileType": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "const": "brief_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "detailed_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "match_words",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scale_1_5",
+                          "type": "string"
+                        },
+                        {
+                          "const": "single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "true_or_false",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_text",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "photoS3Key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "optionText": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isStudentAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isCorrect": {
+                            "type": "boolean"
+                          },
+                          "questionId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "matchedWord": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "scaleAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "optionText",
+                          "displayOrder",
+                          "isCorrect"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title"
+                  ]
+                }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "aiMentorInstructions": {
+                "type": "string"
+              },
+              "completionConditions": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "aiMentorInstructions",
+              "completionConditions"
+            ]
+          }
+        ]
+      },
+      "BetaUpdateAiMentorLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
               "message"
             ]
           }
@@ -7513,6 +8466,10 @@
                   {
                     "const": "quiz",
                     "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
+                    "type": "string"
                   }
                 ]
               },
@@ -7705,6 +8662,38 @@
                     "title"
                   ]
                 }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "updatedAt": {
                 "type": "string"
@@ -7950,7 +8939,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8012,7 +9001,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -8060,7 +9049,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -8122,7 +9111,7 @@
             "required": [
               "id",
               "name",
-              "description"
+              "characteristic"
             ]
           }
         },
@@ -8145,7 +9134,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8207,7 +9196,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -8248,7 +9237,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -8286,7 +9275,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -8303,7 +9292,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "type": "string"
               }
             },
@@ -8530,130 +9519,48 @@
           "data"
         ]
       },
-      "CreateUserSettingsBody": {
-        "type": "object",
-        "properties": {
-          "admin_new_user_notification": {
-            "type": "boolean"
-          },
-          "language": {
-            "type": "string"
-          },
-          "company_information": {
+      "UpdateUserSettingsBody": {
+        "anyOf": [
+          {
             "type": "object",
             "properties": {
-              "company_name": {
-                "type": "string"
-              },
-              "registered_address": {
-                "type": "string"
-              },
-              "tax_number": {
-                "type": "string"
-              },
-              "email_address": {
-                "type": "string"
-              },
-              "court_register_number": {
+              "language": {
                 "type": "string"
               }
             }
-          }
-        }
-      },
-      "CreateUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
+          },
+          {
             "type": "object",
             "properties": {
-              "userId": {
-                "format": "uuid",
+              "language": {
                 "type": "string"
               },
-              "settings": {
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "company_information": {
                 "type": "object",
                 "properties": {
-                  "admin_new_user_notification": {
-                    "type": "boolean"
-                  },
-                  "language": {
+                  "company_name": {
                     "type": "string"
                   },
-                  "company_information": {
-                    "type": "object",
-                    "properties": {
-                      "company_name": {
-                        "type": "string"
-                      },
-                      "registered_address": {
-                        "type": "string"
-                      },
-                      "tax_number": {
-                        "type": "string"
-                      },
-                      "email_address": {
-                        "type": "string"
-                      },
-                      "court_register_number": {
-                        "type": "string"
-                      }
-                    }
+                  "registered_address": {
+                    "type": "string"
+                  },
+                  "tax_number": {
+                    "type": "string"
+                  },
+                  "email_address": {
+                    "type": "string"
+                  },
+                  "court_register_number": {
+                    "type": "string"
                   }
                 }
-              },
-              "createdAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserSettingsBody": {
-        "type": "object",
-        "properties": {
-          "admin_new_user_notification": {
-            "type": "boolean"
-          },
-          "language": {
-            "type": "string"
-          },
-          "company_information": {
-            "type": "object",
-            "properties": {
-              "company_name": {
-                "type": "string"
-              },
-              "registered_address": {
-                "type": "string"
-              },
-              "tax_number": {
-                "type": "string"
-              },
-              "email_address": {
-                "type": "string"
-              },
-              "court_register_number": {
-                "type": "string"
               }
             }
           }
-        }
+        ]
       },
       "UpdateUserSettingsResponse": {
         "type": "object",
@@ -8666,35 +9573,54 @@
                 "type": "string"
               },
               "settings": {
-                "type": "object",
-                "properties": {
-                  "admin_new_user_notification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "company_information": {
+                "anyOf": [
+                  {
                     "type": "object",
                     "properties": {
-                      "company_name": {
-                        "type": "string"
-                      },
-                      "registered_address": {
-                        "type": "string"
-                      },
-                      "tax_number": {
-                        "type": "string"
-                      },
-                      "email_address": {
-                        "type": "string"
-                      },
-                      "court_register_number": {
+                      "language": {
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      },
+                      "company_information": {
+                        "type": "object",
+                        "properties": {
+                          "company_name": {
+                            "type": "string"
+                          },
+                          "registered_address": {
+                            "type": "string"
+                          },
+                          "tax_number": {
+                            "type": "string"
+                          },
+                          "email_address": {
+                            "type": "string"
+                          },
+                          "court_register_number": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
                   }
-                }
+                ]
               },
               "createdAt": {
                 "anyOf": [
@@ -8756,35 +9682,54 @@
                 ]
               },
               "settings": {
-                "type": "object",
-                "properties": {
-                  "admin_new_user_notification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "company_information": {
+                "anyOf": [
+                  {
                     "type": "object",
                     "properties": {
-                      "company_name": {
-                        "type": "string"
-                      },
-                      "registered_address": {
-                        "type": "string"
-                      },
-                      "tax_number": {
-                        "type": "string"
-                      },
-                      "email_address": {
-                        "type": "string"
-                      },
-                      "court_register_number": {
+                      "language": {
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      },
+                      "company_information": {
+                        "type": "object",
+                        "properties": {
+                          "company_name": {
+                            "type": "string"
+                          },
+                          "registered_address": {
+                            "type": "string"
+                          },
+                          "tax_number": {
+                            "type": "string"
+                          },
+                          "email_address": {
+                            "type": "string"
+                          },
+                          "court_register_number": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
                   }
-                }
+                ]
               },
               "createdAt": {
                 "anyOf": [
@@ -8846,35 +9791,54 @@
                 ]
               },
               "settings": {
-                "type": "object",
-                "properties": {
-                  "admin_new_user_notification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "company_information": {
+                "anyOf": [
+                  {
                     "type": "object",
                     "properties": {
-                      "company_name": {
-                        "type": "string"
-                      },
-                      "registered_address": {
-                        "type": "string"
-                      },
-                      "tax_number": {
-                        "type": "string"
-                      },
-                      "email_address": {
-                        "type": "string"
-                      },
-                      "court_register_number": {
+                      "language": {
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      },
+                      "company_information": {
+                        "type": "object",
+                        "properties": {
+                          "company_name": {
+                            "type": "string"
+                          },
+                          "registered_address": {
+                            "type": "string"
+                          },
+                          "tax_number": {
+                            "type": "string"
+                          },
+                          "email_address": {
+                            "type": "string"
+                          },
+                          "court_register_number": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
                   }
-                }
+                ]
               },
               "createdAt": {
                 "anyOf": [

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, UseGuards } from "@nestjs/common";
+import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -12,8 +12,7 @@ import {
   CompanyInformationBody,
   companyInformationBodySchema,
 } from "./schemas/company-information.schema";
-import { CreateSettingsBody, createSettingsBodySchema } from "./schemas/create-settings.schema";
-import { settingsSchema, globalSettingsSchema } from "./schemas/settings.schema";
+import { globalSettingsSchema, settingsSchema } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
@@ -22,24 +21,12 @@ import { SettingsService } from "./settings.service";
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @Get("")
+  @Get()
   async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
-    return await this.settingsService.getUserSettings(userId);
+    return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
-  @Post("")
-  @Validate({
-    request: [{ type: "body", schema: createSettingsBodySchema }],
-    response: baseResponse(settingsSchema),
-  })
-  async createUserSettings(
-    @Body() createSettings: CreateSettingsBody,
-    @CurrentUser("userId") userId: UUIDType,
-  ) {
-    return new BaseResponse(await this.settingsService.createSettings(userId, createSettings));
-  }
-
-  @Patch("")
+  @Put()
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
     response: baseResponse(settingsSchema),
@@ -51,20 +38,17 @@ export class SettingsController {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
+  @Patch("admin-new-user-notification")
+  @Roles(USER_ROLES.ADMIN)
+  async updateAdminNewUserNotification(@CurrentUser("userId") userId: UUIDType) {
+    const result = await this.settingsService.updateAdminNewUserNotification(userId);
+    return new BaseResponse(result);
+  }
+
   @Get("company-information")
   @Public()
   async getCompanyInformation() {
     return await this.settingsService.getCompanyInformation();
-  }
-
-  @Post("company-information")
-  @Roles(USER_ROLES.ADMIN)
-  @Validate({
-    request: [{ type: "body", schema: companyInformationBodySchema }],
-    response: baseResponse(globalSettingsSchema),
-  })
-  async createCompanyInformation(@Body() companyInfo: CompanyInformationBody) {
-    return new BaseResponse(await this.settingsService.createCompanyInformation(companyInfo));
   }
 
   @Patch("company-information")

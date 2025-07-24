@@ -27,14 +27,14 @@ export default function LessonLayout() {
   const { currentUser } = useCurrentUserStore();
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex max-h-dvh flex-col">
       <div className="flex flex-1 flex-col overflow-hidden 2xl:flex-row">
         <Navigation
           menuItems={mapNavigationItems(
             getNavigationConfig(currentUser?.id ?? "", currentUser?.role === "user", t),
           )}
         />
-        <main className="flex-1 overflow-y-auto bg-primary-50">
+        <main className="relative flex-1 overflow-y-auto bg-primary-50">
           <RouteGuard>
             <Outlet />
           </RouteGuard>

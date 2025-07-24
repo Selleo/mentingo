@@ -3,6 +3,7 @@ import request from "supertest";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
+import { cookieFor } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../../auth/auth.service";
 
 import type { DatabasePg } from "../../common";
@@ -35,12 +36,7 @@ describe("UsersController (e2e)", () => {
       .withAdminRole()
       .create();
 
-    const testLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-      email: testUser.email,
-      password: testUser.credentials?.password,
-    });
-
-    testCookies = testLoginResponse.headers["set-cookie"];
+    testCookies = await cookieFor(testUser, app);
   });
 
   describe("GET /user/all", () => {
@@ -51,7 +47,9 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data).toEqual(
-        expect.arrayContaining([expect.objectContaining(omit(testUser, "credentials"))]),
+        expect.arrayContaining([
+          expect.objectContaining(omit(testUser, "credentials", "avatarReference")),
+        ]),
       );
       expect(Array.isArray(response.body.data)).toBe(true);
     });
@@ -65,6 +63,7 @@ describe("UsersController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data).toBeDefined();
+
       expect(response.body.data).toStrictEqual(omit(testUser, "credentials"));
     });
 
@@ -105,7 +104,7 @@ describe("UsersController (e2e)", () => {
 
   describe("PATCH /user/change-password?id=:id", () => {
     it("should change password when old password is correct", async () => {
-      const newPassword = "newPassword123";
+      const newPassword = "newPassword123@";
 
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${testUser.id}`)
@@ -126,7 +125,7 @@ describe("UsersController (e2e)", () => {
 
     it("should return 401 when old password is incorrect", async () => {
       const incorrectOldPassword = "wrongPassword";
-      const newPassword = "newPassword123";
+      const newPassword = "newPassword123@";
 
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${testUser.id}`)
@@ -138,7 +137,7 @@ describe("UsersController (e2e)", () => {
     it("should return 403 when changing another user's password", async () => {
       const anotherUser = await authService.register({
         email: "another2@example.com",
-        password: "password123",
+        password: "Password123@",
         firstName: "Another",
         lastName: "User",
       });
@@ -146,7 +145,7 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch(`/api/user/change-password?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
-        .send({ oldPassword: "password123", newPassword: "newpassword" })
+        .send({ oldPassword: "Password123@", newPassword: "Password2137@" })
         .expect(403);
     });
   });

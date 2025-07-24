@@ -7,6 +7,10 @@ import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import {
+  DEFAULT_USER_ADMIN_SETTINGS,
+  DEFAULT_USER_SETTINGS,
+} from "src/settings/constants/settings.constants";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -58,6 +62,8 @@ async function createUsers(users: UsersSeed, password = faker.internet.password(
 
       const user = await createOrFindUser(userToCreate.email, password, userToCreate);
 
+      await insertUserSettings(user.id, user.role === USER_ROLES.ADMIN);
+
       return user;
     }),
   );
@@ -96,6 +102,24 @@ async function insertUserDetails(userId: UUIDType) {
     contactPhoneNumber: faker.phone.number(),
     jobTitle: faker.person.jobTitle(),
   });
+}
+
+async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
+  const settingsObject = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
+
+  const settingsJSON = JSON.stringify(settingsObject).replace(/'/g, "''");
+
+  await db.execute(
+    sql`
+      INSERT INTO settings (user_id, settings, created_at, updated_at)
+      VALUES (
+        ${userId},
+        '${sql.raw(settingsJSON)}'::jsonb,
+        ${new Date().toISOString()},
+        ${new Date().toISOString()}
+      )
+    `,
+  );
 }
 
 async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {

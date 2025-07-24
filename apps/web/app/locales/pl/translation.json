@@ -13,7 +13,8 @@
       "goBack": "Wróć",
       "clearAll": "Wyczyść wszystko",
       "ignore": "Ignoruj",
-      "validate": "Popraw błędy"
+      "validate": "Popraw błędy",
+      "continue": "Kontynuuj"
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -38,7 +39,8 @@
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka"
-    }
+    },
+    "continueWithGoogle": "Kontynuuj z użyciem Google"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -161,12 +163,20 @@
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordMinLength": "Hasło musi mieć co najmniej 8 znaków",
       "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "button": {
-      "changePassword": "Zmień hasło"
+      "changePassword": "Utwórz hasło"
     }
+  },
+  "passwordValidationDisplay": {
+    "title": "Wymagania dotyczące hasła",
+    "header": "Twoje hasło musi zawierać:",
+    "passwordMinLength": "co najmniej 8 znaków",
+    "passwordUppercase": "co najmniej jedną wielką literę",
+    "passwordLowercase": "co najmniej jedną małą literę",
+    "passwordNumber": "co najmniej jedną cyfrę",
+    "passwordSpecial": "co najmniej jeden znak specjalny"
   },
   "changePasswordView": {
     "header": "Zmień hasło",
@@ -177,7 +187,8 @@
     },
     "validation": {
       "oldPassword": "Stare hasło jest wymagane",
-      "newPassword": "Nowe hasło jest wymagane"
+      "newPassword": "Nowe hasło jest wymagane",
+      "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "toast": {
       "passwordChangedSuccessfully": "Hasło zostało zmienione pomyślnie",
@@ -187,12 +198,42 @@
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
-      "showMore": "Pokaż więcej"
+      "showMore": "Pokaż więcej",
+      "edit": "Edytuj",
+      "share": "Udostępnij profil",
+      "cancel": "Anuluj",
+      "confirm": "Potwierdź",
+      "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
     "breadcrumbs": {
       "dashboard": "Panel"
     },
+    "field": {
+      "firstName": "Imię",
+      "firstNamePlaceholder": "Wprowadź swoje imię",
+      "lastName": "Nazwisko",
+      "lastNamePlaceholder": "Wprowadź swoje nazwisko",
+      "contactEmail": "Email",
+      "contactEmailPlaceholder": "Wprowadź swój adres email",
+      "contactPhone": "Numer telefonu",
+      "contactPhonePlaceholder": "Wprowadź swój numer telefonu",
+      "jobTitle": "Tytuł",
+      "jobTitlePlaceholder": "Wprowadź swój tytuł",
+      "description": "Twój opis",
+      "descriptionPlaceholder": "Wprowadź krótki opis",
+      "uploadThumbnailLabel": "Prześlij zdjęcie profilowe"
+    },
+    "toast": {
+      "profileLinkCopied": "Link do profilu skopiowany!",
+      "profileLinkCopyError": "Błąd podczas kopiowania linku do profilu!"
+    },
     "other": {
+      "personalInfoTitle": "Dane osobiste",
+      "personalInfoDescription": "Zarządzaj swoimi podstawowymi danymi konta",
+      "aboutTitle": "O mnie",
+      "aboutDescription": "Powiedz więcej o sobie",
+      "appearanceTitle": "Wygląd",
+      "appearanceDescription": "Zmień swoje zdjęcie profilowe",
       "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",
@@ -228,7 +269,8 @@
       "continue": "Kontynuuj",
       "start": "Rozpocznij",
       "readMore": "Czytaj więcej",
-      "tryAgain": "Spróbuj ponownie"
+      "tryAgain": "Spróbuj ponownie",
+      "view": "Zobacz"
     },
     "other": {
       "completedCourses": "Zakończone kursy",
@@ -299,7 +341,8 @@
         "video": "Wideo",
         "presentation": "Prezentacja",
         "text": "Tekst",
-        "quiz": "Quiz"
+        "quiz": "Quiz",
+        "aiMentor": "AI Mentor"
       }
     },
     "other": {
@@ -438,19 +481,24 @@
   },
   "adminGroupsView": {
     "name": "Nazwa grupy",
-    "description": "Opis",
+    "characteristic": "Charakterystyka",
     "buttons": {
       "create": "Stwórz nową grupę",
       "deleteSelected": "Usuń wybrane"
     },
     "newGroup": {
       "header": "Utwórz nową grupę",
-      "subheader": "Wprowadź dane dla swojej nowej grupy. Kliknij zapisz, gdy skończysz.",
+      "card": {
+        "header": "Szczegóły grupy",
+        "subheader": "Zdefiniuj nazwę grupy i jej charakterystykę",
+        "footer": "Pamiętaj, członkowie grupy zobaczą ten opis. Mentor AI wykorzysta go w rozmowach."
+      },
       "fields": {
         "name": "Nazwa grupy",
-        "description": "Opis"
+        "characteristic": "Charakterystyka"
       },
-      "submit": "Utwórz grupę"
+      "cancel": "Anuluj",
+      "submit": "Publikuj"
     },
     "updateGroup": {
       "header": "Edytuj grupę",
@@ -565,6 +613,7 @@
         "removePresentationLesson": "Czy na pewno chcesz usunąć tę lekcję prezentacyjną z rozdziału?",
         "removeTextLesson": "Czy na pewno chcesz usunąć tę lekcję tekstową z rozdziału?",
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
+        "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -609,7 +658,14 @@
           "atLeastOneOptionCorrect": "Przynajmniej jedna opcja musi być oznaczona jako poprawna.",
           "allOptionsCorrect": "Wszystkie opcje muszą być poprawne",
           "titleRequired": "Tytuł jest wymagany",
-          "descriptionRequired": "Opis jest wymagany"
+          "descriptionRequired": "Opis jest wymagany",
+          "aiMentorInstructionsRequired": "Instrukcje AI Mentora są wymagane",
+          "aiMentorInstructionsMaxLength": "Instrukcje AI Mentora są zbyt długie (maks. 2000 znaków)",
+          "completionConditionsRequired": "Warunki zaliczenia są wymagane",
+          "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 1000 znaków)",
+          "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
+          "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
+          "titleMaxLength": "Tytuł jest zbyt długi (maks. 255 znaków)"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -619,6 +675,8 @@
           "fileLessonCreatedSuccessfully": "Plik utworzony pomyślnie",
           "textLessonCreatedSuccessfully": "Lekcja tekstowa utworzona pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
+          "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
+          "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
@@ -635,7 +693,10 @@
           "image": "Obrazek",
           "type": "Typ",
           "words": "Słowa",
-          "sentence": "Zdanie"
+          "sentence": "Zdanie",
+          "aiMentorInstructions": "Instrukcje AI Mentora",
+          "completionConditions": "Warunki zaliczenia",
+          "passThreshold": "Próg zaliczenia"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",
@@ -645,7 +706,10 @@
           "singleChoice": "Pojedynczy wybór",
           "multipleChoice": "Wielokrotny wybór",
           "enterWord": "Wprowadź słowo",
-          "enterURL": "Wpisz link"
+          "enterURL": "Wpisz link",
+          "aiMentorInstructions": "Opisz jak AI Mentor powinien zachowywać się podczas lekcji...",
+          "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
+          "passThreshold": "np. 70%"
         },
         "other": {
           "lessonNumber": "Liczba lekcji",
@@ -653,6 +717,7 @@
           "text": "Tekst",
           "video": "Wideo",
           "quiz": "Quiz",
+          "aiMentor": "AI Mentor",
           "correct": "Poprawna",
           "true": "Prawda",
           "false": "Fałsz",
@@ -673,9 +738,36 @@
           "videoLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki wideo, takie jak MP4.",
           "presentationLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki prezentacji, takie jak PPTX.",
           "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
+          "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
           "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
           "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
-          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu."
+          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
+          "aiMentorInstructionsTooltip": "Opisz, jak AI Mentor powinien zachowywać się podczas lekcji. Uwzględnij kontekst, rolę lub scenariusz, który AI powinien realizować. To określa, jak AI będzie prowadzić rozmowę.",
+          "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
+          "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
+          "suggestedExamples": "Sugerowane przykłady",
+          "charactersLeft": "pozostałe znaki",
+          "optional": "opcjonalnie",
+          "overwriteContent": "Nadpisz treść",
+          "overwriteContentDescription": "To zastąpi aktualną treść wybranym przykładem. Czy na pewno chcesz kontynuować?",
+          "scenarioSimulation": "Symulacja scenariusza",
+          "problemSolving": "Rozwiązywanie problemów",
+          "creativeTask": "Zadanie kreatywne",
+          "knowledgeSharing": "Dialog dzielenia się wiedzą",
+          "aiMentorSuggestionExamples": {
+            "instructions": {
+              "scenarioSimulation": "Wcielasz się w rolę klienta biznesowego, który szuka dostawcy usług tworzenia oprogramowania. Masz konkretne wymagania: aplikacja musi być gotowa w ciągu 3 miesięcy, masz ograniczony budżet i oczekujesz jasnej komunikacji. Student wciela się w rolę przedstawiciela handlowego, który chce pozyskać twój biznes. AI Mentor powinien odpowiadać jako klient, zadając pytania i wyrażając obawy.",
+              "problemSolving": "Wcielasz się w rolę pracownika, który prosi o podwyżkę wynagrodzenia. Uważasz, że na nią zasługujesz ze względu na swoje ostatnie osiągnięcia. Jednak firma obecnie nie ma dostępnego budżetu na podwyżki. Student wciela się w rolę menedżera, który musi konstruktywnie przeprowadzić rozmowę, okazując empatię i próbując znaleźć alternatywne rozwiązanie.",
+              "creativeTask": "Prosisz studenta o zaproponowanie pomysłu na nową usługę, którą firma mogłaby zaoferować swoim klientom. Twoją rolą jest zachęcanie do kreatywności, zadawanie pytań uzupełniających i pomaganie studentowi w udoskonaleniu jego koncepcji.",
+              "knowledgeSharing": "Wcielasz się w rolę doświadczonego mentora, który dzieli się wiedzą na temat technik zarządzania czasem. Rozmowa ma charakter nieformalny: wprowadzasz koncepcje, podajesz przykłady i zachęcasz studenta do refleksji. Czasami zadajesz lekkie, otwarte pytania, aby sprawdzić zrozumienie. Celem jest prowadzenie, a nie testowanie."
+            },
+            "conditions": {
+              "scenarioSimulation": "<ul><li>Student pyta o budżet klienta.</li><li>Student pyta o harmonogram.</li><li>Student używa sprzedaży SPIN lub innej techniki sprzedażowej.</li><li>Student identyfikuje kluczowe problemy klienta.</li><li>Student składa propozycję, która odpowiada ograniczeniom klienta.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
+              "problemSolving": "<ul><li>Student uznaje wkład pracownika.</li><li>Student uczciwie wyjaśnia sytuację budżetową.</li><li>Student proponuje alternatywę niefinansową (np. dodatkowe korzyści, możliwość rozwoju).</li><li>Student zgadza się wrócić do tematu w późniejszym terminie.</li><li>Student utrzymuje szanujący, wspierający ton.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
+              "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki muszą być spełnione.)</em>",
+              "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
+            }
+          }
         }
       }
     },
@@ -743,7 +835,8 @@
       "password": "Hasło"
     },
     "other": {
-      "alreadyHaveAccount": "Masz już konto?"
+      "alreadyHaveAccount": "Masz już konto?",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "createAccount": "Utwórz konto",
@@ -752,8 +845,7 @@
     "validation": {
       "firstName": "Imię jest wymagane",
       "lastName": "Nazwisko jest wymagane",
-      "email": "Nieprawidłowy email",
-      "password": "Hasło musi mieć co najmniej 8 znaków"
+      "email": "Nieprawidłowy email"
     }
   },
   "courseChapterView": {
@@ -793,7 +885,8 @@
       "forgotPassword": "Zapomniałeś hasła?",
       "dontHaveAccount": "Nie masz konta?",
       "rememberMe": "Zapamiętaj mnie",
-      "signUp": "Zarejestruj się"
+      "signUp": "Zarejestruj się",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "login": "Zaloguj się"
@@ -827,7 +920,15 @@
           "title": "Szukaj po tytule...",
           "categories": "Kategorie",
           "sort": "Sortuj"
-        }
+        },
+        "options": {}
+      },
+      "headerOptions": {
+        "image": "Zdjęcie",
+        "title": "Nazwa Kursu",
+        "category": "Kategoria",
+        "description": "Opis",
+        "author": "Autor"
       }
     }
   },
@@ -861,7 +962,13 @@
       "multiple": "Wielokrotna",
       "fillInTheBlanks": "Uzupełnij luki.",
       "selectQuestion": "Wybierz pytanie.",
-      "trueOrFalseQuestion": "Pytanie prawda/fałsz."
+      "trueOrFalseQuestion": "Pytanie prawda/fałsz.",
+      "multipleChoice": "Pytanie wielokrotnego wyboru.",
+      "singleChoice": "Pytanie jednokrotnego wyboru."
+    },
+    "aiMentor": {
+      "title": "Sesja AI Mentora",
+      "description": "To jest sesja mentoringu z AI. AI poprowadzi Cię przez lekcję zgodnie z wytycznymi instruktora."
     },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
@@ -890,6 +997,7 @@
       "answerCannotBeEmptyForTextQuestion": "Odpowiedź nie może być pusta dla pytania tekstowego {{questionId}}.",
       "invalidSelectionForSingleAnswer": "Nieprawidłowy wybór dla pytania jednokrotnego wyboru.",
       "invalidFormatForMultiAnswer": "Nieprawidłowy format dla pytania wielokrotnego wyboru.",
+      "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
       "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!"
     }
@@ -910,6 +1018,7 @@
       "yourAnswer": "Twoja odpowiedź",
       "singleChoice": "Pytanie jednokrotnego wyboru",
       "multipleChoice": "Pytanie wielokrotnego wyboru",
+      "trueOrFalseChoice": "Pytanie prawda fałsz",
       "oneOrTwoWordSentence": "Podaj krótką odpowiedź (1-2 zadań)",
       "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)"
     },
@@ -946,6 +1055,19 @@
     "chapterProgress": {
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
+    }
+  },
+
+  "adminPreferences": {
+    "header": "Preferencje administratora",
+    "subHeader": "Zarządzaj swoimi preferencjami powiadomień",
+    "notificationSettings": "Ustawienia powiadomień",
+    "field": {
+      "newUserNotifications": "Powiadomienia o nowych użytkownikach",
+      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień zostały pomyślnie zaktualizowane"
     }
   }
 }

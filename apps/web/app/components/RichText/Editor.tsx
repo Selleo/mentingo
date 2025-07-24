@@ -13,9 +13,17 @@ type EditorProps = {
   placeholder?: string;
   id?: string;
   className?: string;
+  parentClassName?: string;
 };
 
-const Editor = ({ content, placeholder, onChange, id, className }: EditorProps) => {
+const Editor = ({
+  content,
+  placeholder,
+  onChange,
+  id,
+  className,
+  parentClassName,
+}: EditorProps) => {
   const editor = useEditor({
     extensions: [...plugins],
     content: content,
@@ -40,7 +48,12 @@ const Editor = ({ content, placeholder, onChange, id, className }: EditorProps) 
   const editorClasses = cn("h-full", defaultClasses.ul, defaultClasses.ol, defaultClasses.taskList);
 
   return (
-    <div className="prose w-full max-w-none overflow-hidden rounded-lg border border-neutral-300 bg-background dark:prose-invert [&_.ProseMirror]:leading-tight">
+    <div
+      className={cn(
+        "prose w-full max-w-none overflow-hidden rounded-lg border border-neutral-300 bg-background dark:prose-invert [&_.ProseMirror]:leading-tight",
+        parentClassName,
+      )}
+    >
       <EditorToolbar editor={editor} />
       <div
         className={cn(

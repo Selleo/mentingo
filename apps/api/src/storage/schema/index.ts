@@ -14,7 +14,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, id, timestamps } from "./utils";
 
-import type { ActivityHistory } from "src/common/types";
+import type { ActivityHistory, AllSettings } from "src/common/types";
 
 export const users = pgTable("users", {
   ...id,
@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  avatarReference: varchar("avatar_reference", { length: 200 }),
   role: text("role").notNull().default(USER_ROLES.STUDENT),
   archived,
 });
@@ -98,6 +99,7 @@ export const createTokens = pgTable("create_tokens", {
     precision: 3,
     withTimezone: true,
   }).notNull(),
+  reminderCount: integer("reminder_count").notNull().default(0),
 });
 
 export const resetTokens = pgTable("reset_tokens", {
@@ -160,6 +162,16 @@ export const lessons = pgTable("lessons", {
   fileS3Key: varchar("file_s3_key", { length: 200 }),
   fileType: varchar("file_type", { length: 20 }),
   isExternal: boolean("is_external").default(false),
+});
+
+export const aiMentorLessons = pgTable("ai_mentor_lessons", {
+  ...id,
+  ...timestamps,
+  lessonId: uuid("lesson_id")
+    .references(() => lessons.id, { onDelete: "cascade" })
+    .notNull(),
+  aiMentorInstructions: text("ai_mentor_instructions").notNull(),
+  completionConditions: text("completion_conditions").notNull(),
 });
 
 export const questions = pgTable("questions", {
@@ -355,7 +367,7 @@ export const groups = pgTable("groups", {
   ...id,
   ...timestamps,
   name: text("name").notNull(),
-  description: text("description"),
+  characteristic: text("characteristic"),
 });
 
 export const groupUsers = pgTable(
@@ -379,5 +391,5 @@ export const settings = pgTable("settings", {
   ...id,
   ...timestamps,
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-  settings: jsonb("settings").default({}),
+  settings: jsonb("settings").$type<AllSettings>().notNull(),
 });

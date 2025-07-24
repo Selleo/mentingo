@@ -7,7 +7,7 @@ import { USER_ROLES } from "../../user/schemas/userRoles";
 
 import type { DatabasePg } from "../../common";
 import type { CompanyInformationBody } from "../schemas/company-information.schema";
-import type { SettingsJSONContentSchema } from "../schemas/settings.schema";
+import type { AdminSettingsJSONContentSchema } from "../schemas/settings.schema";
 import type { INestApplication } from "@nestjs/common";
 
 describe("SettingsController - Company Information (e2e)", () => {
@@ -136,9 +136,9 @@ describe("SettingsController - Company Information (e2e)", () => {
 
       expect(globalSettings).toBeDefined();
       expect(globalSettings?.userId).toBeNull();
-      expect((globalSettings?.settings as SettingsJSONContentSchema)?.company_information).toEqual(
-        validCompanyData,
-      );
+      expect(
+        (globalSettings?.settings as AdminSettingsJSONContentSchema)?.company_information,
+      ).toEqual(validCompanyData);
     });
 
     it("should create company information with partial data", async () => {
@@ -236,7 +236,9 @@ describe("SettingsController - Company Information (e2e)", () => {
         where: (s, { isNull }) => isNull(s.userId),
       });
 
-      expect((globalSettings?.settings as SettingsJSONContentSchema)?.company_information).toEqual({
+      expect(
+        (globalSettings?.settings as AdminSettingsJSONContentSchema)?.company_information,
+      ).toEqual({
         ...validCompanyData,
         ...updateData,
       });

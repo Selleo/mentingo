@@ -8,22 +8,25 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
-  NewUserEmail,
   PasswordRecoveryEmail,
   WelcomeEmail,
 } from "@repo/email-templates";
 import * as bcrypt from "bcryptjs";
-import { and, eq, isNull, lte, sql } from "drizzle-orm";
+import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
+import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
+import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { createTokens, credentials, resetTokens, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
@@ -32,7 +35,7 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
-import type { AdminSettings } from "src/common/types";
+import type { GoogleUserType } from "src/utils/types/google-user.type";
 
 @Injectable()
 export class AuthService {
@@ -45,33 +48,8 @@ export class AuthService {
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
+    private eventBus: EventBus,
   ) {}
-
-  private async notifyAdminsAboutNewUser(firstName: string, lastName: string, email: string) {
-    const { text, html } = new NewUserEmail({
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-    });
-
-    const allAdmins = await this.userService.getAdminsWithSettings();
-
-    const adminsToNotify = allAdmins.filter((admin) => {
-      return (admin.settings?.settings as AdminSettings)?.admin_new_user_notification === true;
-    });
-
-    await Promise.all(
-      adminsToNotify.map((admin) => {
-        return this.emailService.sendEmail({
-          to: admin.user.email,
-          subject: "A new user has registered on your platform",
-          text,
-          html,
-          from: process.env.SES_EMAIL || "",
-        });
-      }),
-    );
-  }
 
   public async register({
     email,
@@ -85,7 +63,6 @@ export class AuthService {
     password: string;
   }) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.email, email));
-
     if (existingUser) {
       throw new ConflictException("User already exists");
     }
@@ -93,12 +70,28 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     return this.db.transaction(async (trx) => {
-      const [newUser] = await trx.insert(users).values({ email, firstName, lastName }).returning();
+      const [newUser] = await trx
+        .insert(users)
+        .values({
+          email,
+          firstName,
+          lastName,
+        })
+        .returning();
 
-      await trx.insert(credentials).values({ userId: newUser.id, password: hashedPassword });
+      await trx.insert(credentials).values({
+        userId: newUser.id,
+        password: hashedPassword,
+      });
+
+      await this.settingsService.createSettings(
+        newUser.id,
+        newUser.role as UserRole,
+        undefined,
+        trx,
+      );
 
       const emailTemplate = new WelcomeEmail({ email, name: email });
-
       await this.emailService.sendEmail({
         to: email,
         subject: "Welcome to our platform",
@@ -107,8 +100,7 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
-      await this.settingsService.createSettings(newUser.id, undefined, trx);
-      await this.notifyAdminsAboutNewUser(firstName, lastName, email);
+      this.eventBus.publish(new UserRegisteredEvent(newUser));
 
       return newUser;
     });
@@ -170,6 +162,7 @@ export class AuthService {
         updatedAt: users.updatedAt,
         role: users.role,
         archived: users.archived,
+        avatarReference: users.avatarReference,
       })
       .from(users)
       .leftJoin(credentials, eq(users.id, credentials.userId))
@@ -242,7 +235,17 @@ export class AuthService {
     const createToken = await this.createPasswordService.getOneByToken(token);
 
     const [existingUser] = await this.db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        role: users.role,
+        archived: users.archived,
+        avatarReference: users.avatarReference,
+      })
       .from(users)
       .where(eq(users.id, createToken.userId));
 
@@ -254,6 +257,12 @@ export class AuthService {
       .insert(credentials)
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(token);
+
+    await this.settingsService.createSettings(createToken.userId, existingUser.role as UserRole);
+
+    this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
+
+    return existingUser;
   }
 
   public async resetPassword(token: string, newPassword: string) {
@@ -270,6 +279,7 @@ export class AuthService {
         email: users.email,
         oldCreateToken: createTokens.createToken,
         tokenExpiryDate: createTokens.expiryDate,
+        reminderCount: createTokens.reminderCount,
       })
       .from(createTokens)
       .leftJoin(credentials, eq(createTokens.userId, credentials.userId))
@@ -278,6 +288,7 @@ export class AuthService {
         and(
           isNull(credentials.userId),
           lte(sql`DATE(${createTokens.expiryDate})`, sql`CURRENT_DATE`),
+          lt(createTokens.reminderCount, 3),
         ),
       );
   }
@@ -298,6 +309,7 @@ export class AuthService {
     createToken: string,
     emailTemplate: { text: string; html: string },
     expiryDate: Date,
+    reminderCount: number,
   ) {
     await this.db.transaction(async (transaction) => {
       try {
@@ -305,6 +317,7 @@ export class AuthService {
           userId,
           createToken,
           expiryDate,
+          reminderCount,
         });
 
         await this.emailService.sendEmail({
@@ -330,7 +343,7 @@ export class AuthService {
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 24);
 
-    expiryTokens.map(async ({ userId, email, oldCreateToken }) => {
+    expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
       const { createToken, emailTemplate } = this.generateNewTokenAndEmail(email);
 
       await this.sendEmailAndUpdateDatabase(
@@ -340,7 +353,32 @@ export class AuthService {
         createToken,
         emailTemplate,
         expiryDate,
+        reminderCount + 1,
       );
     });
+  }
+
+  public async handleGoogleCallback(googleUser: GoogleUserType) {
+    if (!googleUser) {
+      throw new UnauthorizedException("Google user data is missing");
+    }
+
+    let [user] = await this.db.select().from(users).where(eq(users.email, googleUser.email));
+
+    if (!user) {
+      user = await this.userService.createUser({
+        email: googleUser.email,
+        firstName: googleUser.firstName,
+        lastName: googleUser.lastName,
+        role: USER_ROLES.STUDENT,
+      });
+    }
+
+    const tokens = await this.getTokens(user);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
   }
 }

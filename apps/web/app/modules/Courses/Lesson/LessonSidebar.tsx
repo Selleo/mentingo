@@ -45,7 +45,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
   if (!course) return null;
 
   return (
-    <div className="h-full w-full rounded-lg bg-white">
+    <div className="sticky top-0 h-auto max-h-fit min-h-screen overflow-y-scroll rounded-lg bg-white">
       <div className="flex flex-col gap-y-12">
         <div className="flex flex-col gap-y-4 px-8 pt-8">
           <div className="flex justify-between">

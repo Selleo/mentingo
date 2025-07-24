@@ -1,13 +1,12 @@
 import request from "supertest";
 
-import { settings } from "../../../src/storage/schema";
 import { createE2ETest } from "../../../test/create-e2e-test";
-import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
+import { truncateTables, cookieFor } from "../../../test/helpers/test-helpers";
 
 import type { DatabasePg } from "../../common";
-import type { SettingsJSONContentSchema } from "../schemas/settings.schema";
 import type { INestApplication } from "@nestjs/common";
+import type { AdminSettings } from "src/common/types";
 
 describe("SettingsController (e2e)", () => {
   let app: INestApplication;
@@ -16,124 +15,157 @@ describe("SettingsController (e2e)", () => {
   const testPassword = "Password123@@";
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
-  let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     db = app.get("DB");
     userFactory = createUserFactory(db);
-    settingsFactory = createSettingsFactory(db);
   }, 10000);
 
   afterAll(async () => {
     await app.close();
   }, 10000);
 
-  beforeEach(async () => {
-    await db.delete(settings);
+  describe("PUT /api/settings", () => {
+    beforeEach(async () => {
+      await truncateTables(db, ["settings"]);
 
-    testUser = await userFactory.withCredentials({ password: testPassword }).create();
+      testUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create();
 
-    const testLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-      email: testUser.email,
-      password: testUser.credentials?.password,
+      testCookies = await cookieFor(testUser, app);
     });
 
-    testCookies = testLoginResponse.headers["set-cookie"];
-  });
-
-  describe("POST /settings", () => {
-    it("should create new settings for a user.", async () => {
-      const requestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
+    it("should update user settings (e.g., change language)", async () => {
+      const updatePayload = {
+        language: "de",
+      };
 
       const response = await request(app.getHttpServer())
-        .post("/api/settings")
+        .put("/api/settings")
         .set("Cookie", testCookies)
-        .send(requestBody)
-        .expect(201);
+        .send(updatePayload)
+        .expect(200);
 
       expect(response.body).toBeDefined();
       expect(response.body.data.userId).toBe(testUser.id);
-      expect(response.body.data.settings).toEqual(requestBody);
-      expect(response.body.data.createdAt).toBeDefined();
+      expect(response.body.data.settings.language).toBe("de");
 
-      const createdSettingInDb = await db.query.settings.findFirst({
+      const updatedSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, testUser.id),
       });
 
-      expect(createdSettingInDb).toBeDefined();
-      expect(createdSettingInDb?.userId).toBe(testUser.id);
-      expect(createdSettingInDb?.settings).toEqual(requestBody);
-    });
-
-    it("should return 401 if not authenticated", async () => {
-      const requestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
-      await request(app.getHttpServer()).post("/api/settings").send(requestBody).expect(401);
+      expect(updatedSettingInDb).toBeDefined();
+      expect(updatedSettingInDb?.settings.language).toBe("de");
     });
 
     it("should return 400 if invalid data is provided", async () => {
-      const invalidRequestBody = {
-        admin_new_user_notification: "not_a_boolean",
-        language: 123,
+      const invalidUpdatePayload = {
+        language: 12345,
       };
 
       await request(app.getHttpServer())
-        .post("/api/settings")
+        .put("/api/settings")
         .set("Cookie", testCookies)
-        .send(invalidRequestBody)
+        .send(invalidUpdatePayload)
         .expect(400);
     });
 
-    it("should return 409 if settings for user already exists", async () => {
-      const requestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
+    it("should return 401 if not authenticated", async () => {
+      const updatePayload = {
+        language: "de",
+      };
 
-      await request(app.getHttpServer())
-        .post("/api/settings")
-        .set("Cookie", testCookies)
-        .send(requestBody)
-        .expect(201);
-
-      const duplicateRequestBody = settingsFactory.build().settings as SettingsJSONContentSchema;
-
-      const response = await request(app.getHttpServer())
-        .post("/api/settings")
-        .set("Cookie", testCookies)
-        .send(duplicateRequestBody)
-        .expect(409);
-
-      expect(response.body.message).toBeDefined();
-      expect(response.body.statusCode).toBe(409);
-
-      const settingsInDb = await db.query.settings.findMany({
-        where: (s, { eq }) => eq(s.userId, testUser.id),
-      });
-
-      expect(settingsInDb).toHaveLength(1);
-      expect(settingsInDb[0].settings).toEqual(requestBody);
+      await request(app.getHttpServer()).put("/api/settings").send(updatePayload).expect(401);
     });
   });
 
-  describe("GET /settings", () => {
-    it("should return user settings", async () => {
-      const existingSettings = await settingsFactory.create({ userId: testUser.id });
+  describe("PATCH /api/settings/admin-new-user-notification", () => {
+    let adminUser: UserWithCredentials;
+    let adminCookies: string;
 
+    beforeEach(async () => {
+      await truncateTables(db, ["settings"]);
+
+      adminUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withAdminSettings(db)
+        .create();
+
+      adminCookies = await cookieFor(adminUser, app);
+    });
+
+    it("should toggle the notification setting (as Admin)", async () => {
+      const response = await request(app.getHttpServer())
+        .patch("/api/settings/admin-new-user-notification")
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(response.body).toBeDefined();
+      expect(response.body.data.settings.adminNewUserNotification).toBe(true);
+
+      const updatedSettingInDb = await db.query.settings.findFirst({
+        where: (s, { eq }) => eq(s.userId, adminUser.id),
+      });
+
+      const adminSettings = updatedSettingInDb?.settings as AdminSettings;
+      expect(adminSettings?.adminNewUserNotification).toBe(true);
+
+      const secondResponse = await request(app.getHttpServer())
+        .patch("/api/settings/admin-new-user-notification")
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(secondResponse.body.data.settings.adminNewUserNotification).toBe(false);
+
+      const toggledBackSettingInDb = await db.query.settings.findFirst({
+        where: (s, { eq }) => eq(s.userId, adminUser.id),
+      });
+
+      const toggledAdminSettings = toggledBackSettingInDb?.settings as AdminSettings;
+      expect(toggledAdminSettings?.adminNewUserNotification).toBe(false);
+    });
+
+    it("should return 403 if user is not an admin", async () => {
+      const nonAdminUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create();
+
+      const nonAdminCookies = await cookieFor(nonAdminUser, app);
+
+      await request(app.getHttpServer())
+        .patch("/api/settings/admin-new-user-notification")
+        .set("Cookie", nonAdminCookies)
+        .expect(403);
+    });
+  });
+
+  describe("GET /api/settings", () => {
+    beforeEach(async () => {
+      await truncateTables(db, ["settings"]);
+
+      testUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create();
+
+      testCookies = await cookieFor(testUser, app);
+    });
+
+    it("should return user settings", async () => {
       const response = await request(app.getHttpServer())
         .get("/api/settings")
         .set("Cookie", testCookies)
         .expect(200);
 
       expect(response.body).toBeDefined();
-      expect(response.body.userId).toBe(testUser.id);
-      expect(response.body.settings).toEqual(existingSettings.settings);
-      expect(response.body.createdAt).toBeDefined();
-    });
-
-    it("should return 404 if settings do not exist for the user", async () => {
-      await request(app.getHttpServer())
-        .get("/api/settings")
-        .set("Cookie", testCookies)
-        .expect(404);
+      expect(response.body.data.userId).toBe(testUser.id);
+      expect(response.body.data.settings).toBeDefined();
+      expect(response.body.data.createdAt).toBeDefined();
     });
   });
 });

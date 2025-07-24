@@ -17,9 +17,10 @@ import { baseResponse, BaseResponse, nullResponse, type UUIDType } from "src/com
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { UserActivityEvent } from "src/events";
+import { baseUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { AuthService } from "./auth.service";
@@ -35,6 +36,7 @@ import {
 import { TokenService } from "./token.service";
 
 import type { Static } from "@sinclair/typebox";
+import type { GoogleUserType } from "src/utils/types/google-user.type";
 
 @Controller("auth")
 export class AuthController {
@@ -48,10 +50,12 @@ export class AuthController {
   @Post("register")
   @Validate({
     request: [{ type: "body", schema: createAccountSchema }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(baseUserResponseSchema),
   })
-  async register(data: CreateAccountBody): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
-    const account = await this.authService.register(data);
+  async register(
+    data: CreateAccountBody,
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
+    const { avatarReference: _, ...account } = await this.authService.register(data);
 
     return new BaseResponse(account);
   }
@@ -61,13 +65,18 @@ export class AuthController {
   @Post("login")
   @Validate({
     request: [{ type: "body", schema: loginSchema }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(baseUserResponseSchema),
   })
   async login(
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
-    const { accessToken, refreshToken, ...account } = await this.authService.login(data);
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
+    const {
+      accessToken,
+      refreshToken,
+      avatarReference: _,
+      ...account
+    } = await this.authService.login(data);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
 
@@ -116,11 +125,11 @@ export class AuthController {
 
   @Get("current-user")
   @Validate({
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(baseUserResponseSchema),
   })
   async currentUser(
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     const account = await this.authService.currentUser(currentUserId);
 
     this.eventBus.publish(new UserActivityEvent(currentUserId, "LOGIN"));
@@ -160,5 +169,29 @@ export class AuthController {
   async resetPassword(@Body() data: ResetPasswordBody): Promise<BaseResponse<{ message: string }>> {
     await this.authService.resetPassword(data.resetToken, data.newPassword);
     return new BaseResponse({ message: "Password reset successfully" });
+  }
+
+  @Public()
+  @Get("google")
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth(@Req() _request: Request): Promise<void> {
+    // Initiates the Google OAuth flow
+    // The actual redirection to Google happens in the AuthGuard
+  }
+
+  @Public()
+  @Get("google/callback")
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuthCallback(
+    @Req() request: Request & { user: GoogleUserType },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const googleUser = request.user;
+
+    const { accessToken, refreshToken } = await this.authService.handleGoogleCallback(googleUser);
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    response.redirect(process.env.APP_URL || "http://localhost:5173");
   }
 }

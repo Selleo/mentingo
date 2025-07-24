@@ -1,35 +1,50 @@
 import { faker } from "@faker-js/faker";
+import { sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
-import { settings } from "src/storage/schema";
+import {
+  DEFAULT_USER_ADMIN_SETTINGS,
+  DEFAULT_USER_SETTINGS,
+} from "src/settings/constants/settings.constants";
+
+import { settings } from "../../src/storage/schema";
 
 import type { InferSelectModel } from "drizzle-orm";
-import type { DatabasePg } from "src/common";
-import type { SettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
+import type { DatabasePg, UUIDType } from "src/common";
 
-type SettingTest = InferSelectModel<typeof settings>;
-export type SettingsTest = SettingTest[];
+type SettingsTest = InferSelectModel<typeof settings>;
 
-export const createSettingsFactory = (db: DatabasePg) => {
-  return Factory.define<SettingTest>(({ onCreate }) => {
-    onCreate(async (setting) => {
-      const [inserted] = await db.insert(settings).values(setting).returning();
+export const createSettingsFactory = (
+  db: DatabasePg,
+  userId: UUIDType,
+  isAdmin: boolean = false,
+) => {
+  return Factory.define<SettingsTest>(({ onCreate }) => {
+    onCreate(async () => {
+      const defaultSettings = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
+
+      const finalSettings = {
+        ...defaultSettings,
+      };
+
+      const [inserted] = await db
+        .insert(settings)
+        .values({
+          userId: userId,
+          createdAt: new Date().toISOString(),
+          settings: sql.raw(`'${JSON.stringify(finalSettings).replace(/'/g, "''")}'::jsonb`),
+        })
+        .returning();
+
       return inserted;
     });
 
-    const settingsContent: SettingsJSONContentSchema = {
-      admin_new_user_notification: faker.helpers.arrayElement([
-        faker.datatype.boolean(),
-        undefined,
-      ]),
-      language: faker.helpers.arrayElement(["en", "pl", undefined]),
-    };
     return {
       id: faker.string.uuid(),
-      createdAt: faker.date.past().toISOString(),
-      updatedAt: faker.date.recent().toISOString(),
-      settings: settingsContent,
-      userId: faker.helpers.arrayElement([faker.string.uuid(), null]),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: userId,
+      settings: isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS,
     };
   });
 };
