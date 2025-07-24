@@ -3054,31 +3054,6 @@
             }
           }
         }
-      },
-      "patch": {
-        "operationId": "SettingsController_updateUserSettings",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserSettingsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/settings/admin/new-user-notification": {
@@ -10103,72 +10078,6 @@
                       "language",
                       "adminNewUserNotification"
                     ]
-                  }
-                ]
-              },
-              "createdAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserSettingsBody": {
-        "type": "object",
-        "properties": {
-          "adminNewUserNotification": {
-            "type": "boolean"
-          },
-          "language": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "settings": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      },
-                      "adminNewUserNotification": {
-                        "type": "boolean"
-                      }
-                    }
                   }
                 ]
               },
