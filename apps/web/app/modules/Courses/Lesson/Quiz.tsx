@@ -28,7 +28,10 @@ export const Quiz = ({ lesson }: QuizProps) => {
 
   const questions = lesson.quizDetails?.questions;
 
-  const isUserSubmittedAnswer = questions?.[0]?.options?.[0].studentAnswer !== null;
+  const isUserSubmittedAnswer = Boolean(
+    questions?.[0]?.options?.[0]?.studentAnswer &&
+      questions?.[0]?.options?.[0].studentAnswer !== null,
+  );
   const methods = useForm<QuizForm>({
     mode: "onSubmit",
     // Temporary workaround
