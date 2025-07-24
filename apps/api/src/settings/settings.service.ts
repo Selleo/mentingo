@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -8,6 +9,7 @@ import {
 import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { FileService } from "src/file/file.service";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
@@ -28,7 +30,10 @@ import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class SettingsService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly fileService: FileService,
+  ) {}
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
     const [{ settings: globalSettings }] = await this.db
@@ -181,7 +186,29 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
-  private getDefaultSettingsForRole(role: UserRole): StudentSettings | AdminSettings {
+  public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
+    if (!file) {
+      throw new BadRequestException("No logo file provided");
+    }
+
+    const resource = "platform-logos";
+    const { fileKey } = await this.fileService.uploadFile(file, resource);
+    await this.updateGlobalSettings({ platformLogoS3Key: fileKey });
+  }
+
+  public async getPlatformLogoUrl(): Promise<string | null> {
+    const globalSettings = await this.getGlobalSettings();
+
+    const platformLogoS3Key = globalSettings.settings.platformLogoS3Key;
+
+    if (!platformLogoS3Key) {
+      return null;
+    }
+
+    return await this.fileService.getFileUrl(platformLogoS3Key);
+  }
+
+  private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
     switch (role) {
       case USER_ROLES.ADMIN:
         return DEFAULT_ADMIN_SETTINGS;

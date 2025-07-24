@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { ConditionalModule, ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
+import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
 import { AiModule } from "./ai/ai.module";
@@ -80,6 +81,11 @@ import { UserModule } from "./user/user.module";
       },
       inject: [ConfigService],
       global: true,
+    }),
+    MulterModule.register({
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
     }),
     AuthModule,
     HealthModule,
