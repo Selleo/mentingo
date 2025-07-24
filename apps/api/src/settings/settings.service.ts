@@ -8,12 +8,18 @@ import {
 import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { FileService } from "src/file/file.service";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
-import { DEFAULT_USER_ADMIN_SETTINGS, DEFAULT_USER_SETTINGS } from "./constants/settings.constants";
+import {
+  DEFAULT_USER_ADMIN_SETTINGS,
+  DEFAULT_USER_SETTINGS,
+  DEFAULT_GLOBAL_SETTINGS,
+} from "./constants/settings.constants";
 
+import type { GlobalSettingsType } from "./constants/settings.constants";
 import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
@@ -23,7 +29,10 @@ import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class SettingsService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly fileService: FileService,
+  ) {}
 
   public async createSettings(
     userId: UUIDType,
@@ -119,6 +128,69 @@ export class SettingsService {
       .returning();
 
     return updated;
+  }
+
+  public async getGlobalSettings() {
+    const [globalSettings] = await this.db
+      .select()
+      .from(settings)
+      .where(sql`user_id IS NULL`);
+
+    if (!globalSettings) {
+      const [created] = await this.db
+        .insert(settings)
+        .values({
+          userId: null,
+          createdAt: new Date().toISOString(),
+          settings: settingsToJsonBuildObject(DEFAULT_GLOBAL_SETTINGS),
+        })
+        .returning();
+
+      return created;
+    }
+
+    return globalSettings;
+  }
+
+  public async updateGlobalSettings(updatedSettings: Partial<GlobalSettingsType>) {
+    const currentSettings = await this.getGlobalSettings();
+    const currentSettingsData = currentSettings.settings as any;
+
+    const newSettings = {
+      ...currentSettingsData,
+      platformLogoS3Key: updatedSettings.platformLogoS3Key || null,
+    };
+
+    const [updated] = await this.db
+      .update(settings)
+      .set({
+        settings: settingsToJsonBuildObject(newSettings),
+      })
+      .where(sql`user_id IS NULL`)
+      .returning();
+
+    if (!updated) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    return updated;
+  }
+
+  public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
+    const resource = "platform-logos";
+    const { fileKey } = await this.fileService.uploadFile(file, resource);
+    await this.updateGlobalSettings({ platformLogoS3Key: fileKey });
+  }
+
+  public async getPlatformLogoUrl(): Promise<string | null> {
+    const globalSettings = await this.getGlobalSettings();
+    const platformLogoS3Key = (globalSettings.settings as any)?.platformLogoS3Key;
+
+    if (!platformLogoS3Key) {
+      return null;
+    }
+
+    return await this.fileService.getFileUrl(platformLogoS3Key);
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {

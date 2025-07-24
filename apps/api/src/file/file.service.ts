@@ -23,6 +23,7 @@ export class FileService {
     const allowedMimeTypes = [
       "image/jpeg",
       "image/png",
+      "image/svg+xml",
       "application/pdf",
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
       "video/mp4",
