@@ -221,6 +221,8 @@ describe("AuthController (e2e)", () => {
       expect(response.body.data).toStrictEqual({
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
+        groupName: null,
+        groupId: null,
       });
     });
 

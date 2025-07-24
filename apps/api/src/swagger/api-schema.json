@@ -443,6 +443,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -754,6 +762,27 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/user/bulk/groups": {
+      "patch": {
+        "operationId": "UserController_bulkAssignUsersToGroup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignUsersToGroupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -3474,52 +3503,86 @@
             "type": "array",
             "items": {
               "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "email": {
-                  "type": "string"
-                },
-                "firstName": {
-                  "type": "string"
-                },
-                "lastName": {
-                  "type": "string"
-                },
-                "role": {
-                  "type": "string"
-                },
-                "archived": {
-                  "type": "boolean"
-                },
-                "profilePictureUrl": {
-                  "anyOf": [
-                    {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
                       "type": "string"
                     },
-                    {
-                      "type": "null"
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "role",
+                    "archived",
+                    "profilePictureUrl"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "groupName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "groupId",
+                    "groupName"
                   ]
                 }
-              },
-              "required": [
-                "id",
-                "createdAt",
-                "updatedAt",
-                "email",
-                "firstName",
-                "lastName",
-                "role",
-                "archived",
-                "profilePictureUrl"
               ]
             }
           },
@@ -3559,52 +3622,87 @@
         "properties": {
           "data": {
             "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "email": {
-                "type": "string"
-              },
-              "firstName": {
-                "type": "string"
-              },
-              "lastName": {
-                "type": "string"
-              },
-              "role": {
-                "type": "string"
-              },
-              "archived": {
-                "type": "boolean"
-              },
-              "profilePictureUrl": {
-                "anyOf": [
-                  {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
                     "type": "string"
                   },
-                  {
-                    "type": "null"
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "avatarReference": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "archived": {
+                    "type": "boolean"
                   }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "email",
+                  "firstName",
+                  "lastName",
+                  "avatarReference",
+                  "role",
+                  "archived"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "groupId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "groupName": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "groupId",
+                  "groupName"
                 ]
               }
-            },
-            "required": [
-              "id",
-              "createdAt",
-              "updatedAt",
-              "email",
-              "firstName",
-              "lastName",
-              "role",
-              "archived",
-              "profilePictureUrl"
             ]
           }
         },
@@ -3733,6 +3831,10 @@
             "type": "string"
           },
           "lastName": {
+            "type": "string"
+          },
+          "groupId": {
+            "format": "uuid",
             "type": "string"
           },
           "email": {
@@ -3867,6 +3969,10 @@
             "type": "string"
           },
           "lastName": {
+            "type": "string"
+          },
+          "groupId": {
+            "format": "uuid",
             "type": "string"
           },
           "email": {
@@ -4022,6 +4128,26 @@
       },
       "DeleteBulkUsersResponse": {
         "type": "null"
+      },
+      "BulkAssignUsersToGroupBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "groupId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userIds",
+          "groupId"
+        ]
       },
       "CreateUserBody": {
         "type": "object",
@@ -4637,6 +4763,27 @@
                     }
                   ]
                 },
+                "groupId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "groupName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "id": {
                   "format": "uuid",
                   "type": "string"
@@ -4647,6 +4794,8 @@
                 "lastName",
                 "email",
                 "enrolledAt",
+                "groupId",
+                "groupName",
                 "id"
               ]
             }

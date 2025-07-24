@@ -5,7 +5,7 @@ import { GroupService } from "src/group/group.service";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
-import { cookieFor } from "../../../test/helpers/test-helpers";
+import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../../auth/auth.service";
 
 import type { DatabasePg } from "../../common";
@@ -60,6 +60,9 @@ describe("UsersController (e2e)", () => {
       );
       expect(Array.isArray(response.body.data)).toBe(true);
     });
+  });
+  afterEach(async () => {
+    await truncateTables(db, ["users", "groups"]);
   });
 
   describe("GET /user?id=:id", () => {
@@ -270,6 +273,20 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should return forbidden 403", async () => {
+      firstUser = await authService.register({
+        email: "another6@example.com",
+        password: testPassword,
+        firstName: "Another",
+        lastName: "User",
+      });
+
+      secondUser = await authService.register({
+        email: "another7@example.com",
+        password: testPassword,
+        firstName: "Another",
+        lastName: "User",
+      });
+
       const updateData = await groupService.createGroup({ name: "Test group" });
 
       const loginResponse = await request(app.getHttpServer())
