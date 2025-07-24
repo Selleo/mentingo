@@ -35,6 +35,7 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 
 import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { UserResponse } from "src/user/schemas/user.schema";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
 import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
@@ -92,6 +93,11 @@ export class AuthService {
         trx,
       );
 
+      const { avatarReference, ...userWithoutAvatar } = newUser;
+      const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
+        avatarReference,
+      );
+
       const emailTemplate = new WelcomeEmail({ email, name: email });
       await this.emailService.sendEmail({
         to: email,
@@ -103,7 +109,7 @@ export class AuthService {
 
       this.eventBus.publish(new UserRegisteredEvent(newUser));
 
-      return newUser;
+      return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
     });
   }
 
@@ -115,8 +121,14 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.getTokens(user);
 
+    const { avatarReference, ...userWithoutAvatar } = user;
+    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
+      avatarReference,
+    );
+
     return {
-      ...user,
+      ...userWithoutAvatar,
+      profilePictureUrl: usersProfilePictureUrl,
       accessToken,
       refreshToken,
     };
@@ -180,7 +192,7 @@ export class AuthService {
     return user;
   }
 
-  private async getTokens(user: CommonUser) {
+  private async getTokens(user: CommonUser | UserResponse) {
     const { id: userId, email, role } = user;
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(

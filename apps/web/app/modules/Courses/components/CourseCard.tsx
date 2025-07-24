@@ -3,10 +3,9 @@ import { Link, useLocation } from "@remix-run/react";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { CardBadge } from "~/components/CardBadge";
 import CourseProgress from "~/components/CourseProgress";
-import { Gravatar } from "~/components/Gravatar";
 import { Icon } from "~/components/Icon";
-import { Avatar } from "~/components/ui/avatar";
 import { CategoryChip } from "~/components/ui/CategoryChip";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import CourseCardButton from "~/modules/Dashboard/Courses/CourseCardButton";
@@ -20,6 +19,7 @@ export type CourseCardProps = GetAvailableCoursesResponse["data"][number];
 const CourseCard = ({
   author,
   authorEmail = "",
+  authorAvatarUrl,
   category,
   completedChapterCount,
   courseChapterCount,
@@ -88,9 +88,11 @@ const CourseCard = ({
           </div>
           {authorEmail && (
             <div className="mb-2 mt-1 flex items-center gap-x-1.5">
-              <Avatar className="size-4">
-                <Gravatar email={authorEmail} />
-              </Avatar>
+              <UserAvatar
+                className="size-4"
+                userName={author}
+                profilePictureUrl={authorAvatarUrl}
+              />
               <span className="text-neutral-950">{author}</span>
             </div>
           )}

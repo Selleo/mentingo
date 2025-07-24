@@ -61,7 +61,7 @@ export class AuthController {
   async register(
     data: CreateAccountBody,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
-    const { avatarReference: _, ...account } = await this.authService.register(data);
+    const account = await this.authService.register(data);
 
     return new BaseResponse(account);
   }
@@ -77,12 +77,7 @@ export class AuthController {
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
-    const {
-      accessToken,
-      refreshToken,
-      avatarReference: _,
-      ...account
-    } = await this.authService.login(data);
+    const { accessToken, refreshToken, ...account } = await this.authService.login(data);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
 

@@ -1,9 +1,8 @@
 import { useTranslation } from "react-i18next";
 
-import { Gravatar } from "~/components/Gravatar";
 import { Icon } from "~/components/Icon";
-import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 
 import type { GetUserDetailsResponse } from "~/api/generated-api";
 
@@ -18,17 +17,11 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
   return (
     <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
-        <Avatar className="size-32">
-          {userDetails?.profilePictureUrl ? (
-            <img
-              src={userDetails.profilePictureUrl}
-              alt={`${userDetails.firstName} ${userDetails.lastName} profile`}
-              className="h-full w-full rounded-full object-cover"
-            />
-          ) : (
-            <Gravatar email="email@example.com" />
-          )}
-        </Avatar>
+        <UserAvatar
+          className="size-32"
+          userName={`${userDetails?.firstName} ${userDetails?.lastName}`}
+          profilePictureUrl={userDetails?.profilePictureUrl}
+        />
         <div className="flex w-full flex-col gap-4">
           <div className="flex flex-col gap-y-2">
             <h2 className="h6 md:h4 text-neutral-950">

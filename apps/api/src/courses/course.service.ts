@@ -30,6 +30,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
@@ -87,6 +88,7 @@ export class CourseService {
     private readonly fileService: FileService,
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly userService: UserService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -117,6 +119,7 @@ export class CourseService {
         description: sql<string>`${courses.description}`,
         thumbnailUrl: courses.thumbnailS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+        authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
         enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
         courseChapterCount: courses.chapterCount,
@@ -137,6 +140,7 @@ export class CourseService {
         courses.thumbnailS3Key,
         users.firstName,
         users.lastName,
+        users.avatarReference,
         categories.title,
         courses.priceInCents,
         courses.currency,
@@ -157,7 +161,10 @@ export class CourseService {
 
         try {
           const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-          return { ...item, thumbnailUrl: signedUrl };
+          const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+            item.authorAvatarUrl,
+          );
+          return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
         } catch (error) {
           console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
           return item;
@@ -217,6 +224,7 @@ export class CourseService {
           users.firstName,
           users.lastName,
           users.email,
+          users.avatarReference,
           studentCourses.studentId,
           categories.title,
           coursesSummaryStats.freePurchasedCount,
@@ -242,7 +250,10 @@ export class CourseService {
 
           try {
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            return { ...item, thumbnailUrl: signedUrl };
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              item.authorAvatarUrl,
+            );
+            return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -340,6 +351,7 @@ export class CourseService {
           authorId: sql<string>`${courses.authorId}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
+          authorAvatarUrl: sql<string>`${users.avatarReference}`,
           category: sql<string>`${categories.title}`,
           enrolled: sql<boolean>`FALSE`,
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
@@ -370,6 +382,7 @@ export class CourseService {
           users.firstName,
           users.lastName,
           users.email,
+          users.avatarReference,
           categories.title,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
@@ -389,9 +402,17 @@ export class CourseService {
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
           try {
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
-            return { ...item, thumbnailUrl: signedUrl };
+            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+
+            return {
+              ...itemWithoutReferences,
+              thumbnailUrl: signedUrl,
+              authorAvatarUrl: authorAvatarSignedUrl,
+            };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -651,6 +672,7 @@ export class CourseService {
         authorId: sql<string>`${courses.authorId}`,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorEmail: sql<string>`${users.email}`,
+        authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN true ELSE false END`,
         enrolledParticipantCount: sql<number>`0`,
@@ -683,6 +705,7 @@ export class CourseService {
         users.firstName,
         users.lastName,
         users.email,
+        users.avatarReference,
         studentCourses.studentId,
         categories.title,
       )
@@ -692,12 +715,20 @@ export class CourseService {
       );
 
     return await Promise.all(
-      contentCreatorCourses.map(async (course) => ({
-        ...course,
-        thumbnailUrl: course.thumbnailUrl
-          ? await this.fileService.getFileUrl(course.thumbnailUrl)
-          : course.thumbnailUrl,
-      })),
+      contentCreatorCourses.map(async (course) => {
+        const { authorAvatarUrl, ...courseWithoutReferences } = course;
+
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+
+        return {
+          ...courseWithoutReferences,
+          thumbnailUrl: course.thumbnailUrl
+            ? await this.fileService.getFileUrl(course.thumbnailUrl)
+            : course.thumbnailUrl,
+          authorAvatarUrl: authorAvatarSignedUrl,
+        };
+      }),
     );
   }
 
@@ -1160,6 +1191,7 @@ export class CourseService {
       authorId: sql<string>`${courses.authorId}`,
       author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
       authorEmail: sql<string>`${users.email}`,
+      authorAvatarUrl: sql<string>`${users.avatarReference}`,
       category: sql<string>`${categories.title}`,
       enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
       enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,

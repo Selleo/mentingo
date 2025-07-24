@@ -38,7 +38,8 @@ export const SCORM_CONFIG = [
     SideComponent: (props: SideComponentProps) => {
       const { data: categories } = useCategoriesSuspense();
 
-      const { currentUser: { email, firstName, lastName } = {} } = useCurrentUserStore.getState();
+      const { currentUser: { email, firstName, lastName, profilePictureUrl } = {} } =
+        useCurrentUserStore.getState();
       const {
         formData: { details: { title, description, category: categoryId, thumbnail } = {} },
       } = useScormFormStore.getState();
@@ -64,6 +65,7 @@ export const SCORM_CONFIG = [
           description={description || t("adminScorm.other.noDescription")}
           author={`${firstName} ${lastName}`}
           authorEmail={email ?? ""}
+          authorAvatarUrl={profilePictureUrl ?? ""}
           category={categoryName ?? ""}
           courseChapterCount={0}
           completedChapterCount={0}

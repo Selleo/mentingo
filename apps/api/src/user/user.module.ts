@@ -13,6 +13,6 @@ import { UserService } from "./user.service";
   imports: [EmailModule, FileModule, S3Module],
   controllers: [UserController],
   providers: [UserService, FileService, S3Service],
-  exports: [],
+  exports: [UserService],
 })
 export class UserModule {}
