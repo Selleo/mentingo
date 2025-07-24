@@ -17,7 +17,7 @@ export interface Lesson {
   description: string;
   thresholdScore?: number;
   attemptsLimit?: number;
-  quizCooldown?: number;
+  quizCooldownInHours?: number;
   fileS3Key?: string;
   fileS3SignedUrl?: string;
   fileType?: string;

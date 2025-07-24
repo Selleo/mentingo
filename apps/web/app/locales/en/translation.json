@@ -653,7 +653,7 @@
           "title": "Settings",
           "passingThreshold": "Passing threshold (%)",
           "attemptsLimit": "Attempts limit",
-          "quizCooldown": "Time lock after failed attempts (in hours)",
+          "quizCooldownInHours": "Time lock after failed attempts (in hours)",
           "numberOfQuestions": "{{count1}} of {{count2}} questions",
           "noQuestions": "No questions"
         },
@@ -661,7 +661,7 @@
           "switch": "If enabled, the student has a limited number of quiz attempts.",
           "passingThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
           "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
-          "quizCooldown": "Duration of the quiz lock after all attempts are used."
+          "quizCooldownInHours": "Duration of the quiz lock after all attempts are used."
         },
         "validation": {
           "optionTextRequired": "Option text is required",

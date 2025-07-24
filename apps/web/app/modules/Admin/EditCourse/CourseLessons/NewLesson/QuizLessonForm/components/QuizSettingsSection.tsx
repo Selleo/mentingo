@@ -176,31 +176,31 @@ const QuizSettingsSection = ({
           />
           <div className="flex items-center gap-x-2">
             <Label className="body-base-md flex items-center gap-2 text-sm">
-              {t("adminCourseView.curriculum.lesson.settings.quizCooldown")}
+              {t("adminCourseView.curriculum.lesson.settings.quizCooldownInHours")}
             </Label>
             <InfoTooltip
-              message={t("adminCourseView.curriculum.lesson.tooltip.quizCooldown")}
+              message={t("adminCourseView.curriculum.lesson.tooltip.quizCooldownInHours")}
               iconClassName="text-sm"
             ></InfoTooltip>
           </div>
 
           <FormField
             control={form.control}
-            name="quizCooldown"
+            name="quizCooldownInHours"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <Input
-                    id="quizCooldown"
+                    id="quizCooldownInHours"
                     disabled={!isAttemptsLimitEnabled}
                     {...field}
                     inputMode="decimal"
                     type="number"
                     placeholder={String(
                       isAttemptsLimitEnabled
-                        ? lessonToEdit?.quizCooldown
-                          ? String(lessonToEdit.quizCooldown)
-                          : defaultQuizLessonValues.quizCooldown
+                        ? lessonToEdit?.quizCooldownInHours
+                          ? String(lessonToEdit.quizCooldownInHours)
+                          : defaultQuizLessonValues.quizCooldownInHours
                         : "",
                     )}
                     value={field.value === null || field.value === undefined ? "" : field.value}

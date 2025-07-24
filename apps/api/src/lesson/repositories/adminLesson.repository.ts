@@ -62,7 +62,7 @@ export class AdminLessonRepository {
         chapterId: data.chapterId,
         thresholdScore: data.thresholdScore,
         attemptsLimit: data.attemptsLimit,
-        quizCooldown: data.quizCooldown,
+        quizCooldownInHours: data.quizCooldownInHours,
       })
       .where(eq(lessons.id, id));
   }
@@ -82,7 +82,7 @@ export class AdminLessonRepository {
         displayOrder,
         thresholdScore: data.thresholdScore,
         attemptsLimit: data.attemptsLimit,
-        quizCooldown: data.quizCooldown,
+        quizCooldownInHours: data.quizCooldownInHours,
       })
       .returning();
 

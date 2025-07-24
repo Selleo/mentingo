@@ -1087,7 +1087,7 @@ export interface GetLessonByIdResponse {
     lessonCompleted?: boolean;
     thresholdScore: number | null;
     attemptsLimit: number | null;
-    quizCooldown: number | null;
+    quizCooldownInHours: number | null;
     isQuizPassed: boolean | null;
     attempts: number | null;
     updatedAt: string | null;
@@ -1231,7 +1231,7 @@ export type BetaCreateQuizLessonBody = {
   fileType?: string;
   thresholdScore: number;
   attemptsLimit: number | null;
-  quizCooldown: number | null;
+  quizCooldownInHours: number | null;
   questions?: {
     /** @format uuid */
     id?: string;
@@ -1288,7 +1288,7 @@ export type BetaUpdateQuizLessonBody = {
   fileType?: string;
   thresholdScore?: number;
   attemptsLimit?: number | null;
-  quizCooldown?: number | null;
+  quizCooldownInHours?: number | null;
   questions?: {
     /** @format uuid */
     id?: string;

@@ -37,7 +37,7 @@ export class LessonRepository {
         fileType: lessons.fileType,
         thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
-        quizCooldown: sql<number | null>`${lessons.quizCooldown}`,
+        quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
         lessonCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
         quizScore: sql<number | null>`${studentLessonProgress.quizScore}`,
@@ -161,7 +161,7 @@ export class LessonRepository {
         type: sql<LessonTypes>`${lessons.type}`,
         thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
-        quizCooldown: sql<number | null>`${lessons.quizCooldown}`,
+        quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
       })
       .from(lessons)
       .where(eq(lessons.id, lessonId))

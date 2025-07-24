@@ -60,7 +60,7 @@ const lessonQuizSchema = Type.Object({
   fileType: Type.Optional(Type.String()),
   thresholdScore: Type.Number(),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
-  quizCooldown: Type.Union([Type.Number(), Type.Null()]),
+  quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
 });
 
@@ -79,7 +79,7 @@ export const adminLessonSchema = Type.Object({
   description: Type.String(),
   thresholdScore: Type.Number(),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
-  quizCooldown: Type.Union([Type.Number(), Type.Null()]),
+  quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
@@ -148,7 +148,7 @@ export const lessonShowSchema = Type.Object({
   lessonCompleted: Type.Optional(Type.Boolean()),
   thresholdScore: Type.Union([Type.Number(), Type.Null()]),
   attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
-  quizCooldown: Type.Union([Type.Number(), Type.Null()]),
+  quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   isQuizPassed: Type.Union([Type.Boolean(), Type.Null()]),
   attempts: Type.Union([Type.Number(), Type.Null()]),
   updatedAt: Type.Union([Type.String(), Type.Null()]),

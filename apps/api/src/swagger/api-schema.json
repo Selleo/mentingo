@@ -7663,7 +7663,7 @@
                   }
                 ]
               },
-              "quizCooldown": {
+              "quizCooldownInHours": {
                 "anyOf": [
                   {
                     "type": "number"
@@ -7762,7 +7762,7 @@
               "fileUrl",
               "thresholdScore",
               "attemptsLimit",
-              "quizCooldown",
+              "quizCooldownInHours",
               "isQuizPassed",
               "attempts",
               "updatedAt",
@@ -8375,7 +8375,7 @@
                   }
                 ]
               },
-              "quizCooldown": {
+              "quizCooldownInHours": {
                 "anyOf": [
                   {
                     "type": "number"
@@ -8551,7 +8551,7 @@
               "type",
               "thresholdScore",
               "attemptsLimit",
-              "quizCooldown"
+              "quizCooldownInHours"
             ]
           },
           {
@@ -8632,7 +8632,7 @@
                   }
                 ]
               },
-              "quizCooldown": {
+              "quizCooldownInHours": {
                 "anyOf": [
                   {
                     "type": "number"

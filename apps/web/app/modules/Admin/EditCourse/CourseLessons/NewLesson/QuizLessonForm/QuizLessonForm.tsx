@@ -274,7 +274,7 @@ const QuizLessonForm = ({
 
     if (!checked) {
       form.setValue("attemptsLimit", null);
-      form.setValue("quizCooldown", null);
+      form.setValue("quizCooldownInHours", null);
     }
   };
 

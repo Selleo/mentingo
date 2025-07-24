@@ -268,7 +268,7 @@ export class LessonService {
         attempts,
         quizSettings?.attemptsLimit,
         accessCourseLessonWithDetails.updatedAt,
-        quizSettings?.quizCooldown,
+        quizSettings?.quizCooldownInHours,
       )
     ) {
       throw new ConflictException(

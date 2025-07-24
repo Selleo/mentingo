@@ -45,15 +45,19 @@ export const LessonContent = ({
     if (isAdminLike) return;
 
     if (
-      lesson.type == LessonType.QUIZ ||
       lesson.type == LessonType.VIDEO ||
       lesson.type == LessonType.AI_MENTOR
     ) {
       return setIsNextDisabled(!lesson.lessonCompleted);
     }
+    if (lesson.type == LessonType.QUIZ) {
+      return setIsNextDisabled(
+        (lesson.attempts === null || lesson.attempts === 1) && !lesson.lessonCompleted,
+      );
+    }
 
     setIsNextDisabled(false);
-  }, [isAdminLike, lesson.lessonCompleted, lesson.type]);
+  }, [isAdminLike, lesson.lessonCompleted, lesson.type, lesson.attempts]);
 
   const Content = () =>
     match(lesson.type)

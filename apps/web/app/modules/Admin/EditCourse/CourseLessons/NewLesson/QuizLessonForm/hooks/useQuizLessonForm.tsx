@@ -48,7 +48,7 @@ export const useQuizLessonForm = ({
       title: "",
       thresholdScore: null,
       attemptsLimit: null,
-      quizCooldown: null,
+      quizCooldownInHours: null,
       questions: [],
     },
   });
@@ -61,7 +61,7 @@ export const useQuizLessonForm = ({
         title: lessonToEdit.title,
         thresholdScore: null,
         attemptsLimit: null,
-        quizCooldown: null,
+        quizCooldownInHours: null,
         questions:
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
@@ -153,8 +153,10 @@ export const useQuizLessonForm = ({
           values.attemptsLimit ??
           lessonToEdit?.attemptsLimit ??
           defaultQuizLessonValues.attemptsLimit;
-        values.quizCooldown =
-          values.quizCooldown ?? lessonToEdit?.quizCooldown ?? defaultQuizLessonValues.quizCooldown;
+        values.quizCooldownInHours =
+          values.quizCooldownInHours ??
+          lessonToEdit?.quizCooldownInHours ??
+          defaultQuizLessonValues.quizCooldownInHours;
       }
 
       if (

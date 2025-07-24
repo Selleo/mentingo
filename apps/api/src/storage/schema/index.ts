@@ -160,7 +160,7 @@ export const lessons = pgTable("lessons", {
   description: text("description"),
   thresholdScore: integer("threshold_score"),
   attemptsLimit: integer("attempts_limit"),
-  quizCooldown: integer("quiz_cooldown"),
+  quizCooldownInHours: integer("quiz_cooldown_in_hours"),
   displayOrder: integer("display_order"),
   fileS3Key: varchar("file_s3_key", { length: 200 }),
   fileType: varchar("file_type", { length: 20 }),

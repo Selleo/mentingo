@@ -240,13 +240,13 @@ export const getQuizTooltipText = (
   isUserSubmittedAnswer: boolean,
   canRetake: boolean,
   hoursLeft: number | null,
-  quizCooldown: number | null,
+  quizCooldownInHours: number | null,
 ): string => {
   return match({
     isUserSubmittedAnswer,
     canRetake,
     hoursLeft,
-    quizCooldown,
+    quizCooldownInHours,
   })
     .with(
       {
@@ -260,10 +260,10 @@ export const getQuizTooltipText = (
     )
     .with(
       {
-        quizCooldown: P.when((c) => c !== null && c !== 0),
+        quizCooldownInHours: P.when((c) => c !== null && c !== 0),
       },
       () => {
-        return t("studentLessonView.tooltip.cooldown", { time: quizCooldown });
+        return t("studentLessonView.tooltip.cooldown", { time: quizCooldownInHours });
       },
     )
     .otherwise(() => {

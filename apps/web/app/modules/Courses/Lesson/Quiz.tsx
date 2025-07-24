@@ -63,7 +63,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
     lesson.attempts,
     lesson.attemptsLimit,
     lesson.updatedAt,
-    lesson.quizCooldown,
+    lesson.quizCooldownInHours,
   );
 
   if (!questions?.length) return null;
@@ -145,7 +145,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
                     isUserSubmittedAnswer,
                     canRetake,
                     hoursLeft,
-                    lesson.quizCooldown,
+                    lesson.quizCooldownInHours,
                   )}
                   <TooltipArrow className="fill-black" />
                 </TooltipContent>

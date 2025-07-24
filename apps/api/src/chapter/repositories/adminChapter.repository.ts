@@ -95,7 +95,7 @@ export class AdminChapterRepository {
         isExternal: sql<boolean>`${lessons.isExternal}`,
         thresholdScore: sql<number>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
-        quizCooldown: sql<number | null>`${lessons.quizCooldown}`,
+        quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
         questions: sql<AdminQuestionBody[]>`
         (
           SELECT ARRAY(

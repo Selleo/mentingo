@@ -654,7 +654,7 @@
           "title": "Ustawienia",
           "passingThreshold": "Próg zaliczenia (%)",
           "attemptsLimit": "Limit prób",
-          "quizCooldown": "Blokada czasowa po niezdaniu (w godzinach)",
+          "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
           "numberOfQuestions": "{{count1}} z {{count2}} pytań",
           "noQuestions": "Brak pytań"
         },
@@ -662,7 +662,7 @@
           "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
           "passingThreshold": "Procentowy próg zaliczenia quizu. Jeśli student osiągnie ten wynik, quiz zostanie uznany za zaliczony.",
           "attemptsLimit": "Liczba podejść do quizu przed uruchomieniem blokady czasowej.",
-          "quizCooldown": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób."
+          "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób."
         },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
