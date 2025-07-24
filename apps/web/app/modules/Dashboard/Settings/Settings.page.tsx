@@ -19,7 +19,7 @@ export default function SettingsPage() {
       <UserForm />
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
-      {isAdmin && isAdminSettings(userSettings) && (
+      {isAdmin && userSettings && isAdminSettings(userSettings) && (
         <NotificationPreferencesForm settings={userSettings} />
       )}
     </PageWrapper>
