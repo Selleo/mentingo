@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, isNull } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
@@ -20,7 +20,10 @@ import {
 } from "./constants/settings.constants";
 
 import type { GlobalSettingsType } from "./constants/settings.constants";
-import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
+import type {
+  SettingsJSONContentSchema,
+  GlobalSettingsJSONContentSchema,
+} from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -131,10 +134,7 @@ export class SettingsService {
   }
 
   public async getGlobalSettings() {
-    const [globalSettings] = await this.db
-      .select()
-      .from(settings)
-      .where(sql`user_id IS NULL`);
+    const [globalSettings] = await this.db.select().from(settings).where(isNull(settings.userId));
 
     if (!globalSettings) {
       const [created] = await this.db
@@ -154,7 +154,7 @@ export class SettingsService {
 
   public async updateGlobalSettings(updatedSettings: Partial<GlobalSettingsType>) {
     const currentSettings = await this.getGlobalSettings();
-    const currentSettingsData = currentSettings.settings as any;
+    const currentSettingsData = currentSettings.settings as GlobalSettingsJSONContentSchema;
 
     const newSettings = {
       ...currentSettingsData,
@@ -166,7 +166,7 @@ export class SettingsService {
       .set({
         settings: settingsToJsonBuildObject(newSettings),
       })
-      .where(sql`user_id IS NULL`)
+      .where(isNull(settings.userId))
       .returning();
 
     if (!updated) {
@@ -184,7 +184,8 @@ export class SettingsService {
 
   public async getPlatformLogoUrl(): Promise<string | null> {
     const globalSettings = await this.getGlobalSettings();
-    const platformLogoS3Key = (globalSettings.settings as any)?.platformLogoS3Key;
+    const platformLogoS3Key = (globalSettings.settings as GlobalSettingsJSONContentSchema)
+      ?.platformLogoS3Key;
 
     if (!platformLogoS3Key) {
       return null;

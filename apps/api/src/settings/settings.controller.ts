@@ -24,12 +24,19 @@ import { settingsSchema } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
+const platformLogoResponseSchema = Type.Object({
+  url: Type.Union([Type.String(), Type.Null()]),
+});
+
 @Controller("settings")
 @UseGuards(RolesGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Get()
+  @Validate({
+    response: baseResponse(settingsSchema),
+  })
   async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
@@ -56,7 +63,7 @@ export class SettingsController {
   @Get("platform-logo")
   @Public()
   @Validate({
-    response: baseResponse(Type.Object({ url: Type.Union([Type.String(), Type.Null()]) })),
+    response: baseResponse(platformLogoResponseSchema),
   })
   async getPlatformLogo() {
     const url = await this.settingsService.getPlatformLogoUrl();
