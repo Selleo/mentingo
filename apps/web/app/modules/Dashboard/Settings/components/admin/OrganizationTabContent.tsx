@@ -18,11 +18,6 @@ export default function OrganizationTabContent({
       {isAdmin && userSettings && globalSettings && (
         <AdminPreferences globalSettings={globalSettings} />
       )}
-      {!isAdmin && (
-        <div className="py-8 text-center text-muted-foreground">
-          You do not have permission to view organization settings.
-        </div>
-      )}
     </>
   );
 }

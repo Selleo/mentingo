@@ -5,6 +5,7 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 
 interface SettingsNavigationTabsProps {
+  isAdmin: boolean;
   onCancel?: () => void;
   onSave?: () => void;
   children?: React.ReactNode;
@@ -13,6 +14,7 @@ interface SettingsNavigationTabsProps {
 }
 
 export function SettingsNavigationTabs({
+  isAdmin,
   onCancel,
   onSave,
   accountContent,
@@ -20,9 +22,11 @@ export function SettingsNavigationTabs({
 }: SettingsNavigationTabsProps) {
   const { t } = useTranslation();
 
-  const tabs = [
+  const adminTabs = [{ value: "organization", label: t("settings.tabs.organization") }];
+
+  const allTabs = [
     { value: "account", label: t("settings.tabs.account") },
-    { value: "organization", label: t("settings.tabs.organization") },
+    ...(isAdmin ? adminTabs : []),
   ];
 
   return (
@@ -39,11 +43,10 @@ export function SettingsNavigationTabs({
             </Button>
           </div>
         </div>
-
         <Tabs defaultValue="account" className="w-full">
           <div className="mb-6 flex justify-start">
             <TabsList className="inline-flex h-auto items-center justify-center rounded-md bg-primary-50 p-1 text-muted-foreground">
-              {tabs.map((tab) => (
+              {allTabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
