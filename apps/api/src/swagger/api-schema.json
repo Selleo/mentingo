@@ -10006,64 +10006,33 @@
         "type": "object",
         "properties": {
           "data": {
-            "type": "object",
-            "properties": {
-              "userId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
                     "type": "string"
-                  },
-                  {
-                    "type": "null"
                   }
+                },
+                "required": [
+                  "language"
                 ]
               },
-              "settings": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "language"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      },
-                      "adminNewUserNotification": {
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [
-                      "language",
-                      "adminNewUserNotification"
-                    ]
-                  }
-                ]
-              },
-              "createdAt": {
-                "anyOf": [
-                  {
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
                     "type": "string"
                   },
-                  {
-                    "type": "null"
+                  "adminNewUserNotification": {
+                    "type": "boolean"
                   }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
                 ]
               }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
             ]
           }
         },
@@ -10098,64 +10067,33 @@
         "type": "object",
         "properties": {
           "data": {
-            "type": "object",
-            "properties": {
-              "userId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
                     "type": "string"
-                  },
-                  {
-                    "type": "null"
                   }
+                },
+                "required": [
+                  "language"
                 ]
               },
-              "settings": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "language"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      },
-                      "adminNewUserNotification": {
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [
-                      "language",
-                      "adminNewUserNotification"
-                    ]
-                  }
-                ]
-              },
-              "createdAt": {
-                "anyOf": [
-                  {
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
                     "type": "string"
                   },
-                  {
-                    "type": "null"
+                  "adminNewUserNotification": {
+                    "type": "boolean"
                   }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
                 ]
               }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
             ]
           }
         },

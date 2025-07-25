@@ -1,7 +1,5 @@
 import { Type } from "@sinclair/typebox";
 
-import { UUIDSchema } from "src/common";
-
 import type { Static } from "@sinclair/typebox";
 
 export const studentSettingsJSONContentSchema = Type.Object({
@@ -18,13 +16,8 @@ export const settingsJSONContentSchema = Type.Union([
   adminSettingsJSONContentSchema,
 ]);
 
-export const settingsSchema = Type.Object({
-  userId: Type.Union([UUIDSchema, Type.Null()]),
-  settings: Type.Union([studentSettingsJSONContentSchema, adminSettingsJSONContentSchema]),
-  createdAt: Type.Union([Type.String(), Type.Null()]),
-});
-
-export type SettingsResponse = Static<typeof settingsSchema>;
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;
+
+export type SettingsResponse = SettingsJSONContentSchema;

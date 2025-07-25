@@ -1619,18 +1619,14 @@ export interface GetScormMetadataResponse {
 }
 
 export interface GetUserSettingsResponse {
-  data: {
-    userId: string | null;
-    settings:
-      | {
-          language: string;
-        }
-      | {
-          language: string;
-          adminNewUserNotification: boolean;
-        };
-    createdAt: string | null;
-  };
+  data:
+    | {
+        language: string;
+      }
+    | {
+        language: string;
+        adminNewUserNotification: boolean;
+      };
 }
 
 export type UpdateUserSettingsBody =
@@ -1643,18 +1639,14 @@ export type UpdateUserSettingsBody =
     };
 
 export interface UpdateUserSettingsResponse {
-  data: {
-    userId: string | null;
-    settings:
-      | {
-          language: string;
-        }
-      | {
-          language: string;
-          adminNewUserNotification: boolean;
-        };
-    createdAt: string | null;
-  };
+  data:
+    | {
+        language: string;
+      }
+    | {
+        language: string;
+        adminNewUserNotification: boolean;
+      };
 }
 
 import type {

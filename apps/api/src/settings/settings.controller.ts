@@ -7,11 +7,9 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { settingsSchema } from "./schemas/settings.schema";
+import { settingsJSONContentSchema, type SettingsResponse } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
-
-import type { SettingsResponse } from "./schemas/settings.schema";
 
 @Controller("settings")
 @UseGuards(RolesGuard)
@@ -20,7 +18,7 @@ export class SettingsController {
 
   @Get()
   @Validate({
-    response: baseResponse(settingsSchema),
+    response: baseResponse(settingsJSONContentSchema),
   })
   async getUserSettings(
     @CurrentUser("userId") userId: UUIDType,
@@ -31,7 +29,7 @@ export class SettingsController {
   @Put()
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
-    response: baseResponse(settingsSchema),
+    response: baseResponse(settingsJSONContentSchema),
   })
   async updateUserSettings(
     @Body() updatedSettings: UpdateSettingsBody,

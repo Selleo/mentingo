@@ -26,7 +26,7 @@ export function useUserSettings() {
   return useQuery({
     ...userSettingsQueryOptions,
     select: (data: GetUserSettingsResponse | null) => {
-      return data?.data?.settings;
+      return data?.data;
     },
   });
 }
@@ -39,7 +39,7 @@ export function useUserSettingsSuspense() {
         throw new Error("User not authenticated");
       }
 
-      return data?.data?.settings;
+      return data?.data;
     },
   });
 }
