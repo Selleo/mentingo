@@ -650,6 +650,20 @@
         "breadcrumbs": {
           "back": "Wstecz"
         },
+        "settings": {
+          "title": "Ustawienia",
+          "passingThreshold": "Próg zaliczenia (%)",
+          "attemptsLimit": "Limit prób",
+          "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
+          "numberOfQuestions": "{{count1}} z {{count2}} pytań",
+          "noQuestions": "Brak pytań"
+        },
+        "tooltip": {
+          "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
+          "passingThreshold": "Procentowy próg zaliczenia quizu. Jeśli student osiągnie ten wynik, quiz zostanie uznany za zaliczony.",
+          "attemptsLimit": "Liczba podejść do quizu przed uruchomieniem blokady czasowej.",
+          "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób."
+        },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
           "atLeastOneOptionRequired": "Wymagana jest przynajmniej jedna opcja",
@@ -965,7 +979,9 @@
       "selectQuestion": "Wybierz pytanie.",
       "trueOrFalseQuestion": "Pytanie prawda/fałsz.",
       "multipleChoice": "Pytanie wielokrotnego wyboru.",
-      "singleChoice": "Pytanie jednokrotnego wyboru."
+      "singleChoice": "Pytanie jednokrotnego wyboru.",
+      "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
+      "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -973,6 +989,11 @@
     },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
+    },
+    "tooltip": {
+      "retakeAvailableIn": "Zablokowane na {{time}} godz. po ostatnim podejściu.",
+      "cooldown": "Quiz będzie zablokowany na {{time}} godz. po ostatnim podejściu.",
+      "noCooldown": "Brak okresu oczekiwania."
     },
     "breadcrumbs": {
       "availableCourses": "Dostępne kursy",
@@ -983,7 +1004,8 @@
       "previous": "Poprzedni",
       "complete": "Zakończ",
       "next": "Następny",
-      "submit": "Prześlij"
+      "submit": "Prześlij",
+      "retake": "Powtórz"
     },
     "sideSection": {
       "header": "Spis treści:",
@@ -1069,7 +1091,6 @@
       "courseProgress": "Postęp kursu"
     }
   },
-
   "adminPreferences": {
     "header": "Preferencje administratora",
     "subHeader": "Zarządzaj swoimi preferencjami powiadomień",

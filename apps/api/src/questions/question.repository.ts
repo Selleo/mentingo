@@ -128,6 +128,15 @@ export class QuestionRepository {
       .orderBy(questions.displayOrder);
   }
 
+  async getQuestionsIdsByLessonId(lessonId: UUIDType): Promise<UUIDType[]> {
+    const questionsList = await this.db
+      .select({ id: questions.id })
+      .from(questions)
+      .where(eq(questions.lessonId, lessonId));
+
+    return questionsList.map((question) => question.id);
+  }
+
   async getQuestions(
     answerQuestion: AnswerQuestionSchema,
     trx?: PostgresJsDatabase<typeof schema>,
@@ -281,5 +290,20 @@ export class QuestionRepository {
     trx: PostgresJsDatabase<typeof schema>,
   ) {
     return trx.insert(studentQuestionAnswers).values(answers);
+  }
+
+  async deleteStudentQuizAnswers(
+    questionsId: UUIDType[],
+    studentId: UUIDType,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    return trx
+      .delete(studentQuestionAnswers)
+      .where(
+        and(
+          eq(studentQuestionAnswers.studentId, studentId),
+          inArray(studentQuestionAnswers.questionId, questionsId),
+        ),
+      );
   }
 }

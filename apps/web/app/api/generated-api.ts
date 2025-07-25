@@ -1085,6 +1085,12 @@ export interface GetLessonByIdResponse {
       score: number | null;
     };
     lessonCompleted?: boolean;
+    thresholdScore: number | null;
+    attemptsLimit: number | null;
+    quizCooldownInHours: number | null;
+    isQuizPassed: boolean | null;
+    attempts: number | null;
+    updatedAt: string | null;
     displayOrder: number;
     isExternal?: boolean;
     nextLessonId: string | null;
@@ -1223,6 +1229,9 @@ export type BetaCreateQuizLessonBody = {
   solutionExplanation?: string;
   fileS3Key?: string;
   fileType?: string;
+  thresholdScore: number;
+  attemptsLimit: number | null;
+  quizCooldownInHours: number | null;
   questions?: {
     /** @format uuid */
     id?: string;
@@ -1277,6 +1286,9 @@ export type BetaUpdateQuizLessonBody = {
   solutionExplanation?: string;
   fileS3Key?: string;
   fileType?: string;
+  thresholdScore?: number;
+  attemptsLimit?: number | null;
+  quizCooldownInHours?: number | null;
   questions?: {
     /** @format uuid */
     id?: string;
@@ -1420,6 +1432,12 @@ export interface EvaluationQuizResponse {
       questionCount: number;
       score: number;
     };
+  };
+}
+
+export interface DeleteStudentQuizAnswersResponse {
+  data: {
+    message: string;
   };
 }
 
@@ -3085,6 +3103,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerDeleteStudentQuizAnswers
+     * @request DELETE:/api/lesson/delete-student-quiz-answers
+     */
+    lessonControllerDeleteStudentQuizAnswers: (
+      query: {
+        /** @format uuid */
+        lessonId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteStudentQuizAnswersResponse, any>({
+        path: `/api/lesson/delete-student-quiz-answers`,
+        method: "DELETE",
+        query: query,
         format: "json",
         ...params,
       }),

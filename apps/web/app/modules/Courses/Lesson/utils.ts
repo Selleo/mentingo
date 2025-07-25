@@ -1,3 +1,6 @@
+import { t } from "i18next";
+import { match, P } from "ts-pattern";
+
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
 import type { EvaluationQuizBody, GetLessonByIdResponse } from "~/api/generated-api";
@@ -214,4 +217,56 @@ export const parseQuizFormData = (input: QuizForm) => {
   processBooleanQuestions(input.trueOrFalseQuestions);
 
   return result;
+};
+
+export const leftAttemptsToDisplay = (
+  attempts: number | null,
+  attemptsLimit: number | null,
+  canRetake: boolean,
+  cooldownTimeLeft: number | null,
+): string => {
+  if (attemptsLimit === null) return "";
+
+  const leftAttempts = attemptsLimit - ((attempts ?? 1) % attemptsLimit);
+
+  return match({ canRetake, cooldownTimeLeft, attemptsLimit, leftAttempts })
+    .with({ canRetake: false, cooldownTimeLeft: P.when((v) => v !== null) }, () => "(0)")
+    .with({ attemptsLimit: 1 }, () => "(0)")
+    .with({ leftAttempts: P.when((v) => v > 0) }, ({ leftAttempts }) => `(${leftAttempts})`)
+    .otherwise(() => `(${attemptsLimit})`);
+};
+
+export const getQuizTooltipText = (
+  isUserSubmittedAnswer: boolean,
+  canRetake: boolean,
+  hoursLeft: number | null,
+  quizCooldownInHours: number | null,
+): string => {
+  return match({
+    isUserSubmittedAnswer,
+    canRetake,
+    hoursLeft,
+    quizCooldownInHours,
+  })
+    .with(
+      {
+        isUserSubmittedAnswer: true,
+        canRetake: false,
+        hoursLeft: P.when((h) => h !== null),
+      },
+      () => {
+        return t("studentLessonView.tooltip.retakeAvailableIn", { time: hoursLeft });
+      },
+    )
+    .with(
+      {
+        quizCooldownInHours: P.when((c) => c !== null && c !== 0),
+      },
+      () => {
+        return t("studentLessonView.tooltip.cooldown", { time: quizCooldownInHours });
+      },
+    )
+    .otherwise(() => {
+      return t("studentLessonView.tooltip.noCooldown");
+    });
 };

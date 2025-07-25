@@ -155,6 +155,20 @@
       "when": 1753354688438,
       "tag": "0021_added_ai_student_interaction_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1753429812887,
+      "tag": "0022_add_attempts_and_isQuizPassed_in_student_lesson_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1753429944225,
+      "tag": "0023_add_thresholdScore_attemptsLimit_quizCooldown_in_lessons",
+      "breakpoints": true
     }
   ]
 }
