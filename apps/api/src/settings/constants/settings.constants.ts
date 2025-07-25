@@ -6,3 +6,7 @@ export const DEFAULT_USER_ADMIN_SETTINGS = {
   ...DEFAULT_USER_SETTINGS,
   adminNewUserNotification: false,
 };
+
+export const DEFAULT_GLOBAL_SETTINGS = {
+  enforceSSO: false,
+};

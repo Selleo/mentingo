@@ -15,3 +15,4 @@ export { useUnenrollCourse } from "./useUnenrollCourse";
 export { useUpdateUser } from "./useUpdateUser";
 export { useUpsertUserDetails } from "./useUpsertUserDetails";
 export { useUpdateUserProfile } from "./useUpdateUserProfile";
+export { useUpdateGlobalSettings } from "./useUpdateGlobalSettings";

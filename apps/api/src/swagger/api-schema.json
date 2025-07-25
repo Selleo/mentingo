@@ -3061,6 +3061,48 @@
           }
         }
       }
+    },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGlobalSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateGlobalSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGlobalSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateGlobalSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -10094,6 +10136,52 @@
                   "adminNewUserNotification"
                 ]
               }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enforceSSO": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enforceSSO"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateGlobalSettingsBody": {
+        "type": "object",
+        "properties": {
+          "enforceSSO": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enforceSSO": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enforceSSO"
             ]
           }
         },

@@ -5,16 +5,23 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
-import { DEFAULT_USER_ADMIN_SETTINGS, DEFAULT_USER_SETTINGS } from "./constants/settings.constants";
+import {
+  DEFAULT_GLOBAL_SETTINGS,
+  DEFAULT_USER_ADMIN_SETTINGS,
+  DEFAULT_USER_SETTINGS,
+} from "./constants/settings.constants";
 
-import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
+import type {
+  GlobalSettingsJSONContentSchema,
+  SettingsJSONContentSchema,
+} from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -143,5 +150,64 @@ export class SettingsService {
       default:
         return DEFAULT_USER_SETTINGS;
     }
+  }
+
+  public async upsertGlobalSettings() {
+    const [existingSettings] = await this.db
+      .select({ enforceSSO: sql<boolean>`(settings.settings->>'enforceSSO')::boolean` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (existingSettings) {
+      return existingSettings;
+    }
+
+    const [createdSettings] = await this.db
+      .insert(settings)
+      .values({
+        userId: null,
+        createdAt: new Date().toISOString(),
+        settings: settingsToJsonBuildObject(DEFAULT_GLOBAL_SETTINGS),
+      })
+      .returning({
+        enforceSSO: sql<boolean>`(settings.settings->>'enforceSSO')::boolean`,
+      });
+
+    return createdSettings;
+  }
+
+  public async getGlobalSettings() {
+    const globalSettings = await this.upsertGlobalSettings();
+
+    if (!globalSettings) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    return globalSettings;
+  }
+
+  public async updateGlobalSettings(updatedSettings: Partial<GlobalSettingsJSONContentSchema>) {
+    const [updated] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{enforceSSO}',
+            to_jsonb(${updatedSettings.enforceSSO}),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        enforceSSO: sql<boolean>`(settings.settings->>'enforceSSO')::boolean`,
+      });
+
+    if (!updated) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    return updated;
   }
 }

@@ -11,6 +11,10 @@ export const adminSettingsJSONContentSchema = Type.Object({
   adminNewUserNotification: Type.Boolean(),
 });
 
+export const globalSettingsJSONContentSchema = Type.Object({
+  enforceSSO: Type.Boolean(),
+});
+
 export const settingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
@@ -19,5 +23,6 @@ export const settingsJSONContentSchema = Type.Union([
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;
+export type GlobalSettingsJSONContentSchema = Static<typeof globalSettingsJSONContentSchema>;
 
 export type SettingsResponse = SettingsJSONContentSchema;
