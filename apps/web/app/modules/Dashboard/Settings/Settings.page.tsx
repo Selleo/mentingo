@@ -38,6 +38,7 @@ export default function SettingsPage() {
           </div>
         ) : (
           <SettingsNavigationTabs
+            isAdmin={isAdmin}
             onCancel={handleCancel}
             onSave={handleSave}
             accountContent={
