@@ -468,10 +468,10 @@
       },
       "description": {
         "delete": "Are you sure you want to delete these accounts? This action is irreversible.",
-        "confirmationForGroupSingular": "You will change group to {{ group }} for 1 user",
-        "confirmationForGroupPlural": "You will change group to {{ group }} for {{ number }} users",
-        "confirmationForRoleSingular": "You will change role to {{ role }} for 1 user.",
-        "confirmationForRolePlural": "You will change role to {{ role }} for {{ number }} users"
+        "confirmationForGroup_one": "You will change group to {{ group }} for 1 user",
+        "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
+        "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
+        "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users"
       },
       "placeholder": {
         "group": "Select group",

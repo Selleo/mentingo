@@ -39,6 +39,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { USER_ROLES } from "~/utils/userRoles";
 
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
@@ -266,7 +267,7 @@ const Users = () => {
           onConfirm={editMutation[showEditModal]}
           onCancel={() => setShowEditModal(null)}
           groupData={groups}
-          roleData={[USER_ROLE.admin, USER_ROLE.student, USER_ROLE.contentCreator]}
+          roleData={Object.values(USER_ROLES)}
           selectedUsers={selectedUsers.length}
           selectedValue={selectedValue}
           setSelectedValue={setSelectedValue}
@@ -275,9 +276,10 @@ const Users = () => {
       <div className="flex justify-between">
         <h4 className="text-2xl font-bold">{t("navigationSideBar.users")}</h4>
         <div className="flex gap-3">
-          <Link to="new">
-            <Button variant="primary">{t("adminUsersView.button.createNew")}</Button>
-          </Link>
+          <Button variant="primary" asChild>
+            <Link to="new">{t("adminUsersView.button.createNew")}</Link>
+          </Button>
+
           <EditDropdown dropdownItems={dropdownItems} />
         </div>
       </div>

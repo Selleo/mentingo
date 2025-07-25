@@ -34,7 +34,7 @@ export const EditDropdown = ({ dropdownItems }: EditDropdownProps) => {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="flex gap-2">
           {t("adminUsersView.button.edit")}
-          <Icon className="size-4 text-black" name={`${openDropdown ? "ArrowUp" : "ArrowDown"}`} />
+          <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
         </Button>
       </DropdownMenuTrigger>
 

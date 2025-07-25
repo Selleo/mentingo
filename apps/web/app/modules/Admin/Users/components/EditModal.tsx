@@ -122,7 +122,7 @@ export const EditModal = ({
             </Button>
             <Button
               onClick={handleSubmit}
-              variant={`${type === "delete" ? "destructive" : "primary"}`}
+              variant={type === "delete" ? "destructive" : "primary"}
               disabled={!selectedUsers}
             >
               {t(`adminUsersView.modal.button.${type}`)}

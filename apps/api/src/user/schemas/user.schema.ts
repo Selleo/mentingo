@@ -1,5 +1,6 @@
 import { type Static, Type } from "@sinclair/typebox";
 
+import { UUIDSchema } from "src/common";
 import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -14,7 +15,7 @@ export const allUsersSchema = Type.Array(
   Type.Intersect([
     baseUserResponseSchema,
     Type.Object({
-      groupId: Type.Union([Type.String(), Type.Null()]),
+      groupId: Type.Union([UUIDSchema, Type.Null()]),
       groupName: Type.Union([Type.String(), Type.Null()]),
     }),
   ]),
@@ -23,7 +24,7 @@ export const allUsersSchema = Type.Array(
 export const userSchema = Type.Intersect([
   commonUserSchema,
   Type.Object({
-    groupId: Type.Union([Type.String(), Type.Null()]),
+    groupId: Type.Union([UUIDSchema, Type.Null()]),
     groupName: Type.Union([Type.String(), Type.Null()]),
   }),
 ]);

@@ -1,5 +1,7 @@
 import { Type, type Static } from "@sinclair/typebox";
 
+import { UUIDSchema } from "src/common";
+
 import { USER_ROLES } from "./userRoles";
 
 export const userSortFields = ["title", "createdAt", "role"] as const;
@@ -27,7 +29,7 @@ export const usersFilterSchema = Type.Object({
   keyword: Type.Optional(Type.String()),
   archived: Type.Optional(Type.Boolean()),
   role: Type.Optional(Type.Enum(USER_ROLES)),
-  groupId: Type.Optional(Type.String()),
+  groupId: Type.Optional(UUIDSchema),
 });
 
 export type UsersFilterSchema = Static<typeof usersFilterSchema>;

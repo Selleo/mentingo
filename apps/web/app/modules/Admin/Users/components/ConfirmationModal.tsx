@@ -37,14 +37,10 @@ export const ConfirmationModal = ({
           <DialogTitle>{t(`adminUsersView.modal.title.confirmation`)}</DialogTitle>
 
           <DialogDescription>
-            {selectedUsers === 1
-              ? t(`adminUsersView.modal.description.confirmationFor${capitalize(type)}Singular`, {
-                  [type]: name,
-                })
-              : t(`adminUsersView.modal.description.confirmationFor${capitalize(type)}Plural`, {
-                  [type]: name,
-                  number: selectedUsers,
-                })}
+            {t(`adminUsersView.modal.description.confirmationFor${capitalize(type)}`, {
+              [type]: name,
+              count: selectedUsers,
+            })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
