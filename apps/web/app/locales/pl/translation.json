@@ -1145,8 +1145,8 @@
     }
   },
   "adminPreferences": {
-    "header": "Preferencje administratora",
-    "subHeader": "Zarządzaj swoimi preferencjami i ustawieniami administratora",
+    "header": "Globalne preferencje administratora",
+    "subHeader": "Zarządzaj globalnymi ustawieniami",
     "notificationSettings": "Ustawienia powiadomień",
     "courseSettings": "Ustawienia kursów",
     "field": {

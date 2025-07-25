@@ -5,8 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
 import { SettingItem } from "../SettingItem";
 
-import { GlobalSetting } from "./GlobalSetting";
-
 import type { GlobalSettings } from "~/api/generated-api";
 
 interface CoursesAccessibilityPreferencesProps {
@@ -39,7 +37,6 @@ export default function CoursesAccessibilityPreferences({
               description={t("adminPreferences.field.coursesAccessibilityDescription")}
               checked={globalSettings.unregisteredUserCoursesAccessibility}
               onCheckedChange={handleCoursesAccessibilityChange}
-              icon={<GlobalSetting />}
             />
           </div>
         </div>

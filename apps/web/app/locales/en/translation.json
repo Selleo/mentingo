@@ -1140,8 +1140,8 @@
   },
 
   "adminPreferences": {
-    "header": "Administrator Preferences",
-    "subHeader": "Manage your administrative preferences and settings",
+    "header": "Administrator Global Preferences",
+    "subHeader": "Configure global system settings, user preferences, and administrative options",
     "notificationSettings": "Notification Settings",
     "courseSettings": "Course Settings",
     "field": {
@@ -1150,7 +1150,6 @@
       "coursesAccessibility": "Course availability for unauthenticated users",
       "coursesAccessibilityDescription": "Manage course accessibility settings and permissions"
     },
-    "globalActionWarning": "  This action has global influence on the application. It will change the behavior for all users.",
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesAccessibilityPreferenceChangeSuccess": "Course accessibility preferences for unauthenticated users have been updated successfully"
