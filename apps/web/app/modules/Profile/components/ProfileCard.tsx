@@ -24,13 +24,15 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
         />
         <div className="flex w-full flex-col gap-4">
           <div className="flex flex-col gap-y-2">
-            <h2 className="h6 md:h4 text-neutral-950">
+            <h2 className="h6 md:h4 text-neutral-950" data-testid="username">
               {userDetails?.firstName} {userDetails?.lastName}
             </h2>
             {isAdminLike && (
               <div className="body-sm">
                 <span className="text-neutral-900">{t("contentCreatorView.other.title")}:</span>{" "}
-                <span className="font-medium text-neutral-950">{userDetails?.jobTitle}</span>
+                <span className="font-medium text-neutral-950" data-testid="jobTitle">
+                  {userDetails?.jobTitle}
+                </span>
               </div>
             )}
           </div>
@@ -41,14 +43,14 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
                 className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-3 py-2 text-primary-700 md:justify-start"
               >
                 <Icon name="Phone" className="size-5 text-neutral-900" />
-                <span>{userDetails?.contactPhone}</span>
+                <span data-testid="contactPhone">{userDetails?.contactPhone}</span>
               </a>
               <a
                 href={`mailto:${userDetails?.contactEmail}`}
                 className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-2 py-1 text-primary-700 md:justify-start"
               >
                 <Icon name="Email" className="size-5 text-neutral-900" />
-                <span>{userDetails?.contactEmail}</span>
+                <span data-testid="contactEmail">{userDetails?.contactEmail}</span>
               </a>
             </div>
           )}
@@ -62,7 +64,9 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
             </span>
             <div className="h-px w-full bg-primary-200" />
           </div>
-          <p className="body-base mt-2 text-neutral-950">{userDetails?.description}</p>
+          <p className="body-base mt-2 text-neutral-950" data-testid="description">
+            {userDetails?.description}
+          </p>
         </div>
       )}
       <Button variant="outline" className="sr-only">
