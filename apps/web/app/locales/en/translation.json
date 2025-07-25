@@ -39,7 +39,8 @@
       "uploadingImage": "Uploading image...",
       "copyUrl": "The URL address was copied to the clipboard"
     },
-    "continueWithGoogle": "Continue with Google"
+    "continueWithGoogle": "Continue with Google",
+    "continueWithMicrosoft": "Continue with Microsoft"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -195,7 +196,7 @@
     "passwordSpecial": "at least one special character",
     "passwordsDontMatch": "Passwords do not match"
   },
-  "teacherView": {
+  "contentCreatorView": {
     "button": {
       "collapse": "Collapse",
       "showMore": "Show more",

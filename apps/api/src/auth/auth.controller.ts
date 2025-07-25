@@ -18,6 +18,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
+import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { UserActivityEvent } from "src/events";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
@@ -37,14 +38,19 @@ import { TokenService } from "./token.service";
 
 import type { Static } from "@sinclair/typebox";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
+import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Controller("auth")
 export class AuthController {
+  private APP_URL: string;
+
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
     private readonly eventBus: EventBus,
-  ) {}
+  ) {
+    this.APP_URL = process.env.APP_URL || "http://localhost:5173";
+  }
 
   @Public()
   @Post("register")
@@ -188,10 +194,35 @@ export class AuthController {
   ): Promise<void> {
     const googleUser = request.user;
 
-    const { accessToken, refreshToken } = await this.authService.handleGoogleCallback(googleUser);
+    const { accessToken, refreshToken } =
+      await this.authService.handleProviderLoginCallback(googleUser);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-    response.redirect(process.env.APP_URL || "http://localhost:5173");
+    response.redirect(this.APP_URL);
+  }
+
+  @Public()
+  @Get("microsoft")
+  @UseGuards(MicrosoftOAuthGuard)
+  async microsoftAuth() {
+    // Initiates the Microsoft OAuth flow
+  }
+
+  @Public()
+  @Get("microsoft/callback")
+  @UseGuards(MicrosoftOAuthGuard)
+  async microsoftAuthCallback(
+    @Req() request: Request & { user: MicrosoftUserType },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const microsoftUser = request.user;
+
+    const { accessToken, refreshToken } =
+      await this.authService.handleProviderLoginCallback(microsoftUser);
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    response.redirect(this.APP_URL);
   }
 }
