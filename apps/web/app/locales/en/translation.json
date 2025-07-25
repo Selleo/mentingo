@@ -1147,12 +1147,12 @@
     "field": {
       "newUserNotifications": "New User Notifications",
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
-      "coursesAccessibility": "Course availability for unauthenticated users",
-      "coursesAccessibilityDescription": "Manage course accessibility settings and permissions"
+      "coursesVisibility": "Show courses to visitors",
+      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
-      "coursesAccessibilityPreferenceChangeSuccess": "Course accessibility preferences for unauthenticated users have been updated successfully"
+      "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
     }
   }
 }

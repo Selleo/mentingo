@@ -32,31 +32,25 @@ export default function SettingsPage() {
           </div>
         }
       >
-        {!userSettings || !globalSettings ? (
-          <div className="flex h-full items-center justify-center">
-            <Loader />
-          </div>
-        ) : (
-          <SettingsNavigationTabs
-            isAdmin={isAdmin}
-            onCancel={handleCancel}
-            onSave={handleSave}
-            accountContent={
-              <AccountTabContent
-                isContentCreator={isContentCreator}
-                isAdmin={isAdmin}
-                settings={userSettings}
-              />
-            }
-            organizationContent={
-              <OrganizationTabContent
-                isAdmin={isAdmin}
-                userSettings={userSettings}
-                globalSettings={globalSettings}
-              />
-            }
-          />
-        )}
+        <SettingsNavigationTabs
+          isAdmin={isAdmin}
+          onCancel={handleCancel}
+          onSave={handleSave}
+          accountContent={
+            <AccountTabContent
+              isContentCreator={isContentCreator}
+              isAdmin={isAdmin}
+              settings={userSettings!}
+            />
+          }
+          organizationContent={
+            <OrganizationTabContent
+              isAdmin={isAdmin}
+              userSettings={userSettings!}
+              globalSettings={globalSettings!}
+            />
+          }
+        />
       </Suspense>
     </PageWrapper>
   );

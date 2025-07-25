@@ -21,7 +21,7 @@ export function useUnregisteredUserCoursesAccessibility() {
       queryClient.invalidateQueries(globalSettingsQueryOptions);
       toast({
         variant: "default",
-        description: t("adminPreferences.toast.coursesAccessibilityPreferenceChangeSuccess"),
+        description: t("adminPreferences.toast.coursesVisibilityPreferenceChangeSuccess"),
       });
     },
     onError: (error) => {

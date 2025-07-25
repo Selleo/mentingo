@@ -32,9 +32,9 @@ export default function CoursesAccessibilityPreferences({
         <div>
           <div className="space-y-4">
             <SettingItem
-              id="coursesAccessibility"
-              label={t("adminPreferences.field.coursesAccessibility")}
-              description={t("adminPreferences.field.coursesAccessibilityDescription")}
+              id="coursesVisibility"
+              label={t("adminPreferences.field.coursesVisibility")}
+              description={t("adminPreferences.field.coursesVisibilityDescription")}
               checked={globalSettings.unregisteredUserCoursesAccessibility}
               onCheckedChange={handleCoursesAccessibilityChange}
             />

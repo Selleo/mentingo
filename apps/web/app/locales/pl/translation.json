@@ -1152,12 +1152,12 @@
     "field": {
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
       "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
-      "coursesAccessibility": "Dostępność kursów dla niezalogowanych użytkowników",
-      "coursesAccessibilityDescription": "Zarządzaj ustawieniami dostępności kursów i uprawnieniami"
+      "coursesVisibility": "Pokazuj kursy odwiedzającym",
+      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
-      "coursesAccessibilityPreferenceChangeSuccess": "Preferencje dostępności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
+      "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   }
