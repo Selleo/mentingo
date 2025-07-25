@@ -7,7 +7,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { settingsSchema } from "./schemas/settings.schema";
+import { settingsJSONContentSchema, type SettingsResponse } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
@@ -17,25 +17,32 @@ export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Get()
-  async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
+  @Validate({
+    response: baseResponse(settingsJSONContentSchema),
+  })
+  async getUserSettings(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<SettingsResponse>> {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
   @Put()
   @Validate({
     request: [{ type: "body", schema: updateSettingsBodySchema }],
-    response: baseResponse(settingsSchema),
+    response: baseResponse(settingsJSONContentSchema),
   })
   async updateUserSettings(
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
-  ) {
+  ): Promise<BaseResponse<SettingsResponse>> {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
   @Patch("admin-new-user-notification")
   @Roles(USER_ROLES.ADMIN)
-  async updateAdminNewUserNotification(@CurrentUser("userId") userId: UUIDType) {
+  async updateAdminNewUserNotification(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<SettingsResponse>> {
     const result = await this.settingsService.updateAdminNewUserNotification(userId);
     return new BaseResponse(result);
   }

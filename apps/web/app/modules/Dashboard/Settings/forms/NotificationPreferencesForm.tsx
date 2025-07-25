@@ -5,10 +5,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "~/com
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 
-import type { UserSettings } from "~/api/generated-api";
+import type { AdminSettings } from "../types";
 
 interface NotificationPreferencesFormProps {
-  settings: UserSettings;
+  settings: AdminSettings;
 }
 
 export default function NotificationPreferencesForm({
