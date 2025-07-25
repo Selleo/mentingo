@@ -3055,6 +3055,67 @@
           }
         }
       }
+    },
+    "/api/settings/company-information": {
+      "get": {
+        "operationId": "SettingsController_getCompanyInformation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "SettingsController_createCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -10014,6 +10075,26 @@
               },
               "adminNewUserNotification": {
                 "type": "boolean"
+              },
+              "company_information": {
+                "type": "object",
+                "properties": {
+                  "company_name": {
+                    "type": "string"
+                  },
+                  "registered_address": {
+                    "type": "string"
+                  },
+                  "tax_number": {
+                    "type": "string"
+                  },
+                  "email_address": {
+                    "type": "string"
+                  },
+                  "court_register_number": {
+                    "type": "string"
+                  }
+                }
               }
             }
           }
@@ -10050,6 +10131,244 @@
                       },
                       "adminNewUserNotification": {
                         "type": "boolean"
+                      },
+                      "company_information": {
+                        "type": "object",
+                        "properties": {
+                          "company_name": {
+                            "type": "string"
+                          },
+                          "registered_address": {
+                            "type": "string"
+                          },
+                          "tax_number": {
+                            "type": "string"
+                          },
+                          "email_address": {
+                            "type": "string"
+                          },
+                          "court_register_number": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
+                  }
+                ]
+              },
+              "createdAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "userId",
+              "settings",
+              "createdAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "company_name": {
+            "type": "string"
+          },
+          "registered_address": {
+            "type": "string"
+          },
+          "tax_number": {
+            "type": "string"
+          },
+          "email_address": {
+            "type": "string"
+          },
+          "court_register_number": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "settings": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      },
+                      "company_information": {
+                        "type": "object",
+                        "properties": {
+                          "company_name": {
+                            "type": "string"
+                          },
+                          "registered_address": {
+                            "type": "string"
+                          },
+                          "tax_number": {
+                            "type": "string"
+                          },
+                          "email_address": {
+                            "type": "string"
+                          },
+                          "court_register_number": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "language",
+                      "adminNewUserNotification"
+                    ]
+                  }
+                ]
+              },
+              "createdAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "userId",
+              "settings",
+              "createdAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "company_name": {
+            "type": "string"
+          },
+          "registered_address": {
+            "type": "string"
+          },
+          "tax_number": {
+            "type": "string"
+          },
+          "email_address": {
+            "type": "string"
+          },
+          "court_register_number": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "settings": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "adminNewUserNotification": {
+                        "type": "boolean"
+                      },
+                      "company_information": {
+                        "type": "object",
+                        "properties": {
+                          "company_name": {
+                            "type": "string"
+                          },
+                          "registered_address": {
+                            "type": "string"
+                          },
+                          "tax_number": {
+                            "type": "string"
+                          },
+                          "email_address": {
+                            "type": "string"
+                          },
+                          "court_register_number": {
+                            "type": "string"
+                          }
+                        }
                       }
                     },
                     "required": [

@@ -1653,6 +1653,68 @@ export interface GetScormMetadataResponse {
   };
 }
 
+export interface CreateUserSettingsBody {
+  admin_new_user_notification?: boolean;
+  language?: string;
+  company_information?: {
+    company_name?: string;
+    registered_address?: string;
+    tax_number?: string;
+    email_address?: string;
+    court_register_number?: string;
+  };
+}
+
+export interface CreateUserSettingsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    settings: {
+      admin_new_user_notification?: boolean;
+      language?: string;
+      company_information?: {
+        company_name?: string;
+        registered_address?: string;
+        tax_number?: string;
+        email_address?: string;
+        court_register_number?: string;
+      };
+    };
+    createdAt: string | null;
+  };
+}
+
+export interface UpdateUserSettingsBody {
+  admin_new_user_notification?: boolean;
+  language?: string;
+  company_information?: {
+    company_name?: string;
+    registered_address?: string;
+    tax_number?: string;
+    email_address?: string;
+    court_register_number?: string;
+  };
+}
+
+export interface UpdateUserSettingsResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    settings: {
+      admin_new_user_notification?: boolean;
+      language?: string;
+      company_information?: {
+        company_name?: string;
+        registered_address?: string;
+        tax_number?: string;
+        email_address?: string;
+        court_register_number?: string;
+      };
+    };
+    createdAt: string | null;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
