@@ -469,10 +469,14 @@
       },
       "description": {
         "delete": "Czy na pewno chcesz usunąć te konta? Ta operacja jest nieodwracalna.",
-        "confirmationForGroupSingular": "Zmienisz grupę na {{ group }} dla 1 użytkownika",
-        "confirmationForGroupPlural": "Zmienisz grupę na {{ group }} dla {{ number }} użytkowników",
-        "confirmationForRoleSingular": "Zmienisz rolę na {{ role }} dla 1 użytkownika.",
-        "confirmationForRolePlural": "Zmienisz rolę na {{ role }} dla {{ number }} użytkowników"
+        "confirmationForGroup_one": "Zmienisz grupę na {{ group }} dla 1 użytkownika",
+        "confirmationForGroup_few": "Zmienisz grupę na {{ group }} dla {{ count }} użytkowników",
+        "confirmationForGroup_many": "Zmienisz grupę na {{ group }} dla {{ count }} użytkowników",
+        "confirmationForGroup_other": "Zmienisz grupę na {{ group }} dla {{ count }} użytkowników",
+        "confirmationForRole_one": "Zmienisz rolę na {{ role }} dla 1 użytkownika",
+        "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników"
       },
       "placeholder": {
         "group": "Wybierz grupę",

@@ -3527,6 +3527,7 @@
                     "groupId": {
                       "anyOf": [
                         {
+                          "format": "uuid",
                           "type": "string"
                         },
                         {
@@ -3647,6 +3648,7 @@
                   "groupId": {
                     "anyOf": [
                       {
+                        "format": "uuid",
                         "type": "string"
                       },
                       {
