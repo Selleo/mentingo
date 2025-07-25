@@ -10,7 +10,7 @@ import AccountTabContent from "./components/AccountTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
 
-function SettingsContent() {
+export default function SettingsPage() {
   const { isContentCreator, isAdmin } = useUserRole();
   const { data: userSettings } = useUserSettings();
   const { data: globalSettings } = useGlobalSettings();
@@ -23,37 +23,6 @@ function SettingsContent() {
     console.log("Settings saved");
   };
 
-  if (!userSettings || !globalSettings) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Loader />
-      </div>
-    );
-  }
-
-  return (
-    <SettingsNavigationTabs
-      onCancel={handleCancel}
-      onSave={handleSave}
-      accountContent={
-        <AccountTabContent
-          isContentCreator={isContentCreator}
-          isAdmin={isAdmin}
-          settings={userSettings}
-        />
-      }
-      organizationContent={
-        <OrganizationTabContent
-          isAdmin={isAdmin}
-          userSettings={userSettings}
-          globalSettings={globalSettings}
-        />
-      }
-    />
-  );
-}
-
-export default function SettingsPage() {
   return (
     <PageWrapper className="flex flex-col gap-6 *:h-min">
       <Suspense
@@ -63,7 +32,30 @@ export default function SettingsPage() {
           </div>
         }
       >
-        <SettingsContent />
+        {!userSettings || !globalSettings ? (
+          <div className="flex h-full items-center justify-center">
+            <Loader />
+          </div>
+        ) : (
+          <SettingsNavigationTabs
+            onCancel={handleCancel}
+            onSave={handleSave}
+            accountContent={
+              <AccountTabContent
+                isContentCreator={isContentCreator}
+                isAdmin={isAdmin}
+                settings={userSettings}
+              />
+            }
+            organizationContent={
+              <OrganizationTabContent
+                isAdmin={isAdmin}
+                userSettings={userSettings}
+                globalSettings={globalSettings}
+              />
+            }
+          />
+        )}
       </Suspense>
     </PageWrapper>
   );
