@@ -24,7 +24,7 @@ export default function AccountTabContent({
       <UserForm />
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
-      ## TODO: Handle type error
+      {/* ## TODO: Handle type error */}
       {/* {isAdmin && isAdminSettings(settings) && <NotificationPreferences adminSettings={settings} />} */}
       {/* {isAdmin && <NotificationPreferences adminSettings={settings} />} */}
       {/* {isAdmin && isAdminSettings(settings) && <NotificationPreferences adminSettings={settings} />} */}
