@@ -3015,7 +3015,13 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserSettingsResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -9996,6 +10002,44 @@
           "data"
         ]
       },
+      "GetUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "language"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UpdateUserSettingsBody": {
         "anyOf": [
           {
@@ -10023,57 +10067,33 @@
         "type": "object",
         "properties": {
           "data": {
-            "type": "object",
-            "properties": {
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "settings": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "language"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "language": {
-                        "type": "string"
-                      },
-                      "adminNewUserNotification": {
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [
-                      "language",
-                      "adminNewUserNotification"
-                    ]
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
                   }
+                },
+                "required": [
+                  "language"
                 ]
               },
-              "createdAt": {
-                "anyOf": [
-                  {
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
                     "type": "string"
                   },
-                  {
-                    "type": "null"
+                  "adminNewUserNotification": {
+                    "type": "boolean"
                   }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
                 ]
               }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
             ]
           }
         },

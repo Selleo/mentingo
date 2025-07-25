@@ -22,10 +22,6 @@ export interface RegisterBody {
    * @maxLength 64
    */
   lastName: string;
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   password: string;
 }
 
@@ -65,31 +61,12 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
-    settings: UserSettings;
   };
 }
 
 export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
-
-export interface AdminSettings {
-  adminNewUserNotification: boolean;
-}
-
-export interface UserSettings extends AdminSettings {
-  language: string;
-}
-
-export interface SettingsResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
-    settings: UserSettings;
-  };
-}
 
 export interface CurrentUserResponse {
   data: {
@@ -114,20 +91,12 @@ export interface ForgotPasswordBody {
 }
 
 export interface CreatePasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   password: string;
   /** @minLength 1 */
   createToken: string;
 }
 
 export interface ResetPasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   newPassword: string;
   /** @minLength 1 */
   resetToken: string;
@@ -245,10 +214,6 @@ export interface AdminUpdateUserResponse {
 }
 
 export interface ChangePasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   newPassword: string;
   /**
    * @minLength 8
@@ -1653,6 +1618,37 @@ export interface GetScormMetadataResponse {
   };
 }
 
+export interface GetUserSettingsResponse {
+  data:
+    | {
+        language: string;
+      }
+    | {
+        language: string;
+        adminNewUserNotification: boolean;
+      };
+}
+
+export type UpdateUserSettingsBody =
+  | {
+      language?: string;
+    }
+  | {
+      language?: string;
+      adminNewUserNotification?: boolean;
+    };
+
+export interface UpdateUserSettingsResponse {
+  data:
+    | {
+        language: string;
+      }
+    | {
+        language: string;
+        adminNewUserNotification: boolean;
+      };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -1930,6 +1926,58 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerGoogleAuth
+     * @request GET:/api/auth/google
+     */
+    authControllerGoogleAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/google`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerGoogleAuthCallback
+     * @request GET:/api/auth/google/callback
+     */
+    authControllerGoogleAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/google/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMicrosoftAuth
+     * @request GET:/api/auth/microsoft
+     */
+    authControllerMicrosoftAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMicrosoftAuthCallback
+     * @request GET:/api/auth/microsoft/callback
+     */
+    authControllerMicrosoftAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft/callback`,
+        method: "GET",
         ...params,
       }),
 
@@ -3489,11 +3537,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UserControllerGetUserDetails
-     * @request GET:/api/user/details
+     * @name SettingsControllerGetUserSettings
+     * @request GET:/api/settings
      */
-    userSettings: (params: RequestParams = {}) =>
-      this.request<SettingsResponse, any>({
+    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
+      this.request<GetUserSettingsResponse, any>({
         path: `/api/settings`,
         method: "GET",
         format: "json",
@@ -3503,15 +3551,32 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name BaseResponse
-     * @request GET:/api/settings/admin-new-user-notification
+     * @name SettingsControllerUpdateUserSettings
+     * @request PUT:/api/settings
      */
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminNewUserNotification
+     * @request PATCH:/api/settings/admin-new-user-notification
+     */
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<any>({
+      this.request<void, any>({
         path: `/api/settings/admin-new-user-notification`,
         method: "PATCH",
-        format: "json",
         ...params,
       }),
   };
