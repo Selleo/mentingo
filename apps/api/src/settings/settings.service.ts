@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -19,7 +20,6 @@ import {
   DEFAULT_GLOBAL_SETTINGS,
 } from "./constants/settings.constants";
 
-import type { GlobalSettingsType } from "./constants/settings.constants";
 import type {
   SettingsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
@@ -152,13 +152,13 @@ export class SettingsService {
     return globalSettings;
   }
 
-  public async updateGlobalSettings(updatedSettings: Partial<GlobalSettingsType>) {
+  public async updateGlobalSettings(updatedSettings: Partial<GlobalSettingsJSONContentSchema>) {
     const currentSettings = await this.getGlobalSettings();
-    const currentSettingsData = currentSettings.settings as GlobalSettingsJSONContentSchema;
 
-    const newSettings = {
-      ...currentSettingsData,
-      platformLogoS3Key: updatedSettings.platformLogoS3Key || null,
+    const currentPlatformLogoS3Key = this.extractPlatformLogoS3Key(currentSettings.settings);
+
+    const newSettings: GlobalSettingsJSONContentSchema = {
+      platformLogoS3Key: updatedSettings.platformLogoS3Key || currentPlatformLogoS3Key,
     };
 
     const [updated] = await this.db
@@ -177,6 +177,10 @@ export class SettingsService {
   }
 
   public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
+    if (!file) {
+      throw new BadRequestException("No logo file provided");
+    }
+
     const resource = "platform-logos";
     const { fileKey } = await this.fileService.uploadFile(file, resource);
     await this.updateGlobalSettings({ platformLogoS3Key: fileKey });
@@ -184,14 +188,22 @@ export class SettingsService {
 
   public async getPlatformLogoUrl(): Promise<string | null> {
     const globalSettings = await this.getGlobalSettings();
-    const platformLogoS3Key = (globalSettings.settings as GlobalSettingsJSONContentSchema)
-      ?.platformLogoS3Key;
+
+    const platformLogoS3Key = this.extractPlatformLogoS3Key(globalSettings.settings);
 
     if (!platformLogoS3Key) {
       return null;
     }
 
     return await this.fileService.getFileUrl(platformLogoS3Key);
+  }
+
+  private extractPlatformLogoS3Key(settings: unknown): string | undefined {
+    if (typeof settings === "object" && settings !== null && "platformLogoS3Key" in settings) {
+      const value = (settings as Record<string, unknown>).platformLogoS3Key;
+      return typeof value === "string" ? value : undefined;
+    }
+    return undefined;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {

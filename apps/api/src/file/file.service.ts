@@ -20,6 +20,10 @@ export class FileService {
       throw new BadRequestException("No file uploaded");
     }
 
+    if (!file.originalname || !file.buffer) {
+      throw new BadRequestException("File upload failed - invalid file data");
+    }
+
     const allowedMimeTypes = [
       "image/jpeg",
       "image/png",
@@ -30,17 +34,31 @@ export class FileService {
       "video/quicktime",
     ];
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size && file.size > MAX_FILE_SIZE) {
       throw new BadRequestException(
         `File size exceeds the maximum allowed size of ${MAX_FILE_SIZE} bytes`,
       );
     }
 
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    let mimetype: string | undefined = file.mimetype;
+    if (!mimetype) {
+      const extension = file.originalname.split(".").pop()?.toLowerCase();
+      const mimeTypeMap: Record<string, string> = {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        svg: "image/svg+xml",
+        pdf: "application/pdf",
+        pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        mp4: "video/mp4",
+        mov: "video/quicktime",
+      };
+      mimetype = extension ? mimeTypeMap[extension] : undefined;
+    }
+
+    if (!mimetype || !allowedMimeTypes.includes(mimetype)) {
       throw new BadRequestException(
-        `File type ${file.mimetype} is not allowed. Allowed types are: ${allowedMimeTypes.join(
-          ", ",
-        )}`,
+        `File type ${mimetype || "unknown"} is not allowed. Allowed types are: ${allowedMimeTypes.join(", ")}`,
       );
     }
 
@@ -48,7 +66,7 @@ export class FileService {
       const fileExtension = file.originalname.split(".").pop();
       const fileKey = `${resource}/${crypto.randomUUID()}.${fileExtension}`;
 
-      await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
+      await this.s3Service.uploadFile(file.buffer, fileKey, mimetype);
 
       const fileUrl = await this.s3Service.getSignedUrl(fileKey);
 

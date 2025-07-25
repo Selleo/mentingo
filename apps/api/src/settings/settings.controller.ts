@@ -7,10 +7,8 @@ import {
   Put,
   UseInterceptors,
   UploadedFile,
-  BadRequestException,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -20,13 +18,10 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import { settingsSchema } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
-
-const platformLogoResponseSchema = Type.Object({
-  url: Type.Union([Type.String(), Type.Null()]),
-});
 
 @Controller("settings")
 @UseGuards(RolesGuard)
@@ -72,12 +67,14 @@ export class SettingsController {
 
   @Patch("platform-logo")
   @Roles(USER_ROLES.ADMIN)
-  @UseInterceptors(FileInterceptor("logo"))
+  @UseInterceptors(
+    FileInterceptor("logo", {
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
+    }),
+  )
   async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File): Promise<void> {
-    if (!logo) {
-      throw new BadRequestException("No logo file provided");
-    }
-
     await this.settingsService.uploadPlatformLogo(logo);
   }
 }

@@ -8,9 +8,5 @@ export const DEFAULT_USER_ADMIN_SETTINGS = {
 };
 
 export const DEFAULT_GLOBAL_SETTINGS = {
-  platformLogoS3Key: null as string | null,
+  platformLogoS3Key: undefined,
 } as const;
-
-export type GlobalSettingsType = {
-  platformLogoS3Key: string | null;
-};
