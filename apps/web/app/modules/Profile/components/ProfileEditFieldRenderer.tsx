@@ -41,6 +41,7 @@ export const ProfileEditFieldRenderer = ({ field, control, user, t }: FieldRende
             <Textarea
               {...formField}
               id={name}
+              data-testid={name}
               value={formField.value as string}
               className="min-h-[150px] w-full resize-none rounded-md border border-neutral-300 px-2 py-1"
               placeholder={t(`contentCreatorView.field.${name}Placeholder`)}
@@ -52,6 +53,7 @@ export const ProfileEditFieldRenderer = ({ field, control, user, t }: FieldRende
                 id={name}
                 value={formField.value as string}
                 type={type}
+                data-testid={name}
                 className="peer w-full rounded-md border border-neutral-300 px-2 py-1 ps-9"
                 placeholder={t(`contentCreatorView.field.${name}Placeholder`)}
               />
