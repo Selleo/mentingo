@@ -3623,88 +3623,75 @@
         "properties": {
           "data": {
             "type": "object",
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "archived": {
+                "type": "boolean"
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
                     "type": "string"
                   },
-                  "createdAt": {
-                    "type": "string"
-                  },
-                  "updatedAt": {
-                    "type": "string"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "firstName": {
-                    "type": "string"
-                  },
-                  "lastName": {
-                    "type": "string"
-                  },
-                  "avatarReference": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "maxLength": 200
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "role": {
-                    "type": "string"
-                  },
-                  "archived": {
-                    "type": "boolean"
+                  {
+                    "type": "null"
                   }
-                },
-                "required": [
-                  "id",
-                  "createdAt",
-                  "updatedAt",
-                  "email",
-                  "firstName",
-                  "lastName",
-                  "avatarReference",
-                  "role",
-                  "archived"
                 ]
               },
-              {
-                "type": "object",
-                "properties": {
-                  "groupId": {
-                    "anyOf": [
-                      {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+              "groupId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
                   },
-                  "groupName": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                  {
+                    "type": "null"
                   }
-                },
-                "required": [
-                  "groupId",
-                  "groupName"
+                ]
+              },
+              "groupName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "email",
+              "firstName",
+              "lastName",
+              "role",
+              "archived",
+              "profilePictureUrl",
+              "groupId",
+              "groupName"
             ]
           }
         },

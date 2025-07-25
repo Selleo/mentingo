@@ -21,9 +21,10 @@ export const allUsersSchema = Type.Array(
   ]),
 );
 
-export const userSchema = Type.Intersect([
-  commonUserSchema,
+export const userSchema = Type.Composite([
+  Type.Omit(commonUserSchema, ["avatarReference"]),
   Type.Object({
+    profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
     groupId: Type.Union([UUIDSchema, Type.Null()]),
     groupName: Type.Union([Type.String(), Type.Null()]),
   }),

@@ -249,19 +249,25 @@ describe("UsersController (e2e)", () => {
     let secondUser: UserWithCredentials;
 
     it("should update groups for multiple users", async () => {
-      firstUser = await authService.register({
-        email: "another6@example.com",
-        password: testPassword,
-        firstName: "Another",
-        lastName: "User",
-      });
+      firstUser = {
+        ...(await authService.register({
+          email: "another6@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
 
-      secondUser = await authService.register({
-        email: "another7@example.com",
-        password: testPassword,
-        firstName: "Another",
-        lastName: "User",
-      });
+      secondUser = {
+        ...(await authService.register({
+          email: "another7@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
 
       const updateData = await groupService.createGroup({ name: "Test group" });
 
@@ -273,19 +279,25 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should return forbidden 403", async () => {
-      firstUser = await authService.register({
-        email: "another6@example.com",
-        password: testPassword,
-        firstName: "Another",
-        lastName: "User",
-      });
+      firstUser = {
+        ...(await authService.register({
+          email: "another6@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
 
-      secondUser = await authService.register({
-        email: "another7@example.com",
-        password: testPassword,
-        firstName: "Another",
-        lastName: "User",
-      });
+      secondUser = {
+        ...(await authService.register({
+          email: "another7@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
 
       const updateData = await groupService.createGroup({ name: "Test group" });
 
