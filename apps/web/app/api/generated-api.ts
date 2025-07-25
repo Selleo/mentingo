@@ -65,7 +65,6 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
-    settings: UserSettings;
   };
 }
 
@@ -73,12 +72,26 @@ export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
 
-export interface AdminSettings {
+export interface UserSettings {
+  language: string;
+}
+
+export interface AdminSettings extends UserSettings {
   adminNewUserNotification: boolean;
 }
 
-export interface UserSettings extends AdminSettings {
-  language: string;
+export interface GlobalSettings {
+  unregisteredUserCoursesAccessibility: boolean;
+}
+
+export interface GlobalSettingsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: null;
+    settings: GlobalSettings;
+  };
 }
 
 export interface SettingsResponse {
@@ -87,7 +100,7 @@ export interface SettingsResponse {
     createdAt: string;
     updatedAt: string;
     userId: string;
-    settings: UserSettings;
+    settings: UserSettings | AdminSettings;
   };
 }
 
@@ -242,6 +255,10 @@ export interface AdminUpdateUserResponse {
     archived: boolean;
     profilePictureUrl: string | null;
   };
+}
+
+export interface ChangeLanguageBody {
+  language: string;
 }
 
 export interface ChangePasswordBody {
@@ -2218,6 +2235,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerChangeLanguage
+     * @request PATCH:/api/settings
+     */
+
+    settingsControllerChangeLanguage: (
+      query: {
+        /** @format uuid */
+        id: string;
+      },
+      data: ChangeLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name UserControllerDeleteUser
      * @request DELETE:/api/user/user
      */
@@ -3500,16 +3542,32 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         ...params,
       }),
 
+    globalSettings: (params: RequestParams = {}) =>
+      this.request<GlobalSettingsResponse, any>({
+        path: `/api/settings/global`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
     /**
      * No description
      *
      * @name BaseResponse
-     * @request GET:/api/settings/admin-new-user-notification
+     * @request GET:/api/settings/admin/new-user-notification
      */
 
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
       this.request<any>({
-        path: `/api/settings/admin-new-user-notification`,
+        path: `/api/settings/admin/new-user-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
+      this.request<any>({
+        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
         format: "json",
         ...params,

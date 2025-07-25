@@ -2,6 +2,7 @@ import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -15,6 +16,12 @@ import { SettingsService } from "./settings.service";
 @UseGuards(RolesGuard)
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
+
+  @Public()
+  @Get("global")
+  async getPublicGlobalSettings() {
+    return new BaseResponse(await this.settingsService.getGlobalSettings());
+  }
 
   @Get()
   async getUserSettings(@CurrentUser("userId") userId: UUIDType) {
@@ -33,10 +40,17 @@ export class SettingsController {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
-  @Patch("admin-new-user-notification")
+  @Patch("admin/new-user-notification")
   @Roles(USER_ROLES.ADMIN)
   async updateAdminNewUserNotification(@CurrentUser("userId") userId: UUIDType) {
     const result = await this.settingsService.updateAdminNewUserNotification(userId);
+    return new BaseResponse(result);
+  }
+
+  @Patch("admin/unregistered-user-courses-accessibility")
+  @Roles(USER_ROLES.ADMIN)
+  async updateUnregisteredUserCoursesAccessibility() {
+    const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
   }
 }

@@ -94,9 +94,8 @@ export class AuthService {
       );
 
       const { avatarReference, ...userWithoutAvatar } = newUser;
-      const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-        avatarReference,
-      );
+      const usersProfilePictureUrl =
+        await this.userService.getUsersProfilePictureUrl(avatarReference);
 
       const emailTemplate = new WelcomeEmail({ email, name: email });
       await this.emailService.sendEmail({
@@ -122,9 +121,8 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.getTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
-    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-      avatarReference,
-    );
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     return {
       ...userWithoutAvatar,
@@ -272,6 +270,8 @@ export class AuthService {
     await this.createPasswordService.deleteToken(token);
 
     await this.settingsService.createSettings(createToken.userId, existingUser.role as UserRole);
+
+    this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
 
     this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
 

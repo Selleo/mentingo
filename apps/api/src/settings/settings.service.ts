@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { settings } from "src/storage/schema";
@@ -24,6 +24,12 @@ import type { UserRole } from "src/user/schemas/userRoles";
 @Injectable()
 export class SettingsService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
+
+  public async getGlobalSettings() {
+    const [globalSettings] = await this.db.select().from(settings).where(isNull(settings.userId));
+
+    return globalSettings;
+  }
 
   public async createSettings(
     userId: UUIDType,
@@ -85,6 +91,33 @@ export class SettingsService {
     if (!updated) {
       throw new NotFoundException("User settings not found");
     }
+
+    return updated;
+  }
+  public async updateGlobalUnregisteredUserCoursesAccessibility() {
+    const [res] = await this.db
+      .select({
+        unregisteredUserCoursesAccessibility: sql`settings.settings->>'unregisteredUserCoursesAccessibility'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    const current = res.unregisteredUserCoursesAccessibility === "true";
+
+    const [updated] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+        jsonb_set(
+          settings.settings,
+          '{unregisteredUserCoursesAccessibility}',
+          to_jsonb(${!current}),
+          true
+        )
+      `,
+      })
+      .where(isNull(settings.userId))
+      .returning();
 
     return updated;
   }
