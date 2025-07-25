@@ -8,6 +8,8 @@ import {
 import { EventBus } from "@nestjs/cqrs";
 import { isNumber } from "lodash";
 
+import { AiService } from "src/ai/services/ai.service";
+import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { QuizCompletedEvent } from "src/events";
 import { FileService } from "src/file/file.service";
@@ -24,6 +26,7 @@ import type {
   QuestionBody,
   QuestionDetails,
 } from "../lesson.schema";
+import type { SupportedLanguages } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -35,20 +38,25 @@ export class LessonService {
     private readonly questionRepository: QuestionRepository,
     private readonly fileService: FileService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
+    private readonly aiService: AiService,
     private readonly eventBus: EventBus,
   ) {}
 
-  async getLessonById(id: UUIDType, userId: UUIDType, isStudent: boolean): Promise<LessonShow> {
+  async getLessonById(
+    id: UUIDType,
+    userId: UUIDType,
+    isStudent: boolean,
+    userLanguage?: SupportedLanguages,
+  ): Promise<LessonShow> {
     const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
-
     if (isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("You don't have access");
 
     if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) return lesson;
 
-    if (lesson.type !== LESSON_TYPES.QUIZ) {
+    if (lesson.type !== LESSON_TYPES.QUIZ && lesson.type !== LESSON_TYPES.AI_MENTOR) {
       if (!lesson.fileUrl) throw new NotFoundException("Lesson file not found");
 
       if (lesson.fileUrl.startsWith("https://")) return lesson;
@@ -60,6 +68,22 @@ export class LessonService {
         console.error(`Failed to get signed URL for ${lesson.fileUrl}:`, error);
         throw new NotFoundException("Lesson file not found");
       }
+    }
+
+    if (lesson.type === LESSON_TYPES.AI_MENTOR) {
+      const { data: thread } = await this.aiService.getThreadWithSetup({
+        lessonId: id,
+        status: THREAD_STATUS.ACTIVE,
+        userLanguage: userLanguage ?? "en",
+        userId,
+      });
+
+      return {
+        ...lesson,
+        threadId: thread.id,
+        userLanguage: thread.userLanguage,
+        status: thread.status,
+      };
     }
 
     const questionList = await this.questionRepository.getQuestionsForLesson(
@@ -163,14 +187,14 @@ export class LessonService {
           trx,
         );
 
-        await this.studentLessonProgressService.markLessonAsCompleted(
-          studentQuizAnswers.lessonId,
-          userId,
-          undefined,
-          true,
-          evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
-          trx,
-        );
+        await this.studentLessonProgressService.markLessonAsCompleted({
+          id: studentQuizAnswers.lessonId,
+          studentId: userId,
+          quizCompleted: true,
+          completedQuestionCount:
+            evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
+          dbInstance: trx,
+        });
 
         this.eventBus.publish(
           new QuizCompletedEvent(

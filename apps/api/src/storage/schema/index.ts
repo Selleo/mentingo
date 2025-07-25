@@ -174,6 +174,31 @@ export const aiMentorLessons = pgTable("ai_mentor_lessons", {
   completionConditions: text("completion_conditions").notNull(),
 });
 
+export const aiMentorThreads = pgTable("ai_mentor_threads", {
+  ...id,
+  ...timestamps,
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  aiMentorLessonId: uuid("ai_mentor_lesson_id")
+    .references(() => aiMentorLessons.id, { onDelete: "cascade" })
+    .notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  userLanguage: varchar("user_language", { length: 20 }).notNull().default("en"),
+});
+
+export const aiMentorThreadMessages = pgTable("ai_mentor_thread_messages", {
+  ...id,
+  ...timestamps,
+  threadId: uuid("thread_id")
+    .notNull()
+    .references(() => aiMentorThreads.id, { onDelete: "cascade" }),
+  role: varchar("role", { length: 20 }).notNull(),
+  content: text("content").notNull(),
+  tokenCount: integer("token_count").notNull().default(0),
+  archived: boolean("archived").default(false),
+});
+
 export const questions = pgTable("questions", {
   ...id,
   ...timestamps,
@@ -274,6 +299,20 @@ export const studentLessonProgress = pgTable(
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),
   }),
 );
+
+export const aiMentorStudentLessonProgress = pgTable("ai_mentor_student_lesson_progress", {
+  ...id,
+  ...timestamps,
+  studentLessonProgressId: uuid("student_lesson_progress_id")
+    .references(() => studentLessonProgress.id, { onDelete: "cascade" })
+    .notNull(),
+  summary: text("summary"),
+  score: integer("score"),
+  minScore: integer("min_score"),
+  maxScore: integer("max_score"),
+  percentage: integer("percentage"),
+  passed: boolean("passed").default(false),
+});
 
 export const studentChapterProgress = pgTable(
   "student_chapter_progress",

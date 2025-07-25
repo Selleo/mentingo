@@ -1,5 +1,6 @@
 import { Type } from "@sinclair/typebox";
 
+import { SUPPORTED_LANGUAGES, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { UUIDSchema } from "src/common";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
@@ -142,6 +143,9 @@ export const lessonShowSchema = Type.Object({
   displayOrder: Type.Number(),
   isExternal: Type.Optional(Type.Boolean()),
   nextLessonId: Type.Union([UUIDSchema, Type.Null()]),
+  userLanguage: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
+  status: Type.Optional(Type.Enum(THREAD_STATUS)),
+  threadId: Type.Optional(UUIDSchema),
 });
 
 export const updateLessonSchema = Type.Partial(createLessonSchema);

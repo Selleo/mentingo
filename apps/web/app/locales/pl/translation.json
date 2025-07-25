@@ -1021,7 +1021,18 @@
       "multipleChoice": "Pytanie wielokrotnego wyboru",
       "trueOrFalseChoice": "Pytanie prawda fałsz",
       "oneOrTwoWordSentence": "Podaj krótką odpowiedź (1-2 zadań)",
-      "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)"
+      "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)",
+      "aiMentorLesson": {
+        "sendMessage": "Napisz wiadomość...",
+        "check": "Sprawdź",
+        "retake": "Powtórz",
+        "aiMentorName": "AI Mentor",
+        "userName": "Użytkownik",
+        "typing": "Pisze odpowiedź...",
+        "send": "Wyślij",
+        "retakeModalTitle": "Czy na pewno chcesz powtórzyć lekcję?",
+        "retakeModalDescription": "Spowoduje to zresetowanie Twoich postępów w tej lekcji. Tej akcji nie można cofnąć."
+      }
     },
     "sideSection": {
       "optionHeader": "Opcja",

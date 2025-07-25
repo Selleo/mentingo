@@ -12,6 +12,7 @@ import {
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
+import { SUPPORTED_LANGUAGES, SupportedLanguages } from "src/ai/utils/ai.type";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -48,20 +49,6 @@ export class LessonController {
     private readonly lessonService: LessonService,
   ) {}
 
-  @Get(":id")
-  @Validate({
-    response: baseResponse(lessonShowSchema),
-  })
-  async getLessonById(
-    @Param("id") id: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
-  ): Promise<BaseResponse<LessonShow>> {
-    return new BaseResponse(
-      await this.lessonService.getLessonById(id, userId, userRole === USER_ROLES.STUDENT),
-    );
-  }
-
   @Post("beta-create-lesson")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
@@ -79,6 +66,39 @@ export class LessonController {
     const id = await this.adminLessonsService.createLessonForChapter(createLessonBody);
 
     return new BaseResponse({ id, message: "Lesson created successfully" });
+  }
+
+  @Get(":id")
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "id",
+        schema: UUIDSchema,
+        required: true,
+      },
+      {
+        type: "query",
+        name: "userLanguage",
+        schema: Type.Enum(SUPPORTED_LANGUAGES),
+      },
+    ],
+    response: baseResponse(lessonShowSchema),
+  })
+  async getLessonById(
+    @Param("id") id: UUIDType,
+    @Query("userLanguage") userLanguage: SupportedLanguages,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
+  ): Promise<BaseResponse<LessonShow>> {
+    return new BaseResponse(
+      await this.lessonService.getLessonById(
+        id,
+        userId,
+        userRole === USER_ROLES.STUDENT,
+        userLanguage,
+      ),
+    );
   }
 
   @Post("beta-create-lesson/ai")

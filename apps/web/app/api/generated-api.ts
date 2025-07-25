@@ -974,61 +974,6 @@ export interface UpdateFreemiumStatusResponse {
   };
 }
 
-export interface GetLessonByIdResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
-    description: string | null;
-    fileType: string | null;
-    fileUrl: string | null;
-    quizDetails?: {
-      questions: {
-        /** @format uuid */
-        id: string;
-        type:
-          | "brief_response"
-          | "detailed_response"
-          | "match_words"
-          | "scale_1_5"
-          | "single_choice"
-          | "multiple_choice"
-          | "true_or_false"
-          | "photo_question_single_choice"
-          | "photo_question_multiple_choice"
-          | "fill_in_the_blanks_text"
-          | "fill_in_the_blanks_dnd";
-        description?: string | null;
-        title: string;
-        displayOrder?: number;
-        solutionExplanation: string | null;
-        photoS3Key?: string | null;
-        options?: {
-          /** @format uuid */
-          id: string;
-          optionText: string | null;
-          displayOrder: number | null;
-          isStudentAnswer: boolean | null;
-          studentAnswer: string | null;
-          isCorrect: boolean | null;
-          /** @format uuid */
-          questionId?: string;
-        }[];
-        passQuestion: boolean | null;
-      }[];
-      questionCount: number;
-      correctAnswerCount: number | null;
-      wrongAnswerCount: number | null;
-      score: number | null;
-    };
-    lessonCompleted?: boolean;
-    displayOrder: number;
-    isExternal?: boolean;
-    nextLessonId: string | null;
-  };
-}
-
 export type BetaCreateLessonBody = {
   title: string;
   type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
@@ -1088,6 +1033,65 @@ export interface BetaCreateLessonResponse {
     /** @format uuid */
     id: string;
     message: string;
+  };
+}
+
+export interface GetLessonByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+    description: string | null;
+    fileType: string | null;
+    fileUrl: string | null;
+    quizDetails?: {
+      questions: {
+        /** @format uuid */
+        id: string;
+        type:
+          | "brief_response"
+          | "detailed_response"
+          | "match_words"
+          | "scale_1_5"
+          | "single_choice"
+          | "multiple_choice"
+          | "true_or_false"
+          | "photo_question_single_choice"
+          | "photo_question_multiple_choice"
+          | "fill_in_the_blanks_text"
+          | "fill_in_the_blanks_dnd";
+        description?: string | null;
+        title: string;
+        displayOrder?: number;
+        solutionExplanation: string | null;
+        photoS3Key?: string | null;
+        options?: {
+          /** @format uuid */
+          id: string;
+          optionText: string | null;
+          displayOrder: number | null;
+          isStudentAnswer: boolean | null;
+          studentAnswer: string | null;
+          isCorrect: boolean | null;
+          /** @format uuid */
+          questionId?: string;
+        }[];
+        passQuestion: boolean | null;
+      }[];
+      questionCount: number;
+      correctAnswerCount: number | null;
+      wrongAnswerCount: number | null;
+      score: number | null;
+    };
+    lessonCompleted?: boolean;
+    displayOrder: number;
+    isExternal?: boolean;
+    nextLessonId: string | null;
+    userLanguage?: "pl" | "en";
+    status?: "active" | "completed" | "archived";
+    /** @format uuid */
+    threadId?: string;
   };
 }
 
@@ -1434,6 +1438,48 @@ export interface UpdateLessonDisplayOrderResponse {
 export interface MarkLessonAsCompletedResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetThreadResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    /** @format uuid */
+    userId: string;
+    userLanguage: "pl" | "en";
+    createdAt: string;
+    updatedAt: string;
+    status: "active" | "completed" | "archived";
+  };
+}
+
+export interface GetThreadMessagesResponse {
+  data: (({
+    content: string;
+  } & {
+    role: "system" | "user" | "assistant" | "tool" | "summary";
+    isJudge?: boolean;
+  }) & {
+    id: string;
+  })[];
+}
+
+export interface StreamChatBody {
+  /** @format uuid */
+  threadId: string;
+  /** @minLength 1 */
+  content: string;
+  /** @format uuid */
+  id?: string;
+}
+
+export interface JudgeThreadResponse {
+  data: {
+    summary: string;
+    passed: boolean;
   };
 }
 
@@ -2862,20 +2908,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LessonControllerGetLessonById
-     * @request GET:/api/lesson/{id}
-     */
-    lessonControllerGetLessonById: (id: string, params: RequestParams = {}) =>
-      this.request<GetLessonByIdResponse, any>({
-        path: `/api/lesson/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name LessonControllerBetaCreateLesson
      * @request POST:/api/lesson/beta-create-lesson
      */
@@ -2885,6 +2917,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerGetLessonById
+     * @request GET:/api/lesson/{id}
+     */
+    lessonControllerGetLessonById: (
+      id: string,
+      query?: {
+        userLanguage?: "pl" | "en";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLessonByIdResponse, any>({
+        path: `/api/lesson/${id}`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -3073,6 +3126,90 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetThread
+     * @request GET:/api/ai/thread
+     */
+    aiControllerGetThread: (
+      query?: {
+        /** @format uuid */
+        thread?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThreadResponse, any>({
+        path: `/api/ai/thread`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerGetThreadMessages
+     * @request GET:/api/ai/thread/messages
+     */
+    aiControllerGetThreadMessages: (
+      query?: {
+        /** @format uuid */
+        thread?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThreadMessagesResponse, any>({
+        path: `/api/ai/thread/messages`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerStreamChat
+     * @request POST:/api/ai/chat
+     */
+    aiControllerStreamChat: (data: StreamChatBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ai/chat`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerJudgeThread
+     * @request POST:/api/ai/judge/{threadId}
+     */
+    aiControllerJudgeThread: (threadId: string, params: RequestParams = {}) =>
+      this.request<JudgeThreadResponse, any>({
+        path: `/api/ai/judge/${threadId}`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiControllerRetakeLesson
+     * @request POST:/api/ai/retake/{lessonId}
+     */
+    aiControllerRetakeLesson: (lessonId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ai/retake/${lessonId}`,
+        method: "POST",
         ...params,
       }),
 

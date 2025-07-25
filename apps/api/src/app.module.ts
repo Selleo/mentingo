@@ -5,6 +5,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { ScheduleModule } from "@nestjs/schedule";
 
+import { AiModule } from "./ai/ai.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
@@ -99,6 +100,7 @@ import { UserModule } from "./user/user.module";
     StatisticsModule,
     ScormModule,
     CacheModule,
+    AiModule,
     SettingsModule,
   ],
   controllers: [],

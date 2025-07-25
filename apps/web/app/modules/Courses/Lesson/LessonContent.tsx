@@ -14,6 +14,8 @@ import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 
 import Presentation from "../../../components/Presentation/Presentation";
 
+import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
+
 import type { GetLessonByIdResponse } from "~/api/generated-api";
 
 type LessonContentProps = {
@@ -23,6 +25,7 @@ type LessonContentProps = {
   handleNext: () => void;
   isFirstLesson: boolean;
   isLastLesson: boolean;
+  lessonLoading: boolean;
 };
 
 export const LessonContent = ({
@@ -32,6 +35,7 @@ export const LessonContent = ({
   handleNext,
   isFirstLesson,
   isLastLesson,
+  lessonLoading,
 }: LessonContentProps) => {
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
@@ -41,7 +45,11 @@ export const LessonContent = ({
   useEffect(() => {
     if (isAdminLike) return;
 
-    if (lesson.type == LessonType.QUIZ || lesson.type == LessonType.VIDEO) {
+    if (
+      lesson.type == LessonType.QUIZ ||
+      lesson.type == LessonType.VIDEO ||
+      lesson.type == LessonType.AI_MENTOR
+    ) {
       return setIsNextDisabled(!lesson.lessonCompleted);
     }
 
@@ -62,12 +70,14 @@ export const LessonContent = ({
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
+      .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
       .otherwise(() => null);
 
   const handleMarkLessonAsComplete = () => {
     handleNext();
 
     if (isAdminLike) return;
+    if (lesson.type == LessonType.AI_MENTOR) return;
 
     markLessonAsCompleted({ lessonId: lesson.id });
   };

@@ -8,6 +8,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -28,7 +29,9 @@ const checkOverallLessonPosition = (chapters: Chapters, currentLessonId: string)
 
 export default function LessonPage() {
   const { courseId = "", lessonId = "" } = useParams();
-  const { data: lesson } = useLesson(lessonId);
+  const { language } = useLanguageStore();
+
+  const { data: lesson, isFetching: lessonLoading } = useLesson(lessonId, language);
   const { data: course } = useCourse(courseId);
   const { isStudent } = useUserRole();
   const navigate = useNavigate();
@@ -147,6 +150,7 @@ export default function LessonPage() {
             handleNext={() => handleNextLesson(lessonId, course.chapters)}
             isFirstLesson={isFirst}
             isLastLesson={isLast}
+            lessonLoading={lessonLoading}
           />
         </div>
         <LessonSidebar course={course} lessonId={lessonId} />

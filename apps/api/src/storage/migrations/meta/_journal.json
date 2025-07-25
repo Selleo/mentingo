@@ -148,6 +148,13 @@
       "when": 1753182955757,
       "tag": "0020_create_settings_table",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1753354688438,
+      "tag": "0021_added_ai_student_interaction_tables",
+      "breakpoints": true
     }
   ]
 }

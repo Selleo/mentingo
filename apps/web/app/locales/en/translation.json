@@ -1020,7 +1020,18 @@
       "multipleChoice": "Multiple choice question",
       "trueOfFalseChoice": "True or false question",
       "oneOrTwoWordSentence": "Provide a brief response (1-2 sentences).",
-      "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences)."
+      "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences).",
+      "aiMentorLesson": {
+        "sendMessage": "Write a message...",
+        "check": "Check",
+        "aiMentorName": "AI Mentor",
+        "retake": "Retake",
+        "userName": "User",
+        "typing": "Typing a response...",
+        "send": "Send",
+        "retakeModalTitle": "Are you sure you want to retake the lesson?",
+        "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone."
+      }
     },
     "sideSection": {
       "optionHeader": "Option",
