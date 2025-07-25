@@ -123,7 +123,12 @@ export class UserService {
     const { avatarReference, ...userWithoutAvatar } = user;
     const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
-    return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
+    return {
+      ...userWithoutAvatar,
+      profilePictureUrl: usersProfilePictureUrl,
+      groupId: user.groupId,
+      groupName: user.groupName,
+    };
   }
 
   public async getUserByEmail(email: string) {
@@ -232,8 +237,14 @@ export class UserService {
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
-      return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl, groupId: groupData.id, groupName: groupData.name };
-    })};
+      return {
+        ...userWithoutAvatar,
+        profilePictureUrl: usersProfilePictureUrl,
+        groupId: groupData.id,
+        groupName: groupData.name,
+      };
+    });
+  }
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.id, userId));
