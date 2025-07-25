@@ -87,7 +87,7 @@ test.describe("Admin settings", () => {
     await organizationTab.click();
     await expect(organizationTab).toHaveAttribute("aria-selected", "true");
 
-    const coursesSwitch = page.locator("#coursesAccessibility");
+    const coursesSwitch = page.locator("#coursesVisibility");
 
     await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
 
@@ -107,7 +107,7 @@ test.describe("Admin settings", () => {
     const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();
 
-    const coursesSwitch = page.locator("#coursesAccessibility");
+    const coursesSwitch = page.locator("#coursesVisibility");
 
     const currentState = await coursesSwitch.getAttribute("data-state");
     if (currentState === "checked") {
@@ -139,7 +139,7 @@ test.describe("Admin settings", () => {
     const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();
 
-    const coursesSwitch = page.locator("#coursesAccessibility");
+    const coursesSwitch = page.locator("#coursesVisibility");
 
     const currentState = await coursesSwitch.getAttribute("data-state");
     if (currentState === "unchecked") {
