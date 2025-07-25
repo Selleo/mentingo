@@ -1322,6 +1322,7 @@ describe("CourseController (e2e)", () => {
             chapterId: chapter.id,
             type: LESSON_TYPES.QUIZ,
             title: "Quiz",
+            thresholdScore: 0,
           });
 
           const students = await Promise.all(
