@@ -11,6 +11,10 @@ const TEST_SETTINGS = {
     settings: "settings",
     profile: "profile",
   },
+  tabs: {
+    account: "Account",
+    organization: "Organization",
+  },
 } as const;
 
 test.describe("Admin settings", () => {
@@ -56,8 +60,8 @@ test.describe("Admin settings", () => {
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
-    const accountTab = tablist.getByRole("tab", { name: "Account" });
-    const organizationTab = tablist.getByRole("tab", { name: "Organization" });
+    const accountTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.account });
+    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
 
     await expect(accountTab).toHaveAttribute("aria-selected", "true");
     await expect(accountTab).toHaveAttribute("data-state", "active");
@@ -79,7 +83,7 @@ test.describe("Admin settings", () => {
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: "Organization" });
+    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();
     await expect(organizationTab).toHaveAttribute("aria-selected", "true");
 
@@ -100,7 +104,7 @@ test.describe("Admin settings", () => {
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: "Organization" });
+    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();
 
     const coursesSwitch = page.locator("#coursesAccessibility");
@@ -132,7 +136,7 @@ test.describe("Admin settings", () => {
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: "Organization" });
+    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();
 
     const coursesSwitch = page.locator("#coursesAccessibility");
@@ -142,6 +146,7 @@ test.describe("Admin settings", () => {
       await coursesSwitch.click();
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
+
     await page
       .getByRole("button", { name: /logout/i })
       .filter({ hasText: "Logout" })
