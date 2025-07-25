@@ -1,9 +1,11 @@
 import { omit } from "lodash";
 import request from "supertest";
 
+import { GroupService } from "src/group/group.service";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
-import { cookieFor } from "../../../test/helpers/test-helpers";
+import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../../auth/auth.service";
 
 import type { DatabasePg } from "../../common";
@@ -12,6 +14,7 @@ import type { INestApplication } from "@nestjs/common";
 describe("UsersController (e2e)", () => {
   let app: INestApplication;
   let authService: AuthService;
+  let groupService: GroupService;
   let testUser: UserWithCredentials;
   let testCookies: string;
   const testPassword = "password123";
@@ -22,6 +25,7 @@ describe("UsersController (e2e)", () => {
     const { app: testApp } = await createE2ETest();
     app = testApp;
     authService = app.get(AuthService);
+    groupService = app.get(GroupService);
     db = app.get("DB");
     userFactory = createUserFactory(db);
   }, 10000);
@@ -57,6 +61,9 @@ describe("UsersController (e2e)", () => {
       expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
+  afterEach(async () => {
+    await truncateTables(db, ["users", "groups"]);
+  });
 
   describe("GET /user?id=:id", () => {
     it("should return a user by id", async () => {
@@ -69,6 +76,8 @@ describe("UsersController (e2e)", () => {
       expect(response.body.data).toStrictEqual({
         ...omit(testUser, "credentials", "avatarReference"),
         profilePictureUrl: null,
+        groupId: null,
+        groupName: null,
       });
     });
 
@@ -81,8 +90,21 @@ describe("UsersController (e2e)", () => {
   });
 
   describe("PATCH ?id=:id", () => {
+    it("should update group for user", async () => {
+      const updateData = await groupService.createGroup({ name: "Test group" });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/user?id=${testUser.id}`)
+        .set("Cookie", testCookies)
+        .send({ groupId: updateData.id })
+        .expect(200);
+
+      expect(response.body.data.groupId).toBe(updateData.id);
+    });
+
     it("should update user", async () => {
       const updateData = { email: "newemail@example.com" };
+
       const response = await request(app.getHttpServer())
         .patch(`/api/user?id=${testUser.id}`)
         .set("Cookie", testCookies)
@@ -218,6 +240,81 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .get(`/api/user/details?userId=${anotherUser2.id}`)
         .set("Cookie", cookies)
+        .expect(403);
+    });
+  });
+
+  describe("PATCH /user/bulk/groups", () => {
+    let firstUser: UserWithCredentials;
+    let secondUser: UserWithCredentials;
+
+    it("should update groups for multiple users", async () => {
+      firstUser = {
+        ...(await authService.register({
+          email: "another6@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
+
+      secondUser = {
+        ...(await authService.register({
+          email: "another7@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
+
+      const updateData = await groupService.createGroup({ name: "Test group" });
+
+      await request(app.getHttpServer())
+        .patch(`/api/user/bulk/groups`)
+        .set("Cookie", testCookies)
+        .send({ userIds: [firstUser.id, secondUser.id], groupId: updateData.id })
+        .expect(200);
+    });
+
+    it("should return forbidden 403", async () => {
+      firstUser = {
+        ...(await authService.register({
+          email: "another6@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
+
+      secondUser = {
+        ...(await authService.register({
+          email: "another7@example.com",
+          password: testPassword,
+          firstName: "Another",
+          lastName: "User",
+        })),
+        avatarReference: null,
+      };
+
+      const updateData = await groupService.createGroup({ name: "Test group" });
+
+      const loginResponse = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: firstUser.email,
+          password: testPassword,
+        })
+        .expect(201);
+
+      const cookies = loginResponse.headers["set-cookie"];
+
+      await request(app.getHttpServer())
+        .patch(`/api/user/bulk/groups`)
+        .set("Cookie", cookies)
+        .send({ userIds: [firstUser.id, secondUser.id], groupId: updateData.id })
         .expect(403);
     });
   });

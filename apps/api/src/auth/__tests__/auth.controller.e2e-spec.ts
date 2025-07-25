@@ -77,12 +77,10 @@ describe("AuthController (e2e)", () => {
           email: "test@example.com",
         });
 
-      const response = await request(app.getHttpServer())
-        .post("/api/auth/login")
-        .send({
-          email: user.email,
-          password: user.credentials?.password,
-        });
+      const response = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: user.credentials?.password,
+      });
 
       expect(response.status).toEqual(201);
       expect(response.body.data).toHaveProperty("id");
@@ -223,6 +221,8 @@ describe("AuthController (e2e)", () => {
       expect(response.body.data).toStrictEqual({
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
+        groupName: null,
+        groupId: null,
       });
     });
 

@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { CreatePasswordEmail } from "@repo/email-templates";
 import * as bcrypt from "bcryptjs";
-import { and, count, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { DatabasePg } from "src/common";
@@ -19,7 +19,15 @@ import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 
-import { createTokens, credentials, settings, userDetails, users } from "../storage/schema";
+import {
+  createTokens,
+  credentials,
+  groups,
+  groupUsers,
+  userDetails,
+  users,
+  settings,
+} from "../storage/schema";
 
 import {
   type UsersFilterSchema,
@@ -29,7 +37,11 @@ import {
 } from "./schemas/userQuery";
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
 
-import type { UpdateUserProfileBody, UpsertUserDetailsBody } from "./schemas/updateUser.schema";
+import type {
+  UpdateUserProfileBody,
+  UpsertUserDetailsBody,
+  BulkAssignUserGroups,
+} from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
 import type { AdminSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
@@ -57,17 +69,13 @@ export class UserService {
 
     const usersData = await this.db
       .select({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        role: users.role,
-        archived: users.archived,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-        avatarReference: users.avatarReference,
+        ...getTableColumns(users),
+        groupId: groups.id,
+        groupName: groups.name,
       })
       .from(users)
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions))
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
 
@@ -86,6 +94,8 @@ export class UserService {
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
       .from(users)
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions));
 
     return {
@@ -99,7 +109,12 @@ export class UserService {
   }
 
   public async getUserById(id: UUIDType) {
-    const [user] = await this.db.select().from(users).where(eq(users.id, id));
+    const [user] = await this.db
+      .select({ ...getTableColumns(users), groupName: groups.name, groupId: groups.id })
+      .from(users)
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(eq(users.id, id));
 
     if (!user) {
       throw new NotFoundException("User not found");
@@ -108,7 +123,12 @@ export class UserService {
     const { avatarReference, ...userWithoutAvatar } = user;
     const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
-    return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
+    return {
+      ...userWithoutAvatar,
+      profilePictureUrl: usersProfilePictureUrl,
+      groupId: user.groupId,
+      groupName: user.groupName,
+    };
   }
 
   public async getUserByEmail(email: string) {
@@ -173,20 +193,57 @@ export class UserService {
       lastName?: string;
       archived?: boolean;
       role?: UserRole;
+      groupId?: string;
     },
   ) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
+    const [existingUser] = await this.db
+      .select()
+      .from(users)
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(eq(users.id, id));
 
-    if (!existingUser) {
+    if (!existingUser?.users) {
       throw new NotFoundException("User not found");
     }
 
-    const [updatedUser] = await this.db.update(users).set(data).where(eq(users.id, id)).returning();
+    return this.db.transaction(async (trx) => {
+      const { groupId, ...userData } = data;
 
-    const { avatarReference, ...userWithoutAvatar } = updatedUser;
-    const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
+      const hasUserDataToUpdate = Object.keys(userData).length > 0;
+      const [updatedUser] = hasUserDataToUpdate
+        ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
+        : [existingUser.users];
 
-    return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
+      if (!groupId) {
+        return {
+          ...updatedUser,
+          groupId: existingUser.groups?.id ?? null,
+          groupName: existingUser.groups?.name ?? null,
+        };
+      }
+
+      await trx
+        .insert(groupUsers)
+        .values({ userId: id, groupId })
+        .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
+
+      const [groupData] = await trx
+        .select(getTableColumns(groups))
+        .from(groups)
+        .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
+        .where(eq(groupUsers.userId, id));
+
+      const { avatarReference, ...userWithoutAvatar } = updatedUser;
+      const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
+
+      return {
+        ...userWithoutAvatar,
+        profilePictureUrl: usersProfilePictureUrl,
+        groupId: groupData.id,
+        groupName: groupData.name,
+      };
+    });
   }
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
@@ -369,6 +426,18 @@ export class UserService {
     return await this.s3Service.getSignedUrl(avatarReference);
   };
 
+  async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
+    await this.db.transaction(async (trx) => {
+      await trx
+        .insert(groupUsers)
+        .values(data.userIds.map((userId) => ({ userId, groupId: data.groupId })))
+        .onConflictDoUpdate({
+          target: [groupUsers.userId],
+          set: { groupId: data.groupId },
+        });
+    });
+  }
+
   public async getAdminsToNotifyAboutNewUser() {
     const allAdmins = await this.db
       .select({
@@ -406,6 +475,10 @@ export class UserService {
     }
     if (filters.role) {
       conditions.push(eq(users.role, filters.role));
+    }
+
+    if (filters.groupId) {
+      conditions.push(eq(groupUsers.groupId, filters.groupId));
     }
 
     return conditions.length ? conditions : [sql`1=1`];

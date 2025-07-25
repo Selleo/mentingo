@@ -22,10 +22,6 @@ export interface RegisterBody {
    * @maxLength 64
    */
   lastName: string;
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   password: string;
 }
 
@@ -65,31 +61,12 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
-    settings: UserSettings;
   };
 }
 
 export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
-
-export interface AdminSettings {
-  adminNewUserNotification: boolean;
-}
-
-export interface UserSettings extends AdminSettings {
-  language: string;
-}
-
-export interface SettingsResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
-    settings: UserSettings;
-  };
-}
 
 export interface CurrentUserResponse {
   data: {
@@ -114,27 +91,19 @@ export interface ForgotPasswordBody {
 }
 
 export interface CreatePasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   password: string;
   /** @minLength 1 */
   createToken: string;
 }
 
 export interface ResetPasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   newPassword: string;
   /** @minLength 1 */
   resetToken: string;
 }
 
 export interface GetUsersResponse {
-  data: {
+  data: ({
     id: string;
     createdAt: string;
     updatedAt: string;
@@ -144,7 +113,10 @@ export interface GetUsersResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
-  }[];
+  } & {
+    groupId: string | null;
+    groupName: string | null;
+  })[];
   pagination: {
     totalItems: number;
     page: number;
@@ -164,6 +136,8 @@ export interface GetUserByIdResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
+    groupId: string | null;
+    groupName: string | null;
   };
 }
 
@@ -185,6 +159,8 @@ export interface GetUserDetailsResponse {
 export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
+  /** @format uuid */
+  groupId?: string;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -224,6 +200,8 @@ export interface UpsertUserDetailsResponse {
 export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
+  /** @format uuid */
+  groupId?: string;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -245,10 +223,6 @@ export interface AdminUpdateUserResponse {
 }
 
 export interface ChangePasswordBody {
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
   newPassword: string;
   /**
    * @minLength 8
@@ -266,6 +240,12 @@ export interface DeleteBulkUsersBody {
 }
 
 export type DeleteBulkUsersResponse = null;
+
+export interface BulkAssignUsersToGroupBody {
+  userIds: string[];
+  /** @format uuid */
+  groupId: string;
+}
 
 export interface CreateUserBody {
   /** @format email */
@@ -431,6 +411,8 @@ export interface GetStudentsWithEnrollmentDateResponse {
     lastName: string;
     email: string;
     enrolledAt: string | null;
+    groupId: string | null;
+    groupName: string | null;
     /** @format uuid */
     id: string;
   }[];
@@ -1653,6 +1635,37 @@ export interface GetScormMetadataResponse {
   };
 }
 
+export interface GetUserSettingsResponse {
+  data:
+    | {
+        language: string;
+      }
+    | {
+        language: string;
+        adminNewUserNotification: boolean;
+      };
+}
+
+export type UpdateUserSettingsBody =
+  | {
+      language?: string;
+    }
+  | {
+      language?: string;
+      adminNewUserNotification?: boolean;
+    };
+
+export interface UpdateUserSettingsResponse {
+  data:
+    | {
+        language: string;
+      }
+    | {
+        language: string;
+        adminNewUserNotification: boolean;
+      };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -1936,6 +1949,58 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AuthControllerGoogleAuth
+     * @request GET:/api/auth/google
+     */
+    authControllerGoogleAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/google`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerGoogleAuthCallback
+     * @request GET:/api/auth/google/callback
+     */
+    authControllerGoogleAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/google/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMicrosoftAuth
+     * @request GET:/api/auth/microsoft
+     */
+    authControllerMicrosoftAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMicrosoftAuthCallback
+     * @request GET:/api/auth/microsoft/callback
+     */
+    authControllerMicrosoftAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name HealthControllerCheck
      * @request GET:/api/healthcheck
      */
@@ -2019,6 +2084,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: string;
+        groupId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -2233,6 +2299,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerBulkAssignUsersToGroup
+     * @request PATCH:/api/user/bulk/groups
+     */
+    userControllerBulkAssignUsersToGroup: (
+      data: BulkAssignUsersToGroupBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/user/bulk/groups`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -3489,11 +3573,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UserControllerGetUserDetails
-     * @request GET:/api/user/details
+     * @name SettingsControllerGetUserSettings
+     * @request GET:/api/settings
      */
-    userSettings: (params: RequestParams = {}) =>
-      this.request<SettingsResponse, any>({
+    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
+      this.request<GetUserSettingsResponse, any>({
         path: `/api/settings`,
         method: "GET",
         format: "json",
@@ -3503,15 +3587,32 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name BaseResponse
-     * @request GET:/api/settings/admin-new-user-notification
+     * @name SettingsControllerUpdateUserSettings
+     * @request PUT:/api/settings
      */
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminNewUserNotification
+     * @request PATCH:/api/settings/admin-new-user-notification
+     */
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<any>({
+      this.request<void, any>({
         path: `/api/settings/admin-new-user-notification`,
         method: "PATCH",
-        format: "json",
         ...params,
       }),
   };
