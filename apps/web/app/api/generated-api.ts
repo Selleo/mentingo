@@ -3699,6 +3699,53 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
         path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
+     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
+     */
+    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
+      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
+        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetGlobalSettings
+     * @request GET:/api/settings/global
+     */
+    settingsControllerGetGlobalSettings: (params: RequestParams = {}) =>
+      this.request<GetGlobalSettingsResponse, any>({
+        path: `/api/settings/global`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateGlobalSettings
+     * @request PATCH:/api/settings/global
+     */
+    settingsControllerUpdateGlobalSettings: (
+      data: UpdateGlobalSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateGlobalSettingsResponse, any>({
+        path: `/api/settings/global`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
   };

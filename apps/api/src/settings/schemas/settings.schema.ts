@@ -15,6 +15,10 @@ export const adminSettingsJSONContentSchema = Type.Object({
   adminNewUserNotification: Type.Boolean(),
 });
 
+export const globalSettingsJSONContentSchema = Type.Object({
+  enforceSSO: Type.Boolean(),
+});
+
 export const settingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
