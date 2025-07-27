@@ -140,6 +140,19 @@
       "email": "Email jest wymagany"
     }
   },
+  "ssoEnforcementView": {
+    "header": "Wymuszenie SSO",
+    "subHeader": "Wymuś logowanie SSO dla wszystkich użytkowników",
+    "description": "Przełącznik ten wymusi logowanie przez Google/Microsoft dla wszystkich użytkowników. Jeśli jest wyłączony, użytkownicy będą mogli się zalogować za pomocą tradycyjnego formularza logowania.",
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "Wymuszenie SSO zostało pomyślnie zaktualizowane",
+      "ssoEnforcementUpdateFailed": "Nie udało się zaktualizować wymuszenia SSO"
+    }
+  },
   "mostPopularCoursesView": {
     "header": "Najpopularniejsze",
     "subHeader": "Twoje 5 najlepszych kursów",
@@ -884,6 +897,7 @@
   "registerView": {
     "header": "Rejestracja",
     "subHeader": "Wprowadź dane, aby utworzyć konto",
+    "subHeaderSSO": "Zarejestruj się za pomocą swojego konta Google/Microsoft",
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
@@ -933,6 +947,7 @@
   "loginView": {
     "header": "Logowanie",
     "subHeader": "Wprowadź swój email, aby zalogować się na swoje konto",
+    "subHeaderSSO": "Zaloguj się za pomocą swojego konta Google/Microsoft",
     "validation": {
       "email": "Nieprawidłowy email",
       "password": "Hasło jest wymagane"

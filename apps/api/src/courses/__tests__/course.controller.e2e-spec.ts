@@ -17,6 +17,7 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
+import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
@@ -30,6 +31,7 @@ describe("CourseController (e2e)", () => {
   let userFactory: ReturnType<typeof createUserFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let chapterFactory: ReturnType<typeof createChapterFactory>;
+  let settingsFactory: ReturnType<typeof createSettingsFactory>;
   const password = "password123";
 
   beforeAll(async () => {
@@ -56,6 +58,7 @@ describe("CourseController (e2e)", () => {
     app = testApp;
     db = app.get("DB");
     userFactory = createUserFactory(db);
+    settingsFactory = createSettingsFactory(db);
     categoryFactory = createCategoryFactory(db);
     courseFactory = createCourseFactory(db);
     chapterFactory = createChapterFactory(db);
@@ -75,7 +78,12 @@ describe("CourseController (e2e)", () => {
       "student_courses",
       "users",
       "categories",
+      "settings",
     ]);
+  });
+
+  beforeEach(async () => {
+    await settingsFactory.create({ userId: null });
   });
 
   describe("GET /api/course/all", () => {

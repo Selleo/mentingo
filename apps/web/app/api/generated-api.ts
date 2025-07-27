@@ -1656,6 +1656,7 @@ export interface GetScormMetadataResponse {
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -1698,6 +1699,7 @@ export interface UpdateUserSettingsResponse {
       }
     | {
         unregisteredUserCoursesAccessibility: boolean;
+        enforceSSO: boolean;
         companyInformation?: {
           companyName?: string;
           registeredAddress?: string;
@@ -1719,6 +1721,22 @@ export interface UpdateAdminNewUserNotificationResponse {
 export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+  };
+}
+
+export interface UpdateEnforceSSOResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -3760,6 +3778,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
         path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateEnforceSso
+     * @request PATCH:/api/settings/admin/enforce-sso
+     */
+    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
+      this.request<UpdateEnforceSSOResponse, any>({
+        path: `/api/settings/admin/enforce-sso`,
+        method: "PATCH",
+        format: "json",
         ...params,
       }),
 
