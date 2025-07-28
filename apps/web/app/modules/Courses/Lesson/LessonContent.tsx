@@ -86,16 +86,16 @@ export const LessonContent = ({
     <div className="flex h-full w-full flex-col items-center py-10">
       <div className="flex h-full w-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
         <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
-          <div className="flex w-full flex-col gap-y-4 pl-4">
+          <div className="flex w-full flex-col gap-y-4">
             <p className="body-sm-md text-neutral-800">
               {t("studentLessonView.other.lesson")}{" "}
               <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
-              <span data-testid="lessons-count">{lessonsAmount}</span> -{" "}
+              <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
               <span data-testid="lesson-type">{startCase(lesson.type)}</span>
             </p>
             <p className="h4 text-neutral-950">{lesson.title}</p>
           </div>
-          <div className="mt-4 flex flex-col gap-2 pr-4 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
+          <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
             {!isFirstLesson && (
               <Button
                 variant="outline"
@@ -120,7 +120,8 @@ export const LessonContent = ({
             </Button>
           </div>
         </div>
-        <div className="pt-4">
+
+        <div>
           <Content />
         </div>
       </div>
