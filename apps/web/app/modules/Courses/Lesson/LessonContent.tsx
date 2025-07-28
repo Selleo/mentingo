@@ -83,10 +83,10 @@ export const LessonContent = ({
   };
 
   return (
-    <div className="flex h-full w-full flex-col items-center py-6">
-      <div className="flex h-full w-full flex-col gap-y-8 px-8 3xl:max-w-[1024px] 3xl:p-0">
-        <div className="flex w-full items-end">
-          <div className="flex w-full flex-col gap-y-2">
+    <div className="flex h-full w-full flex-col items-center py-10">
+      <div className="flex h-full w-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
+        <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
+          <div className="flex w-full flex-col gap-y-4 pl-4">
             <p className="body-sm-md text-neutral-800">
               {t("studentLessonView.other.lesson")}{" "}
               <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
@@ -95,17 +95,20 @@ export const LessonContent = ({
             </p>
             <p className="h4 text-neutral-950">{lesson.title}</p>
           </div>
-          <div className="flex gap-x-3">
+          <div className="mt-4 flex flex-col gap-2 pr-4 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
             {!isFirstLesson && (
-              <Button variant="outline" className="gap-x-1" onClick={handlePrevious}>
+              <Button
+                variant="outline"
+                className="w-full gap-x-1 sm:w-auto"
+                onClick={handlePrevious}
+              >
                 <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
                 <span>{t("studentLessonView.button.previous")}</span>
               </Button>
             )}
-
             <Button
               disabled={isNextDisabled}
-              className="gap-x-1"
+              className="w-full gap-x-1 sm:w-auto"
               onClick={handleMarkLessonAsComplete}
             >
               <Icon name="ArrowRight" className="h-auto w-4" />
@@ -117,7 +120,9 @@ export const LessonContent = ({
             </Button>
           </div>
         </div>
-        <Content />
+        <div className="pt-4">
+          <Content />
+        </div>
       </div>
     </div>
   );
