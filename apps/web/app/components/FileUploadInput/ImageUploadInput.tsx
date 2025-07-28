@@ -56,6 +56,7 @@ const ImageUploadInput = ({
         </div>
         <input
           ref={fileInputRef}
+          data-testid="imageUpload"
           type="file"
           accept=".png, .jpg, .jpeg"
           onChange={(e) => {
