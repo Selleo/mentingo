@@ -546,7 +546,8 @@
       "status": "Status",
       "pricing": "Pricing",
       "preview": "Preview",
-      "enrolledStudents": "Enrolled students"
+      "enrolledStudents": "Enrolled students",
+      "testAiMentor": "Test AI Mentor"
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",

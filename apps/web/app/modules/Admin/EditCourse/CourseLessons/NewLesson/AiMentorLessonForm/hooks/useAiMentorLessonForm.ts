@@ -117,6 +117,10 @@ export const useAiMentorLessonForm = ({
 
       setContentTypeToDisplay(ContentTypes.EMPTY);
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+      await queryClient.invalidateQueries({ queryKey: ["lesson", lessonToEdit?.id] });
+      await queryClient.invalidateQueries({
+        queryKey: ["threadMessages", { lessonId: lessonToEdit?.id }],
+      });
     } catch (error) {
       console.error("Error creating/updating AI Mentor lesson:", error);
     }

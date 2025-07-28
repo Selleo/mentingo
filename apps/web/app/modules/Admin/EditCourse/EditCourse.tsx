@@ -45,7 +45,7 @@ const EditCourse = () => {
     );
   }
 
-  if (error) return <Navigate to={"/"} />;
+  if (error) return <Navigate to="/" />;
 
   const breadcrumbs = [
     { title: t("adminCourseView.breadcrumbs.myCourses"), href: "/admin/courses" },
