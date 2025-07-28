@@ -19,13 +19,22 @@ const findFirstNotStartedLessonId = (course: CourseProgressProps["course"]) => {
   return find(allLessons, (lesson) => lesson.status === "not_started")?.id;
 };
 
+const findFirstInProgressLessonId = (course: CourseProgressProps["course"]) => {
+  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
+  return find(allLessons, (lesson) => lesson.status === "in_progress")?.id;
+};
+
 export const CourseProgress = ({ course }: CourseProgressProps) => {
   const { isAdminLike } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const nonStartedLessonId = findFirstNotStartedLessonId(course);
+  const inProgressLessonId = findFirstInProgressLessonId(course);
   const notStartedChapterId = course.chapters.find((chapter) => {
     return chapter.lessons.some((lesson) => lesson.id === nonStartedLessonId);
+  })?.id;
+  const inProgressChapterId = course.chapters.find((chapter) => {
+    return chapter.lessons.some((lesson) => lesson.id === inProgressLessonId);
   })?.id;
 
   const hasCourseProgress = course.chapters.some(
@@ -53,11 +62,15 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
         <>
           <Button
             className="gap-x-2"
-            disabled={!nonStartedLessonId}
+            disabled={!nonStartedLessonId && !inProgressLessonId}
             onClick={() =>
-              navigate(`lesson/${nonStartedLessonId}`, {
-                state: { chapterId: notStartedChapterId },
-              })
+              nonStartedLessonId
+                ? navigate(`lesson/${nonStartedLessonId}`, {
+                    state: { chapterId: notStartedChapterId },
+                  })
+                : navigate(`lesson/${inProgressLessonId}`, {
+                    state: { chapterId: inProgressChapterId },
+                  })
             }
           >
             <Icon name="Play" className="h-auto w-6 text-white" />

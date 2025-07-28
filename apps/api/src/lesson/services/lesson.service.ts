@@ -57,6 +57,14 @@ export class LessonService {
 
     if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) return lesson;
 
+    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
+      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, undefined);
+    }
+
+    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
+      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, undefined);
+    }
+
     if (lesson.type !== LESSON_TYPES.QUIZ && lesson.type !== LESSON_TYPES.AI_MENTOR) {
       if (!lesson.fileUrl) throw new NotFoundException("Lesson file not found");
 

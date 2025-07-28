@@ -102,22 +102,16 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                         return (
                           <Link
                             key={id}
-                            to={status === "completed" ? `/course/${course.id}/lesson/${id}` : "#"}
+                            to={status !== "blocked" ? `/course/${course.id}/lesson/${id}` : "#"}
                             className={cn("flex gap-x-4 px-6 py-2 hover:bg-neutral-50", {
-                              "cursor-not-allowed": status === "not_started",
+                              "cursor-not-allowed": status === "blocked",
                               "border-l-2 border-l-primary-600 bg-primary-50 last:rounded-es-lg":
                                 lessonId === id,
                             })}
                           >
                             <Badge
                               variant="icon"
-                              icon={
-                                progressBadge[
-                                  id === lessonId && status === "not_started"
-                                    ? "in_progress"
-                                    : status
-                                ]
-                              }
+                              icon={progressBadge[status]}
                               iconClasses="w-6 h-auto shrink-0"
                             />{" "}
                             <div className="flex w-full flex-col">

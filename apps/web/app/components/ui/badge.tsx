@@ -51,7 +51,6 @@ export const Badge = ({
   iconClasses,
   ...props
 }: BadgeProps) => {
-  console.log(icon);
   return (
     <div
       className={cn(badgeVariants({ variant, outline }), className, {

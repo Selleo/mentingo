@@ -501,8 +501,13 @@ export class CourseService {
         chapterProgress: sql<ProgressStatus>`
           CASE
             WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
-            WHEN ${studentChapterProgress.completedAt} IS NULL
-              AND ${studentChapterProgress.completedLessonCount} > 0 THEN ${PROGRESS_STATUSES.IN_PROGRESS}
+            WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
+              SELECT 1
+              FROM ${studentLessonProgress}
+              WHERE ${studentLessonProgress.chapterId} = ${chapters.id}
+                AND ${studentLessonProgress.studentId} = ${userId}
+                AND ${studentLessonProgress.isStarted} = TRUE
+            ) THEN ${PROGRESS_STATUSES.IN_PROGRESS}
             ELSE ${PROGRESS_STATUSES.NOT_STARTED}
           END
         `,
@@ -523,7 +528,7 @@ export class CourseService {
                     WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${PROGRESS_STATUSES.BLOCKED}
                     WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN  ${PROGRESS_STATUSES.COMPLETED}
                     WHEN ${studentLessonProgress.completedAt} IS NULL
-                      AND ${studentLessonProgress.completedQuestionCount} > 0 THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
+                      AND ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
                   CASE
@@ -542,6 +547,7 @@ export class CourseService {
                   ${lessons.title},
                   ${studentLessonProgress.completedAt},
                   ${studentLessonProgress.completedQuestionCount},
+                  ${studentLessonProgress.isStarted},
                   ${chapters.isFreemium}
                 ORDER BY ${lessons.displayOrder}
               ) AS lesson_data
