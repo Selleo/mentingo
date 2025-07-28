@@ -16,7 +16,6 @@ type ProgressConfig = {
 };
 
 export const ProgressBadge = ({ progress, className }: ProgressBadgeProps) => {
-  console.log(progress);
   const progressConfig: ProgressConfig = {
     completed: {
       variant: "successFilled",

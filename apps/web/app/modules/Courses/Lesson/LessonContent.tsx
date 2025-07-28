@@ -9,7 +9,6 @@ import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useUserRole } from "~/hooks/useUserRole";
-import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 
 import Presentation from "../../../components/Presentation/Presentation";
@@ -17,6 +16,7 @@ import Presentation from "../../../components/Presentation/Presentation";
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 
 import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
@@ -79,7 +79,10 @@ export const LessonContent = ({
       .with("video", () => (
         <Video
           url={lesson.fileUrl}
-          onVideoEnded={() => setIsNextDisabled(false)}
+          onVideoEnded={() => {
+            setIsNextDisabled(false);
+            markLessonAsCompleted({ lessonId: lesson.id });
+          }}
           isExternalUrl={lesson.isExternal}
         />
       ))
@@ -88,9 +91,8 @@ export const LessonContent = ({
       ))
       .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
       .otherwise(() => null);
-  const handleMarkLessonAsComplete = () => {
-    handleNext();
 
+  const handleMarkLessonAsComplete = () => {
     if (isAdminLike) return;
     if (lesson.type == LessonType.AI_MENTOR) return;
 

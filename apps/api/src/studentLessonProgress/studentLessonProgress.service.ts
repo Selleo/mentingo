@@ -162,6 +162,59 @@ export class StudentLessonProgressService {
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
   }
 
+  async markLessonAsStarted(
+    id: UUIDType,
+    studentId: UUIDType,
+    userRole?: UserRole,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+
+    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+
+    if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
+      throw new UnauthorizedException("You don't have assignment to this lesson");
+
+    if (accessCourseLessonWithDetails.lessonIsCompleted) return;
+
+    if (!id) {
+      throw new NotFoundException(`No lesson id provided`);
+    }
+
+    const [lesson] = await this.db
+      .select({
+        id: lessons.id,
+        type: lessons.type,
+      })
+      .from(lessons)
+      .where(and(eq(lessons.id, id)));
+
+    if (!lesson || !lesson.id) {
+      throw new NotFoundException(`No lesson found with id ${id}`);
+    }
+
+    const [lessonProgress] = await dbInstance
+      .select()
+      .from(studentLessonProgress)
+      .where(
+        and(eq(studentLessonProgress.lessonId, id), eq(studentLessonProgress.studentId, studentId)),
+      );
+
+    if (lessonProgress?.isStarted) return;
+
+    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
+      await dbInstance
+        .update(studentLessonProgress)
+        .set({ isStarted: true })
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, id),
+            eq(studentLessonProgress.studentId, studentId),
+          ),
+        );
+    }
+  }
+
   async updateQuizProgress(
     chapterId: UUIDType,
     lessonId: UUIDType,
