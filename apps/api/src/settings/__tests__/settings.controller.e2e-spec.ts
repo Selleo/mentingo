@@ -30,7 +30,7 @@ describe("SettingsController (e2e)", () => {
     await app.close();
   }, 10000);
 
-  describe("PATCH /api/settings", () => {
+  describe("PUT /api/settings", () => {
     beforeEach(async () => {
       await truncateTables(db, ["settings"]);
 

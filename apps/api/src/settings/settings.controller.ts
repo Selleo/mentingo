@@ -57,7 +57,7 @@ export class SettingsController {
   @Patch("admin/unregistered-user-courses-accessibility")
   @Roles(USER_ROLES.ADMIN)
   async updateUnregisteredUserCoursesAccessibility() {
-    const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
+    const result = await this.settingsService.updateGuestAccess();
     return new BaseResponse(result);
   }
 }

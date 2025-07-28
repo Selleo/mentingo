@@ -107,7 +107,7 @@ export class SettingsService {
 
     return newSettings;
   }
-  public async updateGlobalUnregisteredUserCoursesAccessibility() {
+  public async updateGuestAccess() {
     const [res] = await this.db
       .select({
         unregisteredUserCoursesAccessibility: sql`settings.settings->>'unregisteredUserCoursesAccessibility'`,
