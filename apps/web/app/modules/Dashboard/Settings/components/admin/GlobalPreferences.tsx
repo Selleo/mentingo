@@ -7,9 +7,5 @@ interface GlobalPreferencesProps {
 }
 
 export function GlobalPreferences({ globalSettings }: GlobalPreferencesProps) {
-  return (
-    <>
-      <CoursesAccessibilityPreferences globalSettings={globalSettings} />
-    </>
-  );
+  return <CoursesAccessibilityPreferences globalSettings={globalSettings} />;
 }

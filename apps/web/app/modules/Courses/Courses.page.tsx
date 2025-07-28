@@ -166,9 +166,7 @@ export default function CoursesPage() {
               {!userAvailableCourses ||
                 (isEmpty(userAvailableCourses) && (
                   <div className="col-span-3 flex gap-8">
-                    <div>
-                      <Icon name="EmptyCourse" className="mr-2 text-neutral-900" />
-                    </div>
+                    <Icon name="EmptyCourse" className="mr-2 text-neutral-900" />
                     <div className="flex flex-col justify-center gap-2">
                       <p className="text-lg font-bold leading-5 text-neutral-950">
                         {t("studentCoursesView.other.cannotFindCourses")}

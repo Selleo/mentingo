@@ -24,6 +24,7 @@ import {
   lessons,
   questions,
   quizAttempts,
+  settings,
   studentCourses,
   studentLessonProgress,
   userDetails,
@@ -107,34 +108,21 @@ async function insertUserDetails(userId: UUIDType) {
 }
 
 async function insertGlobalSettings() {
-  const settingsSQL = settingsToJsonBuildObject(DEFAULT_GLOBAL_SETTINGS);
-  await db.execute(
-    sql`
-      INSERT INTO settings (settings, created_at, updated_at)
-      VALUES (
-        ${settingsSQL},
-        ${new Date().toISOString()},
-        ${new Date().toISOString()}
-      )
-    `,
-  );
+  await db.insert(settings).values({
+    settings: settingsToJsonBuildObject(DEFAULT_GLOBAL_SETTINGS),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
   const settingsObject = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
-  const settingsSQL = settingsToJsonBuildObject(settingsObject);
-
-  await db.execute(
-    sql`
-      INSERT INTO settings (user_id, settings, created_at, updated_at)
-      VALUES (
-        ${userId},
-        ${settingsSQL},
-        ${new Date().toISOString()},
-        ${new Date().toISOString()}
-      )
-    `,
-  );
+  await db.insert(settings).values({
+    userId,
+    settings: settingsToJsonBuildObject(settingsObject),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {

@@ -1,13 +1,10 @@
 import { useTranslation } from "react-i18next";
 
-import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 
 interface SettingsNavigationTabsProps {
   isAdmin: boolean;
-  onCancel?: () => void;
-  onSave?: () => void;
   children?: React.ReactNode;
   accountContent?: React.ReactNode;
   organizationContent?: React.ReactNode;
@@ -15,8 +12,6 @@ interface SettingsNavigationTabsProps {
 
 export function SettingsNavigationTabs({
   isAdmin,
-  onCancel,
-  onSave,
   accountContent,
   organizationContent,
 }: SettingsNavigationTabsProps) {
@@ -34,14 +29,6 @@ export function SettingsNavigationTabs({
       <CardContent className="p-6">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="rounded px-2 py-1 text-2xl font-bold">{t("settings.title")}</h1>
-          <div className="flex gap-2">
-            <Button disabled={true} variant="outline" onClick={onCancel}>
-              {t("settings.buttons.cancel")}
-            </Button>
-            <Button disabled={true} onClick={onSave}>
-              {t("settings.buttons.save")}
-            </Button>
-          </div>
         </div>
         <Tabs defaultValue="account" className="w-full">
           <div className="mb-6 flex justify-start">

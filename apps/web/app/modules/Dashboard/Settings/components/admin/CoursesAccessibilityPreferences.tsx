@@ -29,16 +29,14 @@ export default function CoursesAccessibilityPreferences({
         <CardTitle>{t("adminPreferences.courseSettings")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div>
-          <div className="space-y-4">
-            <SettingItem
-              id="coursesVisibility"
-              label={t("adminPreferences.field.coursesVisibility")}
-              description={t("adminPreferences.field.coursesVisibilityDescription")}
-              checked={globalSettings.unregisteredUserCoursesAccessibility}
-              onCheckedChange={handleCoursesAccessibilityChange}
-            />
-          </div>
+        <div className="space-y-4">
+          <SettingItem
+            id="coursesVisibility"
+            label={t("adminPreferences.field.coursesVisibility")}
+            description={t("adminPreferences.field.coursesVisibilityDescription")}
+            checked={globalSettings.unregisteredUserCoursesAccessibility}
+            onCheckedChange={handleCoursesAccessibilityChange}
+          />
         </div>
       </CardContent>
     </Card>

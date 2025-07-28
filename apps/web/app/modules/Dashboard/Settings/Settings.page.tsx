@@ -15,14 +15,6 @@ export default function SettingsPage() {
   const { data: userSettings } = useUserSettings();
   const { data: globalSettings } = useGlobalSettings();
 
-  const handleCancel = () => {
-    console.log("Settings cancelled");
-  };
-
-  const handleSave = () => {
-    console.log("Settings saved");
-  };
-
   return (
     <PageWrapper className="flex flex-col gap-6 *:h-min">
       <Suspense
@@ -34,8 +26,6 @@ export default function SettingsPage() {
       >
         <SettingsNavigationTabs
           isAdmin={isAdmin}
-          onCancel={handleCancel}
-          onSave={handleSave}
           accountContent={
             <AccountTabContent
               isContentCreator={isContentCreator}
