@@ -107,15 +107,15 @@ export class SettingsService {
 
     return newSettings;
   }
-  public async updateGuestAccess() {
-    const [res] = await this.db
+  public async updateGlobalUnregisteredUserCoursesAccessibility() {
+    const [globalSetting] = await this.db
       .select({
         unregisteredUserCoursesAccessibility: sql`settings.settings->>'unregisteredUserCoursesAccessibility'`,
       })
       .from(settings)
       .where(isNull(settings.userId));
 
-    const current = res.unregisteredUserCoursesAccessibility === "true";
+    const current = globalSetting.unregisteredUserCoursesAccessibility === "true";
 
     const [updated] = await this.db
       .update(settings)
@@ -136,18 +136,18 @@ export class SettingsService {
   }
 
   public async updateAdminNewUserNotification(userId: UUIDType) {
-    const [res] = await this.db
+    const [userSetting] = await this.db
       .select({
         adminNewUserNotification: sql`settings.settings->>'adminNewUserNotification'`,
       })
       .from(settings)
       .where(eq(settings.userId, userId));
 
-    if (!res) {
+    if (!userSetting) {
       throw new NotFoundException("User settings not found");
     }
 
-    const current = res.adminNewUserNotification === "true";
+    const current = userSetting.adminNewUserNotification === "true";
 
     const [{ settings: updatedSettings }] = await this.db
       .update(settings)

@@ -23,7 +23,7 @@ export function SettingItem({
     <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="bg-muted/50 flex size-8 w-8 shrink-0 items-center justify-center rounded-lg">
+          <div className="bg-muted/50 flex size-8 shrink-0 items-center justify-center rounded-lg">
             {icon}
           </div>
         )}
