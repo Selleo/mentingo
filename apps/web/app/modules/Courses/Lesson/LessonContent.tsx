@@ -15,6 +15,8 @@ import Presentation from "../../../components/Presentation/Presentation";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 
+import { isNextBlocked, isPreviousBlocked } from "./utils";
+
 import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
@@ -58,19 +60,23 @@ export const LessonContent = ({
   const totalLessons = currentChapter.lessons.length;
 
   useEffect(() => {
-    if (isAdminLike) return;
-
-    if (lesson.type == LessonType.VIDEO || lesson.type == LessonType.AI_MENTOR) {
-      return setIsNextDisabled(!lesson.lessonCompleted);
+    if (isAdminLike) {
+      setIsNextDisabled(false);
+      setIsPreviousDisabled(false);
+      return;
     }
-    if (lesson.type == LessonType.QUIZ) {
-      return setIsNextDisabled(
-        (lesson.attempts === null || lesson.attempts === 1) && !lesson.lessonCompleted,
-      );
-    }
-
-    setIsNextDisabled(false);
-  }, [isAdminLike, lesson.lessonCompleted, lesson.type, lesson.attempts]);
+    setIsNextDisabled(isNextBlocked(currentLessonIndex, totalLessons, nextChapter, course));
+    setIsPreviousDisabled(isPreviousBlocked(currentLessonIndex, prevChapter, course));
+  }, [
+    isAdminLike,
+    lesson.type,
+    lesson.lessonCompleted,
+    currentLessonIndex,
+    totalLessons,
+    nextChapter,
+    prevChapter,
+    course.enrolled,
+  ]);
 
   const Content = () =>
     match(lesson.type)

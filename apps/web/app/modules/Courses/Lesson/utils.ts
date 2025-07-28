@@ -3,7 +3,11 @@ import { match, P } from "ts-pattern";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
-import type { EvaluationQuizBody, GetLessonByIdResponse } from "~/api/generated-api";
+import type {
+  GetCourseResponse,
+  EvaluationQuizBody,
+  GetLessonByIdResponse,
+} from "~/api/generated-api";
 import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
 type Questions = NonNullable<GetLessonByIdResponse["data"]["quizDetails"]>["questions"];
@@ -44,6 +48,31 @@ export const getUserAnswers = (questions: Questions): GetUserAnswersResult => {
     briefResponses: prepareAnswers(groupedQuestions.brief_response, "open"),
     detailedResponses: prepareAnswers(groupedQuestions.detailed_response, "open"),
   } as const;
+};
+
+export const isNextBlocked = (
+  currentLessonIndex: number,
+  totalLessons: number,
+  nextChapter: GetCourseResponse["data"]["chapters"][number],
+  course: GetCourseResponse["data"],
+) => {
+  const isLastLessonInChapter = currentLessonIndex === totalLessons - 1;
+  const isNextChapterPaid = nextChapter && !nextChapter.isFreemium;
+  const isUserNotEnrolled = !course.enrolled;
+
+  return isLastLessonInChapter && isNextChapterPaid && isUserNotEnrolled;
+};
+
+export const isPreviousBlocked = (
+  currentLessonIndex: number,
+  prevChapter: GetCourseResponse["data"]["chapters"][number],
+  course: GetCourseResponse["data"],
+) => {
+  const isFirstLessonInChapter = currentLessonIndex === 0;
+  const isPrevChapterPaid = prevChapter && !prevChapter.isFreemium;
+  const isUserNotEnrolled = !course.enrolled;
+
+  return isFirstLessonInChapter && isPrevChapterPaid && isUserNotEnrolled;
 };
 
 const groupQuestionsByType = (questions: Questions) => {
