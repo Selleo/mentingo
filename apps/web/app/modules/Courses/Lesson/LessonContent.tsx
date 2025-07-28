@@ -83,8 +83,8 @@ export const LessonContent = ({
   };
 
   return (
-    <div className="flex h-full w-full flex-col items-center py-10">
-      <div className="flex h-full w-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
+    <div className="flex size-full flex-col items-center py-10">
+      <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
         <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
           <div className="flex w-full flex-col gap-y-4">
             <p className="body-sm-md text-neutral-800">
