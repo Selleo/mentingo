@@ -169,6 +169,13 @@
       "when": 1753429944225,
       "tag": "0023_add_thresholdScore_attemptsLimit_quizCooldown_in_lessons",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1753781750307,
+      "tag": "0024_add_unique_constraint_to_group_users_user_id",
+      "breakpoints": true
     }
   ]
 }

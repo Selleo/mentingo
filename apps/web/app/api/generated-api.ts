@@ -103,7 +103,7 @@ export interface ResetPasswordBody {
 }
 
 export interface GetUsersResponse {
-  data: {
+  data: ({
     id: string;
     createdAt: string;
     updatedAt: string;
@@ -113,7 +113,10 @@ export interface GetUsersResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
-  }[];
+  } & {
+    groupId: string | null;
+    groupName: string | null;
+  })[];
   pagination: {
     totalItems: number;
     page: number;
@@ -133,6 +136,8 @@ export interface GetUserByIdResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
+    groupId: string | null;
+    groupName: string | null;
   };
 }
 
@@ -154,6 +159,8 @@ export interface GetUserDetailsResponse {
 export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
+  /** @format uuid */
+  groupId?: string;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -193,6 +200,8 @@ export interface UpsertUserDetailsResponse {
 export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
+  /** @format uuid */
+  groupId?: string;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -231,6 +240,12 @@ export interface DeleteBulkUsersBody {
 }
 
 export type DeleteBulkUsersResponse = null;
+
+export interface BulkAssignUsersToGroupBody {
+  userIds: string[];
+  /** @format uuid */
+  groupId: string;
+}
 
 export interface CreateUserBody {
   /** @format email */
@@ -396,6 +411,8 @@ export interface GetStudentsWithEnrollmentDateResponse {
     lastName: string;
     email: string;
     enrolledAt: string | null;
+    groupId: string | null;
+    groupName: string | null;
     /** @format uuid */
     id: string;
   }[];
@@ -2085,6 +2102,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: string;
+        groupId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -2299,6 +2317,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerBulkAssignUsersToGroup
+     * @request PATCH:/api/user/bulk/groups
+     */
+    userControllerBulkAssignUsersToGroup: (
+      data: BulkAssignUsersToGroupBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/user/bulk/groups`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

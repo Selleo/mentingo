@@ -44,10 +44,7 @@ export const LessonContent = ({
   useEffect(() => {
     if (isAdminLike) return;
 
-    if (
-      lesson.type == LessonType.VIDEO ||
-      lesson.type == LessonType.AI_MENTOR
-    ) {
+    if (lesson.type == LessonType.VIDEO || lesson.type == LessonType.AI_MENTOR) {
       return setIsNextDisabled(!lesson.lessonCompleted);
     }
     if (lesson.type == LessonType.QUIZ) {

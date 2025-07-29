@@ -30,7 +30,7 @@
       "active": "Active",
       "archived": "Archived",
       "selected": "Selected",
-      "allStatuses": "All statuses",
+      "allStatuses": "All Statuses",
       "draft": "Draft",
       "all": "All",
       "search": "Search",
@@ -247,6 +247,7 @@
     "toast": {
       "userUpdatedSuccessfully": "User updated successfully",
       "userDetailsUpdatedSuccessfully": "User details updated successfully",
+      "updatedSelectedUsersSuccessfully": "Successfully updated selected users",
       "deletedSelectedUsersSuccessfully": "Successfully deleted selected users"
     },
     "field": {
@@ -426,7 +427,8 @@
     "filters": {
       "placeholder": {
         "searchByKeyword": "Search by keyword...",
-        "roles": "Roles"
+        "roles": "Roles",
+        "groups": "Groups"
       }
     },
     "field": {
@@ -435,14 +437,46 @@
       "email": "Email",
       "role": "Role",
       "status": "Status",
-      "createdAt": "Created At"
+      "createdAt": "Created At",
+      "group": "Group"
     },
     "other": {
       "selected": "Selected"
     },
     "button": {
       "createNew": "Create new",
-      "deleteSelected": "Delete selected"
+      "deleteSelected": "Delete selected",
+      "edit": "Edit"
+    },
+    "dropdown": {
+      "changeRole": "Change role",
+      "changeGroup": "Change group",
+      "delete": "Delete"
+    },
+    "modal": {
+      "title": {
+        "delete": "Do you want to delete these accounts?",
+        "role": "Modify roles",
+        "group": "Modify groups",
+        "confirmation": "Are you sure you want to proceed?"
+      },
+      "button": {
+        "delete": "Delete",
+        "role": "Save",
+        "group": "Save",
+        "continue": "Confirm"
+      },
+      "description": {
+        "delete": "Are you sure you want to delete these accounts? This action is irreversible.",
+        "confirmationForGroup_one": "You will change group to {{ group }} for 1 user",
+        "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
+        "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
+        "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users"
+      },
+      "placeholder": {
+        "group": "Select group",
+        "role": "Select role"
+      }
     },
     "breadcrumbs": {
       "users": "Users",
@@ -455,14 +489,16 @@
     "subHeader": "Fill in the details to create a new user. Click save when you're done.",
     "editUserHeader": "User Information",
     "placeholder": {
-      "role": "Select a role"
+      "role": "Select a role",
+      "groupId": "Select a group"
     },
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email",
       "role": "Role",
-      "status": "Status"
+      "status": "Status",
+      "groupId": "Group"
     },
     "toast": {
       "userCreatedSuccessfully": "User created successfully"
