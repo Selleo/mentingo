@@ -9,8 +9,8 @@ import postgres from "postgres";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
   DEFAULT_GLOBAL_SETTINGS,
-  DEFAULT_USER_ADMIN_SETTINGS,
-  DEFAULT_USER_SETTINGS,
+  DEFAULT_ADMIN_SETTINGS,
+  DEFAULT_STUDENT_SETTINGS,
 } from "src/settings/constants/settings.constants";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -116,7 +116,7 @@ async function insertGlobalSettings() {
 }
 
 async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
-  const settingsObject = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
+  const settingsObject = isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS;
   await db.insert(settings).values({
     userId,
     settings: settingsToJsonBuildObject(settingsObject),

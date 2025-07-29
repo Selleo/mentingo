@@ -3,8 +3,8 @@ import { Factory } from "fishery";
 
 import {
   DEFAULT_GLOBAL_SETTINGS,
-  DEFAULT_USER_ADMIN_SETTINGS,
-  DEFAULT_USER_SETTINGS,
+  DEFAULT_ADMIN_SETTINGS,
+  DEFAULT_STUDENT_SETTINGS,
 } from "src/settings/constants/settings.constants";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -24,8 +24,8 @@ export const createSettingsFactory = (
     onCreate(async () => {
       const defaultSettings =
         (userId === null && DEFAULT_GLOBAL_SETTINGS) ||
-        (isAdmin && DEFAULT_USER_ADMIN_SETTINGS) ||
-        DEFAULT_USER_SETTINGS;
+        (isAdmin && DEFAULT_ADMIN_SETTINGS) ||
+        DEFAULT_STUDENT_SETTINGS;
 
       const finalSettings = {
         ...defaultSettings,
@@ -49,7 +49,7 @@ export const createSettingsFactory = (
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: userId,
-      settings: isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS,
+      settings: isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS,
     };
   });
 };

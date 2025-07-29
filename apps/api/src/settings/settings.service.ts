@@ -12,7 +12,7 @@ import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
-import { DEFAULT_USER_ADMIN_SETTINGS, DEFAULT_USER_SETTINGS } from "./constants/settings.constants";
+import { DEFAULT_ADMIN_SETTINGS, DEFAULT_STUDENT_SETTINGS } from "./constants/settings.constants";
 
 import type {
   GlobalSettingsJSONContentSchema,
@@ -23,12 +23,7 @@ import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
-import type {
-  AdminSettings,
-  GlobalSettings,
-  StudentSettings,
-  UserSettings,
-} from "src/common/types";
+import type { AdminSettings, StudentSettings } from "src/common/types";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -36,12 +31,12 @@ export class SettingsService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
-    const [{ settings: rawSettings }] = await this.db
-      .select({ settings: settings.settings })
+    const [{ settings: globalSettings }] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(isNull(settings.userId));
 
-    return rawSettings as GlobalSettingsJSONContentSchema;
+    return globalSettings;
   }
 
   public async createSettings(
@@ -77,14 +72,14 @@ export class SettingsService {
         createdAt: new Date().toISOString(),
         settings: settingsToJsonBuildObject(finalSettings),
       })
-      .returning({ settings: settings.settings });
+      .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
     return createdSettings;
   }
 
   public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
     const [{ settings: userSettings }] = await this.db
-      .select({ settings: settings.settings })
+      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
@@ -92,7 +87,7 @@ export class SettingsService {
       throw new NotFoundException("User settings not found");
     }
 
-    return userSettings as UserSettings;
+    return userSettings;
   }
 
   public async updateUserSettings(
@@ -100,7 +95,7 @@ export class SettingsService {
     updatedSettings: UpdateSettingsBody,
   ): Promise<SettingsJSONContentSchema> {
     const [{ settings: currentSettings }] = await this.db
-      .select({ settings: settings.settings })
+      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
@@ -119,9 +114,9 @@ export class SettingsService {
         settings: settingsToJsonBuildObject(mergedSettings),
       })
       .where(eq(settings.userId, userId))
-      .returning({ settings: settings.settings });
+      .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
-    return newUserSettings as UserSettings;
+    return newUserSettings;
   }
 
   public async updateGlobalUnregisteredUserCoursesAccessibility(): Promise<GlobalSettingsJSONContentSchema> {
@@ -147,9 +142,9 @@ export class SettingsService {
       `,
       })
       .where(isNull(settings.userId))
-      .returning({ settings: settings.settings });
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    return updatedGlobalSettings as GlobalSettings;
+    return updatedGlobalSettings;
   }
 
   public async updateAdminNewUserNotification(
@@ -181,19 +176,19 @@ export class SettingsService {
         `,
       })
       .where(eq(settings.userId, userId))
-      .returning({ settings: settings.settings });
+      .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
 
-    return updatedUserSettings as AdminSettings;
+    return updatedUserSettings;
   }
 
   private getDefaultSettingsForRole(role: UserRole): StudentSettings | AdminSettings {
     switch (role) {
       case USER_ROLES.ADMIN:
-        return DEFAULT_USER_ADMIN_SETTINGS;
+        return DEFAULT_ADMIN_SETTINGS;
       case USER_ROLES.STUDENT:
-        return DEFAULT_USER_SETTINGS;
+        return DEFAULT_STUDENT_SETTINGS;
       default:
-        return DEFAULT_USER_SETTINGS;
+        return DEFAULT_STUDENT_SETTINGS;
     }
   }
 }
