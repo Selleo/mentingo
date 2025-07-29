@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteFile } from "~/api/mutations/admin/useDeleteFile";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import FileUploadInput from "~/components/FileUploadInput/FileUploadInput";
 import { FormTextareaField } from "~/components/Form/FormTextareaFiled";
@@ -49,6 +50,7 @@ const FileLessonForm = ({
   });
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
+  const { mutateAsync: deleteFile } = useDeleteFile();
   const fileType = form.watch("fileType");
   const { t } = useTranslation();
 
@@ -96,6 +98,21 @@ const FileLessonForm = ({
     },
     [uploadFile, form],
   );
+
+  const handleFileDelete = useCallback(() => {
+    const fileKey = form.getValues("fileS3Key");
+    if (fileKey) {
+      deleteFile(fileKey)
+        .then(() => {
+          setDisplayFileUrl("");
+          form.setValue("fileS3Key", "");
+          form.setValue("fileType", "");
+        })
+        .catch((error) => {
+          console.error("Error deleting file:", error);
+        });
+    }
+  }, [deleteFile, form]);
 
   const handleSourceTypeChange = (value: SourceType) => {
     const isExternalUrlValue = value === "external";
@@ -198,6 +215,7 @@ const FileLessonForm = ({
               <FormControl>
                 <FileUploadInput
                   handleFileUpload={handleFileUpload}
+                  handleFileDelete={handleFileDelete}
                   isUploading={isUploading}
                   contentTypeToDisplay={contentTypeToDisplay}
                   url={displayFileUrl}

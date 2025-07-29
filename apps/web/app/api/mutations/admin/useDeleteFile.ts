@@ -4,24 +4,17 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
 
-const extractFileKeyFromUrl = (url: string): string => {
-  try {
-    const urlObj = new URL(url);
-    return urlObj.pathname.slice(1);
-  } catch {
-    return "";
-  }
-};
-
 export function useDeleteFile() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (url: string) => {
-      const fileKey = extractFileKeyFromUrl(url);
+    mutationFn: async (fileKey: string) => {
       return await ApiClient.api.fileControllerDeleteFile({
         fileKey,
       });
+    },
+    onSuccess: () => {
+      toast({ description: "File deleted successfully" });
     },
     onError: (error) => {
       toast({
