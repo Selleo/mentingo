@@ -13,6 +13,6 @@ import { StatisticsService } from "./statistics.service";
   imports: [CqrsModule, FileModule],
   controllers: [StatisticsController],
   providers: [StatisticsHandler, StatisticsRepository, StatisticsService, StatisticsCron],
-  exports: [StatisticsRepository],
+  exports: [StatisticsRepository, StatisticsService],
 })
 export class StatisticsModule {}
