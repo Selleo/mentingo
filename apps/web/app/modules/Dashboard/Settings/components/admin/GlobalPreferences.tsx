@@ -1,6 +1,6 @@
 import CoursesAccessibilityPreferences from "./CoursesAccessibilityPreferences";
 
-import type { GlobalSettings } from "~/api/generated-api";
+import type { GlobalSettings } from "../../types";
 
 interface GlobalPreferencesProps {
   globalSettings: GlobalSettings;

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 
 import { GlobalPreferences } from "./GlobalPreferences";
 
-import type { GlobalSettings } from "~/api/generated-api";
+import type { GlobalSettings } from "../../types";
 
 interface AdminPreferencesProps {
   globalSettings: GlobalSettings;

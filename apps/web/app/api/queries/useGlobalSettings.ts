@@ -3,13 +3,13 @@ import { isAxiosError } from "axios";
 
 import { ApiClient } from "../api-client";
 
-import type { GlobalSettingsResponse } from "../generated-api";
+import type { GetPublicGlobalSettingsResponse } from "../generated-api";
 
 export const globalSettingsQueryOptions = queryOptions({
   queryKey: ["globalSettings"],
   queryFn: async () => {
     try {
-      const response = await ApiClient.api.globalSettings();
+      const response = await ApiClient.api.settingsControllerGetPublicGlobalSettings();
 
       return response.data;
     } catch (error) {
@@ -25,8 +25,8 @@ export const globalSettingsQueryOptions = queryOptions({
 export function useGlobalSettings() {
   return useQuery({
     ...globalSettingsQueryOptions,
-    select: (data: GlobalSettingsResponse | null) => {
-      return data?.data?.settings;
+    select: (data: GetPublicGlobalSettingsResponse | null) => {
+      return data?.data;
     },
   });
 }
@@ -34,12 +34,12 @@ export function useGlobalSettings() {
 export function useGlobalSettingsSuspense() {
   return useSuspenseQuery({
     ...globalSettingsQueryOptions,
-    select: (data: GlobalSettingsResponse | null) => {
+    select: (data: GetPublicGlobalSettingsResponse | null) => {
       if (!data) {
         throw new Error("User not authenticated");
       }
 
-      return data?.data.settings;
+      return data?.data;
     },
   });
 }

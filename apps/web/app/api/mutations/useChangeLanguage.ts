@@ -5,27 +5,19 @@ import { useToast } from "~/components/ui/use-toast";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { ApiClient } from "../api-client";
-import { useCurrentUserSuspense } from "../queries/useCurrentUser";
 import { userSettingsQueryOptions } from "../queries/useUserSettings";
 
-import type { ChangeLanguageBody } from "../generated-api";
+import type { UpdateUserSettingsBody } from "../generated-api";
 import type { Language } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-type ChangeLanguageOptions = {
-  data: ChangeLanguageBody;
-};
 
 export function useChangeLanguage() {
-  const { data: currentUser } = useCurrentUserSuspense();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setLanguage } = useLanguageStore();
 
   return useMutation({
-    mutationFn: async (options: ChangeLanguageOptions) => {
-      const response = await ApiClient.api.settingsControllerChangeLanguage(
-        { id: currentUser.id },
-        options.data,
-      );
+    mutationFn: async (options: UpdateUserSettingsBody) => {
+      const response = await ApiClient.api.settingsControllerUpdateUserSettings(options);
 
       return response.data;
     },
@@ -34,15 +26,15 @@ export function useChangeLanguage() {
         queryKey: userSettingsQueryOptions.queryKey,
       });
 
-      if (data?.data?.settings?.language) {
-        setLanguage(data.data.settings.language as Language);
+      if (data && "language" in data && data.language) {
+        setLanguage(data.language as Language);
       }
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
         return toast({
           variant: "destructive",
-          description: error.response?.data.message,
+          description: error.response?.data?.message,
         });
       }
       toast({

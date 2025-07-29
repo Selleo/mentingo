@@ -3071,7 +3071,13 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -3124,7 +3130,13 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -3135,7 +3147,13 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -10323,6 +10341,25 @@
           "data"
         ]
       },
+      "GetPublicGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetUserSettingsResponse": {
         "type": "object",
         "properties": {
@@ -10415,6 +10452,48 @@
                   "adminNewUserNotification"
                 ]
               }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminNewUserNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "adminNewUserNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility"
             ]
           }
         },

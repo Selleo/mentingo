@@ -8,9 +8,19 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { settingsJSONContentSchema, type SettingsResponse } from "./schemas/settings.schema";
+import {
+  adminSettingsJSONContentSchema,
+  globalSettingsJSONSchema,
+  settingsJSONContentSchema,
+} from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
+
+import type {
+  AdminSettingsJSONContentSchema,
+  GlobalSettingsJSONContentSchema,
+  SettingsJSONContentSchema,
+} from "./schemas/settings.schema";
 
 @Controller("settings")
 @UseGuards(RolesGuard)
@@ -19,7 +29,10 @@ export class SettingsController {
 
   @Public()
   @Get("global")
-  async getPublicGlobalSettings() {
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async getPublicGlobalSettings(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getGlobalSettings());
   }
 
@@ -29,7 +42,7 @@ export class SettingsController {
   })
   async getUserSettings(
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<SettingsResponse>> {
+  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
@@ -41,22 +54,30 @@ export class SettingsController {
   async updateUserSettings(
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<SettingsResponse>> {
+  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
   @Patch("admin/new-user-notification")
   @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(adminSettingsJSONContentSchema),
+  })
   async updateAdminNewUserNotification(
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<SettingsResponse>> {
+  ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateAdminNewUserNotification(userId);
     return new BaseResponse(result);
   }
 
   @Patch("admin/unregistered-user-courses-accessibility")
   @Roles(USER_ROLES.ADMIN)
-  async updateUnregisteredUserCoursesAccessibility() {
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateUnregisteredUserCoursesAccessibility(): Promise<
+    BaseResponse<GlobalSettingsJSONContentSchema>
+  > {
     const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
   }

@@ -6,12 +6,12 @@ export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.String(),
 });
 
-export const globalSettingsSchema = Type.Object({
+export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
-  ...studentSettingsJSONContentSchema.properties,
+  language: Type.String(),
   adminNewUserNotification: Type.Boolean(),
 });
 
@@ -23,6 +23,4 @@ export const settingsJSONContentSchema = Type.Union([
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;
-export type GlobalSettingsSchema = typeof globalSettingsSchema;
-
-export type SettingsResponse = SettingsJSONContentSchema;
+export type GlobalSettingsJSONContentSchema = Static<typeof globalSettingsJSONSchema>;

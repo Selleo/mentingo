@@ -7,7 +7,7 @@ import { truncateTables, cookieFor } from "../../../test/helpers/test-helpers";
 
 import type { DatabasePg } from "../../common";
 import type { INestApplication } from "@nestjs/common";
-import type { AdminSettings, GlobalSettings, UserSettings } from "src/common/types";
+import type { AdminSettings, GlobalSettings, StudentSettings } from "src/common/types";
 
 describe("SettingsController (e2e)", () => {
   let app: INestApplication;
@@ -60,7 +60,7 @@ describe("SettingsController (e2e)", () => {
         where: (s, { eq }) => eq(s.userId, testUser.id),
       });
 
-      const userSettings = updatedSettingInDb?.settings as UserSettings;
+      const userSettings = updatedSettingInDb?.settings as StudentSettings;
 
       expect(updatedSettingInDb).toBeDefined();
       expect(userSettings?.language).toBe("de");
@@ -99,31 +99,36 @@ describe("SettingsController (e2e)", () => {
         .withAdminSettings(db)
         .create();
 
-      const adminLoginResponse = await request(app.getHttpServer())
-        .post("/api/auth/login")
-        .send({
-          email: adminUser.email,
-          password: adminUser.credentials?.password,
-        });
+      const adminLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: adminUser.email,
+        password: adminUser.credentials?.password,
+      });
 
       adminCookies = adminLoginResponse.headers["set-cookie"];
     });
 
     it("should toggle the notification setting (as Admin)", async () => {
+      const initialSettingInDb = await db.query.settings.findFirst({
+        where: (s, { eq }) => eq(s.userId, adminUser.id),
+      });
+
+      const initialAdminSettings = initialSettingInDb?.settings as AdminSettings;
+      const initialNotificationState = initialAdminSettings?.adminNewUserNotification ?? false;
+
       const response = await request(app.getHttpServer())
         .patch("/api/settings/admin/new-user-notification")
         .set("Cookie", adminCookies)
         .expect(200);
 
       expect(response.body).toBeDefined();
-      expect(response.body.data.adminNewUserNotification).toBe(true);
+      expect(response.body.data.adminNewUserNotification).toBe(!initialNotificationState);
 
       const updatedSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, adminUser.id),
       });
 
       const adminSettings = updatedSettingInDb?.settings as AdminSettings;
-      expect(adminSettings?.adminNewUserNotification).toBe(true);
+      expect(adminSettings?.adminNewUserNotification).toBe(!initialNotificationState);
 
       await request(app.getHttpServer())
         .patch("/api/settings/admin/new-user-notification")
@@ -135,7 +140,7 @@ describe("SettingsController (e2e)", () => {
       });
 
       const toggledAdminSettings = toggledBackSettingInDb?.settings as AdminSettings;
-      expect(toggledAdminSettings?.adminNewUserNotification).toBe(false);
+      expect(toggledAdminSettings?.adminNewUserNotification).toBe(initialNotificationState);
     });
 
     it("should return 403 if user is not an admin", async () => {
@@ -187,7 +192,7 @@ describe("SettingsController (e2e)", () => {
 
       expect(response.body).toBeDefined();
       expect(response.body.data).toBeDefined();
-      expect(response.body.data.settings.unregisteredUserCoursesAccessibility).toBeDefined();
+      expect(response.body.data.unregisteredUserCoursesAccessibility).toBeDefined();
     });
 
     it("should return updated global settings after admin changes via PATCH endpoint", async () => {
@@ -202,7 +207,7 @@ describe("SettingsController (e2e)", () => {
         .get("/api/settings/global")
         .expect(200);
 
-      const initialValue = initialResponse.body.data.settings.unregisteredUserCoursesAccessibility;
+      const initialValue = initialResponse.body.data.unregisteredUserCoursesAccessibility;
 
       await request(app.getHttpServer())
         .patch("/api/settings/admin/unregistered-user-courses-accessibility")
@@ -213,9 +218,7 @@ describe("SettingsController (e2e)", () => {
         .get("/api/settings/global")
         .expect(200);
 
-      expect(updatedResponse.body.data.settings.unregisteredUserCoursesAccessibility).toBe(
-        !initialValue,
-      );
+      expect(updatedResponse.body.data.unregisteredUserCoursesAccessibility).toBe(!initialValue);
     });
   });
 
@@ -248,16 +251,14 @@ describe("SettingsController (e2e)", () => {
         .set("Cookie", adminCookies)
         .expect(200);
 
-      expect(response.body.data.settings.unregisteredUserCoursesAccessibility).toBe(!initialValue);
+      expect(response.body.data.unregisteredUserCoursesAccessibility).toBe(!initialValue);
 
       const toggleResponse = await request(app.getHttpServer())
         .patch("/api/settings/admin/unregistered-user-courses-accessibility")
         .set("Cookie", adminCookies)
         .expect(200);
 
-      expect(toggleResponse.body.data.settings.unregisteredUserCoursesAccessibility).toBe(
-        initialValue,
-      );
+      expect(toggleResponse.body.data.unregisteredUserCoursesAccessibility).toBe(initialValue);
     });
 
     it("should return 403 if user is not an admin", async () => {

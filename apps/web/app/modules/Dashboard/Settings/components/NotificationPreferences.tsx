@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
 import { SettingItem } from "./SettingItem";
 
-import type { AdminSettings } from "~/api/generated-api";
+import type { AdminSettings } from "../types";
 
 interface NotificationPreferencesProps {
   adminSettings: AdminSettings;

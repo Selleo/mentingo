@@ -14,21 +14,34 @@ import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-obje
 
 import { DEFAULT_USER_ADMIN_SETTINGS, DEFAULT_USER_SETTINGS } from "./constants/settings.constants";
 
-import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
+import type {
+  GlobalSettingsJSONContentSchema,
+  SettingsJSONContentSchema,
+  AdminSettingsJSONContentSchema,
+} from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
+import type {
+  AdminSettings,
+  GlobalSettings,
+  StudentSettings,
+  UserSettings,
+} from "src/common/types";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class SettingsService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  public async getGlobalSettings() {
-    const [globalSettings] = await this.db.select().from(settings).where(isNull(settings.userId));
+  public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
+    const [{ settings: rawSettings }] = await this.db
+      .select({ settings: settings.settings })
+      .from(settings)
+      .where(isNull(settings.userId));
 
-    return globalSettings;
+    return rawSettings as GlobalSettingsJSONContentSchema;
   }
 
   public async createSettings(
@@ -69,7 +82,7 @@ export class SettingsService {
     return createdSettings;
   }
 
-  public async getUserSettings(userId: UUIDType) {
+  public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
     const [{ settings: userSettings }] = await this.db
       .select({ settings: settings.settings })
       .from(settings)
@@ -79,10 +92,13 @@ export class SettingsService {
       throw new NotFoundException("User settings not found");
     }
 
-    return userSettings;
+    return userSettings as UserSettings;
   }
 
-  public async updateUserSettings(userId: UUIDType, updatedSettings: UpdateSettingsBody) {
+  public async updateUserSettings(
+    userId: UUIDType,
+    updatedSettings: UpdateSettingsBody,
+  ): Promise<SettingsJSONContentSchema> {
     const [{ settings: currentSettings }] = await this.db
       .select({ settings: settings.settings })
       .from(settings)
@@ -97,7 +113,7 @@ export class SettingsService {
       ...updatedSettings,
     };
 
-    const [{ settings: newSettings }] = await this.db
+    const [{ settings: newUserSettings }] = await this.db
       .update(settings)
       .set({
         settings: settingsToJsonBuildObject(mergedSettings),
@@ -105,9 +121,10 @@ export class SettingsService {
       .where(eq(settings.userId, userId))
       .returning({ settings: settings.settings });
 
-    return newSettings;
+    return newUserSettings as UserSettings;
   }
-  public async updateGlobalUnregisteredUserCoursesAccessibility() {
+
+  public async updateGlobalUnregisteredUserCoursesAccessibility(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSetting] = await this.db
       .select({
         unregisteredUserCoursesAccessibility: sql`settings.settings->>'unregisteredUserCoursesAccessibility'`,
@@ -117,7 +134,7 @@ export class SettingsService {
 
     const current = globalSetting.unregisteredUserCoursesAccessibility === "true";
 
-    const [updated] = await this.db
+    const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
@@ -130,12 +147,14 @@ export class SettingsService {
       `,
       })
       .where(isNull(settings.userId))
-      .returning();
+      .returning({ settings: settings.settings });
 
-    return updated;
+    return updatedGlobalSettings as GlobalSettings;
   }
 
-  public async updateAdminNewUserNotification(userId: UUIDType) {
+  public async updateAdminNewUserNotification(
+    userId: UUIDType,
+  ): Promise<AdminSettingsJSONContentSchema> {
     const [userSetting] = await this.db
       .select({
         adminNewUserNotification: sql`settings.settings->>'adminNewUserNotification'`,
@@ -149,7 +168,7 @@ export class SettingsService {
 
     const current = userSetting.adminNewUserNotification === "true";
 
-    const [{ settings: updatedSettings }] = await this.db
+    const [{ settings: updatedUserSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
@@ -164,10 +183,10 @@ export class SettingsService {
       .where(eq(settings.userId, userId))
       .returning({ settings: settings.settings });
 
-    return updatedSettings;
+    return updatedUserSettings as AdminSettings;
   }
 
-  private getDefaultSettingsForRole(role: UserRole) {
+  private getDefaultSettingsForRole(role: UserRole): StudentSettings | AdminSettings {
     switch (role) {
       case USER_ROLES.ADMIN:
         return DEFAULT_USER_ADMIN_SETTINGS;

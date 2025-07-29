@@ -10,6 +10,8 @@ import AccountTabContent from "./components/AccountTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
 
+import type { GlobalSettings } from "./types";
+
 export default function SettingsPage() {
   const { isContentCreator, isAdmin } = useUserRole();
   const { data: userSettings } = useUserSettings();
@@ -34,11 +36,13 @@ export default function SettingsPage() {
             />
           }
           organizationContent={
-            <OrganizationTabContent
-              isAdmin={isAdmin}
-              userSettings={userSettings!}
-              globalSettings={globalSettings!}
-            />
+            globalSettings && (
+              <OrganizationTabContent
+                isAdmin={isAdmin}
+                userSettings={userSettings!}
+                globalSettings={globalSettings as GlobalSettings}
+              />
+            )
           }
         />
       </Suspense>

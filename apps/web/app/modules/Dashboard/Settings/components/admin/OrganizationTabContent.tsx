@@ -1,6 +1,6 @@
 import AdminPreferences from "./Preferences";
 
-import type { GlobalSettings, UserSettings } from "~/api/generated-api";
+import type { GlobalSettings, UserSettings } from "../../types";
 
 interface OrganizationTabContentProps {
   isAdmin: boolean;
@@ -10,14 +10,7 @@ interface OrganizationTabContentProps {
 
 export default function OrganizationTabContent({
   isAdmin,
-  userSettings,
   globalSettings,
 }: OrganizationTabContentProps) {
-  return (
-    <>
-      {isAdmin && userSettings && globalSettings && (
-        <AdminPreferences globalSettings={globalSettings} />
-      )}
-    </>
-  );
+  return <>{isAdmin && <AdminPreferences globalSettings={globalSettings} />}</>;
 }

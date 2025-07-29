@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 
 import { SettingItem } from "../SettingItem";
 
-import type { GlobalSettings } from "~/api/generated-api";
+import type { GlobalSettings } from "../../types";
 
 interface CoursesAccessibilityPreferencesProps {
   globalSettings: GlobalSettings;

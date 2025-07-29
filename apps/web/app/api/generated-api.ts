@@ -68,38 +68,6 @@ export type LogoutResponse = null;
 
 export type RefreshTokensResponse = null;
 
-export interface UserSettings {
-  language: string;
-}
-
-export interface AdminSettings extends UserSettings {
-  adminNewUserNotification: boolean;
-}
-
-export interface GlobalSettings {
-  unregisteredUserCoursesAccessibility: boolean;
-}
-
-export interface GlobalSettingsResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: null;
-    settings: GlobalSettings;
-  };
-}
-
-export interface SettingsResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
-    settings: UserSettings | AdminSettings;
-  };
-}
-
 export interface CurrentUserResponse {
   data: {
     id: string;
@@ -252,10 +220,6 @@ export interface AdminUpdateUserResponse {
     archived: boolean;
     profilePictureUrl: string | null;
   };
-}
-
-export interface ChangeLanguageBody {
-  language: string;
 }
 
 export interface ChangePasswordBody {
@@ -1689,6 +1653,12 @@ export interface GetScormMetadataResponse {
   };
 }
 
+export interface GetPublicGlobalSettingsResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+  };
+}
+
 export interface GetUserSettingsResponse {
   data:
     | {
@@ -1718,6 +1688,19 @@ export interface UpdateUserSettingsResponse {
         language: string;
         adminNewUserNotification: boolean;
       };
+}
+
+export interface UpdateAdminNewUserNotificationResponse {
+  data: {
+    language: string;
+    adminNewUserNotification: boolean;
+  };
+}
+
+export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+  };
 }
 
 import type {
@@ -2328,31 +2311,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<ChangePasswordResponse, any>({
         path: `/api/user/change-password`,
         method: "PATCH",
-        query: query,
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerChangeLanguage
-     * @request PATCH:/api/settings
-     */
-
-    settingsControllerChangeLanguage: (
-      query: {
-        /** @format uuid */
-        id: string;
-      },
-      data: ChangeLanguageBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<SettingsResponse, any>({
-        path: `/api/settings`,
-        method: "PUT",
         query: query,
         body: data,
         type: ContentType.Json,
@@ -3673,6 +3631,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPublicGlobalSettings
+     * @request GET:/api/settings/global
+     */
+    settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
+      this.request<GetPublicGlobalSettingsResponse, any>({
+        path: `/api/settings/global`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetUserSettings
      * @request GET:/api/settings
      */
@@ -3684,10 +3656,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         ...params,
       }),
 
-    globalSettings: (params: RequestParams = {}) =>
-      this.request<GlobalSettingsResponse, any>({
-        path: `/api/settings/global`,
-        method: "GET",
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUserSettings
+     * @request PUT:/api/settings
+     */
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -3695,21 +3678,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name BaseResponse
-     * @request GET:/api/settings/admin/new-user-notification
+     * @name SettingsControllerUpdateAdminNewUserNotification
+     * @request PATCH:/api/settings/admin/new-user-notification
      */
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<any>({
+      this.request<UpdateAdminNewUserNotificationResponse, any>({
         path: `/api/settings/admin/new-user-notification`,
         method: "PATCH",
         format: "json",
         ...params,
       }),
 
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
+     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
+     */
     settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
-      this.request<any>({
+      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
         path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
+        format: "json",
         ...params,
       }),
   };

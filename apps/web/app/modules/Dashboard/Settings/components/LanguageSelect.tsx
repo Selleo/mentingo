@@ -21,9 +21,7 @@ export default function LanguageSelect() {
 
   const handleLanguageChange = (newLanguage: Language) => {
     changeLanguage({
-      data: {
-        language: newLanguage,
-      },
+      language: newLanguage,
     });
   };
 
