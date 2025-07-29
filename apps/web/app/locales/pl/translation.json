@@ -547,7 +547,8 @@
       "status": "Status",
       "pricing": "Cennik",
       "preview": "Podgląd",
-      "enrolledStudents": "Zapisani studenci"
+      "enrolledStudents": "Zapisani studenci",
+      "testAiMentor": "Przetestuj AI Mentora"
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",

@@ -23,16 +23,16 @@ interface AiMentorLessonProps {
 
 const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
   const { t } = useTranslation();
-  const { lessonId = "", courseId = "" } = useParams();
+  const { courseId = "" } = useParams();
 
   const { mutateAsync: judgeLesson, isPending: isJudgePending } = useJudgeLesson(
-    lessonId,
+    lesson.id,
     courseId,
   );
-  const { mutateAsync: retakeLesson } = useRetakeLesson(lessonId, courseId);
+  const { mutateAsync: retakeLesson } = useRetakeLesson(lesson.id, courseId);
 
   const { data: currentThreadMessages } = useCurrentThreadMessages(
-    lessonId,
+    lesson.id,
     lessonLoading,
     lesson.threadId,
   );
@@ -70,7 +70,7 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
 
     setShowRetakeModal(false);
 
-    await retakeLesson({ lessonId });
+    await retakeLesson({ lessonId: lesson.id });
   };
 
   const isSubmitted = status === "submitted";
@@ -83,7 +83,7 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
   }, [messages]);
 
   return (
-    <div className="mx-auto flex size-full max-h-[70vh] w-full flex-col items-center py-4">
+    <div className="mx-auto flex size-full max-h-[85vh] flex-col items-center overflow-y-scroll py-4">
       <RetakeModal
         open={showRetakeModal}
         onOpenChange={setShowRetakeModal}

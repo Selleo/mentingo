@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -82,7 +82,7 @@ export class PromptService {
 
   async isNotEmpty(prompt: string) {
     if (!prompt?.trim()) {
-      throw new Error("Prompt cannot be empty");
+      throw new BadRequestException("At least one message required");
     }
   }
 }

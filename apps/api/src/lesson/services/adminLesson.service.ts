@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 
+import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
@@ -24,6 +25,7 @@ export class AdminLessonService {
     @Inject("DB") private readonly db: DatabasePg,
     private adminLessonRepository: AdminLessonRepository,
     private lessonRepository: LessonRepository,
+    private aiRepository: AiRepository,
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody) {
@@ -74,7 +76,7 @@ export class AdminLessonService {
 
     return lesson?.id;
   }
-  async updateAiMentorLesson(id: UUIDType, data: UpdateAiMentorLessonBody) {
+  async updateAiMentorLesson(id: UUIDType, data: UpdateAiMentorLessonBody, userId: UUIDType) {
     const lesson = await this.lessonRepository.getLesson(id);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
@@ -82,8 +84,7 @@ export class AdminLessonService {
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
 
-    const updatedLessonId = await this.updateAiMentorLessonWithTransaction(id, data);
-    return updatedLessonId;
+    return await this.updateAiMentorLessonWithTransaction(id, data, userId);
   }
 
   async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, authorId: UUIDType) {
@@ -168,7 +169,11 @@ export class AdminLessonService {
     });
   }
 
-  private async updateAiMentorLessonWithTransaction(id: UUIDType, data: UpdateAiMentorLessonBody) {
+  private async updateAiMentorLessonWithTransaction(
+    id: UUIDType,
+    data: UpdateAiMentorLessonBody,
+    userId: UUIDType,
+  ) {
     return await this.db.transaction(async (trx) => {
       const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, data, trx);
 
@@ -183,6 +188,8 @@ export class AdminLessonService {
         },
         trx,
       );
+
+      await this.aiRepository.setThreadsToArchived(id, userId, trx);
 
       return updatedLesson;
     });

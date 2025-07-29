@@ -20,7 +20,7 @@ import { type BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/commo
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 @Controller("ai")
 @UseGuards(RolesGuard)
@@ -31,7 +31,7 @@ export class AiController {
   ) {}
 
   @Get("thread")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(...Object.values(USER_ROLES))
   @Validate({
     request: [{ type: "query" as const, name: "thread", schema: UUIDSchema }],
     response: baseResponse(responseThreadSchema),
@@ -44,7 +44,7 @@ export class AiController {
   }
 
   @Get("thread/messages")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(...Object.values(USER_ROLES))
   @Validate({
     request: [{ type: "query" as const, name: "thread", schema: UUIDSchema }],
     response: baseResponse(Type.Array(responseThreadMessageSchema)),
@@ -57,7 +57,7 @@ export class AiController {
   }
 
   @Post("chat")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(...Object.values(USER_ROLES))
   @Validate({
     request: [{ type: "body", schema: streamChatSchema }],
   })
@@ -72,7 +72,7 @@ export class AiController {
   }
 
   @Post("judge/:threadId")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(...Object.values(USER_ROLES))
   @Validate({
     request: [{ type: "param", name: "threadId", schema: UUIDSchema }],
     response: baseResponse(responseJudgeSchema),
@@ -80,19 +80,21 @@ export class AiController {
   async judgeThread(
     @Param("threadId") threadId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
   ): Promise<BaseResponse<ResponseJudgeBody>> {
-    return await this.aiService.runJudge({ threadId, userId });
+    return await this.aiService.runJudge({ threadId, userId }, userRole);
   }
 
   @Post("retake/:lessonId")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(...Object.values(USER_ROLES))
   @Validate({
     request: [{ type: "param", name: "lessonId", schema: UUIDSchema }],
   })
   async retakeLesson(
     @Param("lessonId") lessonId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
   ) {
-    await this.aiService.retakeLesson(lessonId, userId);
+    await this.aiService.retakeLesson(lessonId, userId, userRole);
   }
 }

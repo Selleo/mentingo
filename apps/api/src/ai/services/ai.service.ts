@@ -126,11 +126,11 @@ export class AiService {
     });
   }
 
-  async runJudge(data: ThreadOwnershipBody) {
+  async runJudge(data: ThreadOwnershipBody, userRole: UserRole = USER_ROLES.STUDENT) {
     const judged = await this.judgeService.runJudge(data);
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
 
-    await this.markAsCompletedIfJudge(lessonId, data.userId, USER_ROLES.STUDENT, judged.data, true);
+    await this.markAsCompletedIfJudge(lessonId, data.userId, userRole, judged.data, true);
 
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
 
@@ -176,10 +176,10 @@ export class AiService {
     });
   }
 
-  async retakeLesson(lessonId: UUIDType, userId: UUIDType) {
+  async retakeLesson(lessonId: UUIDType, userId: UUIDType, userRole: UserRole) {
     const [lesson] = await this.aiRepository.checkLessonAssignment(lessonId, userId);
 
-    if (!lesson.isAssigned && !lesson.isFreemium)
+    if (userRole === USER_ROLES.STUDENT && !lesson.isAssigned && !lesson.isFreemium)
       throw new UnauthorizedException("You are not assigned to this lesson");
 
     await this.db.transaction(async (trx) => {

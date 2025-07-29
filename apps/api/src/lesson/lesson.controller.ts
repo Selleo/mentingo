@@ -140,8 +140,9 @@ export class LessonController {
   async betaUpdateAiMentorLesson(
     @Query("id") id: UUIDType,
     @Body() data: UpdateAiMentorLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateAiMentorLesson(id, data);
+    await this.adminLessonsService.updateAiMentorLesson(id, data, userId);
     return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
   }
   @Post("beta-create-lesson/quiz")

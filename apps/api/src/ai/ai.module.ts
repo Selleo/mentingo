@@ -26,6 +26,6 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     JudgeService,
     SummaryService,
   ],
-  exports: [AiService],
+  exports: [AiService, AiRepository],
 })
 export class AiModule {}

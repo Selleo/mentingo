@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogOverlay,
 } from "~/components/ui/dialog";
 
 import type React from "react";
@@ -24,7 +25,8 @@ const RetakeModal: React.FC<RetakeModalProps> = ({ open, onOpenChange, onConfirm
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogOverlay className="z-[110]" />
+      <DialogContent className="z-[120]">
         <DialogHeader>
           <DialogTitle>{t("studentCourseView.lesson.aiMentorLesson.retakeModalTitle")}</DialogTitle>
           <DialogDescription>
