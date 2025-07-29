@@ -94,6 +94,7 @@ export async function createNiceCourses(
                 : lessonData.type === LESSON_TYPES.VIDEO
                   ? "mp4"
                   : null,
+            thresholdScore: lessonData.type === LESSON_TYPES.QUIZ ? 0 : null,
             chapterId: chapter.id,
             createdAt: createdAt,
             updatedAt: createdAt,

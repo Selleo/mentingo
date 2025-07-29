@@ -93,6 +93,9 @@ export class AdminChapterRepository {
         fileType: sql<string>`${lessons.fileType}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
         isExternal: sql<boolean>`${lessons.isExternal}`,
+        thresholdScore: sql<number>`${lessons.thresholdScore}`,
+        attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
+        quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
         questions: sql<AdminQuestionBody[]>`
         (
           SELECT ARRAY(

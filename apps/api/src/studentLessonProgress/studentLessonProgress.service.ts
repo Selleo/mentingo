@@ -52,14 +52,18 @@ export class StudentLessonProgressService {
     dbInstance?: PostgresJsDatabase<typeof schema>;
     aiMentorLessonData?: ResponseAiJudgeJudgementBody;
   }) {
-    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
-
     if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (accessCourseLessonWithDetails.lessonIsCompleted) return;
+    if (
+      accessCourseLessonWithDetails.lessonIsCompleted ||
+      accessCourseLessonWithDetails.attempts > 1
+    )
+      return;
 
     const [lesson] = await this.db
       .select({
@@ -156,6 +160,45 @@ export class StudentLessonProgressService {
     if (isCompletedAsFreemium) return;
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
+  }
+
+  async updateQuizProgress(
+    chapterId: UUIDType,
+    lessonId: UUIDType,
+    userId: UUIDType,
+    completedQuestionCount: number,
+    quizScore: number,
+    attempts: number,
+    isQuizPassed: boolean,
+    isCompleted: boolean,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    return trx
+      .insert(studentLessonProgress)
+      .values({
+        lessonId,
+        chapterId,
+        studentId: userId,
+        attempts: 1,
+        isQuizPassed,
+        completedAt: sql`now()`,
+        completedQuestionCount,
+        quizScore,
+      })
+      .onConflictDoUpdate({
+        target: [
+          studentLessonProgress.studentId,
+          studentLessonProgress.lessonId,
+          studentLessonProgress.chapterId,
+        ],
+        set: {
+          attempts,
+          isQuizPassed,
+          completedQuestionCount,
+          quizScore,
+          completedAt: isCompleted ? sql`now()` : null,
+        },
+      });
   }
 
   private async updateChapterProgress(
@@ -330,6 +373,7 @@ export class StudentLessonProgressService {
       .select({
         isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
+        attempts: sql<number>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,

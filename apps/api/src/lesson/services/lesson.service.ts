@@ -16,6 +16,7 @@ import { FileService } from "src/file/file.service";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
+import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
@@ -150,11 +151,14 @@ export class LessonService {
       userId,
     );
 
+    if (accessCourseLessonWithDetails.lessonIsCompleted) {
+      throw new ConflictException("You have already answered this quiz");
+    }
+
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (accessCourseLessonWithDetails.lessonIsCompleted)
-      throw new ConflictException("Quiz already finished");
+    const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
 
     const correctAnswersForQuizQuestions =
       await this.questionRepository.getQuizQuestionsToEvaluation(studentQuizAnswers.lessonId);
@@ -172,18 +176,31 @@ export class LessonService {
           trx,
         );
 
-        const quizScore = Math.round(
+        const requiredCorrect = Math.ceil(
+          ((quizSettings?.thresholdScore ?? 0) *
+            (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) /
+            100,
+        );
+
+        const quizScore = Math.floor(
           (evaluationResult.correctAnswerCount /
             (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) *
             100,
         );
 
-        await this.lessonRepository.completeQuiz(
+        const isQuizPassed = quizSettings?.thresholdScore
+          ? requiredCorrect <= evaluationResult.correctAnswerCount
+          : true;
+
+        await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,
           studentQuizAnswers.lessonId,
           userId,
           evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
           quizScore,
+          accessCourseLessonWithDetails.attempts ?? 1,
+          isQuizPassed,
+          true,
           trx,
         );
 
@@ -220,6 +237,62 @@ export class LessonService {
             " problem is: " +
             error?.response?.error,
         );
+      }
+    });
+  }
+
+  async deleteStudentQuizAnswers(lessonId: UUIDType, userId: UUIDType): Promise<void> {
+    const [accessCourseLessonWithDetails] = await this.lessonRepository.checkLessonAssignment(
+      lessonId,
+      userId,
+    );
+
+    if (!accessCourseLessonWithDetails.lessonIsCompleted) {
+      throw new ConflictException("You have not answered this quiz yet");
+    }
+
+    const quizSettings = await this.lessonRepository.getLessonSettings(lessonId);
+
+    let attempts = accessCourseLessonWithDetails.attempts ?? 1;
+
+    if (
+      !isQuizAccessAllowed(
+        attempts,
+        quizSettings?.attemptsLimit,
+        accessCourseLessonWithDetails.updatedAt,
+        quizSettings?.quizCooldownInHours,
+      )
+    ) {
+      throw new ConflictException(
+        "Quiz answers cannot be deleted due to attempts limit or cooldown",
+      );
+    }
+
+    attempts += 1;
+
+    const questions = await this.questionRepository.getQuestionsIdsByLessonId(lessonId);
+
+    if (questions.length === 0) {
+      return;
+    }
+
+    return await this.db.transaction(async (trx) => {
+      try {
+        await this.questionRepository.deleteStudentQuizAnswers(questions, userId, trx);
+
+        await this.studentLessonProgressService.updateQuizProgress(
+          accessCourseLessonWithDetails.chapterId,
+          lessonId,
+          userId,
+          0,
+          0,
+          attempts,
+          false,
+          false,
+          trx,
+        );
+      } catch (error) {
+        throw new ConflictException(`Failed to delete student quiz answers: ${error.message}`);
       }
     });
   }

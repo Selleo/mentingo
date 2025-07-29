@@ -158,6 +158,9 @@ export const lessons = pgTable("lessons", {
   type: varchar("type", { length: 20 }).notNull(),
   title: varchar("title", { length: 100 }).notNull(),
   description: text("description"),
+  thresholdScore: integer("threshold_score"),
+  attemptsLimit: integer("attempts_limit"),
+  quizCooldownInHours: integer("quiz_cooldown_in_hours"),
   displayOrder: integer("display_order"),
   fileS3Key: varchar("file_s3_key", { length: 200 }),
   fileType: varchar("file_type", { length: 20 }),
@@ -289,6 +292,8 @@ export const studentLessonProgress = pgTable(
       .notNull(),
     completedQuestionCount: integer("completed_question_count").default(0).notNull(),
     quizScore: integer("quiz_score"),
+    attempts: integer("attempts"),
+    isQuizPassed: boolean("is_quiz_passed"),
     completedAt: timestamp("completed_at", {
       mode: "string",
       withTimezone: true,

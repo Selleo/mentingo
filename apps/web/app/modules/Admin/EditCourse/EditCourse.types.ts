@@ -15,6 +15,9 @@ export interface Lesson {
   id: string;
   title: string;
   description: string;
+  thresholdScore?: number;
+  attemptsLimit?: number;
+  quizCooldownInHours?: number;
   fileS3Key?: string;
   fileS3SignedUrl?: string;
   fileType?: string;

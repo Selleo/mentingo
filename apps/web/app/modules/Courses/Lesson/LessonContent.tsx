@@ -34,7 +34,6 @@ export const LessonContent = ({
   handlePrevious,
   handleNext,
   isFirstLesson,
-  isLastLesson,
   lessonLoading,
 }: LessonContentProps) => {
   const [isNextDisabled, setIsNextDisabled] = useState(false);
@@ -46,15 +45,19 @@ export const LessonContent = ({
     if (isAdminLike) return;
 
     if (
-      lesson.type == LessonType.QUIZ ||
       lesson.type == LessonType.VIDEO ||
       lesson.type == LessonType.AI_MENTOR
     ) {
       return setIsNextDisabled(!lesson.lessonCompleted);
     }
+    if (lesson.type == LessonType.QUIZ) {
+      return setIsNextDisabled(
+        (lesson.attempts === null || lesson.attempts === 1) && !lesson.lessonCompleted,
+      );
+    }
 
     setIsNextDisabled(false);
-  }, [isAdminLike, lesson.lessonCompleted, lesson.type]);
+  }, [isAdminLike, lesson.lessonCompleted, lesson.type, lesson.attempts]);
 
   const Content = () =>
     match(lesson.type)
@@ -103,20 +106,15 @@ export const LessonContent = ({
                 onClick={handlePrevious}
               >
                 <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                <span>{t("studentLessonView.button.previous")}</span>
               </Button>
             )}
             <Button
+              variant="outline"
               disabled={isNextDisabled}
               className="w-full gap-x-1 sm:w-auto"
               onClick={handleMarkLessonAsComplete}
             >
               <Icon name="ArrowRight" className="h-auto w-4" />
-              <span>
-                {isLastLesson
-                  ? t("studentLessonView.button.complete")
-                  : t("studentLessonView.button.next")}
-              </span>
             </Button>
           </div>
         </div>
