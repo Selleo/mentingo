@@ -51,20 +51,23 @@ export class SettingsService {
       ...customSettings,
     };
 
-    const [createdSettings] = await dbInstance
+    const [{ settings: createdSettings }] = await dbInstance
       .insert(settings)
       .values({
         userId,
         createdAt: new Date().toISOString(),
         settings: settingsToJsonBuildObject(finalSettings),
       })
-      .returning();
+      .returning({ settings: settings.settings });
 
     return createdSettings;
   }
 
   public async getUserSettings(userId: UUIDType) {
-    const [userSettings] = await this.db.select().from(settings).where(eq(settings.userId, userId));
+    const [{ settings: userSettings }] = await this.db
+      .select({ settings: settings.settings })
+      .from(settings)
+      .where(eq(settings.userId, userId));
 
     if (!userSettings) {
       throw new NotFoundException("User settings not found");
@@ -74,19 +77,29 @@ export class SettingsService {
   }
 
   public async updateUserSettings(userId: UUIDType, updatedSettings: UpdateSettingsBody) {
-    const [updated] = await this.db
-      .update(settings)
-      .set({
-        settings: settingsToJsonBuildObject(updatedSettings),
-      })
-      .where(eq(settings.userId, userId))
-      .returning();
+    const [{ settings: currentSettings }] = await this.db
+      .select({ settings: settings.settings })
+      .from(settings)
+      .where(eq(settings.userId, userId));
 
-    if (!updated) {
+    if (!currentSettings) {
       throw new NotFoundException("User settings not found");
     }
 
-    return updated;
+    const mergedSettings = {
+      ...currentSettings,
+      ...updatedSettings,
+    };
+
+    const [{ settings: newSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: settingsToJsonBuildObject(mergedSettings),
+      })
+      .where(eq(settings.userId, userId))
+      .returning({ settings: settings.settings });
+
+    return newSettings;
   }
 
   public async updateAdminNewUserNotification(userId: UUIDType) {
@@ -103,7 +116,7 @@ export class SettingsService {
 
     const current = res.adminNewUserNotification === "true";
 
-    const [updated] = await this.db
+    const [{ settings: updatedSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
@@ -116,12 +129,12 @@ export class SettingsService {
         `,
       })
       .where(eq(settings.userId, userId))
-      .returning();
+      .returning({ settings: settings.settings });
 
-    return updated;
+    return updatedSettings;
   }
 
-  private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
+  private getDefaultSettingsForRole(role: UserRole) {
     switch (role) {
       case USER_ROLES.ADMIN:
         return DEFAULT_USER_ADMIN_SETTINGS;

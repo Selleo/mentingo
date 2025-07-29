@@ -51,8 +51,7 @@ describe("SettingsController (e2e)", () => {
         .expect(200);
 
       expect(response.body).toBeDefined();
-      expect(response.body.data.userId).toBe(testUser.id);
-      expect(response.body.data.settings.language).toBe("de");
+      expect(response.body.data.language).toBe("de");
 
       const updatedSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, testUser.id),
@@ -105,7 +104,7 @@ describe("SettingsController (e2e)", () => {
         .expect(200);
 
       expect(response.body).toBeDefined();
-      expect(response.body.data.settings.adminNewUserNotification).toBe(true);
+      expect(response.body.data.adminNewUserNotification).toBe(true);
 
       const updatedSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, adminUser.id),
@@ -119,7 +118,7 @@ describe("SettingsController (e2e)", () => {
         .set("Cookie", adminCookies)
         .expect(200);
 
-      expect(secondResponse.body.data.settings.adminNewUserNotification).toBe(false);
+      expect(secondResponse.body.data.adminNewUserNotification).toBe(false);
 
       const toggledBackSettingInDb = await db.query.settings.findFirst({
         where: (s, { eq }) => eq(s.userId, adminUser.id),
@@ -163,9 +162,7 @@ describe("SettingsController (e2e)", () => {
         .expect(200);
 
       expect(response.body).toBeDefined();
-      expect(response.body.data.userId).toBe(testUser.id);
-      expect(response.body.data.settings).toBeDefined();
-      expect(response.body.data.createdAt).toBeDefined();
+      expect(response.body.data).toBeDefined();
     });
   });
 });
