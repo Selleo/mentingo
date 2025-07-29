@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 
 import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
 
-import { BunnyStreamService } from "src/bunny/bunny-stream.service";
+import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { S3Service } from "src/s3/s3.service";
 
 import { MAX_FILE_SIZE, EXTENSION_TO_MIME_TYPE_MAP } from "./file.constants";
@@ -12,7 +12,7 @@ import { MimeTypeGuard } from "./guards/mime-type.guard";
 export class FileService {
   constructor(
     private readonly s3Service: S3Service,
-    private readonly bunnyStream: BunnyStreamService,
+    private readonly bunnyStreamService: BunnyStreamService,
   ) {}
 
   async getFileUrl(fileKey: string): Promise<string> {
@@ -20,8 +20,7 @@ export class FileService {
     if (fileKey.startsWith("https://")) return fileKey;
     if (fileKey.startsWith("bunny-")) {
       const videoId = fileKey.replace("bunny-", "");
-      //return `https://iframe.mediadelivery.net/embed/470850/${videoId}`;
-      return this.bunnyStream.getSignedUrl(videoId, 10);
+      return this.bunnyStreamService.getUrl(videoId);
     }
     return await this.s3Service.getSignedUrl(fileKey);
   }
@@ -51,12 +50,10 @@ export class FileService {
 
     try {
       if (file.mimetype.startsWith("video/")) {
-        const result = await this.bunnyStream.upload(file);
+        const result = await this.bunnyStreamService.upload(file);
         return {
           fileKey: result.fileKey,
           fileUrl: result.fileUrl,
-          thumbnailUrl: result.thumbnailUrl,
-          directPlayUrl: result.directPlayUrl,
         };
       }
 
@@ -70,8 +67,6 @@ export class FileService {
       return {
         fileKey,
         fileUrl,
-        thumbnailUrl: null,
-        directPlayUrl: null,
       };
     } catch (error) {
       console.error("Upload error:", error);
@@ -83,7 +78,7 @@ export class FileService {
     try {
       if (fileKey.startsWith("bunny-")) {
         const videoId = fileKey.replace("bunny-", "");
-        return await this.bunnyStream.delete(videoId);
+        return await this.bunnyStreamService.delete(videoId);
       }
       return await this.s3Service.deleteFile(fileKey);
     } catch (error) {

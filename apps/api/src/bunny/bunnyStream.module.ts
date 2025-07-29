@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 
-import { BunnyStreamService } from "src/bunny/bunny-stream.service";
+import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 
 @Module({
   imports: [],

@@ -1898,12 +1898,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "example": {
-                    "fileKey": "bunny-xyz123",
-                    "fileUrl": "https://iframe.mediadelivery.net/embed/470850/xyz123",
-                    "thumbnailUrl": "https://cdn.bunnycdn.com/xyz123/thumbnail.jpg",
-                    "directPlayUrl": "https://cdn.bunnycdn.com/xyz123/play_480p.mp4"
-                  }
+                  "$ref": "#/components/schemas/FileUploadResponse"
                 }
               }
             }
@@ -6058,6 +6053,21 @@
       },
       "UnenrollCourseResponse": {
         "type": "null"
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileKey",
+          "fileUrl"
+        ]
       },
       "GetUserStatisticsResponse": {
         "type": "object",

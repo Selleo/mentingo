@@ -2433,7 +2433,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       },
       params: RequestParams = {},
     ) =>
-      this.request<any, any>({
+      this.request<FileUploadResponse, any>({
         path: `/api/file`,
         method: "POST",
         body: data,

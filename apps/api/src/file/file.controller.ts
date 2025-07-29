@@ -16,8 +16,7 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { FileService } from "./file.service";
-
-import type { FileUploadResponse } from "./schemas/file.schema";
+import { FileUploadResponse } from "./schemas/file.schema";
 
 @UseGuards(RolesGuard)
 @Controller("file")
@@ -46,14 +45,7 @@ export class FileController {
   @ApiResponse({
     status: 201,
     description: "File uploaded successfully",
-    schema: {
-      example: {
-        fileKey: "bunny-xyz123", // lub "resource/uuid.ext" dla S3
-        fileUrl: "https://iframe.mediadelivery.net/embed/470850/xyz123", // lub signed S3 url
-        thumbnailUrl: "https://cdn.bunnycdn.com/xyz123/thumbnail.jpg", // lub null
-        directPlayUrl: "https://cdn.bunnycdn.com/xyz123/play_480p.mp4", // lub null
-      },
-    },
+    type: FileUploadResponse,
   })
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
