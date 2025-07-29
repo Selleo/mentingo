@@ -1,9 +1,8 @@
 BEGIN;
 
-ALTER TABLE lessons
-  ADD COLUMN threshold_score INTEGER NULL,
-  ADD COLUMN attempts_limit INTEGER NULL,
-  ADD COLUMN quiz_cooldown_in_hours INTEGER NULL;
+ALTER TABLE "lessons" ADD COLUMN "threshold_score" integer;--> statement-breakpoint
+ALTER TABLE "lessons" ADD COLUMN "attempts_limit" integer;--> statement-breakpoint
+ALTER TABLE "lessons" ADD COLUMN "quiz_cooldown_in_hours" integer;--> statement-breakpoint
 
 UPDATE lessons
 SET
