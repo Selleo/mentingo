@@ -250,7 +250,6 @@ export class LessonRepository {
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
         updatedAt: studentLessonProgress.updatedAt,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
-        isQuizPassed: sql<boolean | null>`${studentLessonProgress.isQuizPassed}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,

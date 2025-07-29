@@ -118,12 +118,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
                       type="button"
                       onClick={handleRetake}
                       className="gap-x-1"
-                      disabled={
-                        isAdminLike ||
-                        !isUserSubmittedAnswer ||
-                        Boolean(lesson.isQuizPassed) ||
-                        !canRetake
-                      }
+                      disabled={isAdminLike || !isUserSubmittedAnswer || !canRetake}
                     >
                       <span>
                         {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
@@ -155,7 +150,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
           <Button
             type="submit"
             className="flex items-center gap-x-2"
-            disabled={isAdminLike || isUserSubmittedAnswer || Boolean(lesson.isQuizPassed)}
+            disabled={isAdminLike || isUserSubmittedAnswer}
           >
             <span>{t("studentLessonView.button.submit")}</span>
             <Icon name="ArrowRight" className="h-auto w-4" />

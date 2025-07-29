@@ -52,14 +52,18 @@ export class StudentLessonProgressService {
     dbInstance?: PostgresJsDatabase<typeof schema>;
     aiMentorLessonData?: ResponseAiJudgeJudgementBody;
   }) {
-    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
-
     if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (accessCourseLessonWithDetails.lessonIsCompleted) return;
+    if (
+      accessCourseLessonWithDetails.lessonIsCompleted ||
+      accessCourseLessonWithDetails.attempts > 1
+    )
+      return;
 
     const [lesson] = await this.db
       .select({
@@ -369,6 +373,7 @@ export class StudentLessonProgressService {
       .select({
         isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
+        attempts: sql<number>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,

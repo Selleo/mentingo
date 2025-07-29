@@ -158,10 +158,6 @@ export class LessonService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (accessCourseLessonWithDetails.isQuizPassed) {
-      throw new ConflictException("Quiz already finished");
-    }
-
     const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
 
     const correctAnswersForQuizQuestions =
@@ -250,10 +246,6 @@ export class LessonService {
       lessonId,
       userId,
     );
-
-    if (accessCourseLessonWithDetails.isQuizPassed) {
-      throw new ConflictException("Quiz already finished");
-    }
 
     if (!accessCourseLessonWithDetails.lessonIsCompleted) {
       throw new ConflictException("You have not answered this quiz yet");
