@@ -5,13 +5,14 @@ import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
 import { S3Module } from "src/s3/s3.module";
 import { S3Service } from "src/s3/s3.service";
+import { UserModule } from "src/user/user.module";
 import { UserService } from "src/user/user.service";
 
 import { SettingsController } from "./settings.controller";
 import { SettingsService } from "./settings.service";
 
 @Module({
-  imports: [EmailModule, FileModule, S3Module],
+  imports: [EmailModule, FileModule, S3Module, UserModule],
   controllers: [SettingsController],
   providers: [SettingsService, UserService, FileService, S3Service],
 })

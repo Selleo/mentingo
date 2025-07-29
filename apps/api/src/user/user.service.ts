@@ -18,6 +18,7 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
+import { StatisticsService } from "src/statistics/statistics.service";
 
 import {
   createTokens,
@@ -53,6 +54,7 @@ export class UserService {
     private emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
+    private statisticsService: StatisticsService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -359,6 +361,7 @@ export class UserService {
   }
 
   public async deleteUser(id: UUIDType) {
+    await this.validateUserCanBeDeleted(id);
     const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning();
 
     if (!deletedUser) {
@@ -367,6 +370,7 @@ export class UserService {
   }
 
   public async deleteBulkUsers(ids: UUIDType[]) {
+    await this.validateUsersCanBeDeleted(ids);
     const deletedUsers = await this.db.delete(users).where(inArray(users.id, ids)).returning();
 
     if (deletedUsers.length !== ids.length) {
@@ -502,5 +506,17 @@ export class UserService {
       default:
         return users.firstName;
     }
+  }
+
+  private async validateUserCanBeDeleted(userId: UUIDType): Promise<void> {
+    const userQuizAttempts = await this.statisticsService.getUserStats(userId);
+
+    if (userQuizAttempts.quizzes.totalAttempts > 0) {
+      throw new ConflictException("User has quiz attempts and cannot be deleted");
+    }
+  }
+  private async validateUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
+    const validationPromises = userIds.map((id) => this.validateUserCanBeDeleted(id));
+    await Promise.all(validationPromises);
   }
 }
