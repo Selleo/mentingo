@@ -4,6 +4,8 @@ import request from "supertest";
 import { GroupService } from "src/group/group.service";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createCourseFactory } from "../../../test/factory/course.factory";
+import { createQuizAttemptFactory } from "../../../test/factory/quizAttempt.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../../auth/auth.service";
@@ -20,6 +22,7 @@ describe("UsersController (e2e)", () => {
   const testPassword = "password123";
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let quizAttemptFactory: ReturnType<typeof createQuizAttemptFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -28,6 +31,7 @@ describe("UsersController (e2e)", () => {
     groupService = app.get(GroupService);
     db = app.get("DB");
     userFactory = createUserFactory(db);
+    quizAttemptFactory = createQuizAttemptFactory(db);
   }, 10000);
 
   afterAll(async () => {
@@ -201,6 +205,27 @@ describe("UsersController (e2e)", () => {
         .delete(`/api/user/user?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
         .expect(403);
+    });
+
+    it("should return 409 when trying to delete user with quiz attempts", async () => {
+      await quizAttemptFactory.create({
+        userId: testUser.id,
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/api/user/user?id=${testUser.id}`)
+        .set("Cookie", testCookies)
+        .expect(409);
+    });
+    it("should return 409 when trying to delete a user who is the author of courses", async () => {
+      const courseFactory = createCourseFactory(db);
+      await courseFactory.create({ authorId: testUser.id });
+
+      const response = await request(app.getHttpServer())
+        .delete(`/api/user/user?id=${testUser.id}`)
+        .set("Cookie", testCookies);
+
+      expect(response.status).toBe(409);
     });
   });
   describe("GET /user/details?userId=:id", () => {

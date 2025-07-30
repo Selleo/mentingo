@@ -18,11 +18,6 @@ export class ChapterService {
     private readonly eventBus: EventBus,
   ) {}
 
-  async getAuthorChapters(userId: UUIDType) {
-    const authorChapters = await this.chapterRepository.getAuthorChapters(userId);
-    return authorChapters;
-  }
-
   async getChapterWithLessons(
     id: UUIDType,
     userId: UUIDType,

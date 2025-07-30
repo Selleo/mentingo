@@ -11,10 +11,6 @@ import type { ProgressStatus } from "src/utils/types/progress.type";
 export class ChapterRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  async getAuthorChapters(userId: UUIDType) {
-    return this.db.select({ id: chapters.id }).from(chapters).where(eq(chapters.authorId, userId));
-  }
-
   async checkChapterAssignment(id: UUIDType, userId: UUIDType) {
     return this.db
       .select({
