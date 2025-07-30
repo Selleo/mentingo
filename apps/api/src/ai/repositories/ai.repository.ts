@@ -81,12 +81,6 @@ export class AiRepository {
     return thread;
   }
 
-  async createMessage(data: ThreadMessageBody) {
-    const [message] = await this.db.insert(aiMentorThreadMessages).values(data).returning();
-
-    return message;
-  }
-
   async findThreads(conditions: SQL[]) {
     return this.db
       .select({
@@ -171,9 +165,10 @@ export class AiRepository {
       .where(
         and(
           eq(aiMentorThreadMessages.role, MESSAGE_ROLE.SUMMARY),
-          eq(aiMentorThreads.id, threadId),
+          eq(aiMentorThreadMessages.threadId, threadId),
         ),
-      );
+      )
+      .returning();
 
     return newSummary;
   }
