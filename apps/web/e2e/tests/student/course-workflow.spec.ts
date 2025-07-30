@@ -156,9 +156,7 @@ test.describe("Course Workflow", () => {
 
     const navigateTroughLessons = async () => {
       for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount); i++) {
-        const nextButton = page.locator(
-          "button.w-full.gap-x-1.sm\\:w-auto:has(> svg.w-4:not(.rotate-180))",
-        );
+        const nextButton = page.getByTestId("next-lesson-button");
 
         await page.waitForTimeout(250);
 
