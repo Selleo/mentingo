@@ -129,4 +129,4 @@ import { UserModule } from "./user/user.module";
     ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
   ],
 })
-export class AppModule { }
+export class AppModule {}
