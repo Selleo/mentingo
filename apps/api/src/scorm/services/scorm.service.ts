@@ -7,6 +7,7 @@ import { JSDOM } from "jsdom";
 import { match } from "ts-pattern";
 import xml2js from "xml2js";
 
+import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
@@ -41,6 +42,7 @@ export class ScormService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly s3Service: S3Service,
+    private readonly bunnyStreamService: BunnyStreamService,
     private readonly fileService: FileService,
     private readonly scormRepository: ScormRepository,
     private readonly adminChapterService: AdminChapterService,
