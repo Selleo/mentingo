@@ -1126,16 +1126,33 @@
       "courseProgress": "Course progress"
     }
   },
+
+  "settings": {
+    "title": "Settings",
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "tabs": {
+      "account": "Account",
+      "organization": "Organization"
+    }
+  },
+
   "adminPreferences": {
-    "header": "Administrator Preferences",
-    "subHeader": "Manage your notification preferences",
+    "header": "Administrator Global Preferences",
+    "subHeader": "Configure global system settings, user preferences, and administrative options",
     "notificationSettings": "Notification Settings",
+    "courseSettings": "Course Settings",
     "field": {
       "newUserNotifications": "New User Notifications",
-      "newUserNotificationsDescription": "Receive notifications when a new user is created"
+      "newUserNotificationsDescription": "Receive notifications when a new user is created",
+      "coursesVisibility": "Show courses to visitors",
+      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in"
     },
     "toast": {
-      "newUserNotificationsPreferenceChangeSuccess": "Notification preferences have been successfully updated"
+      "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
+      "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
     }
   }
 }

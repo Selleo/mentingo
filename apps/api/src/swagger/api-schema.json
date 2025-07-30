@@ -3065,6 +3065,23 @@
         }
       }
     },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings": {
       "get": {
         "operationId": "SettingsController_getUserSettings",
@@ -3107,13 +3124,36 @@
         }
       }
     },
-    "/api/settings/admin-new-user-notification": {
+    "/api/settings/admin/new-user-notification": {
       "patch": {
         "operationId": "SettingsController_updateAdminNewUserNotification",
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/unregistered-user-courses-accessibility": {
+      "patch": {
+        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -10301,6 +10341,25 @@
           "data"
         ]
       },
+      "GetPublicGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetUserSettingsResponse": {
         "type": "object",
         "properties": {
@@ -10393,6 +10452,48 @@
                   "adminNewUserNotification"
                 ]
               }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminNewUserNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "adminNewUserNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility"
             ]
           }
         },

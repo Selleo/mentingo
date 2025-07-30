@@ -1132,16 +1132,33 @@
       "courseProgress": "Postęp kursu"
     }
   },
+
+  "settings": {
+    "title": "Ustawienia",
+    "buttons": {
+      "cancel": "Odrzuć",
+      "save": "Zapisz"
+    },
+    "tabs": {
+      "account": "Konto",
+      "organization": "Organizacja"
+    }
+  },
   "adminPreferences": {
-    "header": "Preferencje administratora",
-    "subHeader": "Zarządzaj swoimi preferencjami powiadomień",
+    "header": "Globalne preferencje administratora",
+    "subHeader": "Zarządzaj globalnymi ustawieniami",
     "notificationSettings": "Ustawienia powiadomień",
+    "courseSettings": "Ustawienia kursów",
     "field": {
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
-      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik"
+      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
+      "coursesVisibility": "Pokazuj kursy odwiedzającym",
+      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania"
     },
     "toast": {
-      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień zostały pomyślnie zaktualizowane"
-    }
+      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
+      "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
+    },
+    "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   }
 }

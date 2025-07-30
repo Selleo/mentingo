@@ -5,25 +5,39 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
-import { DEFAULT_USER_ADMIN_SETTINGS, DEFAULT_USER_SETTINGS } from "./constants/settings.constants";
+import { DEFAULT_ADMIN_SETTINGS, DEFAULT_STUDENT_SETTINGS } from "./constants/settings.constants";
 
-import type { SettingsJSONContentSchema } from "./schemas/settings.schema";
+import type {
+  GlobalSettingsJSONContentSchema,
+  SettingsJSONContentSchema,
+  AdminSettingsJSONContentSchema,
+} from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
+import type { AdminSettings, StudentSettings } from "src/common/types";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class SettingsService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
+
+  public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
+    const [{ settings: globalSettings }] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    return globalSettings;
+  }
 
   public async createSettings(
     userId: UUIDType,
@@ -58,14 +72,14 @@ export class SettingsService {
         createdAt: new Date().toISOString(),
         settings: settingsToJsonBuildObject(finalSettings),
       })
-      .returning({ settings: settings.settings });
+      .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
     return createdSettings;
   }
 
-  public async getUserSettings(userId: UUIDType) {
+  public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
     const [{ settings: userSettings }] = await this.db
-      .select({ settings: settings.settings })
+      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
@@ -76,9 +90,12 @@ export class SettingsService {
     return userSettings;
   }
 
-  public async updateUserSettings(userId: UUIDType, updatedSettings: UpdateSettingsBody) {
+  public async updateUserSettings(
+    userId: UUIDType,
+    updatedSettings: UpdateSettingsBody,
+  ): Promise<SettingsJSONContentSchema> {
     const [{ settings: currentSettings }] = await this.db
-      .select({ settings: settings.settings })
+      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
@@ -91,32 +108,62 @@ export class SettingsService {
       ...updatedSettings,
     };
 
-    const [{ settings: newSettings }] = await this.db
+    const [{ settings: newUserSettings }] = await this.db
       .update(settings)
       .set({
         settings: settingsToJsonBuildObject(mergedSettings),
       })
       .where(eq(settings.userId, userId))
-      .returning({ settings: settings.settings });
+      .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
-    return newSettings;
+    return newUserSettings;
   }
 
-  public async updateAdminNewUserNotification(userId: UUIDType) {
-    const [res] = await this.db
+  public async updateGlobalUnregisteredUserCoursesAccessibility(): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSetting] = await this.db
+      .select({
+        unregisteredUserCoursesAccessibility: sql`settings.settings->>'unregisteredUserCoursesAccessibility'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    const current = globalSetting.unregisteredUserCoursesAccessibility === "true";
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+        jsonb_set(
+          settings.settings,
+          '{unregisteredUserCoursesAccessibility}',
+          to_jsonb(${!current}),
+          true
+        )
+      `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedGlobalSettings;
+  }
+
+  public async updateAdminNewUserNotification(
+    userId: UUIDType,
+  ): Promise<AdminSettingsJSONContentSchema> {
+    const [userSetting] = await this.db
       .select({
         adminNewUserNotification: sql`settings.settings->>'adminNewUserNotification'`,
       })
       .from(settings)
       .where(eq(settings.userId, userId));
 
-    if (!res) {
+    if (!userSetting) {
       throw new NotFoundException("User settings not found");
     }
 
-    const current = res.adminNewUserNotification === "true";
+    const current = userSetting.adminNewUserNotification === "true";
 
-    const [{ settings: updatedSettings }] = await this.db
+    const [{ settings: updatedUserSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
@@ -129,19 +176,19 @@ export class SettingsService {
         `,
       })
       .where(eq(settings.userId, userId))
-      .returning({ settings: settings.settings });
+      .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
 
-    return updatedSettings;
+    return updatedUserSettings;
   }
 
-  private getDefaultSettingsForRole(role: UserRole) {
+  private getDefaultSettingsForRole(role: UserRole): StudentSettings | AdminSettings {
     switch (role) {
       case USER_ROLES.ADMIN:
-        return DEFAULT_USER_ADMIN_SETTINGS;
+        return DEFAULT_ADMIN_SETTINGS;
       case USER_ROLES.STUDENT:
-        return DEFAULT_USER_SETTINGS;
+        return DEFAULT_STUDENT_SETTINGS;
       default:
-        return DEFAULT_USER_SETTINGS;
+        return DEFAULT_STUDENT_SETTINGS;
     }
   }
 }

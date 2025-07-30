@@ -8,9 +8,11 @@ import postgres from "postgres";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
-  DEFAULT_USER_ADMIN_SETTINGS,
-  DEFAULT_USER_SETTINGS,
+  DEFAULT_GLOBAL_SETTINGS,
+  DEFAULT_ADMIN_SETTINGS,
+  DEFAULT_STUDENT_SETTINGS,
 } from "src/settings/constants/settings.constants";
+import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -22,6 +24,7 @@ import {
   lessons,
   questions,
   quizAttempts,
+  settings,
   studentCourses,
   studentLessonProgress,
   userDetails,
@@ -104,22 +107,22 @@ async function insertUserDetails(userId: UUIDType) {
   });
 }
 
+async function insertGlobalSettings() {
+  await db.insert(settings).values({
+    settings: settingsToJsonBuildObject(DEFAULT_GLOBAL_SETTINGS),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
-  const settingsObject = isAdmin ? DEFAULT_USER_ADMIN_SETTINGS : DEFAULT_USER_SETTINGS;
-
-  const settingsJSON = JSON.stringify(settingsObject).replace(/'/g, "''");
-
-  await db.execute(
-    sql`
-      INSERT INTO settings (user_id, settings, created_at, updated_at)
-      VALUES (
-        ${userId},
-        '${sql.raw(settingsJSON)}'::jsonb,
-        ${new Date().toISOString()},
-        ${new Date().toISOString()}
-      )
-    `,
-  );
+  const settingsObject = isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS;
+  await db.insert(settings).values({
+    userId,
+    settings: settingsToJsonBuildObject(settingsObject),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
@@ -255,6 +258,9 @@ async function seed() {
   await seedTruncateAllTables(db);
 
   try {
+    await insertGlobalSettings();
+    console.log("✨ Created global settings");
+
     const createdStudents = await createUsers(students, "password");
     const [createdAdmin] = await createUsers(admin, "password");
     const createdContentCreators = await createUsers(contentCreators, "password");

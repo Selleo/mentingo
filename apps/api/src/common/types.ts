@@ -1,11 +1,19 @@
 export type ActivityHistory = {
   [date: string]: boolean;
 };
-
-export type UserSettings = {
+export type StudentSettings = {
   language: string;
 };
 
-export type AdminSettings = UserSettings & { adminNewUserNotification: boolean };
+export type AdminSettings = {
+  language: string;
+  adminNewUserNotification: boolean;
+};
 
-export type AllSettings = UserSettings | AdminSettings;
+export type GlobalSettings = {
+  unregisteredUserCoursesAccessibility: boolean;
+};
+
+export type UserSettings = StudentSettings | AdminSettings;
+
+export type AllSettings = StudentSettings | AdminSettings | GlobalSettings;

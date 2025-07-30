@@ -8,11 +8,11 @@ import { Switch } from "~/components/ui/switch";
 import type { AdminSettings } from "../types";
 
 interface NotificationPreferencesFormProps {
-  settings: AdminSettings;
+  adminSettings: AdminSettings;
 }
 
 export default function NotificationPreferencesForm({
-  settings,
+  adminSettings,
 }: NotificationPreferencesFormProps) {
   const { t } = useTranslation();
   const { mutate: changeNewUserEmailNotification } = useChangeNewUserEmailNotification();
@@ -42,7 +42,7 @@ export default function NotificationPreferencesForm({
               </div>
               <Switch
                 id="newUserNotifications"
-                checked={settings.adminNewUserNotification}
+                checked={adminSettings.adminNewUserNotification}
                 onCheckedChange={handleNotificationChange}
               />
             </div>
