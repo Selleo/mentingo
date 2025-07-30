@@ -155,14 +155,12 @@ test.describe("Course Workflow", () => {
     const lessonsCount = await page.getByTestId("lessons-count").textContent();
 
     const navigateTroughLessons = async () => {
-      for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount) ?? 0; i++) {
-        const nextButtonLocator = page.locator('button:has-text("Next")');
-        const completeButtonLocator = page.locator('button:has-text("Complete")');
+      for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount); i++) {
+        const nextButton = page.locator(
+          "button.w-full.gap-x-1.sm\\:w-auto:has(> svg.w-4:not(.rotate-180))",
+        );
 
         await page.waitForTimeout(250);
-
-        const nextButton =
-          (await nextButtonLocator.count()) > 0 ? nextButtonLocator : completeButtonLocator;
 
         const lessonType = await page.getByTestId("lesson-type").textContent();
 
