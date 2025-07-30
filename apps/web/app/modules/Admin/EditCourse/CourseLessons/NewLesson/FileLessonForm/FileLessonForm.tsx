@@ -101,6 +101,7 @@ const FileLessonForm = ({
 
   const handleFileDelete = useCallback(() => {
     const fileKey = form.getValues("fileS3Key");
+
     if (fileKey) {
       deleteFile(fileKey)
         .then(() => {

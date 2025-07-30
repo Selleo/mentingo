@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { cn } from "~/lib/utils";
+
 interface VideoPlayerProps {
   initialUrl: string;
   handleVideoEnded?: () => void;
@@ -162,14 +164,17 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
     <div className="relative aspect-video w-full">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+          <div className="size-12 animate-spin rounded-full border-y-2 border-blue-500" />
         </div>
       )}
 
       <iframe
         ref={iframeRef}
         src={getPlayerUrl(initialUrl)}
-        className={`h-full w-full border-none ${isLoading ? "opacity-0" : "opacity-100"}`}
+        className={cn("size-full border-none", {
+          "opacity-0": isLoading,
+          "opacity-100": !isLoading,
+        })}
         allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         title="Video Player"
