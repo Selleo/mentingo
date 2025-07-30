@@ -2,6 +2,8 @@ import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
 import { formatNumberToTwoDigits } from "~/utils/formatNumberToTwoDigits";
 
+import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type ChapterCounterProps = {
@@ -16,13 +18,14 @@ const chapterCounterIcon = {
 } as const;
 
 export const ChapterCounter = ({
-  chapterProgress = "not_started",
+  chapterProgress = CHAPTER_PROGRESS_STATUSES.NOT_STARTED,
   displayOrder,
 }: ChapterCounterProps) => {
   const chapterNumber = formatNumberToTwoDigits(displayOrder);
 
-  const isChapterCompleted = chapterProgress === "completed";
-  const isChapterStarted = !isChapterCompleted && chapterProgress === "in_progress";
+  const isChapterCompleted = chapterProgress === CHAPTER_PROGRESS_STATUSES.COMPLETED;
+  const isChapterStarted =
+    !isChapterCompleted && chapterProgress === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS;
 
   return (
     <div

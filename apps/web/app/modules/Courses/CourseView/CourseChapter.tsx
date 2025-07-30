@@ -16,6 +16,8 @@ import { formatWithPlural } from "~/lib/utils";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
 
+import { LESSON_PROGRESS_STATUSES } from "../Lesson/types";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseChapterProps = {
@@ -40,8 +42,12 @@ export const CourseChapter = ({ chapter, enrolled, course }: CourseChapterProps)
 
   const isAllLessonsCompleted = chapter.completedLessonCount === chapter.lessonCount;
   const isAllLessonsNotStarted = chapter.completedLessonCount === 0;
-  const firstInProgressLesson = chapter.lessons.find((lesson) => lesson.status === "in_progress");
-  const firstNotStartedLesson = chapter.lessons.find((lesson) => lesson.status === "not_started");
+  const firstInProgressLesson = chapter.lessons.find(
+    (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS,
+  );
+  const firstNotStartedLesson = chapter.lessons.find(
+    (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED,
+  );
 
   return (
     <Accordion type="single" collapsible>
@@ -115,7 +121,7 @@ export const CourseChapter = ({ chapter, enrolled, course }: CourseChapterProps)
                         : t("studentChapterView.other.purchaseRequired");
                     return (
                       <TooltipProvider key={lesson.id}>
-                        <Tooltip key={lesson.id}>
+                        <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="cursor-not-allowed pb-4 pl-14 pt-3 opacity-60">
                               <CourseChapterLesson lesson={lesson} />

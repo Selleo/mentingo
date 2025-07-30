@@ -1,5 +1,4 @@
 import { useNavigate } from "@remix-run/react";
-import { find, flatMap } from "lodash-es";
 import { useTranslation } from "react-i18next";
 
 import { CopyUrlButton } from "~/components/CopyUrlButton";
@@ -8,20 +7,12 @@ import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
+import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseProgressProps = {
   course: GetCourseResponse["data"];
-};
-
-const findFirstNotStartedLessonId = (course: CourseProgressProps["course"]) => {
-  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
-  return find(allLessons, (lesson) => lesson.status === "not_started")?.id;
-};
-
-const findFirstInProgressLessonId = (course: CourseProgressProps["course"]) => {
-  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
-  return find(allLessons, (lesson) => lesson.status === "in_progress")?.id;
 };
 
 export const CourseProgress = ({ course }: CourseProgressProps) => {

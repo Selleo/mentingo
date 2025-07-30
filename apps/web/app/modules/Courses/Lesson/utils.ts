@@ -1,14 +1,16 @@
+import { find, flatMap } from "lodash-es";
+
 import { t } from "i18next";
 import { match, P } from "ts-pattern";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
+import { LESSON_PROGRESS_STATUSES, type QuizForm } from "~/modules/Courses/Lesson/types";
 
 import type {
   GetCourseResponse,
   EvaluationQuizBody,
   GetLessonByIdResponse,
 } from "~/api/generated-api";
-import type { QuizForm } from "~/modules/Courses/Lesson/types";
 
 type Questions = NonNullable<GetLessonByIdResponse["data"]["quizDetails"]>["questions"];
 
@@ -48,31 +50,6 @@ export const getUserAnswers = (questions: Questions): GetUserAnswersResult => {
     briefResponses: prepareAnswers(groupedQuestions.brief_response, "open"),
     detailedResponses: prepareAnswers(groupedQuestions.detailed_response, "open"),
   } as const;
-};
-
-export const isNextBlocked = (
-  currentLessonIndex: number,
-  totalLessons: number,
-  nextChapter: GetCourseResponse["data"]["chapters"][number],
-  course: GetCourseResponse["data"],
-) => {
-  const isLastLessonInChapter = currentLessonIndex === totalLessons - 1;
-  const isNextChapterPaid = nextChapter && !nextChapter.isFreemium;
-  const isUserNotEnrolled = !course.enrolled;
-
-  return isLastLessonInChapter && isNextChapterPaid && isUserNotEnrolled;
-};
-
-export const isPreviousBlocked = (
-  currentLessonIndex: number,
-  prevChapter: GetCourseResponse["data"]["chapters"][number],
-  course: GetCourseResponse["data"],
-) => {
-  const isFirstLessonInChapter = currentLessonIndex === 0;
-  const isPrevChapterPaid = prevChapter && !prevChapter.isFreemium;
-  const isUserNotEnrolled = !course.enrolled;
-
-  return isFirstLessonInChapter && isPrevChapterPaid && isUserNotEnrolled;
 };
 
 const groupQuestionsByType = (questions: Questions) => {
@@ -246,6 +223,41 @@ export const parseQuizFormData = (input: QuizForm) => {
   processBooleanQuestions(input.trueOrFalseQuestions);
 
   return result;
+};
+
+export const findFirstNotStartedLessonId = (course: GetCourseResponse["data"]) => {
+  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
+  return find(allLessons, (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED)?.id;
+};
+
+export const findFirstInProgressLessonId = (course: GetCourseResponse["data"]) => {
+  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
+  return find(allLessons, (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS)?.id;
+};
+
+export const isNextBlocked = (
+  currentLessonIndex: number,
+  totalLessons: number,
+  isNextChapterFreemium: boolean,
+  isEnrolled: boolean,
+) => {
+  const isLastLessonInChapter = currentLessonIndex === totalLessons - 1;
+  const isNextChapterPaid = !isNextChapterFreemium;
+  const isUserNotEnrolled = !isEnrolled;
+
+  return isLastLessonInChapter && isNextChapterPaid && isUserNotEnrolled;
+};
+
+export const isPreviousBlocked = (
+  currentLessonIndex: number,
+  isPrevChapterFreemium: boolean,
+  isEnrolled: boolean,
+) => {
+  const isFirstLessonInChapter = currentLessonIndex === 0;
+  const isPrevChapterPaid = !isPrevChapterFreemium;
+  const isUserNotEnrolled = !isEnrolled;
+
+  return isFirstLessonInChapter && isPrevChapterPaid && isUserNotEnrolled;
 };
 
 export const leftAttemptsToDisplay = (

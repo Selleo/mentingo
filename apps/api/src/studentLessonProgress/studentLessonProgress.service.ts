@@ -181,18 +181,6 @@ export class StudentLessonProgressService {
       throw new NotFoundException(`No lesson id provided`);
     }
 
-    const [lesson] = await this.db
-      .select({
-        id: lessons.id,
-        type: lessons.type,
-      })
-      .from(lessons)
-      .where(and(eq(lessons.id, id)));
-
-    if (!lesson || !lesson.id) {
-      throw new NotFoundException(`No lesson found with id ${id}`);
-    }
-
     const [lessonProgress] = await dbInstance
       .select()
       .from(studentLessonProgress)
@@ -202,7 +190,10 @@ export class StudentLessonProgressService {
 
     if (lessonProgress?.isStarted) return;
 
-    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
+    if (
+      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.QUIZ ||
+      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.VIDEO
+    ) {
       await dbInstance
         .update(studentLessonProgress)
         .set({ isStarted: true })
@@ -428,6 +419,7 @@ export class StudentLessonProgressService {
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
         attempts: sql<number>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        lessonType: lessons.type,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
       })
