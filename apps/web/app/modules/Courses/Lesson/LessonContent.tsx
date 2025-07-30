@@ -65,8 +65,21 @@ export const LessonContent = ({
       setIsPreviousDisabled(false);
       return;
     }
-    setIsNextDisabled(isNextBlocked(currentLessonIndex, totalLessons, nextChapter, course));
-    setIsPreviousDisabled(isPreviousBlocked(currentLessonIndex, prevChapter, course));
+    setIsNextDisabled(
+      isNextBlocked(
+        currentLessonIndex,
+        totalLessons,
+        nextChapter.isFreemium ?? false,
+        course.enrolled ?? false,
+      ),
+    );
+    setIsPreviousDisabled(
+      isPreviousBlocked(
+        currentLessonIndex,
+        prevChapter.isFreemium ?? false,
+        course.enrolled ?? false,
+      ),
+    );
   }, [
     isAdminLike,
     lesson.type,

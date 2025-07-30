@@ -49,6 +49,18 @@ export class LessonController {
     private readonly lessonService: LessonService,
   ) {}
 
+  @Get(":id")
+  @Validate({
+    response: baseResponse(lessonShowSchema),
+  })
+  async getLessonById(
+    @Param("id") id: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
+  ): Promise<BaseResponse<LessonShow>> {
+    return new BaseResponse(await this.lessonService.getLessonById(id, userId, userRole));
+  }
+
   @Post("beta-create-lesson")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
@@ -68,38 +80,7 @@ export class LessonController {
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
 
-  @Get(":id")
-  @Validate({
-    request: [
-      {
-        type: "param",
-        name: "id",
-        schema: UUIDSchema,
-        required: true,
-      },
-      {
-        type: "query",
-        name: "userLanguage",
-        schema: Type.Enum(SUPPORTED_LANGUAGES),
-      },
-    ],
-    response: baseResponse(lessonShowSchema),
-  })
-  async getLessonById(
-    @Param("id") id: UUIDType,
-    @Query("userLanguage") userLanguage: SupportedLanguages,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
-  ): Promise<BaseResponse<LessonShow>> {
-    return new BaseResponse(
-      await this.lessonService.getLessonById(
-        id,
-        userId,
-        userRole === USER_ROLES.STUDENT,
-        userLanguage,
-      ),
-    );
-  }
+ 
 
   @Post("beta-create-lesson/ai")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
@@ -233,7 +214,7 @@ export class LessonController {
   }
 
   @Post("evaluation-quiz")
-  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.STUDENT)
   @Validate({
     request: [{ type: "body", schema: answerQuestionsForLessonBody, required: true }],
     response: baseResponse(
@@ -251,6 +232,7 @@ export class LessonController {
   async evaluationQuiz(
     @Body() answers: AnswerQuestionBody,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<
     BaseResponse<{
       message: string;
@@ -262,7 +244,11 @@ export class LessonController {
       };
     }>
   > {
-    const evaluationResult = await this.lessonService.evaluationQuiz(answers, currentUserId);
+    const evaluationResult = await this.lessonService.evaluationQuiz(
+      answers,
+      currentUserId,
+      currentUserRole,
+    );
     return new BaseResponse({
       message: "Evaluation quiz successfully",
       data: evaluationResult,

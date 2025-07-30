@@ -452,8 +452,7 @@ export class CourseService {
         description: sql<string>`${courses.description}`,
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
-        enrolled:
-          sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END` as any,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isPublished: courses.isPublished,
         isScorm: courses.isScorm,
         priceInCents: courses.priceInCents,

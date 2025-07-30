@@ -17,6 +17,7 @@ import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
+import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
@@ -46,9 +47,11 @@ export class LessonService {
   async getLessonById(
     id: UUIDType,
     userId: UUIDType,
-    isStudent: boolean,
+    userRole: UserRole,
     userLanguage?: SupportedLanguages,
   ): Promise<LessonShow> {
+    const isStudent = userRole === USER_ROLES.STUDENT;
+
     const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
@@ -58,11 +61,11 @@ export class LessonService {
     if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) return lesson;
 
     if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
-      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, undefined);
+      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
     }
 
     if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
-      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, undefined);
+      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
     }
 
     if (lesson.type !== LESSON_TYPES.QUIZ && lesson.type !== LESSON_TYPES.AI_MENTOR) {
@@ -148,6 +151,7 @@ export class LessonService {
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     userId: UUIDType,
+    userRole: UserRole,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;
