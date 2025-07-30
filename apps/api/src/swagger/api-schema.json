@@ -1868,63 +1868,6 @@
         }
       }
     },
-    "/api/file": {
-      "post": {
-        "operationId": "FileController_uploadFile",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "resource": {
-                    "type": "string",
-                    "description": "Optional resource type"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "File uploaded successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileUploadResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
-          }
-        }
-      }
-    },
     "/api/statistics/user-stats": {
       "get": {
         "operationId": "StatisticsController_getUserStatistics",
@@ -6053,21 +5996,6 @@
       },
       "UnenrollCourseResponse": {
         "type": "null"
-      },
-      "FileUploadResponse": {
-        "type": "object",
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "fileUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fileKey",
-          "fileUrl"
-        ]
       },
       "GetUserStatisticsResponse": {
         "type": "object",

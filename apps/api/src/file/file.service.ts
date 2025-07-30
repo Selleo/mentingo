@@ -20,6 +20,7 @@ export class FileService {
     if (fileKey.startsWith("https://")) return fileKey;
     if (fileKey.startsWith("bunny-")) {
       const videoId = fileKey.replace("bunny-", "");
+
       return this.bunnyStreamService.getUrl(videoId);
     }
     return await this.s3Service.getSignedUrl(fileKey);
@@ -51,6 +52,7 @@ export class FileService {
     try {
       if (file.mimetype.startsWith("video/")) {
         const result = await this.bunnyStreamService.upload(file);
+
         return {
           fileKey: result.fileKey,
           fileUrl: result.fileUrl,
