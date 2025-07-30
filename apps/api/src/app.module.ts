@@ -10,6 +10,7 @@ import { AiModule } from "./ai/ai.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
+import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
 import awsConfig from "./common/configuration/aws";
@@ -101,6 +102,7 @@ import { UserModule } from "./user/user.module";
     StudentLessonProgressModule,
     FileModule,
     S3Module,
+    BunnyStreamModule,
     StripeModule,
     EventsModule,
     StatisticsModule,
@@ -127,4 +129,4 @@ import { UserModule } from "./user/user.module";
     ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
   ],
 })
-export class AppModule {}
+export class AppModule { }
