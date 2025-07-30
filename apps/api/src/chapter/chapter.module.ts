@@ -13,12 +13,6 @@ import { ChapterRepository } from "./repositories/chapter.repository";
   imports: [FileModule, LessonModule],
   controllers: [ChapterController],
   providers: [ChapterService, AdminChapterService, ChapterRepository, AdminChapterRepository],
-  exports: [
-    ChapterRepository,
-    AdminChapterService,
-    AdminChapterRepository,
-    ChapterRepository,
-    ChapterService,
-  ],
+  exports: [ChapterRepository, AdminChapterService, AdminChapterRepository],
 })
 export class ChapterModule {}

@@ -11,7 +11,6 @@ import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-import { ChapterService } from "src/chapter/chapter.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -29,6 +28,7 @@ import {
   userDetails,
   users,
   settings,
+  courses,
 } from "../storage/schema";
 
 import {
@@ -56,7 +56,6 @@ export class UserService {
     private fileService: FileService,
     private s3Service: S3Service,
     private statisticsService: StatisticsService,
-    private chapterService: ChapterService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -363,7 +362,7 @@ export class UserService {
   }
 
   public async deleteUser(id: UUIDType) {
-    await this.validateUserCanBeDeleted(id);
+    await this.validateWhetherUserCanBeDeleted(id);
     const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning();
 
     if (!deletedUser) {
@@ -372,7 +371,7 @@ export class UserService {
   }
 
   public async deleteBulkUsers(ids: UUIDType[]) {
-    await this.validateUsersCanBeDeleted(ids);
+    await this.validateWhetherUsersCanBeDeleted(ids);
     const deletedUsers = await this.db.delete(users).where(inArray(users.id, ids)).returning();
 
     if (deletedUsers.length !== ids.length) {
@@ -510,19 +509,31 @@ export class UserService {
     }
   }
 
-  private async validateUserCanBeDeleted(userId: UUIDType): Promise<void> {
+  private async validateWhetherUserCanBeDeleted(userId: UUIDType): Promise<void> {
     const userQuizAttempts = await this.statisticsService.getUserStats(userId);
-    const chapters = await this.chapterService.getAuthorChapters(userId);
+    const hasCourses = await this.hasCoursesWithAuthor(userId);
 
-    if (chapters.length > 0) {
-      throw new ConflictException("User is an author of existing chapters and cannot be deleted");
-    }
     if (userQuizAttempts.quizzes.totalAttempts > 0) {
-      throw new ConflictException("User has quiz attempts and cannot be deleted");
+      throw new ConflictException("adminUserView.toast.userWithAttemptsError");
+    }
+
+    if (hasCourses) {
+      throw new ConflictException("adminUserView.toast.userWithCreatedCoursesError");
     }
   }
-  private async validateUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
-    const validationPromises = userIds.map((id) => this.validateUserCanBeDeleted(id));
+  private async validateWhetherUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
+    const validationPromises = userIds.map((id) => this.validateWhetherUserCanBeDeleted(id));
     await Promise.all(validationPromises);
+  }
+
+  private async hasCoursesWithAuthor(authorId: UUIDType): Promise<boolean> {
+    const course = await this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .where(eq(courses.authorId, authorId))
+      .limit(1)
+      .then((results) => results[0]);
+
+    return !!course;
   }
 }

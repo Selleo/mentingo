@@ -2,11 +2,8 @@ import { Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
 
 import { ResendVerificationMailCron } from "src/auth/resend-verification-mail-cron";
-import { ChapterModule } from "src/chapter/chapter.module";
-import { ChapterService } from "src/chapter/chapter.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { FileService } from "src/file/file.service";
-import { LessonModule } from "src/lesson/lesson.module";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsModule } from "src/statistics/statistics.module";
@@ -24,7 +21,7 @@ import { MicrosoftStrategy } from "./strategy/microsoft.strategy";
 import { TokenService } from "./token.service";
 
 @Module({
-  imports: [PassportModule, EmailModule, StatisticsModule, ChapterModule, LessonModule],
+  imports: [PassportModule, EmailModule, StatisticsModule],
   controllers: [AuthController],
   providers: [
     AuthService,
@@ -41,7 +38,6 @@ import { TokenService } from "./token.service";
     ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
     ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
     SettingsService,
-    ChapterService,
   ],
   exports: [],
 })

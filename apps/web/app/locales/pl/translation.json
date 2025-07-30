@@ -519,7 +519,9 @@
       "groupId": "Grupa"
     },
     "toast": {
-      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie"
+      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie",
+      "userWithAttemptsError": "Nie można usunąć użytkownika z powiązanymi wynikami quizów. Dostępna jest tylko anonimizacja i archiwizacja.",
+      "userWithCreatedCoursesError": "Nie można usunąć użytkownika, który jest autorem istniejących rozdziałów. Dostępne są tylko anonimizacja i archiwizacja."
     },
     "button": {
       "createUser": "Utwórz użytkownika"
