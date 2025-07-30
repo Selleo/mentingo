@@ -11,6 +11,7 @@ import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
+import { ChapterService } from "src/chapter/chapter.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -56,6 +57,7 @@ export class UserService {
     private fileService: FileService,
     private s3Service: S3Service,
     private statisticsService: StatisticsService,
+    private chapterService: ChapterService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -501,7 +503,11 @@ export class UserService {
 
   private async validateUserCanBeDeleted(userId: UUIDType): Promise<void> {
     const userQuizAttempts = await this.statisticsService.getUserStats(userId);
+    const chapters = await this.chapterService.getAuthorChapters(userId);
 
+    if (chapters.length > 0) {
+      throw new ConflictException("User is an author of existing chapters and cannot be deleted");
+    }
     if (userQuizAttempts.quizzes.totalAttempts > 0) {
       throw new ConflictException("User has quiz attempts and cannot be deleted");
     }

@@ -1,6 +1,7 @@
 import { Global, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
+import { ChapterModule } from "src/chapter/chapter.module";
 import { EmailModule } from "src/common/emails/emails.module";
 import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
@@ -14,7 +15,15 @@ import { UserService } from "src/user/user.service";
 
 @Global()
 @Module({
-  imports: [CqrsModule, UserModule, EmailModule, FileModule, S3Module, StatisticsModule],
+  imports: [
+    CqrsModule,
+    UserModule,
+    EmailModule,
+    FileModule,
+    S3Module,
+    StatisticsModule,
+    ChapterModule,
+  ],
   exports: [CqrsModule],
   providers: [NotifyAdminsHandler, UserService, FileService, S3Service, StatisticsService],
 })
