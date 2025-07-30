@@ -41,6 +41,14 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
+            type: LESSON_TYPES.AI_MENTOR,
+            title: "HTML Basics",
+            aiMentorInstructions:
+              "Guide the learner through the basics of HTML structure, including elements, tags, and their roles in building a web page. Encourage questions and provide examples for each concept.",
+            completionConditions:
+              "Learner can identify and explain the purpose of basic HTML elements and successfully create a simple HTML page structure.",
+          },
+          {
             type: LESSON_TYPES.VIDEO,
             title: "HTML Elements Video",
             description:

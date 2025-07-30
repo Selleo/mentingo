@@ -12,8 +12,8 @@ import type { UUIDType } from "src/common";
 export class MessageService {
   constructor(private readonly aiRepository: AiRepository) {}
   async createMessages(studentMessage: ThreadMessageBody, mentorMessage: ThreadMessageBody) {
-    const studentMessageWithId = await this.aiRepository.createMessage(studentMessage);
-    const mentorMessageWithId = await this.aiRepository.createMessage(mentorMessage);
+    const studentMessageWithId = await this.aiRepository.insertMessage(studentMessage);
+    const mentorMessageWithId = await this.aiRepository.insertMessage(mentorMessage);
     return { studentMessageWithId, mentorMessageWithId };
   }
 

@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm/sql";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
+  aiMentorLessons,
   categories,
   chapters,
   courses,
@@ -100,7 +101,20 @@ export async function createNiceCourses(
             updatedAt: createdAt,
           })
           .returning();
-
+        if (
+          lessonData.type === LESSON_TYPES.AI_MENTOR &&
+          lessonData.aiMentorInstructions &&
+          lessonData.completionConditions
+        ) {
+          await db
+            .insert(aiMentorLessons)
+            .values({
+              lessonId: lesson.id,
+              aiMentorInstructions: lessonData.aiMentorInstructions,
+              completionConditions: lessonData.completionConditions,
+            })
+            .returning();
+        }
         if (lessonData.type === LESSON_TYPES.QUIZ && lessonData.questions) {
           for (const [index, questionData] of lessonData.questions.entries()) {
             const questionId = crypto.randomUUID();

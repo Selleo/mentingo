@@ -6,7 +6,7 @@ import { categories, courses, users } from "../../src/storage/schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-type CourseTest = InferSelectModel<typeof courses>;
+export type CourseTest = InferSelectModel<typeof courses>;
 
 const ensureCategory = async (db: DatabasePg, categoryId?: UUIDType): Promise<UUIDType> => {
   if (categoryId) return categoryId;
