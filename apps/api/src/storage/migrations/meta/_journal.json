@@ -183,6 +183,13 @@
       "when": 1753858958553,
       "tag": "0025_update_settings_with_unregistered_user_courses_accessibility",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1753945560438,
+      "tag": "0026_add_is_started_field_to_studentLessonProgress_table",
+      "breakpoints": true
     }
   ]
 }

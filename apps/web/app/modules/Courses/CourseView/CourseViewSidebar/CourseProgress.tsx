@@ -19,10 +19,10 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   const { isAdminLike } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const nonStartedLessonId = findFirstNotStartedLessonId(course);
+  const notStartedLessonId = findFirstNotStartedLessonId(course);
   const inProgressLessonId = findFirstInProgressLessonId(course);
   const notStartedChapterId = course.chapters.find((chapter) => {
-    return chapter.lessons.some((lesson) => lesson.id === nonStartedLessonId);
+    return chapter.lessons.some((lesson) => lesson.id === notStartedLessonId);
   })?.id;
   const inProgressChapterId = course.chapters.find((chapter) => {
     return chapter.lessons.some((lesson) => lesson.id === inProgressLessonId);
@@ -53,10 +53,10 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
         <>
           <Button
             className="gap-x-2"
-            disabled={!nonStartedLessonId && !inProgressLessonId}
+            disabled={!notStartedLessonId && !inProgressLessonId}
             onClick={() =>
-              nonStartedLessonId
-                ? navigate(`lesson/${nonStartedLessonId}`, {
+              notStartedLessonId
+                ? navigate(`lesson/${notStartedLessonId}`, {
                     state: { chapterId: notStartedChapterId },
                   })
                 : navigate(`lesson/${inProgressLessonId}`, {
