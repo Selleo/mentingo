@@ -2,25 +2,28 @@ import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import {
-  AdminSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
-  GlobalSettingsJSONContentSchema,
   globalSettingsJSONSchema,
   settingsJSONContentSchema,
-  UserSettingsJSONContentSchema,
   userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
-import { Public } from "src/common/decorators/public.decorator";
-import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
+
+import type {
+  AdminSettingsJSONContentSchema,
+  GlobalSettingsJSONContentSchema,
+  UserSettingsJSONContentSchema,
+} from "./schemas/settings.schema";
 
 @Controller("settings")
 @UseGuards(RolesGuard)

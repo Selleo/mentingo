@@ -1656,6 +1656,13 @@ export interface GetScormMetadataResponse {
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
   };
 }
 
@@ -1698,6 +1705,34 @@ export interface UpdateUserSettingsResponse {
           courtRegisterNumber?: string;
         };
       };
+}
+
+export interface UpdateAdminNewUserNotificationResponse {
+  data: {
+    language: string;
+    adminNewUserNotification: boolean;
+  };
+}
+
+export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+  };
+}
+
+export interface GetCompanyInformationBody {
+  companyName?: string;
+  registeredAddress?: string;
+  taxNumber?: string;
+  emailAddress?: string;
+  courtRegisterNumber?: string;
 }
 
 export interface GetCompanyInformationResponse {
@@ -3704,12 +3739,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name SettingsControllerUpdateAdminNewUserNotification
-     * @request PATCH:/api/settings/admin-new-user-notification
+     * @request PATCH:/api/settings/admin/new-user-notification
      */
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/settings/admin-new-user-notification`,
+      this.request<UpdateAdminNewUserNotificationResponse, any>({
+        path: `/api/settings/admin/new-user-notification`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
+     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
+     */
+    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
+      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
+        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
+        method: "PATCH",
+        format: "json",
         ...params,
       }),
 
@@ -3719,10 +3769,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name SettingsControllerGetCompanyInformation
      * @request GET:/api/settings/company-information
      */
-    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
+    settingsControllerGetCompanyInformation: (
+      data: GetCompanyInformationBody,
+      params: RequestParams = {},
+    ) =>
       this.request<GetCompanyInformationResponse, any>({
         path: `/api/settings/company-information`,
         method: "GET",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -3740,20 +3795,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateCompanyInformationResponse, any>({
         path: `/api/settings/company-information`,
         method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
-     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
-     */
-    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
-      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
-        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
-        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

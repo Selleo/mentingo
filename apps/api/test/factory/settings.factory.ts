@@ -48,8 +48,8 @@ export const createSettingsFactory = (
         userId === null
           ? DEFAULT_GLOBAL_SETTINGS
           : isAdmin
-          ? DEFAULT_ADMIN_SETTINGS
-          : DEFAULT_STUDENT_SETTINGS,
+            ? DEFAULT_ADMIN_SETTINGS
+            : DEFAULT_STUDENT_SETTINGS,
     };
   });
 };
