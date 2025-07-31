@@ -1,126 +1,88 @@
-import { Pause, SkipBack, SkipForward } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
-import { Play } from "~/assets/svgs/actions";
-import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 
-import type { VideoPlayerProps } from "./VideoPlayer.types";
+interface VideoPlayerProps {
+  initialUrl: string;
+  handleVideoEnded?: () => void;
+}
 
-export const VideoPlayer = ({ url, onVideoEnded }: VideoPlayerProps) => {
-  const { isAdmin } = useUserRole();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+interface PlayerJSPlayer {
+  on: (event: "ready" | "ended", callback: () => void) => void;
+  off: (event: "ready" | "ended", callback: () => void) => void;
+  destroy?: () => void;
+}
 
-  if (!url) throw new Error("Something went wrong");
+declare global {
+  interface Window {
+    playerjs?: {
+      Player: new (el: HTMLIFrameElement) => PlayerJSPlayer;
+    };
+  }
+}
 
-  const togglePlay = (event?: React.MouseEvent) => {
-    event?.stopPropagation();
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-      } else {
-        videoRef.current.pause();
+export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<PlayerJSPlayer | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleIframeLoad = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !window.playerjs) return;
+
+    try {
+      const player = new window.playerjs.Player(iframe);
+      playerRef.current = player;
+
+      const onReady = () => setIsLoading(false);
+      player.on("ready", onReady);
+
+      if (handleVideoEnded) {
+        player.on("ended", handleVideoEnded);
       }
+    } catch (error) {
+      console.warn("Player initialization failed:", error);
     }
-  };
-
-  const handleSeek = (seconds: number) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (videoRef.current) {
-      videoRef.current.currentTime += seconds;
-    }
-  };
-
-  const handleVideoEnd = useCallback(() => {
-    if (!isAdmin && onVideoEnded) {
-      setIsPlaying(false);
-      onVideoEnded();
-    }
-  }, [isAdmin, onVideoEnded]);
+  }, [handleVideoEnded]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => {
-      handleVideoEnd();
-    };
-
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
-    video.addEventListener("ended", handleEnded);
+    const iframe = iframeRef.current;
+    const player = playerRef.current;
 
     return () => {
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
-      video.removeEventListener("ended", handleEnded);
+      try {
+        if (player && iframe?.contentWindow) {
+          player.off("ready", () => {});
+          if (handleVideoEnded) {
+            player.off("ended", handleVideoEnded);
+          }
+          player.destroy?.();
+        }
+      } catch (err) {
+        console.warn("Error during player cleanup:", err);
+      }
     };
-  }, [handleVideoEnd]);
+  }, [handleVideoEnded]);
 
   return (
-    <div
-      className="group relative w-full"
-      role="button"
-      tabIndex={0}
-      onClick={togglePlay}
-      onKeyDown={(event) => {
-        if (event.key === " ") {
-          togglePlay();
-        }
-      }}
-    >
-      <video ref={videoRef} width="100%" height="auto">
-        <source src={url} />
-        <track kind="captions" />
-      </video>
-
-      <div
-        className={cn("absolute inset-0 bg-black transition-opacity duration-200", {
-          "opacity-48": !isPlaying,
-          "opacity-0 group-hover:opacity-48": isPlaying,
+    <div className="relative aspect-video w-full">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+          <div className="size-12 animate-spin rounded-full border-y-2 border-blue-500" />
+        </div>
+      )}
+      <iframe
+        ref={iframeRef}
+        src={initialUrl}
+        onLoad={handleIframeLoad}
+        className={cn("size-full border-none", {
+          "opacity-0": isLoading,
+          "opacity-100": !isLoading,
         })}
+        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        title="Video Player"
+        loading="lazy"
       />
-
-      <div
-        className={cn(
-          "absolute inset-0 flex items-center justify-center gap-20 transition-opacity duration-200",
-          {
-            "opacity-0 group-hover:opacity-100": isPlaying,
-            "opacity-100": !isPlaying,
-          },
-        )}
-      >
-        <button
-          onClick={handleSeek(-10)}
-          className="relative rounded-full p-4 transition-transform duration-200 hover:scale-110"
-        >
-          <div className="absolute inset-0 rounded-full bg-white opacity-32" />
-          <SkipBack className="relative z-10 size-8 text-white" />
-        </button>
-
-        <button
-          onClick={togglePlay}
-          className="relative rounded-full p-4 transition-transform duration-200 hover:scale-110"
-        >
-          <div className="absolute inset-0 rounded-full bg-white opacity-32" />
-          {isPlaying ? (
-            <Pause className="relative z-10 size-8 text-white" />
-          ) : (
-            <Play className="relative z-10 size-8 text-white" />
-          )}
-        </button>
-
-        <button
-          onClick={handleSeek(10)}
-          className="relative rounded-full p-4 transition-transform duration-200 hover:scale-110"
-        >
-          <div className="absolute inset-0 rounded-full bg-white opacity-32" />
-          <SkipForward className="relative z-10 size-8 text-white" />
-        </button>
-      </div>
     </div>
   );
 };

@@ -12,6 +12,7 @@ import type { ChangeEvent } from "react";
 
 type FileUploadInputProps = {
   handleFileUpload: (file: File) => Promise<void>;
+  handleFileDelete: () => void;
   isUploading: boolean;
   contentTypeToDisplay: string;
   url?: string;
@@ -25,6 +26,7 @@ const ACCEPTED_TYPE_FORMATS = {
 
 const FileUploadInput = ({
   handleFileUpload,
+  handleFileDelete,
   isUploading,
   contentTypeToDisplay,
   url,
@@ -97,6 +99,7 @@ const FileUploadInput = ({
               variant="destructive"
               className="mt-2 gap-x-1"
               onClick={() => {
+                handleFileDelete();
                 setFile(null);
                 setVideoPreview(null);
               }}

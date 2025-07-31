@@ -25,5 +25,5 @@ export const Video = ({ url, onVideoEnded, isExternalUrl }: VideoPlayerProps) =>
     );
   }
 
-  return <VideoPlayer url={url} onVideoEnded={onVideoEnded} />;
+  return <VideoPlayer initialUrl={url} handleVideoEnded={onVideoEnded} />;
 };

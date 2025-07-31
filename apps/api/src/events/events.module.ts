@@ -1,6 +1,8 @@
 import { Global, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
+import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
+import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
@@ -12,8 +14,8 @@ import { UserService } from "src/user/user.service";
 
 @Global()
 @Module({
-  imports: [CqrsModule, UserModule, EmailModule, FileModule, S3Module],
+  imports: [CqrsModule, UserModule, EmailModule, FileModule, S3Module, BunnyStreamModule],
   exports: [CqrsModule],
-  providers: [NotifyAdminsHandler, UserService, FileService, S3Service],
+  providers: [NotifyAdminsHandler, UserService, FileService, S3Service, BunnyStreamService],
 })
 export class EventsModule {}
