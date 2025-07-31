@@ -15,5 +15,6 @@ export { useUnenrollCourse } from "./useUnenrollCourse";
 export { useUpdateUser } from "./useUpdateUser";
 export { useUpsertUserDetails } from "./useUpsertUserDetails";
 export { useUpdateUserProfile } from "./useUpdateUserProfile";
-export { useRetakeQuiz } from "./useRetakeQuiz";
 export { useQuizRetakeStatus } from "./useQuizRetakeStatus";
+export { useRetakeQuiz } from "./useRetakeQuiz";
+export { useUploadPlatformLogo } from "./useUploadPlatformLogo";

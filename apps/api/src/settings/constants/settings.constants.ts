@@ -11,4 +11,5 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
 
 export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   unregisteredUserCoursesAccessibility: false,
+  platformLogoS3Key: null,
 };

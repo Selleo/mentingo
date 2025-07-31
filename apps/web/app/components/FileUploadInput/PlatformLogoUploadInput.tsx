@@ -4,7 +4,7 @@ import { cn } from "~/lib/utils";
 
 import { Icon } from "../Icon";
 
-interface ImageUploadProps {
+interface PlatformLogoUploadProps {
   field: { value?: string };
   handleImageUpload: (file: File) => void;
   isUploading: boolean;
@@ -12,13 +12,13 @@ interface ImageUploadProps {
   fileInputRef?: React.RefObject<HTMLInputElement>;
 }
 
-const ImageUploadInput = ({
+const PlatformLogoUploadInput = ({
   field,
   handleImageUpload,
   isUploading,
   imageUrl,
   fileInputRef,
-}: ImageUploadProps) => {
+}: PlatformLogoUploadProps) => {
   const { t } = useTranslation();
 
   return (
@@ -27,8 +27,8 @@ const ImageUploadInput = ({
         {imageUrl && (
           <img
             src={imageUrl || field.value}
-            alt="Uploaded"
-            className="h-full w-full object-cover"
+            alt="Platform Logo"
+            className="size-full object-contain p-4"
           />
         )}
         <div
@@ -51,14 +51,13 @@ const ImageUploadInput = ({
               "text-gray-600": !field.value,
             })}
           >
-            {field.value ? "SVG, PNG, JPG (max. to 20MB)" : "PNG, JPG or JPEG (max. 800x400px)"}
+            PNG, SVG (max. 10MB)
           </div>
         </div>
         <input
           ref={fileInputRef}
-          data-testid="imageUpload"
           type="file"
-          accept=".png, .jpg, .jpeg, .svg"
+          accept=".png, .svg"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
@@ -73,4 +72,4 @@ const ImageUploadInput = ({
   );
 };
 
-export default ImageUploadInput;
+export default PlatformLogoUploadInput;

@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { ConditionalModule, ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
+import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
 import { AiModule } from "./ai/ai.module";
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseModule } from "./courses/course.module";
 import { EventsModule } from "./events/events.module";
+import { MULTER_FILE_SIZE } from "./file/file.constants";
 import { FileModule } from "./file/files.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
@@ -80,6 +82,11 @@ import { UserModule } from "./user/user.module";
       },
       inject: [ConfigService],
       global: true,
+    }),
+    MulterModule.register({
+      limits: {
+        fileSize: MULTER_FILE_SIZE,
+      },
     }),
     AuthModule,
     HealthModule,
