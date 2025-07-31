@@ -6,6 +6,7 @@ import { useCourse, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
+import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -37,7 +38,12 @@ export default function LessonPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  if (!lesson || !course) return null;
+  if (!lesson || !course)
+    return (
+      <div className="fixed inset-0 grid place-items-center">
+        <Loader />
+      </div>
+    );
 
   const { isFirst, isLast } = checkOverallLessonPosition(course.chapters, lessonId);
 

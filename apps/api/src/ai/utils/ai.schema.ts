@@ -75,10 +75,12 @@ export const aiJudgeJudgementSchema = Type.Object({
   }),
   minScore: Type.Integer({
     description: "Minimum score required to pass implied from the lesson conditions",
+    default: 0,
   }),
-  score: Type.Integer({ description: "Score implied from the user conversation" }),
+  score: Type.Integer({ description: "Score implied from the user conversation", default: 0 }),
   maxScore: Type.Integer({
     description: "Maximum score possible to get implied from the lesson conditions",
+    default: 0,
   }),
 });
 
