@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,16 +10,15 @@ import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useUserRole } from "~/hooks/useUserRole";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 
 import Presentation from "../../../components/Presentation/Presentation";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
-
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
-import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
@@ -39,7 +39,7 @@ export const LessonContent = ({
   handleNext,
   isFirstLesson,
   lessonLoading,
-  isLastLesson
+  isLastLesson,
 }: LessonContentProps) => {
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
@@ -59,6 +59,8 @@ export const LessonContent = ({
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const totalLessons = currentChapter.lessons.length;
 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (isAdminLike) {
       setIsNextDisabled(false);
@@ -69,17 +71,18 @@ export const LessonContent = ({
       isNextBlocked(
         currentLessonIndex,
         totalLessons,
-        nextChapter.isFreemium ?? false,
+        nextChapter?.isFreemium ?? false,
         course.enrolled ?? false,
       ),
     );
     setIsPreviousDisabled(
       isPreviousBlocked(
         currentLessonIndex,
-        prevChapter.isFreemium ?? false,
+        prevChapter?.isFreemium ?? false,
         course.enrolled ?? false,
       ),
     );
+    queryClient.invalidateQueries({ queryKey: ["course", { id: course.id }] });
   }, [
     isAdminLike,
     lesson.type,
@@ -111,18 +114,13 @@ export const LessonContent = ({
       .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
       .otherwise(() => null);
 
-  const handleMarkLessonAsComplete = () => {
-    if (isAdminLike) return;
-    if (lesson.type == LessonType.AI_MENTOR) return;
-
-    markLessonAsCompleted({ lessonId: lesson.id });
-    if (!course.enrolled && course.priceInCents !== 0) {
-      setIsNextDisabled(true);
-    }
-  };
   useEffect(() => {
+    if (lesson.type === LessonType.TEXT || lesson.type === LessonType.PRESENTATION) {
+      markLessonAsCompleted({ lessonId: lesson.id });
+    }
+
     if (currentLessonIndex === totalLessons - 1) {
-      if (!nextChapter?.isFreemium) {
+      if (course.enrolled && nextChapter?.isFreemium && course.priceInCents !== 0) {
         setIsNextDisabled(true);
       }
       if (currentLessonIndex === 0) {
@@ -169,7 +167,7 @@ export const LessonContent = ({
               variant="outline"
               disabled={isNextDisabled}
               className="w-full gap-x-1 sm:w-auto"
-              onClick={handleMarkLessonAsComplete}
+              onClick={handleNext}
             >
               <Icon name="ArrowRight" className="h-auto w-4" />
             </Button>

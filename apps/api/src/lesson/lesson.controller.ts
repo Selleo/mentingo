@@ -12,7 +12,6 @@ import {
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { SUPPORTED_LANGUAGES, SupportedLanguages } from "src/ai/utils/ai.type";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -79,8 +78,6 @@ export class LessonController {
 
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
-
- 
 
   @Post("beta-create-lesson/ai")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
@@ -232,7 +229,6 @@ export class LessonController {
   async evaluationQuiz(
     @Body() answers: AnswerQuestionBody,
     @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<
     BaseResponse<{
       message: string;
@@ -244,11 +240,7 @@ export class LessonController {
       };
     }>
   > {
-    const evaluationResult = await this.lessonService.evaluationQuiz(
-      answers,
-      currentUserId,
-      currentUserRole,
-    );
+    const evaluationResult = await this.lessonService.evaluationQuiz(answers, currentUserId);
     return new BaseResponse({
       message: "Evaluation quiz successfully",
       data: evaluationResult,
