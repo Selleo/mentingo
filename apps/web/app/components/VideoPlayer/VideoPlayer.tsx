@@ -51,7 +51,6 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
 
     return () => {
       try {
-        // Używaj zapisanej wartości `iframe`, nie iframeRef.current
         if (player && iframe?.contentWindow) {
           player.off("ready", () => {});
           if (handleVideoEnded) {
