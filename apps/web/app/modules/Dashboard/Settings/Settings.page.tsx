@@ -10,7 +10,6 @@ import AccountTabContent from "./components/AccountTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
 
-import PlatformLogoForm from "./forms/PlatformLogoForm";
 import type { GlobalSettings } from "./types";
 
 export default function SettingsPage() {

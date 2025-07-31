@@ -23,7 +23,7 @@ const PLATFORM_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import {
   adminSettingsJSONContentSchema,
-  globalSettingsJSONSchema,
+  globalSettingsJSONContentSchema,
   settingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
@@ -43,7 +43,7 @@ export class SettingsController {
   @Public()
   @Get("global")
   @Validate({
-    response: baseResponse(globalSettingsJSONSchema),
+    response: baseResponse(globalSettingsJSONContentSchema),
   })
   async getPublicGlobalSettings(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getGlobalSettings());
@@ -86,7 +86,7 @@ export class SettingsController {
   @Patch("admin/unregistered-user-courses-accessibility")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    response: baseResponse(globalSettingsJSONSchema),
+    response: baseResponse(globalSettingsJSONContentSchema),
   })
   async updateUnregisteredUserCoursesAccessibility(): Promise<
     BaseResponse<GlobalSettingsJSONContentSchema>

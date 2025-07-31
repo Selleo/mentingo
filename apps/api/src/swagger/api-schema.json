@@ -10427,24 +10427,6 @@
                   "language",
                   "adminNewUserNotification"
                 ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "platformLogoS3Key": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "platformLogoS3Key"
-                ]
               }
             ]
           }
@@ -10505,24 +10487,6 @@
                 "required": [
                   "language",
                   "adminNewUserNotification"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "platformLogoS3Key": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "platformLogoS3Key"
                 ]
               }
             ]

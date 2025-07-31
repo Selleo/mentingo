@@ -6,11 +6,17 @@ export function useCurrentLanguage() {
   const { data: userSettings } = useUserSettings();
   const { language: fallbackLanguage } = useLanguageStore();
 
-  const currentLanguage = userSettings?.language || fallbackLanguage;
+  const hasLanguage = (
+    settings: typeof userSettings,
+  ): settings is { language: string } & typeof userSettings => {
+    return settings != null && "language" in settings;
+  };
+
+  const currentLanguage = hasLanguage(userSettings) ? userSettings.language : fallbackLanguage;
 
   return {
     language: currentLanguage,
-    isFromDatabase: !!userSettings?.language,
-    isFromLocalStorage: !userSettings?.language && !!fallbackLanguage,
+    isFromDatabase: hasLanguage(userSettings),
+    isFromLocalStorage: !hasLanguage(userSettings) && !!fallbackLanguage,
   };
 }

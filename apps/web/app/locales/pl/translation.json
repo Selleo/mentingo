@@ -1162,17 +1162,17 @@
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników.",
     "platformLogo": {
-    "header": "Logo Platformy",
-    "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, SVG",
-    "field": {
-      "uploadLabel": "Obraz Logo"
-    },
-    "button": {
-      "removeLogo": "Usuń Logo"
-    },
-    "toast": {
-      "logoUploadedSuccessfully": "Logo platformy zostało pomyślnie wgrane"
-    }
+      "header": "Logo Platformy",
+      "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, SVG",
+      "field": {
+        "uploadLabel": "Obraz Logo"
+      },
+      "button": {
+        "removeLogo": "Usuń Logo"
+      },
+      "toast": {
+        "logoUploadedSuccessfully": "Logo platformy zostało pomyślnie wgrane"
+      }
     }
   }
 }

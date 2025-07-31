@@ -6,7 +6,7 @@ import {
   DEFAULT_ADMIN_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
 } from "src/settings/constants/settings.constants";
-import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
+import { settingsToJSONBuildObject } from "src/utils/settingsToJSONBuildObject";
 
 import { settings } from "../../src/storage/schema";
 
@@ -30,7 +30,7 @@ export const createSettingsFactory = (
       const finalSettings = {
         ...defaultSettings,
       };
-      const settingsSQL = settingsToJsonBuildObject(finalSettings);
+      const settingsSQL = settingsToJSONBuildObject(finalSettings);
 
       const [inserted] = await db
         .insert(settings)

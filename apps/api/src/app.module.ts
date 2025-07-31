@@ -85,7 +85,7 @@ import { UserModule } from "./user/user.module";
     }),
     MulterModule.register({
       limits: {
-        fileSize: 10 * 1024 * 1024,
+        fileSize: MULTER_FILE_SIZE,
       },
     }),
     AuthModule,
