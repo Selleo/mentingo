@@ -34,7 +34,7 @@ const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
                   {t("adminGroupsView.newGroup.fields.name")}
                 </Label>
                 <FormControl>
-                  <Input id="name" {...field} />
+                  <Input id="name" {...field} data-testid="groupName" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -46,11 +46,15 @@ const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
             render={({ field }) => (
               <FormItem className="grow">
                 <Label htmlFor="characteristic" className="text">
-                  <RequiredTick />
                   {t("adminGroupsView.newGroup.fields.characteristic")}
                 </Label>
                 <FormControl>
-                  <Textarea id="characteristic" {...field} className="h-full resize-none" />
+                  <Textarea
+                    id="characteristic"
+                    {...field}
+                    className="h-full resize-none"
+                    data-testid="groupCharacteristic"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

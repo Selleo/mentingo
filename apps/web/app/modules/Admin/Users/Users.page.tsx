@@ -158,6 +158,7 @@ const Users = () => {
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
+          data-testid={row.original.email}
           onClick={(e) => e.stopPropagation()}
         />
       ),
