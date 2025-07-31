@@ -10,12 +10,13 @@ export const companyInformationJSONSchema = Type.Object({
   courtRegisterNumber: Type.Optional(Type.String()),
 });
 
-export const studentSettingsJSONContentSchema = Type.Object({
-  language: Type.String(),
-});
-
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
+  companyInformation: Type.Optional(companyInformationJSONSchema),
+});
+
+export const studentSettingsJSONContentSchema = Type.Object({
+  language: Type.String(),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
@@ -26,7 +27,7 @@ export const adminSettingsJSONContentSchema = Type.Object({
 export const settingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
-  globalSettingsJSONSchema
+  globalSettingsJSONSchema,
 ]);
 
 export const userSettingsJSONContentSchema = Type.Union([
@@ -34,9 +35,10 @@ export const userSettingsJSONContentSchema = Type.Union([
   adminSettingsJSONContentSchema,
 ]);
 
-
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;
 export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSONContentSchema>;
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;
+export type UserSettingsJSONContentSchema = Static<typeof userSettingsJSONContentSchema>;
+
+export type CompanyInformationSchema = Static<typeof companyInformationJSONSchema>;
 export type GlobalSettingsJSONContentSchema = Static<typeof globalSettingsJSONSchema>;
-export type CompanyInformationJSONSchema = Static<typeof companyInformationJSONSchema>;

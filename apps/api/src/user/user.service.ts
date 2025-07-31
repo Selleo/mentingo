@@ -446,11 +446,6 @@ export class UserService {
     return adminsToNotify;
   }
 
-  public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
-    if (!avatarReference) return null;
-    return await this.s3Service.getSignedUrl(avatarReference);
-  };
-
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
     await this.db.transaction(async (trx) => {
       await trx

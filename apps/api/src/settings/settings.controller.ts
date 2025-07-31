@@ -1,30 +1,26 @@
-import { Controller, Get, Body, Patch, UseGuards, Put, Post } from "@nestjs/common";
+import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
-import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import {
+  AdminSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
+  companyInformationJSONSchema,
+  GlobalSettingsJSONContentSchema,
   globalSettingsJSONSchema,
   settingsJSONContentSchema,
+  UserSettingsJSONContentSchema,
+  userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
-
-import type {
-  AdminSettingsJSONContentSchema,
-  GlobalSettingsJSONContentSchema,
-  SettingsJSONContentSchema,
-} from "./schemas/settings.schema";
-import {
-  CompanyInformationBody,
-  companyInformationBodySchema,
-} from "./schemas/company-information.schema";
+import { Public } from "src/common/decorators/public.decorator";
+import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 
 @Controller("settings")
 @UseGuards(RolesGuard)
@@ -42,11 +38,11 @@ export class SettingsController {
 
   @Get()
   @Validate({
-    response: baseResponse(settingsJSONContentSchema),
+    response: baseResponse(userSettingsJSONContentSchema),
   })
   async getUserSettings(
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
+  ): Promise<BaseResponse<UserSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
@@ -58,7 +54,7 @@ export class SettingsController {
   async updateUserSettings(
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
+  ): Promise<BaseResponse<UserSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
@@ -88,27 +84,22 @@ export class SettingsController {
 
   @Get("company-information")
   @Public()
-  async getCompanyInformation() {
-    return await this.settingsService.getCompanyInformation();
-  }
-
-  @Post("company-information")
-  @Roles(USER_ROLES.ADMIN)
   @Validate({
-    request: [{ type: "body", schema: companyInformationBodySchema }],
-    response: baseResponse(globalSettingsJSONSchema),
+    request: [{ type: "body", schema: companyInformationJSONSchema }],
+    response: baseResponse(companyInformationJSONSchema),
   })
-  async createCompanyInformation(@Body() companyInfo: CompanyInformationBody) {
-    return new BaseResponse(await this.settingsService.createCompanyInformation(companyInfo));
+  async getCompanyInformation() {
+    const result = await this.settingsService.getCompanyInformation();
+    return new BaseResponse(result);
   }
 
   @Patch("company-information")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    request: [{ type: "body", schema: companyInformationBodySchema }],
-    response: baseResponse(globalSettingsJSONSchema),
+    request: [{ type: "body", schema: companyInformationJSONSchema }],
+    response: baseResponse(companyInformationJSONSchema),
   })
-  async updateCompanyInformation(@Body() companyInfo: CompanyInformationBody) {
+  async updateCompanyInformation(@Body() companyInfo: CompanyInformaitonJSONSchema) {
     return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
   }
 }

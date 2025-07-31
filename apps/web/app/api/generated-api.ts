@@ -1687,19 +1687,44 @@ export interface UpdateUserSettingsResponse {
     | {
         language: string;
         adminNewUserNotification: boolean;
+      }
+    | {
+        unregisteredUserCoursesAccessibility: boolean;
+        companyInformation?: {
+          companyName?: string;
+          registeredAddress?: string;
+          taxNumber?: string;
+          emailAddress?: string;
+          courtRegisterNumber?: string;
+        };
       };
 }
 
-export interface UpdateAdminNewUserNotificationResponse {
+export interface GetCompanyInformationResponse {
   data: {
-    language: string;
-    adminNewUserNotification: boolean;
+    companyName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
   };
 }
 
-export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
+export interface UpdateCompanyInformationBody {
+  companyName?: string;
+  registeredAddress?: string;
+  taxNumber?: string;
+  emailAddress?: string;
+  courtRegisterNumber?: string;
+}
+
+export interface UpdateCompanyInformationResponse {
   data: {
-    unregisteredUserCoursesAccessibility: boolean;
+    companyName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
   };
 }
 
@@ -3649,25 +3674,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/settings
      */
     settingsControllerGetUserSettings: (params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<GetUserSettingsResponse, any>({
         path: `/api/settings`,
         method: "GET",
+        format: "json",
         ...params,
       }),
 
     /**
      * No description
      *
-     * @name SettingsControllerCreateUserSettings
-     * @request POST:/api/settings
+     * @name SettingsControllerUpdateUserSettings
+     * @request PUT:/api/settings
      */
-    settingsControllerCreateUserSettings: (
-      data: CreateUserSettingsBody,
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
       params: RequestParams = {},
     ) =>
-      this.request<CreateUserSettingsResponse, any>({
+      this.request<UpdateUserSettingsResponse, any>({
         path: `/api/settings`,
-        method: "POST",
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",
@@ -3678,11 +3704,41 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name SettingsControllerUpdateAdminNewUserNotification
-     * @request PATCH:/api/settings/admin/new-user-notification
+     * @request PATCH:/api/settings/admin-new-user-notification
      */
     settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<UpdateAdminNewUserNotificationResponse, any>({
-        path: `/api/settings/admin/new-user-notification`,
+      this.request<void, any>({
+        path: `/api/settings/admin-new-user-notification`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetCompanyInformation
+     * @request GET:/api/settings/company-information
+     */
+    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
+      this.request<GetCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCompanyInformation
+     * @request PATCH:/api/settings/company-information
+     */
+    settingsControllerUpdateCompanyInformation: (
+      data: UpdateCompanyInformationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
         method: "PATCH",
         format: "json",
         ...params,

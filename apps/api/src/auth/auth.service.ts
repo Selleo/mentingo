@@ -12,7 +12,6 @@ import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
-  NewUserEmail,
   PasswordRecoveryEmail,
   WelcomeEmail,
 } from "@repo/email-templates";
@@ -95,9 +94,8 @@ export class AuthService {
       );
 
       const { avatarReference, ...userWithoutAvatar } = newUser;
-      const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-        avatarReference,
-      );
+      const usersProfilePictureUrl =
+        await this.userService.getUsersProfilePictureUrl(avatarReference);
 
       const emailTemplate = new WelcomeEmail({ email, name: email });
       await this.emailService.sendEmail({
@@ -123,9 +121,8 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.getTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
-    const usersProfilePictureUrl = await this.userService.getUsersProfilePictureUrl(
-      avatarReference,
-    );
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
 
     return {
       ...userWithoutAvatar,

@@ -10669,11 +10669,6 @@
                   }
                 ]
               }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
             ]
           }
         },
@@ -10681,90 +10676,28 @@
           "data"
         ]
       },
-      "CreateCompanyInformationBody": {
-        "type": "object",
-        "properties": {
-          "company_name": {
-            "type": "string"
-          },
-          "registered_address": {
-            "type": "string"
-          },
-          "tax_number": {
-            "type": "string"
-          },
-          "email_address": {
-            "type": "string"
-          },
-          "court_register_number": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateCompanyInformationResponse": {
+      "GetCompanyInformationResponse": {
         "type": "object",
         "properties": {
           "data": {
             "type": "object",
             "properties": {
-              "userId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              "companyName": {
+                "type": "string"
               },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "admin_new_user_notification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "company_information": {
-                    "type": "object",
-                    "properties": {
-                      "company_name": {
-                        "type": "string"
-                      },
-                      "registered_address": {
-                        "type": "string"
-                      },
-                      "tax_number": {
-                        "type": "string"
-                      },
-                      "email_address": {
-                        "type": "string"
-                      },
-                      "court_register_number": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
+              "registeredAddress": {
+                "type": "string"
               },
-              "createdAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
               }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
-            ]
+            }
           }
         },
         "required": [
@@ -10774,19 +10707,19 @@
       "UpdateCompanyInformationBody": {
         "type": "object",
         "properties": {
-          "company_name": {
+          "companyName": {
             "type": "string"
           },
-          "registered_address": {
+          "registeredAddress": {
             "type": "string"
           },
-          "tax_number": {
+          "taxNumber": {
             "type": "string"
           },
-          "email_address": {
+          "emailAddress": {
             "type": "string"
           },
-          "court_register_number": {
+          "courtRegisterNumber": {
             "type": "string"
           }
         }
@@ -10797,64 +10730,22 @@
           "data": {
             "type": "object",
             "properties": {
-              "userId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              "companyName": {
+                "type": "string"
               },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "admin_new_user_notification": {
-                    "type": "boolean"
-                  },
-                  "language": {
-                    "type": "string"
-                  },
-                  "company_information": {
-                    "type": "object",
-                    "properties": {
-                      "company_name": {
-                        "type": "string"
-                      },
-                      "registered_address": {
-                        "type": "string"
-                      },
-                      "tax_number": {
-                        "type": "string"
-                      },
-                      "email_address": {
-                        "type": "string"
-                      },
-                      "court_register_number": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
+              "registeredAddress": {
+                "type": "string"
               },
-              "createdAt": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
               }
-            },
-            "required": [
-              "userId",
-              "settings",
-              "createdAt"
-            ]
+            }
           }
         },
         "required": [

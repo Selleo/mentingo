@@ -1,13 +1,14 @@
 import request from "supertest";
 
-import { settings } from "../../../src/storage/schema";
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
+import { truncateTables } from "../../../test/helpers/test-helpers";
 import { USER_ROLES } from "../../user/schemas/userRoles";
 
 import type { DatabasePg } from "../../common";
-import type { CompanyInformationBody } from "../schemas/company-information.schema";
-import type { SettingsJSONContentSchema } from "../schemas/settings.schema";
+import type { CompanyInformaitonJSONSchema } from "../schemas/company-information.schema";
+import type { GlobalSettingsJSONContentSchema } from "../schemas/settings.schema";
 import type { INestApplication } from "@nestjs/common";
 
 describe("SettingsController - Company Information (e2e)", () => {
@@ -19,13 +20,14 @@ describe("SettingsController - Company Information (e2e)", () => {
   const testPassword = "Password123@@";
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
 
-  const validCompanyData: CompanyInformationBody = {
-    company_name: "Test Company Ltd",
-    registered_address: "123 Test Street, Test City",
-    tax_number: "1234567890",
-    email_address: "contact@testcompany.com",
-    court_register_number: "KRS0000123456",
+  const validCompanyData: CompanyInformaitonJSONSchema = {
+    companyName: "Test Company Ltd",
+    registeredAddress: "123 Test Street, Test City",
+    taxNumber: "1234567890",
+    emailAddress: "contact@testcompany.com",
+    courtRegisterNumber: "KRS0000123456",
   };
 
   beforeAll(async () => {
@@ -33,6 +35,7 @@ describe("SettingsController - Company Information (e2e)", () => {
     app = testApp;
     db = app.get("DB");
     userFactory = createUserFactory(db);
+    globalSettingsFactory = createSettingsFactory(db, null);
   }, 10000);
 
   afterAll(async () => {
@@ -40,7 +43,9 @@ describe("SettingsController - Company Information (e2e)", () => {
   }, 10000);
 
   beforeEach(async () => {
-    await db.delete(settings);
+    await truncateTables(db, ["settings"]);
+
+    await globalSettingsFactory.create();
 
     adminUser = await userFactory
       .withCredentials({ password: testPassword })
@@ -68,16 +73,16 @@ describe("SettingsController - Company Information (e2e)", () => {
   describe("GET /settings/company-information", () => {
     it("should return company information when it exists", async () => {
       await request(app.getHttpServer())
-        .post("/api/settings/company-information")
+        .patch("/api/settings/company-information")
         .set("Cookie", adminCookies)
         .send(validCompanyData)
-        .expect(201);
+        .expect(200);
 
       const response = await request(app.getHttpServer())
         .get("/api/settings/company-information")
         .expect(200);
 
-      expect(response.body).toEqual(validCompanyData);
+      expect(response.body.data).toEqual(validCompanyData);
     });
 
     it("should return empty object when no company information exists", async () => {
@@ -85,140 +90,58 @@ describe("SettingsController - Company Information (e2e)", () => {
         .get("/api/settings/company-information")
         .expect(200);
 
-      expect(response.body).toEqual({});
+      expect(response.body.data).toEqual({
+        companyName: "",
+        registeredAddress: "",
+        taxNumber: "",
+        emailAddress: "",
+        courtRegisterNumber: "",
+      });
     });
 
     it("should work for students (no authentication required)", async () => {
       await request(app.getHttpServer())
-        .post("/api/settings/company-information")
+        .patch("/api/settings/company-information")
         .set("Cookie", adminCookies)
         .send(validCompanyData)
-        .expect(201);
+        .expect(200);
 
       const response = await request(app.getHttpServer())
         .get("/api/settings/company-information")
         .set("Cookie", studentCookies)
         .expect(200);
 
-      expect(response.body).toEqual(validCompanyData);
+      expect(response.body.data).toEqual(validCompanyData);
     });
 
     it("should work for unauthenticated users", async () => {
       await request(app.getHttpServer())
-        .post("/api/settings/company-information")
+        .patch("/api/settings/company-information")
         .set("Cookie", adminCookies)
         .send(validCompanyData)
-        .expect(201);
+        .expect(200);
 
       const response = await request(app.getHttpServer())
         .get("/api/settings/company-information")
         .expect(200);
 
-      expect(response.body).toEqual(validCompanyData);
-    });
-  });
-
-  describe("POST /settings/company-information", () => {
-    it("should create company information as admin", async () => {
-      const response = await request(app.getHttpServer())
-        .post("/api/settings/company-information")
-        .set("Cookie", adminCookies)
-        .send(validCompanyData)
-        .expect(201);
-
-      expect(response.body.data.userId).toBeNull();
-      expect(response.body.data.settings.company_information).toEqual(validCompanyData);
-      expect(response.body.data.createdAt).toBeDefined();
-
-      const globalSettings = await db.query.settings.findFirst({
-        where: (s, { isNull }) => isNull(s.userId),
-      });
-
-      expect(globalSettings).toBeDefined();
-      expect(globalSettings?.userId).toBeNull();
-      expect((globalSettings?.settings as SettingsJSONContentSchema)?.company_information).toEqual(
-        validCompanyData,
-      );
-    });
-
-    it("should create company information with partial data", async () => {
-      const partialData = {
-        company_name: "Partial Company",
-        email_address: "partial@company.com",
-      };
-
-      const response = await request(app.getHttpServer())
-        .post("/api/settings/company-information")
-        .set("Cookie", adminCookies)
-        .send(partialData)
-        .expect(201);
-
-      expect(response.body.data.settings.company_information).toEqual(partialData);
-    });
-
-    it("should return 409 when company information already exists", async () => {
-      await request(app.getHttpServer())
-        .post("/api/settings/company-information")
-        .set("Cookie", adminCookies)
-        .send(validCompanyData)
-        .expect(201);
-
-      const response = await request(app.getHttpServer())
-        .post("/api/settings/company-information")
-        .set("Cookie", adminCookies)
-        .send({
-          company_name: "Another Company",
-        })
-        .expect(409);
-
-      expect(response.body.message).toBe("Company information already exists");
-      expect(response.body.statusCode).toBe(409);
-    });
-
-    it("should return 403 for student users", async () => {
-      const response = await request(app.getHttpServer())
-        .post("/api/settings/company-information")
-        .set("Cookie", studentCookies)
-        .send(validCompanyData)
-        .expect(403);
-
-      expect(response.body.statusCode).toBe(403);
-    });
-
-    it("should return 401 for unauthenticated users", async () => {
-      await request(app.getHttpServer())
-        .post("/api/settings/company-information")
-        .send(validCompanyData)
-        .expect(401);
-    });
-
-    it("should return 400 for invalid data types", async () => {
-      const invalidData = {
-        company_name: 123,
-        tax_number: true,
-      };
-
-      await request(app.getHttpServer())
-        .post("/api/settings/company-information")
-        .set("Cookie", adminCookies)
-        .send(invalidData)
-        .expect(400);
+      expect(response.body.data).toEqual(validCompanyData);
     });
   });
 
   describe("PATCH /settings/company-information", () => {
     beforeEach(async () => {
       await request(app.getHttpServer())
-        .post("/api/settings/company-information")
+        .patch("/api/settings/company-information")
         .set("Cookie", adminCookies)
         .send(validCompanyData)
-        .expect(201);
+        .expect(200);
     });
 
     it("should update company information as admin", async () => {
       const updateData = {
-        company_name: "Updated Company Name",
-        email_address: "updated@company.com",
+        companyName: "Updated Company Name",
+        emailAddress: "updated@company.com",
       };
 
       const response = await request(app.getHttpServer())
@@ -227,7 +150,7 @@ describe("SettingsController - Company Information (e2e)", () => {
         .send(updateData)
         .expect(200);
 
-      expect(response.body.data.settings.company_information).toEqual({
+      expect(response.body.data).toEqual({
         ...validCompanyData,
         ...updateData,
       });
@@ -236,7 +159,9 @@ describe("SettingsController - Company Information (e2e)", () => {
         where: (s, { isNull }) => isNull(s.userId),
       });
 
-      expect((globalSettings?.settings as SettingsJSONContentSchema)?.company_information).toEqual({
+      expect(
+        (globalSettings?.settings as GlobalSettingsJSONContentSchema)?.companyInformation,
+      ).toEqual({
         ...validCompanyData,
         ...updateData,
       });
@@ -244,7 +169,7 @@ describe("SettingsController - Company Information (e2e)", () => {
 
     it("should preserve existing fields when partially updating", async () => {
       const partialUpdate = {
-        company_name: "Only Name Updated",
+        companyName: "Only Name Updated",
       };
 
       const response = await request(app.getHttpServer())
@@ -255,19 +180,19 @@ describe("SettingsController - Company Information (e2e)", () => {
 
       const expectedData = {
         ...validCompanyData,
-        company_name: "Only Name Updated",
+        companyName: "Only Name Updated",
       };
 
-      expect(response.body.data.settings.company_information).toEqual(expectedData);
+      expect(response.body.data).toEqual(expectedData);
     });
 
     it("should return 404 when no company information exists to update", async () => {
-      await db.delete(settings);
+      await truncateTables(db, ["settings"]);
 
       const response = await request(app.getHttpServer())
         .patch("/api/settings/company-information")
         .set("Cookie", adminCookies)
-        .send({ company_name: "Test" })
+        .send({ companyName: "Test" })
         .expect(404);
 
       expect(response.body.message).toBe("Company information not found");
@@ -278,7 +203,7 @@ describe("SettingsController - Company Information (e2e)", () => {
       const response = await request(app.getHttpServer())
         .patch("/api/settings/company-information")
         .set("Cookie", studentCookies)
-        .send({ company_name: "Unauthorized Update" })
+        .send({ companyName: "Unauthorized Update" })
         .expect(403);
 
       expect(response.body.statusCode).toBe(403);
@@ -287,14 +212,14 @@ describe("SettingsController - Company Information (e2e)", () => {
     it("should return 401 for unauthenticated users", async () => {
       await request(app.getHttpServer())
         .patch("/api/settings/company-information")
-        .send({ company_name: "Unauthorized Update" })
+        .send({ companyName: "Unauthorized Update" })
         .expect(401);
     });
 
     it("should return 400 for invalid data types", async () => {
       const invalidData = {
-        company_name: [],
-        tax_number: {},
+        companyName: [],
+        taxNumber: {},
       };
 
       await request(app.getHttpServer())
