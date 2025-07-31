@@ -88,7 +88,6 @@ export class SettingsController {
   @Get("company-information")
   @Public()
   @Validate({
-    request: [{ type: "body", schema: companyInformationJSONSchema }],
     response: baseResponse(companyInformationJSONSchema),
   })
   async getCompanyInformation() {

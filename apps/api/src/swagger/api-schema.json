@@ -3162,16 +3162,6 @@
       "get": {
         "operationId": "SettingsController_getCompanyInformation",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetCompanyInformationBody"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -10623,26 +10613,6 @@
         "required": [
           "data"
         ]
-      },
-      "GetCompanyInformationBody": {
-        "type": "object",
-        "properties": {
-          "companyName": {
-            "type": "string"
-          },
-          "registeredAddress": {
-            "type": "string"
-          },
-          "taxNumber": {
-            "type": "string"
-          },
-          "emailAddress": {
-            "type": "string"
-          },
-          "courtRegisterNumber": {
-            "type": "string"
-          }
-        }
       },
       "GetCompanyInformationResponse": {
         "type": "object",

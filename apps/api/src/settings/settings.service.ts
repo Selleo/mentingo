@@ -183,14 +183,14 @@ export class SettingsService {
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
-    const [result] = await this.db
+    const [{ companyInformation }] = await this.db
       .select({
         companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
       })
       .from(settings)
       .where(isNull(settings.userId));
 
-    return result?.companyInformation || {};
+    return companyInformation;
   }
 
   public async updateCompanyInformation(
