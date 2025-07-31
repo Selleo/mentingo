@@ -1,4 +1,14 @@
-import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  UseGuards,
+  Put,
+  UseInterceptors,
+  UploadedFile,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -8,6 +18,9 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+const PLATFORM_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+
+import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import {
   adminSettingsJSONContentSchema,
   globalSettingsJSONSchema,
@@ -80,5 +93,28 @@ export class SettingsController {
   > {
     const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
+  }
+
+  @Get("platform-logo")
+  @Public()
+  @Validate({
+    response: baseResponse(platformLogoResponseSchema),
+  })
+  async getPlatformLogo() {
+    const url = await this.settingsService.getPlatformLogoUrl();
+    return new BaseResponse({ url });
+  }
+
+  @Patch("platform-logo")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(
+    FileInterceptor("logo", {
+      limits: {
+        fileSize: PLATFORM_LOGO_MAX_SIZE_BYTES,
+      },
+    }),
+  )
+  async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File): Promise<void> {
+    await this.settingsService.uploadPlatformLogo(logo);
   }
 }

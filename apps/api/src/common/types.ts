@@ -12,6 +12,7 @@ export type AdminSettings = {
 
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
+  platformLogoS3Key: string | null;
 };
 
 export type UserSettings = StudentSettings | AdminSettings;

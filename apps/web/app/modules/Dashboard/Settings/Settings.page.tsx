@@ -17,6 +17,12 @@ export default function SettingsPage() {
   const { data: userSettings } = useUserSettings();
   const { data: globalSettings } = useGlobalSettings();
 
+  const isUserSettings = (
+    settings: typeof userSettings,
+  ): settings is { language: string } & typeof userSettings => {
+    return settings != null && "language" in settings;
+  };
+
   return (
     <PageWrapper className="flex flex-col gap-6 *:h-min">
       <Suspense
@@ -32,14 +38,14 @@ export default function SettingsPage() {
             <AccountTabContent
               isContentCreator={isContentCreator}
               isAdmin={isAdmin}
-              settings={userSettings!}
+              settings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
             />
           }
           organizationContent={
             globalSettings && (
               <OrganizationTabContent
                 isAdmin={isAdmin}
-                userSettings={userSettings!}
+                userSettings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
                 globalSettings={globalSettings as GlobalSettings}
               />
             )
