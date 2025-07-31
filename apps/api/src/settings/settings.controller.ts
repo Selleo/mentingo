@@ -81,4 +81,14 @@ export class SettingsController {
     const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
   }
+
+  @Patch("admin/enforce-sso")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateEnforceSSO(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalEnforceSSO();
+    return new BaseResponse(result);
+  }
 }

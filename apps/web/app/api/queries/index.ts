@@ -15,4 +15,3 @@ export {
 } from "./useStudentCourses";
 export { useAllUsers, useAllUsersSuspense, usersQueryOptions } from "./useUsers";
 export { useContentCreatorStatistics } from "./useContentCreatorStatistics";
-export { useGetGlobalSettings } from "./useGetGlobalSettings";

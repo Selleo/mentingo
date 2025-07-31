@@ -99,12 +99,10 @@ describe("SettingsController (e2e)", () => {
         .withAdminSettings(db)
         .create();
 
-      const adminLoginResponse = await request(app.getHttpServer())
-        .post("/api/auth/login")
-        .send({
-          email: adminUser.email,
-          password: adminUser.credentials?.password,
-        });
+      const adminLoginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: adminUser.email,
+        password: adminUser.credentials?.password,
+      });
 
       adminCookies = adminLoginResponse.headers["set-cookie"];
     });

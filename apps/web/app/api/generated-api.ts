@@ -1656,6 +1656,7 @@ export interface GetScormMetadataResponse {
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
   };
 }
 
@@ -1700,6 +1701,14 @@ export interface UpdateAdminNewUserNotificationResponse {
 export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+  };
+}
+
+export interface UpdateEnforceSSOResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
   };
 }
 
@@ -3706,45 +3715,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
-     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
+     * @name SettingsControllerUpdateEnforceSso
+     * @request PATCH:/api/settings/admin/enforce-sso
      */
-    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
-      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
-        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
+    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
+      this.request<UpdateEnforceSSOResponse, any>({
+        path: `/api/settings/admin/enforce-sso`,
         method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetGlobalSettings
-     * @request GET:/api/settings/global
-     */
-    settingsControllerGetGlobalSettings: (params: RequestParams = {}) =>
-      this.request<GetGlobalSettingsResponse, any>({
-        path: `/api/settings/global`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateGlobalSettings
-     * @request PATCH:/api/settings/global
-     */
-    settingsControllerUpdateGlobalSettings: (
-      data: UpdateGlobalSettingsBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateGlobalSettingsResponse, any>({
-        path: `/api/settings/global`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),

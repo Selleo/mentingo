@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
-import { useGetGlobalSettingsSuspense } from "~/api/queries/useGetGlobalSettings";
+import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -46,7 +46,7 @@ export default function RegisterPage() {
 
   const {
     data: { enforceSSO: isSSOEnforced },
-  } = useGetGlobalSettingsSuspense();
+  } = useGlobalSettingsSuspense();
 
   const {
     register,

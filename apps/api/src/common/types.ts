@@ -12,6 +12,7 @@ export type AdminSettings = {
 
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
+  enforceSSO: boolean;
 };
 
 export type UserSettings = StudentSettings | AdminSettings;

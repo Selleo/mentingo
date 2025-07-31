@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useUpdateGlobalSettings } from "~/api/mutations/useUpdateGlobalSettings";
+import { useUpdateEnforceSSO } from "~/api/mutations/admin/useUpdateEnforceSSO";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -21,11 +21,15 @@ export default function SSOEnforceSwitch({ enforceSSO }: SSOEnforceSwitchProps) 
   const { t } = useTranslation();
   const [isChecked, setIsChecked] = useState(enforceSSO || false);
 
-  const { mutate: updateGlobalSettings, isPending } = useUpdateGlobalSettings();
+  const { mutate: updateEnforceSSO, isPending } = useUpdateEnforceSSO();
 
   const toggleSwitch = () => setIsChecked((prev) => !prev);
 
-  const saveSSOEnforcement = () => updateGlobalSettings({ data: { enforceSSO: isChecked } });
+  const saveSSOEnforcement = () => {
+    if (isChecked !== enforceSSO) {
+      updateEnforceSSO();
+    }
+  };
 
   return (
     <Card id="sso-enforcement">

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useLoginUser } from "~/api/mutations/useLoginUser";
-import { useGetGlobalSettingsSuspense } from "~/api/queries/useGetGlobalSettings";
+import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import LogoUrl from "~/assets/menitngo_logo_light_transparent.svg";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { Button } from "~/components/ui/button";
@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   const {
     data: { enforceSSO: isSSOEnforced },
-  } = useGetGlobalSettingsSuspense();
+  } = useGlobalSettingsSuspense();
 
   const {
     register,
