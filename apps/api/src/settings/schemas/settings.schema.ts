@@ -23,7 +23,6 @@ export const globalSettingsJSONContentSchema = Type.Object({
 export const settingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
-  globalSettingsJSONContentSchema,
 ]);
 
 export type SettingsJSONContentSchema = Static<typeof settingsJSONContentSchema>;

@@ -3179,30 +3179,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/unregistered-user-courses-accessibility": {
-      "patch": {
-        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
-                }
-              }
-            }
+            "description": ""
           }
         }
       }
@@ -10398,10 +10375,21 @@
             "properties": {
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "platformLogoS3Key"
             ]
           }
         },
@@ -10438,24 +10426,6 @@
                 "required": [
                   "language",
                   "adminNewUserNotification"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "platformLogoS3Key": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "platformLogoS3Key"
                 ]
               }
             ]
@@ -10518,24 +10488,6 @@
                   "language",
                   "adminNewUserNotification"
                 ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "platformLogoS3Key": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "platformLogoS3Key"
-                ]
               }
             ]
           }
@@ -10575,10 +10527,47 @@
             "properties": {
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
             ]
           }
         },
