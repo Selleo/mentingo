@@ -8,10 +8,13 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import {
   adminSettingsJSONContentSchema,
+  companyInformationJSONSchema,
   globalSettingsJSONSchema,
   settingsJSONContentSchema,
+  userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
@@ -19,7 +22,7 @@ import { SettingsService } from "./settings.service";
 import type {
   AdminSettingsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
-  SettingsJSONContentSchema,
+  UserSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 
 @Controller("settings")
@@ -38,11 +41,11 @@ export class SettingsController {
 
   @Get()
   @Validate({
-    response: baseResponse(settingsJSONContentSchema),
+    response: baseResponse(userSettingsJSONContentSchema),
   })
   async getUserSettings(
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
+  ): Promise<BaseResponse<UserSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
@@ -54,7 +57,7 @@ export class SettingsController {
   async updateUserSettings(
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
+  ): Promise<BaseResponse<UserSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
@@ -80,5 +83,25 @@ export class SettingsController {
   > {
     const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
+  }
+
+  @Get("company-information")
+  @Public()
+  @Validate({
+    response: baseResponse(companyInformationJSONSchema),
+  })
+  async getCompanyInformation() {
+    const result = await this.settingsService.getCompanyInformation();
+    return new BaseResponse(result);
+  }
+
+  @Patch("company-information")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: companyInformationJSONSchema }],
+    response: baseResponse(companyInformationJSONSchema),
+  })
+  async updateCompanyInformation(@Body() companyInfo: CompanyInformaitonJSONSchema) {
+    return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
   }
 }

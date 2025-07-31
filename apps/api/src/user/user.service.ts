@@ -407,8 +407,8 @@ export class UserService {
       await this.emailService.sendEmail({
         to: createdUser.email,
         subject: "Welcome to the Platform!",
-        text,
-        html,
+        text: text,
+        html: html,
         from: process.env.SES_EMAIL || "",
       });
 
@@ -425,18 +425,6 @@ export class UserService {
     if (!avatarReference) return null;
     return await this.s3Service.getSignedUrl(avatarReference);
   };
-
-  async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
-    await this.db.transaction(async (trx) => {
-      await trx
-        .insert(groupUsers)
-        .values(data.userIds.map((userId) => ({ userId, groupId: data.groupId })))
-        .onConflictDoUpdate({
-          target: [groupUsers.userId],
-          set: { groupId: data.groupId },
-        });
-    });
-  }
 
   public async getAdminsToNotifyAboutNewUser() {
     const allAdmins = await this.db
@@ -456,6 +444,31 @@ export class UserService {
     });
 
     return adminsToNotify;
+  }
+
+  async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
+    await this.db.transaction(async (trx) => {
+      await trx
+        .insert(groupUsers)
+        .values(data.userIds.map((userId) => ({ userId, groupId: data.groupId })))
+        .onConflictDoUpdate({
+          target: [groupUsers.userId],
+          set: { groupId: data.groupId },
+        });
+    });
+  }
+
+  public async getAdminsWithSettings() {
+    const adminsWithSettings = await this.db
+      .select({
+        user: users,
+        settings: settings,
+      })
+      .from(users)
+      .leftJoin(settings, eq(users.id, settings.userId))
+      .where(and(eq(users.role, USER_ROLES.ADMIN)));
+
+    return adminsWithSettings;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {
