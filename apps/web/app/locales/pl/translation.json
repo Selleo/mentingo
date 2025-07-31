@@ -106,7 +106,6 @@
     "close": "Zamknij",
     "profile": "Profil",
     "dashboard": "Pulpit",
-    "organizationSettings": "Ustawienia organizacji",
     "courses": "Kursy",
     "myCourses": "Moje kursy",
     "categories": "Kategorie",
@@ -926,14 +925,6 @@
     "button": {
       "download": "Pobierz",
       "preview": "Podgląd"
-    }
-  },
-  "organizationSettingsView": {
-    "header": "Ustawienia organizacji",
-    "subHeader": "Prześlij tło certyfikatu (PNG lub SVG)",
-    "other": {
-      "fileExtension": "Tylko pliki PNG lub SVG",
-      "selected": "Wybrano:"
     }
   }
 }

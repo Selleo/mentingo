@@ -38,11 +38,6 @@ export const getNavigationConfig = (
     iconName: "Course",
   },
   {
-    label: t("navigationSideBar.organizationSettings"),
-    path: "admin/organization-settings",
-    iconName: "Settings",
-  },
-  {
     label: isUser ? t("navigationSideBar.courses") : t("navigationSideBar.browseCourses"),
     path: "courses",
     iconName: isUser ? "Course" : "Multi",
