@@ -8,6 +8,7 @@ const progressBadge = {
   completed: "completed",
   in_progress: "inProgress",
   not_started: "notStarted",
+  blocked: "blocked",
 } as const;
 
 type Lesson = GetCourseResponse["data"]["chapters"][number]["lessons"][number];
@@ -15,7 +16,6 @@ type Lesson = GetCourseResponse["data"]["chapters"][number]["lessons"][number];
 type CourseChapterLessonProps = {
   lesson: Lesson;
 };
-
 export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   return (
     <div className="flex w-full gap-x-2 p-2">
