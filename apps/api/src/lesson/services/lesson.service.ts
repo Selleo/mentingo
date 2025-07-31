@@ -16,8 +16,8 @@ import { FileService } from "src/file/file.service";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
-import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
+import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
@@ -151,7 +151,6 @@ export class LessonService {
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     userId: UUIDType,
-    userRole: UserRole,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;

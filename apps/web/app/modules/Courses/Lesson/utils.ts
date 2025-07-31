@@ -1,6 +1,5 @@
-import { find, flatMap } from "lodash-es";
-
 import { t } from "i18next";
+import { find, flatMap } from "lodash-es";
 import { match, P } from "ts-pattern";
 
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
@@ -224,6 +223,16 @@ export const parseQuizFormData = (input: QuizForm) => {
 
   return result;
 };
+
+export function getCurrentChapterId(
+  course: GetCourseResponse["data"],
+  lessonId: string,
+): string | undefined {
+  return (
+    course.chapters.find((chapter) => chapter.lessons.some((lesson) => lesson.id === lessonId))
+      ?.id ?? course.chapters[0]?.id
+  );
+}
 
 export const findFirstNotStartedLessonId = (course: GetCourseResponse["data"]) => {
   const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);

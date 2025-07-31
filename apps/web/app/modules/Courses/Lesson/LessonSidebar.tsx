@@ -20,6 +20,7 @@ import {
 } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { LESSON_PROGRESS_STATUSES } from "./types";
+import { getCurrentChapterId } from "./utils";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -37,12 +38,15 @@ const progressBadge = {
 
 export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
   const { state } = useLocation();
-  const [activeChapter, setActiveChapter] = useState<string | undefined>(state?.chapterId);
+
+  const [activeChapter, setActiveChapter] = useState<string | undefined>(
+    state?.chapterId ?? getCurrentChapterId(course, lessonId),
+  );
   const { t } = useTranslation();
 
   useEffect(() => {
-    setActiveChapter(state?.chapterId);
-  }, [state?.chapterId]);
+    setActiveChapter(state?.chapterId ?? getCurrentChapterId(course, lessonId));
+  }, [state?.chapterId, lessonId, course]);
 
   const handleAccordionChange = (value: string | undefined) => {
     setActiveChapter(value);
@@ -73,7 +77,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
             <Accordion
               type="single"
               collapsible
-              value={activeChapter ?? course?.chapters?.[0]?.id}
+              value={activeChapter}
               onValueChange={handleAccordionChange}
             >
               {course?.chapters?.map(
