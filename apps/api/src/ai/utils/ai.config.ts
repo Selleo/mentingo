@@ -59,7 +59,6 @@ Instructions: ${lesson.instructions}
 – Ask focused, helpful questions aligned with the lesson details and group characteristics.  
 – Keep replies clear and concise (100–200 words), while staying warm, curious, and engaging.  
 – Always end your turn with a prompt that encourages the student to continue explaining or exploring the topic.
-
 Begin the session by greeting the student, summarizing today's lesson and instructions, and asking them to begin teaching you.`;
 };
 

@@ -83,7 +83,7 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
   }, [messages]);
 
   return (
-    <div className="mx-auto flex size-full max-h-[85vh] flex-col items-center overflow-y-scroll py-4">
+    <div className="mx-auto flex h-[85vh] max-h-[85vh] w-full flex-col items-center overflow-y-scroll py-4">
       <RetakeModal
         open={showRetakeModal}
         onOpenChange={setShowRetakeModal}
