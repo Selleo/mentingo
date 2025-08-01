@@ -61,6 +61,5 @@ export class TokenService {
   clearTokenCookies(response: Response) {
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");
-    response.clearCookie("mfa_access_token");
   }
 }
