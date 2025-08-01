@@ -4,6 +4,8 @@ import type { Static } from "@sinclair/typebox";
 
 export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.String(),
+  isMFAEnabled: Type.Boolean({ default: false }),
+  mfaSecret: Type.Union([Type.String({ default: null }), Type.Null()]),
 });
 
 export const globalSettingsJSONSchema = Type.Object({
@@ -11,7 +13,7 @@ export const globalSettingsJSONSchema = Type.Object({
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
-  language: Type.String(),
+  ...studentSettingsJSONContentSchema.properties,
   adminNewUserNotification: Type.Boolean(),
 });
 

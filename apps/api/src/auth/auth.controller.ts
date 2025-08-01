@@ -23,11 +23,18 @@ import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { UserActivityEvent } from "src/events";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
 import { LoginBody, loginSchema } from "./schemas/login.schema";
+import {
+  mfaSetupResponseSchema,
+  MFAVerifyBody,
+  mfaVerifyResponseSchema,
+  mfaVerifySchema,
+} from "./schemas/mfa.schema";
 import {
   ForgotPasswordBody,
   forgotPasswordSchema,
@@ -47,6 +54,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
+    private readonly userService: UserService,
     private readonly eventBus: EventBus,
   ) {
     this.APP_URL = process.env.APP_URL || "http://localhost:5173";
@@ -79,7 +87,7 @@ export class AuthController {
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     const { accessToken, refreshToken, ...account } = await this.authService.login(data);
 
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
+    this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
     return new BaseResponse(account);
   }
@@ -219,5 +227,50 @@ export class AuthController {
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
     response.redirect(this.APP_URL);
+  }
+
+  @Post("mfa/setup")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    response: baseResponse(mfaSetupResponseSchema),
+  })
+  async mfaSetup(@CurrentUser("userId") userId: UUIDType) {
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+
+    const secret = await this.authService.generateMFASecret(user.id);
+
+    return new BaseResponse({
+      secret,
+      otpauth: `otpauth://totp/Mentingo:${user.email}?secret=${secret}&issuer=Mentingo`,
+    });
+  }
+
+  @Post("mfa/verify")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    request: [{ type: "body", schema: mfaVerifySchema }],
+    response: baseResponse(mfaVerifyResponseSchema),
+  })
+  async mfaVerify(
+    @Body() body: MFAVerifyBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const mfaVerifyResult = await this.authService.verifyMFACode(userId, body.token);
+
+    if (!mfaVerifyResult) {
+      return new BaseResponse({ isValid: false });
+    }
+
+    const { isValid, accessToken, refreshToken } = mfaVerifyResult;
+
+    this.tokenService.clearTokenCookies(response);
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    return new BaseResponse({ isValid });
   }
 }

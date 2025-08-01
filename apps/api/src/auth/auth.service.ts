@@ -18,6 +18,7 @@ import {
 import * as bcrypt from "bcryptjs";
 import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { authenticator } from "otplib";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
@@ -391,5 +392,45 @@ export class AuthService {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };
+  }
+
+  async generateMFASecret(userId: string) {
+    const secret = authenticator.generateSecret();
+
+    const newSettings = await this.settingsService.updateUserSettings(userId, {
+      mfaSecret: secret,
+    });
+
+    if (!newSettings.mfaSecret) {
+      throw new BadRequestException("Failed to generate secret");
+    }
+
+    return secret;
+  }
+
+  async verifyMFACode(userId: string, token: string) {
+    if (!userId || !token) {
+      throw new BadRequestException("User ID and token are required");
+    }
+
+    const settings = await this.settingsService.getUserSettings(userId);
+
+    if (!settings.mfaSecret) return false;
+
+    const isValid = authenticator.check(token, settings.mfaSecret);
+
+    if (!isValid) {
+      throw new BadRequestException("Invalid MFA token");
+    }
+
+    const user = await this.userService.getUserById(userId);
+
+    const { refreshToken, accessToken } = await this.getTokens(user);
+
+    await this.settingsService.updateUserSettings(userId, {
+      isMFAEnabled: true,
+    });
+
+    return { isValid, accessToken, refreshToken };
   }
 }
