@@ -8,14 +8,14 @@ import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 import { SetupMFACard, VerifyMFACard } from "./components";
 
 export default function MFAPage() {
-  const { data: userSettings, isLoading } = useUserSettings();
+  const { data: userSettings, isLoading, isFetching } = useUserSettings();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
 
   if (hasVerifiedMFA) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" />;
   }
 
-  if (isLoading) {
+  if (isLoading || isFetching || !userSettings) {
     return (
       <div className="grid h-full w-full place-items-center">
         <Loader />
@@ -23,9 +23,17 @@ export default function MFAPage() {
     );
   }
 
+  if (!userSettings.mfaSecret) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-6">
+        <SetupMFACard />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6">
-      {userSettings?.isMFAEnabled ? <VerifyMFACard /> : <SetupMFACard />}
+      <VerifyMFACard />
     </div>
   );
 }

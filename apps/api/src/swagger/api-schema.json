@@ -10467,10 +10467,27 @@
                 "properties": {
                   "language": {
                     "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "mfaSecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
-                  "language"
+                  "language",
+                  "isMFAEnabled",
+                  "mfaSecret"
                 ]
               },
               {
@@ -10479,12 +10496,29 @@
                   "language": {
                     "type": "string"
                   },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "mfaSecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
+                  "isMFAEnabled",
+                  "mfaSecret",
                   "adminNewUserNotification"
                 ]
               }
@@ -10502,6 +10536,21 @@
             "properties": {
               "language": {
                 "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "mfaSecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             }
           },
@@ -10510,6 +10559,21 @@
             "properties": {
               "language": {
                 "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "mfaSecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "adminNewUserNotification": {
                 "type": "boolean"
@@ -10528,10 +10592,27 @@
                 "properties": {
                   "language": {
                     "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "mfaSecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
-                  "language"
+                  "language",
+                  "isMFAEnabled",
+                  "mfaSecret"
                 ]
               },
               {
@@ -10540,12 +10621,29 @@
                   "language": {
                     "type": "string"
                   },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "mfaSecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "adminNewUserNotification": {
                     "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
+                  "isMFAEnabled",
+                  "mfaSecret",
                   "adminNewUserNotification"
                 ]
               }
@@ -10565,12 +10663,29 @@
               "language": {
                 "type": "string"
               },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "mfaSecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "adminNewUserNotification": {
                 "type": "boolean"
               }
             },
             "required": [
               "language",
+              "isMFAEnabled",
+              "mfaSecret",
               "adminNewUserNotification"
             ]
           }

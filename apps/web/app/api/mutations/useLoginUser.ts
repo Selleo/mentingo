@@ -7,6 +7,7 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 
 import { ApiClient } from "../api-client";
 import { currentUserQueryOptions } from "../queries/useCurrentUser";
+import { userSettingsQueryOptions } from "../queries/useUserSettings";
 import { queryClient } from "../queryClient";
 
 import type { LoginBody } from "../generated-api";
@@ -33,6 +34,8 @@ export function useLoginUser() {
       setCurrentUser(data);
       queryClient.setQueryData(currentUserQueryOptions.queryKey, { data });
       queryClient.invalidateQueries(currentUserQueryOptions);
+      queryClient.invalidateQueries(userSettingsQueryOptions);
+      queryClient.invalidateQueries({ queryKey: ["mfa-setup"] });
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
