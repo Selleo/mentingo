@@ -3,7 +3,9 @@ import { isArray, omit } from "lodash";
 import request from "supertest";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
 import type { DatabasePg } from "../../common/index";
@@ -14,6 +16,7 @@ describe("AuthController (e2e)", () => {
   let authService: AuthService;
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -21,6 +24,15 @@ describe("AuthController (e2e)", () => {
     authService = app.get(AuthService);
     db = app.get("DB");
     userFactory = createUserFactory(db);
+    settingsFactory = createSettingsFactory(db);
+  });
+
+  beforeEach(async () => {
+    await settingsFactory.create({ userId: null });
+  });
+
+  afterEach(async () => {
+    await truncateTables(db, ["settings"]);
   });
 
   describe("POST /api/auth/register", () => {
