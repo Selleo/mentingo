@@ -3157,6 +3157,23 @@
           }
         }
       }
+    },
+    "/api/settings/admin/enforce-sso": {
+      "patch": {
+        "operationId": "SettingsController_updateEnforceSSO",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -10349,10 +10366,14 @@
             "properties": {
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO"
             ]
           }
         },
@@ -10490,10 +10511,37 @@
             "properties": {
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEnforceSSOResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO"
             ]
           }
         },

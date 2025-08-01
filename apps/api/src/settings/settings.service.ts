@@ -181,6 +181,36 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
+  public async updateGlobalEnforceSSO(): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.db
+      .select({
+        enforceSSO: sql<boolean>`(settings.settings->>'enforceSSO')::boolean`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{enforceSSO}',
+            to_jsonb(${!globalSettings.enforceSSO}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedGlobalSettings;
+  }
+
   private getDefaultSettingsForRole(role: UserRole): StudentSettings | AdminSettings {
     switch (role) {
       case USER_ROLES.ADMIN:

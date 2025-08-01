@@ -12,6 +12,12 @@ vi.mock("../../../api/api-client");
 
 mockRemixReact();
 
+vi.mock("~/api/queries/useGlobalSettings", () => ({
+  useGlobalSettingsSuspense: () => ({
+    data: { enforceSSO: false },
+  }),
+}));
+
 describe("Login page", () => {
   beforeEach(() => {
     vi.resetAllMocks();

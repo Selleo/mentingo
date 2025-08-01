@@ -8,6 +8,7 @@ export const studentSettingsJSONContentSchema = Type.Object({
 
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
+  enforceSSO: Type.Boolean(),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({

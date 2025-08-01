@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
+import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -44,6 +45,10 @@ export default function RegisterPage() {
   });
 
   const {
+    data: { enforceSSO: isSSOEnforced },
+  } = useGlobalSettingsSuspense();
+
+  const {
     register,
     handleSubmit,
     formState: { errors, isValid },
@@ -58,50 +63,55 @@ export default function RegisterPage() {
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
-          <CardDescription>{t("registerView.subHeader")}</CardDescription>
+          <CardDescription>
+            {isSSOEnforced ? t("registerView.subHeaderSSO") : t("registerView.subHeader")}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
-              <Input id="firstName" type="text" placeholder="John" {...register("firstName")} />
-              {errors.firstName?.message && (
-                <FormValidationError message={t(errors.firstName.message)} />
-              )}
-            </div>
+          {!isSSOEnforced && (
+            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="firstName">{t("registerView.field.firstName")}</Label>
+                <Input id="firstName" type="text" placeholder="John" {...register("firstName")} />
+                {errors.firstName?.message && (
+                  <FormValidationError message={t(errors.firstName.message)} />
+                )}
+              </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="lastName">{t("registerView.field.lastName")}</Label>
-              <Input id="lastName" type="text" placeholder="Doe" {...register("lastName")} />
-              {errors.lastName?.message && (
-                <FormValidationError message={t(errors.lastName.message)} />
-              )}
-            </div>
+              <div className="grid gap-2">
+                <Label htmlFor="lastName">{t("registerView.field.lastName")}</Label>
+                <Input id="lastName" type="text" placeholder="Doe" {...register("lastName")} />
+                {errors.lastName?.message && (
+                  <FormValidationError message={t(errors.lastName.message)} />
+                )}
+              </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="email">{t("registerView.field.email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="user@example.com"
-                {...register("email")}
-              />
-              {errors.email?.message && <FormValidationError message={t(errors.email.message)} />}
-            </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">{t("registerView.field.email")}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  {...register("email")}
+                />
+                {errors.email?.message && <FormValidationError message={t(errors.email.message)} />}
+              </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="password">{t("registerView.field.password")}</Label>
-              <Input id="password" type="password" {...register("password")} />
-              <PasswordValidationDisplay fieldName="password" />
-            </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">{t("registerView.field.password")}</Label>
+                <Input id="password" type="password" {...register("password")} />
+                <PasswordValidationDisplay fieldName="password" />
+              </div>
 
-            <Button type="submit" className="w-full" disabled={!isValid}>
-              {t("registerView.button.createAccount")}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full" disabled={!isValid}>
+                {t("registerView.button.createAccount")}
+              </Button>
+            </form>
+          )}
 
           {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
             <SocialLogin
+              isSSOEnforced={isSSOEnforced}
               isGoogleOAuthEnabled={isGoogleOAuthEnabled}
               isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
             />

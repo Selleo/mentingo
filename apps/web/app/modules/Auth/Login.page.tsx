@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useLoginUser } from "~/api/mutations/useLoginUser";
+import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import LogoUrl from "~/assets/menitngo_logo_light_transparent.svg";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { Button } from "~/components/ui/button";
@@ -33,6 +34,10 @@ export default function LoginPage() {
   const { t } = useTranslation();
 
   const {
+    data: { enforceSSO: isSSOEnforced },
+  } = useGlobalSettingsSuspense();
+
+  const {
     register,
     handleSubmit,
     control,
@@ -40,6 +45,10 @@ export default function LoginPage() {
   } = useForm<LoginBody>({ resolver: zodResolver(loginSchema(t)) });
 
   const onSubmit = (data: LoginBody) => {
+    if (isSSOEnforced && (isGoogleOAuthEnabled || isMicrosoftOAuthEnabled)) {
+      return;
+    }
+
     loginUser({ data }).then(() => {
       navigate("/");
     });
@@ -52,50 +61,58 @@ export default function LoginPage() {
           <img src={LogoUrl} alt="" loading="eager" decoding="async" />
           {t("loginView.header")}
         </CardTitle>
-        <CardDescription>{t("loginView.subHeader")}</CardDescription>
+        <CardDescription>
+          {isSSOEnforced ? t("loginView.subHeaderSSO") : t("loginView.subHeader")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
-            <Label htmlFor="email">{t("loginView.field.email")}</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="user@example.com"
-              className={cn({ "border-red-500": errors.email })}
-              {...register("email")}
-            />
-            {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
-          </div>
-          <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">{t("loginView.field.password")}</Label>
-              <Link to="/auth/password-recovery" className="ml-auto inline-block text-sm underline">
-                {t("loginView.other.forgotPassword")}
-              </Link>
+        {!isSSOEnforced && (
+          <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid gap-2">
+              <Label htmlFor="email">{t("loginView.field.email")}</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="user@example.com"
+                className={cn({ "border-red-500": errors.email })}
+                {...register("email")}
+              />
+              {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
             </div>
-            <Input
-              id="password"
-              type="password"
-              className={cn({ "border-red-500": errors.password })}
-              {...register("password")}
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">{t("loginView.field.password")}</Label>
+                <Link
+                  to="/auth/password-recovery"
+                  className="ml-auto inline-block text-sm underline"
+                >
+                  {t("loginView.other.forgotPassword")}
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                className={cn({ "border-red-500": errors.password })}
+                {...register("password")}
+              />
+              {errors.password && (
+                <div className="text-sm text-red-500">{errors.password.message}</div>
+              )}
+            </div>
+            <FormCheckbox
+              control={control}
+              name="rememberMe"
+              label={t("loginView.other.rememberMe")}
             />
-            {errors.password && (
-              <div className="text-sm text-red-500">{errors.password.message}</div>
-            )}
-          </div>
-          <FormCheckbox
-            control={control}
-            name="rememberMe"
-            label={t("loginView.other.rememberMe")}
-          />
-          <Button type="submit" className="w-full">
-            {t("loginView.button.login")}
-          </Button>
-        </form>
+            <Button type="submit" className="w-full">
+              {t("loginView.button.login")}
+            </Button>
+          </form>
+        )}
 
         {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
           <SocialLogin
+            isSSOEnforced={isSSOEnforced}
             isGoogleOAuthEnabled={isGoogleOAuthEnabled}
             isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
           />
