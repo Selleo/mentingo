@@ -3699,7 +3699,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
         path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
-        format: "json",
         ...params,
       }),
   };

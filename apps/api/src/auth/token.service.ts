@@ -6,6 +6,12 @@ import type { Response } from "express";
 
 @Injectable()
 export class TokenService {
+  private isProduction: boolean;
+
+  constructor() {
+    this.isProduction = process.env.NODE_ENV === "production";
+  }
+
   setTokenCookies(
     response: Response,
     accessToken: string,
@@ -17,20 +23,37 @@ export class TokenService {
     const accessTokenMaxAge = rememberMe ? oneMonthExpirationTime : ACCESS_TOKEN_EXPIRATION_TIME;
     const refreshTokenMaxAge = rememberMe ? oneMonthExpirationTime : REFRESH_TOKEN_EXPIRATION_TIME;
 
-    const isProduction = process.env.NODE_ENV === "production";
-
     response.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: isProduction,
+      secure: this.isProduction,
       sameSite: "strict",
       maxAge: accessTokenMaxAge,
     });
 
     response.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: isProduction,
+      secure: this.isProduction,
       sameSite: "strict",
       maxAge: refreshTokenMaxAge,
+      path: "/api/auth/refresh",
+    });
+  }
+
+  setTemporaryTokenCookies(response: Response, accessToken: string, refreshToken: string) {
+    const fiveMinutesExpirationTime = 5 * 60 * 1000;
+
+    response.cookie("access_token", accessToken, {
+      httpOnly: true,
+      secure: this.isProduction,
+      sameSite: "strict",
+      maxAge: fiveMinutesExpirationTime,
+    });
+
+    response.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: this.isProduction,
+      sameSite: "strict",
+      maxAge: fiveMinutesExpirationTime,
       path: "/api/auth/refresh",
     });
   }
@@ -38,5 +61,6 @@ export class TokenService {
   clearTokenCookies(response: Response) {
     response.clearCookie("access_token");
     response.clearCookie("refresh_token");
+    response.clearCookie("mfa_access_token");
   }
 }

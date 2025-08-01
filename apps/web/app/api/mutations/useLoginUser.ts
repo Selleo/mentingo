@@ -18,6 +18,7 @@ type LoginUserOptions = {
 export function useLoginUser() {
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
   const setCurrentUser = useCurrentUserStore(({ setCurrentUser }) => setCurrentUser);
+  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
   const { toast } = useToast();
 
   return useMutation({
@@ -27,6 +28,7 @@ export function useLoginUser() {
       return response.data;
     },
     onSuccess: ({ data }) => {
+      setHasVerifiedMFA(false);
       setLoggedIn(true);
       setCurrentUser(data);
       queryClient.setQueryData(currentUserQueryOptions.queryKey, { data });

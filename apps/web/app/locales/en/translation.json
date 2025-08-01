@@ -1154,5 +1154,27 @@
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
     }
+  },
+  "mfa": {
+    "setup": {
+      "title": "Setup Multi-Factor Authentication",
+      "description": "Follow the steps below to set up Multi-Factor Authentication (MFA) for your account.",
+      "scanQr": "Scan the QR code below with your authenticator app (Google Authenticator, Authy, etc).",
+      "manualEntry": "If you can't scan, enter the secret manually in your app.",
+      "enterCode": "Enter the 6-digit code from your app below and click 'Verify & Enable MFA'.",
+      "loadingQr": "Loading your QR code...",
+      "secretLabel": "Secret",
+      "tokenLabel": "MFA Token",
+      "verifyButton": "Verify & Enable MFA"
+    },
+    "verify": {
+      "title": "Setup Multi-Factor Authentication",
+      "description": "Follow the steps below to set up Multi-Factor Authentication (MFA) for your account.",
+      "openAuthenticator": "Open your authenticator app",
+      "enterCode": "Enter the 6-digit code from your app",
+      "verifyToken": "Verify your MFA token",
+      "tokenLabel": "MFA Token",
+      "submitButton": "Verify your token"
+    }
   }
 }

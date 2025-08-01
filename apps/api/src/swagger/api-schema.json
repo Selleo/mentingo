@@ -213,6 +213,50 @@
         }
       }
     },
+    "/api/auth/mfa/setup": {
+      "post": {
+        "operationId": "AuthController_mfaSetup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/mfa/verify": {
+      "post": {
+        "operationId": "AuthController_mfaVerify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaVerifyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaVerifyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",
@@ -3534,6 +3578,59 @@
         "required": [
           "newPassword",
           "resetToken"
+        ]
+      },
+      "MfaSetupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "secret": {
+                "type": "string"
+              },
+              "otpauth": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "secret",
+              "otpauth"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MfaVerifyBody": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "MfaVerifyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "isValid": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "isValid"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetUsersResponse": {

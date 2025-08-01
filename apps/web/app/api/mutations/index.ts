@@ -17,3 +17,5 @@ export { useUpsertUserDetails } from "./useUpsertUserDetails";
 export { useUpdateUserProfile } from "./useUpdateUserProfile";
 export { useRetakeQuiz } from "./useRetakeQuiz";
 export { useQuizRetakeStatus } from "./useQuizRetakeStatus";
+export { useSetupMFA } from "./useSetupMFA";
+export { useVerifyMFA } from "./useVerifyMFA";
