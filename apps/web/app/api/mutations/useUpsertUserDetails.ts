@@ -6,6 +6,7 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 import { currentUserQueryOptions } from "../queries/useCurrentUser";
+import { userDetails } from "../queries/useUserDetails";
 import { queryClient } from "../queryClient";
 
 import type { UpsertUserDetailsBody } from "../generated-api";
@@ -23,8 +24,9 @@ export function useUpsertUserDetails() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(currentUserQueryOptions);
+      queryClient.invalidateQueries(userDetails(data.data.id));
 
       toast({ description: t("changeUserInformationView.toast.userDetailsUpdatedSuccessfully") });
     },
