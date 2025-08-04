@@ -1173,7 +1173,11 @@
       "openAuthenticator": "Open your authenticator app",
       "enterCode": "Enter the 6-digit code from your app",
       "verifyToken": "Verify your MFA token",
-      "tokenLabel": "MFA Token"
+      "tokenLabel": "MFA Token",
+      "toast": {
+        "success": "MFA has been successfully verified.",
+        "error": "MFA verification failed."
+      }
     }
   }
 }

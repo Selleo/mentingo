@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
@@ -7,7 +7,9 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 import { ApiClient } from "../api-client";
 
 export function useVerifyMFA() {
+  const { t } = useTranslation();
   const { toast } = useToast();
+
   const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
 
   return useMutation({
@@ -18,20 +20,14 @@ export function useVerifyMFA() {
     },
     onSuccess: () => {
       toast({
-        description: "MFA verification successful.",
+        description: t("mfa.verify.toast.success"),
       });
 
       setHasVerifiedMFA(true);
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          description: error.response?.data.message,
-          variant: "destructive",
-        });
-      }
+    onError: () => {
       toast({
-        description: error.message,
+        description: t("mfa.verify.toast.error"),
         variant: "destructive",
       });
     },
