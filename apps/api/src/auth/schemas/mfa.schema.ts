@@ -2,19 +2,19 @@ import { Type } from "@sinclair/typebox";
 
 import type { Static } from "@sinclair/typebox";
 
-export const mfaVerifySchema = Type.Object({
+export const MFAVerifySchema = Type.Object({
   token: Type.String(),
 });
 
-export const mfaSetupResponseSchema = Type.Object({
+export const MFASetupResponseSchema = Type.Object({
   secret: Type.String(),
   otpauth: Type.String(),
 });
 
-export const mfaVerifyResponseSchema = Type.Object({
+export const MFAVerifyResponseSchema = Type.Object({
   isValid: Type.Boolean(),
 });
 
-export type MFAVerifyBody = Static<typeof mfaVerifySchema>;
-export type MFAEnableResponse = Static<typeof mfaSetupResponseSchema>;
-export type MFAVerifyResponse = Static<typeof mfaVerifyResponseSchema>;
+export type MFAVerifyBody = Static<typeof MFAVerifySchema>;
+export type MFAEnableResponse = Static<typeof MFASetupResponseSchema>;
+export type MFAVerifyResponse = Static<typeof MFAVerifyResponseSchema>;

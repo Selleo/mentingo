@@ -215,14 +215,14 @@
     },
     "/api/auth/mfa/setup": {
       "post": {
-        "operationId": "AuthController_mfaSetup",
+        "operationId": "AuthController_MFASetup",
         "parameters": [],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MfaSetupResponse"
+                  "$ref": "#/components/schemas/MFASetupResponse"
                 }
               }
             }
@@ -232,14 +232,14 @@
     },
     "/api/auth/mfa/verify": {
       "post": {
-        "operationId": "AuthController_mfaVerify",
+        "operationId": "AuthController_MFAVerify",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MfaVerifyBody"
+                "$ref": "#/components/schemas/MFAVerifyBody"
               }
             }
           }
@@ -249,7 +249,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MfaVerifyResponse"
+                  "$ref": "#/components/schemas/MFAVerifyResponse"
                 }
               }
             }
@@ -3580,7 +3580,7 @@
           "resetToken"
         ]
       },
-      "MfaSetupResponse": {
+      "MFASetupResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -3603,7 +3603,7 @@
           "data"
         ]
       },
-      "MfaVerifyBody": {
+      "MFAVerifyBody": {
         "type": "object",
         "properties": {
           "token": {
@@ -3614,7 +3614,7 @@
           "token"
         ]
       },
-      "MfaVerifyResponse": {
+      "MFAVerifyResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -10472,7 +10472,7 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "mfaSecret": {
+                  "MFASecret": {
                     "anyOf": [
                       {
                         "default": null,
@@ -10487,7 +10487,7 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "mfaSecret"
+                  "MFASecret"
                 ]
               },
               {
@@ -10500,7 +10500,7 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "mfaSecret": {
+                  "MFASecret": {
                     "anyOf": [
                       {
                         "default": null,
@@ -10518,7 +10518,7 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "mfaSecret",
+                  "MFASecret",
                   "adminNewUserNotification"
                 ]
               }
@@ -10541,7 +10541,7 @@
                 "default": false,
                 "type": "boolean"
               },
-              "mfaSecret": {
+              "MFASecret": {
                 "anyOf": [
                   {
                     "default": null,
@@ -10564,7 +10564,7 @@
                 "default": false,
                 "type": "boolean"
               },
-              "mfaSecret": {
+              "MFASecret": {
                 "anyOf": [
                   {
                     "default": null,
@@ -10597,7 +10597,7 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "mfaSecret": {
+                  "MFASecret": {
                     "anyOf": [
                       {
                         "default": null,
@@ -10612,7 +10612,7 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "mfaSecret"
+                  "MFASecret"
                 ]
               },
               {
@@ -10625,7 +10625,7 @@
                     "default": false,
                     "type": "boolean"
                   },
-                  "mfaSecret": {
+                  "MFASecret": {
                     "anyOf": [
                       {
                         "default": null,
@@ -10643,7 +10643,7 @@
                 "required": [
                   "language",
                   "isMFAEnabled",
-                  "mfaSecret",
+                  "MFASecret",
                   "adminNewUserNotification"
                 ]
               }
@@ -10667,7 +10667,7 @@
                 "default": false,
                 "type": "boolean"
               },
-              "mfaSecret": {
+              "MFASecret": {
                 "anyOf": [
                   {
                     "default": null,
@@ -10685,7 +10685,7 @@
             "required": [
               "language",
               "isMFAEnabled",
-              "mfaSecret",
+              "MFASecret",
               "adminNewUserNotification"
             ]
           }

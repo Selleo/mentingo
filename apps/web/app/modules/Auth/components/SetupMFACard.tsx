@@ -85,7 +85,7 @@ export function SetupMFACard() {
             onChange={(newValue: string) => setValue("token", newValue)}
           >
             <InputOTPGroup className="flex">
-              {Array.from({ length: 6 }).map((_, idx) => (
+              {Array.from({ length: 6 }, (_, idx) => (
                 <InputOTPSlot index={idx} key={idx} />
               ))}
             </InputOTPGroup>

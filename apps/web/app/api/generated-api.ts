@@ -102,18 +102,18 @@ export interface ResetPasswordBody {
   resetToken: string;
 }
 
-export interface MfaSetupResponse {
+export interface MFASetupResponse {
   data: {
     secret: string;
     otpauth: string;
   };
 }
 
-export interface MfaVerifyBody {
+export interface MFAVerifyBody {
   token: string;
 }
 
-export interface MfaVerifyResponse {
+export interface MFAVerifyResponse {
   data: {
     isValid: boolean;
   };
@@ -1682,13 +1682,13 @@ export interface GetUserSettingsResponse {
         language: string;
         /** @default false */
         isMFAEnabled: boolean;
-        mfaSecret: string | null;
+        MFASecret: string | null;
       }
     | {
         language: string;
         /** @default false */
         isMFAEnabled: boolean;
-        mfaSecret: string | null;
+        MFASecret: string | null;
         adminNewUserNotification: boolean;
       };
 }
@@ -1698,13 +1698,13 @@ export type UpdateUserSettingsBody =
       language?: string;
       /** @default false */
       isMFAEnabled?: boolean;
-      mfaSecret?: string | null;
+      MFASecret?: string | null;
     }
   | {
       language?: string;
       /** @default false */
       isMFAEnabled?: boolean;
-      mfaSecret?: string | null;
+      MFASecret?: string | null;
       adminNewUserNotification?: boolean;
     };
 
@@ -1714,13 +1714,13 @@ export interface UpdateUserSettingsResponse {
         language: string;
         /** @default false */
         isMFAEnabled: boolean;
-        mfaSecret: string | null;
+        MFASecret: string | null;
       }
     | {
         language: string;
         /** @default false */
         isMFAEnabled: boolean;
-        mfaSecret: string | null;
+        MFASecret: string | null;
         adminNewUserNotification: boolean;
       };
 }
@@ -1730,7 +1730,7 @@ export interface UpdateAdminNewUserNotificationResponse {
     language: string;
     /** @default false */
     isMFAEnabled: boolean;
-    mfaSecret: string | null;
+    MFASecret: string | null;
     adminNewUserNotification: boolean;
   };
 }
@@ -2080,7 +2080,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/auth/mfa/setup
      */
     authControllerMfaSetup: (params: RequestParams = {}) =>
-      this.request<MfaSetupResponse, any>({
+      this.request<MFASetupResponse, any>({
         path: `/api/auth/mfa/setup`,
         method: "POST",
         format: "json",
@@ -2093,8 +2093,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AuthControllerMfaVerify
      * @request POST:/api/auth/mfa/verify
      */
-    authControllerMfaVerify: (data: MfaVerifyBody, params: RequestParams = {}) =>
-      this.request<MfaVerifyResponse, any>({
+    authControllerMfaVerify: (data: MFAVerifyBody, params: RequestParams = {}) =>
+      this.request<MFAVerifyResponse, any>({
         path: `/api/auth/mfa/verify`,
         method: "POST",
         body: data,

@@ -30,10 +30,10 @@ import { CreateAccountBody, createAccountSchema } from "./schemas/create-account
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
 import { LoginBody, loginSchema } from "./schemas/login.schema";
 import {
-  mfaSetupResponseSchema,
+  MFASetupResponseSchema,
   MFAVerifyBody,
-  mfaVerifyResponseSchema,
-  mfaVerifySchema,
+  MFAVerifyResponseSchema,
+  MFAVerifySchema,
 } from "./schemas/mfa.schema";
 import {
   ForgotPasswordBody,
@@ -232,44 +232,29 @@ export class AuthController {
   @Post("mfa/setup")
   @Roles(...Object.values(USER_ROLES))
   @Validate({
-    response: baseResponse(mfaSetupResponseSchema),
+    response: baseResponse(MFASetupResponseSchema),
   })
-  async mfaSetup(@CurrentUser("userId") userId: UUIDType) {
-    const user = await this.userService.getUserById(userId);
-
-    if (!user) {
-      throw new UnauthorizedException("User not found");
-    }
-
-    const secret = await this.authService.generateMFASecret(user.id);
+  async MFASetup(@CurrentUser("userId") userId: UUIDType) {
+    const { secret, otpauth } = await this.authService.generateMFASecret(userId);
 
     return new BaseResponse({
       secret,
-      otpauth: `otpauth://totp/Mentingo:${user.email}?secret=${secret}&issuer=Mentingo`,
+      otpauth,
     });
   }
 
   @Post("mfa/verify")
   @Roles(...Object.values(USER_ROLES))
   @Validate({
-    request: [{ type: "body", schema: mfaVerifySchema }],
-    response: baseResponse(mfaVerifyResponseSchema),
+    request: [{ type: "body", schema: MFAVerifySchema }],
+    response: baseResponse(MFAVerifyResponseSchema),
   })
-  async mfaVerify(
+  async MFAVerify(
     @Body() body: MFAVerifyBody,
     @CurrentUser("userId") userId: UUIDType,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const mfaVerifyResult = await this.authService.verifyMFACode(userId, body.token);
-
-    if (!mfaVerifyResult) {
-      return new BaseResponse({ isValid: false });
-    }
-
-    const { isValid, accessToken, refreshToken } = mfaVerifyResult;
-
-    this.tokenService.clearTokenCookies(response);
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+    const isValid = await this.authService.verifyMFACode(userId, body.token, response);
 
     return new BaseResponse({ isValid });
   }

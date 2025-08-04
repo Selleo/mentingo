@@ -34,7 +34,9 @@ import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
+import { TokenService } from "./token.service";
 
+import type { Response } from "express";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { UserResponse } from "src/user/schemas/user.schema";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
@@ -52,6 +54,7 @@ export class AuthService {
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
     private eventBus: EventBus,
+    private tokenService: TokenService,
   ) {}
 
   public async register({
@@ -395,29 +398,38 @@ export class AuthService {
   }
 
   async generateMFASecret(userId: string) {
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+
     const secret = authenticator.generateSecret();
 
     const newSettings = await this.settingsService.updateUserSettings(userId, {
-      mfaSecret: secret,
+      MFASecret: secret,
     });
 
-    if (!newSettings.mfaSecret) {
+    if (!newSettings.MFASecret) {
       throw new BadRequestException("Failed to generate secret");
     }
 
-    return secret;
+    return {
+      secret,
+      otpauth: `otpauth://totp/Mentingo:${user.email}?secret=${secret}&issuer=Mentingo`,
+    };
   }
 
-  async verifyMFACode(userId: string, token: string) {
+  async verifyMFACode(userId: string, token: string, response: Response) {
     if (!userId || !token) {
       throw new BadRequestException("User ID and token are required");
     }
 
     const settings = await this.settingsService.getUserSettings(userId);
 
-    if (!settings.mfaSecret) return false;
+    if (!settings.MFASecret) return false;
 
-    const isValid = authenticator.check(token, settings.mfaSecret);
+    const isValid = authenticator.check(token, settings.MFASecret);
 
     if (!isValid) {
       throw new BadRequestException("Invalid MFA token");
@@ -425,12 +437,19 @@ export class AuthService {
 
     const user = await this.userService.getUserById(userId);
 
+    if (!user) {
+      throw new NotFoundException("Failed to retrieve user");
+    }
+
     const { refreshToken, accessToken } = await this.getTokens(user);
+
+    this.tokenService.clearTokenCookies(response);
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
     await this.settingsService.updateUserSettings(userId, {
       isMFAEnabled: true,
     });
 
-    return { isValid, accessToken, refreshToken };
+    return isValid;
   }
 }

@@ -61,13 +61,13 @@ export function VerifyMFACard() {
             onChange={(newValue: string) => setValue("token", newValue)}
           >
             <InputOTPGroup className="flex">
-              {Array.from({ length: 6 }).map((_, idx) => (
+              {Array.from({ length: 6 }, (_, idx) => (
                 <InputOTPSlot index={idx} key={idx} />
               ))}
             </InputOTPGroup>
           </InputOTP>
           <Button variant="primary" className="mt-4" disabled={isVerifyingMFA}>
-            {t("mfa.verify.submitButton")}
+            {t("mfa.verify.verifyToken")}
           </Button>
         </form>
       </CardContent>

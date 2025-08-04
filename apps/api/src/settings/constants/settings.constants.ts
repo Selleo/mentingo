@@ -3,7 +3,7 @@ import type { AdminSettings, GlobalSettings, StudentSettings } from "src/common/
 export const DEFAULT_STUDENT_SETTINGS: StudentSettings = {
   language: "en",
   isMFAEnabled: false,
-  mfaSecret: null,
+  MFASecret: null,
 };
 
 export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {

@@ -1173,8 +1173,7 @@
       "openAuthenticator": "Open your authenticator app",
       "enterCode": "Enter the 6-digit code from your app",
       "verifyToken": "Verify your MFA token",
-      "tokenLabel": "MFA Token",
-      "submitButton": "Verify your token"
+      "tokenLabel": "MFA Token"
     }
   }
 }

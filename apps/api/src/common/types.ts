@@ -4,7 +4,7 @@ export type ActivityHistory = {
 export type StudentSettings = {
   language: string;
   isMFAEnabled: boolean;
-  mfaSecret: string | null;
+  MFASecret: string | null;
 };
 
 export type AdminSettings = {
