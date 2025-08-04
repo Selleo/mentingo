@@ -50,6 +50,11 @@
       "fileUploadedSuccessfully": "File uploaded successfully"
     }
   },
+  "deleteFile": {
+    "toast": {
+      "success": "File deleted successfully"
+    }
+  },
   "adminScorm": {
     "header": "Upload SCORM",
     "subHeader": "Upload your SCORM .zip file.",

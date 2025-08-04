@@ -9,14 +9,14 @@ export class BunnyStreamService {
   private readonly apiKey: string;
   private readonly signingKey: string;
   private readonly libraryId: string;
-  private readonly cdnUrl: string;
+  private readonly CDN_URL: string;
   private readonly httpClient: AxiosInstance;
 
   constructor(private readonly configService: ConfigService) {
     this.apiKey = this.configService.get<string>("BUNNY_STREAM_API_KEY") || "";
     this.signingKey = this.configService.get<string>("BUNNY_STREAM_SIGNING_KEY") || "";
     this.libraryId = this.configService.get<string>("BUNNY_STREAM_LIBRARY_ID") || "";
-    this.cdnUrl = this.configService.get<string>("BUNNY_STREAM_CDN_URL") || "";
+    this.CDN_URL = this.configService.get<string>("BUNNY_STREAM_CDN_URL") || "";
 
     this.httpClient = axios.create({
       baseURL: `https://video.bunnycdn.com/library/${this.libraryId}`,

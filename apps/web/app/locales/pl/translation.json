@@ -51,6 +51,11 @@
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
     }
   },
+  "deleteFile": {
+    "toast": {
+      "success": "Plik został pomyślnie usunięty"
+    }
+  },
   "adminScorm": {
     "header": "Prześlij SCORM",
     "subHeader": "Prześlij swój plik SCORM w formacie .zip.",

@@ -34,7 +34,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <script
           type="text/javascript"
-          src="//assets.mediadelivery.net/playerjs/playerjs-latest.min.js"
+          src={
+            import.meta.env.VITE_PLAYERJS_CDN_URL ||
+            "//assets.mediadelivery.net/playerjs/playerjs-latest.min.js"
+          }
           defer
         />
         <ScrollRestoration />

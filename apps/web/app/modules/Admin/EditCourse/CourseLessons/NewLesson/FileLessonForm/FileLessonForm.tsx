@@ -99,19 +99,19 @@ const FileLessonForm = ({
     [uploadFile, form],
   );
 
-  const handleFileDelete = useCallback(() => {
+  const handleFileDelete = useCallback(async () => {
     const fileKey = form.getValues("fileS3Key");
 
-    if (fileKey) {
-      deleteFile(fileKey)
-        .then(() => {
-          setDisplayFileUrl("");
-          form.setValue("fileS3Key", "");
-          form.setValue("fileType", "");
-        })
-        .catch((error) => {
-          console.error("Error deleting file:", error);
-        });
+    try {
+      if (fileKey) {
+        await deleteFile(fileKey);
+
+        setDisplayFileUrl("");
+        form.setValue("fileS3Key", "");
+        form.setValue("fileType", "");
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
     }
   }, [deleteFile, form]);
 
