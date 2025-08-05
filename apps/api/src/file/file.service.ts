@@ -2,7 +2,8 @@ import { BadRequestException, ConflictException, Injectable } from "@nestjs/comm
 
 import { S3Service } from "src/s3/s3.service";
 
-import { MAX_FILE_SIZE } from "./file.constants";
+import { MAX_FILE_SIZE, EXTENSION_TO_MIME_TYPE_MAP } from "./file.constants";
+import { MimeTypeGuard } from "./guards/mime-type.guard";
 
 @Injectable()
 export class FileService {
@@ -20,34 +21,29 @@ export class FileService {
       throw new BadRequestException("No file uploaded");
     }
 
-    const allowedMimeTypes = [
-      "image/jpeg",
-      "image/png",
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "video/mp4",
-      "video/quicktime",
-    ];
+    if (!file.originalname || !file.buffer) {
+      throw new BadRequestException("File upload failed - invalid file data");
+    }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size && file.size > MAX_FILE_SIZE) {
       throw new BadRequestException(
         `File size exceeds the maximum allowed size of ${MAX_FILE_SIZE} bytes`,
       );
     }
 
-    if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        `File type ${file.mimetype} is not allowed. Allowed types are: ${allowedMimeTypes.join(
-          ", ",
-        )}`,
-      );
+    let mimetype: string | undefined = file.mimetype;
+    if (!mimetype) {
+      const extension = file.originalname.split(".").pop()?.toLowerCase();
+      mimetype = extension ? EXTENSION_TO_MIME_TYPE_MAP[extension] : undefined;
     }
+
+    MimeTypeGuard.validateMimeType(mimetype);
 
     try {
       const fileExtension = file.originalname.split(".").pop();
       const fileKey = `${resource}/${crypto.randomUUID()}.${fileExtension}`;
 
-      await this.s3Service.uploadFile(file.buffer, fileKey, file.mimetype);
+      await this.s3Service.uploadFile(file.buffer, fileKey, mimetype);
 
       const fileUrl = await this.s3Service.getSignedUrl(fileKey);
 

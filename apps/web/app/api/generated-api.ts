@@ -1656,6 +1656,7 @@ export interface GetScormMetadataResponse {
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    platformLogoS3Key: string | null;
   };
 }
 
@@ -1700,6 +1701,13 @@ export interface UpdateAdminNewUserNotificationResponse {
 export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    platformLogoS3Key: string | null;
+  };
+}
+
+export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
   };
 }
 
@@ -3700,6 +3708,33 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/settings/admin/unregistered-user-courses-accessibility`,
         method: "PATCH",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPlatformLogo
+     * @request GET:/api/settings/platform-logo
+     */
+    settingsControllerGetPlatformLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformLogoResponse, any>({
+        path: `/api/settings/platform-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformLogo
+     * @request PATCH:/api/settings/platform-logo
+     */
+    settingsControllerUpdatePlatformLogo: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-logo`,
+        method: "PATCH",
         ...params,
       }),
   };
