@@ -22,9 +22,10 @@ export const userSettingsQueryOptions = queryOptions({
   staleTime: 1000 * 60 * 5,
 });
 
-export function useUserSettings() {
+export function useUserSettings(enabled: boolean = true) {
   return useQuery({
     ...userSettingsQueryOptions,
+    enabled,
     select: (data: GetUserSettingsResponse | null) => {
       return data?.data;
     },

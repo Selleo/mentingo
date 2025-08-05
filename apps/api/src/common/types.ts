@@ -3,6 +3,8 @@ export type ActivityHistory = {
 };
 export type StudentSettings = {
   language: string;
+  isMFAEnabled: boolean;
+  MFASecret: string | null;
 };
 
 export type AdminSettings = {

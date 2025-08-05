@@ -28,9 +28,11 @@ const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true
 const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const { mutateAsync: loginUser } = useLoginUser();
   const { t } = useTranslation();
+
+  const navigate = useNavigate();
+
+  const { mutateAsync: loginUser } = useLoginUser();
 
   const {
     register,
@@ -41,7 +43,7 @@ export default function LoginPage() {
 
   const onSubmit = (data: LoginBody) => {
     loginUser({ data }).then(() => {
-      navigate("/");
+      navigate("/auth/mfa");
     });
   };
 

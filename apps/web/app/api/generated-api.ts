@@ -102,6 +102,23 @@ export interface ResetPasswordBody {
   resetToken: string;
 }
 
+export interface MFASetupResponse {
+  data: {
+    secret: string;
+    otpauth: string;
+  };
+}
+
+export interface MFAVerifyBody {
+  token: string;
+}
+
+export interface MFAVerifyResponse {
+  data: {
+    isValid: boolean;
+  };
+}
+
 export interface GetUsersResponse {
   data: ({
     id: string;
@@ -1664,9 +1681,15 @@ export interface GetUserSettingsResponse {
   data:
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
       }
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
         adminNewUserNotification: boolean;
       };
 }
@@ -1674,9 +1697,15 @@ export interface GetUserSettingsResponse {
 export type UpdateUserSettingsBody =
   | {
       language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
     }
   | {
       language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
       adminNewUserNotification?: boolean;
     };
 
@@ -1684,9 +1713,15 @@ export interface UpdateUserSettingsResponse {
   data:
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
       }
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
         adminNewUserNotification: boolean;
       };
 }
@@ -1694,6 +1729,9 @@ export interface UpdateUserSettingsResponse {
 export interface UpdateAdminNewUserNotificationResponse {
   data: {
     language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
     adminNewUserNotification: boolean;
   };
 }
@@ -2040,6 +2078,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/auth/microsoft/callback`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMfaSetup
+     * @request POST:/api/auth/mfa/setup
+     */
+    authControllerMfaSetup: (params: RequestParams = {}) =>
+      this.request<MFASetupResponse, any>({
+        path: `/api/auth/mfa/setup`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMfaVerify
+     * @request POST:/api/auth/mfa/verify
+     */
+    authControllerMfaVerify: (data: MFAVerifyBody, params: RequestParams = {}) =>
+      this.request<MFAVerifyResponse, any>({
+        path: `/api/auth/mfa/verify`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
