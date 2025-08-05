@@ -28,12 +28,12 @@ export class NotifyAdminsHandler
       email: email,
     });
 
-    const adminsToNotify = await this.userService.getAdminsToNotifyAboutNewUser();
+    const adminsEmailsToNotify = await this.userService.getAdminsToNotifyAboutNewUser();
 
     await Promise.all(
-      adminsToNotify.map((admin) => {
+      adminsEmailsToNotify.map((adminsEmail) => {
         return this.emailService.sendEmail({
-          to: admin.user.email,
+          to: adminsEmail,
           subject: "A new user has registered on your platform",
           text,
           html,

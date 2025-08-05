@@ -1,18 +1,12 @@
+import type { CompanyInformationSchema } from "src/settings/schemas/settings.schema";
+
 export type ActivityHistory = {
   [date: string]: boolean;
 };
 
-export type CompanyInformation = {
-  companyName?: string;
-  registeredAddress?: string;
-  taxNumber?: string;
-  emailAddress?: string;
-  courtRegisterNumber?: string;
-};
-
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
-  companyInformation?: CompanyInformation;
+  companyInformation?: CompanyInformationSchema;
 };
 
 export type StudentSettings = {

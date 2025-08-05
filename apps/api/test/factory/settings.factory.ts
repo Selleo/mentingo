@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
+import { match } from "ts-pattern";
 
 import {
   DEFAULT_ADMIN_SETTINGS,
@@ -20,19 +21,20 @@ export const createSettingsFactory = (
   userId: UUIDType | null = null,
   isAdmin: boolean = false,
 ) => {
+  const defaultSettings = match({ isAdmin, userId })
+    .with({ isAdmin: false, userId: null }, () => DEFAULT_GLOBAL_SETTINGS)
+    .with({ isAdmin: true }, () => DEFAULT_ADMIN_SETTINGS)
+    .with({ isAdmin: false }, () => DEFAULT_STUDENT_SETTINGS)
+    .exhaustive();
+
   return Factory.define<SettingsTest>(({ onCreate }) => {
     onCreate(async () => {
-      const finalSettings =
-        userId === null
-          ? { ...DEFAULT_GLOBAL_SETTINGS }
-          : { ...(isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS) };
-
       const [inserted] = await db
         .insert(settings)
         .values({
           userId: userId,
           createdAt: new Date().toISOString(),
-          settings: settingsToJSONBuildObject(finalSettings),
+          settings: settingsToJSONBuildObject(defaultSettings),
         })
         .returning();
 
@@ -44,12 +46,7 @@ export const createSettingsFactory = (
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: userId,
-      settings:
-        userId === null
-          ? DEFAULT_GLOBAL_SETTINGS
-          : isAdmin
-            ? DEFAULT_ADMIN_SETTINGS
-            : DEFAULT_STUDENT_SETTINGS,
+      settings: defaultSettings,
     };
   });
 };
