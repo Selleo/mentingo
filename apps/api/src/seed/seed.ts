@@ -12,7 +12,7 @@ import {
   DEFAULT_ADMIN_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
 } from "src/settings/constants/settings.constants";
-import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -109,9 +109,7 @@ async function insertUserDetails(userId: UUIDType) {
 
 async function insertGlobalSettings() {
   await db.insert(settings).values({
-    settings: settingsToJsonBuildObject(DEFAULT_GLOBAL_SETTINGS),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
   });
 }
 
@@ -119,9 +117,7 @@ async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
   const settingsObject = isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS;
   await db.insert(settings).values({
     userId,
-    settings: settingsToJsonBuildObject(settingsObject),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    settings: settingsToJSONBuildObject(settingsObject),
   });
 }
 

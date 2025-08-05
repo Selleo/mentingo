@@ -1656,6 +1656,13 @@ export interface GetScormMetadataResponse {
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
     platformLogoS3Key: string | null;
   };
 }
@@ -1688,6 +1695,17 @@ export interface UpdateUserSettingsResponse {
     | {
         language: string;
         adminNewUserNotification: boolean;
+      }
+    | {
+        unregisteredUserCoursesAccessibility: boolean;
+        companyInformation?: {
+          companyName?: string;
+          registeredAddress?: string;
+          taxNumber?: string;
+          emailAddress?: string;
+          courtRegisterNumber?: string;
+        };
+        platformLogoS3Key: string | null;
       };
 }
 
@@ -1701,6 +1719,13 @@ export interface UpdateAdminNewUserNotificationResponse {
 export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
     platformLogoS3Key: string | null;
   };
 }
@@ -1708,6 +1733,34 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
 export interface GetPlatformLogoResponse {
   data: {
     url: string | null;
+  };
+}
+
+export interface GetCompanyInformationResponse {
+  data: {
+    companyName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
+  };
+}
+
+export interface UpdateCompanyInformationBody {
+  companyName?: string;
+  registeredAddress?: string;
+  taxNumber?: string;
+  emailAddress?: string;
+  courtRegisterNumber?: string;
+}
+
+export interface UpdateCompanyInformationResponse {
+  data: {
+    companyName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
   };
 }
 
@@ -3735,6 +3788,39 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/settings/platform-logo`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetCompanyInformation
+     * @request GET:/api/settings/company-information
+     */
+    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
+      this.request<GetCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCompanyInformation
+     * @request PATCH:/api/settings/company-information
+     */
+    settingsControllerUpdateCompanyInformation: (
+      data: UpdateCompanyInformationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
   };

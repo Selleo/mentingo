@@ -1,12 +1,13 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
+import { match } from "ts-pattern";
 
 import {
-  DEFAULT_GLOBAL_SETTINGS,
   DEFAULT_ADMIN_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
+  DEFAULT_GLOBAL_SETTINGS,
 } from "src/settings/constants/settings.constants";
-import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { settings } from "../../src/storage/schema";
 
@@ -20,24 +21,20 @@ export const createSettingsFactory = (
   userId: UUIDType | null = null,
   isAdmin: boolean = false,
 ) => {
+  const defaultSettings = match({ isAdmin, userId })
+    .with({ isAdmin: false, userId: null }, () => DEFAULT_GLOBAL_SETTINGS)
+    .with({ isAdmin: true }, () => DEFAULT_ADMIN_SETTINGS)
+    .with({ isAdmin: false }, () => DEFAULT_STUDENT_SETTINGS)
+    .exhaustive();
+
   return Factory.define<SettingsTest>(({ onCreate }) => {
     onCreate(async () => {
-      const defaultSettings =
-        (userId === null && DEFAULT_GLOBAL_SETTINGS) ||
-        (isAdmin && DEFAULT_ADMIN_SETTINGS) ||
-        DEFAULT_STUDENT_SETTINGS;
-
-      const finalSettings = {
-        ...defaultSettings,
-      };
-      const settingsSQL = settingsToJsonBuildObject(finalSettings);
-
       const [inserted] = await db
         .insert(settings)
         .values({
           userId: userId,
           createdAt: new Date().toISOString(),
-          settings: settingsSQL,
+          settings: settingsToJSONBuildObject(defaultSettings),
         })
         .returning();
 
@@ -49,7 +46,7 @@ export const createSettingsFactory = (
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: userId,
-      settings: isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS,
+      settings: defaultSettings,
     };
   });
 };

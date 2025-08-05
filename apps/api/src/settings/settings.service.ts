@@ -12,14 +12,16 @@ import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
-import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { DEFAULT_ADMIN_SETTINGS, DEFAULT_STUDENT_SETTINGS } from "./constants/settings.constants";
 
+import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import type {
-  GlobalSettingsJSONContentSchema,
   SettingsJSONContentSchema,
+  GlobalSettingsJSONContentSchema,
   AdminSettingsJSONContentSchema,
+  UserSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
@@ -48,19 +50,19 @@ export class SettingsService {
   }
 
   public async createSettings(
-    userId: UUIDType,
+    userId: UUIDType | null,
     userRole: UserRole,
     customSettings?: Partial<SettingsJSONContentSchema>,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
-    if (!userId) {
+  ): Promise<SettingsJSONContentSchema> {
+    if (userId !== null && !userId) {
       throw new UnauthorizedException("User not authenticated");
     }
 
     const [existingSettings] = await dbInstance
       .select()
       .from(settings)
-      .where(eq(settings.userId, userId));
+      .where(userId === null ? isNull(settings.userId) : eq(settings.userId, userId));
 
     if (existingSettings) {
       throw new ConflictException("Settings already exists");
@@ -77,8 +79,7 @@ export class SettingsService {
       .insert(settings)
       .values({
         userId,
-        createdAt: new Date().toISOString(),
-        settings: settingsToJsonBuildObject(finalSettings),
+        settings: settingsToJSONBuildObject(finalSettings),
       })
       .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
@@ -86,7 +87,7 @@ export class SettingsService {
   }
 
   public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
-    const [userSettings] = await this.db
+    const [{ settings: userSettings }] = await this.db
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
@@ -95,23 +96,21 @@ export class SettingsService {
       throw new NotFoundException("User settings not found");
     }
 
-    return userSettings.settings;
+    return userSettings;
   }
 
   public async updateUserSettings(
     userId: UUIDType,
     updatedSettings: UpdateSettingsBody,
   ): Promise<SettingsJSONContentSchema> {
-    const [currentUserSettings] = await this.db
+    const [{ settings: currentSettings }] = await this.db
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
-    if (!currentUserSettings) {
+    if (!currentSettings) {
       throw new NotFoundException("User settings not found");
     }
-
-    const currentSettings = currentUserSettings.settings;
 
     const mergedSettings = {
       ...currentSettings,
@@ -121,10 +120,10 @@ export class SettingsService {
     const [{ settings: newUserSettings }] = await this.db
       .update(settings)
       .set({
-        settings: settingsToJsonBuildObject(mergedSettings),
+        settings: settingsToJSONBuildObject(mergedSettings),
       })
       .where(eq(settings.userId, userId))
-      .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
+      .returning({ settings: sql<UserSettingsJSONContentSchema>`${settings.settings}` });
 
     return newUserSettings;
   }
@@ -226,6 +225,54 @@ export class SettingsService {
     }
 
     return await this.fileService.getFileUrl(platformLogoS3Key);
+  }
+
+  public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
+    const [{ companyInformation }] = await this.db
+      .select({
+        companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    return companyInformation;
+  }
+
+  public async updateCompanyInformation(
+    companyInfo: CompanyInformaitonJSONSchema,
+  ): Promise<CompanyInformaitonJSONSchema> {
+    const [existingGlobal] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!existingGlobal) {
+      throw new NotFoundException("Company information not found");
+    }
+
+    const currentSettings = existingGlobal.settings || {};
+    const currentCompanyInfo = currentSettings.companyInformation || {};
+
+    const updatedSettings = {
+      ...currentSettings,
+      companyInformation: {
+        ...currentCompanyInfo,
+        ...companyInfo,
+      },
+    };
+
+    const [updated] = await this.db
+      .update(settings)
+      .set({
+        settings: settingsToJSONBuildObject(updatedSettings),
+        updatedAt: new Date().toISOString(),
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
+      });
+
+    return updated.companyInformation;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {

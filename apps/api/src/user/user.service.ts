@@ -44,7 +44,6 @@ import type {
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
-import type { AdminSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
 @Injectable()
@@ -426,6 +425,23 @@ export class UserService {
     return await this.s3Service.getSignedUrl(avatarReference);
   };
 
+  public async getAdminsToNotifyAboutNewUser(): Promise<string[]> {
+    const adminEmails = await this.db
+      .select({
+        email: users.email,
+      })
+      .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
+      .where(
+        and(
+          eq(users.role, USER_ROLES.ADMIN),
+          sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
+        ),
+      );
+
+    return adminEmails.map((admin) => admin.email);
+  }
+
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
     await this.db.transaction(async (trx) => {
       await trx
@@ -438,24 +454,17 @@ export class UserService {
     });
   }
 
-  public async getAdminsToNotifyAboutNewUser() {
-    const allAdmins = await this.db
+  public async getAdminsWithSettings() {
+    const adminsWithSettings = await this.db
       .select({
         user: users,
         settings: settings,
       })
       .from(users)
       .leftJoin(settings, eq(users.id, settings.userId))
-      .where(eq(users.role, USER_ROLES.ADMIN));
+      .where(and(eq(users.role, USER_ROLES.ADMIN)));
 
-    const adminsToNotify = allAdmins.filter((admin) => {
-      return (
-        (admin.settings?.settings as AdminSettingsJSONContentSchema)?.adminNewUserNotification ===
-        true
-      );
-    });
-
-    return adminsToNotify;
+    return adminsWithSettings;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {

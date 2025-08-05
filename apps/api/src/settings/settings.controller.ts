@@ -20,11 +20,14 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 const PLATFORM_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
+import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import {
   adminSettingsJSONContentSchema,
+  companyInformationJSONSchema,
   globalSettingsJSONSchema,
   settingsJSONContentSchema,
+  userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
@@ -51,7 +54,7 @@ export class SettingsController {
 
   @Get()
   @Validate({
-    response: baseResponse(settingsJSONContentSchema),
+    response: baseResponse(userSettingsJSONContentSchema),
   })
   async getUserSettings(
     @CurrentUser("userId") userId: UUIDType,
@@ -116,5 +119,25 @@ export class SettingsController {
   )
   async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File): Promise<void> {
     await this.settingsService.uploadPlatformLogo(logo);
+  }
+
+  @Get("company-information")
+  @Public()
+  @Validate({
+    response: baseResponse(companyInformationJSONSchema),
+  })
+  async getCompanyInformation() {
+    const result = await this.settingsService.getCompanyInformation();
+    return new BaseResponse(result);
+  }
+
+  @Patch("company-information")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: companyInformationJSONSchema }],
+    response: baseResponse(companyInformationJSONSchema),
+  })
+  async updateCompanyInformation(@Body() companyInfo: CompanyInformaitonJSONSchema) {
+    return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
   }
 }

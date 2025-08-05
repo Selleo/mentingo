@@ -3183,6 +3183,48 @@
           }
         }
       }
+    },
+    "/api/settings/company-information": {
+      "get": {
+        "operationId": "SettingsController_getCompanyInformation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -10376,6 +10418,26 @@
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
               },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
               "platformLogoS3Key": {
                 "anyOf": [
                   {
@@ -10488,6 +10550,48 @@
                   "language",
                   "adminNewUserNotification"
                 ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "unregisteredUserCoursesAccessibility": {
+                    "type": "boolean"
+                  },
+                  "companyInformation": {
+                    "type": "object",
+                    "properties": {
+                      "companyName": {
+                        "type": "string"
+                      },
+                      "registeredAddress": {
+                        "type": "string"
+                      },
+                      "taxNumber": {
+                        "type": "string"
+                      },
+                      "emailAddress": {
+                        "type": "string"
+                      },
+                      "courtRegisterNumber": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "platformLogoS3Key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "unregisteredUserCoursesAccessibility",
+                  "platformLogoS3Key"
+                ]
               }
             ]
           }
@@ -10527,6 +10631,26 @@
             "properties": {
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
               },
               "platformLogoS3Key": {
                 "anyOf": [
@@ -10569,6 +10693,82 @@
             "required": [
               "url"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string"
+          },
+          "registeredAddress": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "emailAddress": {
+            "type": "string"
+          },
+          "courtRegisterNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [
