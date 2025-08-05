@@ -64,7 +64,6 @@ const navigateTroughTextLesson = async (page: Page, nextButton: Locator) => {
 
 const navigateTroughPresentationLesson = async (page: Page, nextButton: Locator) => {
   await nextButton.click();
-  await page.waitForLoadState("networkidle");
 };
 
 const navigateTroughQuiz = async (page: Page, nextButton: Locator) => {

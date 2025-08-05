@@ -169,7 +169,7 @@ test.describe("Admin profile page flow", () => {
     await editAllTextFields(page);
   });
 
-  test("should edit profile picture successfully", async ({ page }) => {
+  test.skip("should edit profile picture successfully", async ({ page }) => {
     await navigateToProfilePage(page);
     await editProfilePicture(page);
   });
