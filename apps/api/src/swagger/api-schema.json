@@ -3158,6 +3158,32 @@
         }
       }
     },
+    "/api/settings/platform-logo": {
+      "get": {
+        "operationId": "SettingsController_getPlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updatePlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/company-information": {
       "get": {
         "operationId": "SettingsController_getCompanyInformation",
@@ -10411,10 +10437,21 @@
                     "type": "string"
                   }
                 }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "platformLogoS3Key"
             ]
           }
         },
@@ -10539,10 +10576,21 @@
                         "type": "string"
                       }
                     }
+                  },
+                  "platformLogoS3Key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
-                  "unregisteredUserCoursesAccessibility"
+                  "unregisteredUserCoursesAccessibility",
+                  "platformLogoS3Key"
                 ]
               }
             ]
@@ -10603,10 +10651,47 @@
                     "type": "string"
                   }
                 }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
             ]
           }
         },

@@ -13,6 +13,7 @@ export const companyInformationJSONSchema = Type.Object({
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
   companyInformation: Type.Optional(companyInformationJSONSchema),
+  platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({
@@ -22,6 +23,10 @@ export const studentSettingsJSONContentSchema = Type.Object({
 export const adminSettingsJSONContentSchema = Type.Object({
   language: Type.String(),
   adminNewUserNotification: Type.Boolean(),
+});
+
+export const globalSettingsJSONContentSchema = Type.Object({
+  platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const settingsJSONContentSchema = Type.Union([

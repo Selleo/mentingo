@@ -1,4 +1,14 @@
-import { Controller, Get, Body, Patch, UseGuards, Put } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  UseGuards,
+  Put,
+  UseInterceptors,
+  UploadedFile,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -8,7 +18,10 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+const PLATFORM_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
+import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
@@ -22,7 +35,7 @@ import { SettingsService } from "./settings.service";
 import type {
   AdminSettingsJSONContentSchema,
   GlobalSettingsJSONContentSchema,
-  UserSettingsJSONContentSchema,
+  SettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 
 @Controller("settings")
@@ -45,7 +58,7 @@ export class SettingsController {
   })
   async getUserSettings(
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<UserSettingsJSONContentSchema>> {
+  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getUserSettings(userId));
   }
 
@@ -57,7 +70,7 @@ export class SettingsController {
   async updateUserSettings(
     @Body() updatedSettings: UpdateSettingsBody,
     @CurrentUser("userId") userId: UUIDType,
-  ): Promise<BaseResponse<UserSettingsJSONContentSchema>> {
+  ): Promise<BaseResponse<SettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.updateUserSettings(userId, updatedSettings));
   }
 
@@ -83,6 +96,29 @@ export class SettingsController {
   > {
     const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
     return new BaseResponse(result);
+  }
+
+  @Get("platform-logo")
+  @Public()
+  @Validate({
+    response: baseResponse(platformLogoResponseSchema),
+  })
+  async getPlatformLogo() {
+    const url = await this.settingsService.getPlatformLogoUrl();
+    return new BaseResponse({ url });
+  }
+
+  @Patch("platform-logo")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(
+    FileInterceptor("logo", {
+      limits: {
+        fileSize: PLATFORM_LOGO_MAX_SIZE_BYTES,
+      },
+    }),
+  )
+  async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File): Promise<void> {
+    await this.settingsService.uploadPlatformLogo(logo);
   }
 
   @Get("company-information")

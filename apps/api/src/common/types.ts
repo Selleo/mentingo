@@ -7,6 +7,7 @@ export type ActivityHistory = {
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
   companyInformation?: CompanyInformationSchema;
+  platformLogoS3Key: string | null;
 };
 
 export type StudentSettings = {

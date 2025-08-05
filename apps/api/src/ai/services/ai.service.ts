@@ -85,6 +85,9 @@ export class AiService {
         role: this.mapRole(m.role),
       })) as Omit<Message, "id">[],
       maxTokens: MAX_TOKENS,
+      temperature: 0.8,
+      topK: 50,
+      topP: 0.8,
       onFinish: async (event) => {
         const mentorTokenCount = this.tokenService.countTokens(model, event.text);
         const userTokenCount = this.tokenService.countTokens(model, data.content);

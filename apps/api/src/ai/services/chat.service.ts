@@ -38,9 +38,13 @@ export class ChatService {
       const result = await generateObject({
         model: openai(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
         schema: jsonSchema({ ...aiJudgeJudgementSchema, additionalProperties: false }),
+        temperature: 0.5,
+        topK: 10,
+        topP: 0.9,
         system,
         prompt,
       });
+
       return await this.evaluate(result.object as AiJudgeJudgementBody);
     } catch (error) {
       throw new Error(`Failed to generate result ${error}`);
@@ -48,8 +52,13 @@ export class ChatService {
   }
 
   private async evaluate(result: AiJudgeJudgementBody): Promise<ResponseAiJudgeJudgementBody> {
-    const percentage = Math.ceil((result.score / result.maxScore) * 100);
     const passed = result.score >= result.minScore;
+
+    if (result.score === result.maxScore) {
+      return { ...result, percentage: 100, passed };
+    }
+
+    const percentage = result.maxScore > 0 ? Math.ceil((result.score / result.maxScore) * 100) : 0;
 
     return { ...result, percentage, passed };
   }

@@ -1663,6 +1663,7 @@ export interface GetPublicGlobalSettingsResponse {
       emailAddress?: string;
       courtRegisterNumber?: string;
     };
+    platformLogoS3Key: string | null;
   };
 }
 
@@ -1704,6 +1705,7 @@ export interface UpdateUserSettingsResponse {
           emailAddress?: string;
           courtRegisterNumber?: string;
         };
+        platformLogoS3Key: string | null;
       };
 }
 
@@ -1724,15 +1726,14 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
       emailAddress?: string;
       courtRegisterNumber?: string;
     };
+    platformLogoS3Key: string | null;
   };
 }
 
-export interface GetCompanyInformationBody {
-  companyName?: string;
-  registeredAddress?: string;
-  taxNumber?: string;
-  emailAddress?: string;
-  courtRegisterNumber?: string;
+export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
 }
 
 export interface GetCompanyInformationResponse {
@@ -3766,18 +3767,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPlatformLogo
+     * @request GET:/api/settings/platform-logo
+     */
+    settingsControllerGetPlatformLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformLogoResponse, any>({
+        path: `/api/settings/platform-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformLogo
+     * @request PATCH:/api/settings/platform-logo
+     */
+    settingsControllerUpdatePlatformLogo: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-logo`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetCompanyInformation
      * @request GET:/api/settings/company-information
      */
-    settingsControllerGetCompanyInformation: (
-      data: GetCompanyInformationBody,
-      params: RequestParams = {},
-    ) =>
+    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
       this.request<GetCompanyInformationResponse, any>({
         path: `/api/settings/company-information`,
         method: "GET",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),
