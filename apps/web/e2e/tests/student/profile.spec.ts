@@ -110,12 +110,12 @@ test.describe("Student profile page flow", () => {
     await editUsername(page);
   });
 
-  test.skip("should edit profile picture successfully", async ({ page }) => {
+  test("should edit profile picture successfully", async ({ page }) => {
     await navigateToProfilePage(page);
     await editProfilePicture(page);
   });
 
-  test.skip("should delete profile picture without uploading new one", async ({ page }) => {
+  test("should delete profile picture without uploading new one", async ({ page }) => {
     await navigateToProfilePage(page);
     await goIntoEditMode(page);
     await deleteProfilePicture(page);
