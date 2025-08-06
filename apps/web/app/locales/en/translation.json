@@ -1111,7 +1111,8 @@
         "continueLearning": "Continue learning",
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
-        "goToContentCreatorPage": "Go to content creator page"
+        "goToContentCreatorPage": "Go to content creator page",
+        "repeatLessons": "Repeat lessons"
       }
     },
     "breadcrumbs": {
