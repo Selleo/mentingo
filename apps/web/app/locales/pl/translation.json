@@ -1132,7 +1132,8 @@
         "continueLearning": "Kontynuuj naukę",
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
-        "goToContentCreatorPage": "Przejdź do strony twórcy treści"
+        "goToContentCreatorPage": "Przejdź do strony twórcy treści",
+        "repeatLessons": "Powtórz lekcje"
       }
     },
     "breadcrumbs": {
