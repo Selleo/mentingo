@@ -134,14 +134,17 @@ const ensureLesson = async (
     return { lessonId, courseId: actualCourseId };
   }
 
+  const lessonType = faker.helpers.arrayElement(["video", "text", "quiz", "assignment"]);
+
   const [lesson] = await db
     .insert(lessons)
     .values({
       id: faker.string.uuid(),
       chapterId: actualChapterId,
-      type: faker.helpers.arrayElement(["video", "text", "quiz", "assignment"]),
+      type: lessonType,
       title: faker.lorem.sentence(),
       description: faker.lorem.paragraph(),
+      thresholdScore: lessonType === "quiz" ? faker.number.int({ min: 0, max: 100 }) : null,
       displayOrder: faker.number.int({ min: 1, max: 10 }),
       fileS3Key: faker.system.directoryPath(),
       fileType: faker.helpers.arrayElement(["mp4", "pdf", "html", "docx"]),

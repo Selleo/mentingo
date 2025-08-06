@@ -521,6 +521,7 @@ export class UserService {
       throw new ConflictException("adminUserView.toast.userWithCreatedCoursesError");
     }
   }
+
   private async validateWhetherUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
     const validationPromises = userIds.map((id) => this.validateWhetherUserCanBeDeleted(id));
     await Promise.all(validationPromises);
