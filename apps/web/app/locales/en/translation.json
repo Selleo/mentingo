@@ -514,7 +514,9 @@
       "groupId": "Group"
     },
     "toast": {
-      "userCreatedSuccessfully": "User created successfully"
+      "userCreatedSuccessfully": "User created successfully",
+      "userWithAttemptsError": "Cannot delete user with linked quiz results. Only anonymization and archiving are available.",
+      "userWithCreatedCoursesError": "Cannot delete a user who is the author of existing courses. Only anonymization and archiving are available."
     },
     "button": {
       "createUser": "Create user"
