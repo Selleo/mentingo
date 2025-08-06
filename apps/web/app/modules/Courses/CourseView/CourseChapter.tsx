@@ -43,10 +43,10 @@ export const CourseChapter = ({ chapter, enrolled, course }: CourseChapterProps)
   const isAllLessonsCompleted = chapter.completedLessonCount === chapter.lessonCount;
   const isAllLessonsNotStarted = chapter.completedLessonCount === 0;
   const firstInProgressLesson = chapter.lessons.find(
-    (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS,
+    ({ status }) => status === LESSON_PROGRESS_STATUSES.IN_PROGRESS,
   );
   const firstNotStartedLesson = chapter.lessons.find(
-    (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED,
+    ({ status }) => status === LESSON_PROGRESS_STATUSES.NOT_STARTED,
   );
 
   return (

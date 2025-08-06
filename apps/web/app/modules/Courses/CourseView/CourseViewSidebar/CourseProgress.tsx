@@ -22,10 +22,10 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   const notStartedLessonId = findFirstNotStartedLessonId(course);
   const inProgressLessonId = findFirstInProgressLessonId(course);
   const notStartedChapterId = course.chapters.find((chapter) => {
-    return chapter.lessons.some((lesson) => lesson.id === notStartedLessonId);
+    return chapter.lessons.some(({ id }) => id === notStartedLessonId);
   })?.id;
   const inProgressChapterId = course.chapters.find((chapter) => {
-    return chapter.lessons.some((lesson) => lesson.id === inProgressLessonId);
+    return chapter.lessons.some(({ id }) => id === inProgressLessonId);
   })?.id;
 
   const hasCourseProgress = course.chapters.some(

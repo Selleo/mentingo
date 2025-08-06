@@ -48,10 +48,10 @@ export const LessonContent = ({
   const { isAdminLike } = useUserRole();
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
-    chapter.lessons.some((l) => l.id === lesson.id),
+    chapter.lessons.some(({ id }) => id === lesson.id),
   );
   const currentLessonIndex = course.chapters[currentChapterIndex]?.lessons.findIndex(
-    (l) => l.id === lesson.id,
+    ({ id }) => id === lesson.id,
   );
 
   const currentChapter = course.chapters[currentChapterIndex];
