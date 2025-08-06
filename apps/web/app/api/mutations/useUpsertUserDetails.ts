@@ -24,9 +24,9 @@ export function useUpsertUserDetails() {
 
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       queryClient.invalidateQueries(currentUserQueryOptions);
-      queryClient.invalidateQueries(userDetails(data.data.id));
+      queryClient.invalidateQueries(userDetails(data.id));
 
       toast({ description: t("changeUserInformationView.toast.userDetailsUpdatedSuccessfully") });
     },
