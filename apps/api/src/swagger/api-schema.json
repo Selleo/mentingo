@@ -2091,6 +2091,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "userLanguage",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

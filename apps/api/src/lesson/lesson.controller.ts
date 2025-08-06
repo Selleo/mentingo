@@ -12,6 +12,7 @@ import {
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
+import { SupportedLanguages } from "src/ai/utils/ai.type";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -54,10 +55,13 @@ export class LessonController {
   })
   async getLessonById(
     @Param("id") id: UUIDType,
+    @Query("userLanguage") userLanguage: SupportedLanguages,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") userRole: UserRole,
   ): Promise<BaseResponse<LessonShow>> {
-    return new BaseResponse(await this.lessonService.getLessonById(id, userId, userRole));
+    return new BaseResponse(
+      await this.lessonService.getLessonById(id, userId, userRole, userLanguage),
+    );
   }
 
   @Post("beta-create-lesson")
