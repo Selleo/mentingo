@@ -2,6 +2,7 @@
   "common": {
     "button": {
       "save": "Save",
+      "saving": "Saving...",
       "delete": "Delete",
       "create": "Create",
       "cancel": "Cancel",
@@ -13,7 +14,8 @@
       "goBack": "Go back",
       "ignore": "Ignore",
       "clearAll": "Clear All",
-      "validate": "Validate"
+      "validate": "Validate",
+      "edit": "Edit"
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -113,10 +115,33 @@
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
+    "providerInformation": "Provider Info",
     "browseCourses": "Browse Courses",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
+  },
+  "providerInformation": {
+    "title": "Provider Information",
+    "description": "Information about your company that will be visible to users",
+    "editTitle": "Edit Provider Information",
+    "companyName": "Company Name",
+    "registeredAddress": "Registered Address",
+    "taxNumber": "Tax Number (NIP)",
+    "emailAddress": "Email Address",
+    "courtRegisterNumber": "Court Register Number (KRS)",
+    "noDataAvailable": "No provider information available",
+    "createSuccess": "Provider information created successfully",
+    "updateSuccess": "Provider information updated successfully",
+    "createError": "Failed to create provider information",
+    "updateError": "Failed to update provider information",
+    "saveError": "Failed to save provider information",
+    "validation": {
+      "nipMustBe10Digits": "NIP must be 10 digits",
+      "krsMustBe10Digits": "KRS must be 10 digits",
+      "invalidEmailFormat": "Invalid email format"
+    },
+    "noCompanyInformationAvailable": "No company information available"
   },
   "changeUserLanguageView": {
     "header": "Change Language",
