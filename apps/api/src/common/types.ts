@@ -6,6 +6,7 @@ export type ActivityHistory = {
 
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
+  enforceSSO: boolean;
   companyInformation?: CompanyInformationSchema;
   platformLogoS3Key: string | null;
 };

@@ -3158,6 +3158,23 @@
         }
       }
     },
+    "/api/settings/admin/enforce-sso": {
+      "patch": {
+        "operationId": "SettingsController_updateEnforceSSO",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/platform-logo": {
       "get": {
         "operationId": "SettingsController_getPlatformLogo",
@@ -10418,6 +10435,9 @@
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
               },
+              "enforceSSO": {
+                "type": "boolean"
+              },
               "companyInformation": {
                 "type": "object",
                 "properties": {
@@ -10451,6 +10471,7 @@
             },
             "required": [
               "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
               "platformLogoS3Key"
             ]
           }
@@ -10557,6 +10578,9 @@
                   "unregisteredUserCoursesAccessibility": {
                     "type": "boolean"
                   },
+                  "enforceSSO": {
+                    "type": "boolean"
+                  },
                   "companyInformation": {
                     "type": "object",
                     "properties": {
@@ -10590,6 +10614,7 @@
                 },
                 "required": [
                   "unregisteredUserCoursesAccessibility",
+                  "enforceSSO",
                   "platformLogoS3Key"
                 ]
               }
@@ -10632,6 +10657,9 @@
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
               },
+              "enforceSSO": {
+                "type": "boolean"
+              },
               "companyInformation": {
                 "type": "object",
                 "properties": {
@@ -10665,6 +10693,61 @@
             },
             "required": [
               "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEnforceSSOResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
               "platformLogoS3Key"
             ]
           }

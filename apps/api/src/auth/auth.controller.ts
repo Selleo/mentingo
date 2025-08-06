@@ -21,6 +21,7 @@ import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { UserActivityEvent } from "src/events";
+import { SettingsService } from "src/settings/settings.service";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -48,6 +49,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
     private readonly eventBus: EventBus,
+    private readonly settingsService: SettingsService,
   ) {
     this.APP_URL = process.env.APP_URL || "http://localhost:5173";
   }
@@ -61,6 +63,12 @@ export class AuthController {
   async register(
     data: CreateAccountBody,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
+    const { enforceSSO } = await this.settingsService.getGlobalSettings();
+
+    if (enforceSSO) {
+      throw new UnauthorizedException("SSO is enforced, registration via email is not allowed");
+    }
+
     const account = await this.authService.register(data);
 
     return new BaseResponse(account);
@@ -77,6 +85,12 @@ export class AuthController {
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
+    const { enforceSSO } = await this.settingsService.getGlobalSettings();
+
+    if (enforceSSO) {
+      throw new UnauthorizedException("SSO is enforced, login via email is not allowed");
+    }
+
     const { accessToken, refreshToken, ...account } = await this.authService.login(data);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
