@@ -51,6 +51,8 @@ jobs:
             --build-arg VITE_SENTRY_ORG=$VITE_SENTRY_ORG \
             --build-arg VITE_SENTRY_PROJECT=$VITE_SENTRY_PROJECT \
             --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
+            --build-arg VITE_GOOGLE_OAUTH_ENABLED=$VITE_GOOGLE_OAUTH_ENABLED \
+            --build-arg VITE_MICROSOFT_OAUTH_ENABLED=$VITE_MICROSOFT_OAUTH_ENABLED \
             -t $ECR_REGISTRY:$IMAGE_TAG .
           docker tag $ECR_REGISTRY:$IMAGE_TAG $ECR_REGISTRY:latest
           docker push $ECR_REGISTRY:$IMAGE_TAG
