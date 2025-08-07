@@ -1,27 +1,22 @@
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
 
-const extractFileKeyFromUrl = (url: string): string => {
-  try {
-    const urlObj = new URL(url);
-    return urlObj.pathname.slice(1);
-  } catch {
-    return "";
-  }
-};
-
 export function useDeleteFile() {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (url: string) => {
-      const fileKey = extractFileKeyFromUrl(url);
+    mutationFn: async (fileKey: string) => {
       return await ApiClient.api.fileControllerDeleteFile({
         fileKey,
       });
+    },
+    onSuccess: () => {
+      toast({ description: t("deleteFile.toast.success") });
     },
     onError: (error) => {
       toast({

@@ -35,10 +35,10 @@ test.describe("Admin settings", () => {
     await page.getByRole("button", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
 
-    const paragraph = page.locator("div.flex.flex-col.gap-y-2 p.body-base.mt-2.text-neutral-950");
-    const jobTitle = page.locator("div.body-sm span.font-medium.text-neutral-950");
+    const description = page.getByTestId("description");
+    const jobTitle = page.getByTestId("jobTitle");
 
-    await expect(paragraph).toHaveText(TEST_SETTINGS.description);
+    await expect(description).toHaveText(TEST_SETTINGS.description);
     await expect(jobTitle).toHaveText(TEST_SETTINGS.jobTitle);
   });
 
@@ -89,10 +89,10 @@ test.describe("Admin settings", () => {
 
     const coursesSwitch = page.locator("#coursesVisibility");
 
-    await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
+    await expect(coursesSwitch).toHaveAttribute("data-state", "unchecked");
 
     await coursesSwitch.click();
-    await expect(coursesSwitch).toHaveAttribute("data-state", "unchecked");
+    await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
   });
 
   test("should redirect to login when courses accessibility is disabled and user is logged out", async ({

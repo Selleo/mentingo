@@ -18,6 +18,7 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
+import { StatisticsService } from "src/statistics/statistics.service";
 
 import {
   createTokens,
@@ -27,6 +28,7 @@ import {
   userDetails,
   users,
   settings,
+  courses,
 } from "../storage/schema";
 
 import {
@@ -53,6 +55,7 @@ export class UserService {
     private emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
+    private statisticsService: StatisticsService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -359,6 +362,7 @@ export class UserService {
   }
 
   public async deleteUser(id: UUIDType) {
+    await this.validateWhetherUserCanBeDeleted(id);
     const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning();
 
     if (!deletedUser) {
@@ -367,6 +371,7 @@ export class UserService {
   }
 
   public async deleteBulkUsers(ids: UUIDType[]) {
+    await this.validateWhetherUsersCanBeDeleted(ids);
     const deletedUsers = await this.db.delete(users).where(inArray(users.id, ids)).returning();
 
     if (deletedUsers.length !== ids.length) {
@@ -502,5 +507,34 @@ export class UserService {
       default:
         return users.firstName;
     }
+  }
+
+  private async validateWhetherUserCanBeDeleted(userId: UUIDType): Promise<void> {
+    const userQuizAttempts = await this.statisticsService.getUserStats(userId);
+    const hasCourses = await this.hasCoursesWithAuthor(userId);
+
+    if (userQuizAttempts.quizzes.totalAttempts > 0) {
+      throw new ConflictException("adminUserView.toast.userWithAttemptsError");
+    }
+
+    if (hasCourses) {
+      throw new ConflictException("adminUserView.toast.userWithCreatedCoursesError");
+    }
+  }
+
+  private async validateWhetherUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
+    const validationPromises = userIds.map((id) => this.validateWhetherUserCanBeDeleted(id));
+    await Promise.all(validationPromises);
+  }
+
+  private async hasCoursesWithAuthor(authorId: UUIDType): Promise<boolean> {
+    const course = await this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .where(eq(courses.authorId, authorId))
+      .limit(1)
+      .then((results) => results[0]);
+
+    return !!course;
   }
 }

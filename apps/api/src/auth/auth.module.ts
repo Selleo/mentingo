@@ -2,10 +2,13 @@ import { Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
 
 import { ResendVerificationMailCron } from "src/auth/resend-verification-mail-cron";
+import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
+import { StatisticsModule } from "src/statistics/statistics.module";
+import { StatisticsService } from "src/statistics/statistics.service";
 import { UserService } from "src/user/user.service";
 
 import { AuthController } from "./auth.controller";
@@ -19,11 +22,12 @@ import { MicrosoftStrategy } from "./strategy/microsoft.strategy";
 import { TokenService } from "./token.service";
 
 @Module({
-  imports: [PassportModule, EmailModule],
+  imports: [PassportModule, EmailModule, StatisticsModule],
   controllers: [AuthController],
   providers: [
     AuthService,
     UserService,
+    StatisticsService,
     TokenService,
     JwtStrategy,
     LocalStrategy,
@@ -32,6 +36,7 @@ import { TokenService } from "./token.service";
     ResendVerificationMailCron,
     FileService,
     S3Service,
+    BunnyStreamService,
     ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
     ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
     SettingsService,

@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
-import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
+import { findFirstNotStartedLessonId } from "../../Lesson/utils";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -20,17 +20,25 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const notStartedLessonId = findFirstNotStartedLessonId(course);
-  const inProgressLessonId = findFirstInProgressLessonId(course);
   const notStartedChapterId = course.chapters.find((chapter) => {
     return chapter.lessons.some(({ id }) => id === notStartedLessonId);
-  })?.id;
-  const inProgressChapterId = course.chapters.find((chapter) => {
-    return chapter.lessons.some(({ id }) => id === inProgressLessonId);
   })?.id;
 
   const hasCourseProgress = course.chapters.some(
     ({ completedLessonCount }) => completedLessonCount,
   );
+
+  const firstLessonId = course.chapters[0]?.lessons[0]?.id;
+
+  const handleNavigateToLesson = () => {
+    if (!notStartedLessonId) {
+      return navigate(`lesson/${firstLessonId}`);
+    }
+
+    navigate(`lesson/${notStartedLessonId}`, {
+      state: { chapterId: notStartedChapterId },
+    });
+  };
 
   return (
     <>
@@ -51,27 +59,17 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
-          <Button
-            className="gap-x-2"
-            disabled={!notStartedLessonId && !inProgressLessonId}
-            onClick={() =>
-              notStartedLessonId
-                ? navigate(`lesson/${notStartedLessonId}`, {
-                    state: { chapterId: notStartedChapterId },
-                  })
-                : navigate(`lesson/${inProgressLessonId}`, {
-                    state: { chapterId: inProgressChapterId },
-                  })
-            }
-          >
+          <Button className="gap-x-2" onClick={handleNavigateToLesson}>
             <Icon name="Play" className="h-auto w-6 text-white" />
             <span>
               {t(
                 isAdminLike
                   ? "adminCourseView.common.preview"
-                  : hasCourseProgress
-                    ? "studentCourseView.sideSection.button.continueLearning"
-                    : "studentCourseView.sideSection.button.startLearning",
+                  : !hasCourseProgress
+                    ? "studentCourseView.sideSection.button.startLearning"
+                    : notStartedLessonId
+                      ? "studentCourseView.sideSection.button.continueLearning"
+                      : "studentCourseView.sideSection.button.repeatLessons",
               )}
             </span>
           </Button>

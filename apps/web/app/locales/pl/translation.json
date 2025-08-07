@@ -2,6 +2,7 @@
   "common": {
     "button": {
       "save": "Zapisz",
+      "saving": "Zapisywanie...",
       "delete": "Usuń",
       "create": "Utwórz",
       "cancel": "Anuluj",
@@ -14,6 +15,7 @@
       "clearAll": "Wyczyść wszystko",
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
+      "edit": "Edytuj",
       "continue": "Kontynuuj"
     },
     "tooltip": {
@@ -49,6 +51,11 @@
     "replace": "Kliknij, aby zastąpić",
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "Plik został pomyślnie usunięty"
     }
   },
   "adminScorm": {
@@ -114,10 +121,33 @@
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
+    "providerInformation": "O dostawcy",
     "browseCourses": "Przeglądaj kursy",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
+  },
+  "providerInformation": {
+    "title": "Informacje o Dostawcy",
+    "description": "Informacje o Twojej firmie, które będą widoczne dla użytkowników",
+    "editTitle": "Edytuj Informacje o Dostawcy",
+    "companyName": "Nazwa firmy",
+    "registeredAddress": "Adres siedziby",
+    "taxNumber": "Numer NIP",
+    "emailAddress": "Adres email",
+    "courtRegisterNumber": "Numer KRS",
+    "noDataAvailable": "Brak informacji o dostawcy",
+    "createSuccess": "Informacje o dostawcy zostały utworzone",
+    "updateSuccess": "Informacje o dostawcy zostały zaktualizowane",
+    "createError": "Nie udało się utworzyć informacji o dostawcy",
+    "updateError": "Nie udało się zaktualizować informacji o dostawcy",
+    "saveError": "Nie udało się zapisać informacji o dostawcy",
+    "validation": {
+      "nipMustBe10Digits": "NIP musi mieć 10 cyfr",
+      "krsMustBe10Digits": "KRS musi mieć 10 cyfr",
+      "invalidEmailFormat": "Nieprawidłowy format email"
+    },
+    "noCompanyInformationAvailable": "Brak informacji o dostawcy"
   },
   "changeUserLanguageView": {
     "header": "Zmień język",
@@ -519,7 +549,9 @@
       "groupId": "Grupa"
     },
     "toast": {
-      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie"
+      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie",
+      "userWithAttemptsError": "Nie można usunąć użytkownika z powiązanymi wynikami quizów. Dostępna jest tylko anonimizacja i archiwizacja.",
+      "userWithCreatedCoursesError": "Nie można usunąć użytkownika, który jest autorem istniejących rozdziałów. Dostępne są tylko anonimizacja i archiwizacja."
     },
     "button": {
       "createUser": "Utwórz użytkownika"
@@ -1132,7 +1164,8 @@
         "continueLearning": "Kontynuuj naukę",
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
-        "goToContentCreatorPage": "Przejdź do strony twórcy treści"
+        "goToContentCreatorPage": "Przejdź do strony twórcy treści",
+        "repeatLessons": "Powtórz lekcje"
       }
     },
     "breadcrumbs": {

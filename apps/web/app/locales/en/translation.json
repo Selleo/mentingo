@@ -2,6 +2,7 @@
   "common": {
     "button": {
       "save": "Save",
+      "saving": "Saving...",
       "delete": "Delete",
       "create": "Create",
       "cancel": "Cancel",
@@ -13,7 +14,8 @@
       "goBack": "Go back",
       "ignore": "Ignore",
       "clearAll": "Clear All",
-      "validate": "Validate"
+      "validate": "Validate",
+      "edit": "Edit"
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -48,6 +50,11 @@
     "replace": "Click to replace",
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "File deleted successfully"
     }
   },
   "adminScorm": {
@@ -113,10 +120,33 @@
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
+    "providerInformation": "Provider Info",
     "browseCourses": "Browse Courses",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
+  },
+  "providerInformation": {
+    "title": "Provider Information",
+    "description": "Information about your company that will be visible to users",
+    "editTitle": "Edit Provider Information",
+    "companyName": "Company Name",
+    "registeredAddress": "Registered Address",
+    "taxNumber": "Tax Number (NIP)",
+    "emailAddress": "Email Address",
+    "courtRegisterNumber": "Court Register Number (KRS)",
+    "noDataAvailable": "No provider information available",
+    "createSuccess": "Provider information created successfully",
+    "updateSuccess": "Provider information updated successfully",
+    "createError": "Failed to create provider information",
+    "updateError": "Failed to update provider information",
+    "saveError": "Failed to save provider information",
+    "validation": {
+      "nipMustBe10Digits": "NIP must be 10 digits",
+      "krsMustBe10Digits": "KRS must be 10 digits",
+      "invalidEmailFormat": "Invalid email format"
+    },
+    "noCompanyInformationAvailable": "No company information available"
   },
   "changeUserLanguageView": {
     "header": "Change Language",
@@ -514,7 +544,9 @@
       "groupId": "Group"
     },
     "toast": {
-      "userCreatedSuccessfully": "User created successfully"
+      "userCreatedSuccessfully": "User created successfully",
+      "userWithAttemptsError": "Cannot delete user with linked quiz results. Only anonymization and archiving are available.",
+      "userWithCreatedCoursesError": "Cannot delete a user who is the author of existing courses. Only anonymization and archiving are available."
     },
     "button": {
       "createUser": "Create user"
@@ -1126,7 +1158,8 @@
         "continueLearning": "Continue learning",
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
-        "goToContentCreatorPage": "Go to content creator page"
+        "goToContentCreatorPage": "Go to content creator page",
+        "repeatLessons": "Repeat lessons"
       }
     },
     "breadcrumbs": {
