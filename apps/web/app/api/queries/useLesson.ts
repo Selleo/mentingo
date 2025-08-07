@@ -9,7 +9,9 @@ export const lessonQueryOptions = (id: string, userLanguage?: Language) =>
   queryOptions({
     queryKey: ["lesson", id],
     queryFn: async () => {
-      const response = await ApiClient.api.lessonControllerGetLessonById(id, { userLanguage });
+      const response = await ApiClient.api.lessonControllerGetLessonById(id, {
+        userLanguage: userLanguage || "",
+      });
       return response.data;
     },
     select: (data: GetLessonByIdResponse) => data.data,

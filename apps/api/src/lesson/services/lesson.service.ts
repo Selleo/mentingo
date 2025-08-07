@@ -16,6 +16,7 @@ import { FileService } from "src/file/file.service";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
+import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 
 import { LESSON_TYPES } from "../lesson.type";
@@ -46,9 +47,11 @@ export class LessonService {
   async getLessonById(
     id: UUIDType,
     userId: UUIDType,
-    isStudent: boolean,
+    userRole: UserRole,
     userLanguage?: SupportedLanguages,
   ): Promise<LessonShow> {
+    const isStudent = userRole === USER_ROLES.STUDENT;
+
     const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
@@ -56,6 +59,14 @@ export class LessonService {
       throw new UnauthorizedException("You don't have access");
 
     if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) return lesson;
+
+    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
+      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
+    }
+
+    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
+      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
+    }
 
     if (lesson.type !== LESSON_TYPES.QUIZ && lesson.type !== LESSON_TYPES.AI_MENTOR) {
       if (!lesson.fileUrl) throw new NotFoundException("Lesson file not found");
