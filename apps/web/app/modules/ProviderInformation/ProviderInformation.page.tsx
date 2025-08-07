@@ -25,7 +25,7 @@ export default function ProviderInformationPage() {
   const handleSubmit = (data: UpdateCompanyInformationBody) => {
     const changedData = filterChangedData(data, companyInfo?.data || {});
 
-    if (Object.keys(changedData).length === 0) {
+    if (!Object.keys(changedData).length) {
       return;
     }
 
@@ -40,7 +40,7 @@ export default function ProviderInformationPage() {
 
   if (isLoading) {
     return (
-      <div className="grid h-full w-full place-items-center">
+      <div className="grid size-full place-items-center">
         <Loader />
       </div>
     );
