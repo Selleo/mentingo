@@ -144,6 +144,19 @@
       "email": "Email is required"
     }
   },
+  "ssoEnforcementView": {
+    "header": "SSO Enforcement",
+    "subHeader": "Enforce SSO login for all users",
+    "description": "This switch will enforce Google/Microsoft login for all users. If disabled, users will be able to log in using the traditional login form.",
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "SSO enforcement updated successfully",
+      "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement"
+    }
+  },
   "mostPopularCoursesView": {
     "header": "Most Popular",
     "subHeader": "Your top 5 Courses",
@@ -506,7 +519,9 @@
       "groupId": "Group"
     },
     "toast": {
-      "userCreatedSuccessfully": "User created successfully"
+      "userCreatedSuccessfully": "User created successfully",
+      "userWithAttemptsError": "Cannot delete user with linked quiz results. Only anonymization and archiving are available.",
+      "userWithCreatedCoursesError": "Cannot delete a user who is the author of existing courses. Only anonymization and archiving are available."
     },
     "button": {
       "createUser": "Create user"
@@ -884,6 +899,7 @@
   "registerView": {
     "header": "Sign Up",
     "subHeader": "Enter your information to create an account",
+    "subHeaderSSO": "Sign up using your Google/Microsoft account",
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
@@ -933,6 +949,7 @@
   "loginView": {
     "header": "Login",
     "subHeader": "Enter your email below to login to your account",
+    "subHeaderSSO": "Login using your Google/Microsoft account",
     "validation": {
       "email": "Invalid email",
       "password": "Password is required"
@@ -1116,7 +1133,8 @@
         "continueLearning": "Continue learning",
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
-        "goToContentCreatorPage": "Go to content creator page"
+        "goToContentCreatorPage": "Go to content creator page",
+        "repeatLessons": "Repeat lessons"
       }
     },
     "breadcrumbs": {

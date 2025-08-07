@@ -6,7 +6,7 @@ import { categories } from "../../src/storage/schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";
 
-type CategoryTest = InferSelectModel<typeof categories>;
+export type CategoryTest = InferSelectModel<typeof categories>;
 export type CategoriesTest = CategoryTest[];
 
 export const createCategoryFactory = (db: DatabasePg) => {

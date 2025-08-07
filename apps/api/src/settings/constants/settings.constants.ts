@@ -9,8 +9,10 @@ const DEFAULT_COMPANY_INFORMATION = {
 export const DEFAULT_GLOBAL_SETTINGS = {
   unregisteredUserCoursesAccessibility: false,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
+  enforceSSO: false,
   platformLogoS3Key: null,
 };
+
 export const DEFAULT_STUDENT_SETTINGS = {
   language: "en",
 };

@@ -12,6 +12,7 @@ export const companyInformationJSONSchema = Type.Object({
 
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
+  enforceSSO: Type.Boolean(),
   companyInformation: Type.Optional(companyInformationJSONSchema),
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
 });

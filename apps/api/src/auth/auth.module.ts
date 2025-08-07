@@ -7,6 +7,8 @@ import { EmailModule } from "src/common/emails/emails.module";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
+import { StatisticsModule } from "src/statistics/statistics.module";
+import { StatisticsService } from "src/statistics/statistics.service";
 import { UserService } from "src/user/user.service";
 
 import { AuthController } from "./auth.controller";
@@ -20,11 +22,12 @@ import { MicrosoftStrategy } from "./strategy/microsoft.strategy";
 import { TokenService } from "./token.service";
 
 @Module({
-  imports: [PassportModule, EmailModule],
+  imports: [PassportModule, EmailModule, StatisticsModule],
   controllers: [AuthController],
   providers: [
     AuthService,
     UserService,
+    StatisticsService,
     TokenService,
     JwtStrategy,
     LocalStrategy,
