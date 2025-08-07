@@ -41,6 +41,8 @@ jobs:
           VITE_SENTRY_ORG: ${{secrets.SENTRY_ORG}}
           VITE_SENTRY_PROJECT: ${{secrets.SENTRY_PROJECT}}
           VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
+          VITE_GOOGLE_OAUTH_ENABLED: ${{secrets.GOOGLE_OAUTH_ENABLED}}
+          VITE_MICROSOFT_OAUTH_ENABLED: ${{secrets.MICROSOFT_OAUTH_ENABLED}}
         run: |
           docker build -f ./web.Dockerfile \
             --build-arg VERSION=$IMAGE_TAG \
