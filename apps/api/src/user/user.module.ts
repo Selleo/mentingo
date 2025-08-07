@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 
+import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
+import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
@@ -12,9 +14,9 @@ import { UserController } from "./user.controller";
 import { UserService } from "./user.service";
 
 @Module({
-  imports: [EmailModule, FileModule, S3Module, StatisticsModule],
+  imports: [EmailModule, FileModule, S3Module, BunnyStreamModule, StatisticsModule],
   controllers: [UserController],
-  providers: [UserService, FileService, S3Service, StatisticsService],
+  providers: [UserService, FileService, S3Service, BunnyStreamService, StatisticsService],
   exports: [UserService, StatisticsService],
 })
 export class UserModule {}

@@ -67,6 +67,6 @@ export class FileController {
     description: "File deleted successfully",
   })
   async deleteFile(@Query("fileKey") fileKey: string): Promise<void> {
-    return await this.fileService.deleteFile(fileKey);
+    await this.fileService.deleteFile(fileKey);
   }
 }
