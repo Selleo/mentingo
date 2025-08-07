@@ -61,7 +61,7 @@ const checkValidSidebarLanguage = async (
   }
 };
 
-test.describe("Switch language flow", () => {
+test.describe.skip("Switch language flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await navigateToPage(

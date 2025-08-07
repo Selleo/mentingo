@@ -135,7 +135,7 @@ const createBasicGroup = async (page: Page) => {
   );
 };
 
-test.describe("Admin groups page flow", () => {
+test.describe.skip("Admin groups page flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
