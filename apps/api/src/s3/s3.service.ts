@@ -14,15 +14,52 @@ export class S3Service {
   private readonly bucketName: string;
 
   constructor(private configService: ConfigService) {
+    const config = this.loadS3Config();
+
     this.s3Client = new S3Client({
-      endpoint: this.configService.get<string>("s3.S3_ENDPOINT") || "",
-      region: this.configService.get<string>("s3.S3_REGION") || "us-east-1",
+      region: config.region,
       credentials: {
-        accessKeyId: this.configService.get<string>("s3.S3_ACCESS_KEY_ID") || "",
-        secretAccessKey: this.configService.get<string>("s3.S3_SECRET_ACCESS_KEY") || "",
+        accessKeyId: config.accessKeyId,
+        secretAccessKey: config.secretAccessKey,
       },
+      forcePathStyle: true,
+      ...(config.endpoint && { endpoint: config.endpoint }),
     });
-    this.bucketName = this.configService.get<string>("s3.S3_BUCKET_NAME") || "";
+
+    this.bucketName = config.bucketName;
+
+    if (!this.s3Client) {
+      throw new Error("S3 client is not initialized. Please check your configuration.");
+    }
+  }
+
+  private loadS3Config() {
+    const awsConfig = this.getS3Config("aws.AWS");
+    if (this.isValidAwsConfig(awsConfig)) {
+      return awsConfig;
+    }
+
+    const s3Config = this.getS3Config("s3.S3");
+    return s3Config;
+  }
+
+  private getS3Config(prefix: string) {
+    return {
+      endpoint: this.configService.get<string>(`${prefix}_ENDPOINT`) || "",
+      region: this.configService.get<string>(`${prefix}_REGION`) || "us-east-1",
+      accessKeyId: this.configService.get<string>(`${prefix}_ACCESS_KEY_ID`) || "",
+      secretAccessKey: this.configService.get<string>(`${prefix}_SECRET_ACCESS_KEY`) || "",
+      bucketName: this.configService.get<string>(`${prefix}_BUCKET_NAME`) || "",
+    };
+  }
+
+  private isValidAwsConfig(config: {
+    region: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    bucketName: string;
+  }): boolean {
+    return !!(config.region && config.accessKeyId && config.secretAccessKey && config.bucketName);
   }
 
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AiModule } from "src/ai/ai.module";
 import { FileModule } from "src/file/files.module";
 import { QuestionsModule } from "src/questions/question.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
@@ -11,9 +12,9 @@ import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
 
 @Module({
-  imports: [FileModule, QuestionsModule, StudentLessonProgressModule],
+  imports: [FileModule, QuestionsModule, StudentLessonProgressModule, AiModule],
   controllers: [LessonController],
   providers: [LessonRepository, AdminLessonService, AdminLessonRepository, LessonService],
-  exports: [AdminLessonService, AdminLessonRepository, LessonRepository],
+  exports: [AdminLessonService, AdminLessonRepository, LessonRepository, LessonService],
 })
 export class LessonModule {}

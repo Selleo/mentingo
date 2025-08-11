@@ -3,7 +3,9 @@ import { isArray, omit } from "lodash";
 import request from "supertest";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
 import type { DatabasePg } from "../../common/index";
@@ -14,6 +16,7 @@ describe("AuthController (e2e)", () => {
   let authService: AuthService;
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -21,11 +24,20 @@ describe("AuthController (e2e)", () => {
     authService = app.get(AuthService);
     db = app.get("DB");
     userFactory = createUserFactory(db);
+    settingsFactory = createSettingsFactory(db);
+  });
+
+  beforeEach(async () => {
+    await settingsFactory.create({ userId: null });
+  });
+
+  afterEach(async () => {
+    await truncateTables(db, ["settings"]);
   });
 
   describe("POST /api/auth/register", () => {
     it("should register a new user", async () => {
-      const user = await userFactory.withCredentials({ password: "password123" }).build();
+      const user = await userFactory.withCredentials({ password: "Password123@" }).build();
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/register")
@@ -46,7 +58,7 @@ describe("AuthController (e2e)", () => {
     it("should return 409 if user already exists", async () => {
       const existingUser = {
         email: "existing@example.com",
-        password: "password123",
+        password: "Password123@",
         firstName: "Tyler",
         lastName: "Durden",
       };
@@ -55,13 +67,23 @@ describe("AuthController (e2e)", () => {
 
       await request(app.getHttpServer()).post("/api/auth/register").send(existingUser).expect(409);
     });
+
+    it("should return 400 if password does not match criteria", async () => {
+      const user = await userFactory.withCredentials({ password: "passnotmatchcriteria" }).build();
+
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/register")
+        .send(user)
+        .expect(400);
+      expect(response.body.message).toEqual("Validation failed (body)");
+    });
   });
 
   describe("POST /api/auth/login", () => {
     it("should login and return user data with cookies", async () => {
       const user = await userFactory
         .withCredentials({
-          password: "password123",
+          password: "Password123@",
         })
         .create({
           email: "test@example.com",
@@ -95,7 +117,7 @@ describe("AuthController (e2e)", () => {
       let accessToken = "";
 
       const user = userFactory.build();
-      const password = "password123";
+      const password = "Password123@";
       await authService.register({
         email: user.email,
         firstName: user.firstName,
@@ -137,7 +159,7 @@ describe("AuthController (e2e)", () => {
   describe("POST /api/auth/refresh", () => {
     it("should refresh tokens", async () => {
       const user = await userFactory.build();
-      const password = "password123";
+      const password = "Password123@";
       await authService.register({
         email: user.email,
         firstName: user.firstName,
@@ -185,11 +207,11 @@ describe("AuthController (e2e)", () => {
     it("should return current user data for authenticated user", async () => {
       let accessToken = "";
 
-      const user = await userFactory.withCredentials({ password: "password123" }).create();
+      const user = await userFactory.withCredentials({ password: "Password123@" }).create();
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
         email: user.email,
-        password: "password123",
+        password: "Password123@",
       });
 
       const cookies = loginResponse.headers["set-cookie"];
@@ -208,7 +230,12 @@ describe("AuthController (e2e)", () => {
         .set("Cookie", `access_token=${accessToken};`)
         .expect(200);
 
-      expect(response.body.data).toStrictEqual(omit(user, "credentials"));
+      expect(response.body.data).toStrictEqual({
+        ...omit(user, "credentials", "avatarReference"),
+        profilePictureUrl: null,
+        groupName: null,
+        groupId: null,
+      });
     });
 
     it("should return 401 for unauthenticated request", async () => {
@@ -220,7 +247,7 @@ describe("AuthController (e2e)", () => {
     it("should send a password reset link if email exists", async () => {
       const user = await userFactory
         .withCredentials({
-          password: "password123",
+          password: "Password123@",
         })
         .create({
           email: "test_2@example.com",
@@ -239,7 +266,7 @@ describe("AuthController (e2e)", () => {
     it("should return 404 if email is empty", async () => {
       await userFactory
         .withCredentials({
-          password: "password123",
+          password: "Password123@",
         })
         .create({
           email: "test_3@example.com",
@@ -259,7 +286,7 @@ describe("AuthController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "valid-token", newPassword: "newpassword123" })
+        .send({ resetToken: "valid-token", newPassword: "Newpassword123@" })
         .expect(201);
 
       expect(response.body.data).toEqual({
@@ -267,10 +294,19 @@ describe("AuthController (e2e)", () => {
       });
     });
 
+    it("should return 400 if new password does not match criteria", async () => {
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/reset-password")
+        .send({ resetToken: "valid-token", newPassword: "passwordnotmatchcriteria" })
+        .expect(400);
+
+      expect(response.body.message).toEqual("Validation failed (body)");
+    });
+
     it("should return 404 if reset token is missing", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")
-        .send({ resetToken: "", newPassword: "newpassword123" })
+        .send({ resetToken: "", newPassword: "Newpassword123@" })
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");

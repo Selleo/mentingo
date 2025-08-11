@@ -21,6 +21,7 @@ export function useUpdateGroup(groupId: string) {
       const { data } = await ApiClient.api.groupControllerUpdateGroup(groupId, input);
 
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
 
       return data;
     },

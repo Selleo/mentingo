@@ -108,6 +108,13 @@ export const CourseEnrolled = (): ReactElement => {
       ),
     },
     {
+      accessorKey: "groupName",
+      header: ({ column }) => (
+        <SortButton column={column}>{t("adminUsersView.field.group")}</SortButton>
+      ),
+      cell: ({ row }) => row.original.groupName,
+    },
+    {
       accessorKey: "enrolledAt",
       header: ({ column }) => (
         <SortButton<EnrolledStudent> column={column}>
@@ -171,11 +178,12 @@ export const CourseEnrolled = (): ReactElement => {
   };
 
   const handleFormSubmit = (event: FormEvent) => {
+    event.preventDefault();
+
     const mutationData = {
       studentIds: Object.keys(rowSelection)
-        .map((idx) => usersData[Number(idx)])
-        .filter((user) => !user.enrolledAt)
-        .map(({ id }) => id),
+        .map((idx) => idx)
+        .filter((id) => usersData.some((user) => user.id === id && !user.enrolledAt)),
     };
 
     if (mutationData.studentIds.length > 0) {
@@ -183,7 +191,6 @@ export const CourseEnrolled = (): ReactElement => {
     }
 
     setRowSelection({});
-    event.preventDefault();
   };
 
   return (

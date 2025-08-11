@@ -64,10 +64,18 @@ const navigateTroughTextLesson = async (page: Page, nextButton: Locator) => {
 
 const navigateTroughPresentationLesson = async (page: Page, nextButton: Locator) => {
   await nextButton.click();
-  await page.waitForLoadState("networkidle");
 };
 
 const navigateTroughQuiz = async (page: Page, nextButton: Locator) => {
+  const submitButton = page.getByRole("button", { name: "Submit" });
+
+  if (await submitButton.isDisabled()) {
+    await nextButton.click();
+    await page.waitForLoadState("networkidle");
+    await page.waitForURL(URL_PATTERNS.course);
+    return;
+  }
+
   const briefResponseQuestion = page.getByTestId("brief-response");
 
   await briefResponseQuestion.click();
@@ -98,8 +106,6 @@ const navigateTroughQuiz = async (page: Page, nextButton: Locator) => {
 
   await blank.click();
   await blank.fill("workflow");
-
-  const submitButton = page.getByRole("button", { name: "Submit" });
 
   await submitButton.click();
 
@@ -132,21 +138,20 @@ test.describe("Course Workflow", () => {
 
     const enrollButton = page.locator('button:has-text("Enroll to the course")');
 
+    await enrollButton.waitFor({ state: "visible" });
+
     if ((await enrollButton.count()) > 0 && (await enrollButton.isVisible())) {
       await enrollButton.click();
     }
-    await page.waitForLoadState("networkidle");
 
-    await page.waitForTimeout(1000);
+    await enrollButton.waitFor({ state: "hidden", timeout: 10000 });
 
-    const startLearningButton = page.locator('button:has-text("Start learning")');
-    await page.waitForLoadState("networkidle");
+    const learningButton = page.getByRole("button", {
+      name: /Start learning|Continue learning|Repeat lessons/,
+    });
 
-    if ((await startLearningButton.count()) > 0 && (await startLearningButton.isVisible())) {
-      await startLearningButton.click();
-    } else {
-      await page.getByRole("button", { name: "Continue learning" }).click();
-    }
+    await learningButton.waitFor({ state: "visible", timeout: 15000 });
+    await learningButton.click();
 
     await page.waitForURL(URL_PATTERNS.lesson);
     await page.waitForLoadState("networkidle");
@@ -155,14 +160,10 @@ test.describe("Course Workflow", () => {
     const lessonsCount = await page.getByTestId("lessons-count").textContent();
 
     const navigateTroughLessons = async () => {
-      for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount) ?? 0; i++) {
-        const nextButtonLocator = page.locator('button:has-text("Next")');
-        const completeButtonLocator = page.locator('button:has-text("Complete")');
+      for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount); i++) {
+        const nextButton = page.getByTestId("next-lesson-button");
 
         await page.waitForTimeout(250);
-
-        const nextButton =
-          (await nextButtonLocator.count()) > 0 ? nextButtonLocator : completeButtonLocator;
 
         const lessonType = await page.getByTestId("lesson-type").textContent();
 

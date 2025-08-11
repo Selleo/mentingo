@@ -10,6 +10,7 @@ export const courseSchema = Type.Object({
   authorId: Type.Optional(UUIDSchema),
   author: Type.String(),
   authorEmail: Type.Optional(Type.String()),
+  authorAvatarUrl: Type.Union([Type.String(), Type.Null()]),
   category: Type.String(),
   courseChapterCount: Type.Number(),
   // completedChapterCount: Type.Number(),

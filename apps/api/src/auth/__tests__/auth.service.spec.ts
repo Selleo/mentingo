@@ -7,12 +7,10 @@ import { nanoid } from "nanoid";
 
 import { AuthService } from "src/auth/auth.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-import hashPassword from "src/common/helpers/hashPassword";
+import { credentials, resetTokens, users } from "src/storage/schema";
 import { createUnitTest, type TestContext } from "test/create-unit-test";
 import { createUserFactory } from "test/factory/user.factory";
 import { truncateAllTables } from "test/helpers/test-helpers";
-
-import { credentials, resetTokens, users } from "../../storage/schema";
 
 import type { DatabasePg } from "src/common";
 import type { EmailTestingAdapter } from "test/helpers/test-email.adapter";
@@ -113,9 +111,12 @@ describe("AuthService", () => {
 
       const decodedToken = await jwtService.verifyAsync(result.accessToken);
 
+      const { avatarReference: _, ...userWithoutAvatar } = user;
+
       expect(decodedToken.userId).toBe(user.id);
       expect(result).toMatchObject({
-        ...omit(user, "credentials"),
+        ...omit(userWithoutAvatar, "credentials"),
+        profilePictureUrl: null,
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
       });
@@ -146,12 +147,8 @@ describe("AuthService", () => {
     it("should validate user successfully", async () => {
       const email = "test@example.com";
       const password = "password123";
-      const firstName = "Tyler";
-      const lastName = "Durden";
-      const hashedPassword = await hashPassword(password);
 
-      const [user] = await db.insert(users).values({ email, firstName, lastName }).returning();
-      await db.insert(credentials).values({ userId: user.id, password: hashedPassword });
+      await userFactory.withCredentials({ password }).create({ email });
 
       const result = await authService.validateUser(email, password);
 

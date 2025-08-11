@@ -12,6 +12,7 @@ import {
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
+import { SUPPORTED_LANGUAGES, SupportedLanguages } from "src/ai/utils/ai.type";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -21,11 +22,15 @@ import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 import {
   AnswerQuestionBody,
   answerQuestionsForLessonBody,
+  CreateAiMentorLessonBody,
+  createAiMentorLessonSchema,
   CreateLessonBody,
   createLessonSchema,
   CreateQuizLessonBody,
   createQuizLessonSchema,
   lessonShowSchema,
+  UpdateAiMentorLessonBody,
+  updateAiMentorLessonSchema,
   UpdateLessonBody,
   updateLessonSchema,
   UpdateQuizLessonBody,
@@ -43,20 +48,6 @@ export class LessonController {
     private readonly adminLessonsService: AdminLessonService,
     private readonly lessonService: LessonService,
   ) {}
-
-  @Get(":id")
-  @Validate({
-    response: baseResponse(lessonShowSchema),
-  })
-  async getLessonById(
-    @Param("id") id: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") userRole: UserRole,
-  ): Promise<BaseResponse<LessonShow>> {
-    return new BaseResponse(
-      await this.lessonService.getLessonById(id, userId, userRole === USER_ROLES.STUDENT),
-    );
-  }
 
   @Post("beta-create-lesson")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
@@ -77,6 +68,83 @@ export class LessonController {
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
 
+  @Get(":id")
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "id",
+        schema: UUIDSchema,
+        required: true,
+      },
+      {
+        type: "query",
+        name: "userLanguage",
+        schema: Type.Enum(SUPPORTED_LANGUAGES),
+      },
+    ],
+    response: baseResponse(lessonShowSchema),
+  })
+  async getLessonById(
+    @Param("id") id: UUIDType,
+    @Query("userLanguage") userLanguage: SupportedLanguages,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
+  ): Promise<BaseResponse<LessonShow>> {
+    return new BaseResponse(
+      await this.lessonService.getLessonById(
+        id,
+        userId,
+        userRole === USER_ROLES.STUDENT,
+        userLanguage,
+      ),
+    );
+  }
+
+  @Post("beta-create-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "body",
+        schema: createAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
+  })
+  async betaCreateAiMentorLesson(
+    @Body() createAiMentorLessonBody: CreateAiMentorLessonBody,
+  ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
+    const id = await this.adminLessonsService.createAiMentorLesson(createAiMentorLessonBody);
+    return new BaseResponse({ id, message: "AI Mentor lesson created successfully" });
+  }
+
+  @Patch("beta-update-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "id",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: updateAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async betaUpdateAiMentorLesson(
+    @Query("id") id: UUIDType,
+    @Body() data: UpdateAiMentorLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.adminLessonsService.updateAiMentorLesson(id, data, userId);
+    return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
+  }
   @Post("beta-create-lesson/quiz")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
@@ -199,6 +267,20 @@ export class LessonController {
       message: "Evaluation quiz successfully",
       data: evaluationResult,
     });
+  }
+
+  @Delete("delete-student-quiz-answers")
+  @Roles(USER_ROLES.STUDENT)
+  @Validate({
+    request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async deleteStudentQuizAnswers(
+    @Query("lessonId") lessonId: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUserId);
+    return new BaseResponse({ message: "Evaluation quiz answers removed successfully" });
   }
 
   //   @Delete("clear-quiz-progress")

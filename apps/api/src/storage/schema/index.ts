@@ -14,7 +14,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, id, timestamps } from "./utils";
 
-import type { ActivityHistory } from "src/common/types";
+import type { ActivityHistory, AllSettings } from "src/common/types";
 
 export const users = pgTable("users", {
   ...id,
@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  avatarReference: varchar("avatar_reference", { length: 200 }),
   role: text("role").notNull().default(USER_ROLES.STUDENT),
   archived,
 });
@@ -98,6 +99,7 @@ export const createTokens = pgTable("create_tokens", {
     precision: 3,
     withTimezone: true,
   }).notNull(),
+  reminderCount: integer("reminder_count").notNull().default(0),
 });
 
 export const resetTokens = pgTable("reset_tokens", {
@@ -157,10 +159,48 @@ export const lessons = pgTable("lessons", {
   type: varchar("type", { length: 20 }).notNull(),
   title: varchar("title", { length: 100 }).notNull(),
   description: text("description"),
+  thresholdScore: integer("threshold_score"),
+  attemptsLimit: integer("attempts_limit"),
+  quizCooldownInHours: integer("quiz_cooldown_in_hours"),
   displayOrder: integer("display_order"),
   fileS3Key: varchar("file_s3_key", { length: 200 }),
   fileType: varchar("file_type", { length: 20 }),
   isExternal: boolean("is_external").default(false),
+});
+
+export const aiMentorLessons = pgTable("ai_mentor_lessons", {
+  ...id,
+  ...timestamps,
+  lessonId: uuid("lesson_id")
+    .references(() => lessons.id, { onDelete: "cascade" })
+    .notNull(),
+  aiMentorInstructions: text("ai_mentor_instructions").notNull(),
+  completionConditions: text("completion_conditions").notNull(),
+});
+
+export const aiMentorThreads = pgTable("ai_mentor_threads", {
+  ...id,
+  ...timestamps,
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  aiMentorLessonId: uuid("ai_mentor_lesson_id")
+    .references(() => aiMentorLessons.id, { onDelete: "cascade" })
+    .notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("active"),
+  userLanguage: varchar("user_language", { length: 20 }).notNull().default("en"),
+});
+
+export const aiMentorThreadMessages = pgTable("ai_mentor_thread_messages", {
+  ...id,
+  ...timestamps,
+  threadId: uuid("thread_id")
+    .notNull()
+    .references(() => aiMentorThreads.id, { onDelete: "cascade" }),
+  role: varchar("role", { length: 20 }).notNull(),
+  content: text("content").notNull(),
+  tokenCount: integer("token_count").notNull().default(0),
+  archived: boolean("archived").default(false),
 });
 
 export const questions = pgTable("questions", {
@@ -253,6 +293,8 @@ export const studentLessonProgress = pgTable(
       .notNull(),
     completedQuestionCount: integer("completed_question_count").default(0).notNull(),
     quizScore: integer("quiz_score"),
+    attempts: integer("attempts"),
+    isQuizPassed: boolean("is_quiz_passed"),
     completedAt: timestamp("completed_at", {
       mode: "string",
       withTimezone: true,
@@ -263,6 +305,20 @@ export const studentLessonProgress = pgTable(
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),
   }),
 );
+
+export const aiMentorStudentLessonProgress = pgTable("ai_mentor_student_lesson_progress", {
+  ...id,
+  ...timestamps,
+  studentLessonProgressId: uuid("student_lesson_progress_id")
+    .references(() => studentLessonProgress.id, { onDelete: "cascade" })
+    .notNull(),
+  summary: text("summary"),
+  score: integer("score"),
+  minScore: integer("min_score"),
+  maxScore: integer("max_score"),
+  percentage: integer("percentage"),
+  passed: boolean("passed").default(false),
+});
 
 export const studentChapterProgress = pgTable(
   "student_chapter_progress",
@@ -356,7 +412,7 @@ export const groups = pgTable("groups", {
   ...id,
   ...timestamps,
   name: text("name").notNull(),
-  description: text("description"),
+  characteristic: text("characteristic"),
 });
 
 export const groupUsers = pgTable(
@@ -366,7 +422,8 @@ export const groupUsers = pgTable(
     ...timestamps,
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
+      .notNull()
+      .unique(),
     groupId: uuid("group_id")
       .references(() => groups.id, { onDelete: "cascade" })
       .notNull(),
@@ -375,6 +432,13 @@ export const groupUsers = pgTable(
     unq: unique().on(table.userId, table.groupId),
   }),
 );
+
+export const settings = pgTable("settings", {
+  ...id,
+  ...timestamps,
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  settings: jsonb("settings").$type<AllSettings>().notNull(),
+});
 
 export const certificates = pgTable(
   "certificates",

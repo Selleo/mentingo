@@ -37,7 +37,7 @@ export function useBulkDeleteUsers() {
       if (error instanceof AxiosError) {
         return toast({
           variant: "destructive",
-          description: error.response?.data.message,
+          description: t(error.response?.data.message),
         });
       }
       toast({

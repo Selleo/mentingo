@@ -23,7 +23,7 @@ import { FileUploadResponse } from "./schemas/file.schema";
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Roles(...Object.values(USER_ROLES))
   @Post()
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
@@ -67,6 +67,6 @@ export class FileController {
     description: "File deleted successfully",
   })
   async deleteFile(@Query("fileKey") fileKey: string): Promise<void> {
-    return await this.fileService.deleteFile(fileKey);
+    await this.fileService.deleteFile(fileKey);
   }
 }

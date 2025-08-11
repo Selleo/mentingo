@@ -7,6 +7,12 @@ import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import {
+  DEFAULT_GLOBAL_SETTINGS,
+  DEFAULT_ADMIN_SETTINGS,
+  DEFAULT_STUDENT_SETTINGS,
+} from "src/settings/constants/settings.constants";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -18,6 +24,7 @@ import {
   lessons,
   questions,
   quizAttempts,
+  settings,
   studentCourses,
   studentLessonProgress,
   userDetails,
@@ -58,6 +65,8 @@ async function createUsers(users: UsersSeed, password = faker.internet.password(
 
       const user = await createOrFindUser(userToCreate.email, password, userToCreate);
 
+      await insertUserSettings(user.id, user.role === USER_ROLES.ADMIN);
+
       return user;
     }),
   );
@@ -95,6 +104,20 @@ async function insertUserDetails(userId: UUIDType) {
     contactEmail: faker.internet.email(),
     contactPhoneNumber: faker.phone.number(),
     jobTitle: faker.person.jobTitle(),
+  });
+}
+
+async function insertGlobalSettings() {
+  await db.insert(settings).values({
+    settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+  });
+}
+
+async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
+  const settingsObject = isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS;
+  await db.insert(settings).values({
+    userId,
+    settings: settingsToJSONBuildObject(settingsObject),
   });
 }
 
@@ -143,6 +166,8 @@ async function createLessonProgress(userId: UUIDType) {
       createdAt: courseLesson.createdAt,
       updatedAt: courseLesson.createdAt,
       quizScore: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 0 : null,
+      attempts: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 1 : null,
+      isQuizPassed: courseLesson.lessonType === LESSON_TYPES.QUIZ ? false : null,
     };
   });
 
@@ -229,6 +254,9 @@ async function seed() {
   await seedTruncateAllTables(db);
 
   try {
+    await insertGlobalSettings();
+    console.log("✨ Created global settings");
+
     const createdStudents = await createUsers(students, "password");
     const [createdAdmin] = await createUsers(admin, "password");
     const createdContentCreators = await createUsers(contentCreators, "password");

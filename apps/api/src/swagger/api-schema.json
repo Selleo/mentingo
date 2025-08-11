@@ -169,6 +169,141 @@
         }
       }
     },
+    "/api/auth/google": {
+      "get": {
+        "operationId": "AuthController_googleAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/google/callback": {
+      "get": {
+        "operationId": "AuthController_googleAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/microsoft": {
+      "get": {
+        "operationId": "AuthController_microsoftAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/microsoft/callback": {
+      "get": {
+        "operationId": "AuthController_microsoftAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/statistics/user-stats": {
+      "get": {
+        "operationId": "StatisticsController_getUserStatistics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserStatisticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/content-creator-stats": {
+      "get": {
+        "operationId": "StatisticsController_getContentCreatorStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetContentCreatorStatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file": {
+      "post": {
+        "operationId": "FileController_uploadFile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "description": "Optional resource type"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "FileController_deleteFile",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "required": true,
+            "in": "query",
+            "description": "Key of the file to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File deleted successfully"
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",
@@ -399,6 +534,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -578,6 +721,41 @@
         }
       }
     },
+    "/api/user/profile": {
+      "patch": {
+        "operationId": "UserController_updateUserProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "userAvatar": {
+                        "type": "string",
+                        "format": "binary"
+                      },
+                      "data": {
+                        "format": "string",
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/user/admin": {
       "patch": {
         "operationId": "UserController_adminUpdateUser",
@@ -675,6 +853,27 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/user/bulk/groups": {
+      "patch": {
+        "operationId": "UserController_bulkAssignUsersToGroup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignUsersToGroupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -1740,97 +1939,6 @@
         }
       }
     },
-    "/api/file": {
-      "post": {
-        "operationId": "FileController_uploadFile",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "resource": {
-                    "type": "string",
-                    "description": "Optional resource type"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "File uploaded successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileUploadResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
-          }
-        }
-      }
-    },
-    "/api/statistics/user-stats": {
-      "get": {
-        "operationId": "StatisticsController_getUserStatistics",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserStatisticsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/statistics/content-creator-stats": {
-      "get": {
-        "operationId": "StatisticsController_getContentCreatorStats",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetContentCreatorStatsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -2009,32 +2117,6 @@
         }
       }
     },
-    "/api/lesson/{id}": {
-      "get": {
-        "operationId": "LessonController_getLessonById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLessonByIdResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/lesson/beta-create-lesson": {
       "post": {
         "operationId": "LessonController_betaCreateLesson",
@@ -2055,6 +2137,114 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BetaCreateLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/{id}": {
+      "get": {
+        "operationId": "LessonController_getLessonById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userLanguage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "en",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLessonByIdResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/beta-create-lesson/ai": {
+      "post": {
+        "operationId": "LessonController_betaCreateAiMentorLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaCreateAiMentorLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaCreateAiMentorLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/beta-update-lesson/ai": {
+      "patch": {
+        "operationId": "LessonController_betaUpdateAiMentorLesson",
+        "parameters": [
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaUpdateAiMentorLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaUpdateAiMentorLessonResponse"
                 }
               }
             }
@@ -2217,6 +2407,33 @@
         }
       }
     },
+    "/api/lesson/delete-student-quiz-answers": {
+      "delete": {
+        "operationId": "LessonController_deleteStudentQuizAnswers",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteStudentQuizAnswersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/update-lesson-display-order": {
       "patch": {
         "operationId": "LessonController_updateLessonDisplayOrder",
@@ -2355,6 +2572,129 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/ai/thread": {
+      "get": {
+        "operationId": "AiController_getThread",
+        "parameters": [
+          {
+            "name": "thread",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/thread/messages": {
+      "get": {
+        "operationId": "AiController_getThreadMessages",
+        "parameters": [
+          {
+            "name": "thread",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadMessagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/chat": {
+      "post": {
+        "operationId": "AiController_streamChat",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamChatBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ai/judge/{threadId}": {
+      "post": {
+        "operationId": "AiController_judgeThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgeThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/retake/{lessonId}": {
+      "post": {
+        "operationId": "AiController_retakeLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
           }
         }
       }
@@ -2849,6 +3189,184 @@
           }
         }
       }
+    },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "operationId": "SettingsController_getUserSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "SettingsController_updateUserSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/new-user-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/unregistered-user-courses-accessibility": {
+      "patch": {
+        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/enforce-sso": {
+      "patch": {
+        "operationId": "SettingsController_updateEnforceSSO",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/platform-logo": {
+      "get": {
+        "operationId": "SettingsController_getPlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updatePlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/company-information": {
+      "get": {
+        "operationId": "SettingsController_getCompanyInformation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -2879,9 +3397,38 @@
             "type": "string"
           },
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -2920,6 +3467,16 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -2930,7 +3487,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "profilePictureUrl"
             ]
           }
         },
@@ -2988,6 +3546,16 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -2998,7 +3566,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3041,6 +3610,16 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3051,7 +3630,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3076,9 +3656,38 @@
         "type": "object",
         "properties": {
           "password": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "createToken": {
             "minLength": 1,
@@ -3094,9 +3703,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "resetToken": {
             "minLength": 1,
@@ -3108,6 +3746,372 @@
           "resetToken"
         ]
       },
+      "GetUserStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "averageStats": {
+                "type": "object",
+                "properties": {
+                  "lessonStats": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  },
+                  "courseStats": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  }
+                },
+                "required": [
+                  "lessonStats",
+                  "courseStats"
+                ]
+              },
+              "quizzes": {
+                "type": "object",
+                "properties": {
+                  "totalAttempts": {
+                    "type": "number"
+                  },
+                  "totalCorrectAnswers": {
+                    "type": "number"
+                  },
+                  "totalWrongAnswers": {
+                    "type": "number"
+                  },
+                  "totalQuestions": {
+                    "type": "number"
+                  },
+                  "averageScore": {
+                    "type": "number"
+                  },
+                  "uniqueQuizzesTaken": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalAttempts",
+                  "totalCorrectAnswers",
+                  "totalWrongAnswers",
+                  "totalQuestions",
+                  "averageScore",
+                  "uniqueQuizzesTaken"
+                ]
+              },
+              "courses": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  }
+                }
+              },
+              "lessons": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  }
+                }
+              },
+              "streak": {
+                "type": "object",
+                "properties": {
+                  "current": {
+                    "type": "number"
+                  },
+                  "longest": {
+                    "type": "number"
+                  },
+                  "activityHistory": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "current",
+                  "longest",
+                  "activityHistory"
+                ]
+              },
+              "nextLesson": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "courseId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "courseTitle": {
+                        "type": "string"
+                      },
+                      "courseDescription": {
+                        "type": "string"
+                      },
+                      "courseThumbnail": {
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "chapterTitle": {
+                        "type": "string"
+                      },
+                      "chapterProgress": {
+                        "anyOf": [
+                          {
+                            "const": "not_started",
+                            "type": "string"
+                          },
+                          {
+                            "const": "in_progress",
+                            "type": "string"
+                          },
+                          {
+                            "const": "completed",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "completedLessonCount": {
+                        "type": "number"
+                      },
+                      "lessonCount": {
+                        "type": "number"
+                      },
+                      "chapterDisplayOrder": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "courseId",
+                      "courseTitle",
+                      "courseDescription",
+                      "courseThumbnail",
+                      "lessonId",
+                      "chapterTitle",
+                      "chapterProgress",
+                      "completedLessonCount",
+                      "lessonCount",
+                      "chapterDisplayOrder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "averageStats",
+              "quizzes",
+              "courses",
+              "lessons",
+              "streak",
+              "nextLesson"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetContentCreatorStatsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fiveMostPopularCourses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "courseName": {
+                      "type": "string"
+                    },
+                    "studentCount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "courseName",
+                    "studentCount"
+                  ]
+                }
+              },
+              "totalCoursesCompletionStats": {
+                "type": "object",
+                "properties": {
+                  "completionPercentage": {
+                    "type": "number"
+                  },
+                  "totalCoursesCompletion": {
+                    "type": "number"
+                  },
+                  "totalCourses": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "completionPercentage",
+                  "totalCoursesCompletion",
+                  "totalCourses"
+                ]
+              },
+              "conversionAfterFreemiumLesson": {
+                "type": "object",
+                "properties": {
+                  "conversionPercentage": {
+                    "type": "number"
+                  },
+                  "purchasedCourses": {
+                    "type": "number"
+                  },
+                  "remainedOnFreemium": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "conversionPercentage",
+                  "purchasedCourses",
+                  "remainedOnFreemium"
+                ]
+              },
+              "courseStudentsStats": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                      "newStudentsCount": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "newStudentsCount"
+                    ]
+                  }
+                }
+              },
+              "avgQuizScore": {
+                "type": "object",
+                "properties": {
+                  "correctAnswerCount": {
+                    "type": "number"
+                  },
+                  "wrongAnswerCount": {
+                    "type": "number"
+                  },
+                  "answerCount": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "correctAnswerCount",
+                  "wrongAnswerCount",
+                  "answerCount"
+                ]
+              }
+            },
+            "required": [
+              "fiveMostPopularCourses",
+              "totalCoursesCompletionStats",
+              "conversionAfterFreemiumLesson",
+              "courseStudentsStats",
+              "avgQuizScore"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileKey",
+          "fileUrl"
+        ]
+      },
       "GetUsersResponse": {
         "type": "object",
         "properties": {
@@ -3115,41 +4119,87 @@
             "type": "array",
             "items": {
               "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "role",
+                    "archived",
+                    "profilePictureUrl"
+                  ]
                 },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "email": {
-                  "type": "string"
-                },
-                "firstName": {
-                  "type": "string"
-                },
-                "lastName": {
-                  "type": "string"
-                },
-                "role": {
-                  "type": "string"
-                },
-                "archived": {
-                  "type": "boolean"
+                {
+                  "type": "object",
+                  "properties": {
+                    "groupId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "groupName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "groupId",
+                    "groupName"
+                  ]
                 }
-              },
-              "required": [
-                "id",
-                "createdAt",
-                "updatedAt",
-                "email",
-                "firstName",
-                "lastName",
-                "role",
-                "archived"
               ]
             }
           },
@@ -3213,6 +4263,37 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "groupId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "groupName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3223,7 +4304,10 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "profilePictureUrl",
+              "groupId",
+              "groupName"
             ]
           }
         },
@@ -3316,6 +4400,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3326,7 +4420,8 @@
               "contactEmail",
               "contactPhone",
               "jobTitle",
-              "role"
+              "role",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3341,6 +4436,10 @@
             "type": "string"
           },
           "lastName": {
+            "type": "string"
+          },
+          "groupId": {
+            "format": "uuid",
             "type": "string"
           },
           "email": {
@@ -3397,6 +4496,16 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3407,7 +4516,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3466,6 +4576,10 @@
           "lastName": {
             "type": "string"
           },
+          "groupId": {
+            "format": "uuid",
+            "type": "string"
+          },
           "email": {
             "format": "email",
             "type": "string"
@@ -3520,6 +4634,16 @@
               },
               "archived": {
                 "type": "boolean"
+              },
+              "profilePictureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -3530,7 +4654,8 @@
               "firstName",
               "lastName",
               "role",
-              "archived"
+              "archived",
+              "profilePictureUrl"
             ]
           }
         },
@@ -3542,9 +4667,38 @@
         "type": "object",
         "properties": {
           "newPassword": {
-            "minLength": 8,
-            "maxLength": 64,
-            "type": "string"
+            "allOf": [
+              {
+                "minLength": 8,
+                "errorMessage": "Password must be at least 8 characters long",
+                "type": "string"
+              },
+              {
+                "maxLength": 64,
+                "errorMessage": "Password cannot be longer than 64 characters",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[A-Z])",
+                "errorMessage": "Password must contain at least one uppercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[a-z])",
+                "errorMessage": "Password must contain at least one lowercase letter",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*\\d)",
+                "errorMessage": "Password must contain at least one digit",
+                "type": "string"
+              },
+              {
+                "pattern": "(?=.*[!@#$%^&*()_+\\-=[\\]{};:'\",.<>?])",
+                "errorMessage": "Password must contain at least one special character",
+                "type": "string"
+              }
+            ]
           },
           "oldPassword": {
             "minLength": 8,
@@ -3579,6 +4733,26 @@
       },
       "DeleteBulkUsersResponse": {
         "type": "null"
+      },
+      "BulkAssignUsersToGroupBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "groupId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userIds",
+          "groupId"
+        ]
       },
       "CreateUserBody": {
         "type": "object",
@@ -3945,6 +5119,16 @@
                 "authorEmail": {
                   "type": "string"
                 },
+                "authorAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "category": {
                   "type": "string"
                 },
@@ -3976,6 +5160,7 @@
                 "thumbnailUrl",
                 "description",
                 "author",
+                "authorAvatarUrl",
                 "category",
                 "courseChapterCount",
                 "enrolledParticipantCount",
@@ -4053,6 +5238,16 @@
                 "authorEmail": {
                   "type": "string"
                 },
+                "authorAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "category": {
                   "type": "string"
                 },
@@ -4090,6 +5285,7 @@
                 "thumbnailUrl",
                 "description",
                 "author",
+                "authorAvatarUrl",
                 "category",
                 "courseChapterCount",
                 "enrolledParticipantCount",
@@ -4157,6 +5353,27 @@
                     }
                   ]
                 },
+                "groupId": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "groupName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "id": {
                   "format": "uuid",
                   "type": "string"
@@ -4167,6 +5384,8 @@
                 "lastName",
                 "email",
                 "enrolledAt",
+                "groupId",
+                "groupName",
                 "id"
               ]
             }
@@ -4214,6 +5433,16 @@
                 "authorEmail": {
                   "type": "string"
                 },
+                "authorAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "category": {
                   "type": "string"
                 },
@@ -4251,6 +5480,7 @@
                 "thumbnailUrl",
                 "description",
                 "author",
+                "authorAvatarUrl",
                 "category",
                 "courseChapterCount",
                 "enrolledParticipantCount",
@@ -4329,6 +5559,16 @@
                 "authorEmail": {
                   "type": "string"
                 },
+                "authorAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "category": {
                   "type": "string"
                 },
@@ -4368,6 +5608,7 @@
                 "authorId",
                 "author",
                 "authorEmail",
+                "authorAvatarUrl",
                 "category",
                 "courseChapterCount",
                 "enrolledParticipantCount",
@@ -4445,6 +5686,10 @@
                               },
                               {
                                 "const": "quiz",
+                                "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
                                 "type": "string"
                               }
                             ]
@@ -4671,6 +5916,10 @@
                               {
                                 "const": "quiz",
                                 "type": "string"
+                              },
+                              {
+                                "const": "ai_mentor",
+                                "type": "string"
                               }
                             ]
                           },
@@ -4866,6 +6115,38 @@
                                 "title"
                               ]
                             }
+                          },
+                          "aiMentor": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "lessonId": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "aiMentorInstructions": {
+                                    "type": "string"
+                                  },
+                                  "completionConditions": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "lessonId",
+                                  "aiMentorInstructions",
+                                  "completionConditions"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "updatedAt": {
                             "type": "string"
@@ -5248,372 +6529,6 @@
       "UnenrollCourseResponse": {
         "type": "null"
       },
-      "FileUploadResponse": {
-        "type": "object",
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "fileUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fileKey",
-          "fileUrl"
-        ]
-      },
-      "GetUserStatisticsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "averageStats": {
-                "type": "object",
-                "properties": {
-                  "lessonStats": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  },
-                  "courseStats": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  }
-                },
-                "required": [
-                  "lessonStats",
-                  "courseStats"
-                ]
-              },
-              "quizzes": {
-                "type": "object",
-                "properties": {
-                  "totalAttempts": {
-                    "type": "number"
-                  },
-                  "totalCorrectAnswers": {
-                    "type": "number"
-                  },
-                  "totalWrongAnswers": {
-                    "type": "number"
-                  },
-                  "totalQuestions": {
-                    "type": "number"
-                  },
-                  "averageScore": {
-                    "type": "number"
-                  },
-                  "uniqueQuizzesTaken": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "totalAttempts",
-                  "totalCorrectAnswers",
-                  "totalWrongAnswers",
-                  "totalQuestions",
-                  "averageScore",
-                  "uniqueQuizzesTaken"
-                ]
-              },
-              "courses": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  }
-                }
-              },
-              "lessons": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  }
-                }
-              },
-              "streak": {
-                "type": "object",
-                "properties": {
-                  "current": {
-                    "type": "number"
-                  },
-                  "longest": {
-                    "type": "number"
-                  },
-                  "activityHistory": {
-                    "type": "object",
-                    "patternProperties": {
-                      "^(.*)$": {
-                        "type": "boolean"
-                      }
-                    }
-                  }
-                },
-                "required": [
-                  "current",
-                  "longest",
-                  "activityHistory"
-                ]
-              },
-              "nextLesson": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "courseId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "courseTitle": {
-                        "type": "string"
-                      },
-                      "courseDescription": {
-                        "type": "string"
-                      },
-                      "courseThumbnail": {
-                        "type": "string"
-                      },
-                      "lessonId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "chapterTitle": {
-                        "type": "string"
-                      },
-                      "chapterProgress": {
-                        "anyOf": [
-                          {
-                            "const": "not_started",
-                            "type": "string"
-                          },
-                          {
-                            "const": "in_progress",
-                            "type": "string"
-                          },
-                          {
-                            "const": "completed",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "completedLessonCount": {
-                        "type": "number"
-                      },
-                      "lessonCount": {
-                        "type": "number"
-                      },
-                      "chapterDisplayOrder": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "courseId",
-                      "courseTitle",
-                      "courseDescription",
-                      "courseThumbnail",
-                      "lessonId",
-                      "chapterTitle",
-                      "chapterProgress",
-                      "completedLessonCount",
-                      "lessonCount",
-                      "chapterDisplayOrder"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "averageStats",
-              "quizzes",
-              "courses",
-              "lessons",
-              "streak",
-              "nextLesson"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetContentCreatorStatsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "fiveMostPopularCourses": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "courseName": {
-                      "type": "string"
-                    },
-                    "studentCount": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "courseName",
-                    "studentCount"
-                  ]
-                }
-              },
-              "totalCoursesCompletionStats": {
-                "type": "object",
-                "properties": {
-                  "completionPercentage": {
-                    "type": "number"
-                  },
-                  "totalCoursesCompletion": {
-                    "type": "number"
-                  },
-                  "totalCourses": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "completionPercentage",
-                  "totalCoursesCompletion",
-                  "totalCourses"
-                ]
-              },
-              "conversionAfterFreemiumLesson": {
-                "type": "object",
-                "properties": {
-                  "conversionPercentage": {
-                    "type": "number"
-                  },
-                  "purchasedCourses": {
-                    "type": "number"
-                  },
-                  "remainedOnFreemium": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "conversionPercentage",
-                  "purchasedCourses",
-                  "remainedOnFreemium"
-                ]
-              },
-              "courseStudentsStats": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "object",
-                    "properties": {
-                      "newStudentsCount": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "newStudentsCount"
-                    ]
-                  }
-                }
-              },
-              "avgQuizScore": {
-                "type": "object",
-                "properties": {
-                  "correctAnswerCount": {
-                    "type": "number"
-                  },
-                  "wrongAnswerCount": {
-                    "type": "number"
-                  },
-                  "answerCount": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "correctAnswerCount",
-                  "wrongAnswerCount",
-                  "answerCount"
-                ]
-              }
-            },
-            "required": [
-              "fiveMostPopularCourses",
-              "totalCoursesCompletionStats",
-              "conversionAfterFreemiumLesson",
-              "courseStudentsStats",
-              "avgQuizScore"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "GetChapterWithLessonResponse": {
         "type": "object",
         "properties": {
@@ -5658,6 +6573,10 @@
                         },
                         {
                           "const": "quiz",
+                          "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
                           "type": "string"
                         }
                       ]
@@ -5797,6 +6716,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -5992,6 +6915,38 @@
                           "title"
                         ]
                       }
+                    },
+                    "aiMentor": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "aiMentorInstructions": {
+                              "type": "string"
+                            },
+                            "completionConditions": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "lessonId",
+                            "aiMentorInstructions",
+                            "completionConditions"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "updatedAt": {
                       "type": "string"
@@ -6120,6 +7075,10 @@
                         {
                           "const": "quiz",
                           "type": "string"
+                        },
+                        {
+                          "const": "ai_mentor",
+                          "type": "string"
                         }
                       ]
                     },
@@ -6315,6 +7274,38 @@
                           "title"
                         ]
                       }
+                    },
+                    "aiMentor": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "lessonId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "aiMentorInstructions": {
+                              "type": "string"
+                            },
+                            "completionConditions": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "lessonId",
+                            "aiMentorInstructions",
+                            "completionConditions"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     },
                     "updatedAt": {
                       "type": "string"
@@ -6478,6 +7469,311 @@
           "data"
         ]
       },
+      "BetaCreateLessonBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "text",
+                    "type": "string"
+                  },
+                  {
+                    "const": "presentation",
+                    "type": "string"
+                  },
+                  {
+                    "const": "video",
+                    "type": "string"
+                  },
+                  {
+                    "const": "quiz",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
+                    "type": "string"
+                  }
+                ]
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileType": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "const": "brief_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "detailed_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "match_words",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scale_1_5",
+                          "type": "string"
+                        },
+                        {
+                          "const": "single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "true_or_false",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_text",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "photoS3Key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "optionText": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isStudentAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isCorrect": {
+                            "type": "boolean"
+                          },
+                          "questionId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "matchedWord": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "scaleAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "optionText",
+                          "displayOrder",
+                          "isCorrect"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title"
+                  ]
+                }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title",
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "chapterId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "displayOrder": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "chapterId"
+            ]
+          }
+        ]
+      },
+      "BetaCreateLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetLessonByIdResponse": {
         "type": "object",
         "properties": {
@@ -6507,6 +7803,10 @@
                   },
                   {
                     "const": "quiz",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
                     "type": "string"
                   }
                 ]
@@ -6776,6 +8076,66 @@
               "lessonCompleted": {
                 "type": "boolean"
               },
+              "thresholdScore": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "attemptsLimit": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quizCooldownInHours": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "isQuizPassed": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "attempts": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "displayOrder": {
                 "type": "number"
               },
@@ -6792,6 +8152,38 @@
                     "type": "null"
                   }
                 ]
+              },
+              "userLanguage": {
+                "anyOf": [
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "en",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  }
+                ]
+              },
+              "threadId": {
+                "format": "uuid",
+                "type": "string"
               }
             },
             "required": [
@@ -6801,6 +8193,12 @@
               "description",
               "fileType",
               "fileUrl",
+              "thresholdScore",
+              "attemptsLimit",
+              "quizCooldownInHours",
+              "isQuizPassed",
+              "attempts",
+              "updatedAt",
               "displayOrder",
               "nextLessonId"
             ]
@@ -6810,7 +8208,7 @@
           "data"
         ]
       },
-      "BetaCreateLessonBody": {
+      "BetaCreateAiMentorLessonBody": {
         "type": "object",
         "allOf": [
           {
@@ -6818,26 +8216,6 @@
             "properties": {
               "title": {
                 "type": "string"
-              },
-              "type": {
-                "anyOf": [
-                  {
-                    "const": "text",
-                    "type": "string"
-                  },
-                  {
-                    "const": "presentation",
-                    "type": "string"
-                  },
-                  {
-                    "const": "video",
-                    "type": "string"
-                  },
-                  {
-                    "const": "quiz",
-                    "type": "string"
-                  }
-                ]
               },
               "description": {
                 "anyOf": [
@@ -7029,13 +8407,44 @@
                   ]
                 }
               },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "updatedAt": {
                 "type": "string"
               }
             },
             "required": [
-              "title",
-              "type"
+              "title"
             ]
           },
           {
@@ -7047,15 +8456,23 @@
               },
               "displayOrder": {
                 "type": "number"
+              },
+              "aiMentorInstructions": {
+                "type": "string"
+              },
+              "completionConditions": {
+                "type": "string"
               }
             },
             "required": [
-              "chapterId"
+              "chapterId",
+              "aiMentorInstructions",
+              "completionConditions"
             ]
           }
         ]
       },
-      "BetaCreateLessonResponse": {
+      "BetaCreateAiMentorLessonResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -7071,6 +8488,281 @@
             },
             "required": [
               "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BetaUpdateAiMentorLessonBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileType": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "const": "brief_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "detailed_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "match_words",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scale_1_5",
+                          "type": "string"
+                        },
+                        {
+                          "const": "single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "true_or_false",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_text",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "photoS3Key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "optionText": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isStudentAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isCorrect": {
+                            "type": "boolean"
+                          },
+                          "questionId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "matchedWord": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "scaleAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "optionText",
+                          "displayOrder",
+                          "isCorrect"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title"
+                  ]
+                }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "aiMentorInstructions": {
+                "type": "string"
+              },
+              "completionConditions": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "aiMentorInstructions",
+              "completionConditions"
+            ]
+          }
+        ]
+      },
+      "BetaUpdateAiMentorLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
               "message"
             ]
           }
@@ -7103,6 +8795,29 @@
               "fileType": {
                 "type": "string"
               },
+              "thresholdScore": {
+                "type": "number"
+              },
+              "attemptsLimit": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quizCooldownInHours": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "questions": {
                 "type": "array",
                 "items": {
@@ -7266,7 +8981,10 @@
             },
             "required": [
               "title",
-              "type"
+              "type",
+              "thresholdScore",
+              "attemptsLimit",
+              "quizCooldownInHours"
             ]
           },
           {
@@ -7333,6 +9051,29 @@
               },
               "fileType": {
                 "type": "string"
+              },
+              "thresholdScore": {
+                "type": "number"
+              },
+              "attemptsLimit": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "quizCooldownInHours": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "questions": {
                 "type": "array",
@@ -7555,6 +9296,10 @@
                   {
                     "const": "quiz",
                     "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
+                    "type": "string"
                   }
                 ]
               },
@@ -7748,6 +9493,38 @@
                   ]
                 }
               },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "updatedAt": {
                 "type": "string"
               }
@@ -7916,6 +9693,25 @@
             "required": [
               "message",
               "data"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteStudentQuizAnswersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
             ]
           }
         },
@@ -8149,6 +9945,195 @@
           ]
         }
       },
+      "GetThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userLanguage": {
+                "anyOf": [
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "en",
+                    "type": "string"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "userId",
+              "userLanguage",
+              "createdAt",
+              "updatedAt",
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetThreadMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "content"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "anyOf": [
+                            {
+                              "const": "system",
+                              "type": "string"
+                            },
+                            {
+                              "const": "user",
+                              "type": "string"
+                            },
+                            {
+                              "const": "assistant",
+                              "type": "string"
+                            },
+                            {
+                              "const": "tool",
+                              "type": "string"
+                            },
+                            {
+                              "const": "summary",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "isJudge": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "role"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "StreamChatBody": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "content": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId",
+          "content"
+        ]
+      },
+      "JudgeThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
+              },
+              "passed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "summary",
+              "passed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetAllGroupsResponse": {
         "type": "object",
         "properties": {
@@ -8164,7 +10149,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8202,6 +10187,16 @@
                       },
                       "archived": {
                         "type": "boolean"
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -8212,7 +10207,8 @@
                       "firstName",
                       "lastName",
                       "role",
-                      "archived"
+                      "archived",
+                      "profilePictureUrl"
                     ]
                   }
                 },
@@ -8226,7 +10222,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -8274,7 +10270,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "anyOf": [
                   {
                     "type": "string"
@@ -8312,6 +10308,16 @@
                     },
                     "archived": {
                       "type": "boolean"
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -8322,7 +10328,8 @@
                     "firstName",
                     "lastName",
                     "role",
-                    "archived"
+                    "archived",
+                    "profilePictureUrl"
                   ]
                 }
               },
@@ -8336,7 +10343,7 @@
             "required": [
               "id",
               "name",
-              "description"
+              "characteristic"
             ]
           }
         },
@@ -8359,7 +10366,7 @@
                 "name": {
                   "type": "string"
                 },
-                "description": {
+                "characteristic": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -8397,6 +10404,16 @@
                       },
                       "archived": {
                         "type": "boolean"
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -8407,7 +10424,8 @@
                       "firstName",
                       "lastName",
                       "role",
-                      "archived"
+                      "archived",
+                      "profilePictureUrl"
                     ]
                   }
                 },
@@ -8421,7 +10439,7 @@
               "required": [
                 "id",
                 "name",
-                "description"
+                "characteristic"
               ]
             }
           },
@@ -8462,7 +10480,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -8500,7 +10518,7 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "characteristic": {
             "type": "string"
           }
         },
@@ -8517,7 +10535,7 @@
               "name": {
                 "type": "string"
               },
-              "description": {
+              "characteristic": {
                 "type": "string"
               }
             },
@@ -8738,6 +10756,438 @@
               "entryPoint",
               "s3Key"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPublicGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "language"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUserSettingsBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "language"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "unregisteredUserCoursesAccessibility": {
+                    "type": "boolean"
+                  },
+                  "enforceSSO": {
+                    "type": "boolean"
+                  },
+                  "companyInformation": {
+                    "type": "object",
+                    "properties": {
+                      "companyName": {
+                        "type": "string"
+                      },
+                      "registeredAddress": {
+                        "type": "string"
+                      },
+                      "taxNumber": {
+                        "type": "string"
+                      },
+                      "emailAddress": {
+                        "type": "string"
+                      },
+                      "courtRegisterNumber": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "platformLogoS3Key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "unregisteredUserCoursesAccessibility",
+                  "enforceSSO",
+                  "platformLogoS3Key"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminNewUserNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "adminNewUserNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEnforceSSOResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string"
+          },
+          "registeredAddress": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "emailAddress": {
+            "type": "string"
+          },
+          "courtRegisterNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [

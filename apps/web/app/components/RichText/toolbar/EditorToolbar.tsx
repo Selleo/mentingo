@@ -32,7 +32,10 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
   };
 
   return (
-    <Toolbar className="m-0 flex items-center justify-between p-2" aria-label="Formatting options">
+    <Toolbar
+      className="m-0 flex items-center justify-between overflow-x-scroll p-2"
+      aria-label="Formatting options"
+    >
       <TooltipProvider>
         <ToggleGroup className="flex flex-row items-center gap-x-1" type="multiple">
           <Tooltip>

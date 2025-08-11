@@ -2,6 +2,7 @@
   "common": {
     "button": {
       "save": "Zapisz",
+      "saving": "Zapisywanie...",
       "delete": "Usuń",
       "create": "Utwórz",
       "cancel": "Anuluj",
@@ -13,7 +14,9 @@
       "goBack": "Wróć",
       "clearAll": "Wyczyść wszystko",
       "ignore": "Ignoruj",
-      "validate": "Popraw błędy"
+      "validate": "Popraw błędy",
+      "edit": "Edytuj",
+      "continue": "Kontynuuj"
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -30,15 +33,17 @@
       "active": "Aktywny",
       "archived": "Zarchiwizowany",
       "selected": "Wybrany",
-      "allStatuses": "Wszystkie statusy",
+      "allStatuses": "Wszystkie Statusy",
       "draft": "Wersja robocza",
-      "all": "Wszystko",
+      "all": "Wszystkie",
       "search": "Szukaj",
       "published": "Opublikowany",
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka"
-    }
+    },
+    "continueWithGoogle": "Kontynuuj z użyciem Google",
+    "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -46,6 +51,11 @@
     "replace": "Kliknij, aby zastąpić",
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "Plik został pomyślnie usunięty"
     }
   },
   "adminScorm": {
@@ -111,10 +121,33 @@
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
+    "providerInformation": "O dostawcy",
     "browseCourses": "Przeglądaj kursy",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
+  },
+  "providerInformation": {
+    "title": "Informacje o Dostawcy",
+    "description": "Informacje o Twojej firmie, które będą widoczne dla użytkowników",
+    "editTitle": "Edytuj Informacje o Dostawcy",
+    "companyName": "Nazwa firmy",
+    "registeredAddress": "Adres siedziby",
+    "taxNumber": "Numer NIP",
+    "emailAddress": "Adres email",
+    "courtRegisterNumber": "Numer KRS",
+    "noDataAvailable": "Brak informacji o dostawcy",
+    "createSuccess": "Informacje o dostawcy zostały utworzone",
+    "updateSuccess": "Informacje o dostawcy zostały zaktualizowane",
+    "createError": "Nie udało się utworzyć informacji o dostawcy",
+    "updateError": "Nie udało się zaktualizować informacji o dostawcy",
+    "saveError": "Nie udało się zapisać informacji o dostawcy",
+    "validation": {
+      "nipMustBe10Digits": "NIP musi mieć 10 cyfr",
+      "krsMustBe10Digits": "KRS musi mieć 10 cyfr",
+      "invalidEmailFormat": "Nieprawidłowy format email"
+    },
+    "noCompanyInformationAvailable": "Brak informacji o dostawcy"
   },
   "changeUserLanguageView": {
     "header": "Zmień język",
@@ -135,6 +168,19 @@
     },
     "validation": {
       "email": "Email jest wymagany"
+    }
+  },
+  "ssoEnforcementView": {
+    "header": "Wymuszenie SSO",
+    "subHeader": "Wymuś logowanie SSO dla wszystkich użytkowników",
+    "description": "Przełącznik ten wymusi logowanie przez Google/Microsoft dla wszystkich użytkowników. Jeśli jest wyłączony, użytkownicy będą mogli się zalogować za pomocą tradycyjnego formularza logowania.",
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "Wymuszenie SSO zostało pomyślnie zaktualizowane",
+      "ssoEnforcementUpdateFailed": "Nie udało się zaktualizować wymuszenia SSO"
     }
   },
   "mostPopularCoursesView": {
@@ -161,12 +207,20 @@
       "confirmPassword": "Potwierdź hasło"
     },
     "validation": {
-      "passwordMinLength": "Hasło musi mieć co najmniej 8 znaków",
       "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "button": {
-      "changePassword": "Zmień hasło"
+      "changePassword": "Utwórz hasło"
     }
+  },
+  "passwordValidationDisplay": {
+    "title": "Wymagania dotyczące hasła",
+    "header": "Twoje hasło musi zawierać:",
+    "passwordMinLength": "co najmniej 8 znaków",
+    "passwordUppercase": "co najmniej jedną wielką literę",
+    "passwordLowercase": "co najmniej jedną małą literę",
+    "passwordNumber": "co najmniej jedną cyfrę",
+    "passwordSpecial": "co najmniej jeden znak specjalny"
   },
   "changePasswordView": {
     "header": "Zmień hasło",
@@ -177,7 +231,8 @@
     },
     "validation": {
       "oldPassword": "Stare hasło jest wymagane",
-      "newPassword": "Nowe hasło jest wymagane"
+      "newPassword": "Nowe hasło jest wymagane",
+      "passwordsDontMatch": "Hasła się nie zgadzają"
     },
     "toast": {
       "passwordChangedSuccessfully": "Hasło zostało zmienione pomyślnie",
@@ -187,12 +242,42 @@
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
-      "showMore": "Pokaż więcej"
+      "showMore": "Pokaż więcej",
+      "edit": "Edytuj",
+      "share": "Udostępnij profil",
+      "cancel": "Anuluj",
+      "confirm": "Potwierdź",
+      "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
     "breadcrumbs": {
       "dashboard": "Panel"
     },
+    "field": {
+      "firstName": "Imię",
+      "firstNamePlaceholder": "Wprowadź swoje imię",
+      "lastName": "Nazwisko",
+      "lastNamePlaceholder": "Wprowadź swoje nazwisko",
+      "contactEmail": "Email",
+      "contactEmailPlaceholder": "Wprowadź swój adres email",
+      "contactPhone": "Numer telefonu",
+      "contactPhonePlaceholder": "Wprowadź swój numer telefonu",
+      "jobTitle": "Tytuł",
+      "jobTitlePlaceholder": "Wprowadź swój tytuł",
+      "description": "Twój opis",
+      "descriptionPlaceholder": "Wprowadź krótki opis",
+      "uploadThumbnailLabel": "Prześlij zdjęcie profilowe"
+    },
+    "toast": {
+      "profileLinkCopied": "Link do profilu skopiowany!",
+      "profileLinkCopyError": "Błąd podczas kopiowania linku do profilu!"
+    },
     "other": {
+      "personalInfoTitle": "Dane osobiste",
+      "personalInfoDescription": "Zarządzaj swoimi podstawowymi danymi konta",
+      "aboutTitle": "O mnie",
+      "aboutDescription": "Powiedz więcej o sobie",
+      "appearanceTitle": "Wygląd",
+      "appearanceDescription": "Zmień swoje zdjęcie profilowe",
       "pageTitle": "Profil",
       "about": "O",
       "contact": "Kontakt",
@@ -206,6 +291,7 @@
     "toast": {
       "userUpdatedSuccessfully": "Użytkownik zaktualizowany pomyślnie",
       "userDetailsUpdatedSuccessfully": "Szczegóły użytkownika zaktualizowane pomyślnie",
+      "updatedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie zaktualizowani",
       "deletedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie usunięci"
     },
     "field": {
@@ -228,7 +314,8 @@
       "continue": "Kontynuuj",
       "start": "Rozpocznij",
       "readMore": "Czytaj więcej",
-      "tryAgain": "Spróbuj ponownie"
+      "tryAgain": "Spróbuj ponownie",
+      "view": "Zobacz"
     },
     "other": {
       "completedCourses": "Zakończone kursy",
@@ -299,7 +386,8 @@
         "video": "Wideo",
         "presentation": "Prezentacja",
         "text": "Tekst",
-        "quiz": "Quiz"
+        "quiz": "Quiz",
+        "aiMentor": "AI Mentor"
       }
     },
     "other": {
@@ -347,6 +435,11 @@
     "toast": {
       "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "createNew": "Utwórz nową kategorię",
+      "back": "Wstecz"
     }
   },
   "adminCategoryView": {
@@ -367,13 +460,19 @@
     "error": {
       "categoryNotFound": "Kategoria nie została znaleziona",
       "categoryIdNotFound": "ID kategorii nie zostało znalezione"
+    },
+    "breadcrumbs": {
+      "categories": "Kategorie",
+      "categoryDetails": "Informacje o kategorii",
+      "back": "Wstecz"
     }
   },
   "adminUsersView": {
     "filters": {
       "placeholder": {
         "searchByKeyword": "Szukaj po słowie kluczowym...",
-        "roles": "Role"
+        "roles": "Role",
+        "groups": "Grupy"
       }
     },
     "field": {
@@ -382,14 +481,55 @@
       "email": "Email",
       "role": "Rola",
       "status": "Status",
-      "createdAt": "Utworzono"
+      "createdAt": "Utworzono",
+      "group": "Grupa"
     },
     "other": {
       "selected": "Wybrany"
     },
     "button": {
       "createNew": "Utwórz nowego",
-      "deleteSelected": "Usuń wybrane"
+      "deleteSelected": "Usuń wybrane",
+      "edit": "Edytuj"
+    },
+    "dropdown": {
+      "changeRole": "Zmień role",
+      "changeGroup": "Zmień grupy",
+      "delete": "Usuń"
+    },
+    "modal": {
+      "title": {
+        "delete": "Czy chcesz usunąć te konta?",
+        "role": "Modyfikuj role",
+        "group": "Modyfikuj grupy",
+        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?"
+      },
+      "button": {
+        "delete": "Usuń",
+        "role": "Zapisz",
+        "group": "Zapisz",
+        "continue": "Zatwierdź"
+      },
+      "description": {
+        "delete": "Czy na pewno chcesz usunąć te konta? Ta operacja jest nieodwracalna.",
+        "confirmationForGroup_one": "Zmienisz grupę na {{ group }} dla 1 użytkownika",
+        "confirmationForGroup_few": "Zmienisz grupę na {{ group }} dla {{ count }} użytkowników",
+        "confirmationForGroup_many": "Zmienisz grupę na {{ group }} dla {{ count }} użytkowników",
+        "confirmationForGroup_other": "Zmienisz grupę na {{ group }} dla {{ count }} użytkowników",
+        "confirmationForRole_one": "Zmienisz rolę na {{ role }} dla 1 użytkownika",
+        "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników"
+      },
+      "placeholder": {
+        "group": "Wybierz grupę",
+        "role": "Wybierz rolę"
+      }
+    },
+    "breadcrumbs": {
+      "users": "Użytkownicy",
+      "createNew": "Utwórz nowego użytkownika",
+      "back": "Wstecz"
     }
   },
   "adminUserView": {
@@ -397,40 +537,54 @@
     "subHeader": "Wypełnij dane, aby utworzyć nowego użytkownika. Kliknij zapisz, gdy skończysz.",
     "editUserHeader": "Informacje o użytkowniku",
     "placeholder": {
-      "role": "Wybierz rolę"
+      "role": "Wybierz rolę",
+      "groupId": "Wybierz grupę"
     },
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
       "email": "Email",
       "role": "Rola",
-      "status": "Status"
+      "status": "Status",
+      "groupId": "Grupa"
     },
     "toast": {
-      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie"
+      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie",
+      "userWithAttemptsError": "Nie można usunąć użytkownika z powiązanymi wynikami quizów. Dostępna jest tylko anonimizacja i archiwizacja.",
+      "userWithCreatedCoursesError": "Nie można usunąć użytkownika, który jest autorem istniejących rozdziałów. Dostępne są tylko anonimizacja i archiwizacja."
     },
     "button": {
       "createUser": "Utwórz użytkownika"
     },
     "error": {
       "userNotFound": "Użytkownik nie został znaleziony"
+    },
+    "breadcrumbs": {
+      "users": "Użytkownicy",
+      "userDetails": "Informacje o użytkowniku",
+      "back": "Wstecz"
     }
   },
   "adminGroupsView": {
     "name": "Nazwa grupy",
-    "description": "Opis",
+    "characteristic": "Charakterystyka",
     "buttons": {
       "create": "Stwórz nową grupę",
       "deleteSelected": "Usuń wybrane"
     },
     "newGroup": {
       "header": "Utwórz nową grupę",
-      "subheader": "Wprowadź dane dla swojej nowej grupy. Kliknij zapisz, gdy skończysz.",
+      "card": {
+        "header": "Szczegóły grupy",
+        "subheader": "Zdefiniuj nazwę grupy i jej charakterystykę",
+        "footer": "Pamiętaj, członkowie grupy zobaczą ten opis. Mentor AI wykorzysta go w rozmowach."
+      },
       "fields": {
         "name": "Nazwa grupy",
-        "description": "Opis"
+        "characteristic": "Charakterystyka"
       },
-      "submit": "Utwórz grupę"
+      "cancel": "Anuluj",
+      "submit": "Publikuj"
     },
     "updateGroup": {
       "header": "Edytuj grupę",
@@ -447,6 +601,12 @@
       "description": "Czy na pewno chcesz usunąć te grupy?",
       "cancel": "Anuluj",
       "submit": "Usuń"
+    },
+    "breadcrumbs": {
+      "groups": "Grupy",
+      "createNew": "Utwórz nową",
+      "editGroup": "Edytuj grupę",
+      "back": "Wstecz"
     }
   },
   "enrollCourseView": {
@@ -472,7 +632,8 @@
       "status": "Status",
       "pricing": "Cennik",
       "preview": "Podgląd",
-      "enrolledStudents": "Zapisani studenci"
+      "enrolledStudents": "Zapisani studenci",
+      "testAiMentor": "Przetestuj AI Mentora"
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
@@ -542,6 +703,7 @@
         "removePresentationLesson": "Czy na pewno chcesz usunąć tę lekcję prezentacyjną z rozdziału?",
         "removeTextLesson": "Czy na pewno chcesz usunąć tę lekcję tekstową z rozdziału?",
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
+        "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -577,6 +739,20 @@
         "breadcrumbs": {
           "back": "Wstecz"
         },
+        "settings": {
+          "title": "Ustawienia",
+          "passingThreshold": "Próg zaliczenia (%)",
+          "attemptsLimit": "Limit prób",
+          "quizCooldownInHours": "Blokada czasowa po niezdaniu (w godzinach)",
+          "numberOfQuestions": "{{count1}} z {{count2}} pytań",
+          "noQuestions": "Brak pytań"
+        },
+        "tooltip": {
+          "switch": "Jeśli włączone, student ma ograniczoną liczbę podejść do quizu.",
+          "passingThreshold": "Procentowy próg zaliczenia quizu. Jeśli student osiągnie ten wynik, quiz zostanie uznany za zaliczony.",
+          "attemptsLimit": "Liczba podejść do quizu przed uruchomieniem blokady czasowej.",
+          "quizCooldownInHours": "Czas trwania blokady quizu po wykorzystaniu wszystkich prób."
+        },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
           "atLeastOneOptionRequired": "Wymagana jest przynajmniej jedna opcja",
@@ -586,7 +762,14 @@
           "atLeastOneOptionCorrect": "Przynajmniej jedna opcja musi być oznaczona jako poprawna.",
           "allOptionsCorrect": "Wszystkie opcje muszą być poprawne",
           "titleRequired": "Tytuł jest wymagany",
-          "descriptionRequired": "Opis jest wymagany"
+          "descriptionRequired": "Opis jest wymagany",
+          "aiMentorInstructionsRequired": "Instrukcje AI Mentora są wymagane",
+          "aiMentorInstructionsMaxLength": "Instrukcje AI Mentora są zbyt długie (maks. 2000 znaków)",
+          "completionConditionsRequired": "Warunki zaliczenia są wymagane",
+          "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 1000 znaków)",
+          "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
+          "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
+          "titleMaxLength": "Tytuł jest zbyt długi (maks. 255 znaków)"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -596,6 +779,8 @@
           "fileLessonCreatedSuccessfully": "Plik utworzony pomyślnie",
           "textLessonCreatedSuccessfully": "Lekcja tekstowa utworzona pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
+          "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
+          "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
@@ -612,7 +797,10 @@
           "image": "Obrazek",
           "type": "Typ",
           "words": "Słowa",
-          "sentence": "Zdanie"
+          "sentence": "Zdanie",
+          "aiMentorInstructions": "Instrukcje AI Mentora",
+          "completionConditions": "Warunki zaliczenia",
+          "passThreshold": "Próg zaliczenia"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",
@@ -622,7 +810,10 @@
           "singleChoice": "Pojedynczy wybór",
           "multipleChoice": "Wielokrotny wybór",
           "enterWord": "Wprowadź słowo",
-          "enterURL": "Wpisz link"
+          "enterURL": "Wpisz link",
+          "aiMentorInstructions": "Opisz jak AI Mentor powinien zachowywać się podczas lekcji...",
+          "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
+          "passThreshold": "np. 70%"
         },
         "other": {
           "lessonNumber": "Liczba lekcji",
@@ -630,6 +821,7 @@
           "text": "Tekst",
           "video": "Wideo",
           "quiz": "Quiz",
+          "aiMentor": "AI Mentor",
           "correct": "Poprawna",
           "true": "Prawda",
           "false": "Fałsz",
@@ -650,9 +842,36 @@
           "videoLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki wideo, takie jak MP4.",
           "presentationLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki prezentacji, takie jak PPTX.",
           "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
+          "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
           "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
           "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
-          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu."
+          "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
+          "aiMentorInstructionsTooltip": "Opisz, jak AI Mentor powinien zachowywać się podczas lekcji. Uwzględnij kontekst, rolę lub scenariusz, który AI powinien realizować. To określa, jak AI będzie prowadzić rozmowę.",
+          "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
+          "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
+          "suggestedExamples": "Sugerowane przykłady",
+          "charactersLeft": "pozostałe znaki",
+          "optional": "opcjonalnie",
+          "overwriteContent": "Nadpisz treść",
+          "overwriteContentDescription": "To zastąpi aktualną treść wybranym przykładem. Czy na pewno chcesz kontynuować?",
+          "scenarioSimulation": "Symulacja scenariusza",
+          "problemSolving": "Rozwiązywanie problemów",
+          "creativeTask": "Zadanie kreatywne",
+          "knowledgeSharing": "Dialog dzielenia się wiedzą",
+          "aiMentorSuggestionExamples": {
+            "instructions": {
+              "scenarioSimulation": "Wcielasz się w rolę klienta biznesowego, który szuka dostawcy usług tworzenia oprogramowania. Masz konkretne wymagania: aplikacja musi być gotowa w ciągu 3 miesięcy, masz ograniczony budżet i oczekujesz jasnej komunikacji. Student wciela się w rolę przedstawiciela handlowego, który chce pozyskać twój biznes. AI Mentor powinien odpowiadać jako klient, zadając pytania i wyrażając obawy.",
+              "problemSolving": "Wcielasz się w rolę pracownika, który prosi o podwyżkę wynagrodzenia. Uważasz, że na nią zasługujesz ze względu na swoje ostatnie osiągnięcia. Jednak firma obecnie nie ma dostępnego budżetu na podwyżki. Student wciela się w rolę menedżera, który musi konstruktywnie przeprowadzić rozmowę, okazując empatię i próbując znaleźć alternatywne rozwiązanie.",
+              "creativeTask": "Prosisz studenta o zaproponowanie pomysłu na nową usługę, którą firma mogłaby zaoferować swoim klientom. Twoją rolą jest zachęcanie do kreatywności, zadawanie pytań uzupełniających i pomaganie studentowi w udoskonaleniu jego koncepcji.",
+              "knowledgeSharing": "Wcielasz się w rolę doświadczonego mentora, który dzieli się wiedzą na temat technik zarządzania czasem. Rozmowa ma charakter nieformalny: wprowadzasz koncepcje, podajesz przykłady i zachęcasz studenta do refleksji. Czasami zadajesz lekkie, otwarte pytania, aby sprawdzić zrozumienie. Celem jest prowadzenie, a nie testowanie."
+            },
+            "conditions": {
+              "scenarioSimulation": "<ul><li>Student pyta o budżet klienta.</li><li>Student pyta o harmonogram.</li><li>Student używa sprzedaży SPIN lub innej techniki sprzedażowej.</li><li>Student identyfikuje kluczowe problemy klienta.</li><li>Student składa propozycję, która odpowiada ograniczeniom klienta.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
+              "problemSolving": "<ul><li>Student uznaje wkład pracownika.</li><li>Student uczciwie wyjaśnia sytuację budżetową.</li><li>Student proponuje alternatywę niefinansową (np. dodatkowe korzyści, możliwość rozwoju).</li><li>Student zgadza się wrócić do tematu w późniejszym terminie.</li><li>Student utrzymuje szanujący, wspierający ton.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
+              "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki muszą być spełnione.)</em>",
+              "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
+            }
+          }
         }
       }
     },
@@ -704,11 +923,16 @@
         "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
       },
       "successResponse": "studentów zostało zapisanych do kursu."
+    },
+    "breadcrumbs": {
+      "myCourses": "Moje kursy",
+      "back": "Wstecz"
     }
   },
   "registerView": {
     "header": "Rejestracja",
     "subHeader": "Wprowadź dane, aby utworzyć konto",
+    "subHeaderSSO": "Zarejestruj się za pomocą swojego konta Google/Microsoft",
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
@@ -716,7 +940,8 @@
       "password": "Hasło"
     },
     "other": {
-      "alreadyHaveAccount": "Masz już konto?"
+      "alreadyHaveAccount": "Masz już konto?",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "createAccount": "Utwórz konto",
@@ -725,8 +950,7 @@
     "validation": {
       "firstName": "Imię jest wymagane",
       "lastName": "Nazwisko jest wymagane",
-      "email": "Nieprawidłowy email",
-      "password": "Hasło musi mieć co najmniej 8 znaków"
+      "email": "Nieprawidłowy email"
     }
   },
   "courseChapterView": {
@@ -758,6 +982,7 @@
   "loginView": {
     "header": "Logowanie",
     "subHeader": "Wprowadź swój email, aby zalogować się na swoje konto",
+    "subHeaderSSO": "Zaloguj się za pomocą swojego konta Google/Microsoft",
     "validation": {
       "email": "Nieprawidłowy email",
       "password": "Hasło jest wymagane"
@@ -766,7 +991,8 @@
       "forgotPassword": "Zapomniałeś hasła?",
       "dontHaveAccount": "Nie masz konta?",
       "rememberMe": "Zapamiętaj mnie",
-      "signUp": "Zarejestruj się"
+      "signUp": "Zarejestruj się",
+      "orContinueWith": "Lub kontynuuj z"
     },
     "button": {
       "login": "Zaloguj się"
@@ -800,7 +1026,15 @@
           "title": "Szukaj po tytule...",
           "categories": "Kategorie",
           "sort": "Sortuj"
-        }
+        },
+        "options": {}
+      },
+      "headerOptions": {
+        "image": "Zdjęcie",
+        "title": "Nazwa Kursu",
+        "category": "Kategoria",
+        "description": "Opis",
+        "author": "Autor"
       }
     }
   },
@@ -828,26 +1062,41 @@
       "answers": "Odpowiedzi:",
       "true": "Prawda",
       "false": "Fałsz",
-      "briefResponseInstruction": "Instrukcja: Podaj krótką odpowiedź (1-2 zdania).",
-      "detailedResponseInstruction": "Instrukcja: Napisz szczegółową odpowiedź (3-5 zdań).",
+      "oneOrTwoWordSentence": "Instrukcja: Podaj krótką odpowiedź (1-2 zdania).",
+      "threeOrFiveWordSentence": "Instrukcja: Napisz szczegółową odpowiedź (3-5 zdań).",
       "single": "Pojedyncza",
       "multiple": "Wielokrotna",
       "fillInTheBlanks": "Uzupełnij luki.",
       "selectQuestion": "Wybierz pytanie.",
-      "trueOrFalseQuestion": "Pytanie prawda/fałsz."
+      "trueOrFalseQuestion": "Pytanie prawda/fałsz.",
+      "multipleChoice": "Pytanie wielokrotnego wyboru.",
+      "singleChoice": "Pytanie jednokrotnego wyboru.",
+      "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
+      "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)"
+    },
+    "aiMentor": {
+      "title": "Sesja AI Mentora",
+      "description": "To jest sesja mentoringu z AI. AI poprowadzi Cię przez lekcję zgodnie z wytycznymi instruktora."
     },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
     },
+    "tooltip": {
+      "retakeAvailableIn": "Zablokowane na {{time}} godz. po ostatnim podejściu.",
+      "cooldown": "Quiz będzie zablokowany na {{time}} godz. po ostatnim podejściu.",
+      "noCooldown": "Brak okresu oczekiwania."
+    },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
-      "lessonTitle": "Lekcja"
+      "availableCourses": "Dostępne kursy",
+      "yourCourses": "Twoje kursy",
+      "back": "Wstecz"
     },
     "button": {
       "previous": "Poprzedni",
       "complete": "Zakończ",
       "next": "Następny",
-      "submit": "Prześlij"
+      "submit": "Prześlij",
+      "retake": "Powtórz"
     },
     "sideSection": {
       "header": "Spis treści:",
@@ -862,6 +1111,7 @@
       "answerCannotBeEmptyForTextQuestion": "Odpowiedź nie może być pusta dla pytania tekstowego {{questionId}}.",
       "invalidSelectionForSingleAnswer": "Nieprawidłowy wybór dla pytania jednokrotnego wyboru.",
       "invalidFormatForMultiAnswer": "Nieprawidłowy format dla pytania wielokrotnego wyboru.",
+      "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
       "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!"
     }
@@ -882,8 +1132,20 @@
       "yourAnswer": "Twoja odpowiedź",
       "singleChoice": "Pytanie jednokrotnego wyboru",
       "multipleChoice": "Pytanie wielokrotnego wyboru",
+      "trueOrFalseChoice": "Pytanie prawda fałsz",
       "oneOrTwoWordSentence": "Podaj krótką odpowiedź (1-2 zadań)",
-      "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)"
+      "threeOrFiveWordSentence": "Napisz szczegółową odpowiedź (3-5 zdań)",
+      "aiMentorLesson": {
+        "sendMessage": "Napisz wiadomość...",
+        "check": "Sprawdź",
+        "retake": "Powtórz",
+        "aiMentorName": "AI Mentor",
+        "userName": "Użytkownik",
+        "typing": "Pisze odpowiedź...",
+        "send": "Wyślij",
+        "retakeModalTitle": "Czy na pewno chcesz powtórzyć lekcję?",
+        "retakeModalDescription": "Spowoduje to zresetowanie Twoich postępów w tej lekcji. Tej akcji nie można cofnąć."
+      }
     },
     "sideSection": {
       "optionHeader": "Opcja",
@@ -905,8 +1167,14 @@
         "continueLearning": "Kontynuuj naukę",
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
-        "goToContentCreatorPage": "Przejdź do strony twórcy treści"
+        "goToContentCreatorPage": "Przejdź do strony twórcy treści",
+        "repeatLessons": "Powtórz lekcje"
       }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Dostępne kursy",
+      "yourCourses": "Twoje kursy",
+      "back": "Wstecz"
     }
   },
   "studentChapterView": {
@@ -914,6 +1182,34 @@
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
     }
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "buttons": {
+      "cancel": "Odrzuć",
+      "save": "Zapisz"
+    },
+    "tabs": {
+      "account": "Konto",
+      "organization": "Organizacja"
+    }
+  },
+  "adminPreferences": {
+    "header": "Globalne preferencje administratora",
+    "subHeader": "Zarządzaj globalnymi ustawieniami",
+    "notificationSettings": "Ustawienia powiadomień",
+    "courseSettings": "Ustawienia kursów",
+    "field": {
+      "newUserNotifications": "Powiadomienia o nowych użytkownikach",
+      "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
+      "coursesVisibility": "Pokazuj kursy odwiedzającym",
+      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
+      "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
+    },
+    "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },
   "studentCertificateView": {
     "header": "Certyfikaty",

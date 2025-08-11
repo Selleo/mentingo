@@ -99,7 +99,7 @@ export class GroupService {
         .select({
           id: groups.id,
           name: groups.name,
-          description: groups.description,
+          characteristic: groups.characteristic,
           createdAt: groups.createdAt,
           updatedAt: groups.updatedAt,
         })
@@ -222,7 +222,7 @@ export class GroupService {
       conditions.push(
         or(
           ilike(groups.name, `%${filters.keyword.toLowerCase()}%`),
-          ilike(groups.description, `%${filters.keyword.toLowerCase()}%`),
+          ilike(groups.characteristic, `%${filters.keyword.toLowerCase()}%`),
         ) as SQL,
       );
     }

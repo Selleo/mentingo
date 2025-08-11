@@ -32,6 +32,18 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
     ({ completedLessonCount }) => completedLessonCount,
   );
 
+  const firstLessonId = course.chapters[0]?.lessons[0]?.id;
+
+  const handleNavigateToLesson = () => {
+    if (!nonStartedLessonId) {
+      return navigate(`lesson/${firstLessonId}`);
+    }
+
+    navigate(`lesson/${nonStartedLessonId}`, {
+      state: { chapterId: notStartedChapterId },
+    });
+  };
+
   return (
     <>
       <h4 className="h6 pb-1 text-neutral-950">
@@ -51,23 +63,17 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
-          <Button
-            className="gap-x-2"
-            disabled={!nonStartedLessonId}
-            onClick={() =>
-              navigate(`lesson/${nonStartedLessonId}`, {
-                state: { chapterId: notStartedChapterId },
-              })
-            }
-          >
+          <Button className="gap-x-2" onClick={handleNavigateToLesson}>
             <Icon name="Play" className="h-auto w-6 text-white" />
             <span>
               {t(
                 isAdminLike
                   ? "adminCourseView.common.preview"
-                  : hasCourseProgress
-                    ? "studentCourseView.sideSection.button.continueLearning"
-                    : "studentCourseView.sideSection.button.startLearning",
+                  : !hasCourseProgress
+                    ? "studentCourseView.sideSection.button.startLearning"
+                    : nonStartedLessonId
+                      ? "studentCourseView.sideSection.button.continueLearning"
+                      : "studentCourseView.sideSection.button.repeatLessons",
               )}
             </span>
           </Button>

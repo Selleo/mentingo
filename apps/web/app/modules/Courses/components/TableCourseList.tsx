@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
 
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { CategoryChip } from "~/components/ui/CategoryChip";
@@ -22,20 +23,22 @@ type CardCourseListProps = {
 
 export const TableCourseList = ({ availableCourses }: CardCourseListProps) => {
   const { isAdmin } = useUserRole();
-
+  const { t } = useTranslation();
   return (
     <Table className="w-full">
       <TableHeader>
         <TableRow className="border-none bg-neutral-50">
           <TableHead className="w-24 rounded-s-lg text-sm font-medium text-neutral-950">
-            Image
+            {t("studentCoursesView.availableCourses.headerOptions.image")}
           </TableHead>
-          <TableHead className="text-sm font-medium text-neutral-950">Course Name</TableHead>
+          <TableHead className="text-sm font-medium text-neutral-950">
+            {t("studentCoursesView.availableCourses.headerOptions.title")}
+          </TableHead>
           <TableHead className="hidden text-sm font-medium text-neutral-950 md:table-cell">
-            Category
+            {t("studentCoursesView.availableCourses.headerOptions.category")}
           </TableHead>
           <TableHead className="hidden text-sm font-medium text-neutral-950 lg:table-cell">
-            Description
+            {t("studentCoursesView.availableCourses.headerOptions.description")}
           </TableHead>
           <TableHead className="w-28 rounded-e-lg"></TableHead>
         </TableRow>

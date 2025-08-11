@@ -30,6 +30,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
@@ -38,6 +39,8 @@ import {
   chapters,
   courses,
   coursesSummaryStats,
+  groups,
+  groupUsers,
   lessons,
   questions,
   quizAttempts,
@@ -87,6 +90,7 @@ export class CourseService {
     private readonly fileService: FileService,
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly userService: UserService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -117,6 +121,7 @@ export class CourseService {
         description: sql<string>`${courses.description}`,
         thumbnailUrl: courses.thumbnailS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+        authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
         enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
         courseChapterCount: courses.chapterCount,
@@ -137,6 +142,7 @@ export class CourseService {
         courses.thumbnailS3Key,
         users.firstName,
         users.lastName,
+        users.avatarReference,
         categories.title,
         courses.priceInCents,
         courses.currency,
@@ -157,7 +163,10 @@ export class CourseService {
 
         try {
           const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-          return { ...item, thumbnailUrl: signedUrl };
+          const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+            item.authorAvatarUrl,
+          );
+          return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
         } catch (error) {
           console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
           return item;
@@ -217,6 +226,7 @@ export class CourseService {
           users.firstName,
           users.lastName,
           users.email,
+          users.avatarReference,
           studentCourses.studentId,
           categories.title,
           coursesSummaryStats.freePurchasedCount,
@@ -242,7 +252,10 @@ export class CourseService {
 
           try {
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            return { ...item, thumbnailUrl: signedUrl };
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              item.authorAvatarUrl,
+            );
+            return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -290,12 +303,16 @@ export class CourseService {
         email: users.email,
         id: users.id,
         enrolledAt: studentCourses.createdAt,
+        groupId: groups.id,
+        groupName: groups.name,
       })
       .from(users)
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
       )
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT)))
       .orderBy(sortOrder(studentCourses.createdAt));
 
@@ -340,6 +357,7 @@ export class CourseService {
           authorId: sql<string>`${courses.authorId}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
+          authorAvatarUrl: sql<string>`${users.avatarReference}`,
           category: sql<string>`${categories.title}`,
           enrolled: sql<boolean>`FALSE`,
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
@@ -370,6 +388,7 @@ export class CourseService {
           users.firstName,
           users.lastName,
           users.email,
+          users.avatarReference,
           categories.title,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
@@ -389,9 +408,17 @@ export class CourseService {
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
           try {
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
-            return { ...item, thumbnailUrl: signedUrl };
+            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+
+            return {
+              ...itemWithoutReferences,
+              thumbnailUrl: signedUrl,
+              authorAvatarUrl: authorAvatarSignedUrl,
+            };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -540,7 +567,7 @@ export class CourseService {
     };
   }
 
-  async getBetaCourseById(id: UUIDType) {
+  async getBetaCourseById(id: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -553,6 +580,7 @@ export class CourseService {
         isPublished: courses.isPublished,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
+        authorId: courses.authorId,
         hasCertificate: courses.hasCertificate,
       })
       .from(courses)
@@ -560,6 +588,10 @@ export class CourseService {
       .where(and(eq(courses.id, id)));
 
     if (!course) throw new NotFoundException("Course not found");
+
+    if (currentUserRole !== USER_ROLES.ADMIN && course.authorId !== currentUserId) {
+      throw new ForbiddenException("You do not have permission to edit this course");
+    }
 
     const courseChapterList = await this.db
       .select({
@@ -648,6 +680,7 @@ export class CourseService {
         authorId: sql<string>`${courses.authorId}`,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorEmail: sql<string>`${users.email}`,
+        authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN true ELSE false END`,
         enrolledParticipantCount: sql<number>`0`,
@@ -680,6 +713,7 @@ export class CourseService {
         users.firstName,
         users.lastName,
         users.email,
+        users.avatarReference,
         studentCourses.studentId,
         categories.title,
       )
@@ -689,12 +723,20 @@ export class CourseService {
       );
 
     return await Promise.all(
-      contentCreatorCourses.map(async (course) => ({
-        ...course,
-        thumbnailUrl: course.thumbnailUrl
-          ? await this.fileService.getFileUrl(course.thumbnailUrl)
-          : course.thumbnailUrl,
-      })),
+      contentCreatorCourses.map(async (course) => {
+        const { authorAvatarUrl, ...courseWithoutReferences } = course;
+
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+
+        return {
+          ...courseWithoutReferences,
+          thumbnailUrl: course.thumbnailUrl
+            ? await this.fileService.getFileUrl(course.thumbnailUrl)
+            : course.thumbnailUrl,
+          authorAvatarUrl: authorAvatarSignedUrl,
+        };
+      }),
     );
   }
 
@@ -757,8 +799,9 @@ export class CourseService {
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
     image?: Express.Multer.File,
-    currentUserId?: UUIDType,
   ) {
     return this.db.transaction(async (trx) => {
       const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
@@ -767,7 +810,7 @@ export class CourseService {
         throw new NotFoundException("Course not found");
       }
 
-      if (existingCourse.authorId !== currentUserId) {
+      if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
         throw new ForbiddenException("You don't have permission to update course");
       }
 
@@ -1176,6 +1219,7 @@ export class CourseService {
       authorId: sql<string>`${courses.authorId}`,
       author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
       authorEmail: sql<string>`${users.email}`,
+      authorAvatarUrl: sql<string>`${users.avatarReference}`,
       category: sql<string>`${categories.title}`,
       enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
       enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,

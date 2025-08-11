@@ -56,6 +56,12 @@ const niceCourseData = Type.Intersect([
                   ),
                 }),
               ),
+              Type.Partial(
+                Type.Object({
+                  aiMentorInstructions: Type.String(),
+                  completionConditions: Type.String(),
+                }),
+              ),
             ]),
           ),
         }),

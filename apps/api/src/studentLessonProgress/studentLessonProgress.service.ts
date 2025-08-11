@@ -12,6 +12,7 @@ import { DatabasePg } from "src/common";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
+  aiMentorStudentLessonProgress,
   chapters,
   courses,
   lessons,
@@ -23,6 +24,7 @@ import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type * as schema from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
@@ -35,22 +37,35 @@ export class StudentLessonProgressService {
     private readonly certificatesService: CertificatesService,
   ) {}
 
-  async markLessonAsCompleted(
-    id: UUIDType,
-    studentId: UUIDType,
-    userRole?: UserRole,
+  async markLessonAsCompleted({
+    id,
+    studentId,
+    userRole,
     quizCompleted = false,
     completedQuestionCount = 0,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
-    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
-
+    dbInstance = this.db,
+    aiMentorLessonData,
+  }: {
+    id: UUIDType;
+    studentId: UUIDType;
+    userRole?: UserRole;
+    quizCompleted?: boolean;
+    completedQuestionCount?: number;
+    dbInstance?: PostgresJsDatabase<typeof schema>;
+    aiMentorLessonData?: ResponseAiJudgeJudgementBody;
+  }) {
     if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (accessCourseLessonWithDetails.lessonIsCompleted) return;
+    if (
+      accessCourseLessonWithDetails.lessonIsCompleted ||
+      accessCourseLessonWithDetails.attempts > 1
+    )
+      return;
 
     const [lesson] = await this.db
       .select({
@@ -71,23 +86,35 @@ export class StudentLessonProgressService {
     if (lesson.type === LESSON_TYPES.QUIZ && !quizCompleted)
       throw new BadRequestException("Quiz not completed");
 
+    if (lesson.type === LESSON_TYPES.AI_MENTOR && !aiMentorLessonData)
+      throw new BadRequestException("No AI Mentor Lesson Data given");
+
     const [lessonProgress] = await dbInstance
       .select()
       .from(studentLessonProgress)
       .where(
         and(eq(studentLessonProgress.lessonId, id), eq(studentLessonProgress.studentId, studentId)),
       );
-    if (!lessonProgress) {
-      await dbInstance.insert(studentLessonProgress).values({
-        studentId,
-        lessonId: lesson.id,
-        chapterId: lesson.chapterId,
-        completedAt: sql`now()`,
-        completedQuestionCount,
-      });
-    }
 
-    if (!lessonProgress?.completedAt) {
+    const currentLessonProgress = !lessonProgress
+      ? (
+          await dbInstance
+            .insert(studentLessonProgress)
+            .values({
+              studentId,
+              lessonId: lesson.id,
+              chapterId: lesson.chapterId,
+              completedQuestionCount,
+            })
+            .returning()
+        )[0]
+      : lessonProgress;
+
+    const updateConditions =
+      (!lessonProgress?.completedAt && lesson.type !== LESSON_TYPES.AI_MENTOR) ||
+      (LESSON_TYPES.AI_MENTOR && !!aiMentorLessonData?.passed);
+
+    if (updateConditions) {
       await dbInstance
         .update(studentLessonProgress)
         .set({ completedAt: sql`now()`, completedQuestionCount })
@@ -98,6 +125,48 @@ export class StudentLessonProgressService {
           ),
         )
         .returning();
+    }
+
+    if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
+      const [existingAiMentorLesson] = await dbInstance
+        .select()
+        .from(aiMentorStudentLessonProgress)
+        .where(eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id));
+
+      if (!existingAiMentorLesson) {
+        await dbInstance.insert(aiMentorStudentLessonProgress).values({
+          ...aiMentorLessonData,
+          studentLessonProgressId: currentLessonProgress.id,
+        });
+      } else {
+        await dbInstance
+          .update(aiMentorStudentLessonProgress)
+          .set(aiMentorLessonData)
+          .where(
+            eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id),
+          );
+      }
+    }
+
+    if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
+      const [existingAiMentorLesson] = await dbInstance
+        .select()
+        .from(aiMentorStudentLessonProgress)
+        .where(eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id));
+
+      if (!existingAiMentorLesson) {
+        await dbInstance.insert(aiMentorStudentLessonProgress).values({
+          ...aiMentorLessonData,
+          studentLessonProgressId: currentLessonProgress.id,
+        });
+      } else {
+        await dbInstance
+          .update(aiMentorStudentLessonProgress)
+          .set(aiMentorLessonData)
+          .where(
+            eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id),
+          );
+      }
     }
 
     const isCompletedAsFreemium =
@@ -115,6 +184,45 @@ export class StudentLessonProgressService {
     if (isCompletedAsFreemium) return;
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
+  }
+
+  async updateQuizProgress(
+    chapterId: UUIDType,
+    lessonId: UUIDType,
+    userId: UUIDType,
+    completedQuestionCount: number,
+    quizScore: number,
+    attempts: number,
+    isQuizPassed: boolean,
+    isCompleted: boolean,
+    trx: PostgresJsDatabase<typeof schema>,
+  ) {
+    return trx
+      .insert(studentLessonProgress)
+      .values({
+        lessonId,
+        chapterId,
+        studentId: userId,
+        attempts: 1,
+        isQuizPassed,
+        completedAt: sql`now()`,
+        completedQuestionCount,
+        quizScore,
+      })
+      .onConflictDoUpdate({
+        target: [
+          studentLessonProgress.studentId,
+          studentLessonProgress.lessonId,
+          studentLessonProgress.chapterId,
+        ],
+        set: {
+          attempts,
+          isQuizPassed,
+          completedQuestionCount,
+          quizScore,
+          completedAt: isCompleted ? sql`now()` : null,
+        },
+      });
   }
 
   private async updateChapterProgress(
@@ -349,6 +457,7 @@ export class StudentLessonProgressService {
       .select({
         isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
+        attempts: sql<number>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,

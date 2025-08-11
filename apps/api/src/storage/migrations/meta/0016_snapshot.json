@@ -1,5 +1,5 @@
 {
-  "id": "bf10cb93-26a9-49b7-9075-ad96aa186c16",
+  "id": "0ae71fd6-32cc-48a7-b789-6fee6897d072",
   "prevId": "348a83d8-60e7-48c8-91b7-abb5060b1cf2",
   "version": "7",
   "dialect": "postgresql",
@@ -52,85 +52,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "title"
-          ]
-        }
-      }
-    },
-    "public.certificates": {
-      "name": "certificates",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "certificates_user_id_users_id_fk": {
-          "name": "certificates_user_id_users_id_fk",
-          "tableFrom": "certificates",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "certificates_course_id_courses_id_fk": {
-          "name": "certificates_course_id_courses_id_fk",
-          "tableFrom": "certificates",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "certificates_user_id_course_id_unique": {
-          "name": "certificates_user_id_course_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "course_id"
           ]
         }
       }
@@ -375,13 +296,6 @@
         },
         "is_published": {
           "name": "is_published",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "has_certificate": {
-          "name": "has_certificate",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -803,8 +717,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "description": {
-          "name": "description",
+        "characteristic": {
+          "name": "characteristic",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1397,6 +1311,63 @@
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.settings": {
+      "name": "settings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "settings": {
+          "name": "settings",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{\"admin_new_user_notification\":false,\"language\":\"en\"}'::jsonb"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "settings_user_id_users_id_fk": {
+          "name": "settings_user_id_users_id_fk",
+          "tableFrom": "settings",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

@@ -1,5 +1,6 @@
 import { Type } from "@sinclair/typebox";
 
+import { SUPPORTED_LANGUAGES, THREAD_STATUS } from "src/ai/utils/ai.type";
 import { UUIDSchema } from "src/common";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
@@ -48,18 +49,6 @@ export const questionSchema = Type.Object({
   passQuestion: Type.Union([Type.Boolean(), Type.Null()]),
 });
 
-export const lessonSchema = Type.Object({
-  id: UUIDSchema,
-  title: Type.String(),
-  type: Type.Enum(LESSON_TYPES),
-  description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  displayOrder: Type.Number(),
-  fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  questions: Type.Optional(Type.Array(adminQuestionSchema)),
-  updatedAt: Type.Optional(Type.String()),
-});
-
 const lessonQuizSchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
@@ -69,7 +58,17 @@ const lessonQuizSchema = Type.Object({
   solutionExplanation: Type.Optional(Type.String()),
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
+  thresholdScore: Type.Number(),
+  attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
+  quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
+});
+
+export const aiMentorLessonSchema = Type.Object({
+  id: UUIDSchema,
+  lessonId: UUIDSchema,
+  aiMentorInstructions: Type.String(),
+  completionConditions: Type.String(),
 });
 
 export const adminLessonSchema = Type.Object({
@@ -78,10 +77,41 @@ export const adminLessonSchema = Type.Object({
   displayOrder: Type.Number(),
   title: Type.String(),
   description: Type.String(),
+  thresholdScore: Type.Number(),
+  attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
+  quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
   fileS3Key: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.String()),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
+  aiMentor: Type.Union([aiMentorLessonSchema, Type.Null()]),
 });
+
+export const lessonSchema = Type.Object({
+  id: UUIDSchema,
+  title: Type.String(),
+  type: Type.Enum(LESSON_TYPES),
+  description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  displayOrder: Type.Number(),
+  fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  questions: Type.Optional(Type.Array(adminQuestionSchema)),
+  aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
+  updatedAt: Type.Optional(Type.String()),
+});
+
+export const createAiMentorLessonSchema = Type.Intersect([
+  Type.Omit(lessonSchema, ["id", "displayOrder", "type"]),
+  Type.Object({
+    chapterId: UUIDSchema,
+    displayOrder: Type.Optional(Type.Number()),
+    aiMentorInstructions: Type.String(),
+    completionConditions: Type.String(),
+  }),
+]);
+export const updateAiMentorLessonSchema = Type.Omit(createAiMentorLessonSchema, [
+  "chapterId",
+  "displayOrder",
+]);
 
 export const createLessonSchema = Type.Intersect([
   Type.Omit(lessonSchema, ["id", "displayOrder"]),
@@ -116,9 +146,18 @@ export const lessonShowSchema = Type.Object({
   fileUrl: Type.Union([Type.String(), Type.Null()]),
   quizDetails: Type.Optional(questionDetails),
   lessonCompleted: Type.Optional(Type.Boolean()),
+  thresholdScore: Type.Union([Type.Number(), Type.Null()]),
+  attemptsLimit: Type.Union([Type.Number(), Type.Null()]),
+  quizCooldownInHours: Type.Union([Type.Number(), Type.Null()]),
+  isQuizPassed: Type.Union([Type.Boolean(), Type.Null()]),
+  attempts: Type.Union([Type.Number(), Type.Null()]),
+  updatedAt: Type.Union([Type.String(), Type.Null()]),
   displayOrder: Type.Number(),
   isExternal: Type.Optional(Type.Boolean()),
   nextLessonId: Type.Union([UUIDSchema, Type.Null()]),
+  userLanguage: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
+  status: Type.Optional(Type.Enum(THREAD_STATUS)),
+  threadId: Type.Optional(UUIDSchema),
 });
 
 export const updateLessonSchema = Type.Partial(createLessonSchema);
@@ -182,12 +221,15 @@ export type CreateLessonBody = Static<typeof createLessonSchema>;
 export type UpdateLessonBody = Static<typeof updateLessonSchema>;
 export type UpdateQuizLessonBody = Static<typeof updateQuizLessonSchema>;
 export type CreateQuizLessonBody = Static<typeof createQuizLessonSchema>;
+export type CreateAiMentorLessonBody = Static<typeof createAiMentorLessonSchema>;
 export type OptionBody = Static<typeof optionSchema>;
 export type AdminOptionBody = Static<typeof adminOptionSchema>;
 export type AdminQuestionBody = Static<typeof adminQuestionSchema>;
 export type QuestionBody = Static<typeof questionSchema>;
 export type LessonShow = Static<typeof lessonShowSchema>;
 export type LessonSchema = Static<typeof lessonSchema>;
+export type AiMentorBody = Static<typeof aiMentorLessonSchema>;
+export type UpdateAiMentorLessonBody = Static<typeof updateAiMentorLessonSchema>;
 export type AnswerQuestionBody = Static<typeof answerQuestionsForLessonBody>;
 export type QuestionDetails = Static<typeof questionDetails>;
 export type NextLesson = Static<typeof nextLessonSchema>;

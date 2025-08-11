@@ -1,8 +1,9 @@
-import { capitalize } from "lodash-es";
+import { camelCase, capitalize } from "lodash-es";
 import { memo } from "react";
 import { type Control, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import {
@@ -24,6 +25,8 @@ export const UserInfo = memo<{
   user: GetUserByIdResponse["data"];
 }>(({ name, control, isEditing, user }) => {
   const { t } = useTranslation();
+  const { data: groups } = useGroupsQuerySuspense();
+
   return (
     <Controller
       name={name}
@@ -57,7 +60,36 @@ export const UserInfo = memo<{
                 <SelectGroup>
                   {[USER_ROLE.student, USER_ROLE.admin, USER_ROLE.contentCreator].map((role) => (
                     <SelectItem className="capitalize" value={role} key={role}>
-                      {t(`common.roles.${role}`)}
+                      {t(`common.roles.${camelCase(role)}`)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          );
+        }
+
+        if (name === "groupId") {
+          return (
+            <Select
+              onValueChange={field.onChange}
+              value={field.value as UpdateUserBody["groupId"] | undefined}
+            >
+              <SelectTrigger
+                className="w-full rounded-md border border-neutral-300 px-2 py-1"
+                data-testid="groupSelect"
+              >
+                <SelectValue
+                  placeholder={capitalize(field.value as string)}
+                  className="capitalize"
+                  data-testid="selectValue"
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {groups.map((group) => (
+                    <SelectItem className="capitalize" value={group.id} key={group.id}>
+                      {group.name}
                     </SelectItem>
                   ))}
                 </SelectGroup>
