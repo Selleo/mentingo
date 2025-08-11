@@ -8,6 +8,7 @@ export const requestManager = {
 
   abortAll() {
     this.controller.abort();
+    this.controller = new AbortController();
   },
 };
 
@@ -24,7 +25,9 @@ ApiClient.instance.interceptors.request.use((config) => {
     config.url?.includes("/forgot-password") ||
     config.url?.includes("/register");
 
-  if (!isAuthEndpoint && !useAuthStore.getState().isLoggedIn) {
+  const isPublicEndpoint = config.url?.includes("/settings/public");
+
+  if (!isAuthEndpoint && !isPublicEndpoint && !useAuthStore.getState().isLoggedIn) {
     config.signal = requestManager.controller.signal;
   }
 
