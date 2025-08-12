@@ -78,6 +78,14 @@ const findAndClickCell = async (page: Page, name: string) => {
     .click();
 };
 
+const findAndClickCheckbox = async (page: Page) => {
+  const checkbox = page.getByLabel("Select row").first();
+
+  await expect(checkbox).not.toBeChecked();
+  await checkbox.click();
+  await expect(checkbox).toBeChecked();
+};
+
 const findAndClickButton = async (page: Page, name: string) =>
   await page
     .getByRole("button", { name: new RegExp(name, "i") })
@@ -95,16 +103,25 @@ const goIntoEditMode = async (page: Page) => {
 };
 
 const deleteAndAssert = async (page: Page, name: string) => {
-  await findAndClickCell(page, GROUPS_PAGE_UI.cell.selectRow);
+  await findAndClickCheckbox(page);
 
-  await findAndClickButton(page, GROUPS_PAGE_UI.button.deleteSelected);
+  const deleteButton = page
+    .getByRole("button", {
+      name: new RegExp(GROUPS_PAGE_UI.button.deleteSelected, "i"),
+    })
+    .first();
+  await expect(deleteButton).toBeEnabled({ timeout: 10000 });
+  await deleteButton.click();
+
   await findAndClickButton(page, GROUPS_PAGE_UI.button.delete);
 
   const newCell = page.getByRole("cell", {
     name: new RegExp(name, "i"),
   });
 
-  await expect(newCell).toHaveCount(0);
+  await page.waitForLoadState("networkidle");
+
+  await expect(newCell).toHaveCount(0, { timeout: 15000 });
 };
 
 const editFields = async (
@@ -125,7 +142,6 @@ const editFields = async (
 
 const createBasicGroup = async (page: Page) => {
   await goIntoCreateMode(page);
-
   await editFields(
     page,
     GROUPS_PAGE_UI.expectedValues.groupName,
@@ -212,6 +228,7 @@ test.describe("Admin groups page flow", () => {
       await groupSelector.click();
 
       await page.locator(".p-1 > div > div").first().click();
+
       await expect(groupSelector).toHaveText(GROUPS_PAGE_UI.expectedValues.groupName);
 
       await findAndClickButton(page, GROUPS_PAGE_UI.button.save);

@@ -59,7 +59,7 @@ const navigateTroughTextLesson = async (page: Page, nextButton: Locator) => {
   await expect(whyParagraph).toBeVisible();
 
   await nextButton.click();
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 };
 
 const navigateTroughPresentationLesson = async (page: Page, nextButton: Locator) => {
@@ -71,7 +71,7 @@ const navigateTroughQuiz = async (page: Page, nextButton: Locator) => {
 
   if (await submitButton.isDisabled()) {
     await nextButton.click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await page.waitForURL(URL_PATTERNS.course);
     return;
   }
@@ -121,64 +121,107 @@ const navigateTroughQuiz = async (page: Page, nextButton: Locator) => {
     );
 
   await nextButton.click();
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
   await page.waitForURL(URL_PATTERNS.course);
 };
 
-test.describe("Course Workflow", () => {
+const ensureEnrolledAndStartLearning = async (page: Page) => {
+  await goToCoursePage(page);
+
+  await page.waitForURL(URL_PATTERNS.course);
+  await page.waitForLoadState("domcontentloaded");
+
+  const learningButton = page.getByRole("button", {
+    name: /Start learning|Continue learning|Repeat lessons/,
+  });
+  const enrollButton = page.locator('button:has-text("Enroll to the course")');
+
+  await Promise.race([
+    learningButton.waitFor({ state: "visible", timeout: 5000 }).catch(() => {}),
+    enrollButton.waitFor({ state: "visible", timeout: 5000 }).catch(() => {}),
+  ]);
+
+  if (await enrollButton.isVisible()) {
+    await enrollButton.click();
+    await enrollButton.waitFor({ state: "hidden", timeout: 10000 });
+  }
+
+  await learningButton.waitFor({ state: "visible", timeout: 15000 });
+  await learningButton.click();
+
+  await page.waitForURL(URL_PATTERNS.lesson);
+  await page.waitForLoadState("domcontentloaded");
+};
+
+test.describe("course enrollment", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/courses");
   });
 
-  test("Navigate trough all the lessons", async ({ page }) => {
+  test("should enroll in course successfully or verify already enrolled", async ({ page }) => {
     await goToCoursePage(page);
 
     await page.waitForURL(URL_PATTERNS.course);
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     const enrollButton = page.locator('button:has-text("Enroll to the course")');
-
-    await enrollButton.waitFor({ state: "visible" });
-
-    if ((await enrollButton.count()) > 0 && (await enrollButton.isVisible())) {
-      await enrollButton.click();
-    }
-
-    await enrollButton.waitFor({ state: "hidden", timeout: 10000 });
-
     const learningButton = page.getByRole("button", {
       name: /Start learning|Continue learning|Repeat lessons/,
     });
 
-    await learningButton.waitFor({ state: "visible", timeout: 15000 });
-    await learningButton.click();
+    await Promise.race([
+      learningButton.waitFor({ state: "visible", timeout: 5000 }).catch(() => {}),
+      enrollButton.waitFor({ state: "visible", timeout: 5000 }).catch(() => {}),
+    ]);
 
-    await page.waitForURL(URL_PATTERNS.lesson);
-    await page.waitForLoadState("networkidle");
+    if (await enrollButton.isVisible()) {
+      await enrollButton.click();
+      await enrollButton.waitFor({ state: "hidden", timeout: 10000 });
+
+      await expect(learningButton).toBeVisible({ timeout: 15000 });
+    } else {
+      await expect(learningButton).toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test("should start learning after enrollment", async ({ page }) => {
+    await ensureEnrolledAndStartLearning(page);
+
+    await expect(page).toHaveURL(URL_PATTERNS.lesson);
+    await expect(page.getByTestId("current-lesson-number")).toBeVisible();
+    await expect(page.getByTestId("lessons-count")).toBeVisible();
+  });
+});
+
+test.describe("complete course workflow", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/courses");
+  });
+
+  test("should navigate through entire course from start to finish", async ({ page }) => {
+    await ensureEnrolledAndStartLearning(page);
 
     const currentLessonNumber = await page.getByTestId("current-lesson-number").textContent();
     const lessonsCount = await page.getByTestId("lessons-count").textContent();
 
-    const navigateTroughLessons = async () => {
-      for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount); i++) {
-        const nextButton = page.getByTestId("next-lesson-button");
+    for (let i = Number(currentLessonNumber) ?? 1; i <= Number(lessonsCount); i++) {
+      const nextButton = page.getByTestId("next-lesson-button");
 
-        await page.waitForTimeout(250);
+      await page.waitForLoadState("domcontentloaded");
 
-        const lessonType = await page.getByTestId("lesson-type").textContent();
+      const lessonType = await page.getByTestId("lesson-type").textContent();
 
-        if (lessonType === "Text") {
-          await navigateTroughTextLesson(page, nextButton);
-        }
-        if (lessonType === "Presentation") {
-          await navigateTroughPresentationLesson(page, nextButton);
-        }
-        if (lessonType === "Quiz") {
-          await navigateTroughQuiz(page, nextButton);
-        }
+      if (lessonType === "Text") {
+        await navigateTroughTextLesson(page, nextButton);
       }
-    };
+      if (lessonType === "Presentation") {
+        await navigateTroughPresentationLesson(page, nextButton);
+      }
+      if (lessonType === "Quiz") {
+        await navigateTroughQuiz(page, nextButton);
+      }
+    }
 
-    await navigateTroughLessons();
+    await expect(page).toHaveURL(URL_PATTERNS.course);
   });
 });
