@@ -45,7 +45,7 @@ const Groups = (): ReactElement => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
   const { data } = useGroupsQuerySuspense();
   const { mutateAsync: deleteGroupsMutation } = useBulkDeleteGroups();
@@ -77,7 +77,7 @@ const Groups = (): ReactElement => {
       event.preventDefault();
       await deleteGroupsMutation(selectedRows);
       setRowSelection({});
-      setDialogOpen(false);
+      setIsDialogOpen(false);
     },
     [deleteGroupsMutation, selectedRows],
   );
@@ -101,7 +101,7 @@ const Groups = (): ReactElement => {
             {t("common.other.selected")} ({selectedRows.length})
           </p>
 
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger disabled={isEmpty(selectedRows)}>
               <Button
                 size="sm"
