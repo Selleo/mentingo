@@ -41,6 +41,16 @@ const config: PlaywrightTestConfig = {
       testMatch: /.*\.setup\.ts/,
     },
     {
+      name: "language-guard",
+      testMatch: /.*\.lang-guard\.ts/,
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        storageState: "e2e/.auth/admin.json",
+      },
+    },
+    {
       name: "chromium-student",
       testDir: "./e2e/tests/student",
       dependencies: ["setup"],

@@ -61,7 +61,7 @@ const checkValidSidebarLanguage = async (
   }
 };
 
-test.describe.skip("Switch language flow", () => {
+test.describe("Switch language flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await navigateToPage(
@@ -74,6 +74,7 @@ test.describe.skip("Switch language flow", () => {
   test("should switch to Polish and verify translations", async ({ page }) => {
     await changeLanguage(page, LANGUAGE_PAGE_UI.languages.polish.language);
     await checkValidSidebarLanguage(page, "polish");
+    await changeLanguage(page, LANGUAGE_PAGE_UI.languages.polish.english);
   });
 
   test("should switch to English and verify translations", async ({ page }) => {
