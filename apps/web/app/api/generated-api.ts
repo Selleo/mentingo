@@ -1706,6 +1706,7 @@ export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -1749,6 +1750,7 @@ export interface UpdateUserSettingsResponse {
     | {
         unregisteredUserCoursesAccessibility: boolean;
         enforceSSO: boolean;
+        certificateBackgroundImage: string | null;
         companyInformation?: {
           companyName?: string;
           registeredAddress?: string;
@@ -1771,6 +1773,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -1786,6 +1789,7 @@ export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -3970,6 +3974,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCertificateBackground
+     * @request PATCH:/api/settings/certificate-background
+     */
+    settingsControllerUpdateCertificateBackground: (
+      data: {
+        /** @format binary */
+        "certificate-background"?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/certificate-background`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
   };

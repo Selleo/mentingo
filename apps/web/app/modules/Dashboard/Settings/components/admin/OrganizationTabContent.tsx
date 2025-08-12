@@ -1,5 +1,6 @@
 import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
+import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
 import AdminPreferences from "./Preferences";
 
 import type { GlobalSettings, UserSettings } from "../../types";
@@ -23,6 +24,11 @@ export default function OrganizationTabContent({
     <>
       {isAdmin && <AdminPreferences globalSettings={globalSettings} />}
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
+      {isAdmin && (
+        <CertificateBackgroundUpload
+          certificateBackgroundImage={globalSettings.certificateBackgroundImage}
+        />
+      )}
     </>
   );
 }

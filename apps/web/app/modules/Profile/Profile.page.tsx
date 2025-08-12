@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useUpdateUserProfile } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
@@ -44,6 +45,8 @@ export default function ProfilePage() {
 
   const { data: userDetails, error } = useUserDetails(id);
   const { data: currentUser } = useCurrentUser();
+
+  const { data: globalSettings } = useGlobalSettings();
 
   const { hasPermission, isProfileOwner } = useMemo(() => {
     return {
@@ -148,6 +151,7 @@ export default function ProfilePage() {
               courseName={certificatePreview.certData?.courseTitle || ""}
               completionDate={certificatePreview.completionDate}
               onClose={handleCloseCertificatePreview}
+              certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
             />
           </div>
         </button>

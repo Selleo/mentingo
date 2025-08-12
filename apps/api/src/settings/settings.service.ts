@@ -37,7 +37,7 @@ export class SettingsService {
   ) {}
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
-    const [globalSettings] = await this.db
+    const [{ settings: globalSettings }] = await this.db
       .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(isNull(settings.userId));
@@ -46,7 +46,13 @@ export class SettingsService {
       throw new NotFoundException("Global settings not found");
     }
 
-    return globalSettings.settings;
+    const { certificateBackgroundImage, ...restOfSettings } = globalSettings;
+
+    const certificateBackgroundSignedUrl = certificateBackgroundImage
+      ? await this.fileService.getFileUrl(certificateBackgroundImage)
+      : null;
+
+    return { ...restOfSettings, certificateBackgroundImage: certificateBackgroundSignedUrl };
   }
 
   public async createSettings(
@@ -303,6 +309,41 @@ export class SettingsService {
       });
 
     return updated.companyInformation;
+  }
+
+  async updateCertificateBackground(
+    certificateBackground: Express.Multer.File,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    let certificateBackgroundValue: string | null = null;
+
+    if (certificateBackground) {
+      const { fileKey } = await this.fileService.uploadFile(
+        certificateBackground,
+        "certificate-backgrounds",
+      );
+      certificateBackgroundValue = fileKey;
+    }
+
+    const [{ settings: updatedSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{certificateBackgroundImage}',
+            ${
+              certificateBackgroundValue
+                ? sql`to_jsonb(${certificateBackgroundValue}::text)`
+                : sql`'null'::jsonb`
+            },
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedSettings;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {

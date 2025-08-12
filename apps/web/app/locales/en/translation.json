@@ -1188,6 +1188,16 @@
       "organization": "Organization"
     }
   },
+  "certificateBackgroundUpload": {
+    "title": "Certificate Background Upload",
+    "description": "Upload a background image for the certificate.",
+    "button": {
+      "removeBackgroundImage": "Remove Background Image"
+    },
+    "other": {
+      "uploading": "Uploading..."
+    }
+  },
   "adminPreferences": {
     "header": "Administrator Global Preferences",
     "subHeader": "Configure global system settings, user preferences, and administrative options",

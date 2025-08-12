@@ -2,6 +2,7 @@ export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
   enforceSSO: boolean;
   platformLogoS3Key: string | null;
+  certificateBackgroundImage: string | null;
 };
 
 export type UserSettings = {

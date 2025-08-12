@@ -3367,6 +3367,33 @@
           }
         }
       }
+    },
+    "/api/settings/certificate-background": {
+      "patch": {
+        "operationId": "SettingsController_updateCertificateBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "certificate-background": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -10774,6 +10801,16 @@
               "enforceSSO": {
                 "type": "boolean"
               },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "companyInformation": {
                 "type": "object",
                 "properties": {
@@ -10808,6 +10845,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
+              "certificateBackgroundImage",
               "platformLogoS3Key"
             ]
           }
@@ -10917,6 +10955,16 @@
                   "enforceSSO": {
                     "type": "boolean"
                   },
+                  "certificateBackgroundImage": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "companyInformation": {
                     "type": "object",
                     "properties": {
@@ -10951,6 +10999,7 @@
                 "required": [
                   "unregisteredUserCoursesAccessibility",
                   "enforceSSO",
+                  "certificateBackgroundImage",
                   "platformLogoS3Key"
                 ]
               }
@@ -10996,6 +11045,16 @@
               "enforceSSO": {
                 "type": "boolean"
               },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "companyInformation": {
                 "type": "object",
                 "properties": {
@@ -11030,6 +11089,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
+              "certificateBackgroundImage",
               "platformLogoS3Key"
             ]
           }
@@ -11050,6 +11110,16 @@
               "enforceSSO": {
                 "type": "boolean"
               },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "companyInformation": {
                 "type": "object",
                 "properties": {
@@ -11084,6 +11154,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
+              "certificateBackgroundImage",
               "platformLogoS3Key"
             ]
           }

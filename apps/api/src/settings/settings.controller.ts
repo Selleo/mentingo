@@ -9,6 +9,7 @@ import {
   UploadedFile,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -149,5 +150,28 @@ export class SettingsController {
   })
   async updateCompanyInformation(@Body() companyInfo: CompanyInformaitonJSONSchema) {
     return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
+  }
+
+  @Patch("certificate-background")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(FileInterceptor("certificate-background"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        "certificate-background": {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  async updateCertificateBackground(
+    @UploadedFile() certificateBackground: Express.Multer.File,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    return new BaseResponse(
+      await this.settingsService.updateCertificateBackground(certificateBackground),
+    );
   }
 }

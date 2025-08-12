@@ -1194,6 +1194,16 @@
       "organization": "Organizacja"
     }
   },
+  "certificateBackgroundUpload": {
+    "title": "Przesyłanie tła certyfikatu",
+    "description": "Prześlij obraz tła dla certyfikatu.",
+    "button": {
+      "removeBackgroundImage": "Usuń obraz tła"
+    },
+    "other": {
+      "uploading": "Przesyłanie..."
+    }
+  },
   "adminPreferences": {
     "header": "Globalne preferencje administratora",
     "subHeader": "Zarządzaj globalnymi ustawieniami",

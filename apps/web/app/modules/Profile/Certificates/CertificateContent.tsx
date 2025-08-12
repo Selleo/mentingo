@@ -10,6 +10,7 @@ interface CertificateContentProps {
   courseName?: string;
   completionDate?: string;
   hasBottomMargin?: boolean;
+  backgroundImageUrl?: string | null;
 }
 
 const CertificateContent = ({
@@ -17,6 +18,7 @@ const CertificateContent = ({
   courseName,
   completionDate,
   hasBottomMargin,
+  backgroundImageUrl,
 }: CertificateContentProps) => {
   return (
     <div
@@ -31,6 +33,10 @@ const CertificateContent = ({
         overflow: "hidden",
         backgroundColor: "white",
         padding: "2rem 4rem",
+        backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : "none",
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
       <div
