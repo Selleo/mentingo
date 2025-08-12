@@ -8,6 +8,8 @@ interface CertificateToPDFProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
+  platformLogo?: string | null;
+  backgroundImageUrl?: string | null;
 }
 
 const useCertificatePDF = () => {
@@ -38,6 +40,8 @@ const useCertificatePDF = () => {
     studentName,
     courseName,
     completionDate,
+    platformLogo,
+    backgroundImageUrl,
   }: CertificateToPDFProps) => (
     <div style={{ position: "fixed", top: 0, left: 0, opacity: 0, pointerEvents: "none" }}>
       <div ref={targetRef}>
@@ -45,10 +49,13 @@ const useCertificatePDF = () => {
           studentName={studentName}
           courseName={courseName}
           completionDate={completionDate}
+          platformLogo={platformLogo}
+          backgroundImageUrl={backgroundImageUrl}
         />
       </div>
     </div>
   );
+
   return { downloadCertificatePdf, HiddenCertificate };
 };
 export default useCertificatePDF;

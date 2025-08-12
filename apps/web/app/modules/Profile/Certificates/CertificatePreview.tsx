@@ -8,6 +8,7 @@ interface CertificatePreviewProps {
   courseName?: string;
   completionDate?: string;
   onClose?: () => void;
+  platformLogo?: string | null;
   certificateBackgroundImageUrl?: string | null;
 }
 
@@ -16,6 +17,7 @@ const CertificatePreview = ({
   courseName,
   completionDate,
   onClose,
+  platformLogo,
   certificateBackgroundImageUrl,
 }: CertificatePreviewProps) => {
   const { downloadCertificatePdf, HiddenCertificate } = useCertificatePDF();
@@ -29,9 +31,11 @@ const CertificatePreview = ({
         studentName={studentName}
         courseName={courseName}
         completionDate={completionDate}
+        platformLogo={platformLogo}
+        backgroundImageUrl={certificateBackgroundImageUrl}
       />
 
-      <div className="m-4 w-full rounded-t-lg bg-white">
+      <div className="mx-auto w-full max-w-[95vw] rounded-t-lg bg-white">
         <div className="flex items-center justify-between p-4">
           <div>
             <h2 className="font-medium text-blue-800">{courseName}</h2>
@@ -60,7 +64,8 @@ const CertificatePreview = ({
           studentName={studentName}
           courseName={courseName}
           completionDate={completionDate}
-          hasBottomMargin={true}
+          isModal={true}
+          platformLogo={platformLogo}
           backgroundImageUrl={certificateBackgroundImageUrl}
         />
       </div>

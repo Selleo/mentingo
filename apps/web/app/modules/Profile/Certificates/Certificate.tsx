@@ -11,6 +11,8 @@ interface CertificateProps {
   courseName: string;
   courseCompletionDate: string;
   certData?: CertificateType;
+  platformLogo?: string | null;
+  backgroundImageUrl?: string | null;
   onOpenCertificatePreview?: (data: {
     studentName: string;
     courseName: string;
@@ -30,7 +32,7 @@ const Options = ({ handlePreviewClick, handleDownloadClick }: OptionsProps) => {
   return (
     <div className="absolute right-5 top-5 z-10 w-60 rounded-md border bg-white shadow-xl">
       <ul className="py-1">
-        <button onClick={handlePreviewClick} className="w-full">
+        <button onClick={handlePreviewClick} className="hidden w-full sm:block">
           <li className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-100">
             <Eye className="size-6 text-blue-800" /> {t("studentCertificateView.button.preview")}
           </li>
@@ -50,6 +52,8 @@ const Certificate = ({
   courseName,
   courseCompletionDate,
   certData,
+  platformLogo,
+  backgroundImageUrl,
   onOpenCertificatePreview,
 }: CertificateProps) => {
   const [showOptions, setShowOptions] = useState(false);
@@ -92,6 +96,8 @@ const Certificate = ({
         studentName={certData?.fullName || ""}
         courseName={certData?.courseTitle || courseName}
         completionDate={courseCompletionDate}
+        platformLogo={platformLogo}
+        backgroundImageUrl={backgroundImageUrl}
       />
       <div className="grid grid-cols-1 gap-4">
         <div className="relative">

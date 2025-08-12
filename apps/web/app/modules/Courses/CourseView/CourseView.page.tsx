@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCourse, useCurrentUser } from "~/api/queries";
 import { useCertificate } from "~/api/queries/useCertificates";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
 import { CourseChapter } from "~/modules/Courses/CourseView/CourseChapter";
@@ -18,6 +19,7 @@ export default function CourseViewPage() {
   const { data: course } = useCourse(id);
   const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
 
   const { data: certificate } = useCertificate({
     userId: currentUser?.id ?? "",
@@ -60,12 +62,13 @@ export default function CourseViewPage() {
         <div className="flex flex-col gap-y-6 overflow-hidden">
           <CourseOverview course={course} />
           {canShowCertificate && (
-            <div className="hidden w-full items-center justify-center overflow-hidden rounded-xl border border-white bg-white px-4 shadow-sm sm:flex lg:py-44">
+            <div className="hidden aspect-video w-full rounded-xl border border-white bg-white shadow-sm sm:block">
               <CertificateContent
                 studentName={studentName}
                 courseName={courseName}
                 completionDate={formattedDate}
-                hasBottomMargin={false}
+                backgroundImageUrl={globalSettings?.certificateBackgroundImage}
+                platformLogo={globalSettings?.platformLogoS3Key}
               />
             </div>
           )}

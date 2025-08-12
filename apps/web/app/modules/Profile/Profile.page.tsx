@@ -151,6 +151,7 @@ export default function ProfilePage() {
               courseName={certificatePreview.certData?.courseTitle || ""}
               completionDate={certificatePreview.completionDate}
               onClose={handleCloseCertificatePreview}
+              platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
             />
           </div>
