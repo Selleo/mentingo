@@ -18,14 +18,15 @@ const useCertificatePDF = () => {
   const downloadCertificatePdf = (courseName?: string) => {
     const options: ReactToPdf.Options = {
       filename: `${courseName ?? "certificate"}.pdf`,
-      resolution: ReactToPdf.Resolution.HIGH,
+      resolution: ReactToPdf.Resolution.MEDIUM,
       page: {
         margin: ReactToPdf.Margin.NONE,
         orientation: "landscape",
         format: "a4",
       },
       canvas: {
-        qualityRatio: 2,
+        qualityRatio: 1,
+        useCORS: true,
       },
     };
 
@@ -43,12 +44,23 @@ const useCertificatePDF = () => {
     platformLogo,
     backgroundImageUrl,
   }: CertificateToPDFProps) => (
-    <div style={{ position: "fixed", top: 0, left: 0, opacity: 0, pointerEvents: "none" }}>
-      <div ref={targetRef}>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        opacity: 0,
+        pointerEvents: "none",
+        width: "297mm",
+        height: "210mm",
+      }}
+    >
+      <div ref={targetRef} style={{ width: "297mm", height: "210mm" }}>
         <CertificateContent
           studentName={studentName}
           courseName={courseName}
           completionDate={completionDate}
+          isDownload={true}
           platformLogo={platformLogo}
           backgroundImageUrl={backgroundImageUrl}
         />

@@ -1,15 +1,11 @@
-import {
-  AppLogo,
-  Award,
-  // certificateText as CertificateText,
-  hrLinePdf as HrLinePdf,
-} from "~/assets/svgs";
+import { AppLogo, Award, hrLinePdf as HrLinePdf } from "~/assets/svgs";
 
 interface CertificateContentProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
   isModal?: boolean;
+  isDownload?: boolean;
   backgroundImageUrl?: string | null;
   platformLogo?: string | null;
 }
@@ -19,13 +15,15 @@ const CertificateContent = ({
   courseName,
   completionDate,
   isModal,
+  isDownload,
   backgroundImageUrl,
   platformLogo,
 }: CertificateContentProps) => {
   return (
     <div
       style={{
-        width: isModal ? "min(95vw, 1000px)" : "100%",
+        width: isDownload ? "297mm" : isModal ? "min(95vw, 1000px)" : "100%",
+        height: isDownload ? "210mm" : "auto",
         display: "grid",
         placeItems: "center",
         margin: "0 auto",
@@ -112,7 +110,7 @@ const CertificateContent = ({
             style={{
               position: "relative",
               display: "flex",
-              width: "75%",
+              width: "85%",
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: "#3b82f6",
