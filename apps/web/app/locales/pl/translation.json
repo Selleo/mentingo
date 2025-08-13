@@ -1003,13 +1003,15 @@
     "other": {
       "cannotFindCourses": "Nie znaleziono żadnych kursów",
       "changeSearchCriteria": "Zmień kryteria wyszukiwania lub spróbuj ponownie później",
-      "freeLessons": "Darmowe lekcje!"
+      "freeLessons": "Darmowe lekcje!",
+      "successfullyEnrolledToCourse": "Pomyślnie zapisano na kurs"
     },
     "button": {
       "continue": "Kontynuuj",
       "enroll": "Zapisz się",
       "view": "Zobacz",
-      "readMore": "Czytaj więcej"
+      "readMore": "Czytaj więcej",
+      "playChapter": "Rozpocznij rozdział"
     },
     "enrolledCourses": {
       "header": "Twoje kursy",
