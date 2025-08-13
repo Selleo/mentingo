@@ -1,6 +1,7 @@
 import { useRef } from "react";
-import * as ReactToPdf from "react-to-pdf";
-import generatePDF from "react-to-pdf";
+import { useTranslation } from "react-i18next";
+
+import { useToast } from "~/components/ui/use-toast";
 
 import CertificateContent from "./CertificateContent";
 
@@ -13,27 +14,41 @@ interface CertificateToPDFProps {
 }
 
 const useCertificatePDF = () => {
+  const { toast } = useToast();
+  const { t } = useTranslation();
+
   const targetRef = useRef<HTMLDivElement>(null);
 
-  const downloadCertificatePdf = (courseName?: string) => {
-    const options: ReactToPdf.Options = {
-      filename: `${courseName ?? "certificate"}.pdf`,
-      resolution: ReactToPdf.Resolution.MEDIUM,
-      page: {
-        margin: ReactToPdf.Margin.NONE,
-        orientation: "landscape",
-        format: "a4",
-      },
-      canvas: {
-        qualityRatio: 1,
-        useCORS: true,
-      },
-    };
+  const downloadCertificatePdf = async (courseName?: string) => {
+    if (!targetRef.current) return;
 
-    if (targetRef.current) {
-      generatePDF(targetRef, options);
-    } else {
-      console.error("Couln't generate PDF: no targetRef found");
+    try {
+      const response = await fetch("/api/certificates/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          html: targetRef.current.innerHTML,
+          filename: `${courseName || "certificate"}.pdf`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${courseName || "certificate"}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({ description: t("changeUserInformationView.toast.userDetailsUpdatedSuccessfully") });
     }
   };
 
@@ -55,7 +70,15 @@ const useCertificatePDF = () => {
         height: "210mm",
       }}
     >
-      <div ref={targetRef} style={{ width: "297mm", height: "210mm" }}>
+      <div
+        ref={targetRef}
+        style={{ width: "297mm", height: "210mm" }}
+        data-student-name={studentName}
+        data-course-name={courseName}
+        data-completion-date={completionDate}
+        data-background-image={backgroundImageUrl}
+        data-platform-logo={platformLogo}
+      >
         <CertificateContent
           studentName={studentName}
           courseName={courseName}

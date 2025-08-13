@@ -4,9 +4,11 @@ import {
   ConflictException,
   BadRequestException,
 } from "@nestjs/common";
+import puppeteer from "puppeteer";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { SettingsService } from "src/settings/settings.service";
 
 import { CertificateRepository } from "./certificate.repository";
 
@@ -17,7 +19,10 @@ import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class CertificatesService {
-  constructor(private readonly certificateRepository: CertificateRepository) {}
+  constructor(
+    private readonly certificateRepository: CertificateRepository,
+    private readonly settingsService: SettingsService,
+  ) {}
 
   async getAllCertificates(
     query: CertificatesQuery,
@@ -138,6 +143,80 @@ export class CertificatesService {
     } catch (error) {
       console.error("Error fetching certificate:", error);
       throw error;
+    }
+  }
+
+  async downloadCertificate(html: string): Promise<Buffer> {
+    const globalSettings = await this.settingsService.getGlobalSettings();
+
+    if (!html) {
+      throw new BadRequestException("HTML content is required");
+    }
+
+    const backgroundImage = globalSettings?.certificateBackgroundImage;
+
+    const backgroundStyle = backgroundImage
+      ? `background: url(${backgroundImage}) no-repeat center center; background-size: 100% 100%;`
+      : "background-color: white;";
+
+    const completeHtml = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        * {
+          margin: 0; 
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          overflow: hidden;
+          ${backgroundStyle}
+        }
+        body > * {
+          transform: scale(2.2);
+        }
+        </style>
+        <title>Certificate</title>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    </head>
+    <body>
+      ${html}
+    </body>
+    </html>
+  `;
+
+    try {
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
+
+      const page = await browser.newPage();
+
+      await page.setContent(completeHtml, { waitUntil: "networkidle0" });
+
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        landscape: true,
+        margin: {
+          top: "0",
+          bottom: "0",
+          left: "0",
+          right: "0",
+        },
+        pageRanges: "1",
+        printBackground: true,
+      });
+
+      await browser.close();
+
+      return Buffer.from(pdfBuffer);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      throw new Error(`Error generating PDF: ${error.message || "Unknown error"}`);
     }
   }
 }

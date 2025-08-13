@@ -35,9 +35,9 @@ const CertificatePreview = ({
         backgroundImageUrl={certificateBackgroundImageUrl}
       />
 
-      <div className="mx-auto w-full max-w-[95vw] rounded-t-lg bg-white">
-        <div className="flex items-center justify-between p-4">
-          <div>
+      <div className="mx-auto w-full max-w-[95vw] overflow-hidden rounded-t-lg">
+        <div className="flex items-center justify-between bg-white p-4">
+          <div className="flex flex-col items-start">
             <h2 className="font-medium text-blue-800">{courseName}</h2>
             <h2 className="text-sm text-gray-400">{completionDate}</h2>
           </div>

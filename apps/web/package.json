@@ -90,7 +90,6 @@
     "react-hook-form": "7.52.1",
     "react-i18next": "^15.4.0",
     "react-player": "2.16.0",
-    "react-to-pdf": "^2.0.1",
     "react-use": "17.5.1",
     "recharts": "2.13.3",
     "socket.io-client": "4.8.0",

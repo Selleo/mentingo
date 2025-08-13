@@ -1,11 +1,12 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards, Post, Body, Res } from "@nestjs/common";
 import { Type } from "@sinclair/typebox";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { PaginatedResponse, paginatedResponse, UUIDSchema } from "src/common";
 import { RolesGuard } from "src/common/guards/roles.guard";
 
-import { allCertificatesSchema } from "./certificates.schema";
+import { allCertificatesSchema, downloadCertificateSchema } from "./certificates.schema";
 import { CertificatesService } from "./certificates.service";
 
 import type { AllCertificatesResponse } from "./certificates.types";
@@ -54,5 +55,27 @@ export class CertificatesController {
   ): Promise<AllCertificatesResponse> {
     const certificate = await this.certificatesService.getCertificate(userId, courseId);
     return [certificate];
+  }
+
+  @Post("download")
+  @Validate({
+    request: [{ type: "body", schema: downloadCertificateSchema }],
+  })
+  async downloadCertificate(
+    @Body() body: { html: string; filename?: string },
+    @Res() res: Response,
+  ): Promise<Buffer> {
+    const { html, filename = "certificate.pdf" } = body;
+
+    const pdfBuffer = await this.certificatesService.downloadCertificate(html);
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Length": pdfBuffer.length,
+    });
+    res.send(pdfBuffer);
+
+    return pdfBuffer;
   }
 }

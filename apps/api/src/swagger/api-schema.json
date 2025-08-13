@@ -2576,6 +2576,232 @@
         }
       }
     },
+    "/api/certificates/download": {
+      "post": {
+        "operationId": "CertificatesController_downloadCertificate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "operationId": "SettingsController_getUserSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "SettingsController_updateUserSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/new-user-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/unregistered-user-courses-accessibility": {
+      "patch": {
+        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/enforce-sso": {
+      "patch": {
+        "operationId": "SettingsController_updateEnforceSSO",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/platform-logo": {
+      "get": {
+        "operationId": "SettingsController_getPlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updatePlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/company-information": {
+      "get": {
+        "operationId": "SettingsController_getCompanyInformation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/certificate-background": {
+      "patch": {
+        "operationId": "SettingsController_updateCertificateBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "certificate-background": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/ai/thread": {
       "get": {
         "operationId": "AiController_getThread",
@@ -3186,211 +3412,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/settings/global": {
-      "get": {
-        "operationId": "SettingsController_getPublicGlobalSettings",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings": {
-      "get": {
-        "operationId": "SettingsController_getUserSettings",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "operationId": "SettingsController_updateUserSettings",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserSettingsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/new-user-notification": {
-      "patch": {
-        "operationId": "SettingsController_updateAdminNewUserNotification",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/unregistered-user-courses-accessibility": {
-      "patch": {
-        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/enforce-sso": {
-      "patch": {
-        "operationId": "SettingsController_updateEnforceSSO",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/platform-logo": {
-      "get": {
-        "operationId": "SettingsController_getPlatformLogo",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "SettingsController_updatePlatformLogo",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/settings/company-information": {
-      "get": {
-        "operationId": "SettingsController_getCompanyInformation",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "SettingsController_updateCompanyInformation",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/certificate-background": {
-      "patch": {
-        "operationId": "SettingsController_updateCertificateBackground",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "certificate-background": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }
@@ -9972,6 +9993,496 @@
           ]
         }
       },
+      "DownloadCertificateBody": {
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "html"
+        ]
+      },
+      "GetPublicGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "language"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUserSettingsBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "language"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "adminNewUserNotification"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "unregisteredUserCoursesAccessibility": {
+                    "type": "boolean"
+                  },
+                  "enforceSSO": {
+                    "type": "boolean"
+                  },
+                  "certificateBackgroundImage": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "companyInformation": {
+                    "type": "object",
+                    "properties": {
+                      "companyName": {
+                        "type": "string"
+                      },
+                      "registeredAddress": {
+                        "type": "string"
+                      },
+                      "taxNumber": {
+                        "type": "string"
+                      },
+                      "emailAddress": {
+                        "type": "string"
+                      },
+                      "courtRegisterNumber": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "platformLogoS3Key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "unregisteredUserCoursesAccessibility",
+                  "enforceSSO",
+                  "certificateBackgroundImage",
+                  "platformLogoS3Key"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminNewUserNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "adminNewUserNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEnforceSSOResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string"
+          },
+          "registeredAddress": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "emailAddress": {
+            "type": "string"
+          },
+          "courtRegisterNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetThreadResponse": {
         "type": "object",
         "properties": {
@@ -10783,482 +11294,6 @@
               "entryPoint",
               "s3Key"
             ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPublicGlobalSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "certificateBackgroundImage": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "certificateBackgroundImage",
-              "platformLogoS3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "language"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "adminNewUserNotification"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserSettingsBody": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              }
-            }
-          }
-        ]
-      },
-      "UpdateUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "language"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "adminNewUserNotification"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "unregisteredUserCoursesAccessibility": {
-                    "type": "boolean"
-                  },
-                  "enforceSSO": {
-                    "type": "boolean"
-                  },
-                  "certificateBackgroundImage": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "companyInformation": {
-                    "type": "object",
-                    "properties": {
-                      "companyName": {
-                        "type": "string"
-                      },
-                      "registeredAddress": {
-                        "type": "string"
-                      },
-                      "taxNumber": {
-                        "type": "string"
-                      },
-                      "emailAddress": {
-                        "type": "string"
-                      },
-                      "courtRegisterNumber": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "platformLogoS3Key": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "unregisteredUserCoursesAccessibility",
-                  "enforceSSO",
-                  "certificateBackgroundImage",
-                  "platformLogoS3Key"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateAdminNewUserNotificationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "language",
-              "adminNewUserNotification"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "certificateBackgroundImage": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "certificateBackgroundImage",
-              "platformLogoS3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateEnforceSSOResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "certificateBackgroundImage": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "certificateBackgroundImage",
-              "platformLogoS3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPlatformLogoResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "url"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetCompanyInformationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "companyName": {
-                "type": "string"
-              },
-              "registeredAddress": {
-                "type": "string"
-              },
-              "taxNumber": {
-                "type": "string"
-              },
-              "emailAddress": {
-                "type": "string"
-              },
-              "courtRegisterNumber": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateCompanyInformationBody": {
-        "type": "object",
-        "properties": {
-          "companyName": {
-            "type": "string"
-          },
-          "registeredAddress": {
-            "type": "string"
-          },
-          "taxNumber": {
-            "type": "string"
-          },
-          "emailAddress": {
-            "type": "string"
-          },
-          "courtRegisterNumber": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateCompanyInformationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "companyName": {
-                "type": "string"
-              },
-              "registeredAddress": {
-                "type": "string"
-              },
-              "taxNumber": {
-                "type": "string"
-              },
-              "emailAddress": {
-                "type": "string"
-              },
-              "courtRegisterNumber": {
-                "type": "string"
-              }
-            }
           }
         },
         "required": [

@@ -13,6 +13,11 @@ export const certificateSchema = Type.Object({
   updatedAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
+export const downloadCertificateSchema = Type.Object({
+  html: Type.String(),
+  filename: Type.Optional(Type.String()),
+});
+
 export const allCertificatesSchema = Type.Array(certificateSchema);
 
 export const paginatedCertificatesSchema = paginatedResponse(allCertificatesSchema);
