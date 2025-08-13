@@ -167,7 +167,7 @@ jobs:
     #       pgrep -af caddy || exit 1
 
       - name: Run tests
-        run: pnpm playwright test
+        run: pnpm playwright test --reporter=line
         working-directory: ./apps/web
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
@@ -181,3 +181,13 @@ jobs:
           AWS_REGION: us-east-1
           AWS_BUCKET_NAME: test-bucket
           API_URL: http://localhost:3000
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report
+            test-results
+            **/*.zip
