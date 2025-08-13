@@ -122,7 +122,7 @@ export const CourseEnrolled = (): ReactElement => {
         </SortButton>
       ),
       cell: ({ row }) => (
-        <Badge variant={"secondary"} className="w-max">
+        <Badge variant={"secondary"} className="w-max" data-testid={row.original.email}>
           {row.original.enrolledAt
             ? t("adminCourseView.enrolled.statuses.enrolled")
             : t("adminCourseView.enrolled.statuses.notEnrolled")}

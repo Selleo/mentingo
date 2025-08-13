@@ -1,27 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const PROFILE_PAGE_UI = {
-  button: {
-    profile: "profile",
-    edit: "edit",
-    confirm: "confirm",
-    delete: "Delete profile picture",
-  },
-  header: {
-    profileHeader: "Profile",
-  },
-  dataId: {
-    firstName: "firstName",
-    lastName: "lastName",
-    imageUpload: "imageUpload",
-  },
-  expectedValues: {
-    firstName: "test",
-    lastName: "Student",
-  },
-} as const;
+import { fillAndAssertTextField } from "../../utils";
 
-const PROFILE_PAGE_FILE_PATH = "e2e/data/images/profile_icon_test.png";
+import { PROFILE_PAGE_FILE_PATH, PROFILE_PAGE_UI } from "./data/profile-data";
 
 const navigateToProfilePage = async (page: Page) => {
   await page.getByRole("button", { name: new RegExp(PROFILE_PAGE_UI.button.profile, "i") }).click();
@@ -39,12 +20,6 @@ const goIntoEditMode = async (page: Page) => {
 
 const confirmEditMode = async (page: Page) => {
   await page.getByRole("button", { name: new RegExp(PROFILE_PAGE_UI.button.confirm, "i") }).click();
-};
-
-const fillAndAssertTextField = async (page: Page, valueToFill: string, testId: string) => {
-  const field = page.getByTestId(testId);
-  await field.fill(valueToFill);
-  await expect(field).toHaveValue(valueToFill);
 };
 
 const deleteProfilePicture = async (page: Page) => {
