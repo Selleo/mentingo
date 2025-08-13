@@ -54,6 +54,8 @@ export const CourseEnrolled = (): ReactElement => {
   const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
   const { data: usersData } = useAllUsersEnrolledSuspense(courseId, searchParams);
 
   const columns: ColumnDef<EnrolledStudent>[] = [
@@ -122,7 +124,7 @@ export const CourseEnrolled = (): ReactElement => {
         </SortButton>
       ),
       cell: ({ row }) => (
-        <Badge variant={"secondary"} className="w-max" data-testid={row.original.email}>
+        <Badge variant="secondary" className="w-max" data-testid={row.original.email}>
           {row.original.enrolledAt
             ? t("adminCourseView.enrolled.statuses.enrolled")
             : t("adminCourseView.enrolled.statuses.notEnrolled")}
@@ -191,6 +193,7 @@ export const CourseEnrolled = (): ReactElement => {
     }
 
     setRowSelection({});
+    setIsDialogOpen(false);
   };
 
   const isDisabled = Object.values(rowSelection).length === 0;
@@ -205,7 +208,7 @@ export const CourseEnrolled = (): ReactElement => {
           isLoading={false}
         />
 
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger disabled={isDisabled}>
             <Button
               className="border border-primary-500 bg-transparent text-primary-700"
@@ -222,15 +225,13 @@ export const CourseEnrolled = (): ReactElement => {
                 {t("adminCourseView.enrolled.confirmation.description")}
               </DialogDescription>
               <form onSubmit={handleFormSubmit}>
-                <div className={"flex justify-end gap-4"}>
+                <div className="flex justify-end gap-4">
                   <DialogClose>
-                    <Button type={"reset"} variant={"ghost"}>
+                    <Button type="reset" variant="ghost">
                       {t("common.button.cancel")}
                     </Button>
                   </DialogClose>
-                  <DialogClose>
-                    <Button type={"submit"}>{t("common.button.save")}</Button>
-                  </DialogClose>
+                  <Button type="submit">{t("common.button.save")}</Button>
                 </div>
               </form>
             </DialogContent>
