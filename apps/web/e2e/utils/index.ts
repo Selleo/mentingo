@@ -91,7 +91,13 @@ export const enrollSelected = async (page: Page) => {
 };
 
 export const enrollAllStudents = async (page: Page) => {
-  await findAndClickCell(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.selectAll);
+  const selectAllCheckbox = page.getByLabel(
+    new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.selectAll, "i"),
+  );
+
+  if (!(await selectAllCheckbox.isChecked())) await selectAllCheckbox.click();
+  await expect(selectAllCheckbox).toBeChecked();
+
   await enrollSelected(page);
 
   await expect(

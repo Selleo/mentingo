@@ -48,9 +48,9 @@ const studentEnrollToCourse = async (page: Page, courseHandle: string, courseNam
 
   await courseCard.click();
 
-  await page.waitForLoadState("networkidle");
-
   const header = page.getByRole("link", { name: new RegExp(courseName, "i") });
+
+  await header.waitFor({ state: "visible" });
 
   await expect(header).toHaveText(new RegExp(courseName, "i"));
 
@@ -58,9 +58,9 @@ const studentEnrollToCourse = async (page: Page, courseHandle: string, courseNam
     name: new RegExp(COURSE_SETTINGS_UI.button.enrollToCourse, "i"),
   });
 
-  if (await enrollButton.isVisible()) await enrollButton.click();
+  await enrollButton.waitFor({ state: "visible" });
 
-  await page.waitForLoadState("networkidle");
+  if (await enrollButton.isVisible()) await enrollButton.click();
 
   return !(await enrollButton.isVisible()) && header.isVisible();
 };
