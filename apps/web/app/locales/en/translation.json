@@ -406,7 +406,8 @@
     },
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
-      "deleteCourseFailed": "Failed to delete course"
+      "deleteCourseFailed": "Failed to delete course",
+      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first."
     }
   },
   "adminCategoriesView": {
