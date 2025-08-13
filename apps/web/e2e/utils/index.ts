@@ -23,7 +23,6 @@ export const navigateToPage = async (page: Page, name: string, headerText: strin
     .filter({ hasText: new RegExp(headerText, "i") });
 
   await header.waitFor({ state: "visible" });
-  console.log(header.isVisible());
 
   await expect(header).toHaveText(new RegExp(headerText, "i"));
 };
