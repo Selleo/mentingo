@@ -22,6 +22,14 @@ const goIntoCreateMode = async (page: Page) => {
   await expect(header).toHaveText(new RegExp(GROUPS_PAGE_UI.header.createGroupHeader, "i"));
 };
 
+const findAndClickCheckbox = async (page: Page) => {
+  const checkbox = page.getByLabel("Select row").first();
+
+  await expect(checkbox).not.toBeChecked();
+  await checkbox.click();
+  await expect(checkbox).toBeChecked();
+};
+
 const goIntoEditMode = async (page: Page) => {
   await findAndClickCell(page, GROUPS_PAGE_UI.expectedValues.groupName);
 

@@ -1,8 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
-import { navigateToPage } from "../../utils";
-
-import { LANGUAGE_PAGE_UI } from "./data/language-data";
+import { LANGUAGE_PAGE_UI } from "./tests/admin/data/language-data";
+import { navigateToPage } from "./utils";
 
 const changeLanguage = async (page: Page, language: string) => {
   await page.getByRole("combobox").click();

@@ -31,14 +31,14 @@ const editUsername = async (page: Page) => {
 
   await fillAndAssertTextField(
     page,
-    PROFILE_PAGE_UI.expectedValues.firstName,
     PROFILE_PAGE_UI.dataId.firstName,
+    PROFILE_PAGE_UI.expectedValues.firstName,
   );
 
   await fillAndAssertTextField(
     page,
-    PROFILE_PAGE_UI.expectedValues.lastName,
     PROFILE_PAGE_UI.dataId.lastName,
+    PROFILE_PAGE_UI.expectedValues.lastName,
   );
 
   await confirmEditMode(page);
