@@ -22,8 +22,6 @@ const config: PlaywrightTestConfig = {
   retries: process.env.CI ? 2 : 0,
   workers: 3,
   use: {
-    trace: process.env.CI ? "on-first-retry" : "retain-on-failure",
-    video: process.env.CI ? "on-first-retry" : "retain-on-failure",
     baseURL,
     ignoreHTTPSErrors: true,
     launchOptions: {
@@ -37,7 +35,6 @@ const config: PlaywrightTestConfig = {
       ],
     },
   },
-  reporter: [["html", { open: "never" }], ["list"]],
   projects: [
     {
       name: "setup",
