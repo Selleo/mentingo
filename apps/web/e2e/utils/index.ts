@@ -17,7 +17,10 @@ export const logout = async (page: Page) => {
 export const navigateToPage = async (page: Page, name: string, headerText: string) => {
   await page.getByRole("button", { name: new RegExp(name, "i") }).click();
 
-  const header = page.getByRole("heading").first().filter({ hasText: headerText });
+  const header = page
+    .getByRole("heading")
+    .first()
+    .filter({ hasText: new RegExp(headerText, "i") });
 
   await expect(header).toHaveText(new RegExp(headerText, "i"));
 };

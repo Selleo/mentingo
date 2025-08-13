@@ -1,7 +1,14 @@
 import { test, expect, type Page } from "@playwright/test";
 
 import { LANGUAGE_PAGE_UI } from "./tests/admin/data/language-data";
-import { navigateToPage } from "./utils";
+
+const navigateToPage = async (page: Page, name: string, headerText: string) => {
+  await page.getByRole("button", { name: new RegExp(name, "i") }).click();
+
+  const header = page.getByRole("heading", { name: new RegExp(headerText, "i") });
+
+  await expect(header).toHaveText(new RegExp(headerText, "i"));
+};
 
 const changeLanguage = async (page: Page, language: string) => {
   await page.getByRole("combobox").click();
