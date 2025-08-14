@@ -438,6 +438,7 @@
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "categories": "Kategorie",
       "createNew": "Utwórz nową kategorię",
       "back": "Wstecz"
@@ -528,6 +529,7 @@
       }
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "users": "Użytkownicy",
       "createNew": "Utwórz nowego użytkownika",
       "back": "Wstecz"
@@ -604,6 +606,7 @@
       "submit": "Usuń"
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "groups": "Grupy",
       "createNew": "Utwórz nową",
       "editGroup": "Edytuj grupę",
@@ -923,6 +926,7 @@
       "successResponse": "studentów zostało zapisanych do kursu."
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "myCourses": "Moje kursy",
       "back": "Wstecz"
     }
@@ -1006,6 +1010,10 @@
       "changeSearchCriteria": "Zmień kryteria wyszukiwania lub spróbuj ponownie później",
       "freeLessons": "Darmowe lekcje!",
       "successfullyEnrolledToCourse": "Pomyślnie zapisano na kurs"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "availableCourses": "Dostępne kursy"
     },
     "button": {
       "continue": "Kontynuuj",

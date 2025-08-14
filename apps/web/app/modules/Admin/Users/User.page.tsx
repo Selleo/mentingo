@@ -63,7 +63,7 @@ const User = () => {
   const backButton = { title: t("adminUserView.breadcrumbs.back"), href: "/admin/users" };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} isBarebones>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
       <div className="flex flex-col">
         <form onSubmit={handleSubmit(onSubmit)} className="h-full rounded-lg">
           <div className="flex items-center justify-between">

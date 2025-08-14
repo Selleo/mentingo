@@ -18,6 +18,7 @@ import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUse
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
+import { PageWrapper } from "~/components/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -261,67 +262,80 @@ const Users = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      {showEditModal && (
-        <EditModal
-          type={showEditModal}
-          onConfirm={editMutation[showEditModal]}
-          onCancel={() => setShowEditModal(null)}
-          groupData={groups}
-          roleData={Object.values(USER_ROLES)}
-          selectedUsers={selectedUsers.length}
-          selectedValue={selectedValue}
-          setSelectedValue={setSelectedValue}
-        />
-      )}
-      <div className="flex justify-between">
-        <h4 className="text-2xl font-bold">{t("navigationSideBar.users")}</h4>
-        <div className="flex gap-3">
-          <Button variant="primary" asChild>
-            <Link to="new">{t("adminUsersView.button.createNew")}</Link>
-          </Button>
+    <PageWrapper
+      breadcrumbs={[
+        {
+          title: t("adminUsersView.breadcrumbs.dashboard"),
+          href: "/",
+        },
+        {
+          title: t("adminUsersView.breadcrumbs.users"),
+          href: "/admin/users",
+        },
+      ]}
+    >
+      <div className="flex flex-col">
+        {showEditModal && (
+          <EditModal
+            type={showEditModal}
+            onConfirm={editMutation[showEditModal]}
+            onCancel={() => setShowEditModal(null)}
+            groupData={groups}
+            roleData={Object.values(USER_ROLES)}
+            selectedUsers={selectedUsers.length}
+            selectedValue={selectedValue}
+            setSelectedValue={setSelectedValue}
+          />
+        )}
+        <div className="flex justify-between">
+          <h4 className="text-2xl font-bold">{t("navigationSideBar.users")}</h4>
+          <div className="flex gap-3">
+            <Button variant="primary" asChild>
+              <Link to="new">{t("adminUsersView.button.createNew")}</Link>
+            </Button>
 
-          <EditDropdown dropdownItems={dropdownItems} />
+            <EditDropdown dropdownItems={dropdownItems} />
+          </div>
         </div>
+        <div className="flex items-center justify-between gap-2">
+          <SearchFilter
+            filters={filterConfig}
+            values={searchParams}
+            onChange={handleFilterChange}
+            isLoading={isPending}
+          />
+        </div>
+        <Table className="border bg-neutral-50">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={() => handleRowClick(row.original.id)}
+                className="cursor-pointer hover:bg-neutral-100"
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <SearchFilter
-          filters={filterConfig}
-          values={searchParams}
-          onChange={handleFilterChange}
-          isLoading={isPending}
-        />
-      </div>
-      <Table className="border bg-neutral-50">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-              onClick={() => handleRowClick(row.original.id)}
-              className="cursor-pointer hover:bg-neutral-100"
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    </PageWrapper>
   );
 };
 
