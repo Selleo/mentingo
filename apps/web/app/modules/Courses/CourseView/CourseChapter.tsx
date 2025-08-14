@@ -19,7 +19,6 @@ import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseChapterProps = {
   chapter: GetCourseResponse["data"]["chapters"][0];
-  enrolled: GetCourseResponse["data"]["enrolled"];
 };
 
 export const CourseChapter = ({ chapter }: CourseChapterProps) => {
@@ -42,7 +41,13 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
       chapter.lessons,
       (lesson) => lesson.status === "not_started",
     )?.id;
-    const lessonToPlay = firstNotStartedLesson ?? chapter.lessons[0].id;
+
+    const firstInProgressLesson = find(
+      chapter.lessons,
+      (lesson) => lesson.status === "in_progress",
+    )?.id;
+
+    const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? chapter.lessons[0].id;
 
     return navigate(`lesson/${lessonToPlay}`);
   };

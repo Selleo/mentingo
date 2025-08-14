@@ -1175,6 +1175,15 @@
     "chapterProgress": {
       "header": "Table of content:",
       "courseProgress": "Course progress"
+    },
+    "button": {
+      "open": "Open",
+      "continue": "Continue",
+      "playChapter": "Play chapter"
+    },
+    "other": {
+      "enrollmentRequired": "Enroll in the course to open.",
+      "purchaseRequired": "Unlock this lesson by purchasing the course."
     }
   },
 
@@ -1205,5 +1214,11 @@
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
     }
+  },
+  "progressBadge": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started",
+    "blocked": "Blocked"
   }
 }
