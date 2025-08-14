@@ -86,6 +86,18 @@ const config: PlaywrightTestConfig = {
       testMatch: /.*\.(spec|test)\.ts$/,
       fullyParallel: false,
     },
+    {
+      name: "chromium-admin-student",
+      testDir: "./e2e/tests/admin-student",
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        storageState: "e2e/.auth/admin.json",
+      },
+      testMatch: /.*\.(spec|test)\.ts$/,
+      fullyParallel: false,
+    },
   ],
 };
 

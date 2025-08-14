@@ -6,7 +6,6 @@ import { useCompanyInformation } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
-import { filterChangedData } from "~/utils/filterChangedData";
 
 import Loader from "../common/Loader/Loader";
 
@@ -23,13 +22,7 @@ export default function ProviderInformationPage() {
   const { mutate: updateCompanyInformation, isPending } = useUpdateCompanyInformation();
 
   const handleSubmit = (data: UpdateCompanyInformationBody) => {
-    const changedData = filterChangedData(data, companyInfo?.data || {});
-
-    if (!Object.keys(changedData).length) {
-      return;
-    }
-
-    updateCompanyInformation(changedData, {
+    updateCompanyInformation(data, {
       onSuccess: () => {
         setIsEditing(false);
       },
