@@ -1220,5 +1220,11 @@
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+  },
+  "progressBadge": {
+    "completed": "Ukończone",
+    "inProgress": "W trakcie",
+    "notStarted": "Nierozpoczęte",
+    "blocked": "Zablokowane"
   }
 }

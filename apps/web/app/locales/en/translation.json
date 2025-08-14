@@ -1214,5 +1214,11 @@
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
     }
+  },
+  "progressBadge": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started",
+    "blocked": "Blocked"
   }
 }

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { Badge } from "~/components/ui/badge";
 
 import type { IconName } from "~/types/shared";
@@ -16,26 +18,28 @@ type ProgressConfig = {
 };
 
 export const ProgressBadge = ({ progress, className }: ProgressBadgeProps) => {
+  const { t } = useTranslation();
+
   const progressConfig: ProgressConfig = {
     completed: {
       variant: "successFilled",
       icon: "InputRoundedMarkerSuccess",
-      label: "Completed",
+      label: t("progressBadge.completed"),
     },
     inProgress: {
       variant: "inProgressFilled",
       icon: "InProgress",
-      label: "In Progress",
+      label: t("progressBadge.inProgress"),
     },
     notStarted: {
       variant: "notStartedFilled",
       icon: "NotStartedRounded",
-      label: "Not Started",
+      label: t("progressBadge.notStarted"),
     },
     blocked: {
       variant: "blockedFilled",
       icon: "Blocked",
-      label: "Blocked",
+      label: t("progressBadge.blocked"),
     },
   };
 

@@ -41,7 +41,13 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
       chapter.lessons,
       (lesson) => lesson.status === "not_started",
     )?.id;
-    const lessonToPlay = firstNotStartedLesson ?? chapter.lessons[0].id;
+
+    const firstInProgressLesson = find(
+      chapter.lessons,
+      (lesson) => lesson.status === "in_progress",
+    )?.id;
+
+    const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? chapter.lessons[0].id;
 
     return navigate(`lesson/${lessonToPlay}`);
   };

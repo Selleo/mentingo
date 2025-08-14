@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
 
-import { findFirstNotStartedLessonId } from "../../Lesson/utils";
+import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -24,6 +24,11 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
     return chapter.lessons.some(({ id }) => id === notStartedLessonId);
   })?.id;
 
+  const firstInProgressLessonId = findFirstInProgressLessonId(course);
+  const firstInProgressChapterId = course.chapters.find((chapter) => {
+    return chapter.lessons.some(({ id }) => id === firstInProgressLessonId);
+  })?.id;
+
   const hasCourseProgress = course.chapters.some(
     ({ completedLessonCount }) => completedLessonCount,
   );
@@ -31,12 +36,12 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   const firstLessonId = course.chapters[0]?.lessons[0]?.id;
 
   const handleNavigateToLesson = () => {
-    if (!notStartedLessonId) {
+    if (!notStartedLessonId && !firstInProgressLessonId) {
       return navigate(`lesson/${firstLessonId}`);
     }
 
-    navigate(`lesson/${notStartedLessonId}`, {
-      state: { chapterId: notStartedChapterId },
+    navigate(`lesson/${firstInProgressLessonId ?? notStartedLessonId}`, {
+      state: { chapterId: firstInProgressChapterId ?? notStartedChapterId },
     });
   };
 
@@ -67,7 +72,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
                   ? "adminCourseView.common.preview"
                   : !hasCourseProgress
                     ? "studentCourseView.sideSection.button.startLearning"
-                    : notStartedLessonId
+                    : !notStartedLessonId || !firstInProgressLessonId
                       ? "studentCourseView.sideSection.button.continueLearning"
                       : "studentCourseView.sideSection.button.repeatLessons",
               )}

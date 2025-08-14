@@ -104,6 +104,16 @@ export class StudentLessonProgressService {
               chapterId: lesson.chapterId,
               completedQuestionCount,
             })
+            .onConflictDoUpdate({
+              target: [
+                studentLessonProgress.studentId,
+                studentLessonProgress.lessonId,
+                studentLessonProgress.chapterId,
+              ],
+              set: {
+                completedQuestionCount,
+              },
+            })
             .returning()
         )[0]
       : lessonProgress;
