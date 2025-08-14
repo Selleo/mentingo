@@ -8,6 +8,7 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { isAxiosError } from "axios";
 import { format } from "date-fns";
 import { isEmpty } from "lodash-es";
 import { Trash } from "lucide-react";
@@ -222,6 +223,15 @@ const Courses = () => {
         },
         onError: (error) => {
           console.error("Error deleting courses:", error);
+
+          if (
+            isAxiosError(error) &&
+            error.response?.data.message === "You can't delete a published course"
+          ) {
+            return toast({
+              title: t("adminCoursesView.toast.deletePublishedCourseFailed"),
+            });
+          }
           toast({
             title: t("adminCoursesView.toast.deleteCourseFailed"),
           });
@@ -235,6 +245,15 @@ const Courses = () => {
         },
         onError: (error) => {
           console.error("Error deleting courses:", error);
+          if (
+            isAxiosError(error) &&
+            error.response?.data.message === "You can't delete a published course"
+          ) {
+            return toast({
+              title: t("adminCoursesView.toast.deletePublishedCourseFailed"),
+            });
+          }
+
           toast({
             title: t("adminCoursesView.toast.deleteCourseFailed"),
           });

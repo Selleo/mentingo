@@ -115,7 +115,7 @@
     "menu": "Menu",
     "close": "Zamknij",
     "profile": "Profil",
-    "dashboard": "Pulpit",
+    "dashboard": "Panel główny",
     "courses": "Kursy",
     "myCourses": "Moje kursy",
     "categories": "Kategorie",
@@ -250,7 +250,7 @@
       "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
     "breadcrumbs": {
-      "dashboard": "Panel"
+      "dashboard": "Panel główny"
     },
     "field": {
       "firstName": "Imię",
@@ -407,7 +407,8 @@
     },
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
-      "deleteCourseFailed": "Nie udało się usunąć kursu"
+      "deleteCourseFailed": "Nie udało się usunąć kursu",
+      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza."
     }
   },
   "adminCategoriesView": {
