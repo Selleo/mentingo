@@ -148,27 +148,6 @@ export class StudentLessonProgressService {
       }
     }
 
-    if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
-      const [existingAiMentorLesson] = await dbInstance
-        .select()
-        .from(aiMentorStudentLessonProgress)
-        .where(eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id));
-
-      if (!existingAiMentorLesson) {
-        await dbInstance.insert(aiMentorStudentLessonProgress).values({
-          ...aiMentorLessonData,
-          studentLessonProgressId: currentLessonProgress.id,
-        });
-      } else {
-        await dbInstance
-          .update(aiMentorStudentLessonProgress)
-          .set(aiMentorLessonData)
-          .where(
-            eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id),
-          );
-      }
-    }
-
     const isCompletedAsFreemium =
       !accessCourseLessonWithDetails.isAssigned && accessCourseLessonWithDetails.isFreemium;
 

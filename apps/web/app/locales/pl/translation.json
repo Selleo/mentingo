@@ -638,7 +638,8 @@
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
       "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
-      "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie"
+      "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
+      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu"
     },
     "settings": {
       "breadcrumbs": {
@@ -1202,6 +1203,10 @@
     },
     "other": {
       "uploading": "Przesyłanie..."
+    },
+    "toast": {
+      "success": "Tło certyfikatu zostało pomyślnie zmienione",
+      "error": "Wystąpił błąd podczas zmiany tła certyfikatu"
     }
   },
   "adminPreferences": {

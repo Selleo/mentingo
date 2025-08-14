@@ -633,7 +633,8 @@
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",
-      "certificateUpdatedSuccessfully": "Certificate updated successfully"
+      "certificateUpdatedSuccessfully": "Certificate updated successfully",
+      "certificateUpdateError": "Error updating certificate"
     },
     "settings": {
       "breadcrumbs": {
@@ -1196,6 +1197,10 @@
     },
     "other": {
       "uploading": "Uploading..."
+    },
+    "toast": {
+      "success": "Certificate background image changed successfully",
+      "error": "Error changing certificate background image"
     }
   },
   "adminPreferences": {

@@ -215,8 +215,7 @@ export class CertificatesService {
 
       return Buffer.from(pdfBuffer);
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      throw new Error(`Error generating PDF: ${error.message || "Unknown error"}`);
+      throw new Error(`Error generating PDF`);
     }
   }
 }

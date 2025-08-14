@@ -30,10 +30,10 @@ export function useUpdateHasCertificate() {
         description: t("adminCourseView.toast.certificateUpdatedSuccessfully"),
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         variant: "destructive",
-        description: error.message,
+        description: t("adminCourseView.toast.certificateUpdateError"),
       });
     },
     meta: {

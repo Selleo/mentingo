@@ -28,11 +28,11 @@ export function useUploadCertificateBackgroundImage() {
     onSuccess: () => {
       queryClient.invalidateQueries(globalSettingsQueryOptions);
 
-      toast({ description: t("uploadFile.toast.fileUploadedSuccessfully") });
+      toast({ description: t("certificateBackgroundUpload.toast.success") });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
-        description: error.message,
+        description: t("certificateBackgroundUpload.toast.error"),
         variant: "destructive",
       });
     },
