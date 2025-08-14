@@ -9873,16 +9873,6 @@
                 },
                 "createdAt": {
                   "type": "string"
-                },
-                "updatedAt": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
                 }
               },
               "required": [
@@ -9973,16 +9963,6 @@
             },
             "createdAt": {
               "type": "string"
-            },
-            "updatedAt": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ]
             }
           },
           "required": [

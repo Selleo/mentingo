@@ -1466,7 +1466,6 @@ export interface GetAllCertificatesResponse {
     completionDate?: string | null;
     fullName?: string | null;
     createdAt: string;
-    updatedAt?: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1487,7 +1486,6 @@ export type GetCertificateResponse = {
   completionDate?: string | null;
   fullName?: string | null;
   createdAt: string;
-  updatedAt?: string | null;
 }[];
 
 export interface DownloadCertificateBody {

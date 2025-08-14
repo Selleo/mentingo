@@ -14,7 +14,7 @@ import { CertificateRepository } from "./certificate.repository";
 
 import type { CertificatesQuery, AllCertificatesResponse } from "./certificates.types";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { PaginatedResponse } from "src/common";
+import type { PaginatedResponse, UUIDType } from "src/common";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
@@ -51,8 +51,8 @@ export class CertificatesService {
   }
 
   async createCertificate(
-    userId: string,
-    courseId: string,
+    userId: UUIDType,
+    courseId: UUIDType,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     try {
@@ -128,7 +128,7 @@ export class CertificatesService {
     }
   }
 
-  async getCertificate(userId: string, courseId: string) {
+  async getCertificate(userId: UUIDType, courseId: UUIDType) {
     try {
       const certificate = await this.certificateRepository.findCertificateByUserAndCourse(
         userId,

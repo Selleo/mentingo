@@ -44,7 +44,7 @@ const CertificatePreview = ({
 
           <div className="flex gap-3">
             <button
-              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+              className="flex size-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
               onClick={handleDownload}
             >
               <Download className="size-5" />
@@ -52,7 +52,7 @@ const CertificatePreview = ({
             {onClose && (
               <button
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                className="flex size-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
               >
                 <X className="size-5" />
               </button>
@@ -64,7 +64,7 @@ const CertificatePreview = ({
           studentName={studentName}
           courseName={courseName}
           completionDate={completionDate}
-          isModal={true}
+          isModal
           platformLogo={platformLogo}
           backgroundImageUrl={certificateBackgroundImageUrl}
         />

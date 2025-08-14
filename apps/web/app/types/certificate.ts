@@ -6,7 +6,6 @@ export interface CertificateType {
   completionDate?: string | null;
   fullName?: string | null;
   createdAt: string;
-  updatedAt?: string | null;
 }
 
 export interface CertificatesResponse {

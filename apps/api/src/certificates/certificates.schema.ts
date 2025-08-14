@@ -10,7 +10,6 @@ export const certificateSchema = Type.Object({
   completionDate: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   fullName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   createdAt: Type.String(),
-  updatedAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const downloadCertificateSchema = Type.Object({

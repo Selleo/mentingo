@@ -3,7 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { PaginatedResponse, paginatedResponse, UUIDSchema } from "src/common";
+import { PaginatedResponse, paginatedResponse, UUIDSchema, UUIDType } from "src/common";
 import { RolesGuard } from "src/common/guards/roles.guard";
 
 import { allCertificatesSchema, downloadCertificateSchema } from "./certificates.schema";
@@ -27,7 +27,7 @@ export class CertificatesController {
     response: paginatedResponse(allCertificatesSchema),
   })
   async getAllCertificates(
-    @Query("userId") userId: string,
+    @Query("userId") userId: UUIDType,
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
     @Query("sort") sort?: string,
@@ -50,8 +50,8 @@ export class CertificatesController {
     response: allCertificatesSchema,
   })
   async getCertificate(
-    @Query("userId") userId: string,
-    @Query("courseId") courseId: string,
+    @Query("userId") userId: UUIDType,
+    @Query("courseId") courseId: UUIDType,
   ): Promise<AllCertificatesResponse> {
     const certificate = await this.certificatesService.getCertificate(userId, courseId);
     return [certificate];

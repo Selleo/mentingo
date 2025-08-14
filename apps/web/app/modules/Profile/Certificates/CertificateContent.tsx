@@ -25,7 +25,7 @@ const CertificateContent = ({
       className={cn(
         "mx-auto flex aspect-[297/210] flex-col items-center justify-center gap-y-4 overflow-hidden p-10 xl:gap-y-12",
         isModal ? "h-auto w-[min(95vw,1000px)]" : "h-auto w-full",
-        !isDownload && "bg-primary-50",
+        !isDownload && "bg-white",
         !isModal && "rounded-lg",
       )}
       style={{
