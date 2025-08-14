@@ -10,7 +10,7 @@ export const LANGUAGE_PAGE_UI = {
       language: "polish",
       english: "angielski",
       sidebarItems: {
-        dashboard: "pulpit",
+        dashboard: "panel główny",
         myCourses: "moje kursy",
         browseCourses: "przeglądaj kursy",
         categories: "kategorie",
