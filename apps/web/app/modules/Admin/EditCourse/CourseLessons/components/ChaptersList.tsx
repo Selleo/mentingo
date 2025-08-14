@@ -144,6 +144,7 @@ const ChapterCard = ({
         console.error("Failed to update chapter premium status:", error);
       } finally {
         await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+        await queryClient.invalidateQueries({ queryKey: ["available-courses"] });
         setTimeout(() => {
           setOpenItem(currentOpenState);
         }, 0);

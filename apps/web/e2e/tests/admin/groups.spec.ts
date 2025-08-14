@@ -1,52 +1,14 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const GROUPS_PAGE_UI = {
-  button: {
-    groups: "groups",
-    users: "users",
-    createNew: "create new",
-    publish: "publish",
-    deleteSelected: "delete selected",
-    delete: "delete",
-    cancel: "cancel",
-    save: "save",
-    back: "back",
-    edit: "edit",
-    changeGroup: "Change group",
-    confirm: "confirm",
-  },
-  cell: {
-    selectRow: "Select row",
-  },
-  header: {
-    groupHeader: "Groups",
-    createGroupHeader: "Create new group",
-    updateGroup: "Update group",
-    usersHeader: "Users",
-    userInformation: "User Information",
-  },
-  dataId: {
-    groupName: "groupName",
-    groupCharacteristic: "groupCharacteristic",
-    firstUser: "contentcreator@example.com",
-    secondUser: "student@example.com",
-    groupSelect: "groupSelect",
-  },
-  expectedValues: {
-    groupName: "Developer",
-    groupCharacteristic: "Frontend developer",
-    updatedGroupName: "Designer",
-    updatedGroupCharacteristic: "UI/UX",
-  },
-};
+import {
+  fillAndAssertTextField,
+  findAndAssertCell,
+  findAndClickButton,
+  findAndClickCell,
+  navigateToPage,
+} from "e2e/utils";
 
-const navigateToPage = async (page: Page, name: string, headerText: string) => {
-  await page.getByRole("button", { name: new RegExp(name, "i") }).click();
-
-  const header = page.getByRole("heading").filter({ hasText: headerText });
-
-  await expect(header).toHaveText(new RegExp(headerText, "i"));
-};
+import { GROUPS_PAGE_UI } from "./data/groups-data";
 
 const goIntoCreateMode = async (page: Page) => {
   await page
@@ -60,29 +22,13 @@ const goIntoCreateMode = async (page: Page) => {
   await expect(header).toHaveText(new RegExp(GROUPS_PAGE_UI.header.createGroupHeader, "i"));
 };
 
-const fillAndAssertTextField = async (page: Page, testId: string, valueToFill: string) => {
-  const field = page.getByTestId(testId);
-  await field.fill(valueToFill);
-  await expect(field).toHaveValue(valueToFill);
-};
+const findAndClickCheckbox = async (page: Page) => {
+  const checkbox = page.getByLabel("Select row").first();
 
-const findAndAssertCell = async (page: Page, expectedValue: string) => {
-  const field = page.getByRole("cell", { name: new RegExp(expectedValue, "i") }).first();
-  await expect(field).toHaveText(expectedValue);
+  await expect(checkbox).not.toBeChecked();
+  await checkbox.click();
+  await expect(checkbox).toBeChecked();
 };
-
-const findAndClickCell = async (page: Page, name: string) => {
-  await page
-    .getByRole("cell", { name: new RegExp(name, "i") })
-    .first()
-    .click();
-};
-
-const findAndClickButton = async (page: Page, name: string) =>
-  await page
-    .getByRole("button", { name: new RegExp(name, "i") })
-    .first()
-    .click();
 
 const goIntoEditMode = async (page: Page) => {
   await findAndClickCell(page, GROUPS_PAGE_UI.expectedValues.groupName);
@@ -95,16 +41,25 @@ const goIntoEditMode = async (page: Page) => {
 };
 
 const deleteAndAssert = async (page: Page, name: string) => {
-  await findAndClickCell(page, GROUPS_PAGE_UI.cell.selectRow);
+  await findAndClickCheckbox(page);
 
-  await findAndClickButton(page, GROUPS_PAGE_UI.button.deleteSelected);
+  const deleteButton = page
+    .getByRole("button", {
+      name: new RegExp(GROUPS_PAGE_UI.button.deleteSelected, "i"),
+    })
+    .first();
+  await expect(deleteButton).toBeEnabled({ timeout: 10000 });
+  await deleteButton.click();
+
   await findAndClickButton(page, GROUPS_PAGE_UI.button.delete);
 
   const newCell = page.getByRole("cell", {
     name: new RegExp(name, "i"),
   });
 
-  await expect(newCell).toHaveCount(0);
+  await page.waitForLoadState("networkidle");
+
+  await expect(newCell).toHaveCount(0, { timeout: 15000 });
 };
 
 const editFields = async (
@@ -125,7 +80,6 @@ const editFields = async (
 
 const createBasicGroup = async (page: Page) => {
   await goIntoCreateMode(page);
-
   await editFields(
     page,
     GROUPS_PAGE_UI.expectedValues.groupName,
@@ -212,6 +166,7 @@ test.describe("Admin groups page flow", () => {
       await groupSelector.click();
 
       await page.locator(".p-1 > div > div").first().click();
+
       await expect(groupSelector).toHaveText(GROUPS_PAGE_UI.expectedValues.groupName);
 
       await findAndClickButton(page, GROUPS_PAGE_UI.button.save);

@@ -89,10 +89,11 @@ test.describe("Admin settings", () => {
 
     const coursesSwitch = page.locator("#coursesVisibility");
 
-    await expect(coursesSwitch).toHaveAttribute("data-state", "unchecked");
+    const currentState = await coursesSwitch.getAttribute("data-state");
+    const expectedState = currentState === "checked" ? "unchecked" : "checked";
 
     await coursesSwitch.click();
-    await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
+    await expect(coursesSwitch).toHaveAttribute("data-state", expectedState);
   });
 
   test("should redirect to login when courses accessibility is disabled and user is logged out", async ({

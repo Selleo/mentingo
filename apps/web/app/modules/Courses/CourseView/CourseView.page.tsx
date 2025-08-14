@@ -43,14 +43,7 @@ export default function CourseViewPage() {
             {course?.chapters?.map((chapter) => {
               if (!chapter) return null;
 
-              return (
-                <CourseChapter
-                  chapter={chapter}
-                  key={chapter.id}
-                  course={course}
-                  enrolled={course.enrolled}
-                />
-              );
+              return <CourseChapter chapter={chapter} key={chapter.id} />;
             })}
           </div>
           <MoreCoursesByAuthor courseId={course.id} contentCreatorId={course.authorId} />

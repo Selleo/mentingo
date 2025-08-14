@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { first, get, last, orderBy } from "lodash-es";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourse, useLesson } from "~/api/queries";
@@ -32,11 +33,19 @@ export default function LessonPage() {
   const { courseId = "", lessonId = "" } = useParams();
   const { language } = useLanguageStore();
 
-  const { data: lesson, isFetching: lessonLoading } = useLesson(lessonId, language);
+  const {
+    data: lesson,
+    isFetching: lessonLoading,
+    isError: lessonError,
+  } = useLesson(lessonId, language);
   const { data: course } = useCourse(courseId);
   const { isStudent } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (lessonError) navigate(`/course/${courseId}`);
+  }, [lessonError, navigate, courseId]);
 
   if (!lesson || !course)
     return (

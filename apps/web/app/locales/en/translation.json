@@ -406,7 +406,8 @@
     },
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
-      "deleteCourseFailed": "Failed to delete course"
+      "deleteCourseFailed": "Failed to delete course",
+      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first."
     }
   },
   "adminCategoriesView": {
@@ -998,13 +999,15 @@
     "other": {
       "cannotFindCourses": "We could not find any courses",
       "changeSearchCriteria": "Please change the search criteria or try again later",
-      "freeLessons": "Free Lessons!"
+      "freeLessons": "Free Lessons!",
+      "successfullyEnrolledToCourse": "Successfully enrolled in the course"
     },
     "button": {
       "continue": "Continue",
       "enroll": "Enroll",
       "view": "View",
-      "readMore": "Read More"
+      "readMore": "Read More",
+      "playChapter": "Play chapter"
     },
     "enrolledCourses": {
       "header": "Your Courses",
