@@ -193,6 +193,8 @@ export const CourseEnrolled = (): ReactElement => {
     setRowSelection({});
   };
 
+  const isDisabled = Object.values(rowSelection).length === 0;
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
@@ -204,10 +206,10 @@ export const CourseEnrolled = (): ReactElement => {
         />
 
         <Dialog>
-          <DialogTrigger>
+          <DialogTrigger disabled={isDisabled}>
             <Button
               className="border border-primary-500 bg-transparent text-primary-700"
-              disabled={Object.values(rowSelection).length === 0}
+              disabled={isDisabled}
             >
               {t("adminCourseView.enrolled.enrollSelected")}
             </Button>

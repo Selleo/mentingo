@@ -1,14 +1,14 @@
+import { useNavigate } from "@remix-run/react";
 import { Elements } from "@stripe/react-stripe-js";
 import { useTranslation } from "react-i18next";
 
 import { useStripePaymentIntent } from "~/api/mutations/useStripePaymentIntent";
-import { currentUserQueryOptions } from "~/api/queries/useCurrentUser";
+import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
 import { Enroll } from "~/assets/svgs";
 import { Button } from "~/components/ui/button";
 import { toast } from "~/components/ui/use-toast";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { useStripePromise } from "./hooks/useStripePromise";
 import { PaymentForm } from "./PaymentForm";
@@ -34,12 +34,17 @@ const appearance: Appearance = {
 };
 
 export function PaymentModal({ coursePrice, courseCurrency, courseId }: PaymentModalProps) {
-  const { currentUser } = useCurrentUserStore();
+  const { data: currentUser } = useCurrentUser();
   const stripePromise = useStripePromise();
   const { clientSecret, createPaymentIntent, resetClientSecret } = useStripePaymentIntent();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const handlePayment = async () => {
+    if (!currentUser) {
+      return navigate("/auth/register");
+    }
+
     try {
       await createPaymentIntent({
         amount: coursePrice,
@@ -68,6 +73,7 @@ export function PaymentModal({ coursePrice, courseCurrency, courseId }: PaymentM
           {t("paymentView.other.enrollCourse")} - {formatPrice(coursePrice, courseCurrency)}
         </span>
       </Button>
+
       {clientSecret && (
         <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
           <PaymentForm
