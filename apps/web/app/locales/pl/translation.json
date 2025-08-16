@@ -638,7 +638,9 @@
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
-      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie"
+      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
+      "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
+      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu"
     },
     "settings": {
       "breadcrumbs": {
@@ -647,7 +649,9 @@
         "createNew": "Utwórz nowy"
       },
       "button": {
-        "removeThumbnail": "Usuń miniaturę"
+        "removeThumbnail": "Usuń miniaturę",
+        "includesCertificate": "Zawiera certyfikat",
+        "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
       },
       "selectButton": {
         "uploadFile": "Plik",
@@ -1183,7 +1187,6 @@
       "courseProgress": "Postęp kursu"
     }
   },
-
   "settings": {
     "title": "Ustawienia",
     "buttons": {
@@ -1193,6 +1196,20 @@
     "tabs": {
       "account": "Konto",
       "organization": "Organizacja"
+    }
+  },
+  "certificateBackgroundUpload": {
+    "title": "Przesyłanie tła certyfikatu",
+    "description": "Prześlij obraz tła dla certyfikatu.",
+    "button": {
+      "removeBackgroundImage": "Usuń obraz tła"
+    },
+    "other": {
+      "uploading": "Przesyłanie..."
+    },
+    "toast": {
+      "success": "Tło certyfikatu zostało pomyślnie zmienione",
+      "error": "Wystąpił błąd podczas zmiany tła certyfikatu"
     }
   },
   "adminPreferences": {
@@ -1211,5 +1228,17 @@
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+  },
+  "studentCertificateView": {
+    "header": "Certyfikaty",
+    "informations": {
+      "loading": "Ładowanie certyfikatów...",
+      "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
+      "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później."
+    },
+    "button": {
+      "download": "Pobierz",
+      "preview": "Podgląd"
+    }
   }
 }

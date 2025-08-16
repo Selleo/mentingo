@@ -19,7 +19,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   if (!role) return null;
 
   return (
-    <header className="sticky top-0 z-10 h-min w-full 2xl:static 2xl:flex 2xl:h-dvh 2xl:w-14 2xl:flex-col 2xl:gap-y-6 2xl:px-2 2xl:py-4 3xl:w-60 3xl:p-4">
+    <header className="sticky top-0 z-10 h-min w-full 2xl:static 2xl:flex 2xl:h-dvh 2xl:w-14 2xl:flex-col 2xl:gap-y-6 2xl:px-2 2xl:py-4 3xl:w-64 3xl:p-4">
       <NavigationHeader isMobileNavOpen={isMobileNavOpen} setIsMobileNavOpen={setIsMobileNavOpen} />
       <Separator className="sr-only bg-primary-200 2xl:not-sr-only 2xl:h-px" />
       <nav

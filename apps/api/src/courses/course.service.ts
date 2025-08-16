@@ -458,6 +458,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
+        hasCertificate: courses.hasCertificate,
         hasFreeChapter: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -580,6 +581,7 @@ export class CourseService {
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
+        hasCertificate: courses.hasCertificate,
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -736,6 +738,26 @@ export class CourseService {
         };
       }),
     );
+  }
+
+  async updateHasCertificate(courseId: UUIDType, hasCertificate: boolean) {
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const [updatedCourse] = await this.db
+      .update(courses)
+      .set({ hasCertificate })
+      .where(eq(courses.id, courseId))
+      .returning();
+
+    if (!updatedCourse) {
+      throw new ConflictException("Failed to update course");
+    }
+
+    return updatedCourse;
   }
 
   async createCourse(createCourseBody: CreateCourseBody, authorId: UUIDType) {
