@@ -1,4 +1,4 @@
-import { useNavigate } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { find } from "lodash-es";
 import { useTranslation } from "react-i18next";
 
@@ -19,9 +19,11 @@ import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseChapterProps = {
   chapter: GetCourseResponse["data"]["chapters"][0];
+  courseId: string;
+  isEnrolled: boolean;
 };
 
-export const CourseChapter = ({ chapter }: CourseChapterProps) => {
+export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterProps) => {
   const { t } = useTranslation();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
@@ -110,7 +112,13 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                 {chapter?.lessons?.map((lesson) => {
                   if (!lesson) return null;
 
-                  return <CourseChapterLesson key={lesson.id} lesson={lesson} />;
+                  return chapter.isFreemium || isEnrolled ? (
+                    <Link to={`/course/${courseId}/lesson/${lesson.id}`}>
+                      <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                    </Link>
+                  ) : (
+                    <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                  );
                 })}
                 {chapter.isFreemium && (
                   <Button

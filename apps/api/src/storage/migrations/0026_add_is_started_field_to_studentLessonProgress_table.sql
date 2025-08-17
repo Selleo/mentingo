@@ -1,1 +1,0 @@
-ALTER TABLE "student_lesson_progress" ADD COLUMN "is_started" boolean DEFAULT false;
