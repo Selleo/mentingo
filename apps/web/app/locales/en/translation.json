@@ -146,7 +146,11 @@
       "krsMustBe10Digits": "KRS must be 10 digits",
       "invalidEmailFormat": "Invalid email format"
     },
-    "noCompanyInformationAvailable": "No company information available"
+    "noCompanyInformationAvailable": "No company information available",
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "providerInformation": "Provider Information"
+    }
   },
   "changeUserLanguageView": {
     "header": "Change Language",

@@ -147,7 +147,11 @@
       "krsMustBe10Digits": "KRS musi mieć 10 cyfr",
       "invalidEmailFormat": "Nieprawidłowy format email"
     },
-    "noCompanyInformationAvailable": "Brak informacji o dostawcy"
+    "noCompanyInformationAvailable": "Brak informacji o dostawcy",
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "providerInformation": "Informacje o dostawcy"
+    }
   },
   "changeUserLanguageView": {
     "header": "Zmień język",
