@@ -1201,6 +1201,10 @@
     "tabs": {
       "account": "Konto",
       "organization": "Organizacja"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "settings": "Ustawienia"
     }
   },
   "adminPreferences": {

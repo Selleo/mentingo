@@ -1196,6 +1196,10 @@
     "tabs": {
       "account": "Account",
       "organization": "Organization"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "settings": "Settings"
     }
   },
 
