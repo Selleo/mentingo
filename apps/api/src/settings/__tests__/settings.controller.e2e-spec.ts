@@ -302,7 +302,6 @@ describe("SettingsController (e2e)", () => {
           .withAdminSettings(db)
           .create();
 
-        await globalSettingsFactory.create();
         adminCookies = await cookieFor(adminUser, app);
       });
 

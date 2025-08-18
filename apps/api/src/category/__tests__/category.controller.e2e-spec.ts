@@ -49,6 +49,7 @@ describe("CategoryController (e2e)", () => {
       it("returns archived and createdAt equal to null", async () => {
         const user = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
 
         const response = await request(app.getHttpServer())
@@ -69,6 +70,7 @@ describe("CategoryController (e2e)", () => {
       it("returns all filled category columns", async () => {
         const user = await userFactory
           .withCredentials({ password })
+          .withAdminSettings(db)
           .create({ role: USER_ROLES.ADMIN });
 
         const response = await request(app.getHttpServer())
@@ -92,6 +94,7 @@ describe("CategoryController (e2e)", () => {
         let page = 1;
         const user = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
 
         const response = await request(app.getHttpServer())

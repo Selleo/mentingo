@@ -29,7 +29,7 @@ import { UserService } from "src/user/user.service";
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
-import { LoginBody, loginSchema } from "./schemas/login.schema";
+import { LoginBody, loginResponseSchema, loginSchema } from "./schemas/login.schema";
 import {
   MFASetupResponseSchema,
   MFAVerifyBody,
@@ -87,23 +87,28 @@ export class AuthController {
   @Post("login")
   @Validate({
     request: [{ type: "body", schema: loginSchema }],
-    response: baseResponse(baseUserResponseSchema),
+    response: baseResponse(loginResponseSchema),
   })
   async login(
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
-    const { enforceSSO } = await this.settingsService.getGlobalSettings();
+  ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
+    const { enforceSSO, MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
     if (enforceSSO) {
       throw new UnauthorizedException("SSO is enforced, login via email is not allowed");
     }
 
-    const { accessToken, refreshToken, ...account } = await this.authService.login(data);
+    const { accessToken, refreshToken, navigateTo, ...account } = await this.authService.login(
+      data,
+      MFAEnforcedRoles,
+    );
 
-    this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
+    navigateTo === "/"
+      ? this.tokenService.setTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
-    return new BaseResponse(account);
+    return new BaseResponse({ ...account, navigateTo });
   }
 
   @Post("logout")

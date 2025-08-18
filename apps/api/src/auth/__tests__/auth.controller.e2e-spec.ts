@@ -85,6 +85,7 @@ describe("AuthController (e2e)", () => {
         .withCredentials({
           password: "Password123@",
         })
+        .withUserSettings(db)
         .create({
           email: "test@example.com",
         });
@@ -207,7 +208,10 @@ describe("AuthController (e2e)", () => {
     it("should return current user data for authenticated user", async () => {
       let accessToken = "";
 
-      const user = await userFactory.withCredentials({ password: "Password123@" }).create();
+      const user = await userFactory
+        .withCredentials({ password: "Password123@" })
+        .withUserSettings(db)
+        .create();
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
         email: user.email,

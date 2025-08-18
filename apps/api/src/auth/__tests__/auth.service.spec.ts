@@ -102,12 +102,18 @@ describe("AuthService", () => {
     it("should login user successfully", async () => {
       const password = "password123";
       const email = "example@test.com";
-      const user = await userFactory.withCredentials({ password }).create({ email });
+      const user = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ email });
 
-      const result = await authService.login({
-        email: user.email,
-        password,
-      });
+      const result = await authService.login(
+        {
+          email: user.email,
+          password,
+        },
+        [],
+      );
 
       const decodedToken = await jwtService.verifyAsync(result.accessToken);
 
@@ -119,15 +125,19 @@ describe("AuthService", () => {
         profilePictureUrl: null,
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
+        navigateTo: expect.stringMatching("/"),
       });
     });
 
     it("should throw UnauthorizedException for invalid email", async () => {
       await expect(
-        authService.login({
-          email: "nonexistent@example.com",
-          password: "password123",
-        }),
+        authService.login(
+          {
+            email: "nonexistent@example.com",
+            password: "password123",
+          },
+          [],
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -135,10 +145,13 @@ describe("AuthService", () => {
       const user = await userFactory.create({ email: "example@test.com" });
 
       await expect(
-        authService.login({
-          email: user.email,
-          password: "wrongpassword",
-        }),
+        authService.login(
+          {
+            email: user.email,
+            password: "wrongpassword",
+          },
+          [],
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
