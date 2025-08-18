@@ -19,10 +19,12 @@ export const globalSettingsJSONSchema = Type.Object({
 
 export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.String(),
+  isMFAEnabled: Type.Boolean({ default: false }),
+  MFASecret: Type.Union([Type.String({ default: null }), Type.Null()]),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
-  language: Type.String(),
+  ...studentSettingsJSONContentSchema.properties,
   adminNewUserNotification: Type.Boolean(),
 });
 
@@ -33,7 +35,6 @@ export const globalSettingsJSONContentSchema = Type.Object({
 export const settingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
-  globalSettingsJSONSchema,
 ]);
 
 export const userSettingsJSONContentSchema = Type.Union([

@@ -13,6 +13,8 @@ export type GlobalSettings = {
 
 export type StudentSettings = {
   language: string;
+  isMFAEnabled: boolean;
+  MFASecret: string | null;
 };
 
 export type AdminSettings = StudentSettings & { adminNewUserNotification: boolean };
