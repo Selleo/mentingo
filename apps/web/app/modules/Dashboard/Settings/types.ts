@@ -1,5 +1,7 @@
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
+  enforceSSO: boolean;
+  platformLogoS3Key: string | null;
 };
 
 export type UserSettings = {

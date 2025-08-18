@@ -21,6 +21,7 @@ export const routes: (
         index: true,
       });
       route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
+      route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
     });
     route("course/:courseId/lesson", "modules/Courses/Lesson/Lesson.layout.tsx", () => {
       route(":lessonId", "modules/Courses/Lesson/Lesson.page.tsx");

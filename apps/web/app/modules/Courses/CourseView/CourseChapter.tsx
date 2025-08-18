@@ -1,3 +1,5 @@
+import { useNavigate } from "@remix-run/react";
+import { find } from "lodash-es";
 import { useTranslation } from "react-i18next";
 
 import { CardBadge } from "~/components/CardBadge";
@@ -8,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import { Button } from "~/components/ui/button";
 import { formatWithPlural } from "~/lib/utils";
 import { ChapterCounter } from "~/modules/Courses/CourseView/components/ChapterCounter";
 import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterLesson";
@@ -31,6 +34,18 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
     t("courseChapterView.other.quiz"),
     t("courseChapterView.other.quizzes"),
   );
+
+  const navigate = useNavigate();
+
+  const playChapter = (chapter: CourseChapterProps["chapter"]) => {
+    const firstNotStartedLesson = find(
+      chapter.lessons,
+      (lesson) => lesson.status === "not_started",
+    )?.id;
+    const lessonToPlay = firstNotStartedLesson ?? chapter.lessons[0].id;
+
+    return navigate(`lesson/${lessonToPlay}`);
+  };
 
   return (
     <Accordion type="single" collapsible>
@@ -92,6 +107,16 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
 
                   return <CourseChapterLesson key={lesson.id} lesson={lesson} />;
                 })}
+                {chapter.isFreemium && (
+                  <Button
+                    variant="primary"
+                    className="mt-4 gap-2"
+                    onClick={() => playChapter(chapter)}
+                  >
+                    <Icon name="Play" className="size-4" />
+                    {t("studentCoursesView.button.playChapter")}
+                  </Button>
+                )}
               </div>
             </AccordionContent>
           </div>

@@ -1,11 +1,13 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { first, get, last, orderBy } from "lodash-es";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourse, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
+import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -31,13 +33,26 @@ export default function LessonPage() {
   const { courseId = "", lessonId = "" } = useParams();
   const { language } = useLanguageStore();
 
-  const { data: lesson, isFetching: lessonLoading } = useLesson(lessonId, language);
+  const {
+    data: lesson,
+    isFetching: lessonLoading,
+    isError: lessonError,
+  } = useLesson(lessonId, language);
   const { data: course } = useCourse(courseId);
   const { isStudent } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  if (!lesson || !course) return null;
+  useEffect(() => {
+    if (lessonError) navigate(`/course/${courseId}`);
+  }, [lessonError, navigate, courseId]);
+
+  if (!lesson || !course)
+    return (
+      <div className="fixed inset-0 grid place-items-center">
+        <Loader />
+      </div>
+    );
 
   const { isFirst, isLast } = checkOverallLessonPosition(course.chapters, lessonId);
 

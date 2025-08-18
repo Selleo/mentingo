@@ -106,6 +106,7 @@ export const LessonContent = ({
               </Button>
             )}
             <Button
+              data-testid="next-lesson-button"
               variant="outline"
               disabled={isNextDisabled}
               className="w-full gap-x-1 sm:w-auto"

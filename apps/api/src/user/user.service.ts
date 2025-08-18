@@ -18,6 +18,7 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
+import { StatisticsService } from "src/statistics/statistics.service";
 
 import {
   createTokens,
@@ -27,6 +28,7 @@ import {
   userDetails,
   users,
   settings,
+  courses,
 } from "../storage/schema";
 
 import {
@@ -44,7 +46,6 @@ import type {
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
-import type { AdminSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 
 @Injectable()
@@ -54,6 +55,7 @@ export class UserService {
     private emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
+    private statisticsService: StatisticsService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -360,6 +362,7 @@ export class UserService {
   }
 
   public async deleteUser(id: UUIDType) {
+    await this.validateWhetherUserCanBeDeleted(id);
     const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning();
 
     if (!deletedUser) {
@@ -368,6 +371,7 @@ export class UserService {
   }
 
   public async deleteBulkUsers(ids: UUIDType[]) {
+    await this.validateWhetherUsersCanBeDeleted(ids);
     const deletedUsers = await this.db.delete(users).where(inArray(users.id, ids)).returning();
 
     if (deletedUsers.length !== ids.length) {
@@ -426,6 +430,23 @@ export class UserService {
     return await this.s3Service.getSignedUrl(avatarReference);
   };
 
+  public async getAdminsToNotifyAboutNewUser(): Promise<string[]> {
+    const adminEmails = await this.db
+      .select({
+        email: users.email,
+      })
+      .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
+      .where(
+        and(
+          eq(users.role, USER_ROLES.ADMIN),
+          sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
+        ),
+      );
+
+    return adminEmails.map((admin) => admin.email);
+  }
+
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
     await this.db.transaction(async (trx) => {
       await trx
@@ -438,24 +459,17 @@ export class UserService {
     });
   }
 
-  public async getAdminsToNotifyAboutNewUser() {
-    const allAdmins = await this.db
+  public async getAdminsWithSettings() {
+    const adminsWithSettings = await this.db
       .select({
         user: users,
         settings: settings,
       })
       .from(users)
       .leftJoin(settings, eq(users.id, settings.userId))
-      .where(eq(users.role, USER_ROLES.ADMIN));
+      .where(and(eq(users.role, USER_ROLES.ADMIN)));
 
-    const adminsToNotify = allAdmins.filter((admin) => {
-      return (
-        (admin.settings?.settings as AdminSettingsJSONContentSchema)?.adminNewUserNotification ===
-        true
-      );
-    });
-
-    return adminsToNotify;
+    return adminsWithSettings;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {
@@ -493,5 +507,34 @@ export class UserService {
       default:
         return users.firstName;
     }
+  }
+
+  private async validateWhetherUserCanBeDeleted(userId: UUIDType): Promise<void> {
+    const userQuizAttempts = await this.statisticsService.getUserStats(userId);
+    const hasCourses = await this.hasCoursesWithAuthor(userId);
+
+    if (userQuizAttempts.quizzes.totalAttempts > 0) {
+      throw new ConflictException("adminUserView.toast.userWithAttemptsError");
+    }
+
+    if (hasCourses) {
+      throw new ConflictException("adminUserView.toast.userWithCreatedCoursesError");
+    }
+  }
+
+  private async validateWhetherUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
+    const validationPromises = userIds.map((id) => this.validateWhetherUserCanBeDeleted(id));
+    await Promise.all(validationPromises);
+  }
+
+  private async hasCoursesWithAuthor(authorId: UUIDType): Promise<boolean> {
+    const course = await this.db
+      .select({ id: courses.id })
+      .from(courses)
+      .where(eq(courses.authorId, authorId))
+      .limit(1)
+      .then((results) => results[0]);
+
+    return !!course;
   }
 }

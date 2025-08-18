@@ -147,9 +147,14 @@ const editProfilePicture = async (page: Page) => {
 
   await confirmEditMode(page);
 
-  const profileImage = page.getByRole("img", {
-    name: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName} profile`,
-  });
+  const profileImage = page
+    .locator("section")
+    .filter({
+      hasText: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName}Title:`,
+    })
+    .getByRole("img", {
+      name: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName} profile`,
+    });
 
   await expect(profileImage).toBeVisible();
 };

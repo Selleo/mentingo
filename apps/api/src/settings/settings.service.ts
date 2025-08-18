@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -8,51 +9,60 @@ import {
 import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { FileService } from "src/file/file.service";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
-import { settingsToJsonBuildObject } from "src/utils/settings-to-json-build-object";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { DEFAULT_ADMIN_SETTINGS, DEFAULT_STUDENT_SETTINGS } from "./constants/settings.constants";
 
+import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import type {
-  GlobalSettingsJSONContentSchema,
   SettingsJSONContentSchema,
+  GlobalSettingsJSONContentSchema,
   AdminSettingsJSONContentSchema,
+  UserSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
-import type { AdminSettings, StudentSettings } from "src/common/types";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class SettingsService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly fileService: FileService,
+  ) {}
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
-    const [{ settings: globalSettings }] = await this.db
+    const [globalSettings] = await this.db
       .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(isNull(settings.userId));
 
-    return globalSettings;
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    return globalSettings.settings;
   }
 
   public async createSettings(
-    userId: UUIDType,
+    userId: UUIDType | null,
     userRole: UserRole,
     customSettings?: Partial<SettingsJSONContentSchema>,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
-    if (!userId) {
+  ): Promise<SettingsJSONContentSchema> {
+    if (userId !== null && !userId) {
       throw new UnauthorizedException("User not authenticated");
     }
 
     const [existingSettings] = await dbInstance
       .select()
       .from(settings)
-      .where(eq(settings.userId, userId));
+      .where(userId === null ? isNull(settings.userId) : eq(settings.userId, userId));
 
     if (existingSettings) {
       throw new ConflictException("Settings already exists");
@@ -69,8 +79,7 @@ export class SettingsService {
       .insert(settings)
       .values({
         userId,
-        createdAt: new Date().toISOString(),
-        settings: settingsToJsonBuildObject(finalSettings),
+        settings: settingsToJSONBuildObject(finalSettings),
       })
       .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
@@ -111,10 +120,10 @@ export class SettingsService {
     const [{ settings: newUserSettings }] = await this.db
       .update(settings)
       .set({
-        settings: settingsToJsonBuildObject(mergedSettings),
+        settings: settingsToJSONBuildObject(mergedSettings),
       })
       .where(eq(settings.userId, userId))
-      .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
+      .returning({ settings: sql<UserSettingsJSONContentSchema>`${settings.settings}` });
 
     return newUserSettings;
   }
@@ -127,6 +136,9 @@ export class SettingsService {
       .from(settings)
       .where(isNull(settings.userId));
 
+    if (!globalSetting) {
+      throw new NotFoundException("Global settings not found");
+    }
     const current = globalSetting.unregisteredUserCoursesAccessibility === "true";
 
     const [{ settings: updatedGlobalSettings }] = await this.db
@@ -160,7 +172,6 @@ export class SettingsService {
     if (!userSetting) {
       throw new NotFoundException("User settings not found");
     }
-
     const current = userSetting.adminNewUserNotification === "true";
 
     const [{ settings: updatedUserSettings }] = await this.db
@@ -181,7 +192,120 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
-  private getDefaultSettingsForRole(role: UserRole): StudentSettings | AdminSettings {
+  public async updateGlobalEnforceSSO(): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.db
+      .select({
+        enforceSSO: sql<boolean>`(settings.settings->>'enforceSSO')::boolean`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{enforceSSO}',
+            to_jsonb(${!globalSettings.enforceSSO}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedGlobalSettings;
+  }
+
+  public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
+    if (!file) {
+      throw new BadRequestException("No logo file provided");
+    }
+
+    const resource = "platform-logos";
+    const { fileKey } = await this.fileService.uploadFile(file, resource);
+
+    await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{platformLogoS3Key}',
+            to_jsonb(${fileKey}::text),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId));
+  }
+
+  public async getPlatformLogoUrl(): Promise<string | null> {
+    const globalSettings = await this.getGlobalSettings();
+
+    const platformLogoS3Key = globalSettings.platformLogoS3Key;
+
+    if (!platformLogoS3Key) {
+      return null;
+    }
+
+    return await this.fileService.getFileUrl(platformLogoS3Key);
+  }
+
+  public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
+    const [{ companyInformation }] = await this.db
+      .select({
+        companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    return companyInformation;
+  }
+
+  public async updateCompanyInformation(
+    companyInfo: CompanyInformaitonJSONSchema,
+  ): Promise<CompanyInformaitonJSONSchema> {
+    const [existingGlobal] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!existingGlobal) {
+      throw new NotFoundException("Company information not found");
+    }
+
+    const currentSettings = existingGlobal.settings || {};
+    const currentCompanyInfo = currentSettings.companyInformation || {};
+
+    const updatedSettings = {
+      ...currentSettings,
+      companyInformation: {
+        ...currentCompanyInfo,
+        ...companyInfo,
+      },
+    };
+
+    const [updated] = await this.db
+      .update(settings)
+      .set({
+        settings: settingsToJSONBuildObject(updatedSettings),
+        updatedAt: new Date().toISOString(),
+      })
+      .where(isNull(settings.userId))
+      .returning({
+        companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
+      });
+
+    return updated.companyInformation;
+  }
+
+  private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
     switch (role) {
       case USER_ROLES.ADMIN:
         return DEFAULT_ADMIN_SETTINGS;

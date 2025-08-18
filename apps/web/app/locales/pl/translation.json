@@ -2,6 +2,7 @@
   "common": {
     "button": {
       "save": "Zapisz",
+      "saving": "Zapisywanie...",
       "delete": "Usuń",
       "create": "Utwórz",
       "cancel": "Anuluj",
@@ -14,6 +15,7 @@
       "clearAll": "Wyczyść wszystko",
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
+      "edit": "Edytuj",
       "continue": "Kontynuuj"
     },
     "tooltip": {
@@ -49,6 +51,11 @@
     "replace": "Kliknij, aby zastąpić",
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "Plik został pomyślnie usunięty"
     }
   },
   "adminScorm": {
@@ -108,16 +115,39 @@
     "menu": "Menu",
     "close": "Zamknij",
     "profile": "Profil",
-    "dashboard": "Pulpit",
+    "dashboard": "Panel główny",
     "courses": "Kursy",
     "myCourses": "Moje kursy",
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
+    "providerInformation": "O dostawcy",
     "browseCourses": "Przeglądaj kursy",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
+  },
+  "providerInformation": {
+    "title": "Informacje o Dostawcy",
+    "description": "Informacje o Twojej firmie, które będą widoczne dla użytkowników",
+    "editTitle": "Edytuj Informacje o Dostawcy",
+    "companyName": "Nazwa firmy",
+    "registeredAddress": "Adres siedziby",
+    "taxNumber": "Numer NIP",
+    "emailAddress": "Adres email",
+    "courtRegisterNumber": "Numer KRS",
+    "noDataAvailable": "Brak informacji o dostawcy",
+    "createSuccess": "Informacje o dostawcy zostały utworzone",
+    "updateSuccess": "Informacje o dostawcy zostały zaktualizowane",
+    "createError": "Nie udało się utworzyć informacji o dostawcy",
+    "updateError": "Nie udało się zaktualizować informacji o dostawcy",
+    "saveError": "Nie udało się zapisać informacji o dostawcy",
+    "validation": {
+      "nipMustBe10Digits": "NIP musi mieć 10 cyfr",
+      "krsMustBe10Digits": "KRS musi mieć 10 cyfr",
+      "invalidEmailFormat": "Nieprawidłowy format email"
+    },
+    "noCompanyInformationAvailable": "Brak informacji o dostawcy"
   },
   "changeUserLanguageView": {
     "header": "Zmień język",
@@ -138,6 +168,19 @@
     },
     "validation": {
       "email": "Email jest wymagany"
+    }
+  },
+  "ssoEnforcementView": {
+    "header": "Wymuszenie SSO",
+    "subHeader": "Wymuś logowanie SSO dla wszystkich użytkowników",
+    "description": "Przełącznik ten wymusi logowanie przez Google/Microsoft dla wszystkich użytkowników. Jeśli jest wyłączony, użytkownicy będą mogli się zalogować za pomocą tradycyjnego formularza logowania.",
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "Wymuszenie SSO zostało pomyślnie zaktualizowane",
+      "ssoEnforcementUpdateFailed": "Nie udało się zaktualizować wymuszenia SSO"
     }
   },
   "mostPopularCoursesView": {
@@ -207,7 +250,7 @@
       "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
     "breadcrumbs": {
-      "dashboard": "Panel"
+      "dashboard": "Panel główny"
     },
     "field": {
       "firstName": "Imię",
@@ -364,7 +407,8 @@
     },
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
-      "deleteCourseFailed": "Nie udało się usunąć kursu"
+      "deleteCourseFailed": "Nie udało się usunąć kursu",
+      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza."
     }
   },
   "adminCategoriesView": {
@@ -506,7 +550,9 @@
       "groupId": "Grupa"
     },
     "toast": {
-      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie"
+      "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie",
+      "userWithAttemptsError": "Nie można usunąć użytkownika z powiązanymi wynikami quizów. Dostępna jest tylko anonimizacja i archiwizacja.",
+      "userWithCreatedCoursesError": "Nie można usunąć użytkownika, który jest autorem istniejących rozdziałów. Dostępne są tylko anonimizacja i archiwizacja."
     },
     "button": {
       "createUser": "Utwórz użytkownika"
@@ -884,6 +930,7 @@
   "registerView": {
     "header": "Rejestracja",
     "subHeader": "Wprowadź dane, aby utworzyć konto",
+    "subHeaderSSO": "Zarejestruj się za pomocą swojego konta Google/Microsoft",
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
@@ -933,6 +980,7 @@
   "loginView": {
     "header": "Logowanie",
     "subHeader": "Wprowadź swój email, aby zalogować się na swoje konto",
+    "subHeaderSSO": "Zaloguj się za pomocą swojego konta Google/Microsoft",
     "validation": {
       "email": "Nieprawidłowy email",
       "password": "Hasło jest wymagane"
@@ -956,13 +1004,15 @@
     "other": {
       "cannotFindCourses": "Nie znaleziono żadnych kursów",
       "changeSearchCriteria": "Zmień kryteria wyszukiwania lub spróbuj ponownie później",
-      "freeLessons": "Darmowe lekcje!"
+      "freeLessons": "Darmowe lekcje!",
+      "successfullyEnrolledToCourse": "Pomyślnie zapisano na kurs"
     },
     "button": {
       "continue": "Kontynuuj",
       "enroll": "Zapisz się",
       "view": "Zobacz",
-      "readMore": "Czytaj więcej"
+      "readMore": "Czytaj więcej",
+      "playChapter": "Rozpocznij rozdział"
     },
     "enrolledCourses": {
       "header": "Twoje kursy",
@@ -1117,7 +1167,8 @@
         "continueLearning": "Kontynuuj naukę",
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
-        "goToContentCreatorPage": "Przejdź do strony twórcy treści"
+        "goToContentCreatorPage": "Przejdź do strony twórcy treści",
+        "repeatLessons": "Powtórz lekcje"
       }
     },
     "breadcrumbs": {

@@ -45,6 +45,8 @@ const Groups = (): ReactElement => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
   const { data } = useGroupsQuerySuspense();
   const { mutateAsync: deleteGroupsMutation } = useBulkDeleteGroups();
   const table = useReactTable({
@@ -75,6 +77,7 @@ const Groups = (): ReactElement => {
       event.preventDefault();
       await deleteGroupsMutation(selectedRows);
       setRowSelection({});
+      setIsDialogOpen(false);
     },
     [deleteGroupsMutation, selectedRows],
   );
@@ -85,10 +88,10 @@ const Groups = (): ReactElement => {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center justify-between gap-2 pt-6">
           <Link to="new">
-            <Button variant={"outline"}>{t("adminGroupsView.buttons.create")}</Button>
+            <Button variant="outline">{t("adminGroupsView.buttons.create")}</Button>
           </Link>
         </div>
-        <div className={"flex items-center justify-between gap-2 px-4 py-2"}>
+        <div className="flex items-center justify-between gap-2 px-4 py-2">
           <p
             className={cn("text-sm", {
               "text-neutral-500": isEmpty(selectedRows),
@@ -98,7 +101,7 @@ const Groups = (): ReactElement => {
             {t("common.other.selected")} ({selectedRows.length})
           </p>
 
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger disabled={isEmpty(selectedRows)}>
               <Button
                 size="sm"
@@ -117,17 +120,15 @@ const Groups = (): ReactElement => {
                   {t("adminGroupsView.deleteGroup.description")}
                 </DialogDescription>
                 <form onSubmit={handleGroupsDelete}>
-                  <div className={"flex justify-end gap-4"}>
+                  <div className="flex justify-end gap-4">
                     <DialogClose>
-                      <Button type={"reset"} variant={"ghost"}>
+                      <Button type="reset" variant="ghost">
                         {t("adminGroupsView.deleteGroup.cancel")}
                       </Button>
                     </DialogClose>
-                    <DialogClose>
-                      <Button type={"submit"} variant={"secondary"}>
-                        {t("adminGroupsView.deleteGroup.submit")}
-                      </Button>
-                    </DialogClose>
+                    <Button type="submit" variant="secondary">
+                      {t("adminGroupsView.deleteGroup.submit")}
+                    </Button>
                   </div>
                 </form>
               </DialogContent>

@@ -257,6 +257,97 @@
         }
       }
     },
+    "/api/statistics/user-stats": {
+      "get": {
+        "operationId": "StatisticsController_getUserStatistics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserStatisticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistics/content-creator-stats": {
+      "get": {
+        "operationId": "StatisticsController_getContentCreatorStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetContentCreatorStatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file": {
+      "post": {
+        "operationId": "FileController_uploadFile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "description": "Optional resource type"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "FileController_deleteFile",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "required": true,
+            "in": "query",
+            "description": "Key of the file to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File deleted successfully"
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",
@@ -827,63 +918,6 @@
         "responses": {
           "200": {
             "description": ""
-          }
-        }
-      }
-    },
-    "/api/file": {
-      "post": {
-        "operationId": "FileController_uploadFile",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "resource": {
-                    "type": "string",
-                    "description": "Optional resource type"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "File uploaded successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileUploadResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
           }
         }
       }
@@ -1905,40 +1939,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UnenrollCourseResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/statistics/user-stats": {
-      "get": {
-        "operationId": "StatisticsController_getUserStatistics",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserStatisticsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/statistics/content-creator-stats": {
-      "get": {
-        "operationId": "StatisticsController_getContentCreatorStats",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetContentCreatorStatsResponse"
                 }
               }
             }
@@ -3201,6 +3201,91 @@
           }
         }
       }
+    },
+    "/api/settings/admin/enforce-sso": {
+      "patch": {
+        "operationId": "SettingsController_updateEnforceSSO",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/platform-logo": {
+      "get": {
+        "operationId": "SettingsController_getPlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updatePlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/company-information": {
+      "get": {
+        "operationId": "SettingsController_getCompanyInformation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -3631,6 +3716,372 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetUserStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "averageStats": {
+                "type": "object",
+                "properties": {
+                  "lessonStats": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  },
+                  "courseStats": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  }
+                },
+                "required": [
+                  "lessonStats",
+                  "courseStats"
+                ]
+              },
+              "quizzes": {
+                "type": "object",
+                "properties": {
+                  "totalAttempts": {
+                    "type": "number"
+                  },
+                  "totalCorrectAnswers": {
+                    "type": "number"
+                  },
+                  "totalWrongAnswers": {
+                    "type": "number"
+                  },
+                  "totalQuestions": {
+                    "type": "number"
+                  },
+                  "averageScore": {
+                    "type": "number"
+                  },
+                  "uniqueQuizzesTaken": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalAttempts",
+                  "totalCorrectAnswers",
+                  "totalWrongAnswers",
+                  "totalQuestions",
+                  "averageScore",
+                  "uniqueQuizzesTaken"
+                ]
+              },
+              "courses": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  }
+                }
+              },
+              "lessons": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                      "started": {
+                        "type": "number"
+                      },
+                      "completed": {
+                        "type": "number"
+                      },
+                      "completionRate": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "started",
+                      "completed",
+                      "completionRate"
+                    ]
+                  }
+                }
+              },
+              "streak": {
+                "type": "object",
+                "properties": {
+                  "current": {
+                    "type": "number"
+                  },
+                  "longest": {
+                    "type": "number"
+                  },
+                  "activityHistory": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "current",
+                  "longest",
+                  "activityHistory"
+                ]
+              },
+              "nextLesson": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "courseId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "courseTitle": {
+                        "type": "string"
+                      },
+                      "courseDescription": {
+                        "type": "string"
+                      },
+                      "courseThumbnail": {
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "chapterTitle": {
+                        "type": "string"
+                      },
+                      "chapterProgress": {
+                        "anyOf": [
+                          {
+                            "const": "not_started",
+                            "type": "string"
+                          },
+                          {
+                            "const": "in_progress",
+                            "type": "string"
+                          },
+                          {
+                            "const": "completed",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "completedLessonCount": {
+                        "type": "number"
+                      },
+                      "lessonCount": {
+                        "type": "number"
+                      },
+                      "chapterDisplayOrder": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "courseId",
+                      "courseTitle",
+                      "courseDescription",
+                      "courseThumbnail",
+                      "lessonId",
+                      "chapterTitle",
+                      "chapterProgress",
+                      "completedLessonCount",
+                      "lessonCount",
+                      "chapterDisplayOrder"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "averageStats",
+              "quizzes",
+              "courses",
+              "lessons",
+              "streak",
+              "nextLesson"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetContentCreatorStatsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fiveMostPopularCourses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "courseName": {
+                      "type": "string"
+                    },
+                    "studentCount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "courseName",
+                    "studentCount"
+                  ]
+                }
+              },
+              "totalCoursesCompletionStats": {
+                "type": "object",
+                "properties": {
+                  "completionPercentage": {
+                    "type": "number"
+                  },
+                  "totalCoursesCompletion": {
+                    "type": "number"
+                  },
+                  "totalCourses": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "completionPercentage",
+                  "totalCoursesCompletion",
+                  "totalCourses"
+                ]
+              },
+              "conversionAfterFreemiumLesson": {
+                "type": "object",
+                "properties": {
+                  "conversionPercentage": {
+                    "type": "number"
+                  },
+                  "purchasedCourses": {
+                    "type": "number"
+                  },
+                  "remainedOnFreemium": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "conversionPercentage",
+                  "purchasedCourses",
+                  "remainedOnFreemium"
+                ]
+              },
+              "courseStudentsStats": {
+                "type": "object",
+                "patternProperties": {
+                  "^(.*)$": {
+                    "type": "object",
+                    "properties": {
+                      "newStudentsCount": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "newStudentsCount"
+                    ]
+                  }
+                }
+              },
+              "avgQuizScore": {
+                "type": "object",
+                "properties": {
+                  "correctAnswerCount": {
+                    "type": "number"
+                  },
+                  "wrongAnswerCount": {
+                    "type": "number"
+                  },
+                  "answerCount": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "correctAnswerCount",
+                  "wrongAnswerCount",
+                  "answerCount"
+                ]
+              }
+            },
+            "required": [
+              "fiveMostPopularCourses",
+              "totalCoursesCompletionStats",
+              "conversionAfterFreemiumLesson",
+              "courseStudentsStats",
+              "avgQuizScore"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileKey",
+          "fileUrl"
         ]
       },
       "GetUsersResponse": {
@@ -4338,21 +4789,6 @@
         },
         "required": [
           "data"
-        ]
-      },
-      "FileUploadResponse": {
-        "type": "object",
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "fileUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fileKey",
-          "fileUrl"
         ]
       },
       "GetAllCategoriesResponse": {
@@ -6025,357 +6461,6 @@
       },
       "UnenrollCourseResponse": {
         "type": "null"
-      },
-      "GetUserStatisticsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "averageStats": {
-                "type": "object",
-                "properties": {
-                  "lessonStats": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  },
-                  "courseStats": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  }
-                },
-                "required": [
-                  "lessonStats",
-                  "courseStats"
-                ]
-              },
-              "quizzes": {
-                "type": "object",
-                "properties": {
-                  "totalAttempts": {
-                    "type": "number"
-                  },
-                  "totalCorrectAnswers": {
-                    "type": "number"
-                  },
-                  "totalWrongAnswers": {
-                    "type": "number"
-                  },
-                  "totalQuestions": {
-                    "type": "number"
-                  },
-                  "averageScore": {
-                    "type": "number"
-                  },
-                  "uniqueQuizzesTaken": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "totalAttempts",
-                  "totalCorrectAnswers",
-                  "totalWrongAnswers",
-                  "totalQuestions",
-                  "averageScore",
-                  "uniqueQuizzesTaken"
-                ]
-              },
-              "courses": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  }
-                }
-              },
-              "lessons": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "object",
-                    "properties": {
-                      "started": {
-                        "type": "number"
-                      },
-                      "completed": {
-                        "type": "number"
-                      },
-                      "completionRate": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "started",
-                      "completed",
-                      "completionRate"
-                    ]
-                  }
-                }
-              },
-              "streak": {
-                "type": "object",
-                "properties": {
-                  "current": {
-                    "type": "number"
-                  },
-                  "longest": {
-                    "type": "number"
-                  },
-                  "activityHistory": {
-                    "type": "object",
-                    "patternProperties": {
-                      "^(.*)$": {
-                        "type": "boolean"
-                      }
-                    }
-                  }
-                },
-                "required": [
-                  "current",
-                  "longest",
-                  "activityHistory"
-                ]
-              },
-              "nextLesson": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "courseId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "courseTitle": {
-                        "type": "string"
-                      },
-                      "courseDescription": {
-                        "type": "string"
-                      },
-                      "courseThumbnail": {
-                        "type": "string"
-                      },
-                      "lessonId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "chapterTitle": {
-                        "type": "string"
-                      },
-                      "chapterProgress": {
-                        "anyOf": [
-                          {
-                            "const": "not_started",
-                            "type": "string"
-                          },
-                          {
-                            "const": "in_progress",
-                            "type": "string"
-                          },
-                          {
-                            "const": "completed",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "completedLessonCount": {
-                        "type": "number"
-                      },
-                      "lessonCount": {
-                        "type": "number"
-                      },
-                      "chapterDisplayOrder": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "courseId",
-                      "courseTitle",
-                      "courseDescription",
-                      "courseThumbnail",
-                      "lessonId",
-                      "chapterTitle",
-                      "chapterProgress",
-                      "completedLessonCount",
-                      "lessonCount",
-                      "chapterDisplayOrder"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "averageStats",
-              "quizzes",
-              "courses",
-              "lessons",
-              "streak",
-              "nextLesson"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetContentCreatorStatsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "fiveMostPopularCourses": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "courseName": {
-                      "type": "string"
-                    },
-                    "studentCount": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "courseName",
-                    "studentCount"
-                  ]
-                }
-              },
-              "totalCoursesCompletionStats": {
-                "type": "object",
-                "properties": {
-                  "completionPercentage": {
-                    "type": "number"
-                  },
-                  "totalCoursesCompletion": {
-                    "type": "number"
-                  },
-                  "totalCourses": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "completionPercentage",
-                  "totalCoursesCompletion",
-                  "totalCourses"
-                ]
-              },
-              "conversionAfterFreemiumLesson": {
-                "type": "object",
-                "properties": {
-                  "conversionPercentage": {
-                    "type": "number"
-                  },
-                  "purchasedCourses": {
-                    "type": "number"
-                  },
-                  "remainedOnFreemium": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "conversionPercentage",
-                  "purchasedCourses",
-                  "remainedOnFreemium"
-                ]
-              },
-              "courseStudentsStats": {
-                "type": "object",
-                "patternProperties": {
-                  "^(.*)$": {
-                    "type": "object",
-                    "properties": {
-                      "newStudentsCount": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "newStudentsCount"
-                    ]
-                  }
-                }
-              },
-              "avgQuizScore": {
-                "type": "object",
-                "properties": {
-                  "correctAnswerCount": {
-                    "type": "number"
-                  },
-                  "wrongAnswerCount": {
-                    "type": "number"
-                  },
-                  "answerCount": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "correctAnswerCount",
-                  "wrongAnswerCount",
-                  "answerCount"
-                ]
-              }
-            },
-            "required": [
-              "fiveMostPopularCourses",
-              "totalCoursesCompletionStats",
-              "conversionAfterFreemiumLesson",
-              "courseStudentsStats",
-              "avgQuizScore"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
       },
       "GetChapterWithLessonResponse": {
         "type": "object",
@@ -10446,10 +10531,45 @@
             "properties": {
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "platformLogoS3Key"
             ]
           }
         },
@@ -10702,11 +10822,202 @@
             "properties": {
               "unregisteredUserCoursesAccessibility": {
                 "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
-              "unregisteredUserCoursesAccessibility"
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "platformLogoS3Key"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEnforceSSOResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string"
+          },
+          "registeredAddress": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "emailAddress": {
+            "type": "string"
+          },
+          "courtRegisterNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [

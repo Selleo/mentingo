@@ -2,6 +2,7 @@
   "common": {
     "button": {
       "save": "Save",
+      "saving": "Saving...",
       "delete": "Delete",
       "create": "Create",
       "cancel": "Cancel",
@@ -13,7 +14,8 @@
       "goBack": "Go back",
       "ignore": "Ignore",
       "clearAll": "Clear All",
-      "validate": "Validate"
+      "validate": "Validate",
+      "edit": "Edit"
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -48,6 +50,11 @@
     "replace": "Click to replace",
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "File deleted successfully"
     }
   },
   "adminScorm": {
@@ -113,10 +120,33 @@
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
+    "providerInformation": "Provider Info",
     "browseCourses": "Browse Courses",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
+  },
+  "providerInformation": {
+    "title": "Provider Information",
+    "description": "Information about your company that will be visible to users",
+    "editTitle": "Edit Provider Information",
+    "companyName": "Company Name",
+    "registeredAddress": "Registered Address",
+    "taxNumber": "Tax Number (NIP)",
+    "emailAddress": "Email Address",
+    "courtRegisterNumber": "Court Register Number (KRS)",
+    "noDataAvailable": "No provider information available",
+    "createSuccess": "Provider information created successfully",
+    "updateSuccess": "Provider information updated successfully",
+    "createError": "Failed to create provider information",
+    "updateError": "Failed to update provider information",
+    "saveError": "Failed to save provider information",
+    "validation": {
+      "nipMustBe10Digits": "NIP must be 10 digits",
+      "krsMustBe10Digits": "KRS must be 10 digits",
+      "invalidEmailFormat": "Invalid email format"
+    },
+    "noCompanyInformationAvailable": "No company information available"
   },
   "changeUserLanguageView": {
     "header": "Change Language",
@@ -137,6 +167,19 @@
     },
     "validation": {
       "email": "Email is required"
+    }
+  },
+  "ssoEnforcementView": {
+    "header": "SSO Enforcement",
+    "subHeader": "Enforce SSO login for all users",
+    "description": "This switch will enforce Google/Microsoft login for all users. If disabled, users will be able to log in using the traditional login form.",
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "SSO enforcement updated successfully",
+      "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement"
     }
   },
   "mostPopularCoursesView": {
@@ -363,7 +406,8 @@
     },
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
-      "deleteCourseFailed": "Failed to delete course"
+      "deleteCourseFailed": "Failed to delete course",
+      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first."
     }
   },
   "adminCategoriesView": {
@@ -501,7 +545,9 @@
       "groupId": "Group"
     },
     "toast": {
-      "userCreatedSuccessfully": "User created successfully"
+      "userCreatedSuccessfully": "User created successfully",
+      "userWithAttemptsError": "Cannot delete user with linked quiz results. Only anonymization and archiving are available.",
+      "userWithCreatedCoursesError": "Cannot delete a user who is the author of existing courses. Only anonymization and archiving are available."
     },
     "button": {
       "createUser": "Create user"
@@ -879,6 +925,7 @@
   "registerView": {
     "header": "Sign Up",
     "subHeader": "Enter your information to create an account",
+    "subHeaderSSO": "Sign up using your Google/Microsoft account",
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
@@ -928,6 +975,7 @@
   "loginView": {
     "header": "Login",
     "subHeader": "Enter your email below to login to your account",
+    "subHeaderSSO": "Login using your Google/Microsoft account",
     "validation": {
       "email": "Invalid email",
       "password": "Password is required"
@@ -951,13 +999,15 @@
     "other": {
       "cannotFindCourses": "We could not find any courses",
       "changeSearchCriteria": "Please change the search criteria or try again later",
-      "freeLessons": "Free Lessons!"
+      "freeLessons": "Free Lessons!",
+      "successfullyEnrolledToCourse": "Successfully enrolled in the course"
     },
     "button": {
       "continue": "Continue",
       "enroll": "Enroll",
       "view": "View",
-      "readMore": "Read More"
+      "readMore": "Read More",
+      "playChapter": "Play chapter"
     },
     "enrolledCourses": {
       "header": "Your Courses",
@@ -1111,7 +1161,8 @@
         "continueLearning": "Continue learning",
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
-        "goToContentCreatorPage": "Go to content creator page"
+        "goToContentCreatorPage": "Go to content creator page",
+        "repeatLessons": "Repeat lessons"
       }
     },
     "breadcrumbs": {
