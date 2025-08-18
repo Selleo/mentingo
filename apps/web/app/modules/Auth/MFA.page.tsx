@@ -23,7 +23,7 @@ export default function MFAPage() {
     );
   }
 
-  if (!userSettings.MFASecret) {
+  if (!userSettings.isMFAEnabled) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center px-6">
         <SetupMFACard />

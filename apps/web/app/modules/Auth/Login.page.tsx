@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -31,8 +31,6 @@ const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED ===
 export default function LoginPage() {
   const { t } = useTranslation();
 
-  const navigate = useNavigate();
-
   const { mutateAsync: loginUser } = useLoginUser();
 
   const {
@@ -51,9 +49,7 @@ export default function LoginPage() {
       return;
     }
 
-    loginUser({ data }).then(() => {
-      navigate("/auth/mfa");
-    });
+    loginUser({ data });
   };
 
   return (

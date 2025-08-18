@@ -11,6 +11,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   companyInformation: DEFAULT_COMPANY_INFORMATION,
   enforceSSO: false,
   platformLogoS3Key: null,
+  MFAEnforcedRoles: [],
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {

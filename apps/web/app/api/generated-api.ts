@@ -61,6 +61,7 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
+    navigateTo: string;
   };
 }
 
@@ -117,6 +118,82 @@ export interface MFAVerifyResponse {
   data: {
     isValid: boolean;
   };
+}
+
+export interface GetUserStatisticsResponse {
+  data: {
+    averageStats: {
+      lessonStats: {
+        started: number;
+        completed: number;
+        completionRate: number;
+      };
+      courseStats: {
+        started: number;
+        completed: number;
+        completionRate: number;
+      };
+    };
+    quizzes: {
+      totalAttempts: number;
+      totalCorrectAnswers: number;
+      totalWrongAnswers: number;
+      totalQuestions: number;
+      averageScore: number;
+      uniqueQuizzesTaken: number;
+    };
+    courses: object;
+    lessons: object;
+    streak: {
+      current: number;
+      longest: number;
+      activityHistory: object;
+    };
+    nextLesson: {
+      /** @format uuid */
+      courseId: string;
+      courseTitle: string;
+      courseDescription: string;
+      courseThumbnail: string;
+      /** @format uuid */
+      lessonId: string;
+      chapterTitle: string;
+      chapterProgress: "not_started" | "in_progress" | "completed";
+      completedLessonCount: number;
+      lessonCount: number;
+      chapterDisplayOrder: number;
+    } | null;
+  };
+}
+
+export interface GetContentCreatorStatsResponse {
+  data: {
+    fiveMostPopularCourses: {
+      courseName: string;
+      studentCount: number;
+    }[];
+    totalCoursesCompletionStats: {
+      completionPercentage: number;
+      totalCoursesCompletion: number;
+      totalCourses: number;
+    };
+    conversionAfterFreemiumLesson: {
+      conversionPercentage: number;
+      purchasedCourses: number;
+      remainedOnFreemium: number;
+    };
+    courseStudentsStats: object;
+    avgQuizScore: {
+      correctAnswerCount: number;
+      wrongAnswerCount: number;
+      answerCount: number;
+    };
+  };
+}
+
+export interface FileUploadResponse {
+  fileKey: string;
+  fileUrl: string;
 }
 
 export interface GetUsersResponse {
@@ -286,11 +363,6 @@ export interface CreateUserResponse {
     id: string;
     message: string;
   };
-}
-
-export interface FileUploadResponse {
-  fileKey: string;
-  fileUrl: string;
 }
 
 export interface GetAllCategoriesResponse {
@@ -699,77 +771,6 @@ export interface DeleteManyCoursesBody {
 export type DeleteManyCoursesResponse = null;
 
 export type UnenrollCourseResponse = null;
-
-export interface GetUserStatisticsResponse {
-  data: {
-    averageStats: {
-      lessonStats: {
-        started: number;
-        completed: number;
-        completionRate: number;
-      };
-      courseStats: {
-        started: number;
-        completed: number;
-        completionRate: number;
-      };
-    };
-    quizzes: {
-      totalAttempts: number;
-      totalCorrectAnswers: number;
-      totalWrongAnswers: number;
-      totalQuestions: number;
-      averageScore: number;
-      uniqueQuizzesTaken: number;
-    };
-    courses: object;
-    lessons: object;
-    streak: {
-      current: number;
-      longest: number;
-      activityHistory: object;
-    };
-    nextLesson: {
-      /** @format uuid */
-      courseId: string;
-      courseTitle: string;
-      courseDescription: string;
-      courseThumbnail: string;
-      /** @format uuid */
-      lessonId: string;
-      chapterTitle: string;
-      chapterProgress: "not_started" | "in_progress" | "completed";
-      completedLessonCount: number;
-      lessonCount: number;
-      chapterDisplayOrder: number;
-    } | null;
-  };
-}
-
-export interface GetContentCreatorStatsResponse {
-  data: {
-    fiveMostPopularCourses: {
-      courseName: string;
-      studentCount: number;
-    }[];
-    totalCoursesCompletionStats: {
-      completionPercentage: number;
-      totalCoursesCompletion: number;
-      totalCourses: number;
-    };
-    conversionAfterFreemiumLesson: {
-      conversionPercentage: number;
-      purchasedCourses: number;
-      remainedOnFreemium: number;
-    };
-    courseStudentsStats: object;
-    avgQuizScore: {
-      correctAnswerCount: number;
-      wrongAnswerCount: number;
-      answerCount: number;
-    };
-  };
-}
 
 export interface GetChapterWithLessonResponse {
   data: {
@@ -1682,6 +1683,7 @@ export interface GetPublicGlobalSettingsResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1731,18 +1733,6 @@ export interface UpdateUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
-      }
-    | {
-        unregisteredUserCoursesAccessibility: boolean;
-        enforceSSO: boolean;
-        companyInformation?: {
-          companyName?: string;
-          registeredAddress?: string;
-          taxNumber?: string;
-          emailAddress?: string;
-          courtRegisterNumber?: string;
-        };
-        platformLogoS3Key: string | null;
       };
 }
 
@@ -1768,6 +1758,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1783,6 +1774,7 @@ export interface UpdateEnforceSSOResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1818,6 +1810,12 @@ export interface UpdateCompanyInformationResponse {
     emailAddress?: string;
     courtRegisterNumber?: string;
   };
+}
+
+export interface UpdateMFAEnforcedRolesBody {
+  admin?: boolean;
+  student?: boolean;
+  content_creator?: boolean;
 }
 
 import type {
@@ -2185,6 +2183,78 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name StatisticsControllerGetUserStatistics
+     * @request GET:/api/statistics/user-stats
+     */
+    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
+      this.request<GetUserStatisticsResponse, any>({
+        path: `/api/statistics/user-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetContentCreatorStats
+     * @request GET:/api/statistics/content-creator-stats
+     */
+    statisticsControllerGetContentCreatorStats: (params: RequestParams = {}) =>
+      this.request<GetContentCreatorStatsResponse, any>({
+        path: `/api/statistics/content-creator-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerUploadFile
+     * @request POST:/api/file
+     */
+    fileControllerUploadFile: (
+      data: {
+        /** @format binary */
+        file?: File;
+        /** Optional resource type */
+        resource?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FileUploadResponse, any>({
+        path: `/api/file`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerDeleteFile
+     * @request DELETE:/api/file
+     */
+    fileControllerDeleteFile: (
+      query: {
+        /** Key of the file to delete */
+        fileKey: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name HealthControllerCheck
      * @request GET:/api/healthcheck
      */
@@ -2501,50 +2571,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerUploadFile
-     * @request POST:/api/file
-     */
-    fileControllerUploadFile: (
-      data: {
-        /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FileUploadResponse, any>({
-        path: `/api/file`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
         ...params,
       }),
 
@@ -3016,34 +3042,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/unenroll-course`,
         method: "DELETE",
         query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StatisticsControllerGetUserStatistics
-     * @request GET:/api/statistics/user-stats
-     */
-    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
-      this.request<GetUserStatisticsResponse, any>({
-        path: `/api/statistics/user-stats`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StatisticsControllerGetContentCreatorStats
-     * @request GET:/api/statistics/content-creator-stats
-     */
-    statisticsControllerGetContentCreatorStats: (params: RequestParams = {}) =>
-      this.request<GetContentCreatorStatsResponse, any>({
-        path: `/api/statistics/content-creator-stats`,
-        method: "GET",
         format: "json",
         ...params,
       }),
@@ -3921,6 +3919,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateMfaEnforcedRoles
+     * @request PATCH:/api/settings/admin/mfa-enforced-roles
+     */
+    settingsControllerUpdateMfaEnforcedRoles: (
+      data: UpdateMFAEnforcedRolesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/mfa-enforced-roles`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

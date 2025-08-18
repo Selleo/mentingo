@@ -29,7 +29,12 @@ import {
   settingsJSONContentSchema,
   userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
-import { UpdateSettingsBody, updateSettingsBodySchema } from "./schemas/update-settings.schema";
+import {
+  UpdateMFAEnforcedRolesRequest,
+  updateMFAEnforcedRolesSchema,
+  UpdateSettingsBody,
+  updateSettingsBodySchema,
+} from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
 import type {
@@ -149,5 +154,16 @@ export class SettingsController {
   })
   async updateCompanyInformation(@Body() companyInfo: CompanyInformaitonJSONSchema) {
     return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
+  }
+
+  @Patch("admin/mfa-enforced-roles")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: updateMFAEnforcedRolesSchema }],
+  })
+  async updateMFAEnforcedRoles(
+    @Body() rolesRequest: UpdateMFAEnforcedRolesRequest,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    return await this.settingsService.updateMFAEnforcedRoles(rolesRequest);
   }
 }

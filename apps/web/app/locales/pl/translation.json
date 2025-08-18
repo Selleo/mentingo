@@ -1236,5 +1236,23 @@
         "error": "Weryfikacja MFA nie powiodła się."
       }
     }
+  },
+  "MFAEnforcementView": {
+    "header": "Wymuszenie uwierzytelniania dwuskładnikowego na podstawie ról",
+    "subHeader": "Wymuś MFA dla określonych ról użytkowników",
+    "description": "To ustawienie pozwala na wymuszenie uwierzytelniania dwuskładnikowego (MFA) dla określonych ról użytkowników w Twojej organizacji.",
+    "roles": {
+      "admin": "Administrator",
+      "student": "Student",
+      "content_creator": "Twórca treści"
+    },
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "Ustawienia wymuszenia MFA zostały pomyślnie zaktualizowane.",
+      "mfaEnforcementUpdateFailed": "Nie udało się zaktualizować ustawień wymuszenia MFA."
+    }
   }
 }
