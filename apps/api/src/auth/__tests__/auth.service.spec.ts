@@ -102,7 +102,10 @@ describe("AuthService", () => {
     it("should login user successfully", async () => {
       const password = "password123";
       const email = "example@test.com";
-      const user = await userFactory.withCredentials({ password }).create({ email });
+      const user = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ email });
 
       const result = await authService.login(
         {
@@ -122,6 +125,7 @@ describe("AuthService", () => {
         profilePictureUrl: null,
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
+        navigateTo: expect.stringMatching("/"),
       });
     });
 
