@@ -813,7 +813,9 @@
           "sentence": "Zdanie",
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
-          "passThreshold": "Próg zaliczenia"
+          "passThreshold": "Próg zaliczenia",
+          "additionalContext": "Dodatkowy kontekst",
+          "includeFiles": "Dołącz pliki, które będą używane jako kontekst w lekcjach"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",

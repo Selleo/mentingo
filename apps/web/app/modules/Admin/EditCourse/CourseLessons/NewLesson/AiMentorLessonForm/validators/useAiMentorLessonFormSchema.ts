@@ -64,4 +64,21 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
       ),
   });
 
+const MAX_MB_PER_FILE = 10;
+const MAX_NUM_OF_FILES = 10;
+export const aiMentorLessonFileSchema = z.object({
+  files: z
+    .array(
+      z
+        .instanceof(File)
+        .refine(
+          (f) => f.size < 1024 * 1024 * MAX_MB_PER_FILE,
+          `File size must be below ${MAX_MB_PER_FILE} MB`,
+        ),
+    )
+    .max(MAX_NUM_OF_FILES, `You cannot upload more than ${MAX_NUM_OF_FILES} file(s)`)
+    .default([]),
+});
+
+export type AiMentorLessonContextValues = z.infer<typeof aiMentorLessonFileSchema>;
 export type AiMentorLessonFormValues = z.infer<ReturnType<typeof aiMentorLessonFormSchema>>;

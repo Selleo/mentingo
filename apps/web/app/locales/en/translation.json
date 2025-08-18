@@ -809,7 +809,9 @@
           "sentence": "Sentence",
           "aiMentorInstructions": "AI Mentor Instructions",
           "completionConditions": "Completion Conditions",
-          "passThreshold": "Pass Threshold"
+          "passThreshold": "Pass Threshold",
+          "additionalContext": "Additional context",
+          "includeFiles": "Attach files to be used as context in lessons"
         },
         "placeholder": {
           "title": "Provide lesson title...",

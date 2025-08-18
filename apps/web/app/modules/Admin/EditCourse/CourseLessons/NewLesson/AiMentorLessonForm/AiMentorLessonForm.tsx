@@ -23,6 +23,7 @@ import {
   TooltipArrow,
 } from "~/components/ui/tooltip";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/MultiFileUploadForm";
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
 import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
 
@@ -220,7 +221,6 @@ const AiMentorLessonForm = ({
                   />
                 </div>
               </div>
-
               <div className="mb-6 rounded-lg bg-neutral-50 p-4">
                 <h3 className="mb-3 text-sm font-semibold text-neutral-900">
                   {t("adminCourseView.curriculum.lesson.other.suggestedExamples")}
@@ -240,6 +240,11 @@ const AiMentorLessonForm = ({
                   ))}
                 </div>
               </div>
+              {lessonToEdit && (
+                <div className="mb-6">
+                  <MultiFileUploadForm />
+                </div>
+              )}
 
               <div className="flex justify-between">
                 <div className="flex gap-x-4">
