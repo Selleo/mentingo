@@ -99,6 +99,7 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const author = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
           await courseFactory.create({
             authorId: author.id,
@@ -126,6 +127,7 @@ describe("CourseController (e2e)", () => {
           await courseFactory.create({ authorId: author.id, categoryId: category.id });
           const user = await userFactory
             .withCredentials({ password })
+            .withUserSettings(db)
             .create({ role: USER_ROLES.STUDENT });
 
           await request(app.getHttpServer())
@@ -140,9 +142,11 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const contentCreator = await userFactory
             .withCredentials({ password })
+            .withContentCreatorSettings(db)
             .create({ role: USER_ROLES.CONTENT_CREATOR });
           const otherContentCreator = await userFactory
             .withCredentials({ password })
+            .withContentCreatorSettings(db)
             .create({ role: USER_ROLES.CONTENT_CREATOR });
 
           await courseFactory.create({
@@ -176,6 +180,7 @@ describe("CourseController (e2e)", () => {
         it("filters by title", async () => {
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
@@ -204,6 +209,7 @@ describe("CourseController (e2e)", () => {
         it("filters by date range", async () => {
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
@@ -233,6 +239,7 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
 
           for (let i = 0; i < 15; i++) {
@@ -263,6 +270,7 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
 
           await courseFactory.create({
@@ -302,6 +310,7 @@ describe("CourseController (e2e)", () => {
       it("returns only courses enrolled by student", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -340,6 +349,7 @@ describe("CourseController (e2e)", () => {
       it("filters by title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -385,6 +395,7 @@ describe("CourseController (e2e)", () => {
       it("returns only published courses", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -428,6 +439,7 @@ describe("CourseController (e2e)", () => {
       it("sorts by -title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -473,6 +485,7 @@ describe("CourseController (e2e)", () => {
       it("paginates results", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -523,9 +536,12 @@ describe("CourseController (e2e)", () => {
     describe("when user is logged in", () => {
       describe("when user is not admin", () => {
         it("should return status 403", async () => {
-          const admin = await userFactory.withCredentials({ password }).create({
-            role: USER_ROLES.STUDENT,
-          });
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({
+              role: USER_ROLES.STUDENT,
+            });
           const cookies = await cookieFor(admin, app);
 
           const response = await request(app.getHttpServer())
@@ -539,7 +555,11 @@ describe("CourseController (e2e)", () => {
 
       describe("when user is admin", () => {
         it("should return list of students with enrollment date", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -590,7 +610,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list filtered by firstName", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -634,7 +658,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list filtered by lastName", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -678,7 +706,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list filtered by email", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -722,7 +754,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list of students in desc order with enrollment date", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -788,6 +824,7 @@ describe("CourseController (e2e)", () => {
       it("returns only published courses that user is not enrolled in", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -833,6 +870,7 @@ describe("CourseController (e2e)", () => {
       it("filters by title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -865,6 +903,7 @@ describe("CourseController (e2e)", () => {
       it("excludes specified course", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -896,6 +935,7 @@ describe("CourseController (e2e)", () => {
       it("includes course chapter count and free chapters info", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -929,6 +969,7 @@ describe("CourseController (e2e)", () => {
       it("sorts by -title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -961,6 +1002,7 @@ describe("CourseController (e2e)", () => {
       it("paginates results", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -993,6 +1035,7 @@ describe("CourseController (e2e)", () => {
     it("correctly shows enrolled participant count and pricing", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const cookies = await cookieFor(student, app);
       const category = await categoryFactory.create();
@@ -1032,6 +1075,7 @@ describe("CourseController (e2e)", () => {
     it("returns only published courses by specified contentCreator", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const otherContentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
@@ -1071,6 +1115,7 @@ describe("CourseController (e2e)", () => {
     it("returns only enrolled courses when scope is ENROLLED", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1109,6 +1154,7 @@ describe("CourseController (e2e)", () => {
     it("returns available courses when scope is AVAILABLE", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1147,6 +1193,7 @@ describe("CourseController (e2e)", () => {
     it("excludes specified course", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1180,6 +1227,7 @@ describe("CourseController (e2e)", () => {
     it("shows contentCreator details correctly", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({
         role: USER_ROLES.CONTENT_CREATOR,
@@ -1210,6 +1258,7 @@ describe("CourseController (e2e)", () => {
     it("correctly shows course details with free chapters", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1253,7 +1302,7 @@ describe("CourseController (e2e)", () => {
     describe("when user is logged in", () => {
       describe("when user is not admin", () => {
         it("should return 403 Forbidden", async () => {
-          const user = await userFactory.withCredentials({ password }).create({
+          const user = await userFactory.withCredentials({ password }).withUserSettings(db).create({
             role: USER_ROLES.STUDENT,
           });
           const cookies = await cookieFor(user, app);
@@ -1268,7 +1317,11 @@ describe("CourseController (e2e)", () => {
       describe("when user is admin", () => {
         describe("when course is not found", () => {
           it("should return 404", async () => {
-            const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
             const cookies = await cookieFor(admin, app);
 
             await request(app.getHttpServer())
@@ -1281,7 +1334,11 @@ describe("CourseController (e2e)", () => {
 
         describe("when student is already enrolled in course", () => {
           it("should return 409", async () => {
-            const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
             const cookies = await cookieFor(admin, app);
             const category = await categoryFactory.create();
 
@@ -1324,7 +1381,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should create enrollments with courses dependencies", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
 

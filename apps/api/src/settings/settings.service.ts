@@ -166,7 +166,14 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    return updatedGlobalSettings;
+    const parsedSettings = {
+      ...updatedGlobalSettings,
+      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
+        ? updatedGlobalSettings.MFAEnforcedRoles
+        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
+    };
+
+    return parsedSettings;
   }
 
   public async updateAdminNewUserNotification(
@@ -229,7 +236,14 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    return updatedGlobalSettings;
+    const parsedSettings = {
+      ...updatedGlobalSettings,
+      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
+        ? updatedGlobalSettings.MFAEnforcedRoles
+        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
+    };
+
+    return parsedSettings;
   }
 
   public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
