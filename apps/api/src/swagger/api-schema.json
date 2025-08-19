@@ -3165,6 +3165,23 @@
         }
       }
     },
+    "/api/settings/admin/finished-course-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminFinishedCourseNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminFinishedCourseNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/platform-logo": {
       "get": {
         "operationId": "SettingsController_getPlatformLogo",
@@ -10526,11 +10543,15 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
-                  "adminNewUserNotification"
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
                 ]
               }
             ]
@@ -10557,6 +10578,9 @@
                 "type": "string"
               },
               "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
                 "type": "boolean"
               }
             }
@@ -10587,11 +10611,15 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
-                  "adminNewUserNotification"
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
                 ]
               },
               {
@@ -10658,11 +10686,15 @@
               },
               "adminNewUserNotification": {
                 "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
               }
             },
             "required": [
               "language",
-              "adminNewUserNotification"
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
             ]
           }
         },
@@ -10771,6 +10803,33 @@
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
               "platformLogoS3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminFinishedCourseNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
             ]
           }
         },

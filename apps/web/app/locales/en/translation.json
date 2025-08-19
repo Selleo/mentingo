@@ -1208,11 +1208,15 @@
       "newUserNotifications": "New User Notifications",
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
       "coursesVisibility": "Show courses to visitors",
-      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in"
+      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
+      "finishedCourseNotification": "Finished Course Notifications",
+      "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
-      "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
+      "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
+      "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences"
     }
   },
   "progressBadge": {

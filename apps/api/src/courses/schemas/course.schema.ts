@@ -38,6 +38,7 @@ export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
 export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCreatorSchema);
 
+export type Course = Static<typeof courseSchema>;
 export type AllCoursesResponse = Static<typeof allCoursesSchema>;
 export type AllStudentCoursesResponse = Static<typeof allStudentCoursesSchema>;
 export type AllCoursesForContentCreatorResponse = Static<typeof allCoursesForContentCreatorSchema>;

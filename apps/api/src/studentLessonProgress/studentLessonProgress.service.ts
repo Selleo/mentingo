@@ -5,19 +5,24 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { CourseCompletedEvent } from "src/events";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
   chapters,
   courses,
+  groups,
+  groupUsers,
   lessons,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
+  users,
 } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
@@ -33,6 +38,7 @@ export class StudentLessonProgressService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async markLessonAsCompleted({
@@ -334,7 +340,7 @@ export class StudentLessonProgressService {
       trx,
     );
 
-    if (courseProgress.courseIsCompleted) {
+    if (courseProgress.progress === PROGRESS_STATUSES.COMPLETED) {
       await this.updateStudentCourseStats(
         studentId,
         courseId,
@@ -343,18 +349,23 @@ export class StudentLessonProgressService {
         trx,
       );
 
+      const courseCompletionDetails = await this.getUserCourseCompletionDetails(
+        studentId,
+        courseId,
+      );
+
+      this.eventBus.publish(new CourseCompletedEvent(courseCompletionDetails));
+
       return await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId);
     }
 
-    if (courseProgress.progress !== PROGRESS_STATUSES.COMPLETED) {
-      return await this.updateStudentCourseStats(
-        studentId,
-        courseId,
-        PROGRESS_STATUSES.IN_PROGRESS,
-        courseFinishedChapterCount,
-        trx,
-      );
-    }
+    return await this.updateStudentCourseStats(
+      studentId,
+      courseId,
+      PROGRESS_STATUSES.IN_PROGRESS,
+      courseFinishedChapterCount,
+      trx,
+    );
   }
 
   private async getCourseFinishedChapterCount(
@@ -447,5 +458,23 @@ export class StudentLessonProgressService {
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
       .where(eq(lessons.id, id));
+  }
+
+  async getUserCourseCompletionDetails(studentId: UUIDType, courseId: UUIDType) {
+    const [courseCompletionDetails] = await this.db
+      .select({
+        usersName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        courseTitle: sql<string>`courses.title`,
+        groupName: sql<string>`groups.name`,
+        completedAt: sql<string>`studentCourses.completedAt`,
+      })
+      .from(studentCourses)
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(courses, eq(studentCourses.courseId, courses.id))
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
+
+    return courseCompletionDetails;
   }
 }

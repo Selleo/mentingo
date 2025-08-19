@@ -24,6 +24,7 @@ export const studentSettingsJSONContentSchema = Type.Object({
 export const adminSettingsJSONContentSchema = Type.Object({
   language: Type.String(),
   adminNewUserNotification: Type.Boolean(),
+  adminFinishedCourseNotification: Type.Boolean(),
 });
 
 export const globalSettingsJSONContentSchema = Type.Object({
