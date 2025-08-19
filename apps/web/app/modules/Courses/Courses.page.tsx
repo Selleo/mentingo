@@ -111,7 +111,18 @@ export default function CoursesPage() {
 
   return (
     <CoursesAccessGuard>
-      <PageWrapper>
+      <PageWrapper
+        breadcrumbs={[
+          {
+            title: t("studentCoursesView.breadcrumbs.dashboard"),
+            href: "/",
+          },
+          {
+            title: t("studentCoursesView.breadcrumbs.availableCourses"),
+            href: "/admin/courses",
+          },
+        ]}
+      >
         <div className="flex h-auto flex-1 flex-col gap-y-12">
           {isStudent && <StudentsCurses />}
           <div className="flex flex-col">

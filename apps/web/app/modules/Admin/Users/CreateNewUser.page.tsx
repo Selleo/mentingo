@@ -65,7 +65,7 @@ export default function CreateNewUserPage() {
   const backButton = { title: t("adminUsersView.breadcrumbs.back"), href: "/admin/users" };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} isBarebones>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
       <div className="flex flex-col gap-y-6">
         <CreatePageHeader
           title={t("adminUserView.header")}

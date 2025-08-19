@@ -56,7 +56,7 @@ export default function CreateNewCategoryPage() {
   };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} isBarebones>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
       <div className="flex flex-col gap-y-6">
         <CreatePageHeader
           title={t("adminCategoryView.header")}

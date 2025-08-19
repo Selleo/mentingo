@@ -146,7 +146,11 @@
       "krsMustBe10Digits": "KRS must be 10 digits",
       "invalidEmailFormat": "Invalid email format"
     },
-    "noCompanyInformationAvailable": "No company information available"
+    "noCompanyInformationAvailable": "No company information available",
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "providerInformation": "Provider Information"
+    }
   },
   "changeUserLanguageView": {
     "header": "Change Language",
@@ -437,6 +441,7 @@
       "deleteCategoryFailed": "Failed to delete category"
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "categories": "Categories",
       "createNew": "Create new category",
       "back": "Back"
@@ -523,6 +528,7 @@
       }
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "users": "Users",
       "createNew": "Create new user",
       "back": "Back"
@@ -556,6 +562,7 @@
       "userNotFound": "User not found"
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "users": "Users",
       "userDetails": "User details",
       "back": "Back"
@@ -599,6 +606,7 @@
       "submit": "Delete"
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "groups": "Groups",
       "createNew": "Create new",
       "editGroup": "Edit group",
@@ -918,6 +926,7 @@
       "successResponse": "students have been assigned to the course."
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "myCourses": "My courses",
       "back": "Back"
     }
@@ -1001,6 +1010,10 @@
       "changeSearchCriteria": "Please change the search criteria or try again later",
       "freeLessons": "Free Lessons!",
       "successfullyEnrolledToCourse": "Successfully enrolled in the course"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "availableCourses": "Available Courses"
     },
     "button": {
       "continue": "Continue",
@@ -1196,6 +1209,10 @@
     "tabs": {
       "account": "Account",
       "organization": "Organization"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "settings": "Settings"
     }
   },
 
