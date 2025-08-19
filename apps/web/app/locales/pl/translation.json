@@ -1181,6 +1181,15 @@
     "chapterProgress": {
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
+    },
+    "button": {
+      "open": "Otwórz",
+      "continue": "Kontynuuj",
+      "playChapter": "Odtwórz rozdział"
+    },
+    "other": {
+      "enrollmentRequired": "Zapisz się na kurs, aby otworzyć.",
+      "purchaseRequired": "Odblokuj tę lekcję, kupując kurs."
     }
   },
 
@@ -1211,5 +1220,11 @@
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+  },
+  "progressBadge": {
+    "completed": "Ukończone",
+    "inProgress": "W trakcie",
+    "notStarted": "Nierozpoczęte",
+    "blocked": "Zablokowane"
   }
 }
