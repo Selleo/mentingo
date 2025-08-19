@@ -72,7 +72,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
                   ? "adminCourseView.common.preview"
                   : !hasCourseProgress
                     ? "studentCourseView.sideSection.button.startLearning"
-                    : !notStartedLessonId || !firstInProgressLessonId
+                    : notStartedLessonId || firstInProgressLessonId
                       ? "studentCourseView.sideSection.button.continueLearning"
                       : "studentCourseView.sideSection.button.repeatLessons",
               )}
