@@ -43,3 +43,5 @@ yarn-error.log*
 
 # Code
 .vscode
+
+test-results

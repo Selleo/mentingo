@@ -20,9 +20,15 @@
     "test:api:e2e": "pnpm run --filter=api test:e2e",
     "start:debug": "pnpm run --filter=api start:debug",
     "prepare": "husky",
-    "gpush": "git push --no-verify"
+    "gpush": "git push --no-verify",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.45.3",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "husky": "^9.1.6",
