@@ -64,7 +64,7 @@ const EditCourse = () => {
           <div className="flex items-center justify-between">
             <h4 className="h4 flex items-center text-neutral-950">
               {course?.title || ""}
-              {course?.isPublished ? (
+              {course?.status === "published" ? (
                 <span className="ml-2 flex items-center rounded-sm bg-success-50 px-2 py-1 text-sm text-success-800">
                   <Icon name="Success" className="mr-1" />
                   {t("common.other.published")}
@@ -120,7 +120,7 @@ const EditCourse = () => {
           />
         </TabsContent>
         <TabsContent value="Status">
-          <CourseStatus courseId={course?.id || ""} isPublished={!!course?.isPublished} />
+          <CourseStatus courseId={course?.id || ""} status={course?.status || "draft"} />
         </TabsContent>
         <TabsContent value="Enrolled">
           <CourseEnrolled />

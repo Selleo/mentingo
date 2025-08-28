@@ -68,7 +68,7 @@ const ensureCourse = async (db: DatabasePg, courseId?: UUIDType): Promise<UUIDTy
       title: faker.commerce.productName(),
       description: faker.commerce.productDescription(),
       thumbnailS3Key: faker.system.directoryPath(),
-      isPublished: true,
+      status: "published",
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
       currency: "usd",
       chapterCount: faker.number.int({ min: 1, max: 20 }),

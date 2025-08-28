@@ -103,7 +103,7 @@ describe("CourseController (e2e)", () => {
           await courseFactory.create({
             authorId: author.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
             thumbnailS3Key: null,
           });
 
@@ -148,13 +148,13 @@ describe("CourseController (e2e)", () => {
           await courseFactory.create({
             authorId: contentCreator.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
             thumbnailS3Key: null,
           });
           await courseFactory.create({
             authorId: otherContentCreator.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
             thumbnailS3Key: null,
           });
 
@@ -310,14 +310,14 @@ describe("CourseController (e2e)", () => {
         const enrolledCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -349,14 +349,14 @@ describe("CourseController (e2e)", () => {
           title: "Python Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         const jsCourse = await courseFactory.create({
           title: "JavaScript Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -393,13 +393,13 @@ describe("CourseController (e2e)", () => {
         const publishedCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         const unpublishedCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: false,
+          status: "draft",
           thumbnailS3Key: null,
         });
 
@@ -437,14 +437,14 @@ describe("CourseController (e2e)", () => {
           title: "A Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         const courseZ = await courseFactory.create({
           title: "Z Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -478,13 +478,17 @@ describe("CourseController (e2e)", () => {
         const category = await categoryFactory.create();
         const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
 
-        const coursesToCreate = Array.from({ length: 15 }, (_, i) => ({
-          title: `Course ${i}`,
-          authorId: contentCreator.id,
-          categoryId: category.id,
-          isPublished: true,
-          thumbnailS3Key: null,
-        }));
+        const coursesToCreate = Array.from(
+          { length: 15 },
+          (_, i) =>
+            ({
+              title: `Course ${i}`,
+              authorId: contentCreator.id,
+              categoryId: category.id,
+              status: "published",
+              thumbnailS3Key: null,
+            }) as const,
+        );
 
         const courses = await Promise.all(
           coursesToCreate.map((course) => courseFactory.create(course)),
@@ -548,7 +552,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -601,7 +605,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -645,7 +649,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -689,7 +693,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -733,7 +737,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -796,21 +800,21 @@ describe("CourseController (e2e)", () => {
         const enrolledCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         const availableCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: false,
+          status: "draft",
           thumbnailS3Key: null,
         });
 
@@ -842,14 +846,14 @@ describe("CourseController (e2e)", () => {
           title: "Python Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         await courseFactory.create({
           title: "JavaScript Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -873,14 +877,14 @@ describe("CourseController (e2e)", () => {
         const courseToExclude = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         const includedCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -904,7 +908,7 @@ describe("CourseController (e2e)", () => {
         const course = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
           chapterCount: 5,
         });
@@ -938,14 +942,14 @@ describe("CourseController (e2e)", () => {
           title: "A Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         await courseFactory.create({
           title: "Z Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -966,13 +970,17 @@ describe("CourseController (e2e)", () => {
         const category = await categoryFactory.create();
         const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
 
-        const coursesToCreate = Array.from({ length: 15 }, (_, i) => ({
-          title: `Course ${i}`,
-          authorId: contentCreator.id,
-          categoryId: category.id,
-          isPublished: true,
-          thumbnailS3Key: null,
-        }));
+        const coursesToCreate = Array.from(
+          { length: 15 },
+          (_, i) =>
+            ({
+              title: `Course ${i}`,
+              authorId: contentCreator.id,
+              categoryId: category.id,
+              status: "published",
+              thumbnailS3Key: null,
+            }) as const,
+        );
 
         await Promise.all(coursesToCreate.map((course) => courseFactory.create(course)));
 
@@ -1001,7 +1009,7 @@ describe("CourseController (e2e)", () => {
       const course = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
         priceInCents: 2999,
         currency: "usd",
@@ -1041,21 +1049,21 @@ describe("CourseController (e2e)", () => {
       const publishedCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: false,
+        status: "draft",
         thumbnailS3Key: null,
       });
 
       await courseFactory.create({
         authorId: otherContentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1079,14 +1087,14 @@ describe("CourseController (e2e)", () => {
       const enrolledCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1117,14 +1125,14 @@ describe("CourseController (e2e)", () => {
       const availableCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       const enrolledCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1155,14 +1163,14 @@ describe("CourseController (e2e)", () => {
       const courseToExclude = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       const courseToInclude = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1193,7 +1201,7 @@ describe("CourseController (e2e)", () => {
       await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1218,7 +1226,7 @@ describe("CourseController (e2e)", () => {
       const course = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
         chapterCount: 3,
         priceInCents: 1999,
@@ -1288,7 +1296,7 @@ describe("CourseController (e2e)", () => {
             const course = await courseFactory.create({
               authorId: admin.id,
               categoryId: category.id,
-              isPublished: true,
+              status: "published",
               thumbnailS3Key: null,
             });
 
@@ -1308,7 +1316,7 @@ describe("CourseController (e2e)", () => {
             await courseFactory.create({
               authorId: admin.id,
               categoryId: category.id,
-              isPublished: true,
+              status: "published",
               thumbnailS3Key: null,
             });
 
@@ -1331,7 +1339,7 @@ describe("CourseController (e2e)", () => {
           const course = await courseFactory.create({
             authorId: admin.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
           });
 
           const chapter = await chapterFactory.create({

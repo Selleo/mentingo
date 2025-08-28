@@ -5,10 +5,12 @@ import { ApiClient } from "../api-client";
 import type { GetAllCoursesResponse } from "../generated-api";
 import type { SortOption } from "~/types/sorting";
 
+export type CourseStatus = "published" | "draft" | "private";
+
 type CourseParams = {
   title?: string;
   category?: string;
-  isPublished?: boolean;
+  status?: CourseStatus;
   sort?: SortOption;
   authorId?: string;
 };
@@ -29,9 +31,7 @@ export const allCoursesQueryOptions = (
       ...(searchParams?.title && { title: searchParams.title }),
       ...(searchParams?.category && { category: searchParams.category }),
       ...(searchParams?.authorId && { authorId: searchParams.authorId }),
-      ...(searchParams?.isPublished !== undefined && {
-        isPublished: String(searchParams.isPublished),
-      }),
+      ...(searchParams?.status && { status: searchParams.status }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
       page: 1,
       perPage: 100,
