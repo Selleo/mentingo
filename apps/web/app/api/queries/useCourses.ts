@@ -7,12 +7,13 @@ import type { SortOption } from "~/types/sorting";
 
 export type CourseStatus = "published" | "draft" | "private";
 
-type CourseParams = {
+export type CourseParams = {
   title?: string;
   category?: string;
-  status?: CourseStatus;
+  state?: CourseStatus;
   sort?: SortOption;
   authorId?: string;
+  archived?: boolean;
 };
 
 type QueryOptions = {
@@ -31,8 +32,9 @@ export const allCoursesQueryOptions = (
       ...(searchParams?.title && { title: searchParams.title }),
       ...(searchParams?.category && { category: searchParams.category }),
       ...(searchParams?.authorId && { authorId: searchParams.authorId }),
-      ...(searchParams?.status && { status: searchParams.status }),
+      ...(searchParams?.state && { status: searchParams.state }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
+      ...(searchParams?.archived && { archived: searchParams.archived }),
       page: 1,
       perPage: 100,
     });

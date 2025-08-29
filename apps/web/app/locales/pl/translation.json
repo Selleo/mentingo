@@ -38,6 +38,7 @@
       "all": "Wszystkie",
       "search": "Szukaj",
       "published": "Opublikowany",
+      "private": "Niepubliczny",
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka"
@@ -373,7 +374,8 @@
       },
       "other": {
         "draft": "Wersja robocza",
-        "published": "Opublikowane"
+        "published": "Opublikowane",
+        "private": "Niepubliczne"
       }
     },
     "field": {
@@ -886,7 +888,9 @@
       "draftHeader": "Wersja robocza",
       "draftBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy już się zapisali, kurs nie będzie widoczny na ich liście kursów.",
       "publishedHeader": "Opublikowany",
-      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie."
+      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie.",
+      "privateHeader": "Niepubliczny",
+      "privateBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy są na niego zapisani (np. przez admina) kurs będzie widoczny na ich liście kursów i będą mogli z niego korzystać."
     },
     "pricing": {
       "header": "Cennik",
@@ -1204,7 +1208,6 @@
       "purchaseRequired": "Odblokuj tę lekcję, kupując kurs."
     }
   },
-
   "settings": {
     "title": "Ustawienia",
     "buttons": {

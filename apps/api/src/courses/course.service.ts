@@ -206,8 +206,11 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     return this.db.transaction(async (trx) => {
-      const conditions = [eq(studentCourses.studentId, userId), eq(courses.status, "published")];
-      conditions.push(...this.getFiltersConditions(filters));
+      const conditions = [
+        eq(studentCourses.studentId, userId),
+        or(eq(courses.status, "published"), eq(courses.status, "private")),
+      ];
+      conditions.push(...this.getFiltersConditions(filters, false));
 
       const queryDB = trx
         .select(this.getSelectField())
@@ -474,9 +477,12 @@ export class CourseService {
       )
       .where(eq(courses.id, id));
 
-    if (!course) throw new NotFoundException("Course not found");
-
     const isEnrolled = !!course.enrolled;
+
+    if (!course) throw new NotFoundException("Course not found");
+    if (course.status === "draft" && !isEnrolled)
+      throw new ForbiddenException("You have no access to this course");
+
     const courseChapterList = await this.db
       .select({
         id: chapters.id,

@@ -64,15 +64,22 @@ const EditCourse = () => {
           <div className="flex items-center justify-between">
             <h4 className="h4 flex items-center text-neutral-950">
               {course?.title || ""}
-              {course?.status === "published" ? (
+              {course?.status === "published" && (
                 <span className="ml-2 flex items-center rounded-sm bg-success-50 px-2 py-1 text-sm text-success-800">
                   <Icon name="Success" className="mr-1" />
                   {t("common.other.published")}
                 </span>
-              ) : (
+              )}
+              {course?.status === "draft" && (
                 <span className="ml-2 flex items-center rounded-sm bg-warning-50 px-2 py-1 text-sm text-yellow-600">
                   <Icon name="Warning" className="mr-1" />
                   {t("common.other.draft")}
+                </span>
+              )}
+              {course?.status === "private" && (
+                <span className="ml-2 flex items-center rounded-sm bg-warning-50 px-2 py-1 text-sm text-yellow-600">
+                  <Icon name="Warning" className="mr-1" />
+                  {t("common.other.private")}
                 </span>
               )}
             </h4>
