@@ -19,6 +19,7 @@ export function NavigationMenuItem({ item, setIsMobileNavOpen }: NavigationMenuI
         <TooltipTrigger className="w-full">
           <NavLink
             to={item.link}
+            role="link"
             onClick={() => setIsMobileNavOpen(false)}
             className={({ isActive }) =>
               cn(
