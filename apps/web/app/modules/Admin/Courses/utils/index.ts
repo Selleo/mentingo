@@ -1,4 +1,6 @@
-export const getCourseStatus = (status: string) => {
+import type { CourseStatus } from "~/api/queries/useCourses";
+
+export const getCourseStatus = (status: CourseStatus) => {
   switch (status) {
     case "draft":
       return "Draft";
@@ -8,5 +10,18 @@ export const getCourseStatus = (status: string) => {
       return "Private";
     default:
       return "Draft";
+  }
+};
+
+export const getCourseBadgeVariant = (status: CourseStatus) => {
+  switch (status) {
+    case "draft":
+      return "draft";
+    case "published":
+      return "success";
+    case "private":
+      return "secondary";
+    default:
+      return "draft";
   }
 };

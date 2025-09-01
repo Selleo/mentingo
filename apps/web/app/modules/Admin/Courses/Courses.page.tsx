@@ -54,11 +54,11 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 
-import { getCourseStatus } from "./utils";
+import { getCourseBadgeVariant, getCourseStatus } from "./utils";
 
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
-import type { CourseParams } from "~/api/queries/useCourses";
+import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
 
 type TCourse = GetAllCoursesResponse["data"][number];
 
@@ -178,10 +178,10 @@ const Courses = () => {
       header: t("adminCoursesView.field.state"),
       cell: ({ row }) => (
         <Badge
-          variant={row.original.status === "published" ? "secondary" : "outline"}
+          variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
           className="w-max"
         >
-          {getCourseStatus(row.original.status as string)}
+          {getCourseStatus(row.original.status as CourseStatus)}
         </Badge>
       ),
     },

@@ -4,12 +4,15 @@ import { useTranslation } from "react-i18next";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
+
+import { getCourseBadgeVariant } from "../Courses/utils";
 
 import CourseLessons from "./CourseLessons/CourseLessons";
 import CoursePricing from "./CoursePricing/CoursePricing";
@@ -64,23 +67,35 @@ const EditCourse = () => {
           <div className="flex items-center justify-between">
             <h4 className="h4 flex items-center text-neutral-950">
               {course?.title || ""}
+
               {course?.status === "published" && (
-                <span className="ml-2 flex items-center rounded-sm bg-success-50 px-2 py-1 text-sm text-success-800">
-                  <Icon name="Success" className="mr-1" />
+                <Badge
+                  variant={getCourseBadgeVariant(course?.status)}
+                  fontWeight="bold"
+                  className="ml-2"
+                  icon="Success"
+                >
                   {t("common.other.published")}
-                </span>
+                </Badge>
               )}
               {course?.status === "draft" && (
-                <span className="ml-2 flex items-center rounded-sm bg-warning-50 px-2 py-1 text-sm text-yellow-600">
-                  <Icon name="Warning" className="mr-1" />
+                <Badge
+                  variant={getCourseBadgeVariant(course?.status)}
+                  fontWeight="bold"
+                  className="ml-2"
+                  icon="Warning"
+                >
                   {t("common.other.draft")}
-                </span>
+                </Badge>
               )}
               {course?.status === "private" && (
-                <span className="ml-2 flex items-center rounded-sm bg-warning-50 px-2 py-1 text-sm text-yellow-600">
-                  <Icon name="Warning" className="mr-1" />
+                <Badge
+                  variant={getCourseBadgeVariant(course?.status)}
+                  fontWeight="bold"
+                  className="ml-2"
+                >
                   {t("common.other.private")}
-                </span>
+                </Badge>
               )}
             </h4>
             <Button
