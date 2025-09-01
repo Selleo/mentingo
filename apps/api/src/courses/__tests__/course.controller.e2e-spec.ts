@@ -226,6 +226,49 @@ describe("CourseController (e2e)", () => {
 
           expect(response.body.data.length).toBe(0);
         });
+
+        it("filters by status", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .create({ role: USER_ROLES.ADMIN });
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+
+          await courseFactory.create({
+            title: "Published course",
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+          await courseFactory.create({
+            title: "Draft course",
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "draft",
+          });
+          await courseFactory.create({
+            title: "Private course",
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "private",
+          });
+
+          const cases = [
+            ["published", "Published course"],
+            ["draft", "Draft course"],
+            ["private", "Private course"],
+          ];
+
+          for (const [status, title] of cases) {
+            const response = await request(app.getHttpServer())
+              .get(`/api/course/all?status=${status}`)
+              .set("Cookie", cookies)
+              .expect(200);
+
+            expect(response.body.data.length).toBe(1);
+            expect(response.body.data[0].title).toContain(title);
+          }
+        });
       });
 
       describe("pagination", () => {
@@ -382,7 +425,7 @@ describe("CourseController (e2e)", () => {
         expect(response.body.data[0].title).toBe("Python Course");
       });
 
-      it("returns only published courses", async () => {
+      it("returns only published and private courses", async () => {
         const student = await userFactory
           .withCredentials({ password })
           .create({ role: USER_ROLES.STUDENT });
@@ -394,6 +437,12 @@ describe("CourseController (e2e)", () => {
           authorId: contentCreator.id,
           categoryId: category.id,
           status: "published",
+          thumbnailS3Key: null,
+        });
+        const privateCourse = await courseFactory.create({
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "private",
           thumbnailS3Key: null,
         });
         const unpublishedCourse = await courseFactory.create({
@@ -414,6 +463,11 @@ describe("CourseController (e2e)", () => {
             courseId: unpublishedCourse.id,
             finishedChapterCount: 0,
           },
+          {
+            studentId: student.id,
+            courseId: privateCourse.id,
+            finishedChapterCount: 0,
+          },
         ]);
 
         const response = await request(app.getHttpServer())
@@ -421,8 +475,9 @@ describe("CourseController (e2e)", () => {
           .set("Cookie", cookies)
           .expect(200);
 
-        expect(response.body.data.length).toBe(1);
-        expect(response.body.data[0].id).toBe(publishedCourse.id);
+        expect(response.body.data.length).toBe(2);
+        expect(response.body.data[0].id).toBe(privateCourse.id);
+        expect(response.body.data[1].id).toBe(publishedCourse.id);
       });
 
       it("sorts by -title", async () => {
