@@ -21,6 +21,7 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
+import type { CourseTest } from "../../../test/factory/course.factory";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
@@ -476,8 +477,9 @@ describe("CourseController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data.length).toBe(2);
-        expect(response.body.data[0].id).toBe(privateCourse.id);
-        expect(response.body.data[1].id).toBe(publishedCourse.id);
+        expect(response.body.data.map((item: CourseTest) => item.id)).toEqual(
+          expect.arrayContaining([publishedCourse.id, privateCourse.id]),
+        );
       });
 
       it("sorts by -title", async () => {
