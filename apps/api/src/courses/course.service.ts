@@ -478,9 +478,10 @@ export class CourseService {
       .where(eq(courses.id, id));
 
     const isEnrolled = !!course.enrolled;
+    const NON_PUBLIC_STATUSES = ["draft", "private"];
 
     if (!course) throw new NotFoundException("Course not found");
-    if (course.status === "draft" && !isEnrolled)
+    if (NON_PUBLIC_STATUSES.includes(course.status) && !isEnrolled)
       throw new ForbiddenException("You have no access to this course");
 
     const courseChapterList = await this.db
