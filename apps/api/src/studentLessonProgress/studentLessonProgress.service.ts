@@ -9,6 +9,7 @@ import { EventBus } from "@nestjs/cqrs";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { EmailService } from "src/common/emails/emails.service";
 import { CourseCompletedEvent } from "src/events";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
@@ -25,11 +26,13 @@ import {
   users,
 } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
+import type { Email } from "src/common/emails/email.interface";
 import type * as schema from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
@@ -39,6 +42,8 @@ export class StudentLessonProgressService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly statisticsRepository: StatisticsRepository,
     private readonly eventBus: EventBus,
+    private readonly userService: UserService,
+    private readonly emailService: EmailService,
   ) {}
 
   async markLessonAsCompleted({
@@ -174,7 +179,6 @@ export class StudentLessonProgressService {
     );
 
     if (isCompletedAsFreemium) return;
-
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
   }
 
@@ -340,7 +344,7 @@ export class StudentLessonProgressService {
       trx,
     );
 
-    if (courseProgress.progress === PROGRESS_STATUSES.COMPLETED) {
+    if (courseProgress.courseIsCompleted) {
       await this.updateStudentCourseStats(
         studentId,
         courseId,
@@ -355,6 +359,15 @@ export class StudentLessonProgressService {
       );
 
       this.eventBus.publish(new CourseCompletedEvent(courseCompletionDetails));
+
+      // TODO: Loop through admins with enabled notifications and send to each, prepare subject and text too.
+      const courseIsFinishedMail: Email = {
+        to: '',
+        from: process.env.SES_EMAIL!,
+        subject: "test",
+        text: "test",
+      };
+      await this.emailService.sendEmail(courseIsFinishedMail);
 
       return await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId);
     }
@@ -400,12 +413,12 @@ export class StudentLessonProgressService {
         progress: sql<ProgressStatus>`${studentCourses.progress}`,
       })
       .from(studentCourses)
-      .leftJoin(courses, and(eq(courses.id, studentCourses.courseId)))
+      .leftJoin(courses, eq(courses.id, studentCourses.courseId))
       .where(and(eq(studentCourses.courseId, courseId), eq(studentCourses.studentId, studentId)));
 
     return {
-      courseIsCompleted: courseCompletedStatus.courseIsCompleted,
-      progress: courseCompletedStatus.progress,
+      courseIsCompleted: courseCompletedStatus?.courseIsCompleted ?? false,
+      progress: courseCompletedStatus?.progress,
     };
   }
 
@@ -464,9 +477,9 @@ export class StudentLessonProgressService {
     const [courseCompletionDetails] = await this.db
       .select({
         usersName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        courseTitle: sql<string>`courses.title`,
-        groupName: sql<string>`groups.name`,
-        completedAt: sql<string>`studentCourses.completedAt`,
+        courseTitle: sql<string>`${courses.title}`,
+        groupName: sql<string>`${groups.name}`,
+        completedAt: sql<string>`${studentCourses.completedAt}`,
       })
       .from(studentCourses)
       .leftJoin(users, eq(studentCourses.studentId, users.id))
