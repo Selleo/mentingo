@@ -47,7 +47,7 @@ describe("AiRepository (e2e)", () => {
     category = await categoryFactory.create();
 
     course = await courseFactory.create({
-      isPublished: true,
+      status: "published",
       thumbnailS3Key: null,
       categoryId: category.id,
     });

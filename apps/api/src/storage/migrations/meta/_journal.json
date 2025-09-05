@@ -204,6 +204,13 @@
       "when": 1754471678391,
       "tag": "0028_add_is_started_field_to_studentLessonProgress_table",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1756472389374,
+      "tag": "0029_replace_isPublished_with_status",
+      "breakpoints": true
     }
   ]
 }

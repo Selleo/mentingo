@@ -35,6 +35,7 @@ import {
   CourseEnrollmentScope,
   SortCourseFieldsOptions,
   SortEnrolledStudentsOptions,
+  CoursesStatusOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -83,7 +84,7 @@ export class CourseController {
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange") creationDateRange: string[],
-    @Query("isPublished") isPublished: boolean,
+    @Query("status") status: CoursesStatusOptions,
     @Query("sort") sort: SortCourseFieldsOptions,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -95,7 +96,7 @@ export class CourseController {
       title,
       category,
       author,
-      isPublished,
+      status,
       creationDateRange:
         creationDateRangeStart && creationDateRangeEnd
           ? [creationDateRangeStart, creationDateRangeEnd]

@@ -54,8 +54,11 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 
+import { getCourseBadgeVariant, getCourseStatus } from "./utils";
+
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
+import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
 
 type TCourse = GetAllCoursesResponse["data"][number];
 
@@ -73,13 +76,8 @@ export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
 const Courses = () => {
   const categories = useLoaderData<typeof clientLoader>();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useState<{
-    title?: string;
-    category?: string;
-    state?: string;
-    archived?: boolean;
-    author?: string;
-  }>({});
+  const [searchParams, setSearchParams] = useState<CourseParams>({});
+
   const { data } = useCoursesSuspense(searchParams);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -102,11 +100,12 @@ const Courses = () => {
     },
     {
       name: "state",
-      type: "state",
+      type: "select",
       placeholder: t("adminCoursesView.filters.placeholder.states"),
       options: [
         { value: "draft", label: t("adminCoursesView.filters.other.draft") },
         { value: "published", label: t("adminCoursesView.filters.other.published") },
+        { value: "private", label: t("adminCoursesView.filters.other.private") },
       ],
     },
     {
@@ -175,11 +174,14 @@ const Courses = () => {
       },
     },
     {
-      accessorKey: "state",
+      accessorKey: "status",
       header: t("adminCoursesView.field.state"),
       cell: ({ row }) => (
-        <Badge variant={row.original.isPublished ? "secondary" : "outline"} className="w-max">
-          {row.original.isPublished ? "Published" : "Draft"}
+        <Badge
+          variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
+          className="w-max"
+        >
+          {getCourseStatus(row.original.status as CourseStatus)}
         </Badge>
       ),
     },

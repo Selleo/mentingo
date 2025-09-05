@@ -37,6 +37,7 @@
       "all": "All",
       "search": "Search",
       "published": "Published",
+      "private": "Private",
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
       "copyUrl": "The URL address was copied to the clipboard"
@@ -372,7 +373,8 @@
       },
       "other": {
         "draft": "Draft",
-        "published": "Published"
+        "published": "Published",
+        "private": "Private"
       }
     },
     "field": {
@@ -882,7 +884,9 @@
       "draftHeader": "Draft",
       "draftBody": "Students cannot purchase or enroll in this course. For those already enrolled, the course will not appear in their Student Course List.",
       "publishedHeader": "Published",
-      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard."
+      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard.",
+      "privateHeader": "Private",
+      "privateBody": "Students cannot purchase nor enroll in this course. For those enrolled (e.g. by admin), the course will appear in their Student Course list and they will be able to go through it."
     },
     "pricing": {
       "header": "Pricing",
@@ -1199,7 +1203,6 @@
       "purchaseRequired": "Unlock this lesson by purchasing the course."
     }
   },
-
   "settings": {
     "title": "Settings",
     "buttons": {
@@ -1215,7 +1218,6 @@
       "settings": "Settings"
     }
   },
-
   "adminPreferences": {
     "header": "Administrator Global Preferences",
     "subHeader": "Configure global system settings, user preferences, and administrative options",

@@ -1,9 +1,11 @@
 import { type Static, Type } from "@sinclair/typebox";
 
+import { coursesStatusOptions } from "./courseQuery";
+
 export const baseCourseSchema = Type.Object({
   title: Type.String(),
   description: Type.String(),
-  isPublished: Type.Optional(Type.Boolean()),
+  status: Type.Optional(coursesStatusOptions),
   thumbnailS3Key: Type.Optional(Type.String()),
   priceInCents: Type.Optional(Type.Integer()),
   currency: Type.Optional(Type.String()),

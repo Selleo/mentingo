@@ -23,16 +23,23 @@ const badgeVariants = cva("", {
       destructive:
         "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
       outline: "text-foreground",
+      draft: "text-yellow-600 bg-warning-50",
       icon: "",
     },
     outline: {
       true: "bg-transparent border border-current",
       false: "",
     },
+    fontWeight: {
+      normal: "font-normal",
+      medium: "font-medium",
+      bold: "font-bold",
+    },
   },
   defaultVariants: {
     variant: "default",
     outline: false,
+    fontWeight: "medium",
   },
 });
 
@@ -45,6 +52,7 @@ type BadgeProps = HTMLAttributes<HTMLDivElement> &
 export const Badge = ({
   className,
   variant,
+  fontWeight,
   outline,
   icon,
   children,
@@ -53,9 +61,8 @@ export const Badge = ({
 }: BadgeProps) => {
   return (
     <div
-      className={cn(badgeVariants({ variant, outline }), className, {
-        "flex h-min shrink-0 items-center gap-x-2 rounded-lg px-2 py-1 text-sm font-medium":
-          children,
+      className={cn(badgeVariants({ variant, outline, fontWeight }), className, {
+        "flex h-min shrink-0 items-center gap-x-2 rounded-lg px-2 py-1 text-sm": children,
       })}
       {...props}
     >
