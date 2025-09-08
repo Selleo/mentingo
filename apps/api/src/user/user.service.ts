@@ -537,4 +537,21 @@ export class UserService {
 
     return !!course;
   }
+
+  public async getAdminsToNotifyAboutFinishedCourse(): Promise<string[]> {
+    const adminEmails = await this.db
+      .select({
+        email: users.email,
+      })
+      .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
+      .where(
+        and(
+          eq(users.role, USER_ROLES.ADMIN),
+          sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
+        ),
+      );
+
+    return adminEmails.map((admin) => admin.email);
+  }
 }

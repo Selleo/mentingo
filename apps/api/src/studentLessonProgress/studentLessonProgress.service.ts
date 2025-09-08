@@ -5,19 +5,25 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
+import { format } from "date-fns";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { CourseCompletedEvent } from "src/events";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
   chapters,
   courses,
+  groups,
+  groupUsers,
   lessons,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
+  users,
 } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
@@ -33,6 +39,7 @@ export class StudentLessonProgressService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async markLessonAsCompleted({
@@ -168,7 +175,6 @@ export class StudentLessonProgressService {
     );
 
     if (isCompletedAsFreemium) return;
-
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
   }
 
@@ -327,10 +333,15 @@ export class StudentLessonProgressService {
     studentId: UUIDType,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
-    const courseProgress = await this.getCourseCompletionStatus(courseId, studentId, trx);
     const courseFinishedChapterCount = await this.getCourseFinishedChapterCount(
       courseId,
       studentId,
+      trx,
+    );
+    const courseProgress = await this.getCourseCompletionStatus(
+      courseId,
+      studentId,
+      courseFinishedChapterCount,
       trx,
     );
 
@@ -346,15 +357,13 @@ export class StudentLessonProgressService {
       return await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId);
     }
 
-    if (courseProgress.progress !== PROGRESS_STATUSES.COMPLETED) {
-      return await this.updateStudentCourseStats(
-        studentId,
-        courseId,
-        PROGRESS_STATUSES.IN_PROGRESS,
-        courseFinishedChapterCount,
-        trx,
-      );
-    }
+    return await this.updateStudentCourseStats(
+      studentId,
+      courseId,
+      PROGRESS_STATUSES.IN_PROGRESS,
+      courseFinishedChapterCount,
+      trx,
+    );
   }
 
   private async getCourseFinishedChapterCount(
@@ -381,20 +390,21 @@ export class StudentLessonProgressService {
   private async getCourseCompletionStatus(
     courseId: UUIDType,
     studentId: UUIDType,
+    courseFinishedChapterCount: number,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     const [courseCompletedStatus] = await dbInstance
       .select({
-        courseIsCompleted: sql<boolean>`${studentCourses.finishedChapterCount} = ${courses.chapterCount}`,
+        courseIsCompleted: sql<boolean>`${courseFinishedChapterCount} = ${courses.chapterCount}`,
         progress: sql<ProgressStatus>`${studentCourses.progress}`,
       })
       .from(studentCourses)
-      .leftJoin(courses, and(eq(courses.id, studentCourses.courseId)))
+      .leftJoin(courses, eq(courses.id, studentCourses.courseId))
       .where(and(eq(studentCourses.courseId, courseId), eq(studentCourses.studentId, studentId)));
 
     return {
-      courseIsCompleted: courseCompletedStatus.courseIsCompleted,
-      progress: courseCompletedStatus.progress,
+      courseIsCompleted: courseCompletedStatus?.courseIsCompleted ?? false,
+      progress: courseCompletedStatus?.progress,
     };
   }
 
@@ -406,10 +416,21 @@ export class StudentLessonProgressService {
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     if (progress === PROGRESS_STATUSES.COMPLETED) {
-      return await dbInstance
+      const [studentCourse] = await dbInstance
         .update(studentCourses)
         .set({ progress, completedAt: sql`now()`, finishedChapterCount })
-        .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
+        .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)))
+        .returning();
+
+      const courseCompletionDetails = await this.getUserCourseCompletionDetails(
+        studentId,
+        courseId,
+        studentCourse.completedAt!,
+      );
+
+      this.eventBus.publish(new CourseCompletedEvent(courseCompletionDetails));
+
+      return studentCourse;
     }
 
     return await dbInstance
@@ -447,5 +468,33 @@ export class StudentLessonProgressService {
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
       .where(eq(lessons.id, id));
+  }
+
+  async getUserCourseCompletionDetails(
+    studentId: UUIDType,
+    courseId: UUIDType,
+    completedAtFromTrx?: string,
+  ) {
+    const [courseCompletionDetails] = await this.db
+      .select({
+        usersName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        courseTitle: sql<string>`${courses.title}`,
+        groupName: sql<string>`CASE WHEN ${groups.name} IS NULL THEN 'User does not belong to a group' ELSE ${groups.name} END`,
+        completedAt: sql<string>`${studentCourses.completedAt}`,
+      })
+      .from(studentCourses)
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(courses, eq(studentCourses.courseId, courses.id))
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
+
+    return {
+      ...courseCompletionDetails,
+      completedAt: format(
+        new Date(completedAtFromTrx ?? courseCompletionDetails.completedAt),
+        "dd MMM yyyy HH:mm:ss",
+      ),
+    };
   }
 }
