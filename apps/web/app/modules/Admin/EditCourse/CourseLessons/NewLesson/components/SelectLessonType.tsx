@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
+import { Badge } from "~/components/ui/badge";
 
 import { ContentTypes } from "../../../EditCourse.types";
 
@@ -67,8 +68,15 @@ const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) =>
               aria-label={`Choose ${title} lesson type`}
             >
               <Icon name={icon as LessonIcons} className="mb-6 size-8 text-primary-700" />
-              <hgroup className="flex flex-col gap-y-3">
-                <h3 className="h6 text-neutral-950">{t(title)}</h3>
+              <hgroup className="space-y-3">
+                <div className="flex flex-wrap items-center gap-x-2">
+                  <h3 className="h6 text-neutral-950">{t(title)}</h3>
+                  {type === ContentTypes.AI_MENTOR_FORM && (
+                    <Badge variant="secondary" className="uppercase">
+                      Beta
+                    </Badge>
+                  )}
+                </div>
                 <p className="body-sm text-neutral-800">{t(description)}</p>
               </hgroup>
             </div>

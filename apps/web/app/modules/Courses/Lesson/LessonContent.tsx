@@ -7,6 +7,7 @@ import { match } from "ts-pattern";
 import { useMarkLessonAsCompleted } from "~/api/mutations";
 import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useUserRole } from "~/hooks/useUserRole";
@@ -143,12 +144,19 @@ export const LessonContent = ({
       <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
         <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
           <div className="flex w-full flex-col gap-y-4">
-            <p className="body-sm-md text-neutral-800">
-              {t("studentLessonView.other.lesson")}{" "}
-              <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
-              <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
-              <span data-testid="lesson-type">{startCase(lesson.type)}</span>
-            </p>
+            <div className="flex items-center gap-x-2">
+              <p className="body-sm-md text-neutral-800">
+                {t("studentLessonView.other.lesson")}{" "}
+                <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
+                <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
+                <span data-testid="lesson-type">{startCase(lesson.type)}</span>
+              </p>
+              {lesson.type === "ai_mentor" && (
+                <Badge variant="secondary" className="uppercase">
+                  Beta
+                </Badge>
+              )}
+            </div>
             <p className="h4 text-neutral-950">{lesson.title}</p>
           </div>
           <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
