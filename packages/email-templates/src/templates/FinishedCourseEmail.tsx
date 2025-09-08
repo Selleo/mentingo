@@ -4,7 +4,7 @@ export type FinishedCourseEmailProps = {
   usersName: string;
   courseName: string;
   completedAt: string;
-  groupName: string;
+  groupName?: string;
 };
 
 export const FinishedCourseEmail = ({
@@ -17,11 +17,9 @@ export const FinishedCourseEmail = ({
     <Html>
       <Text>
         <b>{usersName}</b> finished the course <b>{courseName}</b>.
-        <br />
-        Completed at: {completedAt}
-        <br />
-        Group name: {groupName}
       </Text>
+      <Text>Completed at: {completedAt}</Text>
+      {groupName && <Text>Belongs to group: {groupName}</Text>}
     </Html>
   );
 };

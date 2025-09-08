@@ -479,7 +479,7 @@ export class StudentLessonProgressService {
       .select({
         usersName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         courseTitle: sql<string>`${courses.title}`,
-        groupName: sql<string>`CASE WHEN ${groups.name} IS NULL THEN 'User does not belong to a group' ELSE ${groups.name} END`,
+        groupName: sql<string>`${groups.name}`,
         completedAt: sql<string>`${studentCourses.completedAt}`,
       })
       .from(studentCourses)
