@@ -7,6 +7,7 @@ import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
 import { AiModule } from "./ai/ai.module";
+import { AnnouncementsModule } from "./announcements/announcements.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
@@ -110,6 +111,7 @@ import { UserModule } from "./user/user.module";
     CacheModule,
     AiModule,
     SettingsModule,
+    AnnouncementsModule,
   ],
   controllers: [],
   providers: [
