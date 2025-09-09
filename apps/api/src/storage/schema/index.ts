@@ -439,3 +439,50 @@ export const settings = pgTable("settings", {
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   settings: jsonb("settings").$type<AllSettings>().notNull(),
 });
+
+export const announcements = pgTable("announcements", {
+  ...id,
+  ...timestamps,
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  authorId: uuid("author_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  isEveryone: boolean("is_everyone").notNull().default(false),
+});
+
+export const userAnnouncements = pgTable(
+  "user_announcements",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    announcementId: uuid("announcement_id")
+      .references(() => announcements.id, { onDelete: "cascade" })
+      .notNull(),
+    isRead: boolean("is_read").notNull().default(false),
+    readAt: timestamp("read_at", { withTimezone: true, precision: 3 }),
+  },
+  (table) => ({
+    unq: unique().on(table.userId, table.announcementId),
+  }),
+);
+
+export const groupAnnouncements = pgTable(
+  "group_announcements",
+  {
+    ...id,
+    ...timestamps,
+    groupId: uuid("group_id")
+      .references(() => groups.id, { onDelete: "cascade" })
+      .notNull(),
+    announcementId: uuid("announcement_id")
+      .references(() => announcements.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.groupId, table.announcementId),
+  }),
+);
