@@ -2,6 +2,8 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
+import { coursesStatusOptions } from "./courseQuery";
+
 export const courseSchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
@@ -17,7 +19,7 @@ export const courseSchema = Type.Object({
   enrolledParticipantCount: Type.Number(),
   priceInCents: Type.Number(),
   currency: Type.String(),
-  isPublished: Type.Optional(Type.Boolean()),
+  status: Type.Optional(coursesStatusOptions),
   createdAt: Type.Optional(Type.String()),
   hasFreeChapters: Type.Optional(Type.Boolean()),
 });

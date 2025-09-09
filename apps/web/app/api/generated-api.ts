@@ -433,7 +433,7 @@ export interface GetAllCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
   }[];
@@ -462,7 +462,7 @@ export interface GetStudentCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
     completedChapterCount: number;
@@ -506,7 +506,7 @@ export interface GetAvailableCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
     completedChapterCount: number;
@@ -537,7 +537,7 @@ export interface GetContentCreatorCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
     completedChapterCount: number;
@@ -586,7 +586,7 @@ export interface GetCourseResponse {
     hasFreeChapter?: boolean;
     /** @format uuid */
     id: string;
-    isPublished: boolean | null;
+    status: "draft" | "published" | "private";
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
@@ -677,7 +677,7 @@ export interface GetBetaCourseByIdResponse {
     hasFreeChapter?: boolean;
     /** @format uuid */
     id: string;
-    isPublished: boolean | null;
+    status: "draft" | "published" | "private";
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
@@ -690,7 +690,7 @@ export interface GetBetaCourseByIdResponse {
 export type CreateCourseBody = {
   title: string;
   description: string;
-  isPublished?: boolean;
+  status?: "draft" | "published" | "private";
   thumbnailS3Key?: string;
   priceInCents?: number;
   currency?: string;
@@ -713,7 +713,7 @@ export interface UpdateCourseBody {
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
-  isPublished?: boolean;
+  status?: "draft" | "published" | "private";
   priceInCents?: number;
   currency?: string;
   /** @format uuid */
@@ -2654,7 +2654,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         category?: string;
         author?: string;
         creationDateRange?: string[];
-        isPublished?: string;
+        status?: "draft" | "published" | "private";
         sort?:
           | "title"
           | "category"

@@ -9,18 +9,19 @@ import { courseStatusFormSchema } from "../validators/courseStatusFormSchema";
 
 import type { CourseStatusFormValues } from "../validators/courseStatusFormSchema";
 import type { UpdateCourseBody } from "~/api/generated-api";
+import type { CourseStatus } from "~/api/queries/useCourses";
 
 type UseCourseStatusFormProps = {
   courseId: string;
-  isPublished?: boolean;
+  status?: CourseStatus;
 };
 
-export const useCourseStatusForm = ({ courseId, isPublished }: UseCourseStatusFormProps) => {
+export const useCourseStatusForm = ({ courseId, status }: UseCourseStatusFormProps) => {
   const { mutateAsync: updateCourse } = useUpdateCourse();
   const form = useForm<CourseStatusFormValues>({
     resolver: zodResolver(courseStatusFormSchema),
     defaultValues: {
-      isPublished: isPublished || false,
+      status: status || "draft",
     },
   });
   const onSubmit = async (data: UpdateCourseBody) => {

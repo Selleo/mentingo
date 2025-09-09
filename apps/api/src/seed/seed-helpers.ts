@@ -53,7 +53,7 @@ export async function createNiceCourses(
         title: courseData.title,
         description: courseData.description,
         thumbnailS3Key: courseData.thumbnailS3Key,
-        isPublished: courseData.isPublished,
+        status: courseData.status,
         priceInCents: courseData.priceInCents,
         chapterCount: courseData.chapters.length,
         authorId: creatorUserId,

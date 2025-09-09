@@ -127,7 +127,7 @@ export class CourseService {
         courseChapterCount: courses.chapterCount,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
-        isPublished: courses.isPublished,
+        status: courses.status,
         createdAt: courses.createdAt,
       })
       .from(courses)
@@ -146,7 +146,7 @@ export class CourseService {
         categories.title,
         courses.priceInCents,
         courses.currency,
-        courses.isPublished,
+        courses.status,
         coursesSummaryStats.freePurchasedCount,
         coursesSummaryStats.paidPurchasedCount,
         courses.createdAt,
@@ -206,8 +206,11 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     return this.db.transaction(async (trx) => {
-      const conditions = [eq(studentCourses.studentId, userId), eq(courses.isPublished, true)];
-      conditions.push(...this.getFiltersConditions(filters));
+      const conditions = [
+        eq(studentCourses.studentId, userId),
+        or(eq(courses.status, "published"), eq(courses.status, "private")),
+      ];
+      conditions.push(...this.getFiltersConditions(filters, false));
 
       const queryDB = trx
         .select(this.getSelectField())
@@ -341,7 +344,7 @@ export class CourseService {
         query.excludeCourseId,
       );
 
-      const conditions = [eq(courses.isPublished, true)];
+      const conditions = [eq(courses.status, "published")];
       conditions.push(...this.getFiltersConditions(filters));
 
       if (availableCourseIds.length > 0) {
@@ -453,7 +456,7 @@ export class CourseService {
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
-        isPublished: courses.isPublished,
+        status: courses.status,
         isScorm: courses.isScorm,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
@@ -474,9 +477,13 @@ export class CourseService {
       )
       .where(eq(courses.id, id));
 
-    if (!course) throw new NotFoundException("Course not found");
-
     const isEnrolled = !!course.enrolled;
+    const NON_PUBLIC_STATUSES = ["draft", "private"];
+
+    if (!course) throw new NotFoundException("Course not found");
+    if (NON_PUBLIC_STATUSES.includes(course.status) && !isEnrolled)
+      throw new ForbiddenException("You have no access to this course");
+
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
@@ -585,7 +592,7 @@ export class CourseService {
         categoryId: categories.id,
         description: sql<string>`${courses.description}`,
         courseChapterCount: courses.chapterCount,
-        isPublished: courses.isPublished,
+        status: courses.status,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
@@ -659,7 +666,7 @@ export class CourseService {
     scope: CourseEnrollmentScope;
     excludeCourseId?: UUIDType;
   }): Promise<AllCoursesForContentCreatorResponse> {
-    const conditions = [eq(courses.isPublished, true), eq(courses.authorId, authorId)];
+    const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
     if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
       conditions.push(eq(studentCourses.studentId, currentUserId));
@@ -764,7 +771,7 @@ export class CourseService {
           title: createCourseBody.title,
           description: createCourseBody.description,
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
-          isPublished: createCourseBody.isPublished,
+          status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
           currency: createCourseBody.currency || "usd",
           isScorm: createCourseBody.isScorm,
@@ -1008,7 +1015,7 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
-    if (course.isPublished) {
+    if (course.status === "published") {
       throw new ForbiddenException("You can't delete a published course");
     }
 
@@ -1039,7 +1046,7 @@ export class CourseService {
 
     const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
 
-    if (course.some((course) => course.isPublished)) {
+    if (course.some((course) => course.status === "published")) {
       throw new ForbiddenException("You can't delete a published course");
     }
 
@@ -1243,12 +1250,12 @@ export class CourseService {
 
       conditions.push(between(courses.createdAt, start, end));
     }
-    if (filters.isPublished) {
-      conditions.push(eq(courses.isPublished, filters.isPublished));
+    if (filters.status) {
+      conditions.push(eq(courses.status, filters.status));
     }
 
     if (publishedOnly) {
-      conditions.push(eq(courses.isPublished, true));
+      conditions.push(eq(courses.status, "published"));
     }
 
     return conditions ?? undefined;

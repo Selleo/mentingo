@@ -1156,11 +1156,24 @@
             }
           },
           {
-            "name": "isPublished",
+            "name": "status",
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "const": "draft",
+                  "type": "string"
+                },
+                {
+                  "const": "published",
+                  "type": "string"
+                },
+                {
+                  "const": "private",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -5013,8 +5026,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5132,8 +5158,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5327,8 +5366,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5453,8 +5505,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5686,13 +5751,19 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "isPublished": {
+              "status": {
                 "anyOf": [
                   {
-                    "type": "boolean"
+                    "const": "draft",
+                    "type": "string"
                   },
                   {
-                    "type": "null"
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
                   }
                 ]
               },
@@ -5716,7 +5787,7 @@
               "currency",
               "description",
               "id",
-              "isPublished",
+              "status",
               "priceInCents",
               "title"
             ]
@@ -6109,13 +6180,19 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "isPublished": {
+              "status": {
                 "anyOf": [
                   {
-                    "type": "boolean"
+                    "const": "draft",
+                    "type": "string"
                   },
                   {
-                    "type": "null"
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
                   }
                 ]
               },
@@ -6152,7 +6229,7 @@
               "currency",
               "description",
               "id",
-              "isPublished",
+              "status",
               "priceInCents",
               "title"
             ]
@@ -6174,8 +6251,21 @@
               "description": {
                 "type": "string"
               },
-              "isPublished": {
-                "type": "boolean"
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "draft",
+                    "type": "string"
+                  },
+                  {
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
+                  }
+                ]
               },
               "thumbnailS3Key": {
                 "type": "string"
@@ -6250,8 +6340,21 @@
           "thumbnailS3Key": {
             "type": "string"
           },
-          "isPublished": {
-            "type": "boolean"
+          "status": {
+            "anyOf": [
+              {
+                "const": "draft",
+                "type": "string"
+              },
+              {
+                "const": "published",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
           },
           "priceInCents": {
             "type": "integer"
