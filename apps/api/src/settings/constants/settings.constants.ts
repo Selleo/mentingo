@@ -20,4 +20,5 @@ export const DEFAULT_STUDENT_SETTINGS = {
 export const DEFAULT_ADMIN_SETTINGS = {
   ...DEFAULT_STUDENT_SETTINGS,
   adminNewUserNotification: true,
+  adminFinishedCourseNotification: false,
 };
