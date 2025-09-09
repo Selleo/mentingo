@@ -1,7 +1,7 @@
 import { UUIDType } from "src/common";
 
 type CourseCompletedDetails = {
-  usersName: string;
+  userName: string;
   courseTitle: string;
   groupName: string;
   completedAt: string;

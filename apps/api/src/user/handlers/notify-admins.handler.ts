@@ -62,11 +62,11 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
   async handleNotifyAdminAboutFinishedCourse(event: CourseCompletedEvent) {
     const {
-      courseCompletionData: { usersName, courseTitle, groupName, completedAt },
+      courseCompletionData: { userName, courseTitle, groupName, completedAt },
     } = event;
 
     const { text, html } = new FinishedCourseEmail({
-      usersName: usersName,
+      userName,
       courseName: courseTitle,
       completedAt,
       groupName,

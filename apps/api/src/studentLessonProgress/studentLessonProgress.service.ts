@@ -477,7 +477,7 @@ export class StudentLessonProgressService {
   ) {
     const [courseCompletionDetails] = await this.db
       .select({
-        usersName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+        userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         courseTitle: sql<string>`${courses.title}`,
         groupName: sql<string>`${groups.name}`,
         completedAt: sql<string>`${studentCourses.completedAt}`,
