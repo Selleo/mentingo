@@ -18,27 +18,37 @@ A modern, scalable Learning Management System built with cutting-edge technologi
 
 </div>
 
-- [Overview](#overview)
-  - [Apps](#apps)
-  - [Packages](#packages)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Setup](#environment-setup)
-- [Database Setup](#database-setup)
-  - [Migrations](#migrations)
-  - [Database Seeding](#database-seeding)
-- [Development](#development)
-  - [Available Services](#available-services)
-- [Commands Reference](#commands-reference)
-  - [Database Commands](#database-commands)
-  - [HTTP Client Generation](#http-client-generation)
-  - [Email Templates](#email-templates)
-  - [Testing](#testing)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [Legal Notice](#legal-notice)
-- [About Selleo](#about-selleo)
+- [Mentingo LMS Core Project](#mentingo-lms-core-project)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Overview](#overview)
+    - [Apps](#apps)
+    - [Packages](#packages)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Environment Setup](#environment-setup)
+  - [Database Setup](#database-setup)
+    - [Migrations](#migrations)
+    - [Database Seeding](#database-seeding)
+    - [Default User Accounts](#default-user-accounts)
+  - [Development](#development)
+    - [Available Services](#available-services)
+  - [Commands Reference](#commands-reference)
+    - [Formatting](#formatting)
+    - [Database Commands](#database-commands)
+    - [HTTP Client Generation](#http-client-generation)
+    - [Email Templates](#email-templates)
+    - [Testing](#testing)
+  - [Project Structure](#project-structure)
+  - [Contributing](#contributing)
+    - [📚 Naming Conventions: Branches, Commits, and Pull Requests](#-naming-conventions-branches-commits-and-pull-requests)
+      - [🔀 Branch Naming](#-branch-naming)
+      - [✅ Commit Messages](#-commit-messages)
+      - [📦 Pull Requests](#-pull-requests)
+  - [Deployment](#deployment)
+  - [Legal notice](#legal-notice)
+  - [Partners](#partners)
 
 </br>
 <div align="center">
@@ -398,6 +408,10 @@ refactor(LMS-501): Simplify chart rendering logic
 - Include screenshots, test results, or instructions if applicable
 
 ---
+
+## Deployment
+
+See [Deployment Guide](docs/deployment.md) for more details.
 
 ## Legal notice
 
