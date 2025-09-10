@@ -5,7 +5,6 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 import { announcementsForUserOptions } from "../queries/useAnnouncementsForUser";
-import { latestUnreadAnnouncementsOptions } from "../queries/useLatestUnreadNotifications";
 import { queryClient } from "../queryClient";
 
 type MarkAnnouncementAsReadOptions = {
@@ -27,7 +26,6 @@ export function useMarkAnnouncementAsRead() {
     onSuccess: () => {
       toast({ description: t("announcements.toast.markedAsRead") });
       queryClient.invalidateQueries(announcementsForUserOptions());
-      queryClient.invalidateQueries(latestUnreadAnnouncementsOptions());
     },
     onError: (error) => {
       toast({
