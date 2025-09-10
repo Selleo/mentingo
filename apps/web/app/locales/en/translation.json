@@ -1283,6 +1283,9 @@
         }
       }
     },
+    "buttons": {
+      "readMore": "Read more"
+    },
     "toast": {
       "markedAsRead": "Announcements have been marked as read successfully",
       "markAsReadFailed": "Failed to mark announcements as read",

@@ -1288,6 +1288,9 @@
         }
       }
     },
+    "buttons": {
+      "readMore": "Czytaj więcej"
+    },
     "toast": {
       "markedAsRead": "Ogłoszenia oznaczone jako przeczytane",
       "markAsReadFailed": "Nie udało się oznaczyć ogłoszeń jako przeczytane",

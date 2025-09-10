@@ -1,10 +1,10 @@
-import { useAnnouncementsForUserSuspense } from "~/api/queries/useAnnouncementsForUser";
+import { useAnnouncementsForUser } from "~/api/queries/useAnnouncementsForUser";
 import Loader from "~/modules/common/Loader/Loader";
 
 import AnnouncementsList from "./AnnouncementsList";
 
 export default function UserAnnouncements() {
-  const { data: announcements, isLoading } = useAnnouncementsForUserSuspense();
+  const { data: announcements, isLoading } = useAnnouncementsForUser();
 
   if (isLoading) {
     return (
