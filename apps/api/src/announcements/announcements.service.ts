@@ -46,6 +46,10 @@ export class AnnouncementsService {
     return readAnnouncements;
   }
 
+  async getAnnouncementsForUser(userId: UUIDType) {
+    return await this.announcementsRepository.getAnnouncementsForUser(userId);
+  }
+
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, authorId: UUIDType) {
     if (createAnnouncementData.target.type === "group" && !createAnnouncementData.target.groupId) {
       throw new BadRequestException("announcements.error.groupIdRequired");

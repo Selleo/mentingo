@@ -134,6 +134,28 @@ export class AnnouncementsRepository {
       .returning();
   }
 
+  async getAnnouncementsForUser(userId: UUIDType) {
+    const announcementsData = await this.db
+      .select({
+        ...getTableColumns(announcements),
+        ...this.getAuthorFields(),
+        isRead: userAnnouncements.isRead,
+      })
+      .from(announcements)
+      .leftJoin(
+        userAnnouncements,
+        and(
+          eq(announcements.id, userAnnouncements.announcementId),
+          eq(userAnnouncements.userId, userId),
+        ),
+      )
+      .leftJoin(users, eq(announcements.authorId, users.id))
+      .where(isNotNull(userAnnouncements.userId))
+      .orderBy(announcements.createdAt);
+
+    return await this.mapAnnouncementsWithProfilePictures(announcementsData);
+  }
+
   async createUserAnnouncementRecords(userIds: UUIDType[]) {
     if (!userIds.length) return;
 

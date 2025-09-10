@@ -11,6 +11,7 @@ import { AnnouncementsService } from "./announcements.service";
 import {
   allAnnouncementsSchema,
   announcementSchema,
+  announcementsForUserSchema,
   baseAnnouncementSchema,
   unreadAnnouncementsSchema,
   userAnnouncementsSchema,
@@ -66,6 +67,17 @@ export class AnnouncementsController {
     const announcement = await this.announcementsService.getAnnouncementById(id);
 
     return new BaseResponse(announcement);
+  }
+
+  @Get("user/me")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    response: baseResponse(announcementsForUserSchema),
+  })
+  async getAnnouncementsForUser(@CurrentUser("userId") userId: UUIDType) {
+    const announcements = await this.announcementsService.getAnnouncementsForUser(userId);
+
+    return new BaseResponse(announcements);
   }
 
   @Post()

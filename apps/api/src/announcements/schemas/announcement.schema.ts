@@ -17,3 +17,7 @@ export const allAnnouncementsSchema = Type.Array(announcementSchema);
 export const userAnnouncementsSchema = createSelectSchema(userAnnouncements);
 
 export const unreadAnnouncementsSchema = Type.Object({ unreadCount: Type.Number() });
+
+export const announcementsForUserSchema = Type.Array(
+  Type.Object({ ...announcementSchema.properties, isRead: Type.Boolean() }),
+);

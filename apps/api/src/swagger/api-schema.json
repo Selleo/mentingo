@@ -3335,6 +3335,23 @@
         }
       }
     },
+    "/api/announcements/user/me": {
+      "get": {
+        "operationId": "AnnouncementsController_getAnnouncementsForUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnnouncementsForUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/announcements/{id}/read": {
       "patch": {
         "operationId": "AnnouncementsController_markAnnouncementAsRead",
@@ -11201,6 +11218,71 @@
               "authorName",
               "authorProfilePictureUrl"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAnnouncementsForUserResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "authorId": {
+                  "type": "string"
+                },
+                "isEveryone": {
+                  "type": "boolean"
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "authorProfilePictureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "isRead": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "title",
+                "content",
+                "authorId",
+                "isEveryone",
+                "authorName",
+                "authorProfilePictureUrl",
+                "isRead"
+              ]
+            }
           }
         },
         "required": [
