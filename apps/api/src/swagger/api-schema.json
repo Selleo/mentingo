@@ -3309,32 +3309,6 @@
         }
       }
     },
-    "/api/announcements/{id}": {
-      "get": {
-        "operationId": "AnnouncementsController_getAnnouncementById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAnnouncementByIdResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/announcements/user/me": {
       "get": {
         "operationId": "AnnouncementsController_getAnnouncementsForUser",
@@ -11166,64 +11140,6 @@
           "data"
         ]
       },
-      "GetAnnouncementByIdResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              },
-              "content": {
-                "type": "string"
-              },
-              "authorId": {
-                "type": "string"
-              },
-              "isEveryone": {
-                "type": "boolean"
-              },
-              "authorName": {
-                "type": "string"
-              },
-              "authorProfilePictureUrl": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "createdAt",
-              "updatedAt",
-              "title",
-              "content",
-              "authorId",
-              "isEveryone",
-              "authorName",
-              "authorProfilePictureUrl"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "GetAnnouncementsForUserResponse": {
         "type": "object",
         "properties": {
@@ -11301,36 +11217,14 @@
             "minLength": 1,
             "type": "string"
           },
-          "target": {
+          "groupId": {
+            "default": null,
             "anyOf": [
               {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "const": "everyone",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "type"
-                ]
+                "type": "string"
               },
               {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "const": "group",
-                    "type": "string"
-                  },
-                  "groupId": {
-                    "format": "uuid",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "type",
-                  "groupId"
-                ]
+                "type": "null"
               }
             ]
           }
@@ -11338,7 +11232,7 @@
         "required": [
           "title",
           "content",
-          "target"
+          "groupId"
         ]
       },
       "CreateAnnouncementResponse": {
@@ -11411,7 +11305,7 @@
               "readAt": {
                 "anyOf": [
                   {
-                    "type": "Date"
+                    "type": "string"
                   },
                   {
                     "type": "null"

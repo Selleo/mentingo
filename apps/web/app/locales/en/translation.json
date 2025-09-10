@@ -122,6 +122,7 @@
     "groups": "Groups",
     "providerInformation": "Provider Info",
     "browseCourses": "Browse Courses",
+    "announcements": "Announcements",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
@@ -1237,5 +1238,56 @@
     "inProgress": "In Progress",
     "notStarted": "Not Started",
     "blocked": "Blocked"
+  },
+  "announcements": {
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "announcements": "Announcements",
+      "createAnnouncement": "Create announcement"
+    },
+    "page": {
+      "header": "Announcements",
+      "tooltips": {
+        "markAsRead": "Mark as read"
+      },
+      "buttons": {
+        "new": "Create new"
+      }
+    },
+    "createPage": {
+      "header": "Create announcement",
+      "subheader": "Provide the details to set up an new announcement.",
+      "buttons": {
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      },
+      "fields": {
+        "title": "Title",
+        "content": "Content",
+        "group": "Group",
+        "everyone": "Everyone"
+      },
+      "placeholders": {
+        "title": "Enter title",
+        "content": "Write your announcement here...",
+        "group": "Select group",
+        "everyone": "Select everyone"
+      },
+      "validation": {
+        "title": {
+          "required": "Title is required",
+          "maxLength": "Title must be less than 120 characters"
+        },
+        "content": {
+          "required": "Content is required"
+        }
+      }
+    },
+    "toast": {
+      "markedAsRead": "Announcements have been marked as read successfully",
+      "markAsReadFailed": "Failed to mark announcements as read",
+      "createdSuccessfully": "Announcement created successfully",
+      "createFailed": "Failed to create announcement"
+    }
   }
 }

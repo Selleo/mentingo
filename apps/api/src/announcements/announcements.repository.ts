@@ -1,25 +1,15 @@
 import { Inject, Injectable } from "@nestjs/common";
-import {
-  eq,
-  and,
-  or,
-  isNull,
-  getTableColumns,
-  countDistinct,
-  isNotNull,
-  sql,
-  inArray,
-} from "drizzle-orm";
+import { eq, and, getTableColumns, countDistinct, isNotNull, sql, not, desc } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import {
   announcements,
   groupAnnouncements,
-  groups,
   groupUsers,
   userAnnouncements,
   users,
 } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
 import { LATEST_ANNOUNCEMENTS_LIMIT } from "./consts";
@@ -42,7 +32,7 @@ export class AnnouncementsRepository {
       })
       .from(announcements)
       .leftJoin(users, eq(announcements.authorId, users.id))
-      .orderBy(announcements.createdAt);
+      .orderBy(desc(announcements.createdAt));
 
     return await this.mapAnnouncementsWithProfilePictures(announcementsData);
   }
@@ -63,7 +53,7 @@ export class AnnouncementsRepository {
       )
       .leftJoin(users, eq(announcements.authorId, users.id))
       .where(eq(userAnnouncements.isRead, false))
-      .orderBy(announcements.createdAt)
+      .orderBy(desc(announcements.createdAt))
       .limit(LATEST_ANNOUNCEMENTS_LIMIT);
 
     return await this.mapAnnouncementsWithProfilePictures(announcementsData);
@@ -78,45 +68,42 @@ export class AnnouncementsRepository {
       .where(and(eq(userAnnouncements.userId, userId), eq(userAnnouncements.isRead, false)));
   }
 
-  async getAnnouncementById(id: string) {
-    const announcementData = await this.db
-      .select({
-        ...getTableColumns(announcements),
-        ...this.getAuthorFields(),
-      })
-      .from(announcements)
-      .leftJoin(users, eq(announcements.authorId, users.id))
-      .where(eq(announcements.id, id));
-
-    return await this.mapAnnouncementsWithProfilePictures(announcementData);
-  }
-
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, authorId: UUIDType) {
-    const { target, ...announcementData } = createAnnouncementData;
+    const { groupId, ...announcementData } = createAnnouncementData;
 
     const [announcement] = await this.db
       .insert(announcements)
-      .values({ ...announcementData, authorId, isEveryone: target.type === "everyone" })
+      .values({ ...announcementData, authorId, isEveryone: groupId === null })
       .returning();
 
-    if (target.type === "group" && target.groupId) {
+    if (groupId) {
       await this.db.insert(groupAnnouncements).values({
-        groupId: target.groupId,
+        groupId,
         announcementId: announcement.id,
       });
 
       const usersRelatedToGroup = await this.db
         .select({ userId: groupUsers.userId })
         .from(groupUsers)
-        .where(eq(groupUsers.groupId, target.groupId));
+        .leftJoin(users, eq(groupUsers.userId, users.id))
+        .where(and(eq(groupUsers.groupId, groupId), not(eq(users.role, USER_ROLES.ADMIN))));
 
-      await this.createUserAnnouncementRecords(usersRelatedToGroup.map((user) => user.userId));
+      await this.createUserAnnouncementRecords(
+        usersRelatedToGroup.map((user) => user.userId),
+        announcement.id,
+      );
 
       return announcement;
     }
 
-    const allUserIds = await this.db.select({ id: users.id }).from(users);
-    await this.createUserAnnouncementRecords(allUserIds.map((user) => user.id));
+    const allUserIds = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(not(eq(users.id, authorId)));
+    await this.createUserAnnouncementRecords(
+      allUserIds.map((user) => user.id),
+      announcement.id,
+    );
 
     return announcement;
   }
@@ -151,49 +138,19 @@ export class AnnouncementsRepository {
       )
       .leftJoin(users, eq(announcements.authorId, users.id))
       .where(isNotNull(userAnnouncements.userId))
-      .orderBy(announcements.createdAt);
+      .orderBy(desc(announcements.createdAt));
 
     return await this.mapAnnouncementsWithProfilePictures(announcementsData);
   }
 
-  async createUserAnnouncementRecords(userIds: UUIDType[]) {
+  async createUserAnnouncementRecords(userIds: UUIDType[], announcementId: UUIDType) {
     if (!userIds.length) return;
 
-    const announcementsRelatedToUsers = await this.db
-      .select({ ...getTableColumns(announcements) })
-      .from(announcements)
-      .leftJoin(
-        userAnnouncements,
-        and(
-          eq(announcements.id, userAnnouncements.announcementId),
-          inArray(userAnnouncements.userId, userIds),
-        ),
-      )
-      .leftJoin(groupAnnouncements, eq(announcements.id, groupAnnouncements.announcementId))
-      .leftJoin(groups, eq(groupAnnouncements.groupId, groups.id))
-      .leftJoin(
-        groupUsers,
-        and(
-          eq(groupAnnouncements.groupId, groupUsers.groupId),
-          inArray(groupUsers.userId, userIds),
-        ),
-      )
-      .where(
-        and(
-          or(eq(announcements.isEveryone, true), isNotNull(groupUsers.userId)),
-          isNull(userAnnouncements.userId),
-        ),
-      );
-
-    if (!announcementsRelatedToUsers.length) return;
-
-    const userAnnouncementsToInsert = userIds.flatMap((userId) =>
-      announcementsRelatedToUsers.map((announcement) => ({
-        userId,
-        announcementId: announcement.id,
-        isRead: false,
-      })),
-    );
+    const userAnnouncementsToInsert = userIds.map((userId) => ({
+      userId,
+      announcementId,
+      isRead: false,
+    }));
 
     await this.db.insert(userAnnouncements).values(userAnnouncementsToInsert);
   }

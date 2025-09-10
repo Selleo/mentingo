@@ -10,7 +10,6 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 import { AnnouncementsService } from "./announcements.service";
 import {
   allAnnouncementsSchema,
-  announcementSchema,
   announcementsForUserSchema,
   baseAnnouncementSchema,
   unreadAnnouncementsSchema,
@@ -56,17 +55,6 @@ export class AnnouncementsController {
       await this.announcementsService.getUnreadAnnouncementsCount(userId);
 
     return new BaseResponse(unreadAnnouncementsCount);
-  }
-
-  @Get(":id")
-  @Roles(...Object.values(USER_ROLES))
-  @Validate({
-    response: baseResponse(announcementSchema),
-  })
-  async getAnnouncementById(@Param("id") id: UUIDType) {
-    const announcement = await this.announcementsService.getAnnouncementById(id);
-
-    return new BaseResponse(announcement);
   }
 
   @Get("user/me")

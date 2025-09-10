@@ -14,7 +14,9 @@ export const announcementSchema = Type.Composite([
 ]);
 export const allAnnouncementsSchema = Type.Array(announcementSchema);
 
-export const userAnnouncementsSchema = createSelectSchema(userAnnouncements);
+export const userAnnouncementsSchema = createSelectSchema(userAnnouncements, {
+  readAt: Type.String(),
+});
 
 export const unreadAnnouncementsSchema = Type.Object({ unreadCount: Type.Number() });
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AnnouncementsRepository } from "./announcements.repository";
 
@@ -23,16 +23,6 @@ export class AnnouncementsService {
     return unreadCount;
   }
 
-  async getAnnouncementById(id: string) {
-    const [announcement] = await this.announcementsRepository.getAnnouncementById(id);
-
-    if (!announcement) {
-      throw new NotFoundException("announcements.error.notFound");
-    }
-
-    return announcement;
-  }
-
   async markAnnouncementAsRead(announcementId: UUIDType, userId: UUIDType) {
     const [readAnnouncements] = await this.announcementsRepository.markAnnouncementAsRead(
       announcementId,
@@ -40,7 +30,7 @@ export class AnnouncementsService {
     );
 
     if (!readAnnouncements) {
-      throw new BadRequestException("announcements.error.markAsReadFailed");
+      throw new BadRequestException("announcements.toast.markAsReadFailed");
     }
 
     return readAnnouncements;
@@ -51,17 +41,13 @@ export class AnnouncementsService {
   }
 
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, authorId: UUIDType) {
-    if (createAnnouncementData.target.type === "group" && !createAnnouncementData.target.groupId) {
-      throw new BadRequestException("announcements.error.groupIdRequired");
-    }
-
     const createAnnouncement = await this.announcementsRepository.createAnnouncement(
       createAnnouncementData,
       authorId,
     );
 
     if (!createAnnouncement) {
-      throw new BadRequestException("announcements.error.createFailed");
+      throw new BadRequestException("announcements.toast.createFailed");
     }
 
     return createAnnouncement;
