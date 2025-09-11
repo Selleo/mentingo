@@ -19,14 +19,3 @@ DO $$ BEGIN
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
-
-UPDATE settings
-SET
-    settings = jsonb_set(
-        COALESCE(settings, '{}'::jsonb),
-        '{certificateBackgroundImage}',
-        'null'::jsonb,
-        true
-    )
-WHERE
-    user_id IS NULL;
