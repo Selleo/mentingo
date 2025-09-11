@@ -10,6 +10,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   unregisteredUserCoursesAccessibility: false,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
   enforceSSO: false,
+  certificateBackgroundImage: null,
   platformLogoS3Key: null,
 };
 

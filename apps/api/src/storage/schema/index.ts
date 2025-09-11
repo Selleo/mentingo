@@ -125,6 +125,7 @@ export const courses = pgTable("courses", {
   description: varchar("description", { length: 1000 }),
   thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
   status: coursesStatusEnum("status").notNull().default("draft"),
+  hasCertificate: boolean("has_certificate").notNull().default(false),
   priceInCents: integer("price_in_cents").notNull().default(0),
   currency: varchar("currency").notNull().default("usd"),
   chapterCount: integer("chapter_count").notNull().default(0),
@@ -442,3 +443,20 @@ export const settings = pgTable("settings", {
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   settings: jsonb("settings").$type<AllSettings>().notNull(),
 });
+
+export const certificates = pgTable(
+  "certificates",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.userId, table.courseId),
+  }),
+);

@@ -643,7 +643,9 @@
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
-      "courseUpdatedSuccessfully": "Course updated successfully"
+      "courseUpdatedSuccessfully": "Course updated successfully",
+      "certificateUpdatedSuccessfully": "Certificate updated successfully",
+      "certificateUpdateError": "Error updating certificate"
     },
     "settings": {
       "breadcrumbs": {
@@ -652,7 +654,9 @@
         "createNew": "Create new"
       },
       "button": {
-        "removeThumbnail": "Remove Thumbnail"
+        "removeThumbnail": "Remove Thumbnail",
+        "includesCertificate": "Includes certificate",
+        "doesNotIncludeCertificate": "Does not include certificate"
       },
       "selectButton": {
         "uploadFile": "Upload file",
@@ -1218,6 +1222,20 @@
       "settings": "Settings"
     }
   },
+  "certificateBackgroundUpload": {
+    "title": "Certificate Background Upload",
+    "description": "Upload a background image for the certificate.",
+    "button": {
+      "removeBackgroundImage": "Remove Background Image"
+    },
+    "other": {
+      "uploading": "Uploading..."
+    },
+    "toast": {
+      "success": "Certificate background image changed successfully",
+      "error": "Error changing certificate background image"
+    }
+  },
   "adminPreferences": {
     "header": "Administrator Global Preferences",
     "subHeader": "Configure global system settings, user preferences, and administrative options",
@@ -1239,5 +1257,18 @@
     "inProgress": "In Progress",
     "notStarted": "Not Started",
     "blocked": "Blocked"
+  },
+  "studentCertificateView": {
+    "header": "Certificates",
+    "informations": {
+      "loading": "Loading certificates...",
+      "noCertificates": "No certificates available yet. Complete courses to earn certificates.",
+      "failedToLoad": "Failed to load certificates. Please try again later.",
+      "failedToDownload": "Failed to download certificate. Please try again later."
+    },
+    "button": {
+      "download": "Download",
+      "preview": "Preview"
+    }
   }
 }

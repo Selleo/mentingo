@@ -211,6 +211,20 @@
       "when": 1756472389374,
       "tag": "0029_replace_isPublished_with_status",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1757585663293,
+      "tag": "0030_add_certificates_table_and_course_certificate_flag",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1757585714926,
+      "tag": "0031_add_default_certificate_background_image_to_settings",
+      "breakpoints": true
     }
   ]
 }

@@ -37,9 +37,10 @@ import type { GetLessonByIdResponse } from "~/api/generated-api";
 
 type QuizProps = {
   lesson: GetLessonByIdResponse["data"];
+  userId: string;
 };
 
-export const Quiz = ({ lesson }: QuizProps) => {
+export const Quiz = ({ lesson, userId }: QuizProps) => {
   const { lessonId = "" } = useParams();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
@@ -53,7 +54,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
     resolver: zodResolver(QuizFormSchema(t)),
   });
 
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(userId);
 
   const submitQuiz = useSubmitQuiz({
     handleOnSuccess: () => {

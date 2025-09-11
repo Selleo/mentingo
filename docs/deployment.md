@@ -1,31 +1,31 @@
 This guide provides a complete walkthrough for deploying the Mentingo application. The infrastructure will be hosted on Hetzner Cloud, while AWS will be used for DNS, container image storage (ECR), and user management (IAM).
 
------
+---
 
 ### **Part 1: Hetzner Infrastructure Setup** ⚙️
 
 #### **1.1 Project & Firewall**
 
 1.  In the Hetzner Cloud Console, create a new **Project**.
-    
+
     ![Image1](images/image1.png)
 
 2.  Navigate to **Security -\> Firewalls** within your new project.
 
 3.  Create a new firewall. Add an **inbound rule** to allow traffic on **port 22 (SSH)**. For enhanced security, restrict the **Source IPs** to your public IP address.
-    
+
     ![Image2](images/image2.png)
 
 4.  For **outbound rules**, allow all **IPv4** traffic to any destination.
-    
+
 #### **1.2 Object Storage (S3 Bucket)**
 
 1.  In the Hetzner Console, navigate to **Storage -\> Object Storage** and create a new **bucket**. This will be used for file uploads.
-    
+
     ![Image4](images/image3.png)
 
 2.  After the bucket is created, generate **credentials** (access key and secret key) for it.
-    
+
     ![Image5](images/image5.png)
 
 3.  🔐 **Important:** Securely save these credentials. You will need them for the application's environment variables later.
@@ -37,7 +37,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 2.  Select your desired server **location**.
 
 3.  Choose the **Ubuntu** image (e.g., 22.04). A server with **4 vCPU** and **8 GB of RAM** is recommended.
-    
+
     ![Image6](images/image6.png)
 
 4.  In the **Networking** section, ensure **Public IPv4** is enabled.
@@ -55,23 +55,23 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 8.  Before creating the server, under **Firewall**, select the firewall you created in step 1.1.
 
 9.  Enable **Backups**.
-    
+
     ![image7](images/image7.png)
 
 #### **1.4 Networking (Floating IP)**
 
 1.  Once the server is running, navigate to **Networking -\> Floating IPs** and assign a new **Floating IP** to your server. This provides a static IP that can be re-assigned if you ever need to replace the server.
-    
+
     ![Image8](images/image8.png)
 
 2.  To make the floating IP persistent on the server, first connect to the server using its **public IP** (not the floating IP yet) and your SSH key.
-    
+
     ![Image9](images/image9.png)
 
 3.  Once logged in, follow the official Hetzner documentation to [create a persistent configuration file for the floating IP](https://docs.hetzner.com/cloud/floating-ips/persistent-configuration/).
-    
+
     ![Image10](images/image10.png)
-    
+
     ![Image11](images/image11.png)
 
 4.  Apply the new network configuration with the command:
@@ -82,7 +82,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
 5.  You can now disconnect and reconnect to the server using the new **Floating IP**.
 
------
+---
 
 ### **Part 2: AWS Foundation Setup** ☁️
 
@@ -94,22 +94,23 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
     > **Alternative:** If you cannot delegate NS records to AWS, create an A record in your own DNS provider that points to the Hetzner server's floating IP.
 
-1.  Once the NS records have propagated, create an **A Record** in your new hosted zone. Point it to the **Floating IP** of your Hetzner server.
-    
+3.  Once the NS records have propagated, create an **A Record** in your new hosted zone. Point it to the **Floating IP** of your Hetzner server.
+
     ![Image12](images/image12.png)
-    
+
     ![Image13](images/image13.png)
-    
+
     ![Image14](images/image14.png)
 
 #### **2.2 Container Registry (ECR)**
 
 1.  In the AWS Console, go to **Elastic Container Registry (ECR)**.
 2.  Create two new **private** repositories. Replace `<client>` with the actual client's name.
-      * `tenant/<client>/api`
-      * `tenant/<client>/ui`
-        
-        ![Image15](images/image15.png)
+
+    - `tenant/<client>/api`
+    - `tenant/<client>/ui`
+
+      ![Image15](images/image15.png)
 
 #### **2.3 IAM Policies & Users**
 
@@ -123,52 +124,48 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
     ```json
     {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Sid": "AllowEcrAuth",
-                "Effect": "Allow",
-                "Action": "ecr:GetAuthorizationToken",
-                "Resource": "*"
-            },
-            {
-                "Sid": "AllowReadAccessToRepos",
-                "Effect": "Allow",
-                "Action": [
-                    "ecr:ListImages",
-                    "ecr:GetDownloadUrlForLayer",
-                    "ecr:BatchGetImage"
-                ],
-                "Resource": [
-                    "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/api",
-                    "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/ui"
-                ]
-            },
-            {
-                "Sid": "AllowWriteAccessToApiRepo",
-                "Effect": "Allow",
-                "Action": [
-                    "ecr:UploadLayerPart",
-                    "ecr:PutImage",
-                    "ecr:InitiateLayerUpload",
-                    "ecr:CompleteLayerUpload",
-                    "ecr:BatchCheckLayerAvailability"
-                ],
-                "Resource": "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/api"
-            },
-            {
-                "Sid": "AllowWriteAccessToUiRepo",
-                "Effect": "Allow",
-                "Action": [
-                    "ecr:UploadLayerPart",
-                    "ecr:PutImage",
-                    "ecr:InitiateLayerUpload",
-                    "ecr:CompleteLayerUpload",
-                    "ecr:BatchCheckLayerAvailability"
-                ],
-                "Resource": "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/ui"
-            }
-        ]
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "AllowEcrAuth",
+          "Effect": "Allow",
+          "Action": "ecr:GetAuthorizationToken",
+          "Resource": "*"
+        },
+        {
+          "Sid": "AllowReadAccessToRepos",
+          "Effect": "Allow",
+          "Action": ["ecr:ListImages", "ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage"],
+          "Resource": [
+            "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/api",
+            "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/ui"
+          ]
+        },
+        {
+          "Sid": "AllowWriteAccessToApiRepo",
+          "Effect": "Allow",
+          "Action": [
+            "ecr:UploadLayerPart",
+            "ecr:PutImage",
+            "ecr:InitiateLayerUpload",
+            "ecr:CompleteLayerUpload",
+            "ecr:BatchCheckLayerAvailability"
+          ],
+          "Resource": "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/api"
+        },
+        {
+          "Sid": "AllowWriteAccessToUiRepo",
+          "Effect": "Allow",
+          "Action": [
+            "ecr:UploadLayerPart",
+            "ecr:PutImage",
+            "ecr:InitiateLayerUpload",
+            "ecr:CompleteLayerUpload",
+            "ecr:BatchCheckLayerAvailability"
+          ],
+          "Resource": "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/ui"
+        }
+      ]
     }
     ```
 
@@ -176,28 +173,24 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
     ```json
     {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Sid": "AllowEcrAuth",
-                "Effect": "Allow",
-                "Action": "ecr:GetAuthorizationToken",
-                "Resource": "*"
-            },
-            {
-                "Sid": "AllowReadAccessToRepos",
-                "Effect": "Allow",
-                "Action": [
-                    "ecr:ListImages",
-                    "ecr:GetDownloadUrlForLayer",
-                    "ecr:BatchGetImage"
-                ],
-                "Resource": [
-                    "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/api",
-                    "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/ui"
-                ]
-            }
-        ]
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "AllowEcrAuth",
+          "Effect": "Allow",
+          "Action": "ecr:GetAuthorizationToken",
+          "Resource": "*"
+        },
+        {
+          "Sid": "AllowReadAccessToRepos",
+          "Effect": "Allow",
+          "Action": ["ecr:ListImages", "ecr:GetDownloadUrlForLayer", "ecr:BatchGetImage"],
+          "Resource": [
+            "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/api",
+            "arn:aws:ecr:eu-central-1:123456789012:repository/tenant/<client>/ui"
+          ]
+        }
+      ]
     }
     ```
 
@@ -205,33 +198,33 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
     **User 1: `tenant-<client>-ci`**
 
-      * Create a user with this name.
-        
-        ![Image16](images/image16.png)
+    - Create a user with this name.
 
-      * Attach the `tenant-client-ci` policy you just created.
-        
-        ![Image17](images/image17.png)
+      ![Image16](images/image16.png)
 
-      * Go to the user's **Security credentials** tab and create an **Access key**.
-        
-        ![Image18](images/image18.png)
+    - Attach the `tenant-client-ci` policy you just created.
 
-      * Select **Command Line Interface (CLI)** as the use case.
-        
-        ![Image19](images/image19.png)
+      ![Image17](images/image17.png)
 
-      * 🔐 **Important:** Save the generated Access Key ID and Secret Access Key. You will use these as GitHub Actions secrets.
-        
-        ![Image20](images/image20.png)
+    - Go to the user's **Security credentials** tab and create an **Access key**.
+
+      ![Image18](images/image18.png)
+
+    - Select **Command Line Interface (CLI)** as the use case.
+
+      ![Image19](images/image19.png)
+
+    - 🔐 **Important:** Save the generated Access Key ID and Secret Access Key. You will use these as GitHub Actions secrets.
+
+      ![Image20](images/image20.png)
 
     **User 2: `tenant-<client>-docker`**
 
-      * Repeat the process to create this second user.
-      * Attach the `tenant-client-docker` policy.
-      * Generate and save the access keys for this user as well. You will use these on the Hetzner server.
+    - Repeat the process to create this second user.
+    - Attach the `tenant-client-docker` policy.
+    - Generate and save the access keys for this user as well. You will use these on the Hetzner server.
 
------
+---
 
 ### **Part 3: GitHub & CI/CD Configuration** 👨‍💻
 
@@ -239,7 +232,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
 1.  Init a new GitHub repository as a single commit containing the copy of `https://github.com/Selleo/mentingo`
 2.  Single commit is preffered to clearly seperate IP boundry between open source and custom changes and simplifies appling patches in the future.
-    
+
     ![Image23](images/image23.png)
 
 #### **3.3 GitHub Actions Workflows**
@@ -336,18 +329,18 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
 2.  Add the following secrets using the credentials from your `tenant-<client>-ci` IAM user and the ECR repository URIs.
 
-      * `AWS_ACCESS_KEY_ID`: Access key ID for the CI user.
-      * `AWS_SECRET_ACCESS_KEY`: Secret access key for the CI user.
-      * `AWS_REGION`: e.g., `eu-central-1`.
-      * `AWS_ECR_REGISTRY`: The full URI for the `tenant/<client>/api` ECR repository.
-      * `AWS_ECR_REGISTRY_WEB`: The full URI for the `tenant/<client>/ui` ECR repository.
-      * (Add other secrets like `VITE_STRIPE_PUBLISHABLE_KEY` and Sentry keys as needed).
-        
-        ![Image24](images/image24.png)
+    - `AWS_ACCESS_KEY_ID`: Access key ID for the CI user.
+    - `AWS_SECRET_ACCESS_KEY`: Secret access key for the CI user.
+    - `AWS_REGION`: e.g., `eu-central-1`.
+    - `AWS_ECR_REGISTRY`: The full URI for the `tenant/<client>/api` ECR repository.
+    - `AWS_ECR_REGISTRY_WEB`: The full URI for the `tenant/<client>/ui` ECR repository.
+    - (Add other secrets like `VITE_STRIPE_PUBLISHABLE_KEY` and Sentry keys as needed).
+
+      ![Image24](images/image24.png)
 
 3.  Push your code changes. The GitHub Actions should run automatically and push your first images to ECR.
 
------
+---
 
 ### **Part 4: Final Deployment & Server Configuration** 🚀
 
@@ -355,6 +348,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
 1.  SSH into your Hetzner server.
 2.  Save the following installation script as `install_packages.sh`.
+
     ```sh
     #!/bin/sh
     set -e
@@ -388,6 +382,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
     echo "Installation complete."
     ```
+
 3.  Run the script:
     ```bash
     chmod +x install_packages.sh
@@ -398,19 +393,23 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 #### **4.2 Configure Docker for AWS ECR**
 
 1.  Install the ECR credential helper (see full instructions [here](https://github.com/awslabs/amazon-ecr-credential-helper)).
+
     ```bash
     sudo apt install amazon-ecr-credential-helper
     ```
 
 2.  Create mentingo user, add it to group docker and switch to it
+
     ```bash
     sudo add user mentingo
     ```
+
     ![Image31](images/image31.png)
 
     ```bash
     sudo user mod -aG docker mentingo
     ```
+
     ![Image32](images/image32.png)
 
     ```bash
@@ -418,38 +417,42 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     ```
 
 3.  Create the AWS config directory:
+
     ```bash
     mkdir -p ~/.aws
     ```
-    
+
     ![Image25](images/image25.png)
 
 4.  Create a credentials file at `~/.aws/credentials`.
+
     ```ini
     [default]
     aws_access_key_id = <ACCESS_KEY_FOR_TENANT_CLIENT_DOCKER_USER>
     aws_secret_access_key = <SECRET_KEY_FOR_TENANT_CLIENT_DOCKER_USER>
     ```
-    
+
     ![Image26](images/image26.png)
 
 5.  Configure Docker to use the ECR helper by editing `~/.docker/config.json`.
+
     ```json
     {
       "credsStore": "ecr-login"
     }
     ```
-    
+
     ![Image27](images/image27.png)
 
 #### **4.3 Pull & Tag Docker Images**
 
 1.  You can now pull images directly from ECR.
+
     ```bash
     docker pull <ecr_uri_for_api>:latest
     docker pull <ecr_uri_for_ui>:latest
     ```
-    
+
     ![Image28](images/image28.png)
 
 2.  List your images to see them locally.
@@ -457,11 +460,12 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     docker images
     ```
 3.  Tag the images with simpler names for easier use in `docker-compose.yml`.
+
     ```bash
     docker tag <ecr_uri_for_api>:latest app:latest
     docker tag <ecr_uri_for_ui>:latest ui:latest
     ```
-    
+
     ![Image29](images/image29.png)
 
 #### **4.4 Configure Docker Compose**
@@ -506,13 +510,13 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
           - "3080:8080"
 
       redis:
-        image: 'redis:latest'
+        image: "redis:latest"
         container_name: redis
         restart: unless-stopped
         ports:
-          - '6379:6379'
+          - "6379:6379"
         volumes:
-          - 'lms-redis-data:/data'
+          - "lms-redis-data:/data"
 
     volumes:
       lms-db-data:
@@ -611,6 +615,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     vim /etc/caddy/Caddyfile
     ```
 2.  Replace the entire file content with the following, updating `<client-domain.com>` with your actual domain. Caddy will automatically handle HTTPS.
+
     ```caddy
     <client-domain.com> {
         # API traffic
@@ -630,17 +635,18 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
 1.  Go back to the Hetzner Cloud firewall settings.
 2.  Add two new **inbound** rules to allow public web traffic:
-      * Port `80` (HTTP) from any IPv4 source.
-      * Port `443` (HTTPS) from any IPv4 source.
-        
-        ![Image30](images/image30.png)
-        
+
+    - Port `80` (HTTP) from any IPv4 source.
+    - Port `443` (HTTPS) from any IPv4 source.
+
+      ![Image30](images/image30.png)
+
 3.  Back in the server's console, reload Caddy to apply the new configuration.
     ```bash
     systemctl reload caddy
     ```
 
------
+---
 
 ### **Deployment Complete\!** 🎉
 
