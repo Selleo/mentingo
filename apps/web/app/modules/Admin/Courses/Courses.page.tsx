@@ -8,6 +8,7 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { isAxiosError } from "axios";
 import { format } from "date-fns";
 import { isEmpty } from "lodash-es";
 import { Trash } from "lucide-react";
@@ -19,6 +20,7 @@ import { useDeleteManyCourses } from "~/api/mutations/admin/useDeleteManyCourses
 import { categoriesQueryOptions } from "~/api/queries";
 import { useCoursesSuspense, ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
+import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -52,8 +54,11 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 
+import { getCourseBadgeVariant, getCourseStatus } from "./utils";
+
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
+import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
 
 type TCourse = GetAllCoursesResponse["data"][number];
 
@@ -71,13 +76,8 @@ export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
 const Courses = () => {
   const categories = useLoaderData<typeof clientLoader>();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useState<{
-    title?: string;
-    category?: string;
-    state?: string;
-    archived?: boolean;
-    author?: string;
-  }>({});
+  const [searchParams, setSearchParams] = useState<CourseParams>({});
+
   const { data } = useCoursesSuspense(searchParams);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -100,11 +100,12 @@ const Courses = () => {
     },
     {
       name: "state",
-      type: "state",
+      type: "select",
       placeholder: t("adminCoursesView.filters.placeholder.states"),
       options: [
         { value: "draft", label: t("adminCoursesView.filters.other.draft") },
         { value: "published", label: t("adminCoursesView.filters.other.published") },
+        { value: "private", label: t("adminCoursesView.filters.other.private") },
       ],
     },
     {
@@ -173,11 +174,14 @@ const Courses = () => {
       },
     },
     {
-      accessorKey: "state",
+      accessorKey: "status",
       header: t("adminCoursesView.field.state"),
       cell: ({ row }) => (
-        <Badge variant={row.original.isPublished ? "secondary" : "outline"} className="w-max">
-          {row.original.isPublished ? "Published" : "Draft"}
+        <Badge
+          variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
+          className="w-max"
+        >
+          {getCourseStatus(row.original.status as CourseStatus)}
         </Badge>
       ),
     },
@@ -222,6 +226,15 @@ const Courses = () => {
         },
         onError: (error) => {
           console.error("Error deleting courses:", error);
+
+          if (
+            isAxiosError(error) &&
+            error.response?.data.message === "You can't delete a published course"
+          ) {
+            return toast({
+              title: t("adminCoursesView.toast.deletePublishedCourseFailed"),
+            });
+          }
           toast({
             title: t("adminCoursesView.toast.deleteCourseFailed"),
           });
@@ -235,6 +248,15 @@ const Courses = () => {
         },
         onError: (error) => {
           console.error("Error deleting courses:", error);
+          if (
+            isAxiosError(error) &&
+            error.response?.data.message === "You can't delete a published course"
+          ) {
+            return toast({
+              title: t("adminCoursesView.toast.deletePublishedCourseFailed"),
+            });
+          }
+
           toast({
             title: t("adminCoursesView.toast.deleteCourseFailed"),
           });
@@ -262,117 +284,130 @@ const Courses = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="ml-auto flex gap-3">
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button variant="outline" disabled>
-                {t("adminCoursesView.button.uploadScorm")}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              align="center"
-              className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-            >
-              {t("common.tooltip.soon")}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <Link to="/admin/beta-courses/new">
-          <Button variant="outline">{t("adminCoursesView.button.createNew")}</Button>
-        </Link>
-      </div>
-      <div className="flex items-center justify-between gap-2">
-        <SearchFilter
-          filters={filterConfig}
-          values={searchParams}
-          onChange={handleFilterChange}
-          isLoading={false}
-        />
-        <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
-          <p
-            className={cn("text-sm", {
-              "text-neutral-900": !isEmpty(selectedCourses),
-              "text-neutral-500": isEmpty(selectedCourses),
-            })}
-          >
-            {t("common.other.selected")} ({selectedCourses.length})
-          </p>
-
-          <Dialog>
-            <DialogTrigger disabled={isEmpty(selectedCourses)}>
-              <Button
-                size="sm"
-                className="flex items-center gap-x-2"
-                disabled={isEmpty(selectedCourses)}
+    <PageWrapper
+      breadcrumbs={[
+        {
+          title: t("adminCourseView.breadcrumbs.dashboard"),
+          href: "/",
+        },
+        {
+          title: t("adminCourseView.breadcrumbs.myCourses"),
+          href: "/admin/courses",
+        },
+      ]}
+    >
+      <div className="flex flex-col">
+        <div className="ml-auto flex gap-3">
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button variant="outline" disabled>
+                  {t("adminCoursesView.button.uploadScorm")}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                align="center"
+                className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
               >
-                <Trash className="size-3" />
-                <span className="text-xs">{t("adminCoursesView.button.deleteSelected")}</span>
-              </Button>
-            </DialogTrigger>
-            <DialogPortal>
-              <DialogOverlay className="bg-primary-400 opacity-65" />
-              <DialogContent className="max-w-md">
-                <DialogTitle className="text-xl font-semibold text-neutral-900">
-                  {getDeleteModalTitle()}
-                </DialogTitle>
-                <DialogDescription className="mt-2 text-sm text-neutral-600">
-                  {getDeleteModalDescription()}
-                </DialogDescription>
-                <div className="mt-6 flex justify-end gap-4">
-                  <DialogClose>
-                    <Button variant="ghost" className="text-primary-800">
-                      {t("common.button.cancel")}
-                    </Button>
-                  </DialogClose>
-                  <DialogClose>
-                    <Button
-                      onClick={handleDeleteCourses}
-                      className="bg-error-500 text-white hover:bg-error-600"
-                    >
-                      {t("common.button.delete")}
-                    </Button>
-                  </DialogClose>
-                </div>
-              </DialogContent>
-            </DialogPortal>
-          </Dialog>
+                {t("common.tooltip.soon")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <Link to="/admin/beta-courses/new">
+            <Button variant="outline">{t("adminCoursesView.button.createNew")}</Button>
+          </Link>
         </div>
-      </div>
-      <Table className="border bg-neutral-50">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => (
-                <TableHead key={header.id} className={cn({ "size-12": index === 0 })}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-course-id={row.original.id}
-              data-state={row.getIsSelected() && "selected"}
-              onClick={() => handleRowClick(row.original.id)}
-              className="cursor-pointer hover:bg-neutral-100"
+        <div className="flex items-center justify-between gap-2">
+          <SearchFilter
+            filters={filterConfig}
+            values={searchParams}
+            onChange={handleFilterChange}
+            isLoading={false}
+          />
+          <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
+            <p
+              className={cn("text-sm", {
+                "text-neutral-900": !isEmpty(selectedCourses),
+                "text-neutral-500": isEmpty(selectedCourses),
+              })}
             >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell key={cell.id} className={cn({ "size-12": index === 0 })}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+              {t("common.other.selected")} ({selectedCourses.length})
+            </p>
+
+            <Dialog>
+              <DialogTrigger disabled={isEmpty(selectedCourses)}>
+                <Button
+                  size="sm"
+                  className="flex items-center gap-x-2"
+                  disabled={isEmpty(selectedCourses)}
+                >
+                  <Trash className="size-3" />
+                  <span className="text-xs">{t("adminCoursesView.button.deleteSelected")}</span>
+                </Button>
+              </DialogTrigger>
+              <DialogPortal>
+                <DialogOverlay className="bg-primary-400 opacity-65" />
+                <DialogContent className="max-w-md">
+                  <DialogTitle className="text-xl font-semibold text-neutral-900">
+                    {getDeleteModalTitle()}
+                  </DialogTitle>
+                  <DialogDescription className="mt-2 text-sm text-neutral-600">
+                    {getDeleteModalDescription()}
+                  </DialogDescription>
+                  <div className="mt-6 flex justify-end gap-4">
+                    <DialogClose>
+                      <Button variant="ghost" className="text-primary-800">
+                        {t("common.button.cancel")}
+                      </Button>
+                    </DialogClose>
+                    <DialogClose>
+                      <Button
+                        onClick={handleDeleteCourses}
+                        className="bg-error-500 text-white hover:bg-error-600"
+                      >
+                        {t("common.button.delete")}
+                      </Button>
+                    </DialogClose>
+                  </div>
+                </DialogContent>
+              </DialogPortal>
+            </Dialog>
+          </div>
+        </div>
+        <Table className="border bg-neutral-50">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => (
+                  <TableHead key={header.id} className={cn({ "size-12": index === 0 })}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-course-id={row.original.id}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={() => handleRowClick(row.original.id)}
+                className="cursor-pointer hover:bg-neutral-100"
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={cell.id} className={cn({ "size-12": index === 0 })}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </PageWrapper>
   );
 };
 

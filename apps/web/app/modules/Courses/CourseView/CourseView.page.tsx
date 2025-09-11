@@ -80,7 +80,12 @@ export default function CourseViewPage() {
             {course.chapters?.map((chapter) => {
               if (!chapter) return null;
               return (
-                <CourseChapter chapter={chapter} key={chapter.id} enrolled={course.enrolled} />
+                <CourseChapter
+                  key={chapter.id}
+                  chapter={chapter}
+                  courseId={course.id}
+                  isEnrolled={Boolean(course.enrolled)}
+                />
               );
             })}
           </div>

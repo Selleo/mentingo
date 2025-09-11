@@ -1,5 +1,5 @@
 {
-  "id": "147a4e45-d8f9-4b17-be65-f8214681769f",
+  "id": "433d65b4-f113-41ce-8ff6-a6932da9a31c",
   "prevId": "1d516dd6-4b4a-4adc-afe7-591f11d75470",
   "version": "7",
   "dialect": "postgresql",
@@ -368,85 +368,6 @@
         }
       }
     },
-    "public.certificates": {
-      "name": "certificates",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "certificates_user_id_users_id_fk": {
-          "name": "certificates_user_id_users_id_fk",
-          "tableFrom": "certificates",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "certificates_course_id_courses_id_fk": {
-          "name": "certificates_course_id_courses_id_fk",
-          "tableFrom": "certificates",
-          "tableTo": "courses",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "certificates_user_id_course_id_unique": {
-          "name": "certificates_user_id_course_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "course_id"
-          ]
-        }
-      }
-    },
     "public.chapters": {
       "name": "chapters",
       "schema": "",
@@ -687,13 +608,6 @@
         },
         "is_published": {
           "name": "is_published",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "has_certificate": {
-          "name": "has_certificate",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -2095,6 +2009,13 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_started": {
+          "name": "is_started",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         },
         "completed_at": {
           "name": "completed_at",

@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBulkDeleteGroups } from "~/api/mutations/admin/useBulkDeleteGroups";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
+import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -45,6 +46,8 @@ const Groups = (): ReactElement => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
   const { data } = useGroupsQuerySuspense();
   const { mutateAsync: deleteGroupsMutation } = useBulkDeleteGroups();
   const table = useReactTable({
@@ -75,97 +78,109 @@ const Groups = (): ReactElement => {
       event.preventDefault();
       await deleteGroupsMutation(selectedRows);
       setRowSelection({});
+      setIsDialogOpen(false);
     },
     [deleteGroupsMutation, selectedRows],
   );
 
   return (
-    <div className="flex flex-col">
-      <h4 className="text-2xl font-bold">{t("navigationSideBar.groups")}</h4>
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center justify-between gap-2 pt-6">
-          <Link to="new">
-            <Button variant={"outline"}>{t("adminGroupsView.buttons.create")}</Button>
-          </Link>
-        </div>
-        <div className={"flex items-center justify-between gap-2 px-4 py-2"}>
-          <p
-            className={cn("text-sm", {
-              "text-neutral-500": isEmpty(selectedRows),
-              "text-neutral-900": !isEmpty(selectedRows),
-            })}
-          >
-            {t("common.other.selected")} ({selectedRows.length})
-          </p>
+    <PageWrapper
+      breadcrumbs={[
+        {
+          title: t("adminGroupsView.breadcrumbs.dashboard"),
+          href: "/",
+        },
+        {
+          title: t("adminGroupsView.breadcrumbs.groups"),
+          href: "/admin/groups",
+        },
+      ]}
+    >
+      <div className="flex flex-col">
+        <h4 className="text-2xl font-bold">{t("navigationSideBar.groups")}</h4>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 pt-6">
+            <Link to="new">
+              <Button variant="outline">{t("adminGroupsView.buttons.create")}</Button>
+            </Link>
+          </div>
+          <div className="flex items-center justify-between gap-2 px-4 py-2">
+            <p
+              className={cn("text-sm", {
+                "text-neutral-500": isEmpty(selectedRows),
+                "text-neutral-900": !isEmpty(selectedRows),
+              })}
+            >
+              {t("common.other.selected")} ({selectedRows.length})
+            </p>
 
-          <Dialog>
-            <DialogTrigger disabled={isEmpty(selectedRows)}>
-              <Button
-                size="sm"
-                className="flex items-center gap-x-2"
-                disabled={isEmpty(selectedRows)}
-              >
-                <Trash className="size-3" />
-                <span className="text-xs">{t("adminGroupsView.buttons.deleteSelected")}</span>
-              </Button>
-            </DialogTrigger>
-            <DialogPortal>
-              <DialogOverlay />
-              <DialogContent>
-                <DialogTitle>{t("adminGroupsView.deleteGroup.title")}</DialogTitle>
-                <DialogDescription>
-                  {t("adminGroupsView.deleteGroup.description")}
-                </DialogDescription>
-                <form onSubmit={handleGroupsDelete}>
-                  <div className={"flex justify-end gap-4"}>
-                    <DialogClose>
-                      <Button type={"reset"} variant={"ghost"}>
-                        {t("adminGroupsView.deleteGroup.cancel")}
-                      </Button>
-                    </DialogClose>
-                    <DialogClose>
-                      <Button type={"submit"} variant={"secondary"}>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger disabled={isEmpty(selectedRows)}>
+                <Button
+                  size="sm"
+                  className="flex items-center gap-x-2"
+                  disabled={isEmpty(selectedRows)}
+                >
+                  <Trash className="size-3" />
+                  <span className="text-xs">{t("adminGroupsView.buttons.deleteSelected")}</span>
+                </Button>
+              </DialogTrigger>
+              <DialogPortal>
+                <DialogOverlay />
+                <DialogContent>
+                  <DialogTitle>{t("adminGroupsView.deleteGroup.title")}</DialogTitle>
+                  <DialogDescription>
+                    {t("adminGroupsView.deleteGroup.description")}
+                  </DialogDescription>
+                  <form onSubmit={handleGroupsDelete}>
+                    <div className="flex justify-end gap-4">
+                      <DialogClose>
+                        <Button type="reset" variant="ghost">
+                          {t("adminGroupsView.deleteGroup.cancel")}
+                        </Button>
+                      </DialogClose>
+                      <Button type="submit" variant="secondary">
                         {t("adminGroupsView.deleteGroup.submit")}
                       </Button>
-                    </DialogClose>
-                  </div>
-                </form>
-              </DialogContent>
-            </DialogPortal>
-          </Dialog>
+                    </div>
+                  </form>
+                </DialogContent>
+              </DialogPortal>
+            </Dialog>
+          </div>
         </div>
+        <div className="ml-auto flex items-center gap-x-2 px-4 py-2"></div>
+        <Table className="border bg-neutral-50">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={handleGroupEdit(row.original?.id)}
+                className="cursor-pointer hover:bg-neutral-100"
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-      <div className="ml-auto flex items-center gap-x-2 px-4 py-2"></div>
-      <Table className="border bg-neutral-50">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-              onClick={handleGroupEdit(row.original?.id)}
-              className="cursor-pointer hover:bg-neutral-100"
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    </PageWrapper>
   );
 };
 

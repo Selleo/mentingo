@@ -3,7 +3,12 @@ import { useParams } from "@remix-run/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useSubmitQuiz, useRetakeQuiz, useQuizRetakeStatus } from "~/api/mutations";
+import {
+  useSubmitQuiz,
+  useRetakeQuiz,
+  useQuizRetakeStatus,
+  useMarkLessonAsCompleted,
+} from "~/api/mutations";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
@@ -16,6 +21,7 @@ import {
 } from "~/components/ui/tooltip";
 import { toast } from "~/components/ui/use-toast";
 import { useUserRole } from "~/hooks/useUserRole";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
@@ -31,9 +37,10 @@ import type { GetLessonByIdResponse } from "~/api/generated-api";
 
 type QuizProps = {
   lesson: GetLessonByIdResponse["data"];
+  userId: string;
 };
 
-export const Quiz = ({ lesson }: QuizProps) => {
+export const Quiz = ({ lesson, userId }: QuizProps) => {
   const { lessonId = "" } = useParams();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
@@ -47,8 +54,15 @@ export const Quiz = ({ lesson }: QuizProps) => {
     resolver: zodResolver(QuizFormSchema(t)),
   });
 
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(userId);
+
   const submitQuiz = useSubmitQuiz({
-    handleOnSuccess: () => queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] }),
+    handleOnSuccess: () => {
+      if (isAdminLike) return;
+      if (lesson.type == LessonType.QUIZ) {
+        markLessonAsCompleted({ lessonId });
+      }
+    },
   });
 
   const retakeQuiz = useRetakeQuiz({

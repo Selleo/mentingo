@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, count, eq, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
@@ -65,7 +65,7 @@ async function createUsers(users: UsersSeed, password = faker.internet.password(
 
       const user = await createOrFindUser(userToCreate.email, password, userToCreate);
 
-      await insertUserSettings(user.id, user.role === USER_ROLES.ADMIN);
+      await insertUserSettings(db, user.id, user.role === USER_ROLES.ADMIN);
 
       return user;
     }),
@@ -107,18 +107,38 @@ async function insertUserDetails(userId: UUIDType) {
   });
 }
 
-async function insertGlobalSettings() {
-  await db.insert(settings).values({
-    settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
-  });
+export async function insertGlobalSettings(database: DatabasePg) {
+  const [globalSettings] = await database.select().from(settings).where(isNull(settings.userId));
+  if (globalSettings) return globalSettings;
+
+  const [createdGlobalSettings] = await database
+    .insert(settings)
+    .values({
+      settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+    })
+    .returning();
+
+  return createdGlobalSettings;
 }
 
-async function insertUserSettings(userId: UUIDType, isAdmin: boolean) {
+export async function insertUserSettings(database: DatabasePg, userId: UUIDType, isAdmin: boolean) {
+  const [existingUserSettings] = await database
+    .select()
+    .from(settings)
+    .where(eq(settings.userId, userId));
+
+  if (existingUserSettings) return existingUserSettings;
+
   const settingsObject = isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS;
-  await db.insert(settings).values({
-    userId,
-    settings: settingsToJSONBuildObject(settingsObject),
-  });
+  const [createdUserSettings] = await database
+    .insert(settings)
+    .values({
+      userId,
+      settings: settingsToJSONBuildObject(settingsObject),
+    })
+    .returning();
+
+  return createdUserSettings;
 }
 
 async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
@@ -195,7 +215,7 @@ async function createQuizAttempts(userId: UUIDType) {
     .innerJoin(chapters, eq(courses.id, chapters.courseId))
     .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
     .innerJoin(questions, eq(questions.lessonId, lessons.id))
-    .where(and(eq(courses.isPublished, true), eq(lessons.type, LESSON_TYPES.QUIZ)))
+    .where(and(eq(courses.status, "published"), eq(lessons.type, LESSON_TYPES.QUIZ)))
     .groupBy(courses.id, lessons.id);
 
   const createdQuizAttempts = quizzes.map((quiz) => {
@@ -233,7 +253,7 @@ async function createCourseStudentsStats() {
       authorId: courses.authorId,
     })
     .from(courses)
-    .where(eq(courses.isPublished, true));
+    .where(eq(courses.status, "published"));
 
   const twelveMonthsAgoArray = getLast12Months();
 
@@ -254,7 +274,7 @@ async function seed() {
   await seedTruncateAllTables(db);
 
   try {
-    await insertGlobalSettings();
+    await insertGlobalSettings(db);
     console.log("✨ Created global settings");
 
     const createdStudents = await createUsers(students, "password");

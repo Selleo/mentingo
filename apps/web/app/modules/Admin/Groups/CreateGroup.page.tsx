@@ -8,7 +8,6 @@ import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import CreateGroupCard from "~/modules/Admin/Groups/components/CreateGroupCard";
-import { GroupPageBreadcrumbs } from "~/modules/Admin/Groups/components/GroupBreadcrumbs";
 import { GroupHeader } from "~/modules/Admin/Groups/components/GroupHeader";
 import { groupFormSchema } from "~/modules/Admin/Groups/group.utils";
 
@@ -39,8 +38,24 @@ const CreateGroup = (): ReactElement => {
   };
 
   return (
-    <PageWrapper className="flex h-full flex-col">
-      <GroupPageBreadcrumbs name={t("adminGroupsView.newGroup.header")} href="" />
+    <PageWrapper
+      className="flex h-full flex-col"
+      backButton={{ href: "/admin/groups", title: t("adminGroupsView.breadcrumbs.back") }}
+      breadcrumbs={[
+        {
+          title: t("adminGroupsView.breadcrumbs.dashboard"),
+          href: "/",
+        },
+        {
+          title: t("adminGroupsView.breadcrumbs.groups"),
+          href: "/admin/groups",
+        },
+        {
+          title: t("adminGroupsView.newGroup.header"),
+          href: "/admin/groups/new",
+        },
+      ]}
+    >
       <GroupHeader
         title={t("adminGroupsView.newGroup.header")}
         handlePublish={() => form.handleSubmit(handleSubmit)()}

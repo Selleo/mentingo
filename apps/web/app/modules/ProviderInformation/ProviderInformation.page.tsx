@@ -6,7 +6,6 @@ import { useCompanyInformation } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
-import { filterChangedData } from "~/utils/filterChangedData";
 
 import Loader from "../common/Loader/Loader";
 
@@ -23,13 +22,7 @@ export default function ProviderInformationPage() {
   const { mutate: updateCompanyInformation, isPending } = useUpdateCompanyInformation();
 
   const handleSubmit = (data: UpdateCompanyInformationBody) => {
-    const changedData = filterChangedData(data, companyInfo?.data || {});
-
-    if (!Object.keys(changedData).length) {
-      return;
-    }
-
-    updateCompanyInformation(changedData, {
+    updateCompanyInformation(data, {
       onSuccess: () => {
         setIsEditing(false);
       },
@@ -47,7 +40,16 @@ export default function ProviderInformationPage() {
   }
 
   return (
-    <PageWrapper role="main">
+    <PageWrapper
+      role="main"
+      breadcrumbs={[
+        { title: t("providerInformation.breadcrumbs.dashboard"), href: "/" },
+        {
+          title: t("providerInformation.breadcrumbs.providerInformation"),
+          href: "/provider-information",
+        },
+      ]}
+    >
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] justify-between">
           <h2 className="h5 md:h3 text-neutral-950">{t("providerInformation.title")}</h2>

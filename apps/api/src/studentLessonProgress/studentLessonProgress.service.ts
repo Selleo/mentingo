@@ -106,6 +106,16 @@ export class StudentLessonProgressService {
               chapterId: lesson.chapterId,
               completedQuestionCount,
             })
+            .onConflictDoUpdate({
+              target: [
+                studentLessonProgress.studentId,
+                studentLessonProgress.lessonId,
+                studentLessonProgress.chapterId,
+              ],
+              set: {
+                completedQuestionCount,
+              },
+            })
             .returning()
         )[0]
       : lessonProgress;
@@ -163,6 +173,50 @@ export class StudentLessonProgressService {
     if (isCompletedAsFreemium) return;
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
+  }
+
+  async markLessonAsStarted(
+    id: UUIDType,
+    studentId: UUIDType,
+    userRole?: UserRole,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ) {
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+
+    if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
+
+    if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
+      throw new UnauthorizedException("You don't have assignment to this lesson");
+
+    if (accessCourseLessonWithDetails.lessonIsCompleted) return;
+
+    if (!id) {
+      throw new NotFoundException(`No lesson id provided`);
+    }
+
+    const [lessonProgress] = await dbInstance
+      .select()
+      .from(studentLessonProgress)
+      .where(
+        and(eq(studentLessonProgress.lessonId, id), eq(studentLessonProgress.studentId, studentId)),
+      );
+
+    if (lessonProgress?.isStarted) return;
+
+    if (
+      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.QUIZ ||
+      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.VIDEO
+    ) {
+      await dbInstance
+        .update(studentLessonProgress)
+        .set({ isStarted: true })
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, id),
+            eq(studentLessonProgress.studentId, studentId),
+          ),
+        );
+    }
   }
 
   async updateQuizProgress(
@@ -438,6 +492,7 @@ export class StudentLessonProgressService {
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
         attempts: sql<number>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        lessonType: lessons.type,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
       })

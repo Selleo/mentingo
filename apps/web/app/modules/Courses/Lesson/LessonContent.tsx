@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -16,61 +17,96 @@ import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 import Presentation from "../../../components/Presentation/Presentation";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
+import { isNextBlocked, isPreviousBlocked } from "./utils";
 
-import type { GetLessonByIdResponse } from "~/api/generated-api";
+import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
 
 type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
+  course: GetCourseResponse["data"];
   lessonsAmount: number;
   handlePrevious: () => void;
   handleNext: () => void;
   isFirstLesson: boolean;
   isLastLesson: boolean;
-  courseId: string;
   lessonLoading: boolean;
 };
 
 export const LessonContent = ({
   lesson,
+  course,
   lessonsAmount,
   handlePrevious,
   handleNext,
   isFirstLesson,
   lessonLoading,
-  courseId,
+  isLastLesson,
 }: LessonContentProps) => {
+  const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const { data: user } = useCurrentUser();
   const [isNextDisabled, setIsNextDisabled] = useState(false);
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(
-    user?.id || "",
-    courseId || "",
-  );
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
 
+  const currentChapterIndex = course.chapters.findIndex((chapter) =>
+    chapter.lessons.some(({ id }) => id === lesson.id),
+  );
+  const currentLessonIndex = course.chapters[currentChapterIndex]?.lessons.findIndex(
+    ({ id }) => id === lesson.id,
+  );
+
+  const currentChapter = course.chapters[currentChapterIndex];
+  const nextChapter = course.chapters[currentChapterIndex + 1];
+  const prevChapter = course.chapters[currentChapterIndex - 1];
+  const totalLessons = currentChapter.lessons.length;
+
+  const queryClient = useQueryClient();
+
   useEffect(() => {
-    if (isAdminLike) return;
-
-    if (lesson.type == LessonType.VIDEO || lesson.type == LessonType.AI_MENTOR) {
-      return setIsNextDisabled(!lesson.lessonCompleted);
+    if (isAdminLike) {
+      setIsNextDisabled(false);
+      setIsPreviousDisabled(false);
+      return;
     }
-    if (lesson.type == LessonType.QUIZ) {
-      return setIsNextDisabled(
-        (lesson.attempts === null || lesson.attempts === 1) && !lesson.lessonCompleted,
-      );
-    }
-
-    setIsNextDisabled(false);
-  }, [isAdminLike, lesson.lessonCompleted, lesson.type, lesson.attempts]);
+    setIsNextDisabled(
+      isNextBlocked(
+        currentLessonIndex,
+        totalLessons,
+        nextChapter?.isFreemium ?? false,
+        course.enrolled ?? false,
+      ),
+    );
+    setIsPreviousDisabled(
+      isPreviousBlocked(
+        currentLessonIndex,
+        prevChapter?.isFreemium ?? false,
+        course.enrolled ?? false,
+      ),
+    );
+    queryClient.invalidateQueries({ queryKey: ["course", { id: course.id }] });
+  }, [
+    isAdminLike,
+    lesson.type,
+    lesson.lessonCompleted,
+    currentLessonIndex,
+    totalLessons,
+    nextChapter,
+    prevChapter,
+    course.enrolled,
+  ]);
 
   const Content = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
-      .with("quiz", () => <Quiz lesson={lesson} />)
+      .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
       .with("video", () => (
         <Video
           url={lesson.fileUrl}
-          onVideoEnded={() => setIsNextDisabled(false)}
+          onVideoEnded={() => {
+            setIsNextDisabled(false);
+            markLessonAsCompleted({ lessonId: lesson.id });
+          }}
           isExternalUrl={lesson.isExternal}
         />
       ))
@@ -80,15 +116,30 @@ export const LessonContent = ({
       .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
       .otherwise(() => null);
 
-  const handleMarkLessonAsComplete = () => {
-    handleNext();
+  useEffect(() => {
+    if (lesson.type === LessonType.TEXT || lesson.type === LessonType.PRESENTATION) {
+      markLessonAsCompleted({ lessonId: lesson.id });
+    }
 
-    if (isAdminLike) return;
-    if (lesson.type == LessonType.AI_MENTOR) return;
-
-    markLessonAsCompleted({ lessonId: lesson.id });
-  };
-
+    if (currentLessonIndex === totalLessons - 1) {
+      if (course.enrolled && nextChapter?.isFreemium && course.priceInCents !== 0) {
+        setIsNextDisabled(true);
+      }
+      if (currentLessonIndex === 0) {
+        if (!prevChapter?.isFreemium) {
+          setIsPreviousDisabled(true);
+        }
+      }
+    }
+  }, [
+    nextChapter?.isFreemium,
+    prevChapter?.isFreemium,
+    totalLessons,
+    currentLessonIndex,
+    currentChapterIndex,
+    course,
+    isLastLesson,
+  ]);
   return (
     <div className="flex size-full flex-col items-center py-10">
       <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
@@ -107,6 +158,7 @@ export const LessonContent = ({
               <Button
                 variant="outline"
                 className="w-full gap-x-1 sm:w-auto"
+                disabled={isPreviousDisabled}
                 onClick={handlePrevious}
               >
                 <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
@@ -117,7 +169,7 @@ export const LessonContent = ({
               variant="outline"
               disabled={isNextDisabled}
               className="w-full gap-x-1 sm:w-auto"
-              onClick={handleMarkLessonAsComplete}
+              onClick={handleNext}
             >
               <Icon name="ArrowRight" className="h-auto w-4" />
             </Button>

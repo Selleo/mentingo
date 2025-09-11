@@ -144,6 +144,7 @@ const ChapterCard = ({
         console.error("Failed to update chapter premium status:", error);
       } finally {
         await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+        await queryClient.invalidateQueries({ queryKey: ["available-courses"] });
         setTimeout(() => {
           setOpenItem(currentOpenState);
         }, 0);
@@ -210,6 +211,7 @@ const ChapterCard = ({
                     "bg-blue-500": chapter.isFree,
                     "bg-gray-200": !chapter.isFree,
                   })}
+                  id="freemiumToggle"
                   onClick={onSwitchClick}
                   checked={chapter.isFree}
                 >

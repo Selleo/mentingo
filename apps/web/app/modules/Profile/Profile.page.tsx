@@ -22,7 +22,6 @@ import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 import CertificatePreview from "./Certificates/CertificatePreview";
 import Certificates from "./Certificates/Certificates";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
-import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
 import type { UpdateUserProfileBody } from "./types";
 import type { CertificateType } from "~/types/certificate";
@@ -134,7 +133,12 @@ export default function ProfilePage() {
     );
 
   return (
-    <PageWrapper role="main">
+    <PageWrapper
+      role="main"
+      breadcrumbs={[
+        { href: `/profile/${id}`, title: `${userDetails?.firstName} ${userDetails?.lastName}` },
+      ]}
+    >
       {certificatePreview.isOpen && (
         <button
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
@@ -157,10 +161,6 @@ export default function ProfilePage() {
           </div>
         </button>
       )}
-      <ProfilePageBreadcrumbs
-        id={id}
-        username={`${userDetails?.firstName} ${userDetails?.lastName}`}
-      />
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] flex-col justify-between gap-2 md:flex-row">
           <h2 className="h5 md:h3 text-neutral-950">{t("contentCreatorView.other.pageTitle")}</h2>

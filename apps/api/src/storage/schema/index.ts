@@ -2,6 +2,7 @@ import {
   boolean,
   integer,
   jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -115,13 +116,15 @@ export const resetTokens = pgTable("reset_tokens", {
   }).notNull(),
 });
 
+export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
+
 export const courses = pgTable("courses", {
   ...id,
   ...timestamps,
   title: varchar("title", { length: 100 }).notNull(),
   description: varchar("description", { length: 1000 }),
   thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
-  isPublished: boolean("is_published").notNull().default(false),
+  status: coursesStatusEnum("status").notNull().default("draft"),
   hasCertificate: boolean("has_certificate").notNull().default(false),
   priceInCents: integer("price_in_cents").notNull().default(0),
   currency: varchar("currency").notNull().default("usd"),
@@ -295,6 +298,7 @@ export const studentLessonProgress = pgTable(
     quizScore: integer("quiz_score"),
     attempts: integer("attempts"),
     isQuizPassed: boolean("is_quiz_passed"),
+    isStarted: boolean("is_started").default(false),
     completedAt: timestamp("completed_at", {
       mode: "string",
       withTimezone: true,

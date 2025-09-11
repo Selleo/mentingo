@@ -38,6 +38,7 @@
       "all": "Wszystkie",
       "search": "Szukaj",
       "published": "Opublikowany",
+      "private": "Niepubliczny",
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka"
@@ -115,7 +116,7 @@
     "menu": "Menu",
     "close": "Zamknij",
     "profile": "Profil",
-    "dashboard": "Pulpit",
+    "dashboard": "Panel główny",
     "courses": "Kursy",
     "myCourses": "Moje kursy",
     "categories": "Kategorie",
@@ -147,7 +148,11 @@
       "krsMustBe10Digits": "KRS musi mieć 10 cyfr",
       "invalidEmailFormat": "Nieprawidłowy format email"
     },
-    "noCompanyInformationAvailable": "Brak informacji o dostawcy"
+    "noCompanyInformationAvailable": "Brak informacji o dostawcy",
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "providerInformation": "Informacje o dostawcy"
+    }
   },
   "changeUserLanguageView": {
     "header": "Zmień język",
@@ -250,7 +255,7 @@
       "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
     "breadcrumbs": {
-      "dashboard": "Panel"
+      "dashboard": "Panel główny"
     },
     "field": {
       "firstName": "Imię",
@@ -369,7 +374,8 @@
       },
       "other": {
         "draft": "Wersja robocza",
-        "published": "Opublikowane"
+        "published": "Opublikowane",
+        "private": "Niepubliczne"
       }
     },
     "field": {
@@ -407,7 +413,8 @@
     },
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
-      "deleteCourseFailed": "Nie udało się usunąć kursu"
+      "deleteCourseFailed": "Nie udało się usunąć kursu",
+      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza."
     }
   },
   "adminCategoriesView": {
@@ -437,6 +444,7 @@
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "categories": "Kategorie",
       "createNew": "Utwórz nową kategorię",
       "back": "Wstecz"
@@ -527,6 +535,7 @@
       }
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "users": "Użytkownicy",
       "createNew": "Utwórz nowego użytkownika",
       "back": "Wstecz"
@@ -603,6 +612,7 @@
       "submit": "Usuń"
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "groups": "Grupy",
       "createNew": "Utwórz nową",
       "editGroup": "Edytuj grupę",
@@ -882,7 +892,9 @@
       "draftHeader": "Wersja robocza",
       "draftBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy już się zapisali, kurs nie będzie widoczny na ich liście kursów.",
       "publishedHeader": "Opublikowany",
-      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie."
+      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie.",
+      "privateHeader": "Niepubliczny",
+      "privateBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy są na niego zapisani (np. przez admina) kurs będzie widoczny na ich liście kursów i będą mogli z niego korzystać."
     },
     "pricing": {
       "header": "Cennik",
@@ -926,6 +938,7 @@
       "successResponse": "studentów zostało zapisanych do kursu."
     },
     "breadcrumbs": {
+      "dashboard": "Panel główny",
       "myCourses": "Moje kursy",
       "back": "Wstecz"
     }
@@ -1007,13 +1020,19 @@
     "other": {
       "cannotFindCourses": "Nie znaleziono żadnych kursów",
       "changeSearchCriteria": "Zmień kryteria wyszukiwania lub spróbuj ponownie później",
-      "freeLessons": "Darmowe lekcje!"
+      "freeLessons": "Darmowe lekcje!",
+      "successfullyEnrolledToCourse": "Pomyślnie zapisano na kurs"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "availableCourses": "Dostępne kursy"
     },
     "button": {
       "continue": "Kontynuuj",
       "enroll": "Zapisz się",
       "view": "Zobacz",
-      "readMore": "Czytaj więcej"
+      "readMore": "Czytaj więcej",
+      "playChapter": "Rozpocznij rozdział"
     },
     "enrolledCourses": {
       "header": "Twoje kursy",
@@ -1182,6 +1201,15 @@
     "chapterProgress": {
       "header": "Spis treści:",
       "courseProgress": "Postęp kursu"
+    },
+    "button": {
+      "open": "Otwórz",
+      "continue": "Kontynuuj",
+      "playChapter": "Odtwórz rozdział"
+    },
+    "other": {
+      "enrollmentRequired": "Zapisz się na kurs, aby otworzyć.",
+      "purchaseRequired": "Odblokuj tę lekcję, kupując kurs."
     }
   },
   "settings": {
@@ -1193,6 +1221,10 @@
     "tabs": {
       "account": "Konto",
       "organization": "Organizacja"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "settings": "Ustawienia"
     }
   },
   "certificateBackgroundUpload": {
@@ -1225,6 +1257,12 @@
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+  },
+  "progressBadge": {
+    "completed": "Ukończone",
+    "inProgress": "W trakcie",
+    "notStarted": "Nierozpoczęte",
+    "blocked": "Zablokowane"
   },
   "studentCertificateView": {
     "header": "Certyfikaty",

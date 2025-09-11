@@ -5,10 +5,9 @@ import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
-import { courseQueryOptions } from "../queries";
 import { certificatesQueryOptions } from "../queries/useCertificates";
 
-export const useMarkLessonAsCompleted = (userId: string, courseId: string) => {
+export const useMarkLessonAsCompleted = (userId: string) => {
   return useMutation({
     mutationFn: async ({ lessonId }: { lessonId: string }) => {
       const response = await ApiClient.api.studentLessonProgressControllerMarkLessonAsCompleted({
@@ -16,9 +15,10 @@ export const useMarkLessonAsCompleted = (userId: string, courseId: string) => {
       });
       return response.data;
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
-      await queryClient.invalidateQueries(courseQueryOptions(courseId));
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["lesson", variables.lessonId] });
+      queryClient.invalidateQueries({ queryKey: ["lessonProgress", variables.lessonId] });
+      queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
