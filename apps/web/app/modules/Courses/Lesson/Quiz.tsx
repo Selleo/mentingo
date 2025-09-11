@@ -94,7 +94,7 @@ export const Quiz = ({ lesson }: QuizProps) => {
   return (
     <FormProvider {...methods}>
       <form
-        className="flex w-full flex-col gap-y-4"
+        className="flex w-full flex-col gap-y-4 bg-red-500"
         onSubmit={methods.handleSubmit(handleOnSubmit, () => {
           toast({
             variant: "destructive",

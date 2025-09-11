@@ -7,6 +7,7 @@ import { FillInTheBlanks } from "./FillInTheBlanks/FillInTheBlanks";
 import { MultipleChoice } from "./MultipleChoice";
 import { PhotoQuestionMultipleChoice } from "./PhotoQuestionMultipleChoice";
 import { PhotoQuestionSingleChoice } from "./PhotoQuestionSingleChoice";
+import { Scale } from "./Scale/Scale";
 import { SingleChoice } from "./SingleChoice/SingleChoice";
 import { TrueOrFalse } from "./TrueOrFalse";
 
@@ -32,6 +33,7 @@ export const Question = ({ question, isCompleted }: QuestionProps) => {
   const isDetailedResponse = question.type === "detailed_response";
   const isTextFillInTheBlanks = question.type === "fill_in_the_blanks_text";
   const isDraggableFillInTheBlanks = question.type === "fill_in_the_blanks_dnd";
+  const isScale = question.type === "scale_1_5";
 
   switch (true) {
     case isBriefResponse:
@@ -60,6 +62,9 @@ export const Question = ({ question, isCompleted }: QuestionProps) => {
 
     case isTrueOrFalse:
       return <TrueOrFalse question={question} isCompleted={isCompleted} />;
+
+    case isScale:
+      return <Scale question={question} isCompleted={isCompleted} />;
 
     default:
       return null;

@@ -96,6 +96,7 @@ const ScaleQuestion = ({ form, questionIndex }: ScaleQuestionProps) => {
               <SortableList
                 items={watchedOptions}
                 onChange={(updatedItems) => {
+                  console.log("updatedItems", updatedItems);
                   form.setValue(`questions.${questionIndex}.options`, updatedItems, {
                     shouldDirty: true,
                   });
@@ -117,34 +118,7 @@ const ScaleQuestion = ({ form, questionIndex }: ScaleQuestionProps) => {
                           required
                           className="flex-1"
                         />
-                        {/* This code is currently commented out temporarily */}
-                        {/* <div className="w-[10%]">
-                            <Select
-                              name={`questions.${questionIndex}.options.${index}.scaleAnswer`}
-                              value={form
-                                .getValues(
-                                  `questions.${questionIndex}.options.${index}.scaleAnswer`,
-                                )
-                                ?.toString()}
-                              onValueChange={(value) =>
-                                handleOptionChange(index, "scaleAnswer", Number(value))
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue
-                                  className="text-left body-base-md"
-                                  placeholder={`Scale`}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {[1, 2, 3, 4, 5].map((option) => (
-                                  <SelectItem key={option} value={option.toString()}>
-                                    {option}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div> */}
+
                         <div className="flex items-center">
                           <TooltipProvider delayDuration={0}>
                             <Tooltip>

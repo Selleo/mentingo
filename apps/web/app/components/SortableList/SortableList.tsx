@@ -62,10 +62,13 @@ export function SortableList<T extends BaseItem>({
 
         const updatedItems = arrayMove(items, activeIndex, overIndex);
 
-        const updatedItemsWithOrder = updatedItems.map((item, index) => ({
-          ...item,
-          displayOrder: index + 1,
-        }));
+        const updatedItemsWithOrder = updatedItems.map((item, index) => {
+          console.log(item, index);
+          return {
+            ...item,
+            displayOrder: index + 1,
+          };
+        });
 
         const updatedItem = updatedItemsWithOrder.find((item) => item.sortableId === active?.id);
 

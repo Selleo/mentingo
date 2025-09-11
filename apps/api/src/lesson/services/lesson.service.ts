@@ -51,7 +51,7 @@ export class LessonService {
     userLanguage?: SupportedLanguages,
   ): Promise<LessonShow> {
     const isStudent = userRole === USER_ROLES.STUDENT;
-
+    console.log("eloooo");
     const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");

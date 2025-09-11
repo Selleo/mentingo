@@ -10,7 +10,8 @@ type QuestionCardProps = {
     | "multipleChoice"
     | "trueOrFalseQuestion"
     | "oneOrTwoWordSentence"
-    | "threeOrFiveWordSentence";
+    | "threeOrFiveWordSentence"
+    | "scale";
   children: ReactNode;
 };
 

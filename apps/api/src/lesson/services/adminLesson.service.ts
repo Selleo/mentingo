@@ -209,16 +209,19 @@ export class AdminLessonService {
 
       if (!data.questions) return;
 
-      const questionsToInsert = data?.questions?.map((question) => ({
-        lessonId: lesson.id,
-        authorId,
-        type: question.type,
-        description: question.description || null,
-        title: question.title,
-        displayOrder: question.displayOrder,
-        solutionExplanation: question.solutionExplanation,
-        photoS3Key: question.photoS3Key,
-      }));
+      const questionsToInsert = data?.questions?.map((question) => {
+        console.log("question", question.displayOrder);
+        return {
+          lessonId: lesson.id,
+          authorId,
+          type: question.type,
+          description: question.description || null,
+          title: question.title,
+          displayOrder: question.displayOrder,
+          solutionExplanation: question.solutionExplanation,
+          photoS3Key: question.photoS3Key,
+        };
+      });
 
       const insertedQuestions = await trx.insert(questions).values(questionsToInsert).returning();
 

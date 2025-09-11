@@ -59,6 +59,7 @@ export class LessonController {
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") userRole: UserRole,
   ): Promise<BaseResponse<LessonShow>> {
+    console.log("siemanko");
     return new BaseResponse(
       await this.lessonService.getLessonById(id, userId, userRole, userLanguage),
     );
