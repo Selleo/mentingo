@@ -137,7 +137,7 @@ const CourseSettings = ({
                 {isCertificateEnabled
                   ? t("adminCourseView.settings.button.includesCertificate")
                   : t("adminCourseView.settings.button.doesNotIncludeCertificate")}
-                {updateHasCertificate.isPending && " (Zapisywanie...)"}
+                {updateHasCertificate.isPending && t("common.button.saving")}
               </Toggle>
             </div>
             <div className="flex items-center gap-x-2"></div>

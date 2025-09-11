@@ -34,21 +34,17 @@ const useCertificatePDF = () => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${courseName || "certificate"}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const linkElement = document.createElement("a");
+      linkElement.href = url;
+      linkElement.download = `${courseName || "certificate"}.pdf`;
+      document.body.appendChild(linkElement);
+      linkElement.click();
+      document.body.removeChild(linkElement);
       URL.revokeObjectURL(url);
     } catch (error) {
-      toast({ description: t("changeUserInformationView.toast.userDetailsUpdatedSuccessfully") });
+      toast({ description: t("studentCertificateView.informations.failedToDownload") });
     }
   };
 

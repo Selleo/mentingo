@@ -1224,7 +1224,8 @@
     "informations": {
       "loading": "Loading certificates...",
       "noCertificates": "No certificates available yet. Complete courses to earn certificates.",
-      "failedToLoad": "Failed to load certificates. Please try again later."
+      "failedToLoad": "Failed to load certificates. Please try again later.",
+      "failedToDownload": "Failed to download certificate. Please try again later."
     },
     "button": {
       "download": "Download",

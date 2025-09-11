@@ -303,7 +303,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.updateHasCertificate(id, body.hasCertificate);
 
-    return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
+    return new BaseResponse({ message: "Pomyślnie_zaktualizowano_kurs" });
   }
 
   @Post("enroll-course")

@@ -1231,7 +1231,8 @@
     "informations": {
       "loading": "Ładowanie certyfikatów...",
       "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
-      "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później."
+      "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
+      "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później."
     },
     "button": {
       "download": "Pobierz",
