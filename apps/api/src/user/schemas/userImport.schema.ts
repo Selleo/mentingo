@@ -13,7 +13,9 @@ export const importUserRowSchema = Type.Object({
 // Schema for import request validation
 export const userImportRequestSchema = Type.Object({
   // Additional metadata can be added here if needed
-  validateOnly: Type.Optional(Type.Boolean()),
+  // TODO: needs clarification from the PM do we need this feature
+  validateOnly: Type.Optional(Type.Boolean({ default: false })),
+  sendWelcomeEmail: Type.Optional(Type.Boolean({ default: false })),
 });
 
 // Schema for import response
@@ -21,24 +23,28 @@ export const userImportResponseSchema = Type.Object({
   message: Type.String(),
   successCount: Type.Number(),
   totalRows: Type.Number(),
-  createdUsers: Type.Array(Type.Object({
-    id: Type.String(),
-    email: Type.String(),
-    firstName: Type.String(),
-    lastName: Type.String(),
-    role: Type.Enum(USER_ROLES),
-  })),
+  createdUsers: Type.Array(
+    Type.Object({
+      id: Type.String(),
+      email: Type.String(),
+      firstName: Type.String(),
+      lastName: Type.String(),
+      role: Type.String(),
+    }),
+  ),
 });
 
 // Schema for import validation error response
 export const userImportErrorResponseSchema = Type.Object({
   message: Type.String(),
-  errors: Type.Array(Type.Object({
-    row: Type.Number(),
-    field: Type.String(),
-    value: Type.Union([Type.String(), Type.Null()]),
-    message: Type.String(),
-  })),
+  errors: Type.Array(
+    Type.Object({
+      row: Type.Number(),
+      field: Type.String(),
+      value: Type.Union([Type.String(), Type.Null()]),
+      message: Type.String(),
+    }),
+  ),
   totalRows: Type.Number(),
 });
 

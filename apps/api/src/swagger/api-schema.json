@@ -878,6 +878,47 @@
         }
       }
     },
+    "/api/user/import": {
+      "post": {
+        "operationId": "UserImportController_importUsers",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "CSV or XLSX file containing user data"
+                  },
+                  "data": {
+                    "type": "string",
+                    "description": "JSON string with import options"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/test-config/setup": {
       "post": {
         "operationId": "TestConfigController_setup",
@@ -4681,6 +4722,117 @@
             "required": [
               "id",
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ImportUsersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "successCount": {
+                    "type": "number"
+                  },
+                  "totalRows": {
+                    "type": "number"
+                  },
+                  "createdUsers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "role": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "firstName",
+                        "lastName",
+                        "role"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "message",
+                  "successCount",
+                  "totalRows",
+                  "createdUsers"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "errors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "row": {
+                          "type": "number"
+                        },
+                        "field": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "row",
+                        "field",
+                        "value",
+                        "message"
+                      ]
+                    }
+                  },
+                  "totalRows": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "message",
+                  "errors",
+                  "totalRows"
+                ]
+              }
             ]
           }
         },

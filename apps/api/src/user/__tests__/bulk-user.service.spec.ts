@@ -63,7 +63,7 @@ describe("BulkUserService", () => {
 
     service = module.get<BulkUserService>(BulkUserService);
     mockDb = module.get("DB");
-    mockEmailService = module.get<EmailService>(EmailService);
+    mockEmailService = module.get<EmailService>(EmailService) as jest.Mocked<EmailService>;
   });
 
   afterEach(() => {
@@ -87,8 +87,8 @@ describe("BulkUserService", () => {
     ];
 
     it("should create users successfully", async () => {
-      // Mock no existing users
-      mockFrom.mockResolvedValue([]);
+      // Mock no existing users (after the WHERE clause)
+      mockWhere.mockResolvedValue([]);
 
       // Mock transaction
       const mockTrx = {
@@ -113,7 +113,7 @@ describe("BulkUserService", () => {
 
       mockEmailService.sendEmail.mockResolvedValue(undefined);
 
-      const result = await service.createUsersInBulk([validUserRows[0]]);
+      const result = await service.createUsersInBulk([validUserRows[0]], true);
 
       expect(result.successCount).toBe(1);
       expect(result.totalRows).toBe(1);
@@ -132,7 +132,7 @@ describe("BulkUserService", () => {
 
     it("should throw ConflictException for existing users in database", async () => {
       // Mock existing user found
-      mockFrom.mockResolvedValue([{ email: "john.doe@example.com" }]);
+      mockWhere.mockResolvedValue([{ email: "john.doe@example.com" }]);
 
       await expect(service.createUsersInBulk([validUserRows[0]])).rejects.toThrow(
         ConflictException,
@@ -156,7 +156,7 @@ describe("BulkUserService", () => {
       ];
 
       // Mock existing user found
-      mockFrom.mockResolvedValue([{ email: "existing@example.com" }]);
+      mockWhere.mockResolvedValue([{ email: "existing@example.com" }]);
 
       const errors = await service.validateUserRows(userRows);
 
@@ -182,7 +182,7 @@ describe("BulkUserService", () => {
       ];
 
       // Mock no existing users in database
-      mockFrom.mockResolvedValue([]);
+      mockWhere.mockResolvedValue([]);
 
       const errors = await service.validateUserRows(userRows);
 
@@ -201,7 +201,7 @@ describe("BulkUserService", () => {
       ];
 
       // Mock no existing users
-      mockFrom.mockResolvedValue([]);
+      mockWhere.mockResolvedValue([]);
 
       const errors = await service.validateUserRows(userRows);
 

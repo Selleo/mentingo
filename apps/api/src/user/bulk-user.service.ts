@@ -34,7 +34,10 @@ export class BulkUserService {
    * Creates multiple users in a transaction with proper error handling
    * All users must be valid or none will be created (all-or-nothing)
    */
-  public async createUsersInBulk(userRows: ImportUserRow[]): Promise<BulkUserCreationResult> {
+  public async createUsersInBulk(
+    userRows: ImportUserRow[],
+    sendWelcomeEmail?: boolean,
+  ): Promise<BulkUserCreationResult> {
     if (userRows.length === 0) {
       throw new BadRequestException("No users provided for import");
     }
@@ -81,7 +84,9 @@ export class BulkUserService {
         }
 
         // Send welcome email with password creation link
-        await this.sendWelcomeEmail(createdUser, token);
+        if (sendWelcomeEmail) {
+          await this.sendWelcomeEmail(createdUser, token);
+        }
 
         createdUsers.push({
           id: createdUser.id,

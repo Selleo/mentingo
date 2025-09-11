@@ -111,14 +111,18 @@ describe("UserImportController Integration Tests", () => {
 
       jest.spyOn(csvProcessorService, "processUserImportFile").mockResolvedValue(mockProcessedData);
 
-      // Execute import
-      const result = await controller.importUsers({ data: { validateOnly: false } }, mockFile);
+      // Execute import with welcome emails enabled
+      const result = await controller.importUsers(
+        { data: { validateOnly: false, sendWelcomeEmail: true } },
+        mockFile,
+      );
 
       // Verify response
-      expect(result.data.successCount).toBe(3);
-      expect(result.data.totalRows).toBe(3);
-      expect(result.data.createdUsers).toHaveLength(3);
-      expect(result.data.message).toContain("Successfully imported 3 users");
+      const data: any = result.data;
+      expect(data.successCount).toBe(3);
+      expect(data.totalRows).toBe(3);
+      expect(data.createdUsers).toHaveLength(3);
+      expect(data.message).toContain("Successfully imported 3 users");
 
       // Verify database state - users created
       const createdUsers = await db.select().from(users);
@@ -134,7 +138,7 @@ describe("UserImportController Integration Tests", () => {
       // Verify database state - create tokens created
       const createdTokens = await db.select().from(createTokens);
       expect(createdTokens).toHaveLength(3);
-      createdTokens.forEach((token) => {
+      createdTokens.forEach((token: any) => {
         expect(token.createToken).toBeDefined();
         expect(token.expiryDate).toBeDefined();
         expect(token.reminderCount).toBe(0);
@@ -188,13 +192,14 @@ describe("UserImportController Integration Tests", () => {
       jest.spyOn(csvProcessorService, "processUserImportFile").mockResolvedValue(mockProcessedData);
 
       // Execute import
-      const result = await controller.importUsers({ data: { validateOnly: false } }, mockFile);
+      const result = await controller.importUsers({ data: {} }, mockFile);
 
       // Verify error response
-      expect(result.data.message).toBe("Import validation failed");
-      expect(result.data.errors).toBeDefined();
-      expect(result.data.errors.length).toBeGreaterThan(0);
-      expect(result.data.errors[0].message).toContain("already exists");
+      const data2: any = result.data;
+      expect(data2.message).toBe("Import validation failed");
+      expect(data2.errors).toBeDefined();
+      expect(data2.errors.length).toBeGreaterThan(0);
+      expect(data2.errors[0].message).toContain("already exists");
 
       // Verify no new users created (all-or-nothing)
       const allUsers = await db.select().from(users);
@@ -238,10 +243,11 @@ describe("UserImportController Integration Tests", () => {
       const result = await controller.importUsers({ data: { validateOnly: true } }, mockFile);
 
       // Verify validation-only response
-      expect(result.data.message).toContain("validation mode");
-      expect(result.data.successCount).toBe(0);
-      expect(result.data.totalRows).toBe(2);
-      expect(result.data.createdUsers).toHaveLength(0);
+      const data3: any = result.data;
+      expect(data3.message).toContain("validation mode");
+      expect(data3.successCount).toBe(0);
+      expect(data3.totalRows).toBe(2);
+      expect(data3.createdUsers).toHaveLength(0);
 
       // Verify no users created in database
       const allUsers = await db.select().from(users);
@@ -278,12 +284,13 @@ describe("UserImportController Integration Tests", () => {
       jest.spyOn(csvProcessorService, "processUserImportFile").mockResolvedValue(mockProcessedData);
 
       // Execute import
-      const result = await controller.importUsers({ data: { validateOnly: false } }, mockFile);
+      const result = await controller.importUsers({ data: {} }, mockFile);
 
       // Verify error response for duplicates
-      expect(result.data.message).toBe("Import validation failed");
-      expect(result.data.errors).toBeDefined();
-      expect(result.data.errors.some((e) => e.message.includes("Duplicate email"))).toBe(true);
+      const data4: any = result.data;
+      expect(data4.message).toBe("Import validation failed");
+      expect(data4.errors).toBeDefined();
+      expect(data4.errors.some((e: any) => e.message.includes("Duplicate email"))).toBe(true);
 
       // Verify no users created
       const allUsers = await db.select().from(users);
@@ -319,9 +326,9 @@ describe("UserImportController Integration Tests", () => {
 
       jest.spyOn(csvProcessorService, "processUserImportFile").mockResolvedValue(mockProcessedData);
 
-      // Execute import and expect failure
+      // Execute import and expect failure (welcome emails enabled)
       await expect(
-        controller.importUsers({ data: { validateOnly: false } }, mockFile),
+        controller.importUsers({ data: { sendWelcomeEmail: true } }, mockFile),
       ).rejects.toThrow("Email service failed");
 
       // Verify transaction rollback - no users should be created

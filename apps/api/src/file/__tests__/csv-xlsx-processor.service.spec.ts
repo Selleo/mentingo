@@ -1,10 +1,14 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+
+import {
+  UnsupportedImportFileException,
+  ImportFileSizeException,
+  MissingColumnsException,
+} from "src/user/exceptions/import.exceptions";
 
 import { CsvXlsxProcessorService } from "../csv-xlsx-processor.service";
-import { 
-  UnsupportedImportFileException, 
-  ImportFileSizeException,
-} from "src/user/exceptions/import.exceptions";
+
+import type { TestingModule } from "@nestjs/testing";
 
 describe("CsvXlsxProcessorService", () => {
   let service: CsvXlsxProcessorService;
@@ -33,7 +37,7 @@ describe("CsvXlsxProcessorService", () => {
       };
 
       await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-        UnsupportedImportFileException
+        UnsupportedImportFileException,
       );
     });
 
@@ -52,7 +56,7 @@ describe("CsvXlsxProcessorService", () => {
       };
 
       await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-        ImportFileSizeException
+        ImportFileSizeException,
       );
     });
 
@@ -70,16 +74,16 @@ describe("CsvXlsxProcessorService", () => {
         path: "",
       };
 
-      // Should attempt to process CSV (will fail due to missing dependency)
+      // Should attempt CSV processing but end up with no data
       await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-        UnsupportedImportFileException
+        UnsupportedImportFileException,
       );
-      
-      // But the error message should indicate CSV processing was attempted
+
+      // Error message should indicate file contained no data
       try {
         await service.processUserImportFile(mockFile);
       } catch (error) {
-        expect(error.message).toContain("csv-parse");
+        expect(error.message).toContain("File contains no data");
       }
     });
 
@@ -97,16 +101,14 @@ describe("CsvXlsxProcessorService", () => {
         path: "",
       };
 
-      // Should attempt to process XLSX (will fail due to missing dependency)  
       await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-        UnsupportedImportFileException
+        MissingColumnsException,
       );
 
-      // But the error message should indicate XLSX processing was attempted
       try {
         await service.processUserImportFile(mockFile);
       } catch (error) {
-        expect(error.message).toContain("xlsx");
+        expect(error.message).toContain("Missing required columns");
       }
     });
 
@@ -114,7 +116,7 @@ describe("CsvXlsxProcessorService", () => {
       const mockFile: Express.Multer.File = {
         fieldname: "file",
         originalname: "users.csv",
-        encoding: "7bit", 
+        encoding: "7bit",
         mimetype: "application/octet-stream", // Generic mimetype
         size: 1000,
         buffer: Buffer.from("test"),
@@ -124,15 +126,15 @@ describe("CsvXlsxProcessorService", () => {
         path: "",
       };
 
-      // Should still identify as CSV due to .csv extension
+      // Should still identify as CSV but produce no-data error
       await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-        UnsupportedImportFileException
+        UnsupportedImportFileException,
       );
-      
+
       try {
         await service.processUserImportFile(mockFile);
       } catch (error) {
-        expect(error.message).toContain("csv-parse");
+        expect(error.message).toContain("File contains no data");
       }
     });
 
@@ -141,7 +143,7 @@ describe("CsvXlsxProcessorService", () => {
         fieldname: "file",
         originalname: "users.xlsx",
         encoding: "7bit",
-        mimetype: "application/octet-stream", // Generic mimetype  
+        mimetype: "application/octet-stream", // Generic mimetype
         size: 1000,
         buffer: Buffer.from("test"),
         stream: null as any,
@@ -150,15 +152,16 @@ describe("CsvXlsxProcessorService", () => {
         path: "",
       };
 
-      // Should still identify as XLSX due to .xlsx extension
+      // Should identify as XLSX and fail header validation
       await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-        UnsupportedImportFileException
+        MissingColumnsException,
       );
-      
+
+      // Verify the specific reason: missing required columns
       try {
         await service.processUserImportFile(mockFile);
       } catch (error) {
-        expect(error.message).toContain("xlsx");
+        expect(error.message).toContain("Missing required columns");
       }
     });
   });
@@ -174,7 +177,9 @@ describe("CsvXlsxProcessorService", () => {
     ];
 
     testCases.forEach(({ size, shouldPass }) => {
-      it(`should ${shouldPass ? "accept" : "reject"} file of ${Math.round(size / 1024 / 1024 * 100) / 100}MB`, async () => {
+      it(`should ${shouldPass ? "accept" : "reject"} file of ${
+        Math.round((size / 1024 / 1024) * 100) / 100
+      }MB`, async () => {
         const mockFile: Express.Multer.File = {
           fieldname: "file",
           originalname: "test.csv",
@@ -191,19 +196,20 @@ describe("CsvXlsxProcessorService", () => {
         if (shouldPass) {
           // Should fail due to missing dependency, not size limit
           await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-            UnsupportedImportFileException
+            UnsupportedImportFileException,
           );
-          
+
           try {
             await service.processUserImportFile(mockFile);
           } catch (error) {
             expect(error.message).not.toContain("File size");
-            expect(error.message).toContain("csv-parse");
+            // Any CSV file with no data will hit 'File contains no data'
+            expect(error.message).toContain("File contains no data");
           }
         } else {
           // Should fail due to size limit
           await expect(service.processUserImportFile(mockFile)).rejects.toThrow(
-            ImportFileSizeException
+            ImportFileSizeException,
           );
         }
       });

@@ -91,6 +91,7 @@ export class UserImportController {
       }
 
       // If validateOnly is true, return success without creating users
+      // NOTE: probably not needed, but who knows :)
       if (requestData.data?.validateOnly) {
         const response: UserImportResponse = {
           message: "Validation successful - no users created (validation mode)",
@@ -103,7 +104,10 @@ export class UserImportController {
       }
 
       // Create users
-      const result = await this.bulkUserService.createUsersInBulk(userData);
+      const result = await this.bulkUserService.createUsersInBulk(
+        userData,
+        requestData.data?.sendWelcomeEmail,
+      );
 
       const response: UserImportResponse = {
         message: `Successfully imported ${result.successCount} users`,
