@@ -67,6 +67,7 @@
     "cache-manager": "6.2.0",
     "cookie": "0.6.0",
     "cookie-parser": "1.4.6",
+    "csv-parse": "^6.1.0",
     "date-fns": "3.6.0",
     "dotenv": "16.4.5",
     "drizzle-kit": "0.22.8",
@@ -94,9 +95,11 @@
     "tiktoken": "1.0.21",
     "ts-pattern": "5.2.0",
     "uuid": "10.0.0",
+    "xlsx": "^0.18.5",
     "xml2js": "0.6.2"
   },
   "devDependencies": {
+    "@types/csv-parse": "^1.2.5",
     "@aws-sdk/types": "3.696.0",
     "@nestjs/cli": "10.0.0",
     "@nestjs/schematics": "10.0.0",
