@@ -56,7 +56,7 @@ export default function LatestAnnouncementCard({
             </div>
             {announcementsCount > 1 && (
               <span className="text-sm text-neutral-600">
-                {currentIndex + 1} of {announcementsCount}
+                {currentIndex + 1} {t("announcements.other.of")} {announcementsCount}
               </span>
             )}
           </div>

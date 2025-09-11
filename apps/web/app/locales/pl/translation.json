@@ -1292,7 +1292,8 @@
       "readMore": "Czytaj więcej"
     },
     "other": {
-      "noNewAnnouncements": "Brak nowych ogłoszeń do wyświetlenia dla ciebie"
+      "noNewAnnouncements": "Brak nowych ogłoszeń do wyświetlenia dla ciebie",
+      "of": "z"
     },
     "toast": {
       "markedAsRead": "Ogłoszenia oznaczone jako przeczytane",

@@ -1287,7 +1287,8 @@
       "readMore": "Read more"
     },
     "other": {
-      "noNewAnnouncements": "No new announcements available for you today"
+      "noNewAnnouncements": "No new announcements available for you today",
+      "of": "of"
     },
     "toast": {
       "markedAsRead": "Announcements have been marked as read successfully",
