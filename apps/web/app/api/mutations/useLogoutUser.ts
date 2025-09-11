@@ -4,6 +4,7 @@ import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
+import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
 
 import { requestManager, ApiClient } from "../api-client";
 
@@ -13,6 +14,7 @@ export function useLogoutUser() {
   const { toast } = useToast();
   const { setLoggedIn } = useAuthStore();
   const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
+  const setIsVisible = useAnnouncementsPopupStore((state) => state.setIsVisible);
   const navigate = useNavigate();
 
   return useMutation({
@@ -21,6 +23,7 @@ export function useLogoutUser() {
 
       setCurrentUser(undefined);
       setLoggedIn(false);
+      setIsVisible(true);
 
       return response.data;
     },

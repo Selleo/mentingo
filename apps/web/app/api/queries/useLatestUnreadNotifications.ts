@@ -4,19 +4,20 @@ import { ApiClient } from "../api-client";
 
 import type { GetLatestUnreadAnnouncementsResponse } from "../generated-api";
 
-export const latestUnreadAnnouncementsOptions = () => ({
+export const latestUnreadAnnouncementsOptions = (isAuthenticated: boolean) => ({
   queryKey: ["latest-unread-announcements"],
   queryFn: async () => {
     const response = await ApiClient.api.announcementsControllerGetLatestUnreadAnnouncements();
     return response.data;
   },
   select: (data: GetLatestUnreadAnnouncementsResponse) => data.data,
+  enabled: isAuthenticated,
 });
 
-export function useLatestUnreadAnnouncements() {
-  return useQuery(latestUnreadAnnouncementsOptions());
+export function useLatestUnreadAnnouncements(isAuthenticated: boolean) {
+  return useQuery(latestUnreadAnnouncementsOptions(isAuthenticated));
 }
 
-export function useLatestUnreadAnnouncementsSuspense() {
-  return useSuspenseQuery(latestUnreadAnnouncementsOptions());
+export function useLatestUnreadAnnouncementsSuspense(isAuthenticated: boolean) {
+  return useSuspenseQuery(latestUnreadAnnouncementsOptions(isAuthenticated));
 }

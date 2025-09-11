@@ -1286,6 +1286,9 @@
     "buttons": {
       "readMore": "Read more"
     },
+    "other": {
+      "noNewAnnouncements": "No new announcements available for you today"
+    },
     "toast": {
       "markedAsRead": "Announcements have been marked as read successfully",
       "markAsReadFailed": "Failed to mark announcements as read",

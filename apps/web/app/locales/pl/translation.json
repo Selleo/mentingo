@@ -1291,6 +1291,9 @@
     "buttons": {
       "readMore": "Czytaj więcej"
     },
+    "other": {
+      "noNewAnnouncements": "Brak nowych ogłoszeń do wyświetlenia dla ciebie"
+    },
     "toast": {
       "markedAsRead": "Ogłoszenia oznaczone jako przeczytane",
       "markAsReadFailed": "Nie udało się oznaczyć ogłoszeń jako przeczytane",

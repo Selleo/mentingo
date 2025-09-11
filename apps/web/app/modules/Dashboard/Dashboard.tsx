@@ -21,7 +21,8 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   const { t } = useTranslation();
   const { currentUser } = useCurrentUserStore();
 
-  const { data: latestUnreadAnnouncements, isLoading } = useLatestUnreadAnnouncements();
+  const { data: latestUnreadAnnouncements, isLoading } =
+    useLatestUnreadAnnouncements(isAuthenticated);
 
   if (isLoading) {
     return (
