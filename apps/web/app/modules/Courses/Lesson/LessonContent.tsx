@@ -47,7 +47,7 @@ export const LessonContent = ({
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
   const { t } = useTranslation();
-  const { isAdminLike } = useUserRole();
+  const { isAdminLike, isStudent } = useUserRole();
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
     chapter.lessons.some(({ id }) => id === lesson.id),
@@ -105,7 +105,7 @@ export const LessonContent = ({
           url={lesson.fileUrl}
           onVideoEnded={() => {
             setIsNextDisabled(false);
-            markLessonAsCompleted({ lessonId: lesson.id });
+            isStudent && markLessonAsCompleted({ lessonId: lesson.id });
           }}
           isExternalUrl={lesson.isExternal}
         />
@@ -140,6 +140,7 @@ export const LessonContent = ({
     course,
     isLastLesson,
   ]);
+
   return (
     <TooltipProvider>
       <div className="flex size-full flex-col items-center py-10">
