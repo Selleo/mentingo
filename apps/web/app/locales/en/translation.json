@@ -875,7 +875,8 @@
               "creativeTask": "<ul><li>The student presents an original idea.</li><li>The student explains who the target audience is.</li><li>The student describes how the service could provide value to customers.</li><li>The student identifies potential challenges.</li></ul><em>(No threshold defined — all conditions must be met.)</em>",
               "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined — all conditions recommended, but not mandatory for passing.)</em>"
             }
-          }
+          },
+          "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
         }
       }
     },
@@ -1096,7 +1097,8 @@
     "tooltip": {
       "retakeAvailableIn": "Locked for {{time}} hours after last retake.",
       "cooldown": "Quiz will be locked for {{time}} hours after the last attempt.",
-      "noCooldown": "No cooldown period."
+      "noCooldown": "No cooldown period.",
+      "beta": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
     },
     "breadcrumbs": {
       "availableCourses": "Available Courses",
