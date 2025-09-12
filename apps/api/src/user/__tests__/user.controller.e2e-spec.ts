@@ -46,6 +46,7 @@ describe("UsersController (e2e)", () => {
 
     testUser = await userFactory
       .withCredentials({ password: testPassword })
+      .withAdminSettings(db)
       .withAdminRole()
       .create();
 

@@ -61,6 +61,7 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
+    navigateTo: string;
   };
 }
 
@@ -1682,6 +1683,7 @@ export interface GetPublicGlobalSettingsResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1756,6 +1758,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1771,6 +1774,7 @@ export interface UpdateEnforceSSOResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1806,6 +1810,12 @@ export interface UpdateCompanyInformationResponse {
     emailAddress?: string;
     courtRegisterNumber?: string;
   };
+}
+
+export interface UpdateMFAEnforcedRolesBody {
+  admin?: boolean;
+  student?: boolean;
+  content_creator?: boolean;
 }
 
 import type {
@@ -3909,6 +3919,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateMfaEnforcedRoles
+     * @request PATCH:/api/settings/admin/mfa-enforced-roles
+     */
+    settingsControllerUpdateMfaEnforcedRoles: (
+      data: UpdateMFAEnforcedRolesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/mfa-enforced-roles`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

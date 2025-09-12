@@ -1,5 +1,7 @@
 import { Type } from "@sinclair/typebox";
 
+import { USER_ROLES } from "src/user/schemas/userRoles";
+
 import type { Static } from "@sinclair/typebox";
 
 export const companyInformationJSONSchema = Type.Object({
@@ -15,6 +17,7 @@ export const globalSettingsJSONSchema = Type.Object({
   enforceSSO: Type.Boolean(),
   companyInformation: Type.Optional(companyInformationJSONSchema),
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
+  MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

@@ -3289,6 +3289,27 @@
           }
         }
       }
+    },
+    "/api/settings/admin/mfa-enforced-roles": {
+      "patch": {
+        "operationId": "SettingsController_updateMFAEnforcedRoles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMFAEnforcedRolesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -3478,6 +3499,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "navigateTo": {
+                "type": "string"
               }
             },
             "required": [
@@ -3489,7 +3513,8 @@
               "lastName",
               "role",
               "archived",
-              "profilePictureUrl"
+              "profilePictureUrl",
+              "navigateTo"
             ]
           }
         },
@@ -10689,12 +10714,32 @@
                     "type": "null"
                   }
                 ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
-              "platformLogoS3Key"
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
             ]
           }
         },
@@ -10980,12 +11025,32 @@
                     "type": "null"
                   }
                 ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
-              "platformLogoS3Key"
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
             ]
           }
         },
@@ -11034,12 +11099,32 @@
                     "type": "null"
                   }
                 ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
-              "platformLogoS3Key"
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
             ]
           }
         },
@@ -11148,6 +11233,20 @@
         "required": [
           "data"
         ]
+      },
+      "UpdateMFAEnforcedRolesBody": {
+        "type": "object",
+        "properties": {
+          "admin": {
+            "type": "boolean"
+          },
+          "student": {
+            "type": "boolean"
+          },
+          "content_creator": {
+            "type": "boolean"
+          }
+        }
       }
     }
   }

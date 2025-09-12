@@ -116,7 +116,7 @@ export class AuthService {
     });
   }
 
-  public async login(data: { email: string; password: string }) {
+  public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
     const user = await this.validateUser(data.email, data.password);
     if (!user) {
       throw new UnauthorizedException("Invalid email or password");
@@ -128,11 +128,27 @@ export class AuthService {
     const usersProfilePictureUrl =
       await this.userService.getUsersProfilePictureUrl(avatarReference);
 
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+
+    if (
+      MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
+      userSettings.isMFAEnabled
+    ) {
+      return {
+        ...userWithoutAvatar,
+        profilePictureUrl: usersProfilePictureUrl,
+        accessToken,
+        refreshToken,
+        navigateTo: "/auth/mfa",
+      };
+    }
+
     return {
       ...userWithoutAvatar,
       profilePictureUrl: usersProfilePictureUrl,
       accessToken,
       refreshToken,
+      navigateTo: "/",
     };
   }
 

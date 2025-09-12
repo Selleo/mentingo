@@ -1259,6 +1259,24 @@
       }
     }
   },
+  "MFAEnforcementView": {
+    "header": "Role based Multi-Factor Authentication Enforcement",
+    "subHeader": "Enforce MFA for specific user roles",
+    "description": "This setting allows you to enforce Multi-Factor Authentication (MFA) for specific user roles within your organization.",
+    "roles": {
+      "admin": "Administrator",
+      "student": "Student",
+      "content_creator": "Content Creator"
+    },
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "MFA enforcement settings have been successfully updated.",
+      "mfaEnforcementUpdateFailed": "Failed to update MFA enforcement settings."
+    }
+  },
   "progressBadge": {
     "completed": "Completed",
     "inProgress": "In Progress",

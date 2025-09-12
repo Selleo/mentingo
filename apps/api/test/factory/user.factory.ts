@@ -55,6 +55,14 @@ class UserFactory extends Factory<UserWithCredentials> {
       return user;
     });
   }
+
+  withContentCreatorSettings(db: DatabasePg) {
+    return this.associations({ role: USER_ROLES.CONTENT_CREATOR }).afterCreate(async (user) => {
+      const settingsFactory = createSettingsFactory(db, user.id, false);
+      await settingsFactory.create();
+      return user;
+    });
+  }
 }
 
 export const createUserFactory = (db: DatabasePg) => {

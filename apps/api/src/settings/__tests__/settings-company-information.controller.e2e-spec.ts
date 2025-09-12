@@ -49,11 +49,13 @@ describe("SettingsController - Company Information (e2e)", () => {
 
     adminUser = await userFactory
       .withCredentials({ password: testPassword })
+      .withAdminSettings(db)
       .withAdminRole()
       .create();
 
     studentUser = await userFactory
       .withCredentials({ password: testPassword })
+      .withUserSettings(db)
       .associations({ role: USER_ROLES.STUDENT })
       .create();
 
