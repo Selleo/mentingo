@@ -19,7 +19,6 @@ import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
-import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
 import type { UpdateUserProfileBody } from "./types";
 
@@ -101,11 +100,12 @@ export default function ProfilePage() {
     );
 
   return (
-    <PageWrapper role="main">
-      <ProfilePageBreadcrumbs
-        id={id}
-        username={`${userDetails?.firstName} ${userDetails?.lastName}`}
-      />
+    <PageWrapper
+      role="main"
+      breadcrumbs={[
+        { href: `/profile/${id}`, title: `${userDetails?.firstName} ${userDetails?.lastName}` },
+      ]}
+    >
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] flex-col justify-between gap-2 md:flex-row">
           <h2 className="h5 md:h3 text-neutral-950">{t("contentCreatorView.other.pageTitle")}</h2>

@@ -1200,11 +1200,24 @@
             }
           },
           {
-            "name": "isPublished",
+            "name": "status",
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "const": "draft",
+                  "type": "string"
+                },
+                {
+                  "const": "published",
+                  "type": "string"
+                },
+                {
+                  "const": "private",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -2124,6 +2137,40 @@
         }
       }
     },
+    "/api/lesson/{id}": {
+      "get": {
+        "operationId": "LessonController_getLessonById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userLanguage",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLessonByIdResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/beta-create-lesson": {
       "post": {
         "operationId": "LessonController_betaCreateLesson",
@@ -2144,50 +2191,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BetaCreateLessonResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/lesson/{id}": {
-      "get": {
-        "operationId": "LessonController_getLessonById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "userLanguage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "en",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLessonByIdResponse"
                 }
               }
             }
@@ -3937,6 +3940,10 @@
                           {
                             "const": "completed",
                             "type": "string"
+                          },
+                          {
+                            "const": "blocked",
+                            "type": "string"
                           }
                         ]
                       },
@@ -5141,8 +5148,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5260,8 +5280,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5455,8 +5488,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5581,8 +5627,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5707,6 +5766,10 @@
                               {
                                 "const": "completed",
                                 "type": "string"
+                              },
+                              {
+                                "const": "blocked",
+                                "type": "string"
                               }
                             ]
                           },
@@ -5749,6 +5812,10 @@
                         },
                         {
                           "const": "completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "blocked",
                           "type": "string"
                         }
                       ]
@@ -5806,13 +5873,19 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "isPublished": {
+              "status": {
                 "anyOf": [
                   {
-                    "type": "boolean"
+                    "const": "draft",
+                    "type": "string"
                   },
                   {
-                    "type": "null"
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
                   }
                 ]
               },
@@ -5836,7 +5909,7 @@
               "currency",
               "description",
               "id",
-              "isPublished",
+              "status",
               "priceInCents",
               "title"
             ]
@@ -6170,6 +6243,10 @@
                         {
                           "const": "completed",
                           "type": "string"
+                        },
+                        {
+                          "const": "blocked",
+                          "type": "string"
                         }
                       ]
                     },
@@ -6225,13 +6302,19 @@
                 "format": "uuid",
                 "type": "string"
               },
-              "isPublished": {
+              "status": {
                 "anyOf": [
                   {
-                    "type": "boolean"
+                    "const": "draft",
+                    "type": "string"
                   },
                   {
-                    "type": "null"
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
                   }
                 ]
               },
@@ -6268,7 +6351,7 @@
               "currency",
               "description",
               "id",
-              "isPublished",
+              "status",
               "priceInCents",
               "title"
             ]
@@ -6290,8 +6373,21 @@
               "description": {
                 "type": "string"
               },
-              "isPublished": {
-                "type": "boolean"
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "draft",
+                    "type": "string"
+                  },
+                  {
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
+                  }
+                ]
               },
               "thumbnailS3Key": {
                 "type": "string"
@@ -6366,8 +6462,21 @@
           "thumbnailS3Key": {
             "type": "string"
           },
-          "isPublished": {
-            "type": "boolean"
+          "status": {
+            "anyOf": [
+              {
+                "const": "draft",
+                "type": "string"
+              },
+              {
+                "const": "published",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
           },
           "priceInCents": {
             "type": "integer"
@@ -6555,6 +6664,10 @@
                         {
                           "const": "completed",
                           "type": "string"
+                        },
+                        {
+                          "const": "blocked",
+                          "type": "string"
                         }
                       ]
                     },
@@ -6597,6 +6710,10 @@
                   },
                   {
                     "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "blocked",
                     "type": "string"
                   }
                 ]
@@ -6930,6 +7047,10 @@
                   },
                   {
                     "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "blocked",
                     "type": "string"
                   }
                 ]
@@ -7290,6 +7411,10 @@
                   {
                     "const": "completed",
                     "type": "string"
+                  },
+                  {
+                    "const": "blocked",
+                    "type": "string"
                   }
                 ]
               },
@@ -7419,311 +7544,6 @@
               }
             },
             "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "BetaCreateLessonBody": {
-        "type": "object",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "title": {
-                "type": "string"
-              },
-              "type": {
-                "anyOf": [
-                  {
-                    "const": "text",
-                    "type": "string"
-                  },
-                  {
-                    "const": "presentation",
-                    "type": "string"
-                  },
-                  {
-                    "const": "video",
-                    "type": "string"
-                  },
-                  {
-                    "const": "quiz",
-                    "type": "string"
-                  },
-                  {
-                    "const": "ai_mentor",
-                    "type": "string"
-                  }
-                ]
-              },
-              "description": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "fileS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "fileType": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "questions": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "type": {
-                      "anyOf": [
-                        {
-                          "const": "brief_response",
-                          "type": "string"
-                        },
-                        {
-                          "const": "detailed_response",
-                          "type": "string"
-                        },
-                        {
-                          "const": "match_words",
-                          "type": "string"
-                        },
-                        {
-                          "const": "scale_1_5",
-                          "type": "string"
-                        },
-                        {
-                          "const": "single_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "true_or_false",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_single_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_text",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_dnd",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "description": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "displayOrder": {
-                      "type": "number"
-                    },
-                    "solutionExplanation": {
-                      "type": "string"
-                    },
-                    "photoS3Key": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "options": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "optionText": {
-                            "type": "string"
-                          },
-                          "displayOrder": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isStudentAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "boolean"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isCorrect": {
-                            "type": "boolean"
-                          },
-                          "questionId": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "matchedWord": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "scaleAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          }
-                        },
-                        "required": [
-                          "optionText",
-                          "displayOrder",
-                          "isCorrect"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "title"
-                  ]
-                }
-              },
-              "aiMentor": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "lessonId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "aiMentorInstructions": {
-                        "type": "string"
-                      },
-                      "completionConditions": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "lessonId",
-                      "aiMentorInstructions",
-                      "completionConditions"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "updatedAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "title",
-              "type"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
-              "chapterId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "displayOrder": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "chapterId"
-            ]
-          }
-        ]
-      },
-      "BetaCreateLessonResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
               "message"
             ]
           }
@@ -8159,6 +7979,311 @@
               "updatedAt",
               "displayOrder",
               "nextLessonId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BetaCreateLessonBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "text",
+                    "type": "string"
+                  },
+                  {
+                    "const": "presentation",
+                    "type": "string"
+                  },
+                  {
+                    "const": "video",
+                    "type": "string"
+                  },
+                  {
+                    "const": "quiz",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ai_mentor",
+                    "type": "string"
+                  }
+                ]
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fileType": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "type": {
+                      "anyOf": [
+                        {
+                          "const": "brief_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "detailed_response",
+                          "type": "string"
+                        },
+                        {
+                          "const": "match_words",
+                          "type": "string"
+                        },
+                        {
+                          "const": "scale_1_5",
+                          "type": "string"
+                        },
+                        {
+                          "const": "single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "true_or_false",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_single_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "photo_question_multiple_choice",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_text",
+                          "type": "string"
+                        },
+                        {
+                          "const": "fill_in_the_blanks_dnd",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "description": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "displayOrder": {
+                      "type": "number"
+                    },
+                    "solutionExplanation": {
+                      "type": "string"
+                    },
+                    "photoS3Key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "optionText": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isStudentAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isCorrect": {
+                            "type": "boolean"
+                          },
+                          "questionId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "matchedWord": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "scaleAnswer": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "optionText",
+                          "displayOrder",
+                          "isCorrect"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title"
+                  ]
+                }
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "lessonId": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "aiMentorInstructions": {
+                        "type": "string"
+                      },
+                      "completionConditions": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "lessonId",
+                      "aiMentorInstructions",
+                      "completionConditions"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "title",
+              "type"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "chapterId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "displayOrder": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "chapterId"
+            ]
+          }
+        ]
+      },
+      "BetaCreateLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "message"
             ]
           }
         },

@@ -49,11 +49,7 @@ test.describe("Assigning students to course flow", () => {
       );
 
       expect(
-        await verifyStudentSeesCourse(
-          page,
-          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
-          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.data.firstEnrolledCourse,
-        ),
+        await verifyStudentSeesCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign),
       ).toBeTruthy();
     });
   });

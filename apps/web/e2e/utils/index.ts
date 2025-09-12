@@ -107,20 +107,14 @@ export const enrollAllStudents = async (page: Page) => {
   ).toHaveCount(0);
 };
 
-export const verifyStudentSeesCourse = async (
-  page: Page,
-  course: string,
-  enrolledCourse: string,
-): Promise<boolean> => {
+export const verifyStudentSeesCourse = async (page: Page, course: string): Promise<boolean> => {
   await navigateToPage(
     page,
     ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
     ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
   );
 
-  const expectedCourse = page.getByTestId("enrolled-courses").getByRole("link", {
-    name: new RegExp(enrolledCourse, "i"),
-  });
+  const expectedCourse = page.getByTestId(course);
 
   if (!(await expectedCourse.isVisible())) return false;
 

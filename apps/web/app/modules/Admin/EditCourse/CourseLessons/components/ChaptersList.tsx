@@ -211,6 +211,7 @@ const ChapterCard = ({
                     "bg-blue-500": chapter.isFree,
                     "bg-gray-200": !chapter.isFree,
                   })}
+                  id="freemiumToggle"
                   onClick={onSwitchClick}
                   checked={chapter.isFree}
                 >

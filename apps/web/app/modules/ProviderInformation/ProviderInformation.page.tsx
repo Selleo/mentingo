@@ -40,7 +40,16 @@ export default function ProviderInformationPage() {
   }
 
   return (
-    <PageWrapper role="main">
+    <PageWrapper
+      role="main"
+      breadcrumbs={[
+        { title: t("providerInformation.breadcrumbs.dashboard"), href: "/" },
+        {
+          title: t("providerInformation.breadcrumbs.providerInformation"),
+          href: "/provider-information",
+        },
+      ]}
+    >
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] justify-between">
           <h2 className="h5 md:h3 text-neutral-950">{t("providerInformation.title")}</h2>
