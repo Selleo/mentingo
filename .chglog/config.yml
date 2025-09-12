@@ -13,6 +13,8 @@ options:
         - fix
         - refactor
         - style
+        - docs
+        - test
   commit_groups:
     title_maps:
       chore: "Chores:"
@@ -20,8 +22,10 @@ options:
       fix: "Bug Fixes:"
       refactor: "Code Refactoring:"
       style: "Styles:"
+      docs: "Documentation:"
+      test: "Tests:"
   header:
-    pattern: "^(\\w*)\\:\\s(.*)$"
+    pattern: "^(\\w+)(?:\\([^)]+\\))?:\\s(.*)$"
     pattern_maps:
       - Type
       - Subject

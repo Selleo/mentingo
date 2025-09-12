@@ -41,7 +41,8 @@
       "private": "Niepubliczny",
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
-      "copyUrl": "Adres URL został skopiowany do schowka"
+      "copyUrl": "Adres URL został skopiowany do schowka",
+      "appVersion": "Wersja aplikacji: {{version}}"
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"

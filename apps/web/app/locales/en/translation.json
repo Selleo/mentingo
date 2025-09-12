@@ -40,7 +40,8 @@
       "private": "Private",
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
-      "copyUrl": "The URL address was copied to the clipboard"
+      "copyUrl": "The URL address was copied to the clipboard",
+      "appVersion": "App Version: {{version}}"
     },
     "continueWithGoogle": "Continue with Google",
     "continueWithMicrosoft": "Continue with Microsoft"
