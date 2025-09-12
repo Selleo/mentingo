@@ -1,3 +1,7 @@
+<a name="learn-v2025.09.12"></a>
+
+## [learn-v2025.09.12] - 01.01.0001
+
 <a name="v3.2.1"></a>
 
 ## [v3.2.1] - 12.09.2025
@@ -19,6 +23,10 @@
 ### Chores:
 
 - Drop unused demo ([#628](https://github.com/Selleo/mentingo/issues/628))
+
+### Documentation:
+
+- update changelog for version v3.2.1
 
 ### Features:
 
@@ -1354,7 +1362,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/learn-v2025.09.12...HEAD
+[learn-v2025.09.12]: https://github.com/Selleo/mentingo/compare/v3.2.1...learn-v2025.09.12
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
 [v3.2.0]: https://github.com/Selleo/mentingo/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/Selleo/mentingo/compare/v3.0.6...v3.1.0
