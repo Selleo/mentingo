@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
+import { version } from "~/../version.json";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import LogoUrl from "~/assets/menitngo_logo_light_transparent.svg";
@@ -122,6 +123,9 @@ export default function LoginPage() {
             {t("loginView.other.signUp")}
           </Link>
         </div>
+        <p className="bottom-4 mt-4 text-center text-sm text-neutral-300">
+          {t("common.other.appVersion", { version })}
+        </p>
       </CardContent>
     </Card>
   );
