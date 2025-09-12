@@ -34,13 +34,13 @@ export class S3Service {
   }
 
   private loadS3Config() {
-    const awsConfig = this.getS3Config("aws.AWS");
-    if (this.isValidAwsConfig(awsConfig)) {
-      return awsConfig;
+    const s3Config = this.getS3Config("s3.S3");
+    if (this.isValidS3Config(s3Config)) {
+      return s3Config;
     }
 
-    const s3Config = this.getS3Config("s3.S3");
-    return s3Config;
+    const awsConfig = this.getS3Config("aws.AWS");
+    return awsConfig;
   }
 
   private getS3Config(prefix: string) {
@@ -53,13 +53,20 @@ export class S3Service {
     };
   }
 
-  private isValidAwsConfig(config: {
+  private isValidS3Config(config: {
+    endpoint: string;
     region: string;
     accessKeyId: string;
     secretAccessKey: string;
     bucketName: string;
   }): boolean {
-    return !!(config.region && config.accessKeyId && config.secretAccessKey && config.bucketName);
+    return !!(
+      config.region &&
+      config.accessKeyId &&
+      config.secretAccessKey &&
+      config.bucketName &&
+      config.endpoint
+    );
   }
 
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
