@@ -15,6 +15,8 @@ export const DEFAULT_GLOBAL_SETTINGS = {
 
 export const DEFAULT_STUDENT_SETTINGS = {
   language: "en",
+  isMFAEnabled: false,
+  MFASecret: null,
 };
 
 export const DEFAULT_ADMIN_SETTINGS = {

@@ -1240,6 +1240,31 @@
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },
+  "mfa": {
+    "setup": {
+      "title": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
+      "description": "Wykonaj poniższe kroki, aby skonfigurować uwierzytelnianie dwuskładnikowe (MFA) dla swojego konta.",
+      "scanQr": "Zeskanuj poniższy kod QR za pomocą aplikacji uwierzytelniającej (Google Authenticator, Authy itp.).",
+      "manualEntry": "Jeśli nie możesz zeskanować, wprowadź sekret ręcznie w aplikacji.",
+      "enterCode": "Wprowadź 6-cyfrowy kod z aplikacji poniżej i kliknij 'Zweryfikuj i włącz MFA'.",
+      "loadingQr": "Ładowanie kodu QR...",
+      "secretLabel": "Sekret",
+      "tokenLabel": "Kod MFA",
+      "verifyButton": "Zweryfikuj i włącz MFA"
+    },
+    "verify": {
+      "title": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
+      "description": "Wykonaj poniższe kroki, aby skonfigurować uwierzytelnianie dwuskładnikowe (MFA) dla swojego konta.",
+      "openAuthenticator": "Otwórz aplikację uwierzytelniającą (Google Authenticator, Authy itp.).",
+      "enterCode": "Wprowadź 6-cyfrowy kod z aplikacji",
+      "verifyToken": "Zweryfikuj swój kod MFA",
+      "tokenLabel": "Kod MFA",
+      "toast": {
+        "success": "Weryfikacja MFA zakończona pomyślnie.",
+        "error": "Weryfikacja MFA nie powiodła się."
+      }
+    }
+  },
   "progressBadge": {
     "completed": "Ukończone",
     "inProgress": "W trakcie",

@@ -24,11 +24,18 @@ import { UserActivityEvent } from "src/events";
 import { SettingsService } from "src/settings/settings.service";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
 import { LoginBody, loginSchema } from "./schemas/login.schema";
+import {
+  MFASetupResponseSchema,
+  MFAVerifyBody,
+  MFAVerifyResponseSchema,
+  MFAVerifySchema,
+} from "./schemas/mfa.schema";
 import {
   ForgotPasswordBody,
   forgotPasswordSchema,
@@ -48,6 +55,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
+    private readonly userService: UserService,
     private readonly eventBus: EventBus,
     private readonly settingsService: SettingsService,
   ) {
@@ -93,7 +101,7 @@ export class AuthController {
 
     const { accessToken, refreshToken, ...account } = await this.authService.login(data);
 
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
+    this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
     return new BaseResponse(account);
   }
@@ -233,5 +241,35 @@ export class AuthController {
     this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
     response.redirect(this.APP_URL);
+  }
+
+  @Post("mfa/setup")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    response: baseResponse(MFASetupResponseSchema),
+  })
+  async MFASetup(@CurrentUser("userId") userId: UUIDType) {
+    const { secret, otpauth } = await this.authService.generateMFASecret(userId);
+
+    return new BaseResponse({
+      secret,
+      otpauth,
+    });
+  }
+
+  @Post("mfa/verify")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    request: [{ type: "body", schema: MFAVerifySchema }],
+    response: baseResponse(MFAVerifyResponseSchema),
+  })
+  async MFAVerify(
+    @Body() body: MFAVerifyBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const isValid = await this.authService.verifyMFACode(userId, body.token, response);
+
+    return new BaseResponse({ isValid });
   }
 }
