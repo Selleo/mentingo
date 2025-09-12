@@ -9,6 +9,9 @@ export const ALLOWED_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   "video/mp4",
   "video/quicktime",
+  "text/csv",
+  "application/csv",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ] as const;
 
 export const EXTENSION_TO_MIME_TYPE_MAP: Record<string, string> = {
@@ -20,4 +23,6 @@ export const EXTENSION_TO_MIME_TYPE_MAP: Record<string, string> = {
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   mp4: "video/mp4",
   mov: "video/quicktime",
+  csv: "text/csv",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };

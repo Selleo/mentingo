@@ -1,0 +1,7 @@
+name,surname,email,role
+John,Doe,invalid-email,STUDENT
+Jane,,jane.smith@example.com,CONTENT_CREATOR
+Bob,Johnson,bob.johnson@example.com,INVALID_ROLE
+,Williams,alice.williams@example.com,STUDENT
+Charlie,Brown,duplicate@example.com,STUDENT
+David,Miller,duplicate@example.com,ADMIN
