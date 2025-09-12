@@ -237,6 +237,7 @@ describe("CourseController (e2e)", () => {
         it("filters by status", async () => {
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
