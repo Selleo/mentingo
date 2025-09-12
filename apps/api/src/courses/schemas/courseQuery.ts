@@ -40,6 +40,14 @@ export const sortCourseFieldsOptions = Type.Union([
 
 export type SortCourseFieldsOptions = Static<typeof sortCourseFieldsOptions>;
 
+export const coursesStatusOptions = Type.Union([
+  Type.Literal("draft"),
+  Type.Literal("published"),
+  Type.Literal("private"),
+]);
+
+export type CoursesStatusOptions = Static<typeof coursesStatusOptions>;
+
 export const coursesFilterFiled = Type.Union([
   Type.Literal("title"),
   Type.Literal("category"),
@@ -52,7 +60,7 @@ export type CoursesFilterFiled = Static<typeof coursesFilterFiled>;
 export const coursesFilterSchema = Type.Object({
   title: Type.Optional(Type.String()),
   category: Type.Optional(Type.String()),
-  isPublished: Type.Optional(Type.Boolean()),
+  status: Type.Optional(coursesStatusOptions),
   creationDateRange: Type.Optional(
     Type.Tuple([Type.String({ format: "date-time" }), Type.String({ format: "date-time" })]),
   ),

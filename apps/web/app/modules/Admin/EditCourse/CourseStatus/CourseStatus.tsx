@@ -5,20 +5,25 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { cn } from "~/lib/utils";
 
+import { useCourseStatusFlags } from "../hooks/useCourseStatusFlags";
+
+import CourseStatusCard from "./CourseStatusCard";
 import { useCourseStatusForm } from "./hooks/useCourseStatusForm";
+
+import type { CourseStatus } from "~/api/queries/useCourses";
 
 type CoursePublishStatusProps = {
   courseId: string;
-  isPublished?: boolean;
+  status: CourseStatus;
 };
 
-const CoursePublishStatus = ({ courseId, isPublished }: CoursePublishStatusProps) => {
-  const { form, onSubmit } = useCourseStatusForm({ courseId, isPublished });
+const CoursePublishStatus = ({ courseId, status }: CoursePublishStatusProps) => {
+  const { form, onSubmit } = useCourseStatusForm({ courseId, status });
   const { t } = useTranslation();
+
+  const currentStatus = form.watch("status");
+  const { isPublished, isDraft, isPrivate } = useCourseStatusFlags(currentStatus);
 
   return (
     <div className="flex w-full max-w-[744px] flex-col gap-y-6 bg-white p-8">
@@ -29,87 +34,32 @@ const CoursePublishStatus = ({ courseId, isPublished }: CoursePublishStatusProps
       <Form {...form}>
         <form className="flex flex-col gap-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
-            name="isPublished"
+            name="status"
             control={form.control}
             render={({ field }) => (
               <FormItem>
                 <div className="flex flex-col space-y-6">
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
-                      {
-                        "border-blue-500": field.value === false,
-                        "border-gray-300": field.value !== false,
-                      },
-                    )}
-                    onClick={() => field.onChange(false)}
-                  >
-                    <div className="mt-1.5">
-                      <Input
-                        type="radio"
-                        name="isPublished"
-                        checked={field.value === false}
-                        onChange={() => field.onChange(false)}
-                        className="size-4 cursor-pointer p-1"
-                        id="draft"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="draft" className="body-lg-md cursor-pointer text-neutral-950">
-                        <div className="body-lg-md mb-2 text-neutral-950">
-                          {t("adminCourseView.status.draftHeader")}
-                        </div>
-                      </Label>
-                      <p
-                        className={cn("body-base mt-1", {
-                          "text-black": field.value === false,
-                          "text-gray-500": field.value !== false,
-                        })}
-                      >
-                        {t("adminCourseView.status.draftBody")}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    className={cn(
-                      "flex cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4",
-                      {
-                        "border-blue-500": field.value === true,
-                        "border-gray-300": field.value !== true,
-                      },
-                    )}
-                    onClick={() => field.onChange(true)}
-                  >
-                    <div className="mt-1.5">
-                      <Input
-                        type="radio"
-                        name="isPublished"
-                        checked={field.value === true}
-                        onChange={() => field.onChange(true)}
-                        className="size-4 cursor-pointer p-1"
-                        id="published"
-                      />
-                    </div>
-                    <div>
-                      <Label
-                        htmlFor="published"
-                        className="body-lg-md cursor-pointer text-neutral-950"
-                      >
-                        <div className="body-lg-md mb-2 text-neutral-950">
-                          {t("adminCourseView.status.publishedHeader")}
-                        </div>
-                      </Label>
-                      <p
-                        className={cn("body-base mt-1", {
-                          "text-neutral-950": field.value === true,
-                          "text-neutral-900": field.value !== true,
-                        })}
-                      >
-                        {t("adminCourseView.status.publishedBody")}
-                      </p>
-                    </div>
-                  </div>
+                  <CourseStatusCard
+                    checked={isDraft}
+                    onChange={() => field.onChange("draft")}
+                    headerKey="adminCourseView.status.draftHeader"
+                    bodyKey="adminCourseView.status.draftBody"
+                    id="draft"
+                  />
+                  <CourseStatusCard
+                    checked={isPrivate}
+                    onChange={() => field.onChange("private")}
+                    headerKey="adminCourseView.status.privateHeader"
+                    bodyKey="adminCourseView.status.privateBody"
+                    id="private"
+                  />
+                  <CourseStatusCard
+                    checked={isPublished}
+                    onChange={() => field.onChange("published")}
+                    headerKey="adminCourseView.status.publishedHeader"
+                    bodyKey="adminCourseView.status.publishedBody"
+                    id="published"
+                  />
                 </div>
                 <FormMessage />
               </FormItem>

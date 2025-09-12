@@ -39,6 +39,7 @@ const CourseCard = ({
   return (
     <Link
       to={isScormCreatePage ? "#" : `/course/${id}`}
+      data-testid={title}
       className={cn(
         "flex h-auto w-full max-w-[320px] flex-col overflow-hidden rounded-lg border bg-white transition hover:shadow-primary lg:bg-none",
         {

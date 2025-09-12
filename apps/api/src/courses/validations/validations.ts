@@ -3,6 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { baseResponse, paginatedResponse, UUIDSchema } from "src/common";
 import { allCoursesSchema, allStudentCoursesSchema } from "src/courses/schemas/course.schema";
 import {
+  coursesStatusOptions,
   sortCourseFieldsOptions,
   sortEnrolledStudentsOptions,
 } from "src/courses/schemas/courseQuery";
@@ -22,8 +23,8 @@ export const allCoursesValidation = {
     },
     {
       type: "query" as const,
-      name: "isPublished",
-      schema: Type.String(),
+      name: "status",
+      schema: coursesStatusOptions,
     },
     { type: "query" as const, name: "sort", schema: sortCourseFieldsOptions },
     {

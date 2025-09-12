@@ -119,6 +119,82 @@ export interface MFAVerifyResponse {
   };
 }
 
+export interface GetUserStatisticsResponse {
+  data: {
+    averageStats: {
+      lessonStats: {
+        started: number;
+        completed: number;
+        completionRate: number;
+      };
+      courseStats: {
+        started: number;
+        completed: number;
+        completionRate: number;
+      };
+    };
+    quizzes: {
+      totalAttempts: number;
+      totalCorrectAnswers: number;
+      totalWrongAnswers: number;
+      totalQuestions: number;
+      averageScore: number;
+      uniqueQuizzesTaken: number;
+    };
+    courses: object;
+    lessons: object;
+    streak: {
+      current: number;
+      longest: number;
+      activityHistory: object;
+    };
+    nextLesson: {
+      /** @format uuid */
+      courseId: string;
+      courseTitle: string;
+      courseDescription: string;
+      courseThumbnail: string;
+      /** @format uuid */
+      lessonId: string;
+      chapterTitle: string;
+      chapterProgress: "not_started" | "in_progress" | "completed" | "blocked";
+      completedLessonCount: number;
+      lessonCount: number;
+      chapterDisplayOrder: number;
+    } | null;
+  };
+}
+
+export interface GetContentCreatorStatsResponse {
+  data: {
+    fiveMostPopularCourses: {
+      courseName: string;
+      studentCount: number;
+    }[];
+    totalCoursesCompletionStats: {
+      completionPercentage: number;
+      totalCoursesCompletion: number;
+      totalCourses: number;
+    };
+    conversionAfterFreemiumLesson: {
+      conversionPercentage: number;
+      purchasedCourses: number;
+      remainedOnFreemium: number;
+    };
+    courseStudentsStats: object;
+    avgQuizScore: {
+      correctAnswerCount: number;
+      wrongAnswerCount: number;
+      answerCount: number;
+    };
+  };
+}
+
+export interface FileUploadResponse {
+  fileKey: string;
+  fileUrl: string;
+}
+
 export interface GetUsersResponse {
   data: ({
     id: string;
@@ -288,11 +364,6 @@ export interface CreateUserResponse {
   };
 }
 
-export interface FileUploadResponse {
-  fileKey: string;
-  fileUrl: string;
-}
-
 export interface GetAllCategoriesResponse {
   data: {
     /** @format uuid */
@@ -379,7 +450,7 @@ export interface GetAllCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
   }[];
@@ -408,7 +479,7 @@ export interface GetStudentCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
     completedChapterCount: number;
@@ -452,7 +523,7 @@ export interface GetAvailableCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
     completedChapterCount: number;
@@ -483,7 +554,7 @@ export interface GetContentCreatorCoursesResponse {
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
-    isPublished?: boolean;
+    status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
     completedChapterCount: number;
@@ -510,12 +581,12 @@ export interface GetCourseResponse {
         title: string;
         type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
         displayOrder: number;
-        status: "not_started" | "in_progress" | "completed";
+        status: "not_started" | "in_progress" | "completed" | "blocked";
         quizQuestionCount: number | null;
         isExternal?: boolean;
       }[];
       completedLessonCount?: number;
-      chapterProgress?: "not_started" | "in_progress" | "completed";
+      chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
       isFreemium?: boolean;
       enrolled?: boolean;
       isSubmitted?: boolean;
@@ -532,7 +603,7 @@ export interface GetCourseResponse {
     hasFreeChapter?: boolean;
     /** @format uuid */
     id: string;
-    isPublished: boolean | null;
+    status: "draft" | "published" | "private";
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
@@ -606,7 +677,7 @@ export interface GetBetaCourseByIdResponse {
         updatedAt?: string;
       }[];
       completedLessonCount?: number;
-      chapterProgress?: "not_started" | "in_progress" | "completed";
+      chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
       isFreemium?: boolean;
       enrolled?: boolean;
       isSubmitted?: boolean;
@@ -623,7 +694,7 @@ export interface GetBetaCourseByIdResponse {
     hasFreeChapter?: boolean;
     /** @format uuid */
     id: string;
-    isPublished: boolean | null;
+    status: "draft" | "published" | "private";
     isScorm?: boolean;
     priceInCents: number;
     thumbnailUrl?: string;
@@ -636,7 +707,7 @@ export interface GetBetaCourseByIdResponse {
 export type CreateCourseBody = {
   title: string;
   description: string;
-  isPublished?: boolean;
+  status?: "draft" | "published" | "private";
   thumbnailS3Key?: string;
   priceInCents?: number;
   currency?: string;
@@ -659,7 +730,7 @@ export interface UpdateCourseBody {
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
-  isPublished?: boolean;
+  status?: "draft" | "published" | "private";
   priceInCents?: number;
   currency?: string;
   /** @format uuid */
@@ -700,77 +771,6 @@ export type DeleteManyCoursesResponse = null;
 
 export type UnenrollCourseResponse = null;
 
-export interface GetUserStatisticsResponse {
-  data: {
-    averageStats: {
-      lessonStats: {
-        started: number;
-        completed: number;
-        completionRate: number;
-      };
-      courseStats: {
-        started: number;
-        completed: number;
-        completionRate: number;
-      };
-    };
-    quizzes: {
-      totalAttempts: number;
-      totalCorrectAnswers: number;
-      totalWrongAnswers: number;
-      totalQuestions: number;
-      averageScore: number;
-      uniqueQuizzesTaken: number;
-    };
-    courses: object;
-    lessons: object;
-    streak: {
-      current: number;
-      longest: number;
-      activityHistory: object;
-    };
-    nextLesson: {
-      /** @format uuid */
-      courseId: string;
-      courseTitle: string;
-      courseDescription: string;
-      courseThumbnail: string;
-      /** @format uuid */
-      lessonId: string;
-      chapterTitle: string;
-      chapterProgress: "not_started" | "in_progress" | "completed";
-      completedLessonCount: number;
-      lessonCount: number;
-      chapterDisplayOrder: number;
-    } | null;
-  };
-}
-
-export interface GetContentCreatorStatsResponse {
-  data: {
-    fiveMostPopularCourses: {
-      courseName: string;
-      studentCount: number;
-    }[];
-    totalCoursesCompletionStats: {
-      completionPercentage: number;
-      totalCoursesCompletion: number;
-      totalCourses: number;
-    };
-    conversionAfterFreemiumLesson: {
-      conversionPercentage: number;
-      purchasedCourses: number;
-      remainedOnFreemium: number;
-    };
-    courseStudentsStats: object;
-    avgQuizScore: {
-      correctAnswerCount: number;
-      wrongAnswerCount: number;
-      answerCount: number;
-    };
-  };
-}
-
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -783,12 +783,12 @@ export interface GetChapterWithLessonResponse {
       title: string;
       type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
       displayOrder: number;
-      status: "not_started" | "in_progress" | "completed";
+      status: "not_started" | "in_progress" | "completed" | "blocked";
       quizQuestionCount: number | null;
       isExternal?: boolean;
     }[];
     completedLessonCount?: number;
-    chapterProgress?: "not_started" | "in_progress" | "completed";
+    chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
     isFreemium?: boolean;
     enrolled?: boolean;
     isSubmitted?: boolean;
@@ -853,7 +853,7 @@ export type BetaCreateChapterBody = {
     } | null;
     updatedAt?: string;
   }[];
-  chapterProgress?: "not_started" | "in_progress" | "completed";
+  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
   isFreemium?: boolean;
   enrolled?: boolean;
   isSubmitted?: boolean;
@@ -927,7 +927,7 @@ export type UpdateChapterBody = {
     } | null;
     updatedAt?: string;
   }[];
-  chapterProgress?: "not_started" | "in_progress" | "completed";
+  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
   isFreemium?: boolean;
   enrolled?: boolean;
   isSubmitted?: boolean;
@@ -969,68 +969,6 @@ export interface UpdateFreemiumStatusBody {
 
 export interface UpdateFreemiumStatusResponse {
   data: {
-    message: string;
-  };
-}
-
-export type BetaCreateLessonBody = {
-  title: string;
-  type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
-  description?: string | null;
-  fileS3Key?: string | null;
-  fileType?: string | null;
-  questions?: {
-    /** @format uuid */
-    id?: string;
-    type:
-      | "brief_response"
-      | "detailed_response"
-      | "match_words"
-      | "scale_1_5"
-      | "single_choice"
-      | "multiple_choice"
-      | "true_or_false"
-      | "photo_question_single_choice"
-      | "photo_question_multiple_choice"
-      | "fill_in_the_blanks_text"
-      | "fill_in_the_blanks_dnd";
-    description?: string | null;
-    title: string;
-    displayOrder?: number;
-    solutionExplanation?: string;
-    photoS3Key?: string | null;
-    options?: {
-      /** @format uuid */
-      id?: string;
-      optionText: string;
-      displayOrder: number | null;
-      isStudentAnswer?: boolean | null;
-      isCorrect: boolean;
-      /** @format uuid */
-      questionId?: string;
-      matchedWord?: string | null;
-      scaleAnswer?: number | null;
-    }[];
-  }[];
-  aiMentor?: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    lessonId: string;
-    aiMentorInstructions: string;
-    completionConditions: string;
-  } | null;
-  updatedAt?: string;
-} & {
-  /** @format uuid */
-  chapterId: string;
-  displayOrder?: number;
-};
-
-export interface BetaCreateLessonResponse {
-  data: {
-    /** @format uuid */
-    id: string;
     message: string;
   };
 }
@@ -1097,6 +1035,68 @@ export interface GetLessonByIdResponse {
     status?: "active" | "completed" | "archived";
     /** @format uuid */
     threadId?: string;
+  };
+}
+
+export type BetaCreateLessonBody = {
+  title: string;
+  type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+  description?: string | null;
+  fileS3Key?: string | null;
+  fileType?: string | null;
+  questions?: {
+    /** @format uuid */
+    id?: string;
+    type:
+      | "brief_response"
+      | "detailed_response"
+      | "match_words"
+      | "scale_1_5"
+      | "single_choice"
+      | "multiple_choice"
+      | "true_or_false"
+      | "photo_question_single_choice"
+      | "photo_question_multiple_choice"
+      | "fill_in_the_blanks_text"
+      | "fill_in_the_blanks_dnd";
+    description?: string | null;
+    title: string;
+    displayOrder?: number;
+    solutionExplanation?: string;
+    photoS3Key?: string | null;
+    options?: {
+      /** @format uuid */
+      id?: string;
+      optionText: string;
+      displayOrder: number | null;
+      isStudentAnswer?: boolean | null;
+      isCorrect: boolean;
+      /** @format uuid */
+      questionId?: string;
+      matchedWord?: string | null;
+      scaleAnswer?: number | null;
+    }[];
+  }[];
+  aiMentor?: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    lessonId: string;
+    aiMentorInstructions: string;
+    completionConditions: string;
+  } | null;
+  updatedAt?: string;
+} & {
+  /** @format uuid */
+  chapterId: string;
+  displayOrder?: number;
+};
+
+export interface BetaCreateLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
   };
 }
 
@@ -1731,18 +1731,6 @@ export interface UpdateUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
-      }
-    | {
-        unregisteredUserCoursesAccessibility: boolean;
-        enforceSSO: boolean;
-        companyInformation?: {
-          companyName?: string;
-          registeredAddress?: string;
-          taxNumber?: string;
-          emailAddress?: string;
-          courtRegisterNumber?: string;
-        };
-        platformLogoS3Key: string | null;
       };
 }
 
@@ -2185,6 +2173,78 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name StatisticsControllerGetUserStatistics
+     * @request GET:/api/statistics/user-stats
+     */
+    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
+      this.request<GetUserStatisticsResponse, any>({
+        path: `/api/statistics/user-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetContentCreatorStats
+     * @request GET:/api/statistics/content-creator-stats
+     */
+    statisticsControllerGetContentCreatorStats: (params: RequestParams = {}) =>
+      this.request<GetContentCreatorStatsResponse, any>({
+        path: `/api/statistics/content-creator-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerUploadFile
+     * @request POST:/api/file
+     */
+    fileControllerUploadFile: (
+      data: {
+        /** @format binary */
+        file?: File;
+        /** Optional resource type */
+        resource?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FileUploadResponse, any>({
+        path: `/api/file`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerDeleteFile
+     * @request DELETE:/api/file
+     */
+    fileControllerDeleteFile: (
+      query: {
+        /** Key of the file to delete */
+        fileKey: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name HealthControllerCheck
      * @request GET:/api/healthcheck
      */
@@ -2507,50 +2567,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name FileControllerUploadFile
-     * @request POST:/api/file
-     */
-    fileControllerUploadFile: (
-      data: {
-        /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FileUploadResponse, any>({
-        path: `/api/file`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name TestConfigControllerSetup
      * @request POST:/api/test-config/setup
      */
@@ -2694,7 +2710,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         category?: string;
         author?: string;
         creationDateRange?: string[];
-        isPublished?: string;
+        status?: "draft" | "published" | "private";
         sort?:
           | "title"
           | "category"
@@ -3023,34 +3039,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name StatisticsControllerGetUserStatistics
-     * @request GET:/api/statistics/user-stats
-     */
-    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
-      this.request<GetUserStatisticsResponse, any>({
-        path: `/api/statistics/user-stats`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StatisticsControllerGetContentCreatorStats
-     * @request GET:/api/statistics/content-creator-stats
-     */
-    statisticsControllerGetContentCreatorStats: (params: RequestParams = {}) =>
-      this.request<GetContentCreatorStatsResponse, any>({
-        path: `/api/statistics/content-creator-stats`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name ChapterControllerGetChapterWithLesson
      * @request GET:/api/chapter
      */
@@ -3176,6 +3164,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonControllerGetLessonById
+     * @request GET:/api/lesson/{id}
+     */
+    lessonControllerGetLessonById: (
+      id: string,
+      query: {
+        userLanguage: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLessonByIdResponse, any>({
+        path: `/api/lesson/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LessonControllerBetaCreateLesson
      * @request POST:/api/lesson/beta-create-lesson
      */
@@ -3185,27 +3194,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LessonControllerGetLessonById
-     * @request GET:/api/lesson/{id}
-     */
-    lessonControllerGetLessonById: (
-      id: string,
-      query?: {
-        userLanguage?: "pl" | "en";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetLessonByIdResponse, any>({
-        path: `/api/lesson/${id}`,
-        method: "GET",
-        query: query,
         format: "json",
         ...params,
       }),

@@ -37,6 +37,7 @@
       "all": "All",
       "search": "Search",
       "published": "Published",
+      "private": "Private",
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
       "copyUrl": "The URL address was copied to the clipboard"
@@ -146,7 +147,11 @@
       "krsMustBe10Digits": "KRS must be 10 digits",
       "invalidEmailFormat": "Invalid email format"
     },
-    "noCompanyInformationAvailable": "No company information available"
+    "noCompanyInformationAvailable": "No company information available",
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "providerInformation": "Provider Information"
+    }
   },
   "changeUserLanguageView": {
     "header": "Change Language",
@@ -368,7 +373,8 @@
       },
       "other": {
         "draft": "Draft",
-        "published": "Published"
+        "published": "Published",
+        "private": "Private"
       }
     },
     "field": {
@@ -437,6 +443,7 @@
       "deleteCategoryFailed": "Failed to delete category"
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "categories": "Categories",
       "createNew": "Create new category",
       "back": "Back"
@@ -523,6 +530,7 @@
       }
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "users": "Users",
       "createNew": "Create new user",
       "back": "Back"
@@ -556,6 +564,7 @@
       "userNotFound": "User not found"
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "users": "Users",
       "userDetails": "User details",
       "back": "Back"
@@ -599,6 +608,7 @@
       "submit": "Delete"
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "groups": "Groups",
       "createNew": "Create new",
       "editGroup": "Edit group",
@@ -874,7 +884,9 @@
       "draftHeader": "Draft",
       "draftBody": "Students cannot purchase or enroll in this course. For those already enrolled, the course will not appear in their Student Course List.",
       "publishedHeader": "Published",
-      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard."
+      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard.",
+      "privateHeader": "Private",
+      "privateBody": "Students cannot purchase nor enroll in this course. For those enrolled (e.g. by admin), the course will appear in their Student Course list and they will be able to go through it."
     },
     "pricing": {
       "header": "Pricing",
@@ -918,6 +930,7 @@
       "successResponse": "students have been assigned to the course."
     },
     "breadcrumbs": {
+      "dashboard": "Dashboard",
       "myCourses": "My courses",
       "back": "Back"
     }
@@ -1001,6 +1014,10 @@
       "changeSearchCriteria": "Please change the search criteria or try again later",
       "freeLessons": "Free Lessons!",
       "successfullyEnrolledToCourse": "Successfully enrolled in the course"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "availableCourses": "Available Courses"
     },
     "button": {
       "continue": "Continue",
@@ -1175,9 +1192,17 @@
     "chapterProgress": {
       "header": "Table of content:",
       "courseProgress": "Course progress"
+    },
+    "button": {
+      "open": "Open",
+      "continue": "Continue",
+      "playChapter": "Play chapter"
+    },
+    "other": {
+      "enrollmentRequired": "Enroll in the course to open.",
+      "purchaseRequired": "Unlock this lesson by purchasing the course."
     }
   },
-
   "settings": {
     "title": "Settings",
     "buttons": {
@@ -1187,9 +1212,12 @@
     "tabs": {
       "account": "Account",
       "organization": "Organization"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "settings": "Settings"
     }
   },
-
   "adminPreferences": {
     "header": "Administrator Global Preferences",
     "subHeader": "Configure global system settings, user preferences, and administrative options",
@@ -1230,5 +1258,11 @@
         "error": "MFA verification failed."
       }
     }
+  },
+  "progressBadge": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started",
+    "blocked": "Blocked"
   }
 }

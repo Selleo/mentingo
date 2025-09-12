@@ -3,6 +3,8 @@ import { type Static, Type } from "@sinclair/typebox";
 import { chapterSchema, showChapterSchema } from "src/chapter/schemas/chapter.schema";
 import { UUIDSchema } from "src/common";
 
+import { coursesStatusOptions } from "./courseQuery";
+
 export const commonShowCourseSchema = Type.Object({
   archived: Type.Optional(Type.Boolean()),
   authorId: Type.Optional(UUIDSchema),
@@ -16,7 +18,7 @@ export const commonShowCourseSchema = Type.Object({
   enrolled: Type.Optional(Type.Boolean()),
   hasFreeChapter: Type.Optional(Type.Boolean()),
   id: Type.String({ format: "uuid" }),
-  isPublished: Type.Union([Type.Boolean(), Type.Null()]),
+  status: coursesStatusOptions,
   isScorm: Type.Optional(Type.Boolean()),
   priceInCents: Type.Number(),
   thumbnailUrl: Type.Optional(Type.String()),
@@ -36,7 +38,7 @@ export const commonShowBetaCourseSchema = Type.Object({
   enrolled: Type.Optional(Type.Boolean()),
   hasFreeChapter: Type.Optional(Type.Boolean()),
   id: Type.String({ format: "uuid" }),
-  isPublished: Type.Union([Type.Boolean(), Type.Null()]),
+  status: coursesStatusOptions,
   isScorm: Type.Optional(Type.Boolean()),
   priceInCents: Type.Number(),
   thumbnailUrl: Type.Optional(Type.String()),

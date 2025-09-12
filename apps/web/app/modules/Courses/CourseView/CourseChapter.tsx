@@ -1,4 +1,4 @@
-import { useNavigate } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { find } from "lodash-es";
 import { useTranslation } from "react-i18next";
 
@@ -19,10 +19,11 @@ import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseChapterProps = {
   chapter: GetCourseResponse["data"]["chapters"][0];
-  enrolled: GetCourseResponse["data"]["enrolled"];
+  courseId: string;
+  isEnrolled: boolean;
 };
 
-export const CourseChapter = ({ chapter }: CourseChapterProps) => {
+export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterProps) => {
   const { t } = useTranslation();
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
@@ -42,7 +43,13 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
       chapter.lessons,
       (lesson) => lesson.status === "not_started",
     )?.id;
-    const lessonToPlay = firstNotStartedLesson ?? chapter.lessons[0].id;
+
+    const firstInProgressLesson = find(
+      chapter.lessons,
+      (lesson) => lesson.status === "in_progress",
+    )?.id;
+
+    const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? chapter.lessons[0].id;
 
     return navigate(`lesson/${lessonToPlay}`);
   };
@@ -56,7 +63,10 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
             displayOrder={chapter.displayOrder}
           />
           <div className="flex w-full flex-col">
-            <AccordionTrigger className="border text-start data-[state=closed]:rounded-lg data-[state=open]:rounded-t-lg data-[state=open]:border-primary-500 data-[state=open]:bg-primary-50 [&[data-state=open]>div>div>svg]:rotate-180 [&[data-state=open]>div>div>svg]:duration-200 [&[data-state=open]>div>div>svg]:ease-out">
+            <AccordionTrigger
+              data-testid={chapter.title}
+              className="border text-start data-[state=closed]:rounded-lg data-[state=open]:rounded-t-lg data-[state=open]:border-primary-500 data-[state=open]:bg-primary-50 [&[data-state=open]>div>div>svg]:rotate-180 [&[data-state=open]>div>div>svg]:duration-200 [&[data-state=open]>div>div>svg]:ease-out"
+            >
               <div className="flex w-full items-center gap-x-1 px-2 py-4 md:gap-x-4 md:p-4">
                 <div className="grid size-8 place-items-center">
                   <Icon name="CarretDownLarge" className="h-auto w-6 text-primary-700" />
@@ -105,7 +115,13 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                 {chapter?.lessons?.map((lesson) => {
                   if (!lesson) return null;
 
-                  return <CourseChapterLesson key={lesson.id} lesson={lesson} />;
+                  return chapter.isFreemium || isEnrolled ? (
+                    <Link to={`/course/${courseId}/lesson/${lesson.id}`}>
+                      <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                    </Link>
+                  ) : (
+                    <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                  );
                 })}
                 {chapter.isFreemium && (
                   <Button
