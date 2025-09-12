@@ -6,6 +6,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { requestManager, ApiClient } from "../api-client";
+import { queryClient } from "../queryClient";
 
 import { useAuthStore } from "./../../modules/Auth/authStore";
 
@@ -28,6 +29,8 @@ export function useLogoutUser() {
     },
     onSuccess: () => {
       requestManager.abortAll();
+
+      queryClient.invalidateQueries();
 
       navigate("/auth/login");
     },
