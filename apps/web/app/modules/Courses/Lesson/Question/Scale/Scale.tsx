@@ -16,7 +16,11 @@ export const Scale = ({ question, isCompleted }: ScaleProps) => {
       questionType="scale"
       questionNumber={question.displayOrder}
     >
-      <ScaleOptionList options={question.options ?? []} isCompleted={isCompleted} />
+      <ScaleOptionList
+        options={question.options ?? []}
+        questionId={question.id}
+        isCompleted={isCompleted}
+      />
     </QuestionCard>
   );
 };

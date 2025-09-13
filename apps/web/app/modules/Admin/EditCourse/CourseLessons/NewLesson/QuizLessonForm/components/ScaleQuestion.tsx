@@ -96,10 +96,19 @@ const ScaleQuestion = ({ form, questionIndex }: ScaleQuestionProps) => {
               <SortableList
                 items={watchedOptions}
                 onChange={(updatedItems) => {
-                  console.log("updatedItems", updatedItems);
-                  form.setValue(`questions.${questionIndex}.options`, updatedItems, {
-                    shouldDirty: true,
-                  });
+                  // Aktualizuj displayOrder zgodnie z nową kolejnością
+                  const itemsWithUpdatedDisplayOrder = updatedItems.map((item, index) => ({
+                    ...item,
+                    displayOrder: index + 1,
+                  }));
+
+                  form.setValue(
+                    `questions.${questionIndex}.options`,
+                    itemsWithUpdatedDisplayOrder,
+                    {
+                      shouldDirty: true,
+                    },
+                  );
                 }}
                 className="grid grid-cols-1"
                 renderItem={(item, index: number) => (

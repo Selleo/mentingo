@@ -68,6 +68,7 @@ export class QuestionRepository {
                   'displayOrder',
                     CASE
                       WHEN ${isCompleted} THEN qao.display_order
+                      WHEN ${questions.type} = ${QUESTION_TYPE.SCALE_1_5} THEN qao.display_order
                       ELSE NULL
                     END,
                     'isStudentAnswer',

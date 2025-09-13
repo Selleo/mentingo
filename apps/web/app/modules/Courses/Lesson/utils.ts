@@ -22,7 +22,7 @@ type GetUserAnswersResult = {
   fillInTheBlanksText: Record<string, Record<string, string>> | Record<string, string>;
   fillInTheBlanksDnd: Record<string, Record<string, string>> | Record<string, string>;
   matchWords: Record<string, Record<string, string>> | Record<string, string>;
-  scaleQuestions: Record<string, Record<string, string>> | Record<string, string>;
+  scaleQuestions: Record<string, string[]>;
   briefResponses: Record<string, string> | Record<string, Record<string, string>>;
   detailedResponses: Record<string, string> | Record<string, Record<string, string>>;
 };
@@ -45,7 +45,7 @@ export const getUserAnswers = (questions: Questions): GetUserAnswersResult => {
     fillInTheBlanksText: prepareAnswers(groupedQuestions.fill_in_the_blanks_text, "options"),
     fillInTheBlanksDnd: prepareAnswers(groupedQuestions.fill_in_the_blanks_dnd, "options"),
     matchWords: prepareAnswers(groupedQuestions.match_words, "options"),
-    scaleQuestions: prepareAnswers(groupedQuestions.scale_1_5, "options"),
+    scaleQuestions: {} as Record<string, string[]>,
     briefResponses: prepareAnswers(groupedQuestions.brief_response, "open"),
     detailedResponses: prepareAnswers(groupedQuestions.detailed_response, "open"),
   } as const;
@@ -197,6 +197,20 @@ export const parseQuizFormData = (input: QuizForm) => {
     }
   };
 
+  const processScaleQuestions = (questionMap: Record<string, string[]>) => {
+    for (const questionId in questionMap) {
+      const answerIds = questionMap[questionId];
+      const answerArray = answerIds.map((answerId) => ({ answerId }));
+
+      if (answerArray.length > 0) {
+        result.push({
+          questionId,
+          answers: answerArray,
+        });
+      }
+    }
+  };
+
   const processSimpleResponses = (questionMap: Record<string, string>) => {
     for (const questionId in questionMap) {
       result.push({
@@ -220,6 +234,7 @@ export const parseQuizFormData = (input: QuizForm) => {
   processFillInTheBlanks(input.fillInTheBlanksDnd);
   processSingleAnswerQuestions(input.photoQuestionMultipleChoice);
   processBooleanQuestions(input.trueOrFalseQuestions);
+  processScaleQuestions(input.scaleQuestions);
 
   return result;
 };

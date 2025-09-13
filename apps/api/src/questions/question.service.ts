@@ -151,8 +151,17 @@ export class QuestionService {
         });
       })
       .with(QUESTION_TYPE.SCALE_1_5, () => {
-        // TODO: implement this
-        return true;
+        if (question.allAnswers.length !== studentAnswer.answers.length) {
+          throw new ConflictException(question.id, "Invalid number of answers for scale question");
+        }
+
+        return question.allAnswers.every((correctAnswer, index) => {
+          const studentAnswerAtIndex = studentAnswer.answers[index];
+          return (
+            this.isAnswerWithId(studentAnswerAtIndex) &&
+            this.getAnswerId(studentAnswerAtIndex) === correctAnswer.answerId
+          );
+        });
       })
       .otherwise(() => {
         throw new Error(`Unsupported question type: ${question.type}`);
@@ -166,6 +175,12 @@ export class QuestionService {
     ) {
       const answer = studentAnswer.answers[0];
       return ["value" in answer ? answer.value : ""];
+    }
+
+    if (question.type === QUESTION_TYPE.SCALE_1_5) {
+      return studentAnswer.answers.map((answer, index) =>
+        this.isAnswerWithId(answer) ? this.getAnswerId(answer) : `unknown-${index}`,
+      );
     }
 
     return studentAnswer.answers.map((answer) => {

@@ -48,6 +48,7 @@ export const QuizFormSchema = (t: typeof i18next.t) =>
           ),
         )
         .optional(),
+      scaleQuestions: z.record(z.array(z.string())).optional(),
     })
     .superRefine((data, ctx) => {
       const requiredFields = {
