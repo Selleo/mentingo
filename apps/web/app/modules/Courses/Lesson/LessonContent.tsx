@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
+import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
 import { Badge } from "~/components/ui/badge";
@@ -44,8 +45,9 @@ export const LessonContent = ({
   isLastLesson,
 }: LessonContentProps) => {
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
+  const { data: user } = useCurrentUser();
   const [isNextDisabled, setIsNextDisabled] = useState(false);
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted();
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { t } = useTranslation();
   const { isAdminLike, isStudent } = useUserRole();
 
@@ -99,7 +101,7 @@ export const LessonContent = ({
   const Content = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
-      .with("quiz", () => <Quiz lesson={lesson} />)
+      .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
       .with("video", () => (
         <Video
           url={lesson.fileUrl}

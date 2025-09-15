@@ -8,6 +8,7 @@ export const requestManager = {
 
   abortAll() {
     this.controller.abort();
+    this.controller = new AbortController();
   },
 };
 

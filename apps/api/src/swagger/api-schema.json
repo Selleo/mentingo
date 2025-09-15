@@ -1806,6 +1806,43 @@
         }
       }
     },
+    "/api/course/update-has-certificate/{id}": {
+      "patch": {
+        "operationId": "CourseController_updateHasCertificate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHasCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateHasCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/enroll-course": {
       "post": {
         "operationId": "CourseController_enrollCourse",
@@ -2498,6 +2535,341 @@
         }
       }
     },
+    "/api/certificates/all": {
+      "get": {
+        "operationId": "CertificatesController_getAllCertificates",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCertificatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/certificate": {
+      "get": {
+        "operationId": "CertificatesController_getCertificate",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/download": {
+      "post": {
+        "operationId": "CertificatesController_downloadCertificate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "operationId": "SettingsController_getUserSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "SettingsController_updateUserSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/new-user-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/unregistered-user-courses-accessibility": {
+      "patch": {
+        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/enforce-sso": {
+      "patch": {
+        "operationId": "SettingsController_updateEnforceSSO",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/platform-logo": {
+      "get": {
+        "operationId": "SettingsController_getPlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updatePlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/company-information": {
+      "get": {
+        "operationId": "SettingsController_getCompanyInformation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/mfa-enforced-roles": {
+      "patch": {
+        "operationId": "SettingsController_updateMFAEnforcedRoles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMFAEnforcedRolesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/certificate-background": {
+      "patch": {
+        "operationId": "SettingsController_updateCertificateBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "certificate-background": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/ai/thread": {
       "get": {
         "operationId": "AiController_getThread",
@@ -3108,205 +3480,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/settings/global": {
-      "get": {
-        "operationId": "SettingsController_getPublicGlobalSettings",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings": {
-      "get": {
-        "operationId": "SettingsController_getUserSettings",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "operationId": "SettingsController_updateUserSettings",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserSettingsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/new-user-notification": {
-      "patch": {
-        "operationId": "SettingsController_updateAdminNewUserNotification",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/unregistered-user-courses-accessibility": {
-      "patch": {
-        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/enforce-sso": {
-      "patch": {
-        "operationId": "SettingsController_updateEnforceSSO",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/platform-logo": {
-      "get": {
-        "operationId": "SettingsController_getPlatformLogo",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "SettingsController_updatePlatformLogo",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/settings/company-information": {
-      "get": {
-        "operationId": "SettingsController_getCompanyInformation",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "SettingsController_updateCompanyInformation",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/mfa-enforced-roles": {
-      "patch": {
-        "operationId": "SettingsController_updateMFAEnforcedRoles",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMFAEnforcedRolesBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }
@@ -5869,6 +6042,9 @@
               "hasFreeChapter": {
                 "type": "boolean"
               },
+              "hasCertificate": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
@@ -6298,6 +6474,9 @@
               "hasFreeChapter": {
                 "type": "boolean"
               },
+              "hasCertificate": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
@@ -6404,6 +6583,9 @@
               },
               "isScorm": {
                 "type": "boolean"
+              },
+              "hasCertificate": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -6501,6 +6683,36 @@
         }
       },
       "UpdateCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateHasCertificateBody": {
+        "type": "object",
+        "properties": {
+          "hasCertificate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasCertificate"
+        ]
+      },
+      "UpdateHasCertificateResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -9856,6 +10068,780 @@
           "data"
         ]
       },
+      "GetAllCertificatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "completionDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fullName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "userId",
+                "courseId",
+                "createdAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCertificateResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "userId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "courseId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "courseTitle": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "completionDate": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fullName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "createdAt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "userId",
+            "courseId",
+            "createdAt"
+          ]
+        }
+      },
+      "DownloadCertificateBody": {
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "html"
+        ]
+      },
+      "GetPublicGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret",
+                  "adminNewUserNotification"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUserSettingsBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret",
+                  "adminNewUserNotification"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminNewUserNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEnforceSSOResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string"
+          },
+          "registeredAddress": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "emailAddress": {
+            "type": "string"
+          },
+          "courtRegisterNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateMFAEnforcedRolesBody": {
+        "type": "object",
+        "properties": {
+          "admin": {
+            "type": "boolean"
+          },
+          "student": {
+            "type": "boolean"
+          },
+          "content_creator": {
+            "type": "boolean"
+          }
+        }
+      },
       "GetThreadResponse": {
         "type": "object",
         "properties": {
@@ -10672,581 +11658,6 @@
         "required": [
           "data"
         ]
-      },
-      "GetPublicGlobalSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "MFAEnforcedRoles": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
-                }
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "platformLogoS3Key",
-              "MFAEnforcedRoles"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "isMFAEnabled": {
-                    "default": false,
-                    "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "language",
-                  "isMFAEnabled",
-                  "MFASecret"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "isMFAEnabled": {
-                    "default": false,
-                    "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "isMFAEnabled",
-                  "MFASecret",
-                  "adminNewUserNotification"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserSettingsBody": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              },
-              "isMFAEnabled": {
-                "default": false,
-                "type": "boolean"
-              },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            }
-          },
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              },
-              "isMFAEnabled": {
-                "default": false,
-                "type": "boolean"
-              },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              }
-            }
-          }
-        ]
-      },
-      "UpdateUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "isMFAEnabled": {
-                    "default": false,
-                    "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "language",
-                  "isMFAEnabled",
-                  "MFASecret"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "isMFAEnabled": {
-                    "default": false,
-                    "type": "boolean"
-                  },
-                  "MFASecret": {
-                    "anyOf": [
-                      {
-                        "default": null,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "isMFAEnabled",
-                  "MFASecret",
-                  "adminNewUserNotification"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateAdminNewUserNotificationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              },
-              "isMFAEnabled": {
-                "default": false,
-                "type": "boolean"
-              },
-              "MFASecret": {
-                "anyOf": [
-                  {
-                    "default": null,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "language",
-              "isMFAEnabled",
-              "MFASecret",
-              "adminNewUserNotification"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "MFAEnforcedRoles": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
-                }
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "platformLogoS3Key",
-              "MFAEnforcedRoles"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateEnforceSSOResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "MFAEnforcedRoles": {
-                "type": "array",
-                "items": {
-                  "anyOf": [
-                    {
-                      "const": "admin",
-                      "type": "string"
-                    },
-                    {
-                      "const": "student",
-                      "type": "string"
-                    },
-                    {
-                      "const": "content_creator",
-                      "type": "string"
-                    }
-                  ]
-                }
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "platformLogoS3Key",
-              "MFAEnforcedRoles"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPlatformLogoResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "url"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetCompanyInformationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "companyName": {
-                "type": "string"
-              },
-              "registeredAddress": {
-                "type": "string"
-              },
-              "taxNumber": {
-                "type": "string"
-              },
-              "emailAddress": {
-                "type": "string"
-              },
-              "courtRegisterNumber": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateCompanyInformationBody": {
-        "type": "object",
-        "properties": {
-          "companyName": {
-            "type": "string"
-          },
-          "registeredAddress": {
-            "type": "string"
-          },
-          "taxNumber": {
-            "type": "string"
-          },
-          "emailAddress": {
-            "type": "string"
-          },
-          "courtRegisterNumber": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateCompanyInformationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "companyName": {
-                "type": "string"
-              },
-              "registeredAddress": {
-                "type": "string"
-              },
-              "taxNumber": {
-                "type": "string"
-              },
-              "emailAddress": {
-                "type": "string"
-              },
-              "courtRegisterNumber": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateMFAEnforcedRolesBody": {
-        "type": "object",
-        "properties": {
-          "admin": {
-            "type": "boolean"
-          },
-          "student": {
-            "type": "boolean"
-          },
-          "content_creator": {
-            "type": "boolean"
-          }
-        }
       }
     }
   }

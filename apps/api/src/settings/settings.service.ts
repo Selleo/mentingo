@@ -56,7 +56,13 @@ export class SettingsService {
         : JSON.parse(globalSettings.settings.MFAEnforcedRoles ?? "[]"),
     };
 
-    return parsedSettings;
+    const { certificateBackgroundImage, ...restOfSettings } = parsedSettings;
+
+    const certificateBackgroundSignedUrl = certificateBackgroundImage
+      ? await this.fileService.getFileUrl(certificateBackgroundImage)
+      : null;
+
+    return { ...restOfSettings, certificateBackgroundImage: certificateBackgroundSignedUrl };
   }
 
   public async createSettings(
@@ -356,6 +362,41 @@ export class SettingsService {
           to_jsonb(${JSON.stringify(enforcedRoles)}::jsonb),
           true
         )`,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedSettings;
+  }
+
+  async updateCertificateBackground(
+    certificateBackground: Express.Multer.File,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    let certificateBackgroundValue: string | null = null;
+
+    if (certificateBackground) {
+      const { fileKey } = await this.fileService.uploadFile(
+        certificateBackground,
+        "certificate-backgrounds",
+      );
+      certificateBackgroundValue = fileKey;
+    }
+
+    const [{ settings: updatedSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{certificateBackgroundImage}',
+            ${
+              certificateBackgroundValue
+                ? sql`to_jsonb(${certificateBackgroundValue}::text)`
+                : sql`'null'::jsonb`
+            },
+            true
+          )
+        `,
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });

@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
+import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
@@ -33,6 +34,7 @@ export class StudentLessonProgressService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly certificatesService: CertificatesService,
   ) {}
 
   async markLessonAsCompleted({
@@ -131,7 +133,8 @@ export class StudentLessonProgressService {
             eq(studentLessonProgress.lessonId, lesson.id),
             eq(studentLessonProgress.studentId, studentId),
           ),
-        );
+        )
+        .returning();
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
@@ -264,7 +267,6 @@ export class StudentLessonProgressService {
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const dbInstance = trx ?? this.db;
-
     const [completedLessonCount] = await dbInstance
       .select({ count: sql<number>`count(*)::INTEGER` })
       .from(studentLessonProgress)
@@ -327,10 +329,15 @@ export class StudentLessonProgressService {
     studentId: UUIDType,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
-    const courseProgress = await this.getCourseCompletionStatus(courseId, studentId, trx);
     const courseFinishedChapterCount = await this.getCourseFinishedChapterCount(
       courseId,
       studentId,
+      trx,
+    );
+    const courseProgress = await this.getCourseCompletionStatus(
+      courseId,
+      studentId,
+      courseFinishedChapterCount,
       trx,
     );
 
@@ -340,10 +347,24 @@ export class StudentLessonProgressService {
         courseId,
         PROGRESS_STATUSES.COMPLETED,
         courseFinishedChapterCount,
+
         trx,
       );
 
-      return await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId);
+      const dbInstance = trx ?? this.db;
+      const [course] = await dbInstance
+        .select({ hasCertificate: courses.hasCertificate })
+        .from(courses)
+        .where(eq(courses.id, courseId));
+
+      if (course?.hasCertificate) {
+        return (
+          await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId),
+          await this.certificatesService.createCertificate(studentId, courseId, trx)
+        );
+      } else {
+        return await this.statisticsRepository.updatePaidPurchasedCoursesStats(courseId);
+      }
     }
 
     if (courseProgress.progress !== PROGRESS_STATUSES.COMPLETED) {
@@ -381,16 +402,58 @@ export class StudentLessonProgressService {
   private async getCourseCompletionStatus(
     courseId: UUIDType,
     studentId: UUIDType,
+    finishedChapterCount: number,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     const [courseCompletedStatus] = await dbInstance
       .select({
-        courseIsCompleted: sql<boolean>`${studentCourses.finishedChapterCount} = ${courses.chapterCount}`,
+        courseIsCompleted: sql<boolean>`${finishedChapterCount} = ${courses.chapterCount}`,
         progress: sql<ProgressStatus>`${studentCourses.progress}`,
       })
       .from(studentCourses)
       .leftJoin(courses, and(eq(courses.id, studentCourses.courseId)))
       .where(and(eq(studentCourses.courseId, courseId), eq(studentCourses.studentId, studentId)));
+    if (!courseCompletedStatus) {
+      // TODO: handle this case with first completed chapter and one element in chapter
+      const [{ chapterCount: chapterCount }] = await dbInstance
+        .select({ chapterCount: courses.chapterCount })
+        .from(courses)
+        .where(eq(courses.id, courseId));
+
+      if (chapterCount === finishedChapterCount) {
+        await dbInstance
+          .insert(studentCourses)
+          .values({
+            studentId,
+            courseId,
+            progress: PROGRESS_STATUSES.COMPLETED,
+            completedAt: sql`now()`,
+            finishedChapterCount: chapterCount,
+          })
+          .onConflictDoNothing()
+          .returning();
+
+        return {
+          courseIsCompleted: true,
+          progress: PROGRESS_STATUSES.COMPLETED,
+        };
+      }
+
+      await dbInstance
+        .insert(studentCourses)
+        .values({
+          studentId,
+          courseId,
+          progress: PROGRESS_STATUSES.IN_PROGRESS,
+        })
+        .onConflictDoNothing()
+        .returning();
+
+      return {
+        courseIsCompleted: false,
+        progress: PROGRESS_STATUSES.IN_PROGRESS,
+      };
+    }
 
     return {
       courseIsCompleted: courseCompletedStatus.courseIsCompleted,

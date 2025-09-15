@@ -5,6 +5,7 @@ export type GlobalSettings = {
   enforceSSO: boolean;
   platformLogoS3Key: string | null;
   MFAEnforcedRoles: GetPublicGlobalSettingsResponse["data"]["MFAEnforcedRoles"];
+  certificateBackgroundImage: string | null;
 };
 
 export type UserSettings = {

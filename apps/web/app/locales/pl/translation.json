@@ -648,7 +648,9 @@
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
-      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie"
+      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
+      "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
+      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu"
     },
     "settings": {
       "breadcrumbs": {
@@ -657,7 +659,9 @@
         "createNew": "Utwórz nowy"
       },
       "button": {
-        "removeThumbnail": "Usuń miniaturę"
+        "removeThumbnail": "Usuń miniaturę",
+        "includesCertificate": "Zawiera certyfikat",
+        "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
       },
       "selectButton": {
         "uploadFile": "Plik",
@@ -1226,6 +1230,20 @@
       "settings": "Ustawienia"
     }
   },
+  "certificateBackgroundUpload": {
+    "title": "Przesyłanie tła certyfikatu",
+    "description": "Prześlij obraz tła dla certyfikatu.",
+    "button": {
+      "removeBackgroundImage": "Usuń obraz tła"
+    },
+    "other": {
+      "uploading": "Przesyłanie..."
+    },
+    "toast": {
+      "success": "Tło certyfikatu zostało pomyślnie zmienione",
+      "error": "Wystąpił błąd podczas zmiany tła certyfikatu"
+    }
+  },
   "adminPreferences": {
     "header": "Globalne preferencje administratora",
     "subHeader": "Zarządzaj globalnymi ustawieniami",
@@ -1291,5 +1309,18 @@
     "inProgress": "W trakcie",
     "notStarted": "Nierozpoczęte",
     "blocked": "Zablokowane"
+  },
+  "studentCertificateView": {
+    "header": "Certyfikaty",
+    "informations": {
+      "loading": "Ładowanie certyfikatów...",
+      "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
+      "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
+      "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później."
+    },
+    "button": {
+      "download": "Pobierz",
+      "preview": "Podgląd"
+    }
   }
 }
