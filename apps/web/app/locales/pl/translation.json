@@ -1253,11 +1253,15 @@
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
       "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
       "coursesVisibility": "Pokazuj kursy odwiedzającym",
-      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania"
+      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
+      "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
+      "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
-      "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
+      "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
+      "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },

@@ -404,6 +404,38 @@ export class SettingsService {
     return updatedSettings;
   }
 
+  public async updateAdminFinishedCourseNotification(
+    userId: UUIDType,
+  ): Promise<AdminSettingsJSONContentSchema> {
+    const [currentUserSettings] = await this.db
+      .select({
+        adminFinishedCourseNotification: sql<boolean>`(settings.settings->>'adminFinishedCourseNotification')::boolean`,
+      })
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (!currentUserSettings) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    const [{ settings: updatedUserSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{adminFinishedCourseNotification}',
+            to_jsonb(${!currentUserSettings.adminFinishedCourseNotification}::boolean),
+            true
+          )
+        `,
+      })
+      .where(eq(settings.userId, userId))
+      .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedUserSettings;
+  }
+
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
     switch (role) {
       case USER_ROLES.ADMIN:

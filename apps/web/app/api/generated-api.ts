@@ -1540,6 +1540,7 @@ export interface GetUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
       };
 }
 
@@ -1556,6 +1557,7 @@ export type UpdateUserSettingsBody =
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
       adminNewUserNotification?: boolean;
+      adminFinishedCourseNotification?: boolean;
     };
 
 export interface UpdateUserSettingsResponse {
@@ -1572,6 +1574,7 @@ export interface UpdateUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
       };
 }
 
@@ -1582,6 +1585,7 @@ export interface UpdateAdminNewUserNotificationResponse {
     isMFAEnabled: boolean;
     MFASecret: string | null;
     adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
   };
 }
 
@@ -1616,6 +1620,17 @@ export interface UpdateEnforceSSOResponse {
     };
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+  };
+}
+
+export interface UpdateAdminFinishedCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
   };
 }
 
@@ -3639,6 +3654,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
       this.request<UpdateEnforceSSOResponse, any>({
         path: `/api/settings/admin/enforce-sso`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminFinishedCourseNotification
+     * @request PATCH:/api/settings/admin/finished-course-notification
+     */
+    settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
+        path: `/api/settings/admin/finished-course-notification`,
         method: "PATCH",
         format: "json",
         ...params,

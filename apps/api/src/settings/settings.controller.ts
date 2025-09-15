@@ -114,6 +114,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/finished-course-notification")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(adminSettingsJSONContentSchema),
+  })
+  async updateAdminFinishedCourseNotification(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateAdminFinishedCourseNotification(userId);
+    return new BaseResponse(result);
+  }
+
   @Get("platform-logo")
   @Public()
   @Validate({
