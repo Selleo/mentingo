@@ -92,7 +92,7 @@ export class UserController {
     const filters: UsersFilterSchema = {
       keyword,
       role,
-      archived: archived === "true",
+      archived: archived === "true" ? true : archived === "false" ? false : undefined,
       groupId,
     };
 

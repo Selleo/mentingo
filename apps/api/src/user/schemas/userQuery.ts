@@ -4,12 +4,13 @@ import { UUIDSchema } from "src/common";
 
 import { USER_ROLES } from "./userRoles";
 
-export const userSortFields = ["title", "createdAt", "role"] as const;
+export const userSortFields = ["title", "createdAt", "role", "archived"] as const;
 
 export const UserSortFields: Record<UserSortField, UserSortField> = {
   title: "title",
   createdAt: "createdAt",
   role: "role",
+  archived: "archived",
 };
 
 export type UserSortField = (typeof userSortFields)[number];

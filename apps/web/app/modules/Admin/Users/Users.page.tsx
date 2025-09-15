@@ -62,7 +62,7 @@ const Users = () => {
     archived?: boolean;
     status?: string;
     groupId?: string;
-  }>({});
+  }>({ archived: false });
   const [isPending, startTransition] = React.useTransition();
 
   const { data } = useAllUsersSuspense(searchParams);

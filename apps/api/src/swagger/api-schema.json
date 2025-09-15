@@ -4443,8 +4443,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -4469,7 +4476,10 @@
           "archived": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "groupId"
+        ]
       },
       "UpdateUserResponse": {
         "type": "object",
@@ -4581,8 +4591,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -4607,7 +4624,10 @@
           "archived": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "groupId"
+        ]
       },
       "AdminUpdateUserResponse": {
         "type": "object",
