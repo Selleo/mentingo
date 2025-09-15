@@ -1,7 +1,10 @@
+import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
+
 export type GlobalSettings = {
   unregisteredUserCoursesAccessibility: boolean;
   enforceSSO: boolean;
   platformLogoS3Key: string | null;
+  MFAEnforcedRoles: GetPublicGlobalSettingsResponse["data"]["MFAEnforcedRoles"];
   certificateBackgroundImage: string | null;
 };
 

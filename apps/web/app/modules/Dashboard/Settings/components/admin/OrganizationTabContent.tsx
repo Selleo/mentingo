@@ -2,6 +2,7 @@ import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
 import AdminPreferences from "./Preferences";
+import RoleBasedMFAEnforcementSwitch from "./RoleBasedMFAEnforcementSwitch";
 
 import type { GlobalSettings, UserSettings } from "../../types";
 
@@ -24,6 +25,7 @@ export default function OrganizationTabContent({
     <>
       {isAdmin && <AdminPreferences globalSettings={globalSettings} />}
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
+      <RoleBasedMFAEnforcementSwitch MFAEnforcedRoles={globalSettings.MFAEnforcedRoles} />
       {isAdmin && (
         <CertificateBackgroundUpload
           certificateBackgroundImage={globalSettings.certificateBackgroundImage}

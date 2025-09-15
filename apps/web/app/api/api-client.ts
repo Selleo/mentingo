@@ -25,9 +25,9 @@ ApiClient.instance.interceptors.request.use((config) => {
     config.url?.includes("/forgot-password") ||
     config.url?.includes("/register");
 
-  const isPublicEndpoint = config.url?.includes("/settings/public");
+  const isSettingsGlobalEndpoint = config.url?.includes("/settings/global");
 
-  if (!isAuthEndpoint && !isPublicEndpoint && !useAuthStore.getState().isLoggedIn) {
+  if (!isAuthEndpoint && !isSettingsGlobalEndpoint && !useAuthStore.getState().isLoggedIn) {
     config.signal = requestManager.controller.signal;
   }
 

@@ -1,8 +1,10 @@
-import { redirect } from "@remix-run/react";
+import { Navigate, redirect } from "@remix-run/react";
 
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
+
+import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
 import { useSyncUserAfterProviderLogin } from "./hooks/useSyncUserAfterProviderLogin";
 
@@ -22,10 +24,15 @@ export const clientLoader = async () => {
 
 export default function UserDashboardLayout() {
   const { data: user } = useCurrentUser();
+  const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
 
   useSyncUserAfterProviderLogin(user);
 
-  const isAuthenticated = Boolean(user);
+  if (!hasVerifiedMFA) {
+    return <Navigate to="/auth/mfa" />;
+  }
+
+  const isAuthenticated = Boolean(user && hasVerifiedMFA);
 
   return <Dashboard isAuthenticated={isAuthenticated} />;
 }

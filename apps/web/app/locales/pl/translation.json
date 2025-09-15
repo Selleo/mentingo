@@ -41,7 +41,8 @@
       "private": "Niepubliczny",
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
-      "copyUrl": "Adres URL został skopiowany do schowka"
+      "copyUrl": "Adres URL został skopiowany do schowka",
+      "appVersion": "Wersja aplikacji: {{version}}"
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"
@@ -882,7 +883,8 @@
               "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki muszą być spełnione.)</em>",
               "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
             }
-          }
+          },
+          "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
         }
       }
     },
@@ -1104,7 +1106,8 @@
     "tooltip": {
       "retakeAvailableIn": "Zablokowane na {{time}} godz. po ostatnim podejściu.",
       "cooldown": "Quiz będzie zablokowany na {{time}} godz. po ostatnim podejściu.",
-      "noCooldown": "Brak okresu oczekiwania."
+      "noCooldown": "Brak okresu oczekiwania.",
+      "beta": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
     },
     "breadcrumbs": {
       "availableCourses": "Dostępne kursy",
@@ -1257,6 +1260,49 @@
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+  },
+  "mfa": {
+    "setup": {
+      "title": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
+      "description": "Wykonaj poniższe kroki, aby skonfigurować uwierzytelnianie dwuskładnikowe (MFA) dla swojego konta.",
+      "scanQr": "Zeskanuj poniższy kod QR za pomocą aplikacji uwierzytelniającej (Google Authenticator, Authy itp.).",
+      "manualEntry": "Jeśli nie możesz zeskanować, wprowadź sekret ręcznie w aplikacji.",
+      "enterCode": "Wprowadź 6-cyfrowy kod z aplikacji poniżej i kliknij 'Zweryfikuj i włącz MFA'.",
+      "loadingQr": "Ładowanie kodu QR...",
+      "secretLabel": "Sekret",
+      "tokenLabel": "Kod MFA",
+      "verifyButton": "Zweryfikuj i włącz MFA"
+    },
+    "verify": {
+      "title": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
+      "description": "Wykonaj poniższe kroki, aby skonfigurować uwierzytelnianie dwuskładnikowe (MFA) dla swojego konta.",
+      "openAuthenticator": "Otwórz aplikację uwierzytelniającą (Google Authenticator, Authy itp.).",
+      "enterCode": "Wprowadź 6-cyfrowy kod z aplikacji",
+      "verifyToken": "Zweryfikuj swój kod MFA",
+      "tokenLabel": "Kod MFA",
+      "toast": {
+        "success": "Weryfikacja MFA zakończona pomyślnie.",
+        "error": "Weryfikacja MFA nie powiodła się."
+      }
+    }
+  },
+  "MFAEnforcementView": {
+    "header": "Wymuszenie uwierzytelniania dwuskładnikowego na podstawie ról",
+    "subHeader": "Wymuś MFA dla określonych ról użytkowników",
+    "description": "To ustawienie pozwala na wymuszenie uwierzytelniania dwuskładnikowego (MFA) dla określonych ról użytkowników w Twojej organizacji.",
+    "roles": {
+      "admin": "Administrator",
+      "student": "Student",
+      "content_creator": "Twórca treści"
+    },
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "Ustawienia wymuszenia MFA zostały pomyślnie zaktualizowane.",
+      "mfaEnforcementUpdateFailed": "Nie udało się zaktualizować ustawień wymuszenia MFA."
+    }
   },
   "progressBadge": {
     "completed": "Ukończone",

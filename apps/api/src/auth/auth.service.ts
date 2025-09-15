@@ -18,6 +18,7 @@ import {
 import * as bcrypt from "bcryptjs";
 import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { authenticator } from "otplib";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
@@ -33,7 +34,9 @@ import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
+import { TokenService } from "./token.service";
 
+import type { Response } from "express";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { UserResponse } from "src/user/schemas/user.schema";
 import type { GoogleUserType } from "src/utils/types/google-user.type";
@@ -51,6 +54,7 @@ export class AuthService {
     private resetPasswordService: ResetPasswordService,
     private settingsService: SettingsService,
     private eventBus: EventBus,
+    private tokenService: TokenService,
   ) {}
 
   public async register({
@@ -112,7 +116,7 @@ export class AuthService {
     });
   }
 
-  public async login(data: { email: string; password: string }) {
+  public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
     const user = await this.validateUser(data.email, data.password);
     if (!user) {
       throw new UnauthorizedException("Invalid email or password");
@@ -124,11 +128,27 @@ export class AuthService {
     const usersProfilePictureUrl =
       await this.userService.getUsersProfilePictureUrl(avatarReference);
 
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+
+    if (
+      MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
+      userSettings.isMFAEnabled
+    ) {
+      return {
+        ...userWithoutAvatar,
+        profilePictureUrl: usersProfilePictureUrl,
+        accessToken,
+        refreshToken,
+        navigateTo: "/auth/mfa",
+      };
+    }
+
     return {
       ...userWithoutAvatar,
       profilePictureUrl: usersProfilePictureUrl,
       accessToken,
       refreshToken,
+      navigateTo: "/",
     };
   }
 
@@ -391,5 +411,61 @@ export class AuthService {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };
+  }
+
+  async generateMFASecret(userId: string) {
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+
+    const secret = authenticator.generateSecret();
+
+    const newSettings = await this.settingsService.updateUserSettings(userId, {
+      MFASecret: secret,
+    });
+
+    if (!newSettings.MFASecret) {
+      throw new BadRequestException("Failed to generate secret");
+    }
+
+    return {
+      secret,
+      otpauth: `otpauth://totp/Mentingo:${user.email}?secret=${secret}&issuer=Mentingo`,
+    };
+  }
+
+  async verifyMFACode(userId: string, token: string, response: Response) {
+    if (!userId || !token) {
+      throw new BadRequestException("User ID and token are required");
+    }
+
+    const settings = await this.settingsService.getUserSettings(userId);
+
+    if (!settings.MFASecret) return false;
+
+    const isValid = authenticator.check(token, settings.MFASecret);
+
+    if (!isValid) {
+      throw new BadRequestException("Invalid MFA token");
+    }
+
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException("Failed to retrieve user");
+    }
+
+    const { refreshToken, accessToken } = await this.getTokens(user);
+
+    this.tokenService.clearTokenCookies(response);
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    await this.settingsService.updateUserSettings(userId, {
+      isMFAEnabled: true,
+    });
+
+    return isValid;
   }
 }

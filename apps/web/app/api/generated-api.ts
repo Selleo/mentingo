@@ -61,6 +61,7 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
+    navigateTo: string;
   };
 }
 
@@ -100,6 +101,23 @@ export interface ResetPasswordBody {
   newPassword: string;
   /** @minLength 1 */
   resetToken: string;
+}
+
+export interface MFASetupResponse {
+  data: {
+    secret: string;
+    otpauth: string;
+  };
+}
+
+export interface MFAVerifyBody {
+  token: string;
+}
+
+export interface MFAVerifyResponse {
+  data: {
+    isValid: boolean;
+  };
 }
 
 export interface GetUserStatisticsResponse {
@@ -1506,6 +1524,7 @@ export interface GetPublicGlobalSettingsResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1513,9 +1532,15 @@ export interface GetUserSettingsResponse {
   data:
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
       }
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
         adminNewUserNotification: boolean;
       };
 }
@@ -1523,9 +1548,15 @@ export interface GetUserSettingsResponse {
 export type UpdateUserSettingsBody =
   | {
       language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
     }
   | {
       language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
       adminNewUserNotification?: boolean;
     };
 
@@ -1533,29 +1564,25 @@ export interface UpdateUserSettingsResponse {
   data:
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
       }
     | {
         language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
         adminNewUserNotification: boolean;
-      }
-    | {
-        unregisteredUserCoursesAccessibility: boolean;
-        enforceSSO: boolean;
-        certificateBackgroundImage: string | null;
-        companyInformation?: {
-          companyName?: string;
-          registeredAddress?: string;
-          taxNumber?: string;
-          emailAddress?: string;
-          courtRegisterNumber?: string;
-        };
-        platformLogoS3Key: string | null;
       };
 }
 
 export interface UpdateAdminNewUserNotificationResponse {
   data: {
     language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
     adminNewUserNotification: boolean;
   };
 }
@@ -1573,6 +1600,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1589,6 +1617,7 @@ export interface UpdateEnforceSSOResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
   };
 }
 
@@ -1624,6 +1653,12 @@ export interface UpdateCompanyInformationResponse {
     emailAddress?: string;
     courtRegisterNumber?: string;
   };
+}
+
+export interface UpdateMFAEnforcedRolesBody {
+  admin?: boolean;
+  student?: boolean;
+  content_creator?: boolean;
 }
 
 export interface GetThreadResponse {
@@ -2167,6 +2202,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/auth/microsoft/callback`,
         method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMfaSetup
+     * @request POST:/api/auth/mfa/setup
+     */
+    authControllerMfaSetup: (params: RequestParams = {}) =>
+      this.request<MFASetupResponse, any>({
+        path: `/api/auth/mfa/setup`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerMfaVerify
+     * @request POST:/api/auth/mfa/verify
+     */
+    authControllerMfaVerify: (data: MFAVerifyBody, params: RequestParams = {}) =>
+      this.request<MFAVerifyResponse, any>({
+        path: `/api/auth/mfa/verify`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -3638,6 +3703,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateMfaEnforcedRoles
+     * @request PATCH:/api/settings/admin/mfa-enforced-roles
+     */
+    settingsControllerUpdateMfaEnforcedRoles: (
+      data: UpdateMFAEnforcedRolesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/mfa-enforced-roles`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
