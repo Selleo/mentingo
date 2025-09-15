@@ -253,7 +253,7 @@ export interface GetUserDetailsResponse {
 export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
-  groupId: string | null;
+  groupId?: string | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -293,7 +293,7 @@ export interface UpsertUserDetailsResponse {
 export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
-  groupId: string | null;
+  groupId?: string | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";

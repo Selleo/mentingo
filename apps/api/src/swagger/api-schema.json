@@ -4476,10 +4476,7 @@
           "archived": {
             "type": "boolean"
           }
-        },
-        "required": [
-          "groupId"
-        ]
+        }
       },
       "UpdateUserResponse": {
         "type": "object",
@@ -4624,10 +4621,7 @@
           "archived": {
             "type": "boolean"
           }
-        },
-        "required": [
-          "groupId"
-        ]
+        }
       },
       "AdminUpdateUserResponse": {
         "type": "object",
