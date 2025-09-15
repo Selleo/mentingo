@@ -9,6 +9,7 @@ import { EventBus } from "@nestjs/cqrs";
 import { format } from "date-fns";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
+import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { CourseCompletedEvent } from "src/events";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -39,6 +40,7 @@ export class StudentLessonProgressService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly certificatesService: CertificatesService,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -138,7 +140,8 @@ export class StudentLessonProgressService {
             eq(studentLessonProgress.lessonId, lesson.id),
             eq(studentLessonProgress.studentId, studentId),
           ),
-        );
+        )
+        .returning();
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
@@ -270,7 +273,6 @@ export class StudentLessonProgressService {
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const dbInstance = trx ?? this.db;
-
     const [completedLessonCount] = await dbInstance
       .select({ count: sql<number>`count(*)::INTEGER` })
       .from(studentLessonProgress)
@@ -354,7 +356,19 @@ export class StudentLessonProgressService {
         trx,
       );
 
-      return await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId);
+      const dbInstance = trx ?? this.db;
+      const [course] = await dbInstance
+        .select({ hasCertificate: courses.hasCertificate })
+        .from(courses)
+        .where(eq(courses.id, courseId));
+
+      if (course?.hasCertificate)
+        return (
+          await this.statisticsRepository.updateCompletedAsFreemiumCoursesStats(courseId),
+          await this.certificatesService.createCertificate(studentId, courseId, trx)
+        );
+
+      return await this.statisticsRepository.updatePaidPurchasedCoursesStats(courseId);
     }
 
     return await this.updateStudentCourseStats(

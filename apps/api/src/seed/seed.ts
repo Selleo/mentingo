@@ -215,7 +215,7 @@ async function createQuizAttempts(userId: UUIDType) {
     .innerJoin(chapters, eq(courses.id, chapters.courseId))
     .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
     .innerJoin(questions, eq(questions.lessonId, lessons.id))
-    .where(and(eq(courses.isPublished, true), eq(lessons.type, LESSON_TYPES.QUIZ)))
+    .where(and(eq(courses.status, "published"), eq(lessons.type, LESSON_TYPES.QUIZ)))
     .groupBy(courses.id, lessons.id);
 
   const createdQuizAttempts = quizzes.map((quiz) => {
@@ -253,7 +253,7 @@ async function createCourseStudentsStats() {
       authorId: courses.authorId,
     })
     .from(courses)
-    .where(eq(courses.isPublished, true));
+    .where(eq(courses.status, "published"));
 
   const twelveMonthsAgoArray = getLast12Months();
 

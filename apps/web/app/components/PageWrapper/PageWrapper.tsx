@@ -37,7 +37,7 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
   const lastBreadcrumb = breadcrumbs[lastIndex];
 
   return (
-    <BreadcrumbList>
+    <BreadcrumbList className="mb-4">
       {backButton && (
         <BreadcrumbItem className="mr-3">
           <BreadcrumbLink className="body-base-md cursor-pointer text-primary-800">

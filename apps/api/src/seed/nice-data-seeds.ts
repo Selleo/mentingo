@@ -10,10 +10,63 @@ dotenv.config({ path: "./.env" });
 
 export const niceCourses: NiceCourseData[] = [
   {
+    title: "Fake test to certificate",
+    description:
+      "Fake test to certificate Fake test to certificate Fake test to certificate Fake test to certificate Fake test to certificate",
+    status: "published",
+    priceInCents: 0,
+    category: "Data Science",
+    thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
+    chapters: [
+      {
+        title: "Understanding Data and Its Importance",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.TEXT,
+            title: "What is Data Science?",
+            description:
+              "Data science is an interdisciplinary field that uses scientific methods, processes, algorithms, and systems to extract knowledge and insights from structured and unstructured data. In this lesson, you'll learn about the fundamental concepts of data science, including data collection, cleaning, analysis, and interpretation. We'll explore how data science combines statistics, computer science, and domain expertise to solve complex problems and make data-driven decisions in various industries.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Data Science Basics Quiz",
+            description: "Test your understanding of fundamental data science concepts.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which of the following is NOT a typical step in the data science process?",
+                options: [
+                  {
+                    optionText: "Data collection",
+                    isCorrect: false,
+                  },
+                  {
+                    optionText: "Data cleaning",
+                    isCorrect: false,
+                  },
+                  {
+                    optionText: "Data analysis",
+                    isCorrect: false,
+                  },
+                  {
+                    optionText: "Data destruction",
+                    isCorrect: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
     title: "Introduction to Web Development: Building Your First Website",
     description:
       "In this beginner-friendly course, you will learn the basics of web development. We will guide you through creating a simple website from scratch using HTML, CSS, and a bit of JavaScript. No prior experience is needed—just a willingness to learn! By the end of the course, you’ll have built your own website and gained essential skills for further web development projects.",
-    isPublished: true,
+    status: "published",
     priceInCents: 9900,
     category: "Web Development",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
@@ -559,7 +612,7 @@ export const niceCourses: NiceCourseData[] = [
     title: "Mobile App Development: Creating Your First Android App",
     description:
       "Dive into the world of mobile app development with this beginner-friendly course. You'll learn the fundamentals of Android app development using Java and Android Studio. By the end of the course, you'll have created your own simple Android app and gained essential skills for future mobile development projects.",
-    isPublished: true,
+    status: "published",
     priceInCents: 0,
     category: "Mobile Development",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
@@ -716,10 +769,11 @@ export const niceCourses: NiceCourseData[] = [
     title: "Kotlin for Beginners: Modern Android Development",
     description:
       "Explore Kotlin, the modern and preferred language for Android development. This beginner-friendly course introduces Kotlin fundamentals and guides you through creating a basic Android app using Kotlin and Android Studio.",
-    isPublished: true,
+    status: "published",
     priceInCents: 0,
     category: "Mobile Development",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Getting Started with Kotlin Programming",
@@ -800,7 +854,7 @@ export const niceCourses: NiceCourseData[] = [
     title: "Mathematics for Beginners: Building a Strong Foundation",
     description:
       "Learn essential math concepts with this beginner-friendly course. Covering fundamental topics like arithmetic, geometry, and algebra, this course is designed to make math accessible and enjoyable. By the end, you'll have a solid understanding of foundational math skills needed for advanced learning.",
-    isPublished: true,
+    status: "published",
     priceInCents: 0,
     category: "Mathematics",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
@@ -1028,10 +1082,11 @@ export const niceCourses: NiceCourseData[] = [
     title: "English Basics: Building a Strong Foundation",
     description:
       "Learn the fundamentals of English with this beginner-friendly course. From grammar to vocabulary, you'll gain the essential skills needed for effective communication in English. By the end of the course, you'll be equipped with the confidence to navigate everyday conversations and writing tasks with ease.",
-    isPublished: true,
+    status: "published",
     priceInCents: 0,
     category: "Language Learning",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Mastering Basic Grammar Rules",
@@ -1314,10 +1369,11 @@ export const niceCourses: NiceCourseData[] = [
     title: "Advanced English: Mastering Complex Language Skills",
     description:
       "Take your English proficiency to the next level with this advanced course. Dive deep into advanced grammar structures, vocabulary, idiomatic expressions, and perfect your writing and speaking skills. By the end of this course, you'll have the tools to express yourself with clarity, sophistication, and confidence.",
-    isPublished: true,
+    status: "published",
     priceInCents: 0,
     category: "Language Learning",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Elevate Your Writing: Advanced Clause Strategies",
@@ -1842,7 +1898,7 @@ export const niceCourses: NiceCourseData[] = [
     title: "Artificial Intelligence in Business: Fundamentals",
     description:
       "This beginner-friendly course introduces the basics of AI in business. Learn about key concepts, terminologies, and how AI is applied to improve efficiency, automate processes, and enhance decision-making in various industries. By the end, you'll understand AI's potential to transform your business.",
-    isPublished: true,
+    status: "published",
     priceInCents: 12900,
     category: "Artificial Intelligence",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),

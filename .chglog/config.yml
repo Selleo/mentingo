@@ -1,0 +1,31 @@
+style: github
+template: CHANGELOG.tpl.md
+info:
+  title: CHANGELOG
+  repository_url: https://github.com/Selleo/mentingo
+options:
+  tag_filter_pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9.]+)?$"
+  commits:
+    filters:
+      Type:
+        - chore
+        - feat
+        - fix
+        - refactor
+        - style
+        - docs
+        - test
+  commit_groups:
+    title_maps:
+      chore: "Chores:"
+      feat: "Features:"
+      fix: "Bug Fixes:"
+      refactor: "Code Refactoring:"
+      style: "Styles:"
+      docs: "Documentation:"
+      test: "Tests:"
+  header:
+    pattern: "^(\\w+)(?:\\([^)]+\\))?:\\s(.*)$"
+    pattern_maps:
+      - Type
+      - Subject

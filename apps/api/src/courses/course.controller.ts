@@ -35,6 +35,7 @@ import {
   CourseEnrollmentScope,
   SortCourseFieldsOptions,
   SortEnrolledStudentsOptions,
+  CoursesStatusOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -83,7 +84,7 @@ export class CourseController {
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange") creationDateRange: string[],
-    @Query("isPublished") isPublished: boolean,
+    @Query("status") status: CoursesStatusOptions,
     @Query("sort") sort: SortCourseFieldsOptions,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -95,7 +96,7 @@ export class CourseController {
       title,
       category,
       author,
-      isPublished,
+      status,
       creationDateRange:
         creationDateRangeStart && creationDateRangeEnd
           ? [creationDateRangeStart, creationDateRangeEnd]
@@ -286,6 +287,24 @@ export class CourseController {
     );
 
     return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
+  }
+
+  @Patch("update-has-certificate/:id")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: Type.Object({ hasCertificate: Type.Boolean() }) },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateHasCertificate(
+    @Param("id") id: UUIDType,
+    @Body() body: { hasCertificate: boolean },
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.updateHasCertificate(id, body.hasCertificate);
+
+    return new BaseResponse({ message: "Pomyślnie_zaktualizowano_kurs" });
   }
 
   @Post("enroll-course")

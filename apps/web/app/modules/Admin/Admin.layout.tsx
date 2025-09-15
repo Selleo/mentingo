@@ -70,7 +70,7 @@ const AdminLayout = () => {
           />
         )}
         <main
-          className={cn("max-h-dvh flex-1 overflow-y-auto bg-primary-50 p-6", {
+          className={cn("max-h-dvh flex-1 overflow-y-auto bg-primary-50", {
             "bg-white p-0": hideTopbarAndSidebar,
           })}
         >

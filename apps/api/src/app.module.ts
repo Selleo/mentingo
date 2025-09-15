@@ -13,11 +13,12 @@ import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
-import awsConfig from "./common/configuration/aws";
+import { CertificatesModule } from "./certificates/certificates.module";
 import database from "./common/configuration/database";
 import emailConfig from "./common/configuration/email";
 import jwtConfig from "./common/configuration/jwt";
 import microsoftConfig from "./common/configuration/microsoft";
+import { getOptionalConfigs } from "./common/configuration/optional-config-loader";
 import redisConfig from "./common/configuration/redis";
 import s3Config from "./common/configuration/s3";
 import stripeConfig from "./common/configuration/stripe";
@@ -49,11 +50,11 @@ import { UserModule } from "./user/user.module";
         database,
         jwtConfig,
         emailConfig,
-        awsConfig,
         s3Config,
         microsoftConfig,
         stripeConfig,
         redisConfig,
+        ...getOptionalConfigs(),
       ],
       isGlobal: true,
     }),
@@ -110,6 +111,7 @@ import { UserModule } from "./user/user.module";
     CacheModule,
     AiModule,
     SettingsModule,
+    CertificatesModule,
   ],
   controllers: [],
   providers: [

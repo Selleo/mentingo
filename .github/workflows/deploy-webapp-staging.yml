@@ -32,6 +32,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Save version in apps/web
+        run: |
+          TAG_VERSION=$(git describe --tags --abbrev=0 --match "v*")
+          echo "{ \"version\": \"$TAG_VERSION\" }" > apps/web/version.json
+          echo "✅ Wrote version $TAG_VERSION to apps/web/version.json"
+
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY_WEB }}

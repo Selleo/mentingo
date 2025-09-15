@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => {
       outDir: "build",
       sourcemap: true,
       rollupOptions: {
-        external: [],
+        external: ["fsevents"],
         output: {
           manualChunks: (id) => {
             if (id.includes("@remix-run")) {
@@ -92,6 +92,7 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       include: ["@remix-run/react", "crypto-js"],
+      exclude: ["fsevents"],
     },
   };
 });

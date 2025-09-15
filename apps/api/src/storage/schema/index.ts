@@ -2,6 +2,7 @@ import {
   boolean,
   integer,
   jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -115,13 +116,16 @@ export const resetTokens = pgTable("reset_tokens", {
   }).notNull(),
 });
 
+export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
+
 export const courses = pgTable("courses", {
   ...id,
   ...timestamps,
   title: varchar("title", { length: 100 }).notNull(),
   description: varchar("description", { length: 1000 }),
   thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
-  isPublished: boolean("is_published").notNull().default(false),
+  status: coursesStatusEnum("status").notNull().default("draft"),
+  hasCertificate: boolean("has_certificate").notNull().default(false),
   priceInCents: integer("price_in_cents").notNull().default(0),
   currency: varchar("currency").notNull().default("usd"),
   chapterCount: integer("chapter_count").notNull().default(0),
@@ -439,3 +443,20 @@ export const settings = pgTable("settings", {
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
   settings: jsonb("settings").$type<AllSettings>().notNull(),
 });
+
+export const certificates = pgTable(
+  "certificates",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.userId, table.courseId),
+  }),
+);

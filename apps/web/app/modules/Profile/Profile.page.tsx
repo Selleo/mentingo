@@ -8,6 +8,7 @@ import { z } from "zod";
 import { useUpdateUserProfile } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
@@ -18,10 +19,12 @@ import { isAdminLike } from "~/utils/userRoles";
 import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
 
+import CertificatePreview from "./Certificates/CertificatePreview";
+import Certificates from "./Certificates/Certificates";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
-import { ProfilePageBreadcrumbs } from "./ProfilePageBreadcrumbs";
 
 import type { UpdateUserProfileBody } from "./types";
+import type { CertificateType } from "~/types/certificate";
 
 const updateUserProfileSchema = z.object({
   firstName: z.string().optional(),
@@ -41,6 +44,8 @@ export default function ProfilePage() {
 
   const { data: userDetails, error } = useUserDetails(id);
   const { data: currentUser } = useCurrentUser();
+
+  const { data: globalSettings } = useGlobalSettings();
 
   const { hasPermission, isProfileOwner } = useMemo(() => {
     return {
@@ -91,6 +96,33 @@ export default function ProfilePage() {
       t("contentCreatorView.toast.profileLinkCopyError"),
     );
 
+  const [certificatePreview, setCertificatePreview] = useState<{
+    isOpen: boolean;
+    completionDate: string;
+    certData?: CertificateType;
+  }>({
+    isOpen: false,
+    completionDate: "",
+    certData: undefined,
+  });
+
+  const handleOpenCertificatePreview = (data: {
+    completionDate: string;
+    certData?: CertificateType;
+  }) => {
+    setCertificatePreview({
+      isOpen: true,
+      ...data,
+    });
+  };
+
+  const handleCloseCertificatePreview = () => {
+    setCertificatePreview((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
+  };
+
   if (error) return <Navigate to="/" />;
 
   if (!userDetails)
@@ -101,11 +133,34 @@ export default function ProfilePage() {
     );
 
   return (
-    <PageWrapper role="main">
-      <ProfilePageBreadcrumbs
-        id={id}
-        username={`${userDetails?.firstName} ${userDetails?.lastName}`}
-      />
+    <PageWrapper
+      role="main"
+      breadcrumbs={[
+        { href: `/profile/${id}`, title: `${userDetails?.firstName} ${userDetails?.lastName}` },
+      ]}
+    >
+      {certificatePreview.isOpen && (
+        <button
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
+          onClick={handleCloseCertificatePreview}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" || e.key === "Enter") {
+              handleCloseCertificatePreview();
+            }
+          }}
+        >
+          <div>
+            <CertificatePreview
+              studentName={certificatePreview.certData?.fullName || ""}
+              courseName={certificatePreview.certData?.courseTitle || ""}
+              completionDate={certificatePreview.completionDate}
+              onClose={handleCloseCertificatePreview}
+              platformLogo={globalSettings?.platformLogoS3Key}
+              certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
+            />
+          </div>
+        </button>
+      )}
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] flex-col justify-between gap-2 md:flex-row">
           <h2 className="h5 md:h3 text-neutral-950">{t("contentCreatorView.other.pageTitle")}</h2>
@@ -158,6 +213,7 @@ export default function ProfilePage() {
             </Button>
           </section>
         )}
+        <Certificates onOpenCertificatePreview={handleOpenCertificatePreview} />
       </div>
     </PageWrapper>
   );

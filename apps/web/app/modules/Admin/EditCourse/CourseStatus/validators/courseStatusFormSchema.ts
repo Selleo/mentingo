@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const courseStatusFormSchema = z.object({
-  isPublished: z.boolean(),
+  status: z.enum(["draft", "published", "private"]),
 });
 
 export type CourseStatusFormValues = z.infer<typeof courseStatusFormSchema>;
