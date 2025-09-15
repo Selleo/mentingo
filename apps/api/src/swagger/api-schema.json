@@ -4616,8 +4616,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -4754,8 +4761,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
