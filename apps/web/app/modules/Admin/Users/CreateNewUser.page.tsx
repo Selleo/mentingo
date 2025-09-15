@@ -78,9 +78,7 @@ export default function CreateNewUserPage() {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="firstName" className="text-right">
-                    {t("adminUserView.field.firstName")}
-                  </Label>
+                  <Label htmlFor="firstName">{t("adminUserView.field.firstName")}</Label>
                   <FormControl>
                     <Input id="firstName" {...field} />
                   </FormControl>
@@ -93,9 +91,7 @@ export default function CreateNewUserPage() {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="lastName" className="text-right">
-                    {t("adminUserView.field.lastName")}
-                  </Label>
+                  <Label htmlFor="lastName">{t("adminUserView.field.lastName")}</Label>
                   <FormControl>
                     <Input id="lastName" {...field} />
                   </FormControl>
@@ -108,9 +104,7 @@ export default function CreateNewUserPage() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="email" className="text-right">
-                    {t("adminUserView.field.email")}
-                  </Label>
+                  <Label htmlFor="email">{t("adminUserView.field.email")}</Label>
                   <FormControl>
                     <Input id="email" type="email" {...field} />
                   </FormControl>
@@ -123,9 +117,7 @@ export default function CreateNewUserPage() {
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <Label htmlFor="role" className="text-right">
-                    {t("adminUserView.field.role")}
-                  </Label>
+                  <Label htmlFor="role">{t("adminUserView.field.role")}</Label>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger id="role">
