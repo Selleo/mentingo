@@ -1,10 +1,18 @@
+<a name="learn-v2025.09.16"></a>
+
+## [learn-v2025.09.16] - 01.01.0001
+
 <a name="v3.4.0"></a>
 
-## [v3.4.0] - 15.09.2025
+## [v3.4.0] - 16.09.2025
 
 ### Bug Fixes:
 
 - archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
+
+### Documentation:
+
+- update changelog for version v3.4.0
 
 ### Features:
 
@@ -1394,7 +1402,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.4.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/learn-v2025.09.16...HEAD
+[learn-v2025.09.16]: https://github.com/Selleo/mentingo/compare/v3.4.0...learn-v2025.09.16
 [v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
 [v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
