@@ -1,6 +1,24 @@
-<a name="learn-v2025.09.12"></a>
+<a name="v3.3.0"></a>
 
-## [learn-v2025.09.12] - 01.01.0001
+## [v3.3.0] - 16.09.2025
+
+### Bug Fixes:
+
+- failing api tests and api e2e tests
+
+- mfa after sso login
+
+- add fetch depth of 0 to deploy ([#645](https://github.com/Selleo/mentingo/issues/645))
+
+- add fetching tags on deploy to save version in file ([#644](https://github.com/Selleo/mentingo/issues/644))
+
+### Documentation:
+
+- update changelog for version learn-v2025.09.12
+
+### Features:
+
+- generate certificates ([#538](https://github.com/Selleo/mentingo/issues/538))
 
 <a name="v3.2.1"></a>
 
@@ -1362,8 +1380,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/learn-v2025.09.12...HEAD
-[learn-v2025.09.12]: https://github.com/Selleo/mentingo/compare/v3.2.1...learn-v2025.09.12
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.3.0...HEAD
+[v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
 [v3.2.0]: https://github.com/Selleo/mentingo/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/Selleo/mentingo/compare/v3.0.6...v3.1.0
