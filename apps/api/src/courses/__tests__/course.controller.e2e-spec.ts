@@ -21,6 +21,7 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
+import type { CourseTest } from "../../../test/factory/course.factory";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
@@ -99,11 +100,12 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const author = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
           await courseFactory.create({
             authorId: author.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
             thumbnailS3Key: null,
           });
 
@@ -126,6 +128,7 @@ describe("CourseController (e2e)", () => {
           await courseFactory.create({ authorId: author.id, categoryId: category.id });
           const user = await userFactory
             .withCredentials({ password })
+            .withUserSettings(db)
             .create({ role: USER_ROLES.STUDENT });
 
           await request(app.getHttpServer())
@@ -140,21 +143,23 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const contentCreator = await userFactory
             .withCredentials({ password })
+            .withContentCreatorSettings(db)
             .create({ role: USER_ROLES.CONTENT_CREATOR });
           const otherContentCreator = await userFactory
             .withCredentials({ password })
+            .withContentCreatorSettings(db)
             .create({ role: USER_ROLES.CONTENT_CREATOR });
 
           await courseFactory.create({
             authorId: contentCreator.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
             thumbnailS3Key: null,
           });
           await courseFactory.create({
             authorId: otherContentCreator.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
             thumbnailS3Key: null,
           });
 
@@ -176,6 +181,7 @@ describe("CourseController (e2e)", () => {
         it("filters by title", async () => {
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
@@ -204,6 +210,7 @@ describe("CourseController (e2e)", () => {
         it("filters by date range", async () => {
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
@@ -226,6 +233,50 @@ describe("CourseController (e2e)", () => {
 
           expect(response.body.data.length).toBe(0);
         });
+
+        it("filters by status", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .create({ role: USER_ROLES.ADMIN });
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+
+          await courseFactory.create({
+            title: "Published course",
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+          await courseFactory.create({
+            title: "Draft course",
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "draft",
+          });
+          await courseFactory.create({
+            title: "Private course",
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "private",
+          });
+
+          const cases = [
+            ["published", "Published course"],
+            ["draft", "Draft course"],
+            ["private", "Private course"],
+          ];
+
+          for (const [status, title] of cases) {
+            const response = await request(app.getHttpServer())
+              .get(`/api/course/all?status=${status}`)
+              .set("Cookie", cookies)
+              .expect(200);
+
+            expect(response.body.data.length).toBe(1);
+            expect(response.body.data[0].title).toContain(title);
+          }
+        });
       });
 
       describe("pagination", () => {
@@ -233,6 +284,7 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
 
           for (let i = 0; i < 15; i++) {
@@ -263,6 +315,7 @@ describe("CourseController (e2e)", () => {
           const category = await categoryFactory.create();
           const admin = await userFactory
             .withCredentials({ password })
+            .withAdminSettings(db)
             .create({ role: USER_ROLES.ADMIN });
 
           await courseFactory.create({
@@ -302,6 +355,7 @@ describe("CourseController (e2e)", () => {
       it("returns only courses enrolled by student", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -310,14 +364,14 @@ describe("CourseController (e2e)", () => {
         const enrolledCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -340,6 +394,7 @@ describe("CourseController (e2e)", () => {
       it("filters by title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -349,14 +404,14 @@ describe("CourseController (e2e)", () => {
           title: "Python Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         const jsCourse = await courseFactory.create({
           title: "JavaScript Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -382,9 +437,10 @@ describe("CourseController (e2e)", () => {
         expect(response.body.data[0].title).toBe("Python Course");
       });
 
-      it("returns only published courses", async () => {
+      it("returns only published and private courses", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -393,13 +449,19 @@ describe("CourseController (e2e)", () => {
         const publishedCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        const privateCourse = await courseFactory.create({
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "private",
           thumbnailS3Key: null,
         });
         const unpublishedCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: false,
+          status: "draft",
           thumbnailS3Key: null,
         });
 
@@ -414,6 +476,11 @@ describe("CourseController (e2e)", () => {
             courseId: unpublishedCourse.id,
             finishedChapterCount: 0,
           },
+          {
+            studentId: student.id,
+            courseId: privateCourse.id,
+            finishedChapterCount: 0,
+          },
         ]);
 
         const response = await request(app.getHttpServer())
@@ -421,13 +488,16 @@ describe("CourseController (e2e)", () => {
           .set("Cookie", cookies)
           .expect(200);
 
-        expect(response.body.data.length).toBe(1);
-        expect(response.body.data[0].id).toBe(publishedCourse.id);
+        expect(response.body.data.length).toBe(2);
+        expect(response.body.data.map((item: CourseTest) => item.id)).toEqual(
+          expect.arrayContaining([publishedCourse.id, privateCourse.id]),
+        );
       });
 
       it("sorts by -title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -437,14 +507,14 @@ describe("CourseController (e2e)", () => {
           title: "A Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         const courseZ = await courseFactory.create({
           title: "Z Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -473,18 +543,23 @@ describe("CourseController (e2e)", () => {
       it("paginates results", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
 
-        const coursesToCreate = Array.from({ length: 15 }, (_, i) => ({
-          title: `Course ${i}`,
-          authorId: contentCreator.id,
-          categoryId: category.id,
-          isPublished: true,
-          thumbnailS3Key: null,
-        }));
+        const coursesToCreate = Array.from(
+          { length: 15 },
+          (_, i) =>
+            ({
+              title: `Course ${i}`,
+              authorId: contentCreator.id,
+              categoryId: category.id,
+              status: "published",
+              thumbnailS3Key: null,
+            }) as const,
+        );
 
         const courses = await Promise.all(
           coursesToCreate.map((course) => courseFactory.create(course)),
@@ -523,9 +598,12 @@ describe("CourseController (e2e)", () => {
     describe("when user is logged in", () => {
       describe("when user is not admin", () => {
         it("should return status 403", async () => {
-          const admin = await userFactory.withCredentials({ password }).create({
-            role: USER_ROLES.STUDENT,
-          });
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({
+              role: USER_ROLES.STUDENT,
+            });
           const cookies = await cookieFor(admin, app);
 
           const response = await request(app.getHttpServer())
@@ -539,7 +617,11 @@ describe("CourseController (e2e)", () => {
 
       describe("when user is admin", () => {
         it("should return list of students with enrollment date", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -548,7 +630,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -590,7 +672,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list filtered by firstName", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -601,7 +687,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -634,7 +720,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list filtered by lastName", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -645,7 +735,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -678,7 +768,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list filtered by email", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -689,7 +783,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -722,7 +816,11 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should return list of students in desc order with enrollment date", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
 
           const students = await Promise.all(
@@ -733,7 +831,7 @@ describe("CourseController (e2e)", () => {
 
           const course = await courseFactory.create({
             authorId: admin.id,
-            isPublished: true,
+            status: "published",
           });
 
           const studentCourse = await db
@@ -788,6 +886,7 @@ describe("CourseController (e2e)", () => {
       it("returns only published courses that user is not enrolled in", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -796,21 +895,21 @@ describe("CourseController (e2e)", () => {
         const enrolledCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         const availableCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: false,
+          status: "draft",
           thumbnailS3Key: null,
         });
 
@@ -833,6 +932,7 @@ describe("CourseController (e2e)", () => {
       it("filters by title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -842,14 +942,14 @@ describe("CourseController (e2e)", () => {
           title: "Python Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         await courseFactory.create({
           title: "JavaScript Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -865,6 +965,7 @@ describe("CourseController (e2e)", () => {
       it("excludes specified course", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -873,14 +974,14 @@ describe("CourseController (e2e)", () => {
         const courseToExclude = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
         const includedCourse = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -896,6 +997,7 @@ describe("CourseController (e2e)", () => {
       it("includes course chapter count and free chapters info", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -904,7 +1006,7 @@ describe("CourseController (e2e)", () => {
         const course = await courseFactory.create({
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
           chapterCount: 5,
         });
@@ -929,6 +1031,7 @@ describe("CourseController (e2e)", () => {
       it("sorts by -title", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
@@ -938,14 +1041,14 @@ describe("CourseController (e2e)", () => {
           title: "A Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
         await courseFactory.create({
           title: "Z Course",
           authorId: contentCreator.id,
           categoryId: category.id,
-          isPublished: true,
+          status: "published",
           thumbnailS3Key: null,
         });
 
@@ -961,18 +1064,23 @@ describe("CourseController (e2e)", () => {
       it("paginates results", async () => {
         const student = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
         const cookies = await cookieFor(student, app);
         const category = await categoryFactory.create();
         const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
 
-        const coursesToCreate = Array.from({ length: 15 }, (_, i) => ({
-          title: `Course ${i}`,
-          authorId: contentCreator.id,
-          categoryId: category.id,
-          isPublished: true,
-          thumbnailS3Key: null,
-        }));
+        const coursesToCreate = Array.from(
+          { length: 15 },
+          (_, i) =>
+            ({
+              title: `Course ${i}`,
+              authorId: contentCreator.id,
+              categoryId: category.id,
+              status: "published",
+              thumbnailS3Key: null,
+            }) as const,
+        );
 
         await Promise.all(coursesToCreate.map((course) => courseFactory.create(course)));
 
@@ -993,6 +1101,7 @@ describe("CourseController (e2e)", () => {
     it("correctly shows enrolled participant count and pricing", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const cookies = await cookieFor(student, app);
       const category = await categoryFactory.create();
@@ -1001,7 +1110,7 @@ describe("CourseController (e2e)", () => {
       const course = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
         priceInCents: 2999,
         currency: "usd",
@@ -1032,6 +1141,7 @@ describe("CourseController (e2e)", () => {
     it("returns only published courses by specified contentCreator", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const otherContentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
@@ -1041,21 +1151,21 @@ describe("CourseController (e2e)", () => {
       const publishedCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: false,
+        status: "draft",
         thumbnailS3Key: null,
       });
 
       await courseFactory.create({
         authorId: otherContentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1071,6 +1181,7 @@ describe("CourseController (e2e)", () => {
     it("returns only enrolled courses when scope is ENROLLED", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1079,14 +1190,14 @@ describe("CourseController (e2e)", () => {
       const enrolledCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1109,6 +1220,7 @@ describe("CourseController (e2e)", () => {
     it("returns available courses when scope is AVAILABLE", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1117,14 +1229,14 @@ describe("CourseController (e2e)", () => {
       const availableCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       const enrolledCourse = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1147,6 +1259,7 @@ describe("CourseController (e2e)", () => {
     it("excludes specified course", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1155,14 +1268,14 @@ describe("CourseController (e2e)", () => {
       const courseToExclude = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
       const courseToInclude = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1180,6 +1293,7 @@ describe("CourseController (e2e)", () => {
     it("shows contentCreator details correctly", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({
         role: USER_ROLES.CONTENT_CREATOR,
@@ -1193,7 +1307,7 @@ describe("CourseController (e2e)", () => {
       await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
       });
 
@@ -1210,6 +1324,7 @@ describe("CourseController (e2e)", () => {
     it("correctly shows course details with free chapters", async () => {
       const student = await userFactory
         .withCredentials({ password })
+        .withUserSettings(db)
         .create({ role: USER_ROLES.STUDENT });
       const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
       const category = await categoryFactory.create();
@@ -1218,7 +1333,7 @@ describe("CourseController (e2e)", () => {
       const course = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
-        isPublished: true,
+        status: "published",
         thumbnailS3Key: null,
         chapterCount: 3,
         priceInCents: 1999,
@@ -1253,7 +1368,7 @@ describe("CourseController (e2e)", () => {
     describe("when user is logged in", () => {
       describe("when user is not admin", () => {
         it("should return 403 Forbidden", async () => {
-          const user = await userFactory.withCredentials({ password }).create({
+          const user = await userFactory.withCredentials({ password }).withUserSettings(db).create({
             role: USER_ROLES.STUDENT,
           });
           const cookies = await cookieFor(user, app);
@@ -1268,7 +1383,11 @@ describe("CourseController (e2e)", () => {
       describe("when user is admin", () => {
         describe("when course is not found", () => {
           it("should return 404", async () => {
-            const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
             const cookies = await cookieFor(admin, app);
 
             await request(app.getHttpServer())
@@ -1281,14 +1400,18 @@ describe("CourseController (e2e)", () => {
 
         describe("when student is already enrolled in course", () => {
           it("should return 409", async () => {
-            const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
             const cookies = await cookieFor(admin, app);
             const category = await categoryFactory.create();
 
             const course = await courseFactory.create({
               authorId: admin.id,
               categoryId: category.id,
-              isPublished: true,
+              status: "published",
               thumbnailS3Key: null,
             });
 
@@ -1308,7 +1431,7 @@ describe("CourseController (e2e)", () => {
             await courseFactory.create({
               authorId: admin.id,
               categoryId: category.id,
-              isPublished: true,
+              status: "published",
               thumbnailS3Key: null,
             });
 
@@ -1324,14 +1447,18 @@ describe("CourseController (e2e)", () => {
         });
 
         it("should create enrollments with courses dependencies", async () => {
-          const admin = await userFactory.withCredentials({ password }).withAdminRole().create();
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
           const cookies = await cookieFor(admin, app);
           const category = await categoryFactory.create();
 
           const course = await courseFactory.create({
             authorId: admin.id,
             categoryId: category.id,
-            isPublished: true,
+            status: "published",
           });
 
           const chapter = await chapterFactory.create({

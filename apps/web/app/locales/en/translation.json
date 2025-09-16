@@ -37,9 +37,11 @@
       "all": "All",
       "search": "Search",
       "published": "Published",
+      "private": "Private",
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
-      "copyUrl": "The URL address was copied to the clipboard"
+      "copyUrl": "The URL address was copied to the clipboard",
+      "appVersion": "App Version: {{version}}"
     },
     "continueWithGoogle": "Continue with Google",
     "continueWithMicrosoft": "Continue with Microsoft"
@@ -373,7 +375,8 @@
       },
       "other": {
         "draft": "Draft",
-        "published": "Published"
+        "published": "Published",
+        "private": "Private"
       }
     },
     "field": {
@@ -642,7 +645,9 @@
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
-      "courseUpdatedSuccessfully": "Course updated successfully"
+      "courseUpdatedSuccessfully": "Course updated successfully",
+      "certificateUpdatedSuccessfully": "Certificate updated successfully",
+      "certificateUpdateError": "Error updating certificate"
     },
     "settings": {
       "breadcrumbs": {
@@ -651,7 +656,9 @@
         "createNew": "Create new"
       },
       "button": {
-        "removeThumbnail": "Remove Thumbnail"
+        "removeThumbnail": "Remove Thumbnail",
+        "includesCertificate": "Includes certificate",
+        "doesNotIncludeCertificate": "Does not include certificate"
       },
       "selectButton": {
         "uploadFile": "Upload file",
@@ -873,7 +880,8 @@
               "creativeTask": "<ul><li>The student presents an original idea.</li><li>The student explains who the target audience is.</li><li>The student describes how the service could provide value to customers.</li><li>The student identifies potential challenges.</li></ul><em>(No threshold defined — all conditions must be met.)</em>",
               "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined — all conditions recommended, but not mandatory for passing.)</em>"
             }
-          }
+          },
+          "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
         }
       }
     },
@@ -883,7 +891,9 @@
       "draftHeader": "Draft",
       "draftBody": "Students cannot purchase or enroll in this course. For those already enrolled, the course will not appear in their Student Course List.",
       "publishedHeader": "Published",
-      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard."
+      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard.",
+      "privateHeader": "Private",
+      "privateBody": "Students cannot purchase nor enroll in this course. For those enrolled (e.g. by admin), the course will appear in their Student Course list and they will be able to go through it."
     },
     "pricing": {
       "header": "Pricing",
@@ -1092,7 +1102,8 @@
     "tooltip": {
       "retakeAvailableIn": "Locked for {{time}} hours after last retake.",
       "cooldown": "Quiz will be locked for {{time}} hours after the last attempt.",
-      "noCooldown": "No cooldown period."
+      "noCooldown": "No cooldown period.",
+      "beta": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
     },
     "breadcrumbs": {
       "availableCourses": "Available Courses",
@@ -1200,7 +1211,6 @@
       "purchaseRequired": "Unlock this lesson by purchasing the course."
     }
   },
-
   "settings": {
     "title": "Settings",
     "buttons": {
@@ -1216,7 +1226,20 @@
       "settings": "Settings"
     }
   },
-
+  "certificateBackgroundUpload": {
+    "title": "Certificate Background Upload",
+    "description": "Upload a background image for the certificate.",
+    "button": {
+      "removeBackgroundImage": "Remove Background Image"
+    },
+    "other": {
+      "uploading": "Uploading..."
+    },
+    "toast": {
+      "success": "Certificate background image changed successfully",
+      "error": "Error changing certificate background image"
+    }
+  },
   "adminPreferences": {
     "header": "Administrator Global Preferences",
     "subHeader": "Configure global system settings, user preferences, and administrative options",
@@ -1226,11 +1249,58 @@
       "newUserNotifications": "New User Notifications",
       "newUserNotificationsDescription": "Receive notifications when a new user is created",
       "coursesVisibility": "Show courses to visitors",
-      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in"
+      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
+      "finishedCourseNotification": "Finished Course Notifications",
+      "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
-      "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully"
+      "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
+      "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences"
+    }
+  },
+  "mfa": {
+    "setup": {
+      "title": "Setup Multi-Factor Authentication",
+      "description": "Follow the steps below to set up Multi-Factor Authentication (MFA) for your account.",
+      "scanQr": "Scan the QR code below with your authenticator app (Google Authenticator, Authy, etc).",
+      "manualEntry": "If you can't scan, enter the secret manually in your app.",
+      "enterCode": "Enter the 6-digit code from your app below and click 'Verify & Enable MFA'.",
+      "loadingQr": "Loading your QR code...",
+      "secretLabel": "Secret",
+      "tokenLabel": "MFA Token",
+      "verifyButton": "Verify & Enable MFA"
+    },
+    "verify": {
+      "title": "Verify Multi-Factor Authentication",
+      "description": "Follow the steps below to verify Multi-Factor Authentication (MFA) for your account.",
+      "openAuthenticator": "Open your authenticator app",
+      "enterCode": "Enter the 6-digit code from your app",
+      "verifyToken": "Verify your MFA token",
+      "tokenLabel": "MFA Token",
+      "toast": {
+        "success": "MFA has been successfully verified.",
+        "error": "MFA verification failed."
+      }
+    }
+  },
+  "MFAEnforcementView": {
+    "header": "Role based Multi-Factor Authentication Enforcement",
+    "subHeader": "Enforce MFA for specific user roles",
+    "description": "This setting allows you to enforce Multi-Factor Authentication (MFA) for specific user roles within your organization.",
+    "roles": {
+      "admin": "Administrator",
+      "student": "Student",
+      "content_creator": "Content Creator"
+    },
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "MFA enforcement settings have been successfully updated.",
+      "mfaEnforcementUpdateFailed": "Failed to update MFA enforcement settings."
     }
   },
   "progressBadge": {
@@ -1238,6 +1308,19 @@
     "inProgress": "In Progress",
     "notStarted": "Not Started",
     "blocked": "Blocked"
+  },
+  "studentCertificateView": {
+    "header": "Certificates",
+    "informations": {
+      "loading": "Loading certificates...",
+      "noCertificates": "No certificates available yet. Complete courses to earn certificates.",
+      "failedToLoad": "Failed to load certificates. Please try again later.",
+      "failedToDownload": "Failed to download certificate. Please try again later."
+    },
+    "button": {
+      "download": "Download",
+      "preview": "Preview"
+    }
   },
   "announcements": {
     "breadcrumbs": {

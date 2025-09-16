@@ -213,6 +213,50 @@
         }
       }
     },
+    "/api/auth/mfa/setup": {
+      "post": {
+        "operationId": "AuthController_MFASetup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MFASetupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/mfa/verify": {
+      "post": {
+        "operationId": "AuthController_MFAVerify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MFAVerifyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MFAVerifyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/statistics/user-stats": {
       "get": {
         "operationId": "StatisticsController_getUserStatistics",
@@ -1156,11 +1200,24 @@
             }
           },
           {
-            "name": "isPublished",
+            "name": "status",
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "const": "draft",
+                  "type": "string"
+                },
+                {
+                  "const": "published",
+                  "type": "string"
+                },
+                {
+                  "const": "private",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -1742,6 +1799,43 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/update-has-certificate/{id}": {
+      "patch": {
+        "operationId": "CourseController_updateHasCertificate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHasCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateHasCertificateResponse"
                 }
               }
             }
@@ -2441,6 +2535,358 @@
         }
       }
     },
+    "/api/certificates/all": {
+      "get": {
+        "operationId": "CertificatesController_getAllCertificates",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCertificatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/certificate": {
+      "get": {
+        "operationId": "CertificatesController_getCertificate",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/download": {
+      "post": {
+        "operationId": "CertificatesController_downloadCertificate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/global": {
+      "get": {
+        "operationId": "SettingsController_getPublicGlobalSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "operationId": "SettingsController_getUserSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "SettingsController_updateUserSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserSettingsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/new-user-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminNewUserNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/unregistered-user-courses-accessibility": {
+      "patch": {
+        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/enforce-sso": {
+      "patch": {
+        "operationId": "SettingsController_updateEnforceSSO",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/finished-course-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminFinishedCourseNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminFinishedCourseNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/platform-logo": {
+      "get": {
+        "operationId": "SettingsController_getPlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updatePlatformLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/company-information": {
+      "get": {
+        "operationId": "SettingsController_getCompanyInformation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateCompanyInformation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/admin/mfa-enforced-roles": {
+      "patch": {
+        "operationId": "SettingsController_updateMFAEnforcedRoles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMFAEnforcedRolesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/certificate-background": {
+      "patch": {
+        "operationId": "SettingsController_updateCertificateBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "certificate-background": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/ai/thread": {
       "get": {
         "operationId": "AiController_getThread",
@@ -3055,184 +3501,6 @@
         }
       }
     },
-    "/api/settings/global": {
-      "get": {
-        "operationId": "SettingsController_getPublicGlobalSettings",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPublicGlobalSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings": {
-      "get": {
-        "operationId": "SettingsController_getUserSettings",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "operationId": "SettingsController_updateUserSettings",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserSettingsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUserSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/new-user-notification": {
-      "patch": {
-        "operationId": "SettingsController_updateAdminNewUserNotification",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateAdminNewUserNotificationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/unregistered-user-courses-accessibility": {
-      "patch": {
-        "operationId": "SettingsController_updateUnregisteredUserCoursesAccessibility",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateUnregisteredUserCoursesAccessibilityResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/admin/enforce-sso": {
-      "patch": {
-        "operationId": "SettingsController_updateEnforceSSO",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateEnforceSSOResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/platform-logo": {
-      "get": {
-        "operationId": "SettingsController_getPlatformLogo",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPlatformLogoResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "SettingsController_updatePlatformLogo",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/settings/company-information": {
-      "get": {
-        "operationId": "SettingsController_getCompanyInformation",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCompanyInformationResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "SettingsController_updateCompanyInformation",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCompanyInformationBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateCompanyInformationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/announcements": {
       "get": {
         "operationId": "AnnouncementsController_getAllAnnouncements",
@@ -3540,6 +3808,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "navigateTo": {
+                "type": "string"
               }
             },
             "required": [
@@ -3551,7 +3822,8 @@
               "lastName",
               "role",
               "archived",
-              "profilePictureUrl"
+              "profilePictureUrl",
+              "navigateTo"
             ]
           }
         },
@@ -3728,6 +4000,59 @@
         "required": [
           "newPassword",
           "resetToken"
+        ]
+      },
+      "MFASetupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "secret": {
+                "type": "string"
+              },
+              "otpauth": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "secret",
+              "otpauth"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MFAVerifyBody": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "MFAVerifyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "isValid": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "isValid"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetUserStatisticsResponse": {
@@ -4427,8 +4752,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -4565,8 +4897,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -5132,8 +5471,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5251,8 +5603,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5446,8 +5811,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5572,8 +5950,21 @@
                 "currency": {
                   "type": "string"
                 },
-                "isPublished": {
-                  "type": "boolean"
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "draft",
+                      "type": "string"
+                    },
+                    {
+                      "const": "published",
+                      "type": "string"
+                    },
+                    {
+                      "const": "private",
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"
@@ -5801,17 +6192,26 @@
               "hasFreeChapter": {
                 "type": "boolean"
               },
+              "hasCertificate": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
               },
-              "isPublished": {
+              "status": {
                 "anyOf": [
                   {
-                    "type": "boolean"
+                    "const": "draft",
+                    "type": "string"
                   },
                   {
-                    "type": "null"
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
                   }
                 ]
               },
@@ -5835,7 +6235,7 @@
               "currency",
               "description",
               "id",
-              "isPublished",
+              "status",
               "priceInCents",
               "title"
             ]
@@ -6224,17 +6624,26 @@
               "hasFreeChapter": {
                 "type": "boolean"
               },
+              "hasCertificate": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
               },
-              "isPublished": {
+              "status": {
                 "anyOf": [
                   {
-                    "type": "boolean"
+                    "const": "draft",
+                    "type": "string"
                   },
                   {
-                    "type": "null"
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
                   }
                 ]
               },
@@ -6271,7 +6680,7 @@
               "currency",
               "description",
               "id",
-              "isPublished",
+              "status",
               "priceInCents",
               "title"
             ]
@@ -6293,8 +6702,21 @@
               "description": {
                 "type": "string"
               },
-              "isPublished": {
-                "type": "boolean"
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "draft",
+                    "type": "string"
+                  },
+                  {
+                    "const": "published",
+                    "type": "string"
+                  },
+                  {
+                    "const": "private",
+                    "type": "string"
+                  }
+                ]
               },
               "thumbnailS3Key": {
                 "type": "string"
@@ -6310,6 +6732,9 @@
                 "type": "string"
               },
               "isScorm": {
+                "type": "boolean"
+              },
+              "hasCertificate": {
                 "type": "boolean"
               }
             },
@@ -6369,8 +6794,21 @@
           "thumbnailS3Key": {
             "type": "string"
           },
-          "isPublished": {
-            "type": "boolean"
+          "status": {
+            "anyOf": [
+              {
+                "const": "draft",
+                "type": "string"
+              },
+              {
+                "const": "published",
+                "type": "string"
+              },
+              {
+                "const": "private",
+                "type": "string"
+              }
+            ]
           },
           "priceInCents": {
             "type": "integer"
@@ -6395,6 +6833,36 @@
         }
       },
       "UpdateCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateHasCertificateBody": {
+        "type": "object",
+        "properties": {
+          "hasCertificate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasCertificate"
+        ]
+      },
+      "UpdateHasCertificateResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -9750,6 +10218,839 @@
           "data"
         ]
       },
+      "GetAllCertificatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "completionDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fullName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "userId",
+                "courseId",
+                "createdAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCertificateResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "userId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "courseId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "courseTitle": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "completionDate": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fullName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "createdAt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "userId",
+            "courseId",
+            "createdAt"
+          ]
+        }
+      },
+      "DownloadCertificateBody": {
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "html"
+        ]
+      },
+      "GetPublicGlobalSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret",
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUserSettingsBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "UpdateUserSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string"
+                  },
+                  "isMFAEnabled": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "MFASecret": {
+                    "anyOf": [
+                      {
+                        "default": null,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "adminNewUserNotification": {
+                    "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "language",
+                  "isMFAEnabled",
+                  "MFASecret",
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminNewUserNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEnforceSSOResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminFinishedCourseNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCompanyInformationBody": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "type": "string"
+          },
+          "registeredAddress": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "emailAddress": {
+            "type": "string"
+          },
+          "courtRegisterNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCompanyInformationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "companyName": {
+                "type": "string"
+              },
+              "registeredAddress": {
+                "type": "string"
+              },
+              "taxNumber": {
+                "type": "string"
+              },
+              "emailAddress": {
+                "type": "string"
+              },
+              "courtRegisterNumber": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateMFAEnforcedRolesBody": {
+        "type": "object",
+        "properties": {
+          "admin": {
+            "type": "boolean"
+          },
+          "student": {
+            "type": "boolean"
+          },
+          "content_creator": {
+            "type": "boolean"
+          }
+        }
+      },
       "GetThreadResponse": {
         "type": "object",
         "properties": {
@@ -10561,438 +11862,6 @@
               "entryPoint",
               "s3Key"
             ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPublicGlobalSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "platformLogoS3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "language"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "adminNewUserNotification"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUserSettingsBody": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              }
-            }
-          }
-        ]
-      },
-      "UpdateUserSettingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "language"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "language": {
-                    "type": "string"
-                  },
-                  "adminNewUserNotification": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "language",
-                  "adminNewUserNotification"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "unregisteredUserCoursesAccessibility": {
-                    "type": "boolean"
-                  },
-                  "enforceSSO": {
-                    "type": "boolean"
-                  },
-                  "companyInformation": {
-                    "type": "object",
-                    "properties": {
-                      "companyName": {
-                        "type": "string"
-                      },
-                      "registeredAddress": {
-                        "type": "string"
-                      },
-                      "taxNumber": {
-                        "type": "string"
-                      },
-                      "emailAddress": {
-                        "type": "string"
-                      },
-                      "courtRegisterNumber": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "platformLogoS3Key": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "unregisteredUserCoursesAccessibility",
-                  "enforceSSO",
-                  "platformLogoS3Key"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateAdminNewUserNotificationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "language": {
-                "type": "string"
-              },
-              "adminNewUserNotification": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "language",
-              "adminNewUserNotification"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateUnregisteredUserCoursesAccessibilityResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "platformLogoS3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateEnforceSSOResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "unregisteredUserCoursesAccessibility": {
-                "type": "boolean"
-              },
-              "enforceSSO": {
-                "type": "boolean"
-              },
-              "companyInformation": {
-                "type": "object",
-                "properties": {
-                  "companyName": {
-                    "type": "string"
-                  },
-                  "registeredAddress": {
-                    "type": "string"
-                  },
-                  "taxNumber": {
-                    "type": "string"
-                  },
-                  "emailAddress": {
-                    "type": "string"
-                  },
-                  "courtRegisterNumber": {
-                    "type": "string"
-                  }
-                }
-              },
-              "platformLogoS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "unregisteredUserCoursesAccessibility",
-              "enforceSSO",
-              "platformLogoS3Key"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPlatformLogoResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "url"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetCompanyInformationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "companyName": {
-                "type": "string"
-              },
-              "registeredAddress": {
-                "type": "string"
-              },
-              "taxNumber": {
-                "type": "string"
-              },
-              "emailAddress": {
-                "type": "string"
-              },
-              "courtRegisterNumber": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateCompanyInformationBody": {
-        "type": "object",
-        "properties": {
-          "companyName": {
-            "type": "string"
-          },
-          "registeredAddress": {
-            "type": "string"
-          },
-          "taxNumber": {
-            "type": "string"
-          },
-          "emailAddress": {
-            "type": "string"
-          },
-          "courtRegisterNumber": {
-            "type": "string"
-          }
-        }
-      },
-      "UpdateCompanyInformationResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "companyName": {
-                "type": "string"
-              },
-              "registeredAddress": {
-                "type": "string"
-              },
-              "taxNumber": {
-                "type": "string"
-              },
-              "emailAddress": {
-                "type": "string"
-              },
-              "courtRegisterNumber": {
-                "type": "string"
-              }
-            }
           }
         },
         "required": [

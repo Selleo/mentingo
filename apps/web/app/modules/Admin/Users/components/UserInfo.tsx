@@ -73,7 +73,7 @@ export const UserInfo = memo<{
           return (
             <Select
               onValueChange={field.onChange}
-              value={field.value as UpdateUserBody["groupId"] | undefined}
+              value={(field.value as UpdateUserBody["groupId"]) || undefined}
             >
               <SelectTrigger
                 className="w-full rounded-md border border-neutral-300 px-2 py-1"

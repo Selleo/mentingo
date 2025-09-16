@@ -31,7 +31,7 @@ export { default as Warning } from "./warning.svg?react";
 export { default as Admin } from "./admin.svg?react";
 export { default as Hat } from "./hat.svg?react";
 export { default as Multi } from "./multi.svg?react";
-
+export { default as CertificateTrophy } from "./certificateTrophy.svg?react";
 export { default as Success } from "./success.svg?react";
 export { default as CourseEmptyState } from "./course-empty-state.svg?react";
 export { default as DragAndDropIcon } from "./drag-and-drop.svg?react";
@@ -49,6 +49,7 @@ export { default as Smile } from "./smile.svg?react";
 export { default as Send } from "./send.svg?react";
 export { default as Google } from "./google.svg?react";
 export { default as Microsoft } from "./microsoft.svg?react";
+export { default as Ribbon } from "./ribbon.svg?react";
 export { default as Megaphone } from "./megaphone.svg?react";
 
 export * from "./lesson-types";

@@ -1,9 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
+import { version } from "~/../version.json";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import LogoUrl from "~/assets/menitngo_logo_light_transparent.svg";
@@ -29,9 +30,9 @@ const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true
 const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 
 export default function LoginPage() {
-  const navigate = useNavigate();
-  const { mutateAsync: loginUser } = useLoginUser();
   const { t } = useTranslation();
+
+  const { mutateAsync: loginUser } = useLoginUser();
 
   const {
     data: { enforceSSO: isSSOEnforced },
@@ -49,9 +50,7 @@ export default function LoginPage() {
       return;
     }
 
-    loginUser({ data }).then(() => {
-      navigate("/");
-    });
+    loginUser({ data });
   };
 
   return (
@@ -124,6 +123,9 @@ export default function LoginPage() {
             {t("loginView.other.signUp")}
           </Link>
         </div>
+        <p className="bottom-4 mt-4 text-center text-sm text-neutral-300">
+          {t("common.other.appVersion", { version })}
+        </p>
       </CardContent>
     </Card>
   );

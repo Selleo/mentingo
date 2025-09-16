@@ -149,6 +149,9 @@ jobs:
         working-directory: ./
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -163,6 +166,12 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2.0.1
+
+      - name: Save version in apps/web
+        run: |
+          TAG_VERSION=$(git describe --tags --abbrev=0 --match "v*")
+          echo "{ \"version\": \"$TAG_VERSION\" }" > apps/web/version.json
+          echo "✅ Wrote version $TAG_VERSION to apps/web/version.json"
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image

@@ -1,5 +1,7 @@
 import { Type } from "@sinclair/typebox";
 
+import { USER_ROLES } from "src/user/schemas/userRoles";
+
 import type { Static } from "@sinclair/typebox";
 
 export const companyInformationJSONSchema = Type.Object({
@@ -13,27 +15,27 @@ export const companyInformationJSONSchema = Type.Object({
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
   enforceSSO: Type.Boolean(),
+  certificateBackgroundImage: Type.Union([Type.String(), Type.Null()]),
   companyInformation: Type.Optional(companyInformationJSONSchema),
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
+  MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({
   language: Type.String(),
+  isMFAEnabled: Type.Boolean({ default: false }),
+  MFASecret: Type.Union([Type.String({ default: null }), Type.Null()]),
 });
 
 export const adminSettingsJSONContentSchema = Type.Object({
-  language: Type.String(),
+  ...studentSettingsJSONContentSchema.properties,
   adminNewUserNotification: Type.Boolean(),
-});
-
-export const globalSettingsJSONContentSchema = Type.Object({
-  platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
+  adminFinishedCourseNotification: Type.Boolean(),
 });
 
 export const settingsJSONContentSchema = Type.Union([
   studentSettingsJSONContentSchema,
   adminSettingsJSONContentSchema,
-  globalSettingsJSONSchema,
 ]);
 
 export const userSettingsJSONContentSchema = Type.Union([

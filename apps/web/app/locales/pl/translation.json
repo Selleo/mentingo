@@ -38,9 +38,11 @@
       "all": "Wszystkie",
       "search": "Szukaj",
       "published": "Opublikowany",
+      "private": "Niepubliczny",
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
-      "copyUrl": "Adres URL został skopiowany do schowka"
+      "copyUrl": "Adres URL został skopiowany do schowka",
+      "appVersion": "Wersja aplikacji: {{version}}"
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"
@@ -374,7 +376,8 @@
       },
       "other": {
         "draft": "Wersja robocza",
-        "published": "Opublikowane"
+        "published": "Opublikowane",
+        "private": "Niepubliczne"
       }
     },
     "field": {
@@ -646,7 +649,9 @@
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
-      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie"
+      "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
+      "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
+      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu"
     },
     "settings": {
       "breadcrumbs": {
@@ -655,7 +660,9 @@
         "createNew": "Utwórz nowy"
       },
       "button": {
-        "removeThumbnail": "Usuń miniaturę"
+        "removeThumbnail": "Usuń miniaturę",
+        "includesCertificate": "Zawiera certyfikat",
+        "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
       },
       "selectButton": {
         "uploadFile": "Plik",
@@ -877,7 +884,8 @@
               "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki muszą być spełnione.)</em>",
               "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
             }
-          }
+          },
+          "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
         }
       }
     },
@@ -887,7 +895,9 @@
       "draftHeader": "Wersja robocza",
       "draftBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy już się zapisali, kurs nie będzie widoczny na ich liście kursów.",
       "publishedHeader": "Opublikowany",
-      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie."
+      "publishedBody": "Studenci mogą zakupić, zapisać się i uzyskać dostęp do treści kursu. Po zapisaniu kurs będzie widoczny na ich dashboardzie.",
+      "privateHeader": "Niepubliczny",
+      "privateBody": "Studenci nie mogą zakupić ani zapisać się na ten kurs. Dla tych, którzy są na niego zapisani (np. przez admina) kurs będzie widoczny na ich liście kursów i będą mogli z niego korzystać."
     },
     "pricing": {
       "header": "Cennik",
@@ -1097,7 +1107,8 @@
     "tooltip": {
       "retakeAvailableIn": "Zablokowane na {{time}} godz. po ostatnim podejściu.",
       "cooldown": "Quiz będzie zablokowany na {{time}} godz. po ostatnim podejściu.",
-      "noCooldown": "Brak okresu oczekiwania."
+      "noCooldown": "Brak okresu oczekiwania.",
+      "beta": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
     },
     "breadcrumbs": {
       "availableCourses": "Dostępne kursy",
@@ -1205,7 +1216,6 @@
       "purchaseRequired": "Odblokuj tę lekcję, kupując kurs."
     }
   },
-
   "settings": {
     "title": "Ustawienia",
     "buttons": {
@@ -1221,6 +1231,20 @@
       "settings": "Ustawienia"
     }
   },
+  "certificateBackgroundUpload": {
+    "title": "Przesyłanie tła certyfikatu",
+    "description": "Prześlij obraz tła dla certyfikatu.",
+    "button": {
+      "removeBackgroundImage": "Usuń obraz tła"
+    },
+    "other": {
+      "uploading": "Przesyłanie..."
+    },
+    "toast": {
+      "success": "Tło certyfikatu zostało pomyślnie zmienione",
+      "error": "Wystąpił błąd podczas zmiany tła certyfikatu"
+    }
+  },
   "adminPreferences": {
     "header": "Globalne preferencje administratora",
     "subHeader": "Zarządzaj globalnymi ustawieniami",
@@ -1230,19 +1254,79 @@
       "newUserNotifications": "Powiadomienia o nowych użytkownikach",
       "newUserNotificationsDescription": "Otrzymuj powiadomienia gdy zostanie utworzony nowy użytkownik",
       "coursesVisibility": "Pokazuj kursy odwiedzającym",
-      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania"
+      "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
+      "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
+      "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
-      "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane"
+      "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
+      "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
+  },
+  "mfa": {
+    "setup": {
+      "title": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
+      "description": "Wykonaj poniższe kroki, aby skonfigurować uwierzytelnianie dwuskładnikowe (MFA) dla swojego konta.",
+      "scanQr": "Zeskanuj poniższy kod QR za pomocą aplikacji uwierzytelniającej (Google Authenticator, Authy itp.).",
+      "manualEntry": "Jeśli nie możesz zeskanować, wprowadź sekret ręcznie w aplikacji.",
+      "enterCode": "Wprowadź 6-cyfrowy kod z aplikacji poniżej i kliknij 'Zweryfikuj i włącz MFA'.",
+      "loadingQr": "Ładowanie kodu QR...",
+      "secretLabel": "Sekret",
+      "tokenLabel": "Kod MFA",
+      "verifyButton": "Zweryfikuj i włącz MFA"
+    },
+    "verify": {
+      "title": "Skonfiguruj uwierzytelnianie dwuskładnikowe",
+      "description": "Wykonaj poniższe kroki, aby skonfigurować uwierzytelnianie dwuskładnikowe (MFA) dla swojego konta.",
+      "openAuthenticator": "Otwórz aplikację uwierzytelniającą (Google Authenticator, Authy itp.).",
+      "enterCode": "Wprowadź 6-cyfrowy kod z aplikacji",
+      "verifyToken": "Zweryfikuj swój kod MFA",
+      "tokenLabel": "Kod MFA",
+      "toast": {
+        "success": "Weryfikacja MFA zakończona pomyślnie.",
+        "error": "Weryfikacja MFA nie powiodła się."
+      }
+    }
+  },
+  "MFAEnforcementView": {
+    "header": "Wymuszenie uwierzytelniania dwuskładnikowego na podstawie ról",
+    "subHeader": "Wymuś MFA dla określonych ról użytkowników",
+    "description": "To ustawienie pozwala na wymuszenie uwierzytelniania dwuskładnikowego (MFA) dla określonych ról użytkowników w Twojej organizacji.",
+    "roles": {
+      "admin": "Administrator",
+      "student": "Student",
+      "content_creator": "Twórca treści"
+    },
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "Ustawienia wymuszenia MFA zostały pomyślnie zaktualizowane.",
+      "mfaEnforcementUpdateFailed": "Nie udało się zaktualizować ustawień wymuszenia MFA."
+    }
   },
   "progressBadge": {
     "completed": "Ukończone",
     "inProgress": "W trakcie",
     "notStarted": "Nierozpoczęte",
     "blocked": "Zablokowane"
+  },
+  "studentCertificateView": {
+    "header": "Certyfikaty",
+    "informations": {
+      "loading": "Ładowanie certyfikatów...",
+      "noCertificates": "Nie masz jeszcze żadnych certyfikatów. Ukończ kurs, aby otrzymać certyfikat.",
+      "failedToLoad": "Nie udało się załadować certyfikatów. Spróbuj ponownie później.",
+      "failedToDownload": "Nie udało się pobrać certyfikatu. Spróbuj ponownie później."
+    },
+    "button": {
+      "download": "Pobierz",
+      "preview": "Podgląd"
+    }
   },
   "announcements": {
     "breadcrumbs": {

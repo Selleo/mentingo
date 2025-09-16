@@ -7,6 +7,7 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
 
 import { requestManager, ApiClient } from "../api-client";
+import { queryClient } from "../queryClient";
 
 import { useAuthStore } from "./../../modules/Auth/authStore";
 
@@ -15,6 +16,7 @@ export function useLogoutUser() {
   const { setLoggedIn } = useAuthStore();
   const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
   const setIsVisible = useAnnouncementsPopupStore((state) => state.setIsVisible);
+  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
   const navigate = useNavigate();
 
   return useMutation({
@@ -24,11 +26,14 @@ export function useLogoutUser() {
       setCurrentUser(undefined);
       setLoggedIn(false);
       setIsVisible(true);
+      setHasVerifiedMFA(false);
 
       return response.data;
     },
     onSuccess: () => {
       requestManager.abortAll();
+
+      queryClient.invalidateQueries();
 
       navigate("/auth/login");
     },

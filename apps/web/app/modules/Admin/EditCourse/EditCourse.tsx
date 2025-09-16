@@ -4,12 +4,15 @@ import { useTranslation } from "react-i18next";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
+
+import { getCourseBadgeVariant } from "../Courses/utils";
 
 import CourseLessons from "./CourseLessons/CourseLessons";
 import CoursePricing from "./CoursePricing/CoursePricing";
@@ -64,16 +67,35 @@ const EditCourse = () => {
           <div className="flex items-center justify-between">
             <h4 className="h4 flex items-center text-neutral-950">
               {course?.title || ""}
-              {course?.isPublished ? (
-                <span className="ml-2 flex items-center rounded-sm bg-success-50 px-2 py-1 text-sm text-success-800">
-                  <Icon name="Success" className="mr-1" />
+
+              {course?.status === "published" && (
+                <Badge
+                  variant={getCourseBadgeVariant(course?.status)}
+                  fontWeight="bold"
+                  className="ml-2"
+                  icon="Success"
+                >
                   {t("common.other.published")}
-                </span>
-              ) : (
-                <span className="ml-2 flex items-center rounded-sm bg-warning-50 px-2 py-1 text-sm text-yellow-600">
-                  <Icon name="Warning" className="mr-1" />
+                </Badge>
+              )}
+              {course?.status === "draft" && (
+                <Badge
+                  variant={getCourseBadgeVariant(course?.status)}
+                  fontWeight="bold"
+                  className="ml-2"
+                  icon="Warning"
+                >
                   {t("common.other.draft")}
-                </span>
+                </Badge>
+              )}
+              {course?.status === "private" && (
+                <Badge
+                  variant={getCourseBadgeVariant(course?.status)}
+                  fontWeight="bold"
+                  className="ml-2"
+                >
+                  {t("common.other.private")}
+                </Badge>
               )}
             </h4>
             <Button
@@ -102,6 +124,7 @@ const EditCourse = () => {
             categoryId={course?.categoryId}
             thumbnailS3SingedUrl={course?.thumbnailS3SingedUrl}
             thumbnailS3Key={course?.thumbnailS3Key}
+            hasCertificate={course?.hasCertificate || false}
           />
         </TabsContent>
         <TabsContent value="Curriculum" className="h-full overflow-hidden">
@@ -120,7 +143,7 @@ const EditCourse = () => {
           />
         </TabsContent>
         <TabsContent value="Status">
-          <CourseStatus courseId={course?.id || ""} isPublished={!!course?.isPublished} />
+          <CourseStatus courseId={course?.id || ""} status={course?.status || "draft"} />
         </TabsContent>
         <TabsContent value="Enrolled">
           <CourseEnrolled />

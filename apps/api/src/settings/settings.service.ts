@@ -23,7 +23,10 @@ import type {
   AdminSettingsJSONContentSchema,
   UserSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
-import type { UpdateSettingsBody } from "./schemas/update-settings.schema";
+import type {
+  UpdateMFAEnforcedRolesRequest,
+  UpdateSettingsBody,
+} from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
@@ -46,7 +49,20 @@ export class SettingsService {
       throw new NotFoundException("Global settings not found");
     }
 
-    return globalSettings.settings;
+    const parsedSettings = {
+      ...globalSettings.settings,
+      MFAEnforcedRoles: Array.isArray(globalSettings.settings.MFAEnforcedRoles)
+        ? globalSettings.settings.MFAEnforcedRoles
+        : JSON.parse(globalSettings.settings.MFAEnforcedRoles ?? "[]"),
+    };
+
+    const { certificateBackgroundImage, ...restOfSettings } = parsedSettings;
+
+    const certificateBackgroundSignedUrl = certificateBackgroundImage
+      ? await this.fileService.getFileUrl(certificateBackgroundImage)
+      : null;
+
+    return { ...restOfSettings, certificateBackgroundImage: certificateBackgroundSignedUrl };
   }
 
   public async createSettings(
@@ -156,7 +172,14 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    return updatedGlobalSettings;
+    const parsedSettings = {
+      ...updatedGlobalSettings,
+      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
+        ? updatedGlobalSettings.MFAEnforcedRoles
+        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
+    };
+
+    return parsedSettings;
   }
 
   public async updateAdminNewUserNotification(
@@ -219,7 +242,14 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    return updatedGlobalSettings;
+    const parsedSettings = {
+      ...updatedGlobalSettings,
+      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
+        ? updatedGlobalSettings.MFAEnforcedRoles
+        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
+    };
+
+    return parsedSettings;
   }
 
   public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
@@ -303,6 +333,107 @@ export class SettingsService {
       });
 
     return updated.companyInformation;
+  }
+
+  async updateMFAEnforcedRoles(
+    rolesRequest: UpdateMFAEnforcedRolesRequest,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const [existingGlobalSettings] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!existingGlobalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const enforcedRoles: UserRole[] = [];
+
+    Object.entries(rolesRequest).forEach(([role, shouldEnforce]) => {
+      if (shouldEnforce === true) enforcedRoles.push(role as UserRole);
+    });
+
+    const [{ settings: updatedSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`jsonb_set(
+          settings.settings,
+          '{MFAEnforcedRoles}',
+          to_jsonb(${JSON.stringify(enforcedRoles)}::jsonb),
+          true
+        )`,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedSettings;
+  }
+
+  async updateCertificateBackground(
+    certificateBackground: Express.Multer.File,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    let certificateBackgroundValue: string | null = null;
+
+    if (certificateBackground) {
+      const { fileKey } = await this.fileService.uploadFile(
+        certificateBackground,
+        "certificate-backgrounds",
+      );
+      certificateBackgroundValue = fileKey;
+    }
+
+    const [{ settings: updatedSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{certificateBackgroundImage}',
+            ${
+              certificateBackgroundValue
+                ? sql`to_jsonb(${certificateBackgroundValue}::text)`
+                : sql`'null'::jsonb`
+            },
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedSettings;
+  }
+
+  public async updateAdminFinishedCourseNotification(
+    userId: UUIDType,
+  ): Promise<AdminSettingsJSONContentSchema> {
+    const [currentUserSettings] = await this.db
+      .select({
+        adminFinishedCourseNotification: sql<boolean>`(settings.settings->>'adminFinishedCourseNotification')::boolean`,
+      })
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (!currentUserSettings) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    const [{ settings: updatedUserSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{adminFinishedCourseNotification}',
+            to_jsonb(${!currentUserSettings.adminFinishedCourseNotification}::boolean),
+            true
+          )
+        `,
+      })
+      .where(eq(settings.userId, userId))
+      .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedUserSettings;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
