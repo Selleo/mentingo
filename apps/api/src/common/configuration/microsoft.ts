@@ -4,7 +4,7 @@ import { type Static, Type } from "@sinclair/typebox";
 import { configValidator } from "src/utils/configValidator";
 
 const microsoftAuthCallbackURL = `${
-  process.env.CORS_ORIGIN || "http://localhost:3000"
+  process.env.API_BASE_URL || "http://localhost:3000"
 }/api/auth/microsoft/callback`;
 
 const schema = Type.Object({

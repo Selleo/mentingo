@@ -14,7 +14,7 @@ export function useLogoutUser() {
   const { toast } = useToast();
   const { setLoggedIn } = useAuthStore();
   const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
-  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
+
   const navigate = useNavigate();
 
   return useMutation({
@@ -23,7 +23,6 @@ export function useLogoutUser() {
 
       setCurrentUser(undefined);
       setLoggedIn(false);
-      setHasVerifiedMFA(false);
 
       return response.data;
     },

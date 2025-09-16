@@ -139,7 +139,7 @@ export class AuthService {
         profilePictureUrl: usersProfilePictureUrl,
         accessToken,
         refreshToken,
-        navigateTo: "/auth/mfa",
+        shouldVerifyMFA: true,
       };
     }
 
@@ -148,7 +148,7 @@ export class AuthService {
       profilePictureUrl: usersProfilePictureUrl,
       accessToken,
       refreshToken,
-      navigateTo: "/",
+      shouldVerifyMFA: false,
     };
   }
 
@@ -159,7 +159,14 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
-    return user;
+    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+
+    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
+      return { ...user, shouldVerifyMFA: true };
+    }
+
+    return { ...user, shouldVerifyMFA: false };
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -403,13 +410,25 @@ export class AuthService {
         lastName: userCallback.lastName,
         role: USER_ROLES.STUDENT,
       });
+
+      await this.settingsService.createSettings(user.id, user.role as UserRole, undefined);
     }
 
     const tokens = await this.getTokens(user);
 
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+
+    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
+      return {
+        ...tokens,
+        shouldVerifyMFA: true,
+      };
+    }
+
     return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      ...tokens,
+      shouldVerifyMFA: false,
     };
   }
 
