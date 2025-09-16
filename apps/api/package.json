@@ -72,6 +72,7 @@
     "drizzle-kit": "0.22.8",
     "drizzle-orm": "0.31.2",
     "drizzle-typebox": "0.1.1",
+    "exceljs": "4.4.0",
     "faker": "link:@types/@faker-js/faker",
     "html-entities": "2.6.0",
     "jsdom": "24.1.1",

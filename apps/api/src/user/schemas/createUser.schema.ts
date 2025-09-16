@@ -10,3 +10,18 @@ export const createUserSchema = Type.Object({
 });
 
 export type CreateUserBody = Static<typeof createUserSchema>;
+
+export const importUserSchema = Type.Object({
+  email: Type.String({ format: "email" }),
+  firstName: Type.String(),
+  lastName: Type.String(),
+  role: Type.Enum(USER_ROLES),
+  groupName: Type.Optional(Type.String()),
+});
+
+export const importUserResponseSchema = Type.Object({
+  importedUsersAmount: Type.Number(),
+  skippedUsersAmount: Type.Number(),
+});
+
+export type ImportUser = Static<typeof importUserSchema>;

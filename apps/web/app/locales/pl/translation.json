@@ -493,6 +493,11 @@
       "createdAt": "Utworzono",
       "group": "Grupa"
     },
+    "import": {
+      "toast": {
+        "success": "Import zakończony pomyślnie.\nZaimportowano {{ importedUsersAmount }} użytkowników.\nPominieto {{ skippedUsersAmount }} istniejących użytkowników."
+      }
+    },
     "other": {
       "selected": "Wybrany"
     },
@@ -1291,5 +1296,14 @@
     "inProgress": "W trakcie",
     "notStarted": "Nierozpoczęte",
     "blocked": "Zablokowane"
+  },
+  "files": {
+    "import": {
+      "noFileUploaded": "Nie przesłano pliku",
+      "invalidFileData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
+      "fileEmpty": "Przesłany plik jest pusty",
+      "requiredDataMissing": "Import nie powiódł się – brak wymaganych danych w pliku.",
+      "invalidFileType": "Nieprawidłowy typ pliku. Wybierz poprawny plik"
+    }
   }
 }

@@ -18,7 +18,9 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
+import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
+import { importUserSchema } from "src/user/schemas/createUser.schema";
 
 import {
   createTokens,
@@ -56,6 +58,7 @@ export class UserService {
     private fileService: FileService,
     private s3Service: S3Service,
     private statisticsService: StatisticsService,
+    private settingsService: SettingsService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -379,8 +382,10 @@ export class UserService {
     }
   }
 
-  public async createUser(data: CreateUserBody) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.email, data.email));
+  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    const [existingUser] = await db.select().from(users).where(eq(users.email, data.email));
 
     if (existingUser) {
       throw new ConflictException("User already exists");
@@ -470,6 +475,57 @@ export class UserService {
       .where(and(eq(users.role, USER_ROLES.ADMIN)));
 
     return adminsWithSettings;
+  }
+
+  async importUsers(usersDataFile: Express.Multer.File) {
+    const importStats = {
+      importedUsersAmount: 0,
+      skippedUsersAmount: 0,
+    };
+
+    const usersData = await this.fileService.parseExcelFile<typeof importUserSchema>(
+      usersDataFile,
+      importUserSchema,
+    );
+
+    for (const userData of usersData) {
+      const [existingUser] = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.email, userData.email));
+
+      if (existingUser) {
+        importStats.skippedUsersAmount++;
+        continue;
+      }
+
+      await this.db.transaction(async (trx) => {
+        const { groupName, ...userInfo } = userData;
+
+        const createdUser = await this.createUser({ ...userInfo }, trx);
+        await this.settingsService.createSettings(
+          createdUser.id,
+          createdUser.role as UserRole,
+          undefined,
+          trx,
+        );
+
+        if (!groupName) return;
+
+        const [group] = await trx.select().from(groups).where(eq(groups.name, groupName));
+
+        if (!group) return;
+
+        await trx
+          .insert(groupUsers)
+          .values({ userId: createdUser.id, groupId: group.id })
+          .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
+
+        importStats.importedUsersAmount++;
+      });
+    }
+
+    return importStats;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {
