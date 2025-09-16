@@ -90,7 +90,7 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      await this.settingsService.createSettings(
+      await this.settingsService.createSettingsIfNotExists(
         newUser.id,
         newUser.role as UserRole,
         undefined,
@@ -296,7 +296,10 @@ export class AuthService {
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(token);
 
-    await this.settingsService.createSettings(createToken.userId, existingUser.role as UserRole);
+    await this.settingsService.createSettingsIfNotExists(
+      createToken.userId,
+      existingUser.role as UserRole,
+    );
 
     this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
 
@@ -411,7 +414,11 @@ export class AuthService {
         role: USER_ROLES.STUDENT,
       });
 
-      await this.settingsService.createSettings(user.id, user.role as UserRole, undefined);
+      await this.settingsService.createSettingsIfNotExists(
+        user.id,
+        user.role as UserRole,
+        undefined,
+      );
     }
 
     const tokens = await this.getTokens(user);
