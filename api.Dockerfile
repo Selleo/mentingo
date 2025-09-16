@@ -8,6 +8,20 @@ WORKDIR /app
 
 COPY . .
 
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    libx11-xcb \
+    xvfb \
+    && rm -rf /var/cache/apk/*
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 RUN pnpm build --filter=api
 # TODO: Move pnpm deploy to turbo prune workflow
