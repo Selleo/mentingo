@@ -6,6 +6,7 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 import { PROMOTION_CODE_QUERY_KEY } from "../queries/admin/usePromotionCodeById";
+import { PROMOTION_CODES_QUERY_KEY } from "../queries/admin/usePromotionCodes";
 import { queryClient } from "../queryClient";
 
 export type UpdatePromotionCode = {
@@ -32,6 +33,9 @@ export const useUpdatePromotionCode = () => {
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({
         queryKey: [PROMOTION_CODE_QUERY_KEY, data?.data?.id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: [PROMOTION_CODES_QUERY_KEY],
       });
       toast({
         description: t("adminPromotionCodesView.notifications.updatedSuccessfully"),
