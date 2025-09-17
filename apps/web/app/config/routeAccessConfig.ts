@@ -113,4 +113,7 @@ export const routeAccessConfig = createRouteConfig({
   "admin/lesson-items/new-question": ADMIN_AND_CONTENT_CREATOR,
   "admin/lesson-items/:id": ADMIN_AND_CONTENT_CREATOR,
   "provider-information": ALL_ROLES,
+  "admin/promotion-codes": ADMIN_ONLY,
+  "admin/promotion-codes/new": ADMIN_ONLY,
+  "admin/promotion-codes/:id": ADMIN_ONLY,
 });

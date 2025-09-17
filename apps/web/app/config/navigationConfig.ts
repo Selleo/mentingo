@@ -62,6 +62,11 @@ export const getNavigationConfig = (
     path: `profile/${userId}`,
     iconName: "User",
   },
+  {
+    label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
+    path: "admin/promotion-codes",
+    iconName: "HandCoins",
+  },
 ];
 
 /**
