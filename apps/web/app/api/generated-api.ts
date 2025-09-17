@@ -1852,6 +1852,152 @@ export interface CreatePaymentIntentResponse {
   };
 }
 
+export interface CreateCheckoutSessionBody {
+  amountInCents: number;
+  currency?: string;
+  allowPromotionCode?: boolean;
+  quantity?: number;
+  productName: string;
+  productDescription?: string;
+  courseId: string;
+  customerId: string;
+  locale?: string;
+}
+
+export interface CreateCheckoutSessionResponse {
+  data: {
+    clientSecret: string;
+  };
+}
+
+export interface GetPromotionCodesResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      livemode: boolean;
+      maxRedemptions?: number | null;
+      metadata: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    livemode: boolean;
+    maxRedemptions?: number | null;
+    metadata: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  }[];
+}
+
+export interface GetPromotionCodeResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      livemode: boolean;
+      maxRedemptions?: number | null;
+      metadata: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    livemode: boolean;
+    maxRedemptions?: number | null;
+    metadata: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  };
+}
+
+export interface CreatePromotionCouponBody {
+  code: string;
+  amountOff?: number;
+  percentOff?: number;
+  maxRedemptions?: number;
+  assignedCourseIds?: string[];
+  currency?: string;
+  expiresAt?: string;
+  courseId?: string[];
+}
+
+export interface CreatePromotionCouponResponse {
+  data: string;
+}
+
+export interface UpdatePromotionCodeBody {
+  active?: boolean;
+  assignedCourseIds?: string[];
+}
+
+export interface UpdatePromotionCodeResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      livemode: boolean;
+      maxRedemptions?: number | null;
+      metadata: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    livemode: boolean;
+    maxRedemptions?: number | null;
+    metadata: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  };
+}
+
 export interface UploadScormPackageResponse {
   data: {
     message: string;
@@ -4143,6 +4289,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name StripeControllerCreateCheckoutSession
+     * @request POST:/api/stripe/checkout-session
+     */
+    stripeControllerCreateCheckoutSession: (
+      data: CreateCheckoutSessionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCheckoutSessionResponse, any>({
+        path: `/api/stripe/checkout-session`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name StripeWebhookControllerHandleWebhook
      * @request POST:/api/stripe/webhook
      */
@@ -4150,6 +4315,73 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/stripe/webhook`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerGetPromotionCodes
+     * @request GET:/api/stripe/promotion-codes
+     */
+    stripeControllerGetPromotionCodes: (params: RequestParams = {}) =>
+      this.request<GetPromotionCodesResponse, any>({
+        path: `/api/stripe/promotion-codes`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerGetPromotionCode
+     * @request GET:/api/stripe/promotion-code/{id}
+     */
+    stripeControllerGetPromotionCode: (id: string, params: RequestParams = {}) =>
+      this.request<GetPromotionCodeResponse, any>({
+        path: `/api/stripe/promotion-code/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerUpdatePromotionCode
+     * @request PATCH:/api/stripe/promotion-code/{id}
+     */
+    stripeControllerUpdatePromotionCode: (
+      id: string,
+      data: UpdatePromotionCodeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdatePromotionCodeResponse, any>({
+        path: `/api/stripe/promotion-code/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerCreatePromotionCoupon
+     * @request POST:/api/stripe/promotion-code
+     */
+    stripeControllerCreatePromotionCoupon: (
+      data: CreatePromotionCouponBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePromotionCouponResponse, any>({
+        path: `/api/stripe/promotion-code`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

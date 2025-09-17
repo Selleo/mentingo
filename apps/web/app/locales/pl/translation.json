@@ -126,6 +126,7 @@
     "providerInformation": "O dostawcy",
     "browseCourses": "Przeglądaj kursy",
     "announcements": "Ogłoszenia",
+    "promotionCodes": "Kody promocyjne",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
@@ -365,6 +366,60 @@
       "completed": "Ukończone",
       "enrolled": "Zapisane",
       "noData": "Brak danych"
+    }
+  },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Kod promocyjny utworzony pomyślnie",
+      "updatedSuccessfully": "Kod promocyjny zaktualizowany pomyślnie"
+    },
+    "headers": {
+      "create": "Utwórz kod promocyjny",
+      "update": "Zaktualizuj kod promocyjny"
+    },
+    "status": {
+      "active": "Aktywny",
+      "deactivated": "Nieaktywny",
+      "expired": "Wygasły",
+      "usageLimitReached": "Osiągnięto limit użyć"
+    },
+    "field": {
+      "code": "Kod",
+      "status": "Status",
+      "uses": "Ilość użyć",
+      "associatedCourses": "Powiązane kursy",
+      "discountType": "Typ rabatu",
+      "discountTypePercent": "Procent",
+      "discountTypeFixed": "Kwota",
+      "discountValue": "Wartość zniżki",
+      "maxRedemptions": "Maksymalna liczba użyć",
+      "expiresAt": "Wygasa",
+      "assignedCourses": "Przypisane kursy",
+      "type": "Typ",
+      "associateCourse": {
+        "checkAll": "Zastosuj do wszystkich kursów"
+      },
+      "discount": "Rabat",
+      "createdAt": "Utworzono"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "promotionCodes": "Kody promocyjne",
+      "createNew": "Utwórz nowy",
+      "update": "Edytuj",
+      "back": "Wstecz"
+    },
+    "button": {
+      "createNew": "Utwórz nowy",
+      "createCoupon": "Utwórz kod promocyjny",
+      "deactivatePromotionCode": "Deaktywuj kod promocyjny",
+      "activatePromotionCode": "Aktywuj kod promocyjny"
+    },
+    "other": {
+      "noCourses": "Brak kursów",
+      "usageInfo": "Informacje o użyciach",
+      "usageAmount": "Liczba użyć",
+      "baseInfo": "Podstawowe informacje"
     }
   },
   "adminCoursesView": {

@@ -62,6 +62,7 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
             courseCurrency={course.currency}
             coursePrice={course.priceInCents}
             courseTitle={course.title}
+            courseDescription={course.description}
             courseId={course.id}
           />
         ) : (

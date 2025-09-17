@@ -3380,6 +3380,33 @@
         }
       }
     },
+    "/api/stripe/checkout-session": {
+      "post": {
+        "operationId": "StripeController_createCheckoutSession",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCheckoutSessionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCheckoutSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stripe/webhook": {
       "post": {
         "operationId": "StripeWebhookController_handleWebhook",
@@ -3396,6 +3423,110 @@
         "responses": {
           "201": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/api/stripe/promotion-codes": {
+      "get": {
+        "operationId": "StripeController_getPromotionCodes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPromotionCodesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stripe/promotion-code/{id}": {
+      "get": {
+        "operationId": "StripeController_getPromotionCode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPromotionCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "StripeController_updatePromotionCode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePromotionCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePromotionCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stripe/promotion-code": {
+      "post": {
+        "operationId": "StripeController_createPromotionCoupon",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePromotionCouponBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePromotionCouponResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -11753,6 +11884,776 @@
             },
             "required": [
               "clientSecret"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateCheckoutSessionBody": {
+        "type": "object",
+        "properties": {
+          "amountInCents": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "allowPromotionCode": {
+            "type": "boolean"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "productDescription": {
+            "type": "string"
+          },
+          "courseId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amountInCents",
+          "productName",
+          "courseId",
+          "customerId"
+        ]
+      },
+      "CreateCheckoutSessionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "clientSecret": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "clientSecret"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPromotionCodesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "active": {
+                  "type": "boolean"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "coupon": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amountOff": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "percentOff": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created": {
+                      "type": "number"
+                    },
+                    "currency": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "duration": {
+                      "type": "string"
+                    },
+                    "durationInMonths": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "livemode": {
+                      "type": "boolean"
+                    },
+                    "maxRedemptions": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "metadata": {
+                      "additionalProperties": true,
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "redeemBy": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "timesRedeemed": {
+                      "type": "number"
+                    },
+                    "valid": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "created",
+                    "duration",
+                    "livemode",
+                    "metadata",
+                    "timesRedeemed",
+                    "valid"
+                  ]
+                },
+                "created": {
+                  "type": "number"
+                },
+                "customer": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "expiresAt": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "livemode": {
+                  "type": "boolean"
+                },
+                "maxRedemptions": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "metadata": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "properties": {}
+                },
+                "restrictions": {
+                  "type": "object",
+                  "properties": {
+                    "firstTimeTransaction": {
+                      "type": "boolean"
+                    },
+                    "minimumAmount": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "minimumAmountCurrency": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "firstTimeTransaction"
+                  ]
+                },
+                "timesRedeemed": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "active",
+                "code",
+                "coupon",
+                "created",
+                "livemode",
+                "metadata",
+                "restrictions",
+                "timesRedeemed"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPromotionCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "code": {
+                "type": "string"
+              },
+              "coupon": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "amountOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "percentOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "created": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "duration": {
+                    "type": "string"
+                  },
+                  "durationInMonths": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "livemode": {
+                    "type": "boolean"
+                  },
+                  "maxRedemptions": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "additionalProperties": true,
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "redeemBy": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "timesRedeemed": {
+                    "type": "number"
+                  },
+                  "valid": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "created",
+                  "duration",
+                  "livemode",
+                  "metadata",
+                  "timesRedeemed",
+                  "valid"
+                ]
+              },
+              "created": {
+                "type": "number"
+              },
+              "customer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "expiresAt": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "livemode": {
+                "type": "boolean"
+              },
+              "maxRedemptions": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "metadata": {
+                "additionalProperties": true,
+                "type": "object",
+                "properties": {}
+              },
+              "restrictions": {
+                "type": "object",
+                "properties": {
+                  "firstTimeTransaction": {
+                    "type": "boolean"
+                  },
+                  "minimumAmount": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "minimumAmountCurrency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "firstTimeTransaction"
+                ]
+              },
+              "timesRedeemed": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "active",
+              "code",
+              "coupon",
+              "created",
+              "livemode",
+              "metadata",
+              "restrictions",
+              "timesRedeemed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreatePromotionCouponBody": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "amountOff": {
+            "type": "integer"
+          },
+          "percentOff": {
+            "type": "integer"
+          },
+          "maxRedemptions": {
+            "type": "integer"
+          },
+          "assignedCourseIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "courseId": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "CreatePromotionCouponResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdatePromotionCodeBody": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "assignedCourseIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UpdatePromotionCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "code": {
+                "type": "string"
+              },
+              "coupon": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "amountOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "percentOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "created": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "duration": {
+                    "type": "string"
+                  },
+                  "durationInMonths": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "livemode": {
+                    "type": "boolean"
+                  },
+                  "maxRedemptions": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "additionalProperties": true,
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "redeemBy": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "timesRedeemed": {
+                    "type": "number"
+                  },
+                  "valid": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "created",
+                  "duration",
+                  "livemode",
+                  "metadata",
+                  "timesRedeemed",
+                  "valid"
+                ]
+              },
+              "created": {
+                "type": "number"
+              },
+              "customer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "expiresAt": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "livemode": {
+                "type": "boolean"
+              },
+              "maxRedemptions": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "metadata": {
+                "additionalProperties": true,
+                "type": "object",
+                "properties": {}
+              },
+              "restrictions": {
+                "type": "object",
+                "properties": {
+                  "firstTimeTransaction": {
+                    "type": "boolean"
+                  },
+                  "minimumAmount": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "minimumAmountCurrency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "firstTimeTransaction"
+                ]
+              },
+              "timesRedeemed": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "active",
+              "code",
+              "coupon",
+              "created",
+              "livemode",
+              "metadata",
+              "restrictions",
+              "timesRedeemed"
             ]
           }
         },

@@ -44,6 +44,9 @@ export const routes: (
       route("groups/new", "modules/Admin/Groups/CreateGroup.page.tsx");
       route("groups/:id", "modules/Admin/Groups/EditGroup.page.tsx");
       route("announcements/new", "modules/Announcements/CreateAnnouncement.page.tsx");
+      route("promotion-codes", "modules/Admin/PromotionCodes/PromotionCodes.page.tsx");
+      route("promotion-codes/new", "modules/Admin/PromotionCodes/CreatePromotionCode.page.tsx");
+      route("promotion-codes/:id", "modules/Admin/PromotionCodes/PromotionCodeDetails.page.tsx");
     });
   });
 };
