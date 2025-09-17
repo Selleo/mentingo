@@ -510,6 +510,8 @@ export class UserService {
           trx,
         );
 
+        importStats.importedUsersAmount++;
+
         if (!groupName) return;
 
         const [group] = await trx.select().from(groups).where(eq(groups.name, groupName));
@@ -520,8 +522,6 @@ export class UserService {
           .insert(groupUsers)
           .values({ userId: createdUser.id, groupId: group.id })
           .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
-
-        importStats.importedUsersAmount++;
       });
     }
 

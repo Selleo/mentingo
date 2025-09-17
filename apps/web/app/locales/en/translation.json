@@ -52,6 +52,14 @@
     "replace": "Click to replace",
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully"
+    },
+    "details": {
+      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 100MB)",
+      "presentation": "PPT/PPTX (max. to 100MB)"
+    },
+    "remove": {
+      "video": "Remove video",
+      "presentation": "Remove presentation"
     }
   },
   "deleteFile": {
@@ -503,7 +511,8 @@
     "button": {
       "createNew": "Create new",
       "deleteSelected": "Delete selected",
-      "edit": "Edit"
+      "edit": "Edit",
+      "import": "Import users"
     },
     "dropdown": {
       "changeRole": "Change role",
@@ -515,7 +524,8 @@
         "delete": "Do you want to delete these accounts?",
         "role": "Modify roles",
         "group": "Modify groups",
-        "confirmation": "Are you sure you want to proceed?"
+        "confirmation": "Are you sure you want to proceed?",
+        "import": "Import users"
       },
       "button": {
         "delete": "Delete",
@@ -528,11 +538,15 @@
         "confirmationForGroup_one": "You will change group to {{ group }} for 1 user",
         "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
-        "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users"
+        "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName."
       },
       "placeholder": {
         "group": "Select group",
         "role": "Select role"
+      },
+      "note": {
+        "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created."
       }
     },
     "breadcrumbs": {

@@ -53,6 +53,14 @@
     "replace": "Kliknij, aby zastąpić",
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+    },
+    "details": {
+      "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 100MB)",
+      "presentation": "PPT/PPTX (maksymalnie 100MB)"
+    },
+    "remove": {
+      "video": "Usuń wideo",
+      "presentation": "Usuń prezentację"
     }
   },
   "deleteFile": {
@@ -504,7 +512,8 @@
     "button": {
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane",
-      "edit": "Edytuj"
+      "edit": "Edytuj",
+      "import": "Importuj użytkowników"
     },
     "dropdown": {
       "changeRole": "Zmień role",
@@ -516,7 +525,8 @@
         "delete": "Czy chcesz usunąć te konta?",
         "role": "Modyfikuj role",
         "group": "Modyfikuj grupy",
-        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?"
+        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?",
+        "import": "Importuj użytkowników"
       },
       "button": {
         "delete": "Usuń",
@@ -533,11 +543,15 @@
         "confirmationForRole_one": "Zmienisz rolę na {{ role }} dla 1 użytkownika",
         "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
-        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników"
+        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne)."
       },
       "placeholder": {
         "group": "Wybierz grupę",
         "role": "Wybierz rolę"
+      },
+      "note": {
+        "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa."
       }
     },
     "breadcrumbs": {
