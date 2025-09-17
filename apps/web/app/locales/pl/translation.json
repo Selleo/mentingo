@@ -125,6 +125,7 @@
     "groups": "Grupy",
     "providerInformation": "O dostawcy",
     "browseCourses": "Przeglądaj kursy",
+    "announcements": "Ogłoszenia",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
@@ -1325,6 +1326,64 @@
     "button": {
       "download": "Pobierz",
       "preview": "Podgląd"
+    }
+  },
+  "announcements": {
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "announcements": "Ogłoszenia",
+      "createAnnouncement": "Utwórz ogłoszenie"
+    },
+    "page": {
+      "header": "Ogłoszenia",
+      "tooltips": {
+        "markAsRead": "Oznacz jako przeczytane"
+      },
+      "buttons": {
+        "new": "Utwórz nowe ogłoszenie"
+      }
+    },
+    "createPage": {
+      "header": "Utwórz ogłoszenie",
+      "subheader": "Podaj szczegóły, aby utworzyć nowe ogłoszenie.",
+      "buttons": {
+        "confirm": "Potwierdź",
+        "cancel": "Anuluj"
+      },
+      "fields": {
+        "title": "Tytuł",
+        "content": "Treść",
+        "group": "Grupa",
+        "everyone": "Wszyscy"
+      },
+      "placeholders": {
+        "title": "Wprowadź tytuł",
+        "content": "Napisz swoje ogłoszenie tutaj...",
+        "group": "Wybierz grupę",
+        "everyone": "Wszyscy"
+      },
+      "validation": {
+        "title": {
+          "required": "Tytuł jest wymagany",
+          "maxLength": "Tytuł musi mieć mniej niż 120 znaków"
+        },
+        "content": {
+          "required": "Treść jest wymagana"
+        }
+      }
+    },
+    "buttons": {
+      "readMore": "Czytaj więcej"
+    },
+    "other": {
+      "noNewAnnouncements": "Brak nowych ogłoszeń do wyświetlenia dla ciebie",
+      "of": "z"
+    },
+    "toast": {
+      "markedAsRead": "Ogłoszenia oznaczone jako przeczytane",
+      "markAsReadFailed": "Nie udało się oznaczyć ogłoszeń jako przeczytane",
+      "createdSuccessfully": "Ogłoszenie zostało pomyślnie utworzone",
+      "createFailed": "Nie udało się utworzyć ogłoszenia"
     }
   }
 }

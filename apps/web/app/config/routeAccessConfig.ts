@@ -89,6 +89,7 @@ export const routeAccessConfig = createRouteConfig({
   settings: ALL_ROLES,
   "profile/:id": ALL_ROLES,
   "course/:courseId/lesson/:lessonId": ALL_ROLES,
+  announcements: ALL_ROLES,
   //Client and public
   "course/:id": ALL_ROLES,
   courses: ALL_ROLES,
@@ -112,5 +113,6 @@ export const routeAccessConfig = createRouteConfig({
   "admin/lesson-items/new-text-block": ADMIN_AND_CONTENT_CREATOR,
   "admin/lesson-items/new-question": ADMIN_AND_CONTENT_CREATOR,
   "admin/lesson-items/:id": ADMIN_AND_CONTENT_CREATOR,
+  "admin/announcements/new": ADMIN_ONLY,
   "provider-information": ALL_ROLES,
 });

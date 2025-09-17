@@ -50,6 +50,7 @@ export { default as Send } from "./send.svg?react";
 export { default as Google } from "./google.svg?react";
 export { default as Microsoft } from "./microsoft.svg?react";
 export { default as Ribbon } from "./ribbon.svg?react";
+export { default as Megaphone } from "./megaphone.svg?react";
 
 export * from "./lesson-types";
 export * from "./question-types";
