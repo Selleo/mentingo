@@ -3,7 +3,7 @@ import {
   InjectStripeModuleConfig,
   StripeModuleConfig,
 } from "@golevelup/nestjs-stripe";
-import { Controller, Post, Query, Headers, Req } from "@nestjs/common";
+import { Controller, Post, Query, Headers, Req, Get, Patch, Param, Body } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
@@ -14,7 +14,14 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+import { checkoutSessionSchema, CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
+import { CreatePromotionCode, createPromotionCodeSchema } from "./schemas/createPromotionCode";
 import { paymentIntentSchema } from "./schemas/payment";
+import { promotionCodeSchema } from "./schemas/promotionCode.schema";
+import {
+  UpdatePromotionCode,
+  updatePromotionCodeSchema,
+} from "./schemas/updatePromotionCode.schema";
 import { StripeService } from "./stripe.service";
 import { StripeWebhookHandler } from "./stripeWebhook.handler";
 
@@ -79,6 +86,16 @@ export class StripeController {
     });
   }
 
+  @Post("checkout-session")
+  @Roles(USER_ROLES.STUDENT)
+  @Validate({
+    response: baseResponse(Type.Object({ clientSecret: Type.String() })),
+    request: [{ type: "body", schema: checkoutSessionSchema }],
+  })
+  async createCheckoutSession(@Body() body: CreateCheckoutSessionBody) {
+    return new BaseResponse(await this.stripeService.createCheckoutSession(body));
+  }
+
   @Public()
   @Post("webhook")
   async handleWebhook(
@@ -116,5 +133,57 @@ export class StripeController {
         clientSecret: 22,
       });
     }
+  }
+
+  @Get("promotion-codes")
+  @Validate({
+    response: baseResponse(Type.Array(promotionCodeSchema)),
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async getPromotionCodes() {
+    return new BaseResponse(await this.stripeService.getPromotionCodes());
+  }
+
+  @Public()
+  @Get("promotion-code/:id")
+  @Validate({
+    response: baseResponse(promotionCodeSchema),
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async getPromotionCode(@Param("id") id: string) {
+    return new BaseResponse(await this.stripeService.getPromotionCode(id));
+  }
+
+  @Post("promotion-code")
+  @Validate({
+    response: baseResponse(Type.String()),
+    request: [{ type: "body", schema: createPromotionCodeSchema }],
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async createPromotionCoupon(
+    @Body()
+    body: CreatePromotionCode,
+  ) {
+    return new BaseResponse(await this.stripeService.createPromotionCode(body));
+  }
+
+  @Patch("promotion-code/:id")
+  @Validate({
+    response: baseResponse(promotionCodeSchema),
+    request: [
+      {
+        type: "param",
+        name: "id",
+        schema: Type.String(),
+      },
+      {
+        type: "body",
+        schema: updatePromotionCodeSchema,
+      },
+    ],
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async updatePromotionCode(@Param("code") id: string, @Body() body: UpdatePromotionCode) {
+    return new BaseResponse(await this.stripeService.updatePromotionCode(id, body));
   }
 }
