@@ -10,6 +10,59 @@ dotenv.config({ path: "./.env" });
 
 export const niceCourses: NiceCourseData[] = [
   {
+    title: "Fake test to certificate",
+    description:
+      "Fake test to certificate Fake test to certificate Fake test to certificate Fake test to certificate Fake test to certificate",
+    status: "published",
+    priceInCents: 0,
+    category: "Data Science",
+    thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
+    chapters: [
+      {
+        title: "Understanding Data and Its Importance",
+        isFreemium: false,
+        lessons: [
+          {
+            type: LESSON_TYPES.TEXT,
+            title: "What is Data Science?",
+            description:
+              "Data science is an interdisciplinary field that uses scientific methods, processes, algorithms, and systems to extract knowledge and insights from structured and unstructured data. In this lesson, you'll learn about the fundamental concepts of data science, including data collection, cleaning, analysis, and interpretation. We'll explore how data science combines statistics, computer science, and domain expertise to solve complex problems and make data-driven decisions in various industries.",
+          },
+          {
+            type: LESSON_TYPES.QUIZ,
+            title: "Data Science Basics Quiz",
+            description: "Test your understanding of fundamental data science concepts.",
+            questions: [
+              {
+                type: QUESTION_TYPE.SINGLE_CHOICE,
+                title: "Which of the following is NOT a typical step in the data science process?",
+                options: [
+                  {
+                    optionText: "Data collection",
+                    isCorrect: false,
+                  },
+                  {
+                    optionText: "Data cleaning",
+                    isCorrect: false,
+                  },
+                  {
+                    optionText: "Data analysis",
+                    isCorrect: false,
+                  },
+                  {
+                    optionText: "Data destruction",
+                    isCorrect: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
     title: "Introduction to Web Development: Building Your First Website",
     description:
       "In this beginner-friendly course, you will learn the basics of web development. We will guide you through creating a simple website from scratch using HTML, CSS, and a bit of JavaScript. No prior experience is needed—just a willingness to learn! By the end of the course, you’ll have built your own website and gained essential skills for further web development projects.",
@@ -720,6 +773,7 @@ export const niceCourses: NiceCourseData[] = [
     priceInCents: 0,
     category: "Mobile Development",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Getting Started with Kotlin Programming",
@@ -1032,6 +1086,7 @@ export const niceCourses: NiceCourseData[] = [
     priceInCents: 0,
     category: "Language Learning",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Mastering Basic Grammar Rules",
@@ -1318,6 +1373,7 @@ export const niceCourses: NiceCourseData[] = [
     priceInCents: 0,
     category: "Language Learning",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
+    hasCertificate: true,
     chapters: [
       {
         title: "Elevate Your Writing: Advanced Clause Strategies",

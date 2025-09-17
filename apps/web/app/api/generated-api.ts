@@ -253,8 +253,7 @@ export interface GetUserDetailsResponse {
 export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
-  /** @format uuid */
-  groupId?: string;
+  groupId?: string | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -294,8 +293,7 @@ export interface UpsertUserDetailsResponse {
 export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
-  /** @format uuid */
-  groupId?: string;
+  groupId?: string | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -376,6 +374,7 @@ export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -402,6 +401,7 @@ export interface GetUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
       };
 }
 
@@ -418,6 +418,7 @@ export type UpdateUserSettingsBody =
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
       adminNewUserNotification?: boolean;
+      adminFinishedCourseNotification?: boolean;
     };
 
 export interface UpdateUserSettingsResponse {
@@ -434,6 +435,7 @@ export interface UpdateUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
       };
 }
 
@@ -444,6 +446,7 @@ export interface UpdateAdminNewUserNotificationResponse {
     isMFAEnabled: boolean;
     MFASecret: string | null;
     adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
   };
 }
 
@@ -451,6 +454,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -467,6 +471,7 @@ export interface UpdateEnforceSSOResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
       registeredAddress?: string;
@@ -476,6 +481,17 @@ export interface UpdateEnforceSSOResponse {
     };
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+  };
+}
+
+export interface UpdateAdminFinishedCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
   };
 }
 
@@ -756,6 +772,7 @@ export interface GetCourseResponse {
     description: string;
     enrolled?: boolean;
     hasFreeChapter?: boolean;
+    hasCertificate?: boolean;
     /** @format uuid */
     id: string;
     status: "draft" | "published" | "private";
@@ -847,6 +864,7 @@ export interface GetBetaCourseByIdResponse {
     description: string;
     enrolled?: boolean;
     hasFreeChapter?: boolean;
+    hasCertificate?: boolean;
     /** @format uuid */
     id: string;
     status: "draft" | "published" | "private";
@@ -869,6 +887,7 @@ export type CreateCourseBody = {
   /** @format uuid */
   categoryId: string;
   isScorm?: boolean;
+  hasCertificate?: boolean;
 } & {
   chapters?: string[];
 };
@@ -895,6 +914,16 @@ export interface UpdateCourseBody {
 }
 
 export interface UpdateCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UpdateHasCertificateBody {
+  hasCertificate: boolean;
+}
+
+export interface UpdateHasCertificateResponse {
   data: {
     message: string;
   };
@@ -1611,6 +1640,45 @@ export interface MarkLessonAsCompletedResponse {
   data: {
     message: string;
   };
+}
+
+export interface GetAllCertificatesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    userId: string;
+    /** @format uuid */
+    courseId: string;
+    courseTitle?: string | null;
+    completionDate?: string | null;
+    fullName?: string | null;
+    createdAt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export type GetCertificateResponse = {
+  /** @format uuid */
+  id: string;
+  /** @format uuid */
+  userId: string;
+  /** @format uuid */
+  courseId: string;
+  courseTitle?: string | null;
+  completionDate?: string | null;
+  fullName?: string | null;
+  createdAt: string;
+}[];
+
+export interface DownloadCertificateBody {
+  html: string;
+  filename?: string;
 }
 
 export interface GetThreadResponse {
@@ -2695,6 +2763,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateAdminFinishedCourseNotification
+     * @request PATCH:/api/settings/admin/finished-course-notification
+     */
+    settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
+        path: `/api/settings/admin/finished-course-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetPlatformLogo
      * @request GET:/api/settings/platform-logo
      */
@@ -2767,6 +2849,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCertificateBackground
+     * @request PATCH:/api/settings/certificate-background
+     */
+    settingsControllerUpdateCertificateBackground: (
+      data: {
+        /** @format binary */
+        "certificate-background"?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/certificate-background`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 
@@ -3143,6 +3246,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<UpdateCourseResponse, any>({
         path: `/api/course/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUpdateHasCertificate
+     * @request PATCH:/api/course/update-has-certificate/{id}
+     */
+    courseControllerUpdateHasCertificate: (
+      id: string,
+      data: UpdateHasCertificateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateHasCertificateResponse, any>({
+        path: `/api/course/update-has-certificate/${id}`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
@@ -3609,6 +3732,72 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetAllCertificates
+     * @request GET:/api/certificates/all
+     */
+    certificatesControllerGetAllCertificates: (
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllCertificatesResponse, any>({
+        path: `/api/certificates/all`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificate
+     * @request GET:/api/certificates/certificate
+     */
+    certificatesControllerGetCertificate: (
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @format uuid */
+        courseId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCertificateResponse, any>({
+        path: `/api/certificates/certificate`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerDownloadCertificate
+     * @request POST:/api/certificates/download
+     */
+    certificatesControllerDownloadCertificate: (
+      data: DownloadCertificateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/certificates/download`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

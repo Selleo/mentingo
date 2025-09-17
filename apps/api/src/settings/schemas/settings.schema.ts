@@ -15,6 +15,7 @@ export const companyInformationJSONSchema = Type.Object({
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
   enforceSSO: Type.Boolean(),
+  certificateBackgroundImage: Type.Union([Type.String(), Type.Null()]),
   companyInformation: Type.Optional(companyInformationJSONSchema),
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
   MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
@@ -29,10 +30,7 @@ export const studentSettingsJSONContentSchema = Type.Object({
 export const adminSettingsJSONContentSchema = Type.Object({
   ...studentSettingsJSONContentSchema.properties,
   adminNewUserNotification: Type.Boolean(),
-});
-
-export const globalSettingsJSONContentSchema = Type.Object({
-  platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
+  adminFinishedCourseNotification: Type.Boolean(),
 });
 
 export const settingsJSONContentSchema = Type.Union([

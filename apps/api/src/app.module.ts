@@ -13,6 +13,7 @@ import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
+import { CertificatesModule } from "./certificates/certificates.module";
 import database from "./common/configuration/database";
 import emailConfig from "./common/configuration/email";
 import jwtConfig from "./common/configuration/jwt";
@@ -110,6 +111,7 @@ import { UserModule } from "./user/user.module";
     CacheModule,
     AiModule,
     SettingsModule,
+    CertificatesModule,
   ],
   controllers: [],
   providers: [

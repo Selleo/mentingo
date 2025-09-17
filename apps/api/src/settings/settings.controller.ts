@@ -9,6 +9,7 @@ import {
   UploadedFile,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -113,6 +114,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/finished-course-notification")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(adminSettingsJSONContentSchema),
+  })
+  async updateAdminFinishedCourseNotification(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateAdminFinishedCourseNotification(userId);
+    return new BaseResponse(result);
+  }
+
   @Get("platform-logo")
   @Public()
   @Validate({
@@ -165,5 +178,28 @@ export class SettingsController {
     @Body() rolesRequest: UpdateMFAEnforcedRolesRequest,
   ): Promise<GlobalSettingsJSONContentSchema> {
     return await this.settingsService.updateMFAEnforcedRoles(rolesRequest);
+  }
+
+  @Patch("certificate-background")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(FileInterceptor("certificate-background"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        "certificate-background": {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  async updateCertificateBackground(
+    @UploadedFile() certificateBackground: Express.Multer.File,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    return new BaseResponse(
+      await this.settingsService.updateCertificateBackground(certificateBackground),
+    );
   }
 }

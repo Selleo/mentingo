@@ -1065,6 +1065,23 @@
         }
       }
     },
+    "/api/settings/admin/finished-course-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminFinishedCourseNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminFinishedCourseNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/platform-logo": {
       "get": {
         "operationId": "SettingsController_getPlatformLogo",
@@ -1143,6 +1160,33 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateMFAEnforcedRolesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/certificate-background": {
+      "patch": {
+        "operationId": "SettingsController_updateCertificateBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "certificate-background": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
@@ -2038,6 +2082,43 @@
         }
       }
     },
+    "/api/course/update-has-certificate/{id}": {
+      "patch": {
+        "operationId": "CourseController_updateHasCertificate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHasCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateHasCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/enroll-course": {
       "post": {
         "operationId": "CourseController_enrollCourse",
@@ -2726,6 +2807,115 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/certificates/all": {
+      "get": {
+        "operationId": "CertificatesController_getAllCertificates",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCertificatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/certificate": {
+      "get": {
+        "operationId": "CertificatesController_getCertificate",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/download": {
+      "post": {
+        "operationId": "CertificatesController_downloadCertificate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
           }
         }
       }
@@ -4476,8 +4666,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -4614,8 +4811,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -4891,6 +5095,16 @@
               "enforceSSO": {
                 "type": "boolean"
               },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "companyInformation": {
                 "type": "object",
                 "properties": {
@@ -4944,6 +5158,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
+              "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles"
             ]
@@ -5009,13 +5224,17 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
                   "isMFAEnabled",
                   "MFASecret",
-                  "adminNewUserNotification"
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
                 ]
               }
             ]
@@ -5072,6 +5291,9 @@
                 ]
               },
               "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
                 "type": "boolean"
               }
             }
@@ -5134,13 +5356,17 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
                   "isMFAEnabled",
                   "MFASecret",
-                  "adminNewUserNotification"
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
                 ]
               }
             ]
@@ -5176,13 +5402,17 @@
               },
               "adminNewUserNotification": {
                 "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
               }
             },
             "required": [
               "language",
               "isMFAEnabled",
               "MFASecret",
-              "adminNewUserNotification"
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
             ]
           }
         },
@@ -5201,6 +5431,16 @@
               },
               "enforceSSO": {
                 "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "companyInformation": {
                 "type": "object",
@@ -5255,6 +5495,7 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
+              "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles"
             ]
@@ -5276,6 +5517,16 @@
               "enforceSSO": {
                 "type": "boolean"
               },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "companyInformation": {
                 "type": "object",
                 "properties": {
@@ -5329,8 +5580,53 @@
             "required": [
               "unregisteredUserCoursesAccessibility",
               "enforceSSO",
+              "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminFinishedCourseNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
             ]
           }
         },
@@ -6500,6 +6796,9 @@
               "hasFreeChapter": {
                 "type": "boolean"
               },
+              "hasCertificate": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
@@ -6929,6 +7228,9 @@
               "hasFreeChapter": {
                 "type": "boolean"
               },
+              "hasCertificate": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
@@ -7035,6 +7337,9 @@
               },
               "isScorm": {
                 "type": "boolean"
+              },
+              "hasCertificate": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -7132,6 +7437,36 @@
         }
       },
       "UpdateCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateHasCertificateBody": {
+        "type": "object",
+        "properties": {
+          "hasCertificate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasCertificate"
+        ]
+      },
+      "UpdateHasCertificateResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -10485,6 +10820,172 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetAllCertificatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "completionDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fullName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "userId",
+                "courseId",
+                "createdAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCertificateResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "userId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "courseId": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "courseTitle": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "completionDate": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fullName": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "createdAt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "userId",
+            "courseId",
+            "createdAt"
+          ]
+        }
+      },
+      "DownloadCertificateBody": {
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "html"
         ]
       },
       "GetThreadResponse": {

@@ -1,12 +1,13 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
+import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
+import { certificatesQueryOptions } from "../queries/useCertificates";
 
-export const useMarkLessonAsCompleted = () => {
-  const queryClient = useQueryClient();
+export const useMarkLessonAsCompleted = (userId: string) => {
   return useMutation({
     mutationFn: async ({ lessonId }: { lessonId: string }) => {
       const response = await ApiClient.api.studentLessonProgressControllerMarkLessonAsCompleted({
@@ -17,6 +18,7 @@ export const useMarkLessonAsCompleted = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["lesson", variables.lessonId] });
       queryClient.invalidateQueries({ queryKey: ["lessonProgress", variables.lessonId] });
+      queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

@@ -45,6 +45,7 @@ import type {
   UpdateUserProfileBody,
   UpsertUserDetailsBody,
   BulkAssignUserGroups,
+  UpdateUserBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
@@ -190,17 +191,7 @@ export class UserService {
     };
   }
 
-  public async updateUser(
-    id: UUIDType,
-    data: {
-      email?: string;
-      firstName?: string;
-      lastName?: string;
-      archived?: boolean;
-      role?: UserRole;
-      groupId?: string;
-    },
-  ) {
+  public async updateUser(id: UUIDType, data: UpdateUserBody) {
     const [existingUser] = await this.db
       .select()
       .from(users)
@@ -592,5 +583,22 @@ export class UserService {
       .then((results) => results[0]);
 
     return !!course;
+  }
+
+  public async getAdminsToNotifyAboutFinishedCourse(): Promise<string[]> {
+    const adminEmails = await this.db
+      .select({
+        email: users.email,
+      })
+      .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
+      .where(
+        and(
+          eq(users.role, USER_ROLES.ADMIN),
+          sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
+        ),
+      );
+
+    return adminEmails.map((admin) => admin.email);
   }
 }
