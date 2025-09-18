@@ -19,7 +19,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
       tokenURL: "https://oauth2.googleapis.com/token",
       clientID: process.env.GOOGLE_CLIENT_ID || "test_google_client_id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "test_google_client_secret",
-      callbackURL: `${process.env.CORS_ORIGIN || "http://localhost:3000"}/api/auth/google/callback`,
+      callbackURL: `${
+        process.env.API_BASE_URL || "http://localhost:3000"
+      }/api/auth/google/callback`,
       scope: ["email", "profile"],
     });
   }
