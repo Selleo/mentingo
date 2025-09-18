@@ -15,11 +15,10 @@ export function SocialLogin({
 }: SocialLoginProps) {
   const { t } = useTranslation();
 
-  const handleGoogleSignIn = () =>
-    (window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`);
+  const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-  const handleMicrosoftSignIn = () =>
-    (window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/microsoft`);
+  const handleGoogleSignIn = () => (window.location.href = `${baseUrl}/api/auth/google`);
+  const handleMicrosoftSignIn = () => (window.location.href = `${baseUrl}/api/auth/microsoft`);
 
   return (
     <>
