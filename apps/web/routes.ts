@@ -22,6 +22,7 @@ export const routes: (
       });
       route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
       route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
+      route("announcements", "modules/Announcements/Announcements.page.tsx");
     });
     route("course/:courseId/lesson", "modules/Courses/Lesson/Lesson.layout.tsx", () => {
       route(":lessonId", "modules/Courses/Lesson/Lesson.page.tsx");
@@ -42,6 +43,7 @@ export const routes: (
       route("groups", "modules/Admin/Groups/Groups.page.tsx");
       route("groups/new", "modules/Admin/Groups/CreateGroup.page.tsx");
       route("groups/:id", "modules/Admin/Groups/EditGroup.page.tsx");
+      route("announcements/new", "modules/Announcements/CreateAnnouncement.page.tsx");
     });
   });
 };
