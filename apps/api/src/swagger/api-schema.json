@@ -5190,11 +5190,39 @@
               },
               "skippedUsersAmount": {
                 "type": "number"
+              },
+              "importedUsersList": {
+                "type": "array",
+                "items": {
+                  "format": "email",
+                  "type": "string"
+                }
+              },
+              "skippedUsersList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "format": "email",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "email",
+                    "reason"
+                  ]
+                }
               }
             },
             "required": [
               "importedUsersAmount",
-              "skippedUsersAmount"
+              "skippedUsersAmount",
+              "importedUsersList",
+              "skippedUsersList"
             ]
           }
         },

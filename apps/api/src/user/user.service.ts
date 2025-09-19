@@ -49,7 +49,7 @@ import type {
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
-import type { CreateUserBody } from "src/user/schemas/createUser.schema";
+import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 
 @Injectable()
 export class UserService {
@@ -469,9 +469,11 @@ export class UserService {
   }
 
   async importUsers(usersDataFile: Express.Multer.File) {
-    const importStats = {
+    const importStats: ImportUserResponse = {
       importedUsersAmount: 0,
       skippedUsersAmount: 0,
+      importedUsersList: [],
+      skippedUsersList: [],
     };
 
     const usersData = await this.fileService.parseExcelFile<typeof importUserSchema>(
@@ -487,6 +489,10 @@ export class UserService {
 
       if (existingUser) {
         importStats.skippedUsersAmount++;
+        importStats.skippedUsersList.push({
+          email: userData.email,
+          reason: "files.import.userFailReason.alreadyExists",
+        });
         continue;
       }
 
@@ -502,6 +508,7 @@ export class UserService {
         );
 
         importStats.importedUsersAmount++;
+        importStats.importedUsersList.push(userData.email);
 
         if (!groupName) return;
 

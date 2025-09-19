@@ -526,7 +526,8 @@
         "role": "Modify roles",
         "group": "Modify groups",
         "confirmation": "Are you sure you want to proceed?",
-        "import": "Import users"
+        "import": "Import users",
+        "importResult": "Import result"
       },
       "button": {
         "delete": "Delete",
@@ -540,7 +541,9 @@
         "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
-        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName."
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName.",
+        "noUsersImported": "No users were imported.",
+        "noUsersSkipped": "No users were skipped."
       },
       "placeholder": {
         "group": "Select group",
@@ -548,6 +551,10 @@
       },
       "note": {
         "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created."
+      },
+      "tabs": {
+        "imported": "Imported",
+        "skipped": "Skipped"
       }
     },
     "breadcrumbs": {
@@ -1405,7 +1412,10 @@
       "invalidFileData": "File upload failed - invalid file data",
       "fileEmpty": "File is empty",
       "requiredDataMissing": "Import failed – required data missing.",
-      "invalidFileType": "Invalid file type. Please upload a valid file."
+      "invalidFileType": "Invalid file type. Please upload a valid file.",
+      "userFailReason": {
+        "alreadyExists": "user with this email already exists"
+      }
     }
   }
 }

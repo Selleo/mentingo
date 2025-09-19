@@ -367,6 +367,12 @@ export interface ImportUsersResponse {
   data: {
     importedUsersAmount: number;
     skippedUsersAmount: number;
+    importedUsersList: string[];
+    skippedUsersList: {
+      /** @format email */
+      email: string;
+      reason: string;
+    }[];
   };
 }
 

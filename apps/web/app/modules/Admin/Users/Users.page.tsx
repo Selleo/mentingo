@@ -42,7 +42,7 @@ import {
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { USER_ROLES } from "~/utils/userRoles";
 
-import { ImportUsersModal } from "./components/ImportUsersModal";
+import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
