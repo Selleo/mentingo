@@ -239,6 +239,20 @@
       "when": 1758022089452,
       "tag": "0033_add_announcement_connected_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1758304766239,
+      "tag": "0034_enable_pgvector",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1758304781889,
+      "tag": "0035_added_rag_tables",
+      "breakpoints": true
     }
   ]
 }

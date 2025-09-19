@@ -40,7 +40,7 @@ const FileCard = memo(({ name, fileType, onRemove, error }: FileCardProps) => (
       type="button"
       aria-label="Remove file"
       onClick={onRemove}
-      className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm hover:bg-neutral-50 hover:text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-300 focus:ring-offset-1"
+      className="absolute right-2 top-2 inline-flex size-6 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm hover:bg-neutral-50 hover:text-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-300 focus:ring-offset-1"
     >
       <Icon name="IconX" className="size-4" />
     </button>
