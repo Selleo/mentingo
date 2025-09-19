@@ -1,12 +1,23 @@
 import { randomUUID } from "crypto";
+import { Readable } from "stream";
 
 import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { TypeCompiler } from "@sinclair/typebox/compiler";
+import Excel from "exceljs";
+import { isEmpty } from "lodash";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { S3Service } from "src/s3/s3.service";
 
-import { MAX_FILE_SIZE, EXTENSION_TO_MIME_TYPE_MAP } from "./file.constants";
+import {
+  MAX_FILE_SIZE,
+  EXTENSION_TO_MIME_TYPE_MAP,
+  ALLOWED_EXCEL_MIME_TYPES,
+  ALLOWED_EXCEL_MIME_TYPES_MAP,
+} from "./file.constants";
 import { MimeTypeGuard } from "./guards/mime-type.guard";
+
+import type { Static, TSchema } from "@sinclair/typebox";
 
 @Injectable()
 export class FileService {
@@ -86,5 +97,64 @@ export class FileService {
     } catch (error) {
       throw new ConflictException("Failed to delete file");
     }
+  }
+
+  async parseExcelFile<T extends TSchema>(
+    file: Express.Multer.File,
+    schema: T,
+  ): Promise<Static<T>[]> {
+    if (!file) {
+      throw new BadRequestException({ message: "files.import.noFileUploaded" });
+    }
+
+    if (!file.originalname || !file.buffer) {
+      throw new BadRequestException({ message: "files.import.invalidFileData" });
+    }
+
+    if (
+      !ALLOWED_EXCEL_MIME_TYPES.includes(file.mimetype as (typeof ALLOWED_EXCEL_MIME_TYPES)[number])
+    ) {
+      throw new BadRequestException({ message: "files.import.invalidFileType" });
+    }
+
+    const validator = TypeCompiler.Compile(schema);
+
+    const fileStream = Readable.from(file.buffer);
+    const workbook = new Excel.Workbook();
+
+    const worksheet =
+      file.mimetype === ALLOWED_EXCEL_MIME_TYPES_MAP.csv
+        ? await workbook.csv.read(fileStream, {
+            parserOptions: { delimiter: "," },
+          })
+        : await workbook.xlsx.read(fileStream).then(() => workbook.worksheets[0]);
+
+    const allSheetValues = worksheet.getSheetValues();
+    if (!allSheetValues || allSheetValues.length <= 1)
+      throw new BadRequestException({ message: "files.import.fileEmpty" });
+
+    const headers = (allSheetValues[1] as string[]).map((h) => String(h).trim().replace(/\r/, ""));
+    const rows = allSheetValues.slice(2);
+
+    const parsedCsvData = rows.map((rowValues) => {
+      if (!Array.isArray(rowValues)) return;
+
+      const parsedObject: Record<string, string> = {};
+
+      headers.forEach((header, colIndex) => {
+        const cellValue = rowValues[colIndex];
+
+        if (!isEmpty(cellValue)) parsedObject[header] = String(cellValue);
+      });
+
+      if (!validator.Check(parsedObject))
+        throw new BadRequestException({
+          message: "files.import.requiredDataMissing",
+        });
+
+      return parsedObject as Static<T>;
+    });
+
+    return parsedCsvData;
   }
 }

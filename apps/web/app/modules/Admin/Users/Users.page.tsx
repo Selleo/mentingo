@@ -42,6 +42,8 @@ import {
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { USER_ROLES } from "~/utils/userRoles";
 
+import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
+
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
 
@@ -70,9 +72,7 @@ const Users = () => {
   const groups = groupData.map(({ id, name }) => ({ groupId: id, groupName: name }));
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
-
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
-
   const [selectedValue, setSelectedValue] = React.useState<string>("");
 
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
@@ -81,6 +81,7 @@ const Users = () => {
   const { t } = useTranslation();
 
   const [showEditModal, setShowEditModal] = React.useState<ModalTypes>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
 
   const dropdownItems: DropdownItems[] = [
     {
@@ -287,13 +288,22 @@ const Users = () => {
             setSelectedValue={setSelectedValue}
           />
         )}
-        <div className="flex justify-between">
+        {isImportModalOpen && (
+          <ImportUsersModal
+            open={isImportModalOpen}
+            onClose={() => setIsImportModalOpen(false)}
+            searchParams={searchParams}
+          />
+        )}
+        <div className="flex flex-wrap justify-between gap-3">
           <h4 className="text-2xl font-bold">{t("navigationSideBar.users")}</h4>
           <div className="flex gap-3">
             <Button variant="primary" asChild>
               <Link to="new">{t("adminUsersView.button.createNew")}</Link>
             </Button>
-
+            <Button onClick={() => setIsImportModalOpen(true)}>
+              {t("adminUsersView.button.import")}
+            </Button>
             <EditDropdown dropdownItems={dropdownItems} />
           </div>
         </div>
