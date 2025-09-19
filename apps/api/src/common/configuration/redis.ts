@@ -7,7 +7,7 @@ const schema = Type.Object({
   REDIS_URL: Type.String(),
 });
 
-type RedisConfigSchema = Static<typeof schema>;
+export type RedisConfigSchema = Static<typeof schema>;
 
 const validateRedisConfig = configValidator(schema);
 
@@ -18,3 +18,7 @@ export default registerAs("redis", (): RedisConfigSchema => {
 
   return validateRedisConfig(values);
 });
+
+export function buildRedisConnection(cfg: RedisConfigSchema) {
+  return { url: cfg.REDIS_URL };
+}

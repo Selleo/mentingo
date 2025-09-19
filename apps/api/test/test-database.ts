@@ -18,7 +18,7 @@ export async function setupTestDatabase(): Promise<{
   pgContainer: StartedTestContainer;
   pgConnectionString: string;
 }> {
-  pgContainer = await new GenericContainer("postgres:16")
+  pgContainer = await new GenericContainer("pgvector/pgvector:pg16")
     .withExposedPorts(5432)
     .withEnvironment({
       POSTGRES_DB: "testdb",

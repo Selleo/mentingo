@@ -31,6 +31,7 @@ import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
+import { IngestionModule } from "./ingestion/ingestion.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { QuestionsModule } from "./questions/question.module";
 import { S3Module } from "./s3/s3.module";
@@ -114,6 +115,7 @@ import { UserModule } from "./user/user.module";
     SettingsModule,
     CertificatesModule,
     AnnouncementsModule,
+    IngestionModule,
   ],
   controllers: [],
   providers: [
