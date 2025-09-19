@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { CreatePasswordService } from "src/auth/create-password.service";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
@@ -16,7 +17,14 @@ import { UserService } from "./user.service";
 @Module({
   imports: [EmailModule, FileModule, S3Module, BunnyStreamModule, StatisticsModule],
   controllers: [UserController],
-  providers: [UserService, FileService, S3Service, BunnyStreamService, StatisticsService],
+  providers: [
+    UserService,
+    FileService,
+    S3Service,
+    BunnyStreamService,
+    StatisticsService,
+    CreatePasswordService,
+  ],
   exports: [UserService, StatisticsService],
 })
 export class UserModule {}
