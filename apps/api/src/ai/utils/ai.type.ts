@@ -1,5 +1,6 @@
 export const OPENAI_MODELS = {
   BASIC: "gpt-4.1-mini",
+  EMBEDDING: "text-embedding-3-small",
 } as const;
 
 export type OpenAIModels = (typeof OPENAI_MODELS)[keyof typeof OPENAI_MODELS];

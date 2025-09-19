@@ -59,3 +59,11 @@ export const FORM_LIMITS = {
   MAX_INSTRUCTIONS_LENGTH: 2000,
   MAX_COMPLETION_CONDITIONS_LENGTH: 1000,
 } as const;
+
+export const FILE_TYPES_MAP: Record<string, string> = {
+  "application/pdf": "PDF",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "DOCX",
+  "text/plain": "TXT",
+};
+
+export const ACCEPTED_FILE_TYPES = ".pdf,.docx,.txt";

@@ -85,7 +85,7 @@ const AiMentorLessonForm = ({
         <AiMentorLessonPreview lesson={lessonToEdit} onClose={onClosePreview} />
       )}
       <TooltipProvider delayDuration={0}>
-        <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
+        <div className="relative flex flex-col gap-y-6 rounded-lg bg-white p-8">
           <div className="flex flex-col gap-y-1">
             {!lessonToEdit && (
               <Breadcrumb
@@ -242,7 +242,7 @@ const AiMentorLessonForm = ({
               </div>
               {lessonToEdit && (
                 <div className="mb-6">
-                  <MultiFileUploadForm />
+                  <MultiFileUploadForm lessonId={lessonToEdit.id} />
                 </div>
               )}
 

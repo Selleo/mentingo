@@ -11,7 +11,7 @@ export const textLessonFormSchema = (t: typeof i18next.t) =>
       .string()
       .min(1, { message: t("adminCourseView.curriculum.lesson.validation.descriptionRequired") })
       .max(5000, {
-        message: t("adminCourseView.curriculum.lesson.validation.descritpionMaxLength"),
+        message: t("adminCourseView.curriculum.lesson.validation.descriptionMaxLength"),
       })
       .trim()
       .refine((val) => val !== "<p></p>" && val.trim() !== "", {

@@ -78,7 +78,7 @@ export class AiService {
 
     const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
 
-    const result = streamText({
+    return streamText({
       model: openai(model),
       messages: prompt.map((m) => ({
         content: m.content,
@@ -107,8 +107,6 @@ export class AiService {
         );
       },
     });
-
-    return result;
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
