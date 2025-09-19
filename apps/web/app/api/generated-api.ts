@@ -254,8 +254,7 @@ export interface GetUserDetailsResponse {
 export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
-  /** @format uuid */
-  groupId?: string;
+  groupId?: string | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -295,8 +294,7 @@ export interface UpsertUserDetailsResponse {
 export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
-  /** @format uuid */
-  groupId?: string;
+  groupId?: string | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -1543,6 +1541,7 @@ export interface GetUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
       };
 }
 
@@ -1559,6 +1558,7 @@ export type UpdateUserSettingsBody =
       isMFAEnabled?: boolean;
       MFASecret?: string | null;
       adminNewUserNotification?: boolean;
+      adminFinishedCourseNotification?: boolean;
     };
 
 export interface UpdateUserSettingsResponse {
@@ -1575,6 +1575,7 @@ export interface UpdateUserSettingsResponse {
         isMFAEnabled: boolean;
         MFASecret: string | null;
         adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
       };
 }
 
@@ -1585,6 +1586,7 @@ export interface UpdateAdminNewUserNotificationResponse {
     isMFAEnabled: boolean;
     MFASecret: string | null;
     adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
   };
 }
 
@@ -1619,6 +1621,17 @@ export interface UpdateEnforceSSOResponse {
     };
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+  };
+}
+
+export interface UpdateAdminFinishedCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
   };
 }
 
@@ -1871,6 +1884,91 @@ export interface GetScormMetadataResponse {
     version: string;
     entryPoint: string;
     s3Key: string;
+  };
+}
+
+export interface GetAllAnnouncementsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    title: string;
+    content: string;
+    authorId: string;
+    isEveryone: boolean;
+    authorName: string;
+    authorProfilePictureUrl: string | null;
+  }[];
+}
+
+export interface GetLatestUnreadAnnouncementsResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    title: string;
+    content: string;
+    authorId: string;
+    isEveryone: boolean;
+    authorName: string;
+    authorProfilePictureUrl: string | null;
+  }[];
+}
+
+export interface GetUnreadAnnouncementsCountResponse {
+  data: {
+    unreadCount: number;
+  };
+}
+
+export interface GetAnnouncementsForUserResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    title: string;
+    content: string;
+    authorId: string;
+    isEveryone: boolean;
+    authorName: string;
+    authorProfilePictureUrl: string | null;
+    isRead: boolean;
+  }[];
+}
+
+export interface CreateAnnouncementBody {
+  /**
+   * @minLength 1
+   * @maxLength 120
+   */
+  title: string;
+  /** @minLength 1 */
+  content: string;
+  /** @default null */
+  groupId: string | null;
+}
+
+export interface CreateAnnouncementResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    title: string;
+    content: string;
+    authorId: string;
+    isEveryone: boolean;
+  };
+}
+
+export interface MarkAnnouncementAsReadResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    announcementId: string;
+    isRead: boolean;
+    readAt: string | null;
   };
 }
 
@@ -3650,6 +3748,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateAdminFinishedCourseNotification
+     * @request PATCH:/api/settings/admin/finished-course-notification
+     */
+    settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
+        path: `/api/settings/admin/finished-course-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetPlatformLogo
      * @request GET:/api/settings/platform-logo
      */
@@ -4099,6 +4211,95 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetScormMetadataResponse, any>({
         path: `/api/scorm/${courseId}/metadata`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AnnouncementsControllerGetAllAnnouncements
+     * @request GET:/api/announcements
+     */
+    announcementsControllerGetAllAnnouncements: (params: RequestParams = {}) =>
+      this.request<GetAllAnnouncementsResponse, any>({
+        path: `/api/announcements`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AnnouncementsControllerCreateAnnouncement
+     * @request POST:/api/announcements
+     */
+    announcementsControllerCreateAnnouncement: (
+      data: CreateAnnouncementBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateAnnouncementResponse, any>({
+        path: `/api/announcements`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AnnouncementsControllerGetLatestUnreadAnnouncements
+     * @request GET:/api/announcements/latest
+     */
+    announcementsControllerGetLatestUnreadAnnouncements: (params: RequestParams = {}) =>
+      this.request<GetLatestUnreadAnnouncementsResponse, any>({
+        path: `/api/announcements/latest`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AnnouncementsControllerGetUnreadAnnouncementsCount
+     * @request GET:/api/announcements/unread
+     */
+    announcementsControllerGetUnreadAnnouncementsCount: (params: RequestParams = {}) =>
+      this.request<GetUnreadAnnouncementsCountResponse, any>({
+        path: `/api/announcements/unread`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AnnouncementsControllerGetAnnouncementsForUser
+     * @request GET:/api/announcements/user/me
+     */
+    announcementsControllerGetAnnouncementsForUser: (params: RequestParams = {}) =>
+      this.request<GetAnnouncementsForUserResponse, any>({
+        path: `/api/announcements/user/me`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AnnouncementsControllerMarkAnnouncementAsRead
+     * @request PATCH:/api/announcements/{id}/read
+     */
+    announcementsControllerMarkAnnouncementAsRead: (id: string, params: RequestParams = {}) =>
+      this.request<MarkAnnouncementAsReadResponse, any>({
+        path: `/api/announcements/${id}/read`,
+        method: "PATCH",
         format: "json",
         ...params,
       }),

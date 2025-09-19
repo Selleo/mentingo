@@ -225,6 +225,20 @@
       "when": 1757585714926,
       "tag": "0031_add_default_certificate_background_image_to_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1757940824380,
+      "tag": "0032_add_adminFinishedCourseNotification_to_admin_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1758022089452,
+      "tag": "0033_add_announcement_connected_tables",
+      "breakpoints": true
     }
   ]
 }

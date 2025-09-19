@@ -1,0 +1,1 @@
+export const LATEST_ANNOUNCEMENTS_LIMIT = 3;

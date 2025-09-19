@@ -2754,6 +2754,23 @@
         }
       }
     },
+    "/api/settings/admin/finished-course-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminFinishedCourseNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminFinishedCourseNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/platform-logo": {
       "get": {
         "operationId": "SettingsController_getPlatformLogo",
@@ -3477,6 +3494,125 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetScormMetadataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/announcements": {
+      "get": {
+        "operationId": "AnnouncementsController_getAllAnnouncements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllAnnouncementsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AnnouncementsController_createAnnouncement",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnnouncementBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAnnouncementResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/announcements/latest": {
+      "get": {
+        "operationId": "AnnouncementsController_getLatestUnreadAnnouncements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLatestUnreadAnnouncementsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/announcements/unread": {
+      "get": {
+        "operationId": "AnnouncementsController_getUnreadAnnouncementsCount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUnreadAnnouncementsCountResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/announcements/user/me": {
+      "get": {
+        "operationId": "AnnouncementsController_getAnnouncementsForUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAnnouncementsForUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/announcements/{id}/read": {
+      "patch": {
+        "operationId": "AnnouncementsController_markAnnouncementAsRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkAnnouncementAsReadResponse"
                 }
               }
             }
@@ -4620,8 +4756,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -4758,8 +4901,15 @@
             "type": "string"
           },
           "groupId": {
-            "format": "uuid",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "email": {
             "format": "email",
@@ -10379,13 +10529,17 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
                   "isMFAEnabled",
                   "MFASecret",
-                  "adminNewUserNotification"
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
                 ]
               }
             ]
@@ -10442,6 +10596,9 @@
                 ]
               },
               "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
                 "type": "boolean"
               }
             }
@@ -10504,13 +10661,17 @@
                   },
                   "adminNewUserNotification": {
                     "type": "boolean"
+                  },
+                  "adminFinishedCourseNotification": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
                   "language",
                   "isMFAEnabled",
                   "MFASecret",
-                  "adminNewUserNotification"
+                  "adminNewUserNotification",
+                  "adminFinishedCourseNotification"
                 ]
               }
             ]
@@ -10546,13 +10707,17 @@
               },
               "adminNewUserNotification": {
                 "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
               }
             },
             "required": [
               "language",
               "isMFAEnabled",
               "MFASecret",
-              "adminNewUserNotification"
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
             ]
           }
         },
@@ -10723,6 +10888,50 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminFinishedCourseNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification"
             ]
           }
         },
@@ -11656,6 +11865,335 @@
               "version",
               "entryPoint",
               "s3Key"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAllAnnouncementsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "authorId": {
+                  "type": "string"
+                },
+                "isEveryone": {
+                  "type": "boolean"
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "authorProfilePictureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "title",
+                "content",
+                "authorId",
+                "isEveryone",
+                "authorName",
+                "authorProfilePictureUrl"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLatestUnreadAnnouncementsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "authorId": {
+                  "type": "string"
+                },
+                "isEveryone": {
+                  "type": "boolean"
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "authorProfilePictureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "title",
+                "content",
+                "authorId",
+                "isEveryone",
+                "authorName",
+                "authorProfilePictureUrl"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUnreadAnnouncementsCountResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unreadCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "unreadCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAnnouncementsForUserResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "authorId": {
+                  "type": "string"
+                },
+                "isEveryone": {
+                  "type": "boolean"
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "authorProfilePictureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "isRead": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "title",
+                "content",
+                "authorId",
+                "isEveryone",
+                "authorName",
+                "authorProfilePictureUrl",
+                "isRead"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateAnnouncementBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "maxLength": 120,
+            "type": "string"
+          },
+          "content": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "groupId": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "content",
+          "groupId"
+        ]
+      },
+      "CreateAnnouncementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "authorId": {
+                "type": "string"
+              },
+              "isEveryone": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "title",
+              "content",
+              "authorId",
+              "isEveryone"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MarkAnnouncementAsReadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "userId": {
+                "type": "string"
+              },
+              "announcementId": {
+                "type": "string"
+              },
+              "isRead": {
+                "type": "boolean"
+              },
+              "readAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "userId",
+              "announcementId",
+              "isRead",
+              "readAt"
             ]
           }
         },
