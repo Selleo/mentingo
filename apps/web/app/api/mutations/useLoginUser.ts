@@ -3,13 +3,13 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
-import { useAuthStore } from "~/modules/Auth/authStore";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
 import { currentUserQueryOptions } from "../queries/useCurrentUser";
 import { userSettingsQueryOptions } from "../queries/useUserSettings";
 import { queryClient } from "../queryClient";
+
+import { mfaSetupQueryOptions } from "./useSetupMFA";
 
 import type { LoginBody } from "../generated-api";
 
@@ -18,9 +18,6 @@ type LoginUserOptions = {
 };
 
 export function useLoginUser() {
-  const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
-  const setCurrentUser = useCurrentUserStore(({ setCurrentUser }) => setCurrentUser);
-  const setHasVerifiedMFA = useCurrentUserStore((state) => state.setHasVerifiedMFA);
   const { toast } = useToast();
 
   const navigate = useNavigate();
@@ -32,18 +29,14 @@ export function useLoginUser() {
       return response.data;
     },
     onSuccess: ({ data }) => {
-      const { navigateTo, ...user } = data;
+      const { shouldVerifyMFA } = data;
 
-      navigateTo === "/" ? setHasVerifiedMFA(true) : setHasVerifiedMFA(false);
-
-      setLoggedIn(true);
-      setCurrentUser(user);
       queryClient.setQueryData(currentUserQueryOptions.queryKey, { data });
       queryClient.invalidateQueries(currentUserQueryOptions);
       queryClient.invalidateQueries(userSettingsQueryOptions);
-      queryClient.invalidateQueries({ queryKey: ["mfa-setup"] });
+      queryClient.invalidateQueries(mfaSetupQueryOptions);
 
-      navigate(navigateTo);
+      navigate(shouldVerifyMFA ? "/auth/mfa" : "/");
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

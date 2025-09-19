@@ -10,7 +10,7 @@ export const loginSchema = Type.Object({
 
 export const loginResponseSchema = Type.Object({
   ...baseUserResponseSchema.properties,
-  navigateTo: Type.String(),
+  shouldVerifyMFA: Type.Boolean(),
 });
 
 export type LoginBody = Static<typeof loginSchema>;

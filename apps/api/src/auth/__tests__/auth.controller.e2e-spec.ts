@@ -239,6 +239,7 @@ describe("AuthController (e2e)", () => {
         profilePictureUrl: null,
         groupName: null,
         groupId: null,
+        shouldVerifyMFA: false,
       });
     });
 

@@ -2,7 +2,10 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, gte } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { createTokens } from "src/storage/schema";
+import hashPassword from "src/common/helpers/hashPassword";
+import { createTokens, credentials } from "src/storage/schema";
+
+import type { UUIDType } from "src/common";
 
 @Injectable()
 export class CreatePasswordService {
@@ -26,5 +29,16 @@ export class CreatePasswordService {
       .returning();
 
     if (!deletedToken) throw new NotFoundException("Token not found");
+  }
+
+  public async createUserPassword(userId: UUIDType, password: string) {
+    const hashedPassword = await hashPassword(password);
+
+    const [createdCredentials] = await this.db
+      .insert(credentials)
+      .values({ userId, password: hashedPassword })
+      .returning();
+
+    if (!createdCredentials) throw new NotFoundException("Failed to create user password");
   }
 }

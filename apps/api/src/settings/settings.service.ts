@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -65,7 +64,7 @@ export class SettingsService {
     return { ...restOfSettings, certificateBackgroundImage: certificateBackgroundSignedUrl };
   }
 
-  public async createSettings(
+  public async createSettingsIfNotExists(
     userId: UUIDType | null,
     userRole: UserRole,
     customSettings?: Partial<SettingsJSONContentSchema>,
@@ -76,12 +75,12 @@ export class SettingsService {
     }
 
     const [existingSettings] = await dbInstance
-      .select()
+      .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(userId === null ? isNull(settings.userId) : eq(settings.userId, userId));
 
     if (existingSettings) {
-      throw new ConflictException("Settings already exists");
+      return existingSettings.settings;
     }
 
     const defaultSettings = this.getDefaultSettingsForRole(userRole);

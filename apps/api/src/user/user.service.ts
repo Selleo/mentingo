@@ -11,6 +11,7 @@ import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
+import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -57,6 +58,7 @@ export class UserService {
     private fileService: FileService,
     private s3Service: S3Service,
     private statisticsService: StatisticsService,
+    private createPasswordService: CreatePasswordService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -314,7 +316,7 @@ export class UserService {
       .where(eq(credentials.userId, id));
 
     if (!userCredentials) {
-      throw new NotFoundException("User credentials not found");
+      return await this.createPasswordService.createUserPassword(id, newPassword);
     }
 
     const isOldPasswordValid = await bcrypt.compare(oldPassword, userCredentials.password);

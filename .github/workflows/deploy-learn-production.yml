@@ -68,6 +68,18 @@ jobs:
             STRIPE_WEBHOOK_SECRET
             REDIS_URL
             CORS_ORIGIN
+            API_BASE_URL
+            GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET
+            GOOGLE_OAUTH_ENABLED
+            MICROSOFT_CLIENT_ID
+            MICROSOFT_CLIENT_SECRET
+            MICROSOFT_OAUTH_ENABLED
+            BUNNY_STREAM_API_KEY
+            BUNNY_STREAM_SIGNING_KEY
+            BUNNY_STREAM_LIBRARY_ID
+            BUNNY_STREAM_CDN_URL
+            OPENAI_API_KEY
 
           paths: |
             /learn/production/api/terraform/
@@ -110,6 +122,18 @@ jobs:
             STRIPE_WEBHOOK_SECRET
             REDIS_URL
             CORS_ORIGIN
+            API_BASE_URL
+            GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET
+            GOOGLE_OAUTH_ENABLED
+            MICROSOFT_CLIENT_ID
+            MICROSOFT_CLIENT_SECRET
+            MICROSOFT_OAUTH_ENABLED
+            BUNNY_STREAM_API_KEY
+            BUNNY_STREAM_SIGNING_KEY
+            BUNNY_STREAM_LIBRARY_ID
+            BUNNY_STREAM_CDN_URL
+            OPENAI_API_KEY
 
           paths: |
             /learn/production/api/terraform/
@@ -182,6 +206,8 @@ jobs:
           VITE_SENTRY_ORG: ${{secrets.SENTRY_ORG}}
           VITE_SENTRY_PROJECT: learn-hub
           VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
+          VITE_GOOGLE_OAUTH_ENABLED: ${{secrets.VITE_GOOGLE_OAUTH_ENABLED}}
+          VITE_MICROSOFT_OAUTH_ENABLED: ${{secrets.VITE_MICROSOFT_OAUTH_ENABLED}}
         run: |
           docker build -f ./web.Dockerfile \
             --build-arg VERSION=$IMAGE_TAG \
@@ -190,6 +216,8 @@ jobs:
             --build-arg VITE_SENTRY_ORG=$VITE_SENTRY_ORG \
             --build-arg VITE_SENTRY_PROJECT=$VITE_SENTRY_PROJECT \
             --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
+            --build-arg VITE_GOOGLE_OAUTH_ENABLED=$VITE_GOOGLE_OAUTH_ENABLED \
+            --build-arg VITE_MICROSOFT_OAUTH_ENABLED=$VITE_MICROSOFT_OAUTH_ENABLED \
             -t $ECR_URL:$IMAGE_TAG .
           docker push $ECR_URL:$IMAGE_TAG
           echo "image=$ECR_URL:$IMAGE_TAG" >> $GITHUB_OUTPUT

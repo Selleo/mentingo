@@ -61,7 +61,7 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
-    navigateTo: string;
+    shouldVerifyMFA: boolean;
   };
 }
 
@@ -80,6 +80,7 @@ export interface CurrentUserResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
+    shouldVerifyMFA: boolean;
   };
 }
 

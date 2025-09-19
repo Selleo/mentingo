@@ -6,7 +6,7 @@ import { Dashboard } from "~/modules/Dashboard/Dashboard";
 
 import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
-import { useSyncUserAfterProviderLogin } from "./hooks/useSyncUserAfterProviderLogin";
+import { useSyncUserAfterLogin } from "./hooks/useSyncUserAfterLogin";
 
 export const clientLoader = async () => {
   try {
@@ -26,7 +26,7 @@ export default function UserDashboardLayout() {
   const { data: user } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
 
-  useSyncUserAfterProviderLogin(user);
+  useSyncUserAfterLogin(user);
 
   if (!hasVerifiedMFA) {
     return <Navigate to="/auth/mfa" />;

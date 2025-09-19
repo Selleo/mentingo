@@ -11,6 +11,13 @@ export const baseUserResponseSchema = Type.Composite([
   }),
 ]);
 
+export const currentUserResponseSchema = Type.Composite([
+  baseUserResponseSchema,
+  Type.Object({
+    shouldVerifyMFA: Type.Boolean(),
+  }),
+]);
+
 export const allUsersSchema = Type.Array(
   Type.Intersect([
     baseUserResponseSchema,
