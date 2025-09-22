@@ -890,13 +890,6 @@ export class CourseService {
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
 
-    /*
-      For Playwright tests to bypass Stripe payment
-      Front-end interfaces, such as Stripe Checkout or the Payment Element, have security measures in place that prevent automated testing, and Stripe APIs are rate limited.
-   */
-    const isTest = testKey && testKey === process.env.TEST_KEY;
-    if (!isTest && Boolean(course.price)) throw new ForbiddenException();
-
     this.db.transaction(async (trx) => {
       await this.createStudentCourse(id, studentId);
       await this.createCourseDependencies(id, studentId, paymentId, trx);
