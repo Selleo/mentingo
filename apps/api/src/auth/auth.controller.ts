@@ -22,7 +22,7 @@ import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { UserActivityEvent } from "src/events";
 import { SettingsService } from "src/settings/settings.service";
-import { baseUserResponseSchema } from "src/user/schemas/user.schema";
+import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
@@ -50,7 +50,7 @@ import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Controller("auth")
 export class AuthController {
-  private APP_URL: string;
+  private CORS_ORIGIN: string;
 
   constructor(
     private readonly authService: AuthService,
@@ -59,7 +59,7 @@ export class AuthController {
     private readonly eventBus: EventBus,
     private readonly settingsService: SettingsService,
   ) {
-    this.APP_URL = process.env.APP_URL || "http://localhost:5173";
+    this.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
   }
 
   @Public()
@@ -99,16 +99,16 @@ export class AuthController {
       throw new UnauthorizedException("SSO is enforced, login via email is not allowed");
     }
 
-    const { accessToken, refreshToken, navigateTo, ...account } = await this.authService.login(
+    const { accessToken, refreshToken, shouldVerifyMFA, ...account } = await this.authService.login(
       data,
       MFAEnforcedRoles,
     );
 
-    navigateTo === "/"
+    shouldVerifyMFA
       ? this.tokenService.setTokenCookies(response, accessToken, refreshToken)
       : this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
-    return new BaseResponse({ ...account, navigateTo });
+    return new BaseResponse({ ...account, shouldVerifyMFA });
   }
 
   @Post("logout")
@@ -153,11 +153,11 @@ export class AuthController {
 
   @Get("current-user")
   @Validate({
-    response: baseResponse(baseUserResponseSchema),
+    response: baseResponse(currentUserResponseSchema),
   })
   async currentUser(
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
+  ): Promise<BaseResponse<Static<typeof currentUserResponseSchema>>> {
     const account = await this.authService.currentUser(currentUserId);
 
     this.eventBus.publish(new UserActivityEvent(currentUserId, "LOGIN"));
@@ -216,12 +216,14 @@ export class AuthController {
   ): Promise<void> {
     const googleUser = request.user;
 
-    const { accessToken, refreshToken } =
+    const { accessToken, refreshToken, shouldVerifyMFA } =
       await this.authService.handleProviderLoginCallback(googleUser);
 
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+    shouldVerifyMFA
+      ? this.tokenService.setTokenCookies(response, accessToken, refreshToken, true)
+      : this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
-    response.redirect(this.APP_URL);
+    response.redirect(this.CORS_ORIGIN);
   }
 
   @Public()
@@ -240,12 +242,14 @@ export class AuthController {
   ): Promise<void> {
     const microsoftUser = request.user;
 
-    const { accessToken, refreshToken } =
+    const { accessToken, refreshToken, shouldVerifyMFA } =
       await this.authService.handleProviderLoginCallback(microsoftUser);
 
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+    shouldVerifyMFA
+      ? this.tokenService.setTokenCookies(response, accessToken, refreshToken, true)
+      : this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
 
-    response.redirect(this.APP_URL);
+    response.redirect(this.CORS_ORIGIN);
   }
 
   @Post("mfa/setup")

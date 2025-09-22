@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AuthModule } from "src/auth/auth.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
@@ -14,7 +15,7 @@ import { SettingsController } from "./settings.controller";
 import { SettingsService } from "./settings.service";
 
 @Module({
-  imports: [EmailModule, FileModule, S3Module, BunnyStreamModule, StatisticsModule],
+  imports: [EmailModule, FileModule, S3Module, BunnyStreamModule, StatisticsModule, AuthModule],
   controllers: [SettingsController],
   providers: [SettingsService, UserService, FileService, S3Service, BunnyStreamService],
   exports: [SettingsModule],
