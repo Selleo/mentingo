@@ -31,7 +31,7 @@ export class StripeWebhookHandler {
     if (!course) return null;
 
     try {
-      await this.courseService.enrollCourse(courseId, userId, paymentIntent.id);
+      await this.courseService.enrollCourse(courseId, userId, undefined, paymentIntent.id);
 
       return true;
     } catch (error) {

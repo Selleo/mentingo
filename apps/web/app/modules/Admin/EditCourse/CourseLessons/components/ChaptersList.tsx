@@ -299,6 +299,7 @@ const ChaptersList = ({
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const { mutateAsync: mutateChapterDisplayOrder } = useChangeChapterDisplayOrder();
   const chapterId = getChapterWithLatestLesson(chapters ?? []);
+  const [chapterList, setChapterList] = useState<Sortable<Chapter>[]>(chapters ?? []);
 
   useEffect(() => {
     if (canRefetchChapterList) {
@@ -312,6 +313,8 @@ const ChaptersList = ({
       newChapterPosition: number,
       newDisplayOrder: number,
     ) => {
+      setChapterList(updatedItems);
+
       await mutateChapterDisplayOrder({
         chapter: {
           chapterId: updatedItems[newChapterPosition].sortableId,
@@ -335,7 +338,7 @@ const ChaptersList = ({
       defaultValue={openItem}
     >
       <SortableList
-        items={chapters}
+        items={chapterList}
         onChange={handleChapterOrderChange}
         className="grid grid-cols-1"
         renderItem={(chapter) => (

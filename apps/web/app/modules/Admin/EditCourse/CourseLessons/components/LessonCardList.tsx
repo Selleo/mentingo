@@ -31,6 +31,7 @@ export const LessonCardList = ({
   const { mutateAsync: mutateLessonDisplayOrder } = useChangeLessonDisplayOrder();
   const { openLeaveModal, isCurrentFormDirty, setIsLeavingContent } = useLeaveModal();
   const [pendingLesson, setPendingLesson] = useState<Lesson | null>(null);
+  const [lessonsList, setLessonsList] = useState<Sortable<Lesson>[]>(lessons);
   const { t } = useTranslation();
 
   const onClickLessonCard = useCallback(
@@ -79,6 +80,8 @@ export const LessonCardList = ({
       newChapterPosition: number,
       newDisplayOrder: number,
     ) => {
+      setLessonsList(updatedItems);
+
       await mutateLessonDisplayOrder({
         lesson: {
           lessonId: updatedItems[newChapterPosition].sortableId,
@@ -105,7 +108,7 @@ export const LessonCardList = ({
 
   return (
     <SortableList
-      items={lessons}
+      items={lessonsList}
       onChange={handleOrderChange}
       className="mt-4 grid grid-cols-1 gap-4"
       renderItem={(item) => (
