@@ -1224,6 +1224,11 @@
     "breadcrumbs": {
       "dashboard": "Dashboard",
       "settings": "Settings"
+    },
+    "toast": {
+      "error": {
+        "globalNotFound": "Global settings not found"
+      }
     }
   },
   "certificateBackgroundUpload": {

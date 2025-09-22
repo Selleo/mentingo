@@ -1523,6 +1523,7 @@ export interface GetPublicGlobalSettingsResponse {
     };
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
   };
 }
 
@@ -1603,6 +1604,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     };
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
   };
 }
 
@@ -1620,6 +1622,7 @@ export interface UpdateEnforceSSOResponse {
     };
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
   };
 }
 
@@ -1672,6 +1675,10 @@ export interface UpdateMFAEnforcedRolesBody {
   admin?: boolean;
   student?: boolean;
   content_creator?: boolean;
+}
+
+export interface UpdateDefaultCourseCurrencyBody {
+  defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
 }
 
 export interface GetThreadResponse {
@@ -3854,6 +3861,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateDefaultCourseCurrency
+     * @request PATCH:/api/settings/admin/default-course-currency
+     */
+    settingsControllerUpdateDefaultCourseCurrency: (
+      data: UpdateDefaultCourseCurrencyBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/default-course-currency`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

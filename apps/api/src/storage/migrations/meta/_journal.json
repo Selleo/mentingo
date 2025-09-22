@@ -239,6 +239,13 @@
       "when": 1758022089452,
       "tag": "0033_add_announcement_connected_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1758537662603,
+      "tag": "0034_add_default_course_currency_setting",
+      "breakpoints": true
     }
   ]
 }

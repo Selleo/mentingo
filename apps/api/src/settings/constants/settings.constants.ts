@@ -13,6 +13,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   certificateBackgroundImage: null,
   platformLogoS3Key: null,
   MFAEnforcedRoles: [],
+  defaultCourseCurrency: "pln",
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {
@@ -26,3 +27,5 @@ export const DEFAULT_ADMIN_SETTINGS = {
   adminNewUserNotification: true,
   adminFinishedCourseNotification: false,
 };
+
+export const ALLOWED_CURRENCIES = ["pln", "eur", "gbp", "usd"] as const;
