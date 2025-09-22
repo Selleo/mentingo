@@ -256,7 +256,7 @@ const QuizLessonForm = ({
               <FillInTheBlanksQuestion questionIndex={questionIndex} form={form} />
             ))
             .with(QuestionType.SCALE_1_5, () => (
-              <ScaleQuestion questionIndex={questionIndex} form={form} />
+              <ScaleQuestion questionIndex={questionIndex} isAdminQuestion />
             ))
             .otherwise(() => null)}
         </QuestionWrapper>

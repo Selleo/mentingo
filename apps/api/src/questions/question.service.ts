@@ -151,7 +151,8 @@ export class QuestionService {
         });
       })
       .with(QUESTION_TYPE.SCALE_1_5, () => {
-        // TODO: implement this
+        // Scale questions are never evaluated as correct/incorrect
+        // They are used for feedback/rating purposes only
         return true;
       })
       .otherwise(() => {

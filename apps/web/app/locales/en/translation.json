@@ -1092,6 +1092,10 @@
       "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)"
     },
+    "scale": {
+      "stronglyDisagree": "Strongly Disagree",
+      "stronglyAgree": "Strongly Agree"
+    },
     "aiMentor": {
       "title": "AI Mentor Session",
       "description": "This is an AI-powered mentoring session. The AI will guide you through the lesson based on the instructor's guidelines."
@@ -1238,6 +1242,14 @@
     "toast": {
       "success": "Certificate background image changed successfully",
       "error": "Error changing certificate background image"
+    }
+  },
+  "adminQuizLessonForm": {
+    "scaleQuestion": {
+      "description": "This is a preview of how the scale question will appear to students.",
+      "stronglyDisagree": "Strongly Disagree",
+      "stronglyAgree": "Strongly Agree",
+      "previewNote": "Preview - students will see this scale question during the quiz."
     }
   },
   "adminPreferences": {

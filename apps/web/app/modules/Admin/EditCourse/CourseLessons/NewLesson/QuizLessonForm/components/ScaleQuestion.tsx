@@ -1,32 +1,61 @@
-import { Label } from "~/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { RadioGroup } from "@radix-ui/react-radio-group";
+import { useTranslation } from "react-i18next";
 
-import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
-import type { UseFormReturn } from "react-hook-form";
+import { Label } from "~/components/ui/label";
+import { RadioGroupItem } from "~/components/ui/radio-group";
 
 type ScaleQuestionProps = {
-  form?: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
+  isAdminQuestion?: boolean;
 };
-// form, questionIndex
-const ScaleQuestion = ({ questionIndex }: ScaleQuestionProps) => {
+
+const ScaleQuestion = ({ questionIndex, isAdminQuestion = false }: ScaleQuestionProps) => {
+  const { t } = useTranslation();
+
   return (
-    <div>
-      <RadioGroup
-        defaultValue="1"
-        name="example"
-        className="flex w-full min-w-0 flex-row justify-between overflow-hidden bg-red-100 py-8"
-      >
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div
-            key={index + questionIndex}
-            className="flex flex-shrink-0 flex-col items-center gap-6 px-4"
-          >
-            <Label className="text-sm font-medium">{index + 1}</Label>
-            <RadioGroupItem disabled={true} value={String(index + 1)} />
+    <div className="space-y-4">
+      <div className="text-sm text-neutral-600">
+        {t("adminQuizLessonForm.scaleQuestion.description")}
+      </div>
+
+      <RadioGroup className="grid grid-cols-5 gap-4 rounded-lg border border-neutral-200 bg-neutral-50 p-6">
+        {[1, 2, 3, 4, 5].map((scaleValue) => (
+          <div key={scaleValue} className="flex flex-col items-center gap-3">
+            <Label
+              htmlFor={`admin-scale-${questionIndex}-${scaleValue}`}
+              className="flex min-h-[60px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white p-3 transition-all hover:border-neutral-400"
+            >
+              <RadioGroupItem
+                disabled={true}
+                id={`admin-scale-${questionIndex}-${scaleValue}`}
+                value={String(scaleValue)}
+                className="sr-only"
+              />
+              <span className="text-xl font-bold">{scaleValue}</span>
+            </Label>
+
+            {/* Kontener dla tekstu z min-height dla równego wyrównania */}
+            <div className="flex min-h-[32px] items-center justify-center">
+              {scaleValue === 1 && (
+                <span className="text-center text-xs leading-tight text-neutral-600">
+                  {t("adminQuizLessonForm.scaleQuestion.stronglyDisagree")}
+                </span>
+              )}
+              {scaleValue === 5 && (
+                <span className="text-center text-xs leading-tight text-neutral-600">
+                  {t("adminQuizLessonForm.scaleQuestion.stronglyAgree")}
+                </span>
+              )}
+            </div>
           </div>
         ))}
       </RadioGroup>
+
+      {!isAdminQuestion && (
+        <div className="text-xs italic text-neutral-500">
+          {t("adminQuizLessonForm.scaleQuestion.previewNote")}
+        </div>
+      )}
     </div>
   );
 };

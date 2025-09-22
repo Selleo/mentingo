@@ -1097,6 +1097,10 @@
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)"
     },
+    "scale": {
+      "stronglyDisagree": "Zdecydowanie się nie zgadzam",
+      "stronglyAgree": "Zdecydowanie się zgadzam"
+    },
     "aiMentor": {
       "title": "Sesja AI Mentora",
       "description": "To jest sesja mentoringu z AI. AI poprowadzi Cię przez lekcję zgodnie z wytycznymi instruktora."
@@ -1243,6 +1247,14 @@
     "toast": {
       "success": "Tło certyfikatu zostało pomyślnie zmienione",
       "error": "Wystąpił błąd podczas zmiany tła certyfikatu"
+    }
+  },
+  "adminQuizLessonForm": {
+    "scaleQuestion": {
+      "description": "To jest podgląd tego, jak pytanie skalowe będzie wyglądać dla studentów.",
+      "stronglyDisagree": "Zdecydowanie się nie zgadzam",
+      "stronglyAgree": "Zdecydowanie się zgadzam",
+      "previewNote": "Podgląd - studenci zobaczą to pytanie skalowe podczas quizu."
     }
   },
   "adminPreferences": {

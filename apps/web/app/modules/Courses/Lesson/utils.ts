@@ -220,6 +220,7 @@ export const parseQuizFormData = (input: QuizForm) => {
   processFillInTheBlanks(input.fillInTheBlanksDnd);
   processSingleAnswerQuestions(input.photoQuestionMultipleChoice);
   processBooleanQuestions(input.trueOrFalseQuestions);
+  processSimpleResponses(input.scaleQuestions);
 
   return result;
 };

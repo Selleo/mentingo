@@ -32,6 +32,7 @@ export type QuizForm = {
       [key: string]: string | null;
     };
   };
+  scaleQuestions: Record<string, string>;
 };
 
 export const LESSON_PROGRESS_STATUSES = {

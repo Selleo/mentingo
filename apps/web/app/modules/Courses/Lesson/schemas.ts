@@ -48,6 +48,9 @@ export const QuizFormSchema = (t: typeof i18next.t) =>
           ),
         )
         .optional(),
+      scaleQuestions: z
+        .record(z.string().min(1, t("studentLessonView.validation.answerCannotBeEmpty")))
+        .optional(),
     })
     .superRefine((data, ctx) => {
       const requiredFields = {
