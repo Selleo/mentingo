@@ -53,6 +53,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 
 import { getCourseBadgeVariant, getCourseStatus } from "./utils";
 
@@ -170,7 +171,11 @@ const Courses = () => {
         <SortButton<TCourse> column={column}>{t("adminCoursesView.field.price")}</SortButton>
       ),
       cell: ({ row }) => {
-        return formatPrice(row.original.priceInCents, row.original.currency);
+        return formatPrice(
+          row.original.priceInCents,
+          row.original.currency,
+          getCurrencyLocale(row.original.currency),
+        );
       },
     },
     {

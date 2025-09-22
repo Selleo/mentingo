@@ -9,6 +9,7 @@ import { Enroll } from "~/assets/svgs";
 import { Button } from "~/components/ui/button";
 import { toast } from "~/components/ui/use-toast";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
+import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 
 import { useStripePromise } from "./hooks/useStripePromise";
 import { PaymentForm } from "./PaymentForm";
@@ -70,7 +71,8 @@ export function PaymentModal({ coursePrice, courseCurrency, courseId }: PaymentM
         <Enroll />
         <span>
           {" "}
-          {t("paymentView.other.enrollCourse")} - {formatPrice(coursePrice, courseCurrency)}
+          {t("paymentView.other.enrollCourse")} -{" "}
+          {formatPrice(coursePrice, courseCurrency, getCurrencyLocale(courseCurrency))}
         </span>
       </Button>
 

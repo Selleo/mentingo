@@ -7,6 +7,7 @@ import { courseQueryOptions } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import { Button } from "~/components/ui/button";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
+import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 
 type PaymentForm = {
   courseId: string;
@@ -63,7 +64,7 @@ export const PaymentForm = ({ price, currency, onPaymentSuccess, courseId }: Pay
         {processing ? (
           <Loader className="animate-spin" />
         ) : (
-          `${t("paymentView.other.buyFor")} ${formatPrice(price, currency)}`
+          `${t("paymentView.other.buyFor")} ${formatPrice(price, currency, getCurrencyLocale(currency))}`
         )}
       </Button>
       {error && (
