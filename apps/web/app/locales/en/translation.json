@@ -15,7 +15,8 @@
       "ignore": "Ignore",
       "clearAll": "Clear All",
       "validate": "Validate",
-      "edit": "Edit"
+      "edit": "Edit",
+      "uploading": "Uploading..."
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -1378,6 +1379,20 @@
       "markAsReadFailed": "Failed to mark announcements as read",
       "createdSuccessfully": "Announcement created successfully",
       "createFailed": "Failed to create announcement"
+    }
+  },
+  "platformLogo": {
+    "header": "Platform Logo",
+    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logo Image"
+    },
+    "button": {
+      "removeLogo": "Remove Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Platform logo uploaded successfully",
+      "logoFetchError": "Error fetching platform logo"
     }
   }
 }

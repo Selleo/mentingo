@@ -2790,6 +2790,25 @@
       "patch": {
         "operationId": "SettingsController_updatePlatformLogo",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "logo"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""

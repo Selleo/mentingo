@@ -7,8 +7,8 @@ import { z } from "zod";
 import { version } from "~/../version.json";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
-import LogoUrl from "~/assets/menitngo_logo_light_transparent.svg";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
+import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -57,7 +57,9 @@ export default function LoginPage() {
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle role="heading" className="text-2xl">
-          <img src={LogoUrl} alt="" loading="eager" decoding="async" />
+          <div className="mb-6 flex justify-center">
+            <PlatformLogo className="h-16 w-auto py-3" alt="Platform Logo" />
+          </div>
           {t("loginView.header")}
         </CardTitle>
         <CardDescription>

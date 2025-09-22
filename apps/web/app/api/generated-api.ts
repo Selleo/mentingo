@@ -3779,10 +3779,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name SettingsControllerUpdatePlatformLogo
      * @request PATCH:/api/settings/platform-logo
      */
-    settingsControllerUpdatePlatformLogo: (params: RequestParams = {}) =>
+    settingsControllerUpdatePlatformLogo: (
+      data: {
+        /** @format binary */
+        logo: File;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<void, any>({
         path: `/api/settings/platform-logo`,
         method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 

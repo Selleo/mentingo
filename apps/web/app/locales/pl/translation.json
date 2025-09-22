@@ -16,7 +16,8 @@
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
       "edit": "Edytuj",
-      "continue": "Kontynuuj"
+      "continue": "Kontynuuj",
+      "uploading": "Wgrywanie..."
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -1384,6 +1385,20 @@
       "markAsReadFailed": "Nie udało się oznaczyć ogłoszeń jako przeczytane",
       "createdSuccessfully": "Ogłoszenie zostało pomyślnie utworzone",
       "createFailed": "Nie udało się utworzyć ogłoszenia"
+    }
+  },
+  "platformLogo": {
+    "header": "Logo Platformy",
+    "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, SVG",
+    "field": {
+      "uploadLabel": "Obraz Logo"
+    },
+    "button": {
+      "removeLogo": "Usuń Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Logo platformy zostało pomyślnie wgrane",
+      "logoFetchError": "Nie udało się pobrać logo platformy"
     }
   }
 }
