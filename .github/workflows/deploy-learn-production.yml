@@ -68,6 +68,18 @@ jobs:
             STRIPE_WEBHOOK_SECRET
             REDIS_URL
             CORS_ORIGIN
+            API_BASE_URL
+            GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET
+            GOOGLE_OAUTH_ENABLED
+            MICROSOFT_CLIENT_ID
+            MICROSOFT_CLIENT_SECRET
+            MICROSOFT_OAUTH_ENABLED
+            BUNNY_STREAM_API_KEY
+            BUNNY_STREAM_SIGNING_KEY
+            BUNNY_STREAM_LIBRARY_ID
+            BUNNY_STREAM_CDN_URL
+            OPENAI_API_KEY
 
           paths: |
             /learn/production/api/terraform/
@@ -110,6 +122,18 @@ jobs:
             STRIPE_WEBHOOK_SECRET
             REDIS_URL
             CORS_ORIGIN
+            API_BASE_URL
+            GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET
+            GOOGLE_OAUTH_ENABLED
+            MICROSOFT_CLIENT_ID
+            MICROSOFT_CLIENT_SECRET
+            MICROSOFT_OAUTH_ENABLED
+            BUNNY_STREAM_API_KEY
+            BUNNY_STREAM_SIGNING_KEY
+            BUNNY_STREAM_LIBRARY_ID
+            BUNNY_STREAM_CDN_URL
+            OPENAI_API_KEY
 
           paths: |
             /learn/production/api/terraform/

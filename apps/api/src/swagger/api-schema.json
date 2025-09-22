@@ -3809,8 +3809,8 @@
                   }
                 ]
               },
-              "navigateTo": {
-                "type": "string"
+              "shouldVerifyMFA": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -3823,7 +3823,7 @@
               "role",
               "archived",
               "profilePictureUrl",
-              "navigateTo"
+              "shouldVerifyMFA"
             ]
           }
         },
@@ -3876,6 +3876,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "shouldVerifyMFA": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -3887,7 +3890,8 @@
               "lastName",
               "role",
               "archived",
-              "profilePictureUrl"
+              "profilePictureUrl",
+              "shouldVerifyMFA"
             ]
           }
         },

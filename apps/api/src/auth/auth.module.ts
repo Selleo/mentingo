@@ -41,6 +41,6 @@ import { TokenService } from "./token.service";
     ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
     SettingsService,
   ],
-  exports: [],
+  exports: [CreatePasswordService],
 })
 export class AuthModule {}

@@ -1,6 +1,7 @@
 import { Global, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
+import { AuthModule } from "src/auth/auth.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
@@ -24,6 +25,7 @@ import { UserService } from "src/user/user.service";
     S3Module,
     BunnyStreamModule,
     StatisticsModule,
+    AuthModule,
   ],
   exports: [CqrsModule],
   providers: [
