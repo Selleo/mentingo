@@ -28,6 +28,7 @@ import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
+import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
@@ -91,6 +92,7 @@ export class CourseService {
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
     private readonly userService: UserService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -787,6 +789,8 @@ export class CourseService {
         throw new NotFoundException("Category not found");
       }
 
+      const globalSettings = await this.settingsService.getGlobalSettings();
+
       const [newCourse] = await trx
         .insert(courses)
         .values({
@@ -795,7 +799,7 @@ export class CourseService {
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
           status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
-          currency: createCourseBody.currency || "usd",
+          currency: globalSettings.defaultCourseCurrency || "usd",
           isScorm: createCourseBody.isScorm,
           authorId,
           categoryId: createCourseBody.categoryId,
