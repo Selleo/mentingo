@@ -54,15 +54,20 @@ export class QuestionService {
           isCorrect: passQuestion,
         };
 
+        // Scale questions are saved but don't affect quiz scoring
+        const isScaleQuestion = question.type === QUESTION_TYPE.SCALE_1_5;
+
         return {
           ...quizStats,
           answers: [...quizStats.answers, validAnswer],
-          correctAnswerCount: passQuestion
-            ? quizStats.correctAnswerCount + 1
-            : quizStats.correctAnswerCount,
-          wrongAnswerCount: !passQuestion
-            ? quizStats.wrongAnswerCount + 1
-            : quizStats.wrongAnswerCount,
+          correctAnswerCount:
+            passQuestion && !isScaleQuestion
+              ? quizStats.correctAnswerCount + 1
+              : quizStats.correctAnswerCount,
+          wrongAnswerCount:
+            !passQuestion && !isScaleQuestion
+              ? quizStats.wrongAnswerCount + 1
+              : quizStats.wrongAnswerCount,
         };
       },
       {
@@ -151,8 +156,6 @@ export class QuestionService {
         });
       })
       .with(QUESTION_TYPE.SCALE_1_5, () => {
-        // Scale questions are never evaluated as correct/incorrect
-        // They are used for feedback/rating purposes only
         return true;
       })
       .otherwise(() => {
