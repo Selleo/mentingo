@@ -3,7 +3,7 @@ import { useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
-import { useCategoriesSuspense } from "~/api/queries";
+import { useCategories } from "~/api/queries";
 import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Icon } from "~/components/Icon";
@@ -68,9 +68,11 @@ export default function CoursesPage() {
     sort: state.sort,
   });
 
-  const { data: categories, isLoading: isCategoriesLoading } = useCategoriesSuspense();
+  const { data: categories, isLoading: isCategoriesLoading } = useCategories();
 
   const { courseListLayout, setCourseListLayout } = useLayoutsStore();
+
+  if (isCategoriesLoading || isAvailableCoursesLoading) return null;
 
   const filterConfig: FilterConfig[] = [
     {
