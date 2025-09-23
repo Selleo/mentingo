@@ -57,7 +57,7 @@ function convertToMajorUnits(amount: number, currency: CurrencyCode): number {
  * @returns The minimum number of fraction digits.
  */
 function getMinimumFractionDigits(currency: CurrencyCode): number {
-  const noFractionCurrencies: CurrencyCode[] = ["JPY", "KRW", "VND", "PLN"];
+  const noFractionCurrencies: CurrencyCode[] = ["JPY", "KRW", "VND", "PLN", "EUR", "USD", "GBP"];
   return noFractionCurrencies.includes(currency) ? 0 : 2;
 }
 
