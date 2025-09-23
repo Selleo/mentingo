@@ -7,6 +7,8 @@ import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
 import { addCourseFormSchema } from "~/modules/Admin/AddCourse/validators/addCourseFormSchema";
 
+import { MAX_COURSE_DESCRIPTION_HTML_LENGTH } from "../constants";
+
 import type { AddCourseFormValues } from "~/modules/Admin/AddCourse/validators/addCourseFormSchema";
 
 export const useAddCourseForm = () => {
@@ -24,9 +26,12 @@ export const useAddCourseForm = () => {
   });
 
   const onSubmit = (values: AddCourseFormValues) => {
-    const { thumbnailUrl: _, ...rest } = values;
+    const { thumbnailUrl: _, description, ...rest } = values;
+
+    if (description.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH) return;
+
     createCourse({
-      data: { ...rest },
+      data: { ...rest, description },
     }).then(({ data }) => {
       queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
       navigate(`/admin/beta-courses/${data.id}`);

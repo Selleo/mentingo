@@ -692,7 +692,8 @@
       },
       "other": {
         "charactersLeft": "Pozostało znaków",
-        "reachedCharactersLimit": "Osiągnięto limit znaków."
+        "reachedCharactersLimit": "Osiągnięto limit znaków.",
+        "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie."
       },
       "header": "Utwórz nowy kurs",
       "subHeader": "Podaj szczegóły, aby utworzyć nowy kurs. Będziesz miał więcej opcji dostosowania później.",

@@ -688,7 +688,8 @@
       },
       "other": {
         "charactersLeft": "Characters left",
-        "reachedCharactersLimit": "You have reached the character limit."
+        "reachedCharactersLimit": "You have reached the character limit.",
+        "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit."
       },
       "header": "Create new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
