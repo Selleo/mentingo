@@ -77,6 +77,8 @@ const CreatePromotionCode = () => {
   const { data: courses } = useCoursesSuspense();
   const { mutateAsync: createCoupon } = useCreatePromotionCode();
 
+  const coursesConnectedWithStripe = courses.filter(({ stripeProductId }) => stripeProductId);
+
   const form = useForm<FormData>({
     defaultValues: {
       code: "",
@@ -284,7 +286,7 @@ const CreatePromotionCode = () => {
                       )}
                     </Label>
                   </div>
-                  {courses?.map(({ stripeProductId, title, id }) => {
+                  {coursesConnectedWithStripe?.map(({ stripeProductId, title, id }) => {
                     return (
                       <div
                         key={id}
