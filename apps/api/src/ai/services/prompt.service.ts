@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { MessageService } from "src/ai/services/message.service";
+import { RagService } from "src/ai/services/rag.service";
 import { TokenService } from "src/ai/services/token.service";
 import { SYSTEM_PROMPT_FOR_MENTOR } from "src/ai/utils/ai.config";
 import { MESSAGE_ROLE, OPENAI_MODELS } from "src/ai/utils/ai.type";
@@ -17,6 +18,7 @@ export class PromptService {
     private readonly aiRepository: AiRepository,
     private readonly messageService: MessageService,
     private readonly tokenService: TokenService,
+    private readonly ragService: RagService,
   ) {}
 
   async buildPrompt(threadId: UUIDType, content: string, tempMessageId?: string) {
@@ -46,7 +48,15 @@ export class PromptService {
         content: systemPrompt.content,
       });
 
+    const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
+
+    const context = await this.ragService.getContext(
+      content + history[history.length - 1].content,
+      lessonId,
+    );
+
     history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, content });
+    history.push(...context);
 
     return history;
   }

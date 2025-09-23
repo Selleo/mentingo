@@ -2124,6 +2124,16 @@ export interface MarkAnnouncementAsReadResponse {
   };
 }
 
+export interface GetAllAssignedDocumentsForLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    type: string;
+    size: number;
+  }[];
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -4547,6 +4557,58 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/announcements/${id}/read`,
         method: "PATCH",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerIngest
+     * @request POST:/api/ingestion/ingest
+     */
+    ingestionControllerIngest: (
+      data: {
+        /** @format uuid */
+        lessonId: string;
+        files: File[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/ingestion/ingest`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerGetAllAssignedDocumentsForLesson
+     * @request GET:/api/ingestion/{lessonId}
+     */
+    ingestionControllerGetAllAssignedDocumentsForLesson: (
+      lessonId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllAssignedDocumentsForLessonResponse, any>({
+        path: `/api/ingestion/${lessonId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerDeleteDocumentLink
+     * @request DELETE:/api/ingestion/{documentLinkId}
+     */
+    ingestionControllerDeleteDocumentLink: (documentLinkId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ingestion/${documentLinkId}`,
+        method: "DELETE",
         ...params,
       }),
   };

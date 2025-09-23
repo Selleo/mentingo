@@ -246,6 +246,20 @@
       "when": 1758623644922,
       "tag": "0034_add_stripe_data_to_course_table",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1758638212071,
+      "tag": "0035_add_pg_vector",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1758638231151,
+      "tag": "0036_added_rag_tables",
+      "breakpoints": true
     }
   ]
 }

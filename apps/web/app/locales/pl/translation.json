@@ -827,7 +827,7 @@
           "atLeastOneOptionRequired": "Wymagana jest przynajmniej jedna opcja",
           "imageRequired": "Obrazek jest wymagany",
           "descriptionLength": "Opis musi mieć co najmniej 10 znaków.",
-          "descritpionMaxLength": "Treść może mieć maksymalnie 5000 znaków.",
+          "descriptionMaxLength": "Treść może mieć maksymalnie 5000 znaków.",
           "atLeastOneOptionCorrect": "Przynajmniej jedna opcja musi być oznaczona jako poprawna.",
           "allOptionsCorrect": "Wszystkie opcje muszą być poprawne",
           "titleRequired": "Tytuł jest wymagany",
@@ -838,7 +838,12 @@
           "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 1000 znaków)",
           "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
           "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
-          "titleMaxLength": "Tytuł jest zbyt długi (maks. 255 znaków)"
+          "titleMaxLength": "Tytuł jest zbyt długi (maks. 255 znaków)",
+          "maxFileSize": "Rozmiar pliku musi być mniejszy niż {{ MAX_MB_PER_FILE }} MB",
+          "maxFileNumber_one": "Nie możesz przesłać więcej niż 1 plik",
+          "maxFileNumber_few": "Nie możesz przesłać więcej niż {{ count }} pliki",
+          "maxFileNumber_many": "Nie możesz przesłać więcej niż {{ count }} plików",
+          "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -850,6 +855,8 @@
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
+          "aiMentorLessonFileAddedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie przesłane",
+          "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
@@ -869,7 +876,12 @@
           "sentence": "Zdanie",
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
-          "passThreshold": "Próg zaliczenia"
+          "passThreshold": "Próg zaliczenia",
+          "additionalContext": "Dodatkowy kontekst",
+          "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{ MAX_FILE_SIZE }} MB, który będzie używany jako kontekst w lekcjach",
+          "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
+          "includeFiles_many": "Dołącz maksymalnie {{ count }} plików, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
+          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",

@@ -1,6 +1,6 @@
 services:
   project-db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     restart: always
     environment:
       POSTGRES_PASSWORD: guidebook
