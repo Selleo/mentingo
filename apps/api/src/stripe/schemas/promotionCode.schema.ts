@@ -18,9 +18,8 @@ export const promotionCodeSchema = Type.Object({
   created: Type.Number(),
   customer: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   expiresAt: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
-  livemode: Type.Boolean(),
   maxRedemptions: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
-  metadata: Type.Object({}, { additionalProperties: true }),
+  metadata: Type.Optional(Type.Object({}, { additionalProperties: true })),
   restrictions: restrictionsSchema,
   timesRedeemed: Type.Number(),
 });

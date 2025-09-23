@@ -411,8 +411,8 @@
     "button": {
       "createNew": "Create new",
       "createCoupon": "Create promotion code",
-      "deactivatePromotionCode": "Deactivate promotion code",
-      "activatePromotionCode": "Activate promotion code"
+      "deactivatePromotionCode": "This promotion code is active",
+      "activatePromotionCode": "This promotion code is not active"
     },
     "other": {
       "noCourses": "No courses",

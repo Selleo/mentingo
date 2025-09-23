@@ -6,12 +6,15 @@ import { useUpdatePromotionCode } from "~/api/mutations/useUpdatePromotionCode";
 import { useCoursesSuspense } from "~/api/queries";
 import { usePromotionCodeByIdSuspense } from "~/api/queries/admin/usePromotionCodeById";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Toggle } from "~/components/ui/toggle";
+import { formatPrice } from "~/lib/formatters/priceFormatter";
 
 import { CreatePageHeader } from "../components";
 
 import { useGetPromotionCodeStatus } from "./hooks/useGetPromotionCodes";
+
+import type { CurrencyCode } from "~/lib/formatters/priceFormatter";
 
 const PromotionCodeDetails = () => {
   const { t } = useTranslation();
@@ -21,7 +24,7 @@ const PromotionCodeDetails = () => {
   const { mutateAsync: updatePromotionCode, isPending: isUpdatePromotionCodePending } =
     useUpdatePromotionCode();
   const { getPromotionCodeStatus } = useGetPromotionCodeStatus();
-  const coursesById = keyBy(courses, "id");
+  const coursesById = keyBy(courses, "stripeProductId");
 
   const breadcrumbs = [
     { title: t("adminPromotionCodesView.breadcrumbs.dashboard"), href: "/" },
@@ -55,15 +58,16 @@ const PromotionCodeDetails = () => {
     <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
       <CreatePageHeader title={t("adminPromotionCodesView.headers.update")} description="" />
       <div className="flex justify-end gap-3 pb-4">
-        <Button
-          variant="outline"
-          onClick={handleCouponActivation}
+        <Toggle
+          pressed={true}
+          onPressedChange={handleCouponActivation}
           disabled={isUpdatePromotionCodePending}
+          aria-label="Coupon Activation"
         >
           {isCouponActive
             ? t("adminPromotionCodesView.button.deactivatePromotionCode")
             : t("adminPromotionCodesView.button.activatePromotionCode")}
-        </Button>
+        </Toggle>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -89,7 +93,10 @@ const PromotionCodeDetails = () => {
               </label>
               <div className="text-lg">
                 {promotionCode?.coupon.amountOff
-                  ? `${promotionCode?.coupon.amountOff} zł`
+                  ? formatPrice(
+                      Number(promotionCode?.coupon.amountOff),
+                      promotionCode?.coupon.currency as CurrencyCode,
+                    )
                   : `${promotionCode?.coupon.percentOff}%`}
               </div>
             </div>
@@ -98,16 +105,17 @@ const PromotionCodeDetails = () => {
                 {t("adminPromotionCodesView.field.expiresAt")}
               </label>
               <div className="text-lg">
-                {(promotionCode?.expiresAt &&
-                  new Date(promotionCode?.expiresAt).toLocaleString()) ??
-                  "n/a"}
+                {promotionCode?.expiresAt
+                  ? new Date(promotionCode.expiresAt * 1000).toLocaleString()
+                  : "n/a"}
               </div>
               <div className="py-2">
                 <label className="text-sm text-gray-500">
                   {t("adminPromotionCodesView.field.createdAt")}
                 </label>
                 <div className="text-lg">
-                  {(promotionCode?.created && new Date(promotionCode?.created).toLocaleString()) ??
+                  {(promotionCode?.created &&
+                    new Date(promotionCode?.created * 1000).toLocaleString()) ??
                     "n/a"}
                 </div>
               </div>
@@ -139,15 +147,13 @@ const PromotionCodeDetails = () => {
           </CardHeader>
           <CardContent>
             <ul className="list-inside list-disc">
-              {promotionCode?.metadata?.assignedCourseIds?.length > 0 ? (
+              {promotionCode?.coupon?.appliesTo?.length > 0 ? (
                 <>
-                  {promotionCode?.metadata?.assignedCourseIds
-                    ?.split(",")
-                    .map((courseId: string) => (
-                      <li key={courseId} className="text-sm">
-                        {coursesById[courseId]?.title}
-                      </li>
-                    ))}
+                  {promotionCode?.coupon?.appliesTo?.map((stripeProductId: string) => (
+                    <li key={stripeProductId} className="text-sm">
+                      {coursesById[stripeProductId]?.title}
+                    </li>
+                  ))}
                 </>
               ) : (
                 <p className="text-sm text-neutral-500">

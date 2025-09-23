@@ -23,6 +23,7 @@ type PaymentModalProps = {
   courseTitle: string;
   courseDescription: string;
   courseId: string;
+  coursePriceId: string;
 };
 
 export function PaymentModal({
@@ -31,6 +32,7 @@ export function PaymentModal({
   courseId,
   courseTitle,
   courseDescription,
+  coursePriceId,
 }: PaymentModalProps) {
   const { data: currentUser } = useCurrentUser();
   const [showCheckout, setShowCheckout] = useState(false);
@@ -40,13 +42,13 @@ export function PaymentModal({
   const fetchClientSecret = async () => {
     const response = await ApiClient.api.stripeControllerCreateCheckoutSession({
       amountInCents: coursePrice,
-      currency: courseCurrency,
       allowPromotionCode: true,
       productName: courseTitle,
       productDescription: courseDescription,
       courseId: courseId,
       customerId: currentUser?.id as string,
       locale: i18n.language,
+      priceId: coursePriceId,
     });
 
     return response.data.data.clientSecret;

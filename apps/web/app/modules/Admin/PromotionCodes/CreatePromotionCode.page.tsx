@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
+import { trim } from "lodash-es";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -14,29 +15,59 @@ import { FormControl, FormField, FormItem, Form } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import { convertToMinorUnits } from "~/lib/formatters/priceFormatter";
 
 import { CreatePageHeader } from "../components";
 
-const formSchema = z.object({
-  code: z.string().min(1, "Code is required."),
-  discountType: z.enum(["percent", "fixed"]),
-  discountValue: z.number().min(1, "Discount value is required."),
-  assignedCourses: z.array(z.string()),
-  maxRedemptions: z.number().optional(),
-  expiresAt: z
-    .string()
-    .optional()
-    .refine(
-      (value) => {
-        if (!value) return true;
-        const expirationDate = new Date(value);
-        return expirationDate >= new Date();
-      },
-      {
-        message: "Expiration date must be in the future",
-      },
-    ),
-});
+const formSchema = z
+  .object({
+    code: z.string().min(1, "Code is required."),
+    discountType: z.enum(["percent", "fixed"]),
+    discountValue: z.number({
+      required_error: "Discount value is required.",
+      invalid_type_error: "Discount value must be a number",
+    }),
+    assignedCourses: z.array(z.string()),
+    maxRedemptions: z.number().optional(),
+    expiresAt: z
+      .string({
+        required_error: "Expiration date is required",
+      })
+      .refine((val) => !Number.isNaN(Date.parse(val)), {
+        message: "Expiration date must be a valid date",
+      })
+      .refine(
+        (val) => {
+          const date = new Date(val);
+          return date >= new Date();
+        },
+        {
+          message: "Expiration date must be in the future",
+        },
+      )
+      .refine(
+        (val) => {
+          const date = new Date(val);
+          const fiftyYearsFromNow = new Date();
+          fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 50);
+          return date <= fiftyYearsFromNow;
+        },
+        {
+          message: "Expiration date cannot be more than 50 years in the future",
+        },
+      ),
+  })
+  .superRefine((data, ctx) => {
+    if (data.discountType === "percent") {
+      if (data.discountValue < 0 || data.discountValue > 100) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Discount value must be between 0 and 100.",
+          path: ["discountValue"],
+        });
+      }
+    }
+  });
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -80,18 +111,22 @@ const CreatePromotionCode = () => {
   };
 
   const onSubmit = (data: FormData) => {
-    createCoupon({
-      code: data.code,
-      amountOff: data.discountType === "fixed" ? data.discountValue : undefined,
+    const payload = {
+      code: trim(data.code),
+      amountOff:
+        data.discountType === "fixed" ? convertToMinorUnits(data.discountValue) : undefined,
       percentOff: data.discountType === "percent" ? data.discountValue : undefined,
-      assignedCourseIds: data?.assignedCourses,
+      assignedStripeCourseIds: data?.assignedCourses,
       maxRedemptions: data?.maxRedemptions,
       expiresAt: data?.expiresAt,
-    }).then(() => navigate("/admin/promotion-codes"));
+      currency: "USD",
+    };
+
+    createCoupon(payload).then(() => navigate("/admin/promotion-codes"));
   };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} className="relative">
       <div className="flex flex-col gap-y-6">
         <CreatePageHeader title={t("adminPromotionCodesView.headers.create")} description="" />
       </div>
@@ -160,6 +195,7 @@ const CreatePromotionCode = () => {
                     {...field}
                     type="number"
                     onChange={(e) => field.onChange(Number(e.target.value))}
+                    onWheel={(e) => e.currentTarget.blur()}
                   />
                 </FormControl>
               </FormItem>
@@ -181,6 +217,7 @@ const CreatePromotionCode = () => {
                     id="maxRedemptions"
                     {...field}
                     type="number"
+                    onWheel={(e) => e.currentTarget.blur()}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
@@ -221,7 +258,15 @@ const CreatePromotionCode = () => {
                     <FormControl>
                       <Checkbox
                         onCheckedChange={(val) =>
-                          field.onChange(!val ? [] : [...courses.map(({ id }) => id)])
+                          field.onChange(
+                            !val
+                              ? []
+                              : [
+                                  ...courses
+                                    .map(({ stripeProductId }) => stripeProductId)
+                                    .filter(Boolean),
+                                ],
+                          )
                         }
                         onClick={(e) => e.stopPropagation()}
                         name={field.name}
@@ -239,7 +284,7 @@ const CreatePromotionCode = () => {
                       )}
                     </Label>
                   </div>
-                  {courses?.map(({ id, title }) => {
+                  {courses?.map(({ stripeProductId, title, id }) => {
                     return (
                       <div
                         key={id}
@@ -247,12 +292,15 @@ const CreatePromotionCode = () => {
                       >
                         <FormControl>
                           <Checkbox
-                            checked={field?.value?.includes(id)}
+                            checked={
+                              // some of the courses might not have a stripe product id
+                              stripeProductId ? field?.value?.includes(stripeProductId) : false
+                            }
                             onCheckedChange={() =>
                               field.onChange(
-                                field?.value.find((_id) => _id === id)
-                                  ? field?.value.filter((_id) => _id !== id)
-                                  : [...field.value, id],
+                                field?.value.find((_id) => _id === stripeProductId)
+                                  ? field?.value.filter((_id) => _id !== stripeProductId)
+                                  : [...field.value, stripeProductId],
                               )
                             }
                             onClick={(e) => e.stopPropagation()}

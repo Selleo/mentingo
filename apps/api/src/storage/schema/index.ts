@@ -136,6 +136,8 @@ export const courses = pgTable("courses", {
   categoryId: uuid("category_id")
     .references(() => categories.id)
     .notNull(),
+  stripeProductId: text("stripe_product_id"),
+  stripePriceId: text("stripe_price_id"),
 });
 
 export const chapters = pgTable("chapters", {

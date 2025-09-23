@@ -46,15 +46,12 @@ export class StripeService {
 
   async createCheckoutSession(body: CreateCheckoutSessionBody) {
     const {
-      amountInCents,
-      currency = "usd",
       allowPromotionCode = false,
       quantity = 1,
-      productName,
-      productDescription = "",
       courseId,
       customerId,
       locale,
+      priceId,
     } = body;
 
     const finalLocale: SupportedLocales = isSupportedLocale(locale) ? locale : "en";
@@ -62,14 +59,7 @@ export class StripeService {
     const session = await this.client.checkout.sessions.create({
       line_items: [
         {
-          price_data: {
-            currency,
-            unit_amount: amountInCents,
-            product_data: {
-              name: productName,
-              description: productDescription,
-            },
-          },
+          price: priceId,
           quantity,
         },
       ],
@@ -89,29 +79,79 @@ export class StripeService {
     return { clientSecret: session.client_secret };
   }
 
+  async createProduct(
+    data: Stripe.ProductCreateParams & { amountInCents: number; currency: string },
+  ) {
+    const product = await this.client.products.create({
+      name: data?.name,
+      description: data?.description,
+    });
+
+    const price = await this.createPrice({
+      product: product.id,
+      unit_amount: data.amountInCents,
+      currency: data.currency,
+    });
+
+    return {
+      productId: product.id,
+      priceId: price.id,
+    };
+  }
+
+  async createPrice(data: Stripe.PriceCreateParams) {
+    const price = await this.client.prices.create(data);
+    return price;
+  }
+
+  async updateProduct(id: string, data: Stripe.ProductUpdateParams) {
+    const product = await this.client.products.update(id, data);
+    return product;
+  }
+
+  async updatePrice(id: string, data: Stripe.PriceUpdateParams) {
+    const price = await this.client.prices.update(id, data);
+    return price;
+  }
+
+  async getCoupon(id: string) {
+    const coupon = await this.client.coupons.retrieve(id);
+    return coupon;
+  }
+
   async getPromotionCodes() {
     const promotionCodes = await this.client.promotionCodes.list();
-
     return promotionCodes?.data?.map(this.promotionCodeToCamelCase) ?? [];
   }
 
   async getPromotionCode(id: string) {
-    const promotionCode = await this.client.promotionCodes.retrieve(id);
+    const promotionCode = await this.client.promotionCodes.retrieve(id, {
+      expand: ["coupon.applies_to"],
+    });
 
     return this.promotionCodeToCamelCase(promotionCode);
   }
 
   async createPromotionCode(body: CreatePromotionCode) {
-    const { amountOff, percentOff, maxRedemptions, code, assignedCourseIds, currency, expiresAt } =
-      body;
+    const {
+      amountOff,
+      percentOff,
+      maxRedemptions,
+      code,
+      assignedStripeCourseIds,
+      currency,
+      expiresAt,
+    } = body;
 
     if (amountOff && percentOff) {
       throw new BadRequestException("You can't use both amount_off and percent_off");
     }
+
     try {
       const coupon = await this.client.coupons.create({
         amount_off: amountOff,
         percent_off: percentOff,
+        applies_to: { products: assignedStripeCourseIds },
         currency: currency ?? "usd",
       });
       const stripeExpiresAt = Math.floor(new Date(expiresAt as string).getTime() / 1000);
@@ -121,23 +161,22 @@ export class StripeService {
         code,
         expires_at: expiresAt ? stripeExpiresAt : undefined,
         max_redemptions: maxRedemptions,
-        metadata: {
-          assignedCourseIds: assignedCourseIds ? assignedCourseIds?.join(",") : null,
-        },
       });
 
       return "Promotion code created successfully";
     } catch (error) {
+      if (error.raw.message) {
+        throw new InternalServerErrorException(error.raw.message);
+      }
       throw new InternalServerErrorException("Failed to create coupon");
     }
   }
 
   async updatePromotionCode(id: string, body: UpdatePromotionCode) {
-    const { active, assignedCourseIds } = body;
+    const { active } = body;
 
     const updatePromotionCodeData = {
       ...(active !== undefined && { active }),
-      ...(assignedCourseIds && { metadata: { assignedCourseIds: assignedCourseIds?.join(",") } }),
     };
 
     const promotionCode = await this.client.promotionCodes.retrieve(id);
@@ -153,6 +192,9 @@ export class StripeService {
       );
       return this.promotionCodeToCamelCase(promoCode);
     } catch (error) {
+      if (error.raw.message) {
+        throw new InternalServerErrorException(error.raw.message);
+      }
       throw new InternalServerErrorException("Failed to update coupon");
     }
   }
@@ -170,18 +212,17 @@ export class StripeService {
         currency: promotionCode.coupon.currency,
         duration: promotionCode.coupon.duration,
         durationInMonths: promotionCode.coupon.duration_in_months,
-        livemode: promotionCode.coupon.livemode,
         maxRedemptions: promotionCode.coupon.max_redemptions,
         metadata: promotionCode.coupon.metadata,
         name: promotionCode.coupon.name,
         redeemBy: promotionCode.coupon.redeem_by,
         timesRedeemed: promotionCode.coupon.times_redeemed,
         valid: promotionCode.coupon.valid,
+        appliesTo: promotionCode?.coupon?.applies_to?.products ?? [],
       },
       created: promotionCode.created,
       customer: promotionCode.customer,
       expiresAt: promotionCode.expires_at,
-      livemode: promotionCode.livemode,
       maxRedemptions: promotionCode.max_redemptions,
       metadata: promotionCode.metadata,
       restrictions: {

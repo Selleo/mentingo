@@ -77,6 +77,8 @@ export const createCourseFactory = (db: DatabasePg) => {
       authorId: "", // Will be auto-created if empty
       categoryId: "", // Will be auto-created if empty
       isScorm: false,
+      stripeProductId: null,
+      stripePriceId: null,
     };
   });
 };

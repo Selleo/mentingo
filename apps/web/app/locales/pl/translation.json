@@ -412,8 +412,8 @@
     "button": {
       "createNew": "Utwórz nowy",
       "createCoupon": "Utwórz kod promocyjny",
-      "deactivatePromotionCode": "Deaktywuj kod promocyjny",
-      "activatePromotionCode": "Aktywuj kod promocyjny"
+      "deactivatePromotionCode": "Ten kod promocyjny jest aktywny",
+      "activatePromotionCode": "Ten kod promocyjny nie jest aktywny"
     },
     "other": {
       "noCourses": "Brak kursów",

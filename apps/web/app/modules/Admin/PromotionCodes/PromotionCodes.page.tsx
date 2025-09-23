@@ -28,9 +28,9 @@ export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
 
     return { promotionsCodes };
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error("Error fetching promotion codes:", error);
 
-    throw new Error("Failed to load categories.");
+    throw new Error("Failed to load promotion codes.");
   }
 };
 const PromotionCodes = () => {

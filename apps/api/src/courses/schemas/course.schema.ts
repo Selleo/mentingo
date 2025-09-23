@@ -22,6 +22,8 @@ export const courseSchema = Type.Object({
   status: Type.Optional(coursesStatusOptions),
   createdAt: Type.Optional(Type.String()),
   hasFreeChapters: Type.Optional(Type.Boolean()),
+  stripeProductId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  stripePriceId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const studentCourseSchema = Type.Object({
