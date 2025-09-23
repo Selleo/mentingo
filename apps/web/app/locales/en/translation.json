@@ -126,6 +126,7 @@
     "providerInformation": "Provider Info",
     "browseCourses": "Browse Courses",
     "announcements": "Announcements",
+    "promotionCodes": "Promotion Codes",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
@@ -365,6 +366,60 @@
       "completed": "Completed",
       "enrolled": "Enrolled",
       "noData": "No data"
+    }
+  },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Promotion code created successfully",
+      "updatedSuccessfully": "Promotion code updated successfully"
+    },
+    "headers": {
+      "create": "Create promotion code",
+      "update": "Update promotion code"
+    },
+    "status": {
+      "active": "Active",
+      "deactivated": "Deactivated",
+      "expired": "Expired",
+      "usageLimitReached": "Usage limit reached"
+    },
+    "field": {
+      "code": "Code",
+      "status": "Status",
+      "uses": "Uses count",
+      "associatedCourses": "Associated Courses",
+      "discountType": "Discount Type",
+      "discountTypePercent": "Percent",
+      "discountTypeFixed": "Fixed",
+      "discountValue": "Discount Value",
+      "maxRedemptions": "Max Redemptions",
+      "expiresAt": "Expires At",
+      "assignedCourses": "Assigned Courses",
+      "type": "Type",
+      "associateCourse": {
+        "checkAll": "Apply to all courses"
+      },
+      "discount": "Discount",
+      "createdAt": "Created At"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "promotionCodes": "Promotion Codes",
+      "createNew": "Create new",
+      "update": "Update",
+      "back": "Back"
+    },
+    "button": {
+      "createNew": "Create new",
+      "createCoupon": "Create promotion code",
+      "deactivatePromotionCode": "This promotion code is active",
+      "activatePromotionCode": "This promotion code is not active"
+    },
+    "other": {
+      "noCourses": "No courses",
+      "usageInfo": "Usage information",
+      "usageAmount": "Usage amount",
+      "baseInfo": "Basic information"
     }
   },
   "adminCoursesView": {

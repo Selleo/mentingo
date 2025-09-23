@@ -1,6 +1,6 @@
 {
-  "id": "6e1ece0c-de4a-42a5-937f-3fbb177a49be",
-  "prevId": "a271a67f-7774-4605-bbd1-49175dfbca8f",
+  "id": "437c38a3-12b4-4c8d-8f2d-65a414ac766d",
+  "prevId": "6e1ece0c-de4a-42a5-937f-3fbb177a49be",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -809,6 +809,18 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "stripe_product_id": {
+          "name": "stripe_product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_price_id": {
+          "name": "stripe_price_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

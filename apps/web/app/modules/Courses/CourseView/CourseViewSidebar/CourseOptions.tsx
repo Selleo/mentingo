@@ -57,12 +57,14 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
           <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
-        {course.priceInCents && course.currency ? (
+        {course.priceInCents && course.currency && course.stripePriceId ? (
           <PaymentModal
             courseCurrency={course.currency}
             coursePrice={course.priceInCents}
             courseTitle={course.title}
+            courseDescription={course.description}
             courseId={course.id}
+            coursePriceId={course.stripePriceId}
           />
         ) : (
           renderEnrollButton()

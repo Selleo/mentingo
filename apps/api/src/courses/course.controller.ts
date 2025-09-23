@@ -8,12 +8,14 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Type } from "@sinclair/typebox";
+import { Request } from "express";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -255,9 +257,15 @@ export class CourseController {
   async createCourse(
     @Body() createCourseBody: CreateCourseBody,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @Req() request: Request,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.courseService.createCourse(createCourseBody, currentUserId);
+    const isPlaywrightTest = request.headers["x-playwright-test"];
 
+    const { id } = await this.courseService.createCourse(
+      createCourseBody,
+      currentUserId,
+      !!isPlaywrightTest,
+    );
     return new BaseResponse({ id, message: "Pomyślnie utworzono kurs" });
   }
 
@@ -277,12 +285,16 @@ export class CourseController {
     @UploadedFile() image: Express.Multer.File,
     @CurrentUser("userId") currentUserId: UUIDType,
     @CurrentUser("role") currentUserRole: UserRole,
+    @Req() request: Request,
   ): Promise<BaseResponse<{ message: string }>> {
+    const isPlaywrightTest = request.headers["x-playwright-test"];
+
     await this.courseService.updateCourse(
       id,
       updateCourseBody,
       currentUserId,
       currentUserRole,
+      !!isPlaywrightTest,
       image,
     );
 
