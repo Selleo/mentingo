@@ -34,6 +34,10 @@ export const LessonCardList = ({
   const [lessonsList, setLessonsList] = useState<Sortable<Lesson>[]>(lessons);
   const { t } = useTranslation();
 
+  useEffect(() => {
+    setLessonsList(lessons);
+  }, [lessons]);
+
   const onClickLessonCard = useCallback(
     (lesson: Lesson) => {
       if (isCurrentFormDirty) {
