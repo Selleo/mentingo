@@ -7650,6 +7650,7 @@
                                         "type": "string"
                                       },
                                       "optionText": {
+                                        "maxLength": 250,
                                         "type": "string"
                                       },
                                       "displayOrder": {
@@ -8494,6 +8495,7 @@
                                   "type": "string"
                                 },
                                 "optionText": {
+                                  "maxLength": 250,
                                   "type": "string"
                                 },
                                 "displayOrder": {
@@ -8857,6 +8859,7 @@
                                   "type": "string"
                                 },
                                 "optionText": {
+                                  "maxLength": 250,
                                   "type": "string"
                                 },
                                 "displayOrder": {
@@ -9294,6 +9297,7 @@
                               "optionText": {
                                 "anyOf": [
                                   {
+                                    "maxLength": 250,
                                     "type": "string"
                                   },
                                   {
@@ -9712,6 +9716,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -9993,6 +9998,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -10281,6 +10287,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -10564,6 +10571,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -10821,6 +10829,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -11079,6 +11088,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {

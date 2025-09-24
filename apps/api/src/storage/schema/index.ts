@@ -233,7 +233,7 @@ export const questionAnswerOptions = pgTable("question_answer_options", {
   questionId: uuid("question_id")
     .references(() => questions.id, { onDelete: "cascade" })
     .notNull(),
-  optionText: varchar("option_text", { length: 100 }).notNull(),
+  optionText: text("option_text").notNull(),
   isCorrect: boolean("is_correct").notNull(),
   displayOrder: integer("display_order"),
   matchedWord: varchar("matched_word", { length: 100 }),

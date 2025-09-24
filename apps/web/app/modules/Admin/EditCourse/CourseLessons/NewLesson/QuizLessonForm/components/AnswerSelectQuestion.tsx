@@ -42,6 +42,7 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
     };
     form.setValue(`questions.${questionIndex}.options`, [...currentOptions, newOption], {
       shouldDirty: true,
+      shouldValidate: true,
     });
   }, [form, questionIndex]);
 
@@ -50,7 +51,10 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
       const currentOptions: QuestionOption[] =
         form.getValues(`questions.${questionIndex}.options`) || [];
       const updatedOptions = currentOptions.filter((_, index) => index !== optionIndex);
-      form.setValue(`questions.${questionIndex}.options`, updatedOptions, { shouldDirty: true });
+      form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     },
     [form, questionIndex],
   );
@@ -58,7 +62,7 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
   const handleRemoveQuestion = useCallback(() => {
     const currentQuestions = form.getValues("questions") || [];
     const updatedQuestions = currentQuestions.filter((_, index) => index !== questionIndex);
-    form.setValue("questions", updatedQuestions, { shouldDirty: true });
+    form.setValue("questions", updatedQuestions, { shouldDirty: true, shouldValidate: true });
   }, [form, questionIndex]);
 
   const handleOptionChange = useCallback(
@@ -76,7 +80,10 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
       }
 
       updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], [field]: value };
-      form.setValue(`questions.${questionIndex}.options`, updatedOptions, { shouldDirty: true });
+      form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     },
     [form, questionIndex, questionType],
   );
@@ -113,6 +120,9 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                 }}
                 className="grid grid-cols-1"
                 renderItem={(item, index) => {
+                  const optionError =
+                    errors?.questions?.[questionIndex]?.options?.[index]?.optionText?.message;
+
                   return (
                     <SortableList.Item id={item.sortableId}>
                       <div className="mt-2">
@@ -184,6 +194,9 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                           </div>
                         </div>
                       </div>
+                      {optionError && (
+                        <p className="ml-16 mt-1 text-sm text-red-500">{optionError}</p>
+                      )}
                     </SortableList.Item>
                   );
                 }}

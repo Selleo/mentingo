@@ -64,6 +64,7 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
     };
     form.setValue(`questions.${questionIndex}.options`, [...currentOptions, newOption], {
       shouldDirty: true,
+      shouldValidate: true,
     });
   }, [form, questionIndex]);
 
@@ -72,7 +73,10 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
       const currentOptions: QuestionOption[] =
         form.getValues(`questions.${questionIndex}.options`) || [];
       const updatedOptions = currentOptions.filter((_, index) => index !== optionIndex);
-      form.setValue(`questions.${questionIndex}.options`, updatedOptions, { shouldDirty: true });
+      form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     },
     [form, questionIndex],
   );
@@ -80,7 +84,7 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
   const handleRemoveQuestion = useCallback(() => {
     const currentQuestions = form.getValues("questions") || [];
     const updatedQuestions = currentQuestions.filter((_, index) => index !== questionIndex);
-    form.setValue("questions", updatedQuestions, { shouldDirty: true });
+    form.setValue("questions", updatedQuestions, { shouldDirty: true, shouldValidate: true });
   }, [form, questionIndex]);
 
   const handleOptionChange = useCallback(
@@ -101,7 +105,10 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
         updatedOptions[optionIndex] = { ...updatedOptions[optionIndex], [field]: value as string };
       }
 
-      form.setValue(`questions.${questionIndex}.options`, updatedOptions, { shouldDirty: true });
+      form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     },
     [form, questionIndex, questionType],
   );
@@ -231,80 +238,90 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
                   });
                 }}
                 className="grid grid-cols-1"
-                renderItem={(item, index: number) => (
-                  <SortableList.Item id={item.sortableId}>
-                    <div className="mt-2">
-                      <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
-                        <SortableList.DragHandle>
-                          <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
-                        </SortableList.DragHandle>
-                        <Input
-                          name={`questions.${questionIndex}.options.${index}.optionText`}
-                          type="text"
-                          value={item.optionText}
-                          onChange={(e) =>
-                            handleOptionChange(index as number, "optionText", e.target.value)
-                          }
-                          placeholder={`${t("adminCourseView.curriculum.lesson.placeholder.option")} ${index + 1}`}
-                          required
-                          className="flex-1"
-                        />
-                        <div className="flex items-center">
-                          {questionType === QuestionType.PHOTO_QUESTION_SINGLE_CHOICE ? (
-                            <Input
-                              type="radio"
-                              className="size-4 cursor-pointer"
-                              name={`questions.${questionIndex}.options.${index}.isCorrect`}
-                              checked={item.isCorrect}
-                              onChange={() =>
-                                handleOptionChange(index, "isCorrect", !item.isCorrect)
-                              }
-                            />
-                          ) : (
-                            <div className="cursor-pointer">
-                              <Checkbox
-                                id="isCorrect"
+                renderItem={(item, index: number) => {
+                  const optionError =
+                    errors?.questions?.[questionIndex]?.options?.[index]?.optionText?.message;
+
+                  return (
+                    <SortableList.Item id={item.sortableId}>
+                      <div className="mt-2">
+                        <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
+                          <SortableList.DragHandle>
+                            <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
+                          </SortableList.DragHandle>
+                          <Input
+                            name={`questions.${questionIndex}.options.${index}.optionText`}
+                            type="text"
+                            value={item.optionText}
+                            onChange={(e) =>
+                              handleOptionChange(index as number, "optionText", e.target.value)
+                            }
+                            placeholder={`${t("adminCourseView.curriculum.lesson.placeholder.option")} ${index + 1}`}
+                            required
+                            className="flex-1"
+                          />
+                          <div className="flex items-center">
+                            {questionType === QuestionType.PHOTO_QUESTION_SINGLE_CHOICE ? (
+                              <Input
+                                type="radio"
+                                className="size-4 cursor-pointer"
                                 name={`questions.${questionIndex}.options.${index}.isCorrect`}
-                                className="mb-2 mt-2"
                                 checked={item.isCorrect}
-                                onCheckedChange={() =>
+                                onChange={() =>
                                   handleOptionChange(index, "isCorrect", !item.isCorrect)
                                 }
                               />
-                            </div>
-                          )}
+                            ) : (
+                              <div className="cursor-pointer">
+                                <Checkbox
+                                  id="isCorrect"
+                                  name={`questions.${questionIndex}.options.${index}.isCorrect`}
+                                  className="mb-2 mt-2"
+                                  checked={item.isCorrect}
+                                  onCheckedChange={() =>
+                                    handleOptionChange(index, "isCorrect", !item.isCorrect)
+                                  }
+                                />
+                              </div>
+                            )}
 
-                          <Label
-                            onClick={() => handleOptionChange(index, "isCorrect", !item.isCorrect)}
-                            className="body-sm ml-2 cursor-pointer align-middle text-neutral-950"
-                          >
-                            {t("adminCourseView.curriculum.lesson.other.correct")}
-                          </Label>
-                          <TooltipProvider delayDuration={0}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="group">
-                                  <Icon
-                                    name="TrashIcon"
-                                    className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
-                                    onClick={() => handleRemoveOption(index)}
-                                  />
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent
-                                side="top"
-                                align="center"
-                                className="ml-4 rounded bg-black text-sm text-white shadow-md"
-                              >
-                                {t("common.button.delete")}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                            <Label
+                              onClick={() =>
+                                handleOptionChange(index, "isCorrect", !item.isCorrect)
+                              }
+                              className="body-sm ml-2 cursor-pointer align-middle text-neutral-950"
+                            >
+                              {t("adminCourseView.curriculum.lesson.other.correct")}
+                            </Label>
+                            <TooltipProvider delayDuration={0}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="group">
+                                    <Icon
+                                      name="TrashIcon"
+                                      className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                      onClick={() => handleRemoveOption(index)}
+                                    />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                  side="top"
+                                  align="center"
+                                  className="ml-4 rounded bg-black text-sm text-white shadow-md"
+                                >
+                                  {t("common.button.delete")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </SortableList.Item>
-                )}
+                      {optionError && (
+                        <p className="ml-16 mt-1 text-sm text-red-500">{optionError}</p>
+                      )}
+                    </SortableList.Item>
+                  );
+                }}
               />
             )}
           </div>
