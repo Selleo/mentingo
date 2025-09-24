@@ -824,7 +824,7 @@
           "atLeastOneOptionRequired": "At least one option is required",
           "imageRequired": "Image is required",
           "descriptionLength": "Description must have at least 10 characters.",
-          "descritpionMaxLength": "Content can have a maximum of 5000 characters.",
+          "descriptionMaxLength": "Content can have a maximum of 5000 characters.",
           "atLeastOneOptionCorrect": "At least one option must be marked as correct for question.",
           "allOptionsCorrect": "All options must be correct",
           "titleRequired": "Title is required",
@@ -835,7 +835,10 @@
           "completionConditionsMaxLength": "Completion Conditions are too long (max 1000 characters)",
           "passThresholdMin": "Pass threshold must be at least 1",
           "passThresholdMax": "Pass threshold cannot exceed 10",
-          "titleMaxLength": "Title is too long (max 255 characters)"
+          "titleMaxLength": "Title is too long (max 255 characters)",
+          "maxFileSize": "File size must be below {{ MAX_MB_PER_FILE }} MB",
+          "maxFileNumber_one": "You cannot upload more than 1 file",
+          "maxFileNumber_other": "You cannot upload more than {{ count }} files"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -847,6 +850,8 @@
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
+          "aiMentorLessonFileAddedSuccessfully": "AI Mentor lesson files uploaded successfully",
+          "aiMentorLessonFileDeletedSuccessfully": "AI Mentor lesson files deleted successfully",
           "lessonUpdatedSuccessfully": "Lesson updated successfully",
           "textLessonUpdatedSuccessfully": "Text lesson updated successfully",
           "fileLessonUpdatedSuccessfully": "File item updated successfully",
@@ -866,7 +871,10 @@
           "sentence": "Sentence",
           "aiMentorInstructions": "AI Mentor Instructions",
           "completionConditions": "Completion Conditions",
-          "passThreshold": "Pass Threshold"
+          "passThreshold": "Pass Threshold",
+          "additionalContext": "Additional context",
+          "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
+          "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
         },
         "placeholder": {
           "title": "Provide lesson title...",

@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   integer,
   jsonb,
@@ -9,6 +10,7 @@ import {
   unique,
   uuid,
   varchar,
+  vector,
 } from "drizzle-orm/pg-core";
 
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -507,5 +509,52 @@ export const groupAnnouncements = pgTable(
   },
   (table) => ({
     unq: unique().on(table.groupId, table.announcementId),
+  }),
+);
+
+export const documents = pgTable("documents", {
+  ...id,
+  ...timestamps,
+  fileName: text("file_name").notNull(),
+  contentType: text("content_type").notNull(),
+  byteSize: bigint("byte_size", { mode: "number" }).notNull(),
+  checksum: text("check_sum").notNull().unique(),
+  status: text("status").notNull().default("processing"), // 'processing' | 'ready' | 'failed'
+  errorMessage: text("error_message"),
+  metadata: jsonb("metadata"),
+});
+
+export const docChunks = pgTable(
+  "doc_chunks",
+  {
+    ...id,
+    ...timestamps,
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+    chunkIndex: integer("chunk_index").notNull(),
+    metadata: jsonb("metadata"),
+    content: text("content").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }),
+  },
+  (t) => ({
+    uniqueOrder: { columns: [t.documentId, t.chunkIndex], unique: true },
+  }),
+);
+
+export const documentToAiMentorLesson = pgTable(
+  "document_to_ai_mentor_lesson",
+  {
+    ...id,
+    ...timestamps,
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+    aiMentorLessonId: uuid("ai_mentor_lesson_id")
+      .references(() => aiMentorLessons.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (t) => ({
+    unq: unique().on(t.documentId, t.aiMentorLessonId),
   }),
 );

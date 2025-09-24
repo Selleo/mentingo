@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
+import { DocumentService } from "src/ingestion/services/document.service";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
@@ -26,6 +27,7 @@ export class AdminLessonService {
     private adminLessonRepository: AdminLessonRepository,
     private lessonRepository: LessonRepository,
     private aiRepository: AiRepository,
+    private documentService: DocumentService,
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody) {
@@ -124,6 +126,7 @@ export class AdminLessonService {
     }
 
     await this.db.transaction(async (trx) => {
+      await this.documentService.deleteAllDocumentsIfLast(lessonId, trx);
       await this.adminLessonRepository.removeLesson(lessonId, trx);
       await this.adminLessonRepository.updateLessonDisplayOrderAfterRemove(lesson.chapterId, trx);
       await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, trx);

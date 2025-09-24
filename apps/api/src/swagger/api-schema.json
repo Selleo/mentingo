@@ -3029,6 +3029,92 @@
         }
       }
     },
+    "/api/ingestion/ingest": {
+      "post": {
+        "operationId": "IngestionController_ingest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lessonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                },
+                "required": [
+                  "lessonId",
+                  "files"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ingestion/{lessonId}": {
+      "get": {
+        "operationId": "IngestionController_getAllAssignedDocumentsForLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllAssignedDocumentsForLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ingestion/{documentLinkId}": {
+      "delete": {
+        "operationId": "IngestionController_deleteDocumentLink",
+        "parameters": [
+          {
+            "name": "documentLinkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/stripe": {
       "post": {
         "operationId": "StripeController_createPaymentIntent",
@@ -11490,6 +11576,41 @@
               "summary",
               "passed"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAllAssignedDocumentsForLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "type",
+                "size"
+              ]
+            }
           }
         },
         "required": [

@@ -51,6 +51,7 @@ export { default as Smile } from "./smile.svg?react";
 export { default as Send } from "./send.svg?react";
 export { default as Google } from "./google.svg?react";
 export { default as Microsoft } from "./microsoft.svg?react";
+export { default as ExclamationTriangle } from "./exclamation-triangle.svg?react";
 export { default as Ribbon } from "./ribbon.svg?react";
 export { default as Megaphone } from "./megaphone.svg?react";
 
