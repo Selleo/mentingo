@@ -631,6 +631,8 @@ export interface GetAllCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -660,6 +662,8 @@ export interface GetStudentCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
   }[];
@@ -704,6 +708,8 @@ export interface GetAvailableCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
   }[];
@@ -735,6 +741,8 @@ export interface GetContentCreatorCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
   }[];
@@ -787,6 +795,8 @@ export interface GetCourseResponse {
     priceInCents: number;
     thumbnailUrl?: string;
     title: string;
+    stripeProductId: string | null;
+    stripePriceId: string | null;
   };
 }
 
@@ -1730,6 +1740,164 @@ export interface JudgeThreadResponse {
   };
 }
 
+export interface GetAllAssignedDocumentsForLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    type: string;
+    size: number;
+  }[];
+}
+
+export interface CreatePaymentIntentResponse {
+  data: {
+    clientSecret: string;
+  };
+}
+
+export interface CreateCheckoutSessionBody {
+  amountInCents: number;
+  allowPromotionCode?: boolean;
+  quantity?: number;
+  productName: string;
+  productDescription?: string;
+  courseId: string;
+  customerId: string;
+  locale?: string;
+  priceId: string;
+}
+
+export interface CreateCheckoutSessionResponse {
+  data: {
+    clientSecret: string;
+  };
+}
+
+export interface GetPromotionCodesResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      maxRedemptions?: number | null;
+      metadata?: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+      appliesTo: string[];
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    maxRedemptions?: number | null;
+    metadata?: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  }[];
+}
+
+export interface GetPromotionCodeResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      maxRedemptions?: number | null;
+      metadata?: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+      appliesTo: string[];
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    maxRedemptions?: number | null;
+    metadata?: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  };
+}
+
+export interface CreatePromotionCouponBody {
+  code: string;
+  amountOff?: number;
+  percentOff?: number;
+  maxRedemptions?: number;
+  assignedStripeCourseIds?: string[];
+  currency?: string;
+  expiresAt?: string;
+  courseId?: string[];
+}
+
+export interface CreatePromotionCouponResponse {
+  data: string;
+}
+
+export interface UpdatePromotionCodeBody {
+  active?: boolean;
+}
+
+export interface UpdatePromotionCodeResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      maxRedemptions?: number | null;
+      metadata?: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+      appliesTo: string[];
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    maxRedemptions?: number | null;
+    metadata?: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  };
+}
+
 export interface GetAllGroupsResponse {
   data: {
     /** @format uuid */
@@ -1856,12 +2024,6 @@ export interface AssignUserToGroupResponse {
 export interface UnassignUserFromGroupResponse {
   data: {
     message: string;
-  };
-}
-
-export interface CreatePaymentIntentResponse {
-  data: {
-    clientSecret: string;
   };
 }
 
@@ -2886,10 +3048,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name SettingsControllerUpdatePlatformLogo
      * @request PATCH:/api/settings/platform-logo
      */
-    settingsControllerUpdatePlatformLogo: (params: RequestParams = {}) =>
+    settingsControllerUpdatePlatformLogo: (
+      data: {
+        /** @format binary */
+        logo: File;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<void, any>({
         path: `/api/settings/platform-logo`,
         method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
 
@@ -3980,6 +4150,180 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name IngestionControllerIngest
+     * @request POST:/api/ingestion/ingest
+     */
+    ingestionControllerIngest: (
+      data: {
+        /** @format uuid */
+        lessonId: string;
+        files: File[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/ingestion/ingest`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerGetAllAssignedDocumentsForLesson
+     * @request GET:/api/ingestion/{lessonId}
+     */
+    ingestionControllerGetAllAssignedDocumentsForLesson: (
+      lessonId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllAssignedDocumentsForLessonResponse, any>({
+        path: `/api/ingestion/${lessonId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerDeleteDocumentLink
+     * @request DELETE:/api/ingestion/{documentLinkId}
+     */
+    ingestionControllerDeleteDocumentLink: (documentLinkId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ingestion/${documentLinkId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerCreatePaymentIntent
+     * @request POST:/api/stripe
+     */
+    stripeControllerCreatePaymentIntent: (
+      query: {
+        amount: number;
+        currency: string;
+        customerId: string;
+        courseId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePaymentIntentResponse, any>({
+        path: `/api/stripe`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerCreateCheckoutSession
+     * @request POST:/api/stripe/checkout-session
+     */
+    stripeControllerCreateCheckoutSession: (
+      data: CreateCheckoutSessionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCheckoutSessionResponse, any>({
+        path: `/api/stripe/checkout-session`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeWebhookControllerHandleWebhook
+     * @request POST:/api/stripe/webhook
+     */
+    stripeWebhookControllerHandleWebhook: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/stripe/webhook`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerGetPromotionCodes
+     * @request GET:/api/stripe/promotion-codes
+     */
+    stripeControllerGetPromotionCodes: (params: RequestParams = {}) =>
+      this.request<GetPromotionCodesResponse, any>({
+        path: `/api/stripe/promotion-codes`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerGetPromotionCode
+     * @request GET:/api/stripe/promotion-code/{id}
+     */
+    stripeControllerGetPromotionCode: (id: string, params: RequestParams = {}) =>
+      this.request<GetPromotionCodeResponse, any>({
+        path: `/api/stripe/promotion-code/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerUpdatePromotionCode
+     * @request PATCH:/api/stripe/promotion-code/{id}
+     */
+    stripeControllerUpdatePromotionCode: (
+      id: string,
+      data: UpdatePromotionCodeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdatePromotionCodeResponse, any>({
+        path: `/api/stripe/promotion-code/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerCreatePromotionCoupon
+     * @request POST:/api/stripe/promotion-code
+     */
+    stripeControllerCreatePromotionCoupon: (
+      data: CreatePromotionCouponBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePromotionCouponResponse, any>({
+        path: `/api/stripe/promotion-code`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name GroupControllerGetAllGroups
      * @request GET:/api/group/all
      */
@@ -4149,42 +4493,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StripeControllerCreatePaymentIntent
-     * @request POST:/api/stripe
-     */
-    stripeControllerCreatePaymentIntent: (
-      query: {
-        amount: number;
-        currency: string;
-        customerId: string;
-        courseId: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<CreatePaymentIntentResponse, any>({
-        path: `/api/stripe`,
-        method: "POST",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StripeWebhookControllerHandleWebhook
-     * @request POST:/api/stripe/webhook
-     */
-    stripeWebhookControllerHandleWebhook: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/stripe/webhook`,
-        method: "POST",
         ...params,
       }),
 

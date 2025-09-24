@@ -1101,6 +1101,25 @@
       "patch": {
         "operationId": "SettingsController_updatePlatformLogo",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "logo"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -3043,6 +3062,293 @@
         }
       }
     },
+    "/api/ingestion/ingest": {
+      "post": {
+        "operationId": "IngestionController_ingest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lessonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                },
+                "required": [
+                  "lessonId",
+                  "files"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ingestion/{lessonId}": {
+      "get": {
+        "operationId": "IngestionController_getAllAssignedDocumentsForLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllAssignedDocumentsForLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ingestion/{documentLinkId}": {
+      "delete": {
+        "operationId": "IngestionController_deleteDocumentLink",
+        "parameters": [
+          {
+            "name": "documentLinkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/stripe": {
+      "post": {
+        "operationId": "StripeController_createPaymentIntent",
+        "parameters": [
+          {
+            "name": "amount",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "currency",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePaymentIntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stripe/checkout-session": {
+      "post": {
+        "operationId": "StripeController_createCheckoutSession",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCheckoutSessionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCheckoutSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stripe/webhook": {
+      "post": {
+        "operationId": "StripeWebhookController_handleWebhook",
+        "parameters": [
+          {
+            "name": "stripe-signature",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/stripe/promotion-codes": {
+      "get": {
+        "operationId": "StripeController_getPromotionCodes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPromotionCodesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stripe/promotion-code/{id}": {
+      "get": {
+        "operationId": "StripeController_getPromotionCode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPromotionCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "StripeController_updatePromotionCode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePromotionCodeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePromotionCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stripe/promotion-code": {
+      "post": {
+        "operationId": "StripeController_createPromotionCoupon",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePromotionCouponBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePromotionCouponResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/group/all": {
       "get": {
         "operationId": "GroupController_getAllGroups",
@@ -3359,76 +3665,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/stripe": {
-      "post": {
-        "operationId": "StripeController_createPaymentIntent",
-        "parameters": [
-          {
-            "name": "amount",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "currency",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "customerId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreatePaymentIntentResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stripe/webhook": {
-      "post": {
-        "operationId": "StripeWebhookController_handleWebhook",
-        "parameters": [
-          {
-            "name": "stripe-signature",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
           }
         }
       }
@@ -6247,6 +6483,26 @@
                 },
                 "hasFreeChapters": {
                   "type": "boolean"
+                },
+                "stripeProductId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stripePriceId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -6379,6 +6635,26 @@
                 },
                 "hasFreeChapters": {
                   "type": "boolean"
+                },
+                "stripeProductId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stripePriceId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "completedChapterCount": {
                   "type": "number"
@@ -6588,6 +6864,26 @@
                 "hasFreeChapters": {
                   "type": "boolean"
                 },
+                "stripeProductId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stripePriceId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "completedChapterCount": {
                   "type": "number"
                 },
@@ -6726,6 +7022,26 @@
                 },
                 "hasFreeChapters": {
                   "type": "boolean"
+                },
+                "stripeProductId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stripePriceId": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "completedChapterCount": {
                   "type": "number"
@@ -6981,6 +7297,26 @@
               },
               "title": {
                 "type": "string"
+              },
+              "stripeProductId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stripePriceId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6992,7 +7328,9 @@
               "id",
               "status",
               "priceInCents",
-              "title"
+              "title",
+              "stripeProductId",
+              "stripePriceId"
             ]
           }
         },
@@ -11328,6 +11666,815 @@
           "data"
         ]
       },
+      "GetAllAssignedDocumentsForLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "type",
+                "size"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreatePaymentIntentResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "clientSecret": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "clientSecret"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateCheckoutSessionBody": {
+        "type": "object",
+        "properties": {
+          "amountInCents": {
+            "type": "number"
+          },
+          "allowPromotionCode": {
+            "type": "boolean"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "productDescription": {
+            "type": "string"
+          },
+          "courseId": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "priceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amountInCents",
+          "productName",
+          "courseId",
+          "customerId",
+          "priceId"
+        ]
+      },
+      "CreateCheckoutSessionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "clientSecret": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "clientSecret"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPromotionCodesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "active": {
+                  "type": "boolean"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "coupon": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amountOff": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "percentOff": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created": {
+                      "type": "number"
+                    },
+                    "currency": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "duration": {
+                      "type": "string"
+                    },
+                    "durationInMonths": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "maxRedemptions": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "metadata": {
+                      "additionalProperties": true,
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "redeemBy": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "timesRedeemed": {
+                      "type": "number"
+                    },
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "appliesTo": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "created",
+                    "duration",
+                    "timesRedeemed",
+                    "valid",
+                    "appliesTo"
+                  ]
+                },
+                "created": {
+                  "type": "number"
+                },
+                "customer": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "expiresAt": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "maxRedemptions": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "metadata": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "properties": {}
+                },
+                "restrictions": {
+                  "type": "object",
+                  "properties": {
+                    "firstTimeTransaction": {
+                      "type": "boolean"
+                    },
+                    "minimumAmount": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "minimumAmountCurrency": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "firstTimeTransaction"
+                  ]
+                },
+                "timesRedeemed": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "active",
+                "code",
+                "coupon",
+                "created",
+                "restrictions",
+                "timesRedeemed"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPromotionCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "code": {
+                "type": "string"
+              },
+              "coupon": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "amountOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "percentOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "created": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "duration": {
+                    "type": "string"
+                  },
+                  "durationInMonths": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maxRedemptions": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "additionalProperties": true,
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "redeemBy": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "timesRedeemed": {
+                    "type": "number"
+                  },
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "appliesTo": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "created",
+                  "duration",
+                  "timesRedeemed",
+                  "valid",
+                  "appliesTo"
+                ]
+              },
+              "created": {
+                "type": "number"
+              },
+              "customer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "expiresAt": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxRedemptions": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "metadata": {
+                "additionalProperties": true,
+                "type": "object",
+                "properties": {}
+              },
+              "restrictions": {
+                "type": "object",
+                "properties": {
+                  "firstTimeTransaction": {
+                    "type": "boolean"
+                  },
+                  "minimumAmount": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "minimumAmountCurrency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "firstTimeTransaction"
+                ]
+              },
+              "timesRedeemed": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "active",
+              "code",
+              "coupon",
+              "created",
+              "restrictions",
+              "timesRedeemed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreatePromotionCouponBody": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "amountOff": {
+            "type": "integer"
+          },
+          "percentOff": {
+            "type": "integer"
+          },
+          "maxRedemptions": {
+            "type": "integer"
+          },
+          "assignedStripeCourseIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currency": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "courseId": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "CreatePromotionCouponResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdatePromotionCodeBody": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdatePromotionCodeResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "code": {
+                "type": "string"
+              },
+              "coupon": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "amountOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "percentOff": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "created": {
+                    "type": "number"
+                  },
+                  "currency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "duration": {
+                    "type": "string"
+                  },
+                  "durationInMonths": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "maxRedemptions": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "additionalProperties": true,
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "redeemBy": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "timesRedeemed": {
+                    "type": "number"
+                  },
+                  "valid": {
+                    "type": "boolean"
+                  },
+                  "appliesTo": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "created",
+                  "duration",
+                  "timesRedeemed",
+                  "valid",
+                  "appliesTo"
+                ]
+              },
+              "created": {
+                "type": "number"
+              },
+              "customer": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "expiresAt": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "maxRedemptions": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "metadata": {
+                "additionalProperties": true,
+                "type": "object",
+                "properties": {}
+              },
+              "restrictions": {
+                "type": "object",
+                "properties": {
+                  "firstTimeTransaction": {
+                    "type": "boolean"
+                  },
+                  "minimumAmount": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "minimumAmountCurrency": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "firstTimeTransaction"
+                ]
+              },
+              "timesRedeemed": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "active",
+              "code",
+              "coupon",
+              "created",
+              "restrictions",
+              "timesRedeemed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetAllGroupsResponse": {
         "type": "object",
         "properties": {
@@ -11818,25 +12965,6 @@
             },
             "required": [
               "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CreatePaymentIntentResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "clientSecret": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "clientSecret"
             ]
           }
         },

@@ -24,6 +24,9 @@ const config: PlaywrightTestConfig = {
   use: {
     baseURL,
     ignoreHTTPSErrors: true,
+    extraHTTPHeaders: {
+      "x-playwright-test": "true",
+    },
     launchOptions: {
       args: [
         "--ignore-certificate-errors",

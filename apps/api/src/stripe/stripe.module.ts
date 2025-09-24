@@ -1,5 +1,5 @@
 import { StripeModule as StripeModuleConfig, StripeWebhookService } from "@golevelup/nestjs-stripe";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { CourseModule } from "src/courses/course.module";
@@ -36,10 +36,10 @@ import { StripeWebhookHandler } from "./stripeWebhook.handler";
         };
       },
     }),
-    CourseModule,
+    forwardRef(() => CourseModule),
   ],
   controllers: [StripeController],
   providers: [StripeService, StripeWebhookHandler, StripeWebhookService],
-  exports: [],
+  exports: [StripeService],
 })
 export class StripeModule {}
