@@ -1,6 +1,50 @@
-<a name="learn-v2025.09.16"></a>
+<a name="v3.5.0"></a>
 
-## [learn-v2025.09.16] - 01.01.0001
+## [v3.5.0] - 24.09.2025
+
+### Bug Fixes:
+
+- first chapter opens on order change ([#665](https://github.com/Selleo/mentingo/issues/665))
+
+- user being logged out after short period of time ([#676](https://github.com/Selleo/mentingo/issues/676))
+
+- app crash on /courses url enter ([#666](https://github.com/Selleo/mentingo/issues/666))
+
+- dnd item moving back when refetching current display order ([#657](https://github.com/Selleo/mentingo/issues/657))
+
+- enrolling to course on successful payment ([#655](https://github.com/Selleo/mentingo/issues/655))
+
+- Downloading certificates in PDF ([#653](https://github.com/Selleo/mentingo/issues/653))
+
+- Incorrect behavior when combining SSO with MFA login ([#647](https://github.com/Selleo/mentingo/issues/647))
+
+### Chores:
+
+- delete no new announcement popup ([#662](https://github.com/Selleo/mentingo/issues/662))
+
+- adjust makefile release for tag releases ([#642](https://github.com/Selleo/mentingo/issues/642))
+
+### Documentation:
+
+- update changelog for version learn-v2025.09.16
+
+### Features:
+
+- allow admin to change currency of course price ([#659](https://github.com/Selleo/mentingo/issues/659))
+
+- users import from excel files ([#650](https://github.com/Selleo/mentingo/issues/650))
+
+- added rag infrastracture with variable document removal and integration with ai mentor ([#670](https://github.com/Selleo/mentingo/issues/670))
+
+- enhance course description handling with rich text ([#671](https://github.com/Selleo/mentingo/issues/671))
+
+- add promo codes ([#649](https://github.com/Selleo/mentingo/issues/649))
+
+- implement platform logo upload functionality ([#578](https://github.com/Selleo/mentingo/issues/578))
+
+- add workflows for demo ([#652](https://github.com/Selleo/mentingo/issues/652))
+
+- add announcements ([#637](https://github.com/Selleo/mentingo/issues/637))
 
 <a name="v3.4.0"></a>
 
@@ -1402,8 +1446,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/learn-v2025.09.16...HEAD
-[learn-v2025.09.16]: https://github.com/Selleo/mentingo/compare/v3.4.0...learn-v2025.09.16
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.5.0...HEAD
+[v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
 [v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
 [v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
