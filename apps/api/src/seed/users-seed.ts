@@ -28,17 +28,17 @@ export const admin: UsersSeed = [
   },
 ];
 
-export const teachers: UsersSeed = [
+export const contentCreators: UsersSeed = [
   {
-    role: USER_ROLES.TEACHER,
-    email: "teacher@example.com",
+    role: USER_ROLES.CONTENT_CREATOR,
+    email: "contentcreator@example.com",
     firstName: faker.person.firstName(),
-    lastName: "Teacher",
+    lastName: "Content Creator",
   },
   {
-    role: USER_ROLES.TEACHER,
-    email: "teacher2@example.com",
+    role: USER_ROLES.CONTENT_CREATOR,
+    email: "contentcreator2@example.com",
     firstName: faker.person.firstName(),
-    lastName: "Teacher",
+    lastName: "Content Creator 2",
   },
 ];

@@ -1,12 +1,18 @@
 import { faker } from "@faker-js/faker";
 import { format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, count, eq, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import {
+  DEFAULT_GLOBAL_SETTINGS,
+  DEFAULT_ADMIN_SETTINGS,
+  DEFAULT_STUDENT_SETTINGS,
+} from "src/settings/constants/settings.constants";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -18,6 +24,7 @@ import {
   lessons,
   questions,
   quizAttempts,
+  settings,
   studentCourses,
   studentLessonProgress,
   userDetails,
@@ -28,7 +35,7 @@ import { USER_ROLES } from "../user/schemas/userRoles";
 import { e2eCourses } from "./e2e-data-seeds";
 import { niceCourses } from "./nice-data-seeds";
 import { createNiceCourses, seedTruncateAllTables } from "./seed-helpers";
-import { admin, students, teachers } from "./users-seed";
+import { admin, contentCreators, students } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
 import type { DatabasePg, UUIDType } from "../common";
@@ -58,6 +65,8 @@ async function createUsers(users: UsersSeed, password = faker.internet.password(
 
       const user = await createOrFindUser(userToCreate.email, password, userToCreate);
 
+      await insertUserSettings(db, user.id, user.role === USER_ROLES.ADMIN);
+
       return user;
     }),
   );
@@ -71,7 +80,7 @@ async function createOrFindUser(email: string, password: string, userData: any) 
 
   await insertCredential(newUser.id, password);
 
-  if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.TEACHER)
+  if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.CONTENT_CREATOR)
     await insertUserDetails(newUser.id);
 
   return newUser;
@@ -96,6 +105,40 @@ async function insertUserDetails(userId: UUIDType) {
     contactPhoneNumber: faker.phone.number(),
     jobTitle: faker.person.jobTitle(),
   });
+}
+
+export async function insertGlobalSettings(database: DatabasePg) {
+  const [globalSettings] = await database.select().from(settings).where(isNull(settings.userId));
+  if (globalSettings) return globalSettings;
+
+  const [createdGlobalSettings] = await database
+    .insert(settings)
+    .values({
+      settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+    })
+    .returning();
+
+  return createdGlobalSettings;
+}
+
+export async function insertUserSettings(database: DatabasePg, userId: UUIDType, isAdmin: boolean) {
+  const [existingUserSettings] = await database
+    .select()
+    .from(settings)
+    .where(eq(settings.userId, userId));
+
+  if (existingUserSettings) return existingUserSettings;
+
+  const settingsObject = isAdmin ? DEFAULT_ADMIN_SETTINGS : DEFAULT_STUDENT_SETTINGS;
+  const [createdUserSettings] = await database
+    .insert(settings)
+    .values({
+      userId,
+      settings: settingsToJSONBuildObject(settingsObject),
+    })
+    .returning();
+
+  return createdUserSettings;
 }
 
 async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
@@ -143,6 +186,8 @@ async function createLessonProgress(userId: UUIDType) {
       createdAt: courseLesson.createdAt,
       updatedAt: courseLesson.createdAt,
       quizScore: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 0 : null,
+      attempts: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 1 : null,
+      isQuizPassed: courseLesson.lessonType === LESSON_TYPES.QUIZ ? false : null,
     };
   });
 
@@ -170,7 +215,7 @@ async function createQuizAttempts(userId: UUIDType) {
     .innerJoin(chapters, eq(courses.id, chapters.courseId))
     .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
     .innerJoin(questions, eq(questions.lessonId, lessons.id))
-    .where(and(eq(courses.isPublished, true), eq(lessons.type, LESSON_TYPES.QUIZ)))
+    .where(and(eq(courses.status, "published"), eq(lessons.type, LESSON_TYPES.QUIZ)))
     .groupBy(courses.id, lessons.id);
 
   const createdQuizAttempts = quizzes.map((quiz) => {
@@ -208,7 +253,7 @@ async function createCourseStudentsStats() {
       authorId: courses.authorId,
     })
     .from(courses)
-    .where(eq(courses.isPublished, true));
+    .where(eq(courses.status, "published"));
 
   const twelveMonthsAgoArray = getLast12Months();
 
@@ -229,9 +274,12 @@ async function seed() {
   await seedTruncateAllTables(db);
 
   try {
+    await insertGlobalSettings(db);
+    console.log("✨ Created global settings");
+
     const createdStudents = await createUsers(students, "password");
     const [createdAdmin] = await createUsers(admin, "password");
-    const createdTeachers = await createUsers(teachers, "password");
+    const createdContentCreators = await createUsers(contentCreators, "password");
     await createUsers(
       [
         {
@@ -245,11 +293,14 @@ async function seed() {
     );
 
     const createdStudentIds = createdStudents.map((student) => student.id);
-    const creatorCourseIds = [createdAdmin.id, ...createdTeachers.map((teacher) => teacher.id)];
+    const creatorCourseIds = [
+      createdAdmin.id,
+      ...createdContentCreators.map((contentCreator) => contentCreator.id),
+    ];
 
     console.log("Created or found admin user:", createdAdmin);
     console.log("Created or found students user:", createdStudents);
-    console.log("Created or found teachers user:", createdTeachers);
+    console.log("Created or found content creators user:", createdContentCreators);
 
     const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses);
     console.log("✨✨✨Created created nice courses✨✨✨");

@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
 import {
@@ -28,8 +29,12 @@ import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
+import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
+import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
+import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
@@ -38,6 +43,8 @@ import {
   chapters,
   courses,
   coursesSummaryStats,
+  groups,
+  groupUsers,
   lessons,
   questions,
   quizAttempts,
@@ -60,7 +67,7 @@ import {
 } from "./schemas/courseQuery";
 
 import type {
-  AllCoursesForTeacherResponse,
+  AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
 } from "./schemas/course.schema";
@@ -78,6 +85,7 @@ import type {
 import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
+import type Stripe from "stripe";
 
 @Injectable()
 export class CourseService {
@@ -87,6 +95,9 @@ export class CourseService {
     private readonly fileService: FileService,
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
+    private readonly userService: UserService,
+    private readonly settingsService: SettingsService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -106,7 +117,7 @@ export class CourseService {
 
     const conditions = this.getFiltersConditions(filters, false);
 
-    if (currentUserRole === USER_ROLES.TEACHER && currentUserId) {
+    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
       conditions.push(eq(courses.authorId, currentUserId));
     }
 
@@ -117,13 +128,16 @@ export class CourseService {
         description: sql<string>`${courses.description}`,
         thumbnailUrl: courses.thumbnailS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+        authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
         enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
         courseChapterCount: courses.chapterCount,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
-        isPublished: courses.isPublished,
+        status: courses.status,
         createdAt: courses.createdAt,
+        stripeProductId: courses.stripeProductId,
+        stripePriceId: courses.stripePriceId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -137,10 +151,11 @@ export class CourseService {
         courses.thumbnailS3Key,
         users.firstName,
         users.lastName,
+        users.avatarReference,
         categories.title,
         courses.priceInCents,
         courses.currency,
-        courses.isPublished,
+        courses.status,
         coursesSummaryStats.freePurchasedCount,
         coursesSummaryStats.paidPurchasedCount,
         courses.createdAt,
@@ -157,7 +172,10 @@ export class CourseService {
 
         try {
           const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-          return { ...item, thumbnailUrl: signedUrl };
+          const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+            item.authorAvatarUrl,
+          );
+          return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
         } catch (error) {
           console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
           return item;
@@ -197,8 +215,11 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     return this.db.transaction(async (trx) => {
-      const conditions = [eq(studentCourses.studentId, userId), eq(courses.isPublished, true)];
-      conditions.push(...this.getFiltersConditions(filters));
+      const conditions = [
+        eq(studentCourses.studentId, userId),
+        or(eq(courses.status, "published"), eq(courses.status, "private")),
+      ];
+      conditions.push(...this.getFiltersConditions(filters, false));
 
       const queryDB = trx
         .select(this.getSelectField())
@@ -217,6 +238,7 @@ export class CourseService {
           users.firstName,
           users.lastName,
           users.email,
+          users.avatarReference,
           studentCourses.studentId,
           categories.title,
           coursesSummaryStats.freePurchasedCount,
@@ -242,7 +264,10 @@ export class CourseService {
 
           try {
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            return { ...item, thumbnailUrl: signedUrl };
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              item.authorAvatarUrl,
+            );
+            return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -290,12 +315,16 @@ export class CourseService {
         email: users.email,
         id: users.id,
         enrolledAt: studentCourses.createdAt,
+        groupId: groups.id,
+        groupName: groups.name,
       })
       .from(users)
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
       )
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT)))
       .orderBy(sortOrder(studentCourses.createdAt));
 
@@ -324,7 +353,7 @@ export class CourseService {
         query.excludeCourseId,
       );
 
-      const conditions = [eq(courses.isPublished, true)];
+      const conditions = [eq(courses.status, "published")];
       conditions.push(...this.getFiltersConditions(filters));
 
       if (availableCourseIds.length > 0) {
@@ -340,6 +369,7 @@ export class CourseService {
           authorId: sql<string>`${courses.authorId}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
+          authorAvatarUrl: sql<string>`${users.avatarReference}`,
           category: sql<string>`${categories.title}`,
           enrolled: sql<boolean>`FALSE`,
           enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
@@ -370,6 +400,7 @@ export class CourseService {
           users.firstName,
           users.lastName,
           users.email,
+          users.avatarReference,
           categories.title,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
@@ -389,9 +420,17 @@ export class CourseService {
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
           try {
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
-            return { ...item, thumbnailUrl: signedUrl };
+            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+
+            return {
+              ...itemWithoutReferences,
+              thumbnailUrl: signedUrl,
+              authorAvatarUrl: authorAvatarSignedUrl,
+            };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
@@ -426,11 +465,12 @@ export class CourseService {
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
-        isPublished: courses.isPublished,
+        status: courses.status,
         isScorm: courses.isScorm,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
+        hasCertificate: courses.hasCertificate,
         hasFreeChapter: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -438,6 +478,8 @@ export class CourseService {
             WHERE ${chapters.courseId} = ${courses.id}
               AND ${chapters.isFreemium} = TRUE
           )`,
+        stripeProductId: courses.stripeProductId,
+        stripePriceId: courses.stripePriceId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -447,7 +489,12 @@ export class CourseService {
       )
       .where(eq(courses.id, id));
 
+    const isEnrolled = !!course.enrolled;
+    const NON_PUBLIC_STATUSES = ["draft", "private"];
+
     if (!course) throw new NotFoundException("Course not found");
+    if (NON_PUBLIC_STATUSES.includes(course.status) && !isEnrolled)
+      throw new ForbiddenException("You have no access to this course");
 
     const courseChapterList = await this.db
       .select({
@@ -472,8 +519,13 @@ export class CourseService {
         chapterProgress: sql<ProgressStatus>`
           CASE
             WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
-            WHEN ${studentChapterProgress.completedAt} IS NULL
-              AND ${studentChapterProgress.completedLessonCount} > 0 THEN ${PROGRESS_STATUSES.IN_PROGRESS}
+            WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
+              SELECT 1
+              FROM ${studentLessonProgress}
+              WHERE ${studentLessonProgress.chapterId} = ${chapters.id}
+                AND ${studentLessonProgress.studentId} = ${userId}
+                AND ${studentLessonProgress.isStarted} = TRUE
+            ) THEN ${PROGRESS_STATUSES.IN_PROGRESS}
             ELSE ${PROGRESS_STATUSES.NOT_STARTED}
           END
         `,
@@ -491,9 +543,10 @@ export class CourseService {
                   ${lessons.displayOrder} AS "displayOrder",
                   ${lessons.isExternal} AS "isExternal",
                   CASE
+                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${PROGRESS_STATUSES.BLOCKED}
                     WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN  ${PROGRESS_STATUSES.COMPLETED}
                     WHEN ${studentLessonProgress.completedAt} IS NULL
-                      AND ${studentLessonProgress.completedQuestionCount} > 0 THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
+                      AND ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
                   CASE
@@ -511,7 +564,9 @@ export class CourseService {
                   ${lessons.displayOrder},
                   ${lessons.title},
                   ${studentLessonProgress.completedAt},
-                  ${studentLessonProgress.completedQuestionCount}
+                  ${studentLessonProgress.completedQuestionCount},
+                  ${studentLessonProgress.isStarted},
+                  ${chapters.isFreemium}
                 ORDER BY ${lessons.displayOrder}
               ) AS lesson_data
             ),
@@ -539,7 +594,7 @@ export class CourseService {
     };
   }
 
-  async getBetaCourseById(id: UUIDType) {
+  async getBetaCourseById(id: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -549,15 +604,21 @@ export class CourseService {
         categoryId: categories.id,
         description: sql<string>`${courses.description}`,
         courseChapterCount: courses.chapterCount,
-        isPublished: courses.isPublished,
+        status: courses.status,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
+        authorId: courses.authorId,
+        hasCertificate: courses.hasCertificate,
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
       .where(and(eq(courses.id, id)));
 
     if (!course) throw new NotFoundException("Course not found");
+
+    if (currentUserRole !== USER_ROLES.ADMIN && course.authorId !== currentUserId) {
+      throw new ForbiddenException("You do not have permission to edit this course");
+    }
 
     const courseChapterList = await this.db
       .select({
@@ -607,7 +668,7 @@ export class CourseService {
     };
   }
 
-  async getTeacherCourses({
+  async getContentCreatorCourses({
     currentUserId,
     authorId,
     scope,
@@ -617,8 +678,8 @@ export class CourseService {
     authorId: UUIDType;
     scope: CourseEnrollmentScope;
     excludeCourseId?: UUIDType;
-  }): Promise<AllCoursesForTeacherResponse> {
-    const conditions = [eq(courses.isPublished, true), eq(courses.authorId, authorId)];
+  }): Promise<AllCoursesForContentCreatorResponse> {
+    const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
     if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
       conditions.push(eq(studentCourses.studentId, currentUserId));
@@ -637,7 +698,7 @@ export class CourseService {
       conditions.push(inArray(courses.id, availableCourseIds));
     }
 
-    const teacherCourses = await this.db
+    const contentCreatorCourses = await this.db
       .select({
         id: courses.id,
         description: sql<string>`${courses.description}`,
@@ -646,6 +707,7 @@ export class CourseService {
         authorId: sql<string>`${courses.authorId}`,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorEmail: sql<string>`${users.email}`,
+        authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN true ELSE false END`,
         enrolledParticipantCount: sql<number>`0`,
@@ -678,6 +740,7 @@ export class CourseService {
         users.firstName,
         users.lastName,
         users.email,
+        users.avatarReference,
         studentCourses.studentId,
         categories.title,
       )
@@ -687,16 +750,48 @@ export class CourseService {
       );
 
     return await Promise.all(
-      teacherCourses.map(async (course) => ({
-        ...course,
-        thumbnailUrl: course.thumbnailUrl
-          ? await this.fileService.getFileUrl(course.thumbnailUrl)
-          : course.thumbnailUrl,
-      })),
+      contentCreatorCourses.map(async (course) => {
+        const { authorAvatarUrl, ...courseWithoutReferences } = course;
+
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+
+        return {
+          ...courseWithoutReferences,
+          thumbnailUrl: course.thumbnailUrl
+            ? await this.fileService.getFileUrl(course.thumbnailUrl)
+            : course.thumbnailUrl,
+          authorAvatarUrl: authorAvatarSignedUrl,
+        };
+      }),
     );
   }
 
-  async createCourse(createCourseBody: CreateCourseBody, authorId: UUIDType) {
+  async updateHasCertificate(courseId: UUIDType, hasCertificate: boolean) {
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const [updatedCourse] = await this.db
+      .update(courses)
+      .set({ hasCertificate })
+      .where(eq(courses.id, courseId))
+      .returning();
+
+    if (!updatedCourse) {
+      throw new ConflictException("Failed to update course");
+    }
+
+    return updatedCourse;
+  }
+
+  async createCourse(
+    createCourseBody: CreateCourseBody,
+    authorId: UUIDType,
+    isPlaywrightTest: boolean,
+  ) {
     return this.db.transaction(async (trx) => {
       const [category] = await trx
         .select()
@@ -706,6 +801,28 @@ export class CourseService {
       if (!category) {
         throw new NotFoundException("Category not found");
       }
+      const globalSettings = await this.settingsService.getGlobalSettings();
+
+      const finalCurrency = globalSettings.defaultCourseCurrency || "usd";
+
+      let productId: string | null = null;
+      let priceId: string | null = null;
+
+      if (!isPlaywrightTest) {
+        const stripeResult = await this.stripeService.createProduct({
+          name: createCourseBody.title,
+          description: createCourseBody?.description ?? "",
+          currency: finalCurrency,
+          amountInCents: createCourseBody?.priceInCents ?? 0,
+        });
+
+        productId = stripeResult.productId;
+        priceId = stripeResult.priceId;
+
+        if (!productId || !priceId) {
+          throw new InternalServerErrorException("Failed to create product");
+        }
+      }
 
       const [newCourse] = await trx
         .insert(courses)
@@ -713,12 +830,14 @@ export class CourseService {
           title: createCourseBody.title,
           description: createCourseBody.description,
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
-          isPublished: createCourseBody.isPublished,
+          status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
-          currency: createCourseBody.currency || "usd",
+          currency: finalCurrency,
           isScorm: createCourseBody.isScorm,
           authorId,
           categoryId: createCourseBody.categoryId,
+          stripeProductId: productId,
+          stripePriceId: priceId,
         })
         .returning();
 
@@ -735,8 +854,10 @@ export class CourseService {
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+    isPlaywrightTest: boolean,
     image?: Express.Multer.File,
-    currentUserId?: UUIDType,
   ) {
     return this.db.transaction(async (trx) => {
       const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
@@ -745,7 +866,7 @@ export class CourseService {
         throw new NotFoundException("Course not found");
       }
 
-      if (existingCourse.authorId !== currentUserId) {
+      if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
         throw new ForbiddenException("You don't have permission to update course");
       }
 
@@ -787,6 +908,64 @@ export class CourseService {
         throw new ConflictException("Failed to update course");
       }
 
+      if (!isPlaywrightTest) {
+        // --- create stripe product if it doesn't exist yet ---
+        if (!updatedCourse.stripeProductId) {
+          const { productId, priceId } = await this.stripeService.createProduct({
+            name: updatedCourse.title,
+            description: updatedCourse.description ?? "",
+            amountInCents: updatedCourse.priceInCents ?? 0,
+            currency: updatedCourse.currency ?? "usd",
+          });
+
+          await trx
+            .update(courses)
+            .set({
+              stripeProductId: productId,
+              stripePriceId: priceId,
+            })
+            .where(eq(courses.id, id));
+        } else {
+          // --- stripe product update ---
+          const productUpdatePayload = {
+            ...(updateCourseBody.title && { name: updateCourseBody.title }),
+            ...(updateCourseBody.description && { description: updateCourseBody.description }),
+          };
+
+          if (hasDataToUpdate(productUpdatePayload)) {
+            await this.stripeService.updateProduct(
+              updatedCourse.stripeProductId,
+              productUpdatePayload,
+            );
+          }
+
+          // --- stripe price update ---
+          const hasPriceUpdate =
+            updateCourseBody.priceInCents !== undefined || updateCourseBody.currency !== undefined;
+
+          if (updatedCourse.stripePriceId && hasPriceUpdate) {
+            const pricePayload: Stripe.PriceCreateParams = {
+              product: updatedCourse.stripeProductId,
+              currency: updateCourseBody.currency ?? "usd",
+              ...(updateCourseBody.priceInCents !== undefined && {
+                unit_amount: updateCourseBody.priceInCents,
+              }),
+            };
+
+            const newStripePrice = await this.stripeService.createPrice(pricePayload);
+
+            if (newStripePrice.id) {
+              await this.stripeService.updatePrice(updatedCourse.stripePriceId, { active: false });
+
+              await trx
+                .update(courses)
+                .set({ stripePriceId: newStripePrice.id })
+                .where(eq(courses.id, id));
+            }
+          }
+        }
+      }
+
       return updatedCourse;
     });
   }
@@ -808,13 +987,6 @@ export class CourseService {
     if (!course) throw new NotFoundException("Course not found");
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
-
-    /*
-      For Playwright tests to bypass Stripe payment
-      Front-end interfaces, such as Stripe Checkout or the Payment Element, have security measures in place that prevent automated testing, and Stripe APIs are rate limited.
-   */
-    const isTest = testKey && testKey === process.env.TEST_KEY;
-    if (!isTest && Boolean(course.price)) throw new ForbiddenException();
 
     this.db.transaction(async (trx) => {
       await this.createStudentCourse(id, studentId);
@@ -952,11 +1124,11 @@ export class CourseService {
       throw new NotFoundException("Course not found");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.TEACHER) {
+    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
-    if (course.isPublished) {
+    if (course.status === "published") {
       throw new ForbiddenException("You can't delete a published course");
     }
 
@@ -981,13 +1153,13 @@ export class CourseService {
       throw new BadRequestException("No course ids provided");
     }
 
-    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.TEACHER) {
+    if (currentUserRole !== USER_ROLES.ADMIN && currentUserRole !== USER_ROLES.CONTENT_CREATOR) {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
     const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
 
-    if (course.some((course) => course.isPublished)) {
+    if (course.some((course) => course.status === "published")) {
       throw new ForbiddenException("You can't delete a published course");
     }
 
@@ -1154,6 +1326,7 @@ export class CourseService {
       authorId: sql<string>`${courses.authorId}`,
       author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
       authorEmail: sql<string>`${users.email}`,
+      authorAvatarUrl: sql<string>`${users.avatarReference}`,
       category: sql<string>`${categories.title}`,
       enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
       enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
@@ -1190,12 +1363,12 @@ export class CourseService {
 
       conditions.push(between(courses.createdAt, start, end));
     }
-    if (filters.isPublished) {
-      conditions.push(eq(courses.isPublished, filters.isPublished));
+    if (filters.status) {
+      conditions.push(eq(courses.status, filters.status));
     }
 
     if (publishedOnly) {
-      conditions.push(eq(courses.isPublished, true));
+      conditions.push(eq(courses.status, "published"));
     }
 
     return conditions ?? undefined;

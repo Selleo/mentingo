@@ -151,7 +151,7 @@ const TrueOrFalseQuestion = ({ form, questionIndex }: TrueOrFalseQuestionProps) 
                               name={`questions.${questionIndex}.options.${index}.isCorrect`}
                               checked={item.isCorrect === true}
                               onChange={() => handleOptionChange(index, "isCorrect", true)}
-                              className="h-4 w-4 cursor-pointer p-1"
+                              className="size-4 cursor-pointer p-1"
                             />
                             <Label
                               className="body-base ml-2 cursor-pointer text-neutral-900"
@@ -164,7 +164,7 @@ const TrueOrFalseQuestion = ({ form, questionIndex }: TrueOrFalseQuestionProps) 
                               name={`questions.${questionIndex}.options.${index}.isCorrect`}
                               checked={item.isCorrect === false}
                               onChange={() => handleOptionChange(index, "isCorrect", false)}
-                              className="ml-3 h-4 w-4 cursor-pointer p-1"
+                              className="ml-3 size-4 cursor-pointer p-1"
                             />
                             <Label
                               className="body-base ml-2 cursor-pointer text-neutral-900"
@@ -179,7 +179,7 @@ const TrueOrFalseQuestion = ({ form, questionIndex }: TrueOrFalseQuestionProps) 
                                   <div className="group">
                                     <Icon
                                       name="TrashIcon"
-                                      className="ml-3 h-7 w-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                      className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
                                       onClick={() => handleRemoveOption(index)}
                                     />
                                   </div>

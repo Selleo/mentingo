@@ -21,7 +21,7 @@ describe("PriceInput", () => {
 
   it("displays initial value correctly", () => {
     render(<PriceInput {...defaultProps} value={1050} />);
-    expect(screen.getByLabelText("Price input")).toHaveValue("10.50");
+    expect(screen.getByLabelText("Price input")).toHaveValue("10.5");
   });
 
   it("displays currency when provided", () => {

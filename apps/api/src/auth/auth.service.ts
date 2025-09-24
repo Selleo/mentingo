@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { EventBus } from "@nestjs/cqrs";
 import { JwtService } from "@nestjs/jwt";
 import {
   CreatePasswordReminderEmail,
@@ -15,21 +16,31 @@ import {
   WelcomeEmail,
 } from "@repo/email-templates";
 import * as bcrypt from "bcryptjs";
-import { and, eq, isNull, lte, sql } from "drizzle-orm";
+import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { authenticator } from "otplib";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import hashPassword from "src/common/helpers/hashPassword";
+import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
+import { UserRegisteredEvent } from "src/events/user/user-registered.event";
+import { SettingsService } from "src/settings/settings.service";
+import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { createTokens, credentials, resetTokens, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
+import { TokenService } from "./token.service";
 
+import type { Response } from "express";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { UserResponse } from "src/user/schemas/user.schema";
+import type { GoogleUserType } from "src/utils/types/google-user.type";
+import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Injectable()
 export class AuthService {
@@ -41,6 +52,9 @@ export class AuthService {
     private emailService: EmailService,
     private createPasswordService: CreatePasswordService,
     private resetPasswordService: ResetPasswordService,
+    private settingsService: SettingsService,
+    private eventBus: EventBus,
+    private tokenService: TokenService,
   ) {}
 
   public async register({
@@ -55,7 +69,6 @@ export class AuthService {
     password: string;
   }) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.email, email));
-
     if (existingUser) {
       throw new ConflictException("User already exists");
     }
@@ -63,12 +76,32 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     return this.db.transaction(async (trx) => {
-      const [newUser] = await trx.insert(users).values({ email, firstName, lastName }).returning();
+      const [newUser] = await trx
+        .insert(users)
+        .values({
+          email,
+          firstName,
+          lastName,
+        })
+        .returning();
 
-      await trx.insert(credentials).values({ userId: newUser.id, password: hashedPassword });
+      await trx.insert(credentials).values({
+        userId: newUser.id,
+        password: hashedPassword,
+      });
+
+      await this.settingsService.createSettingsIfNotExists(
+        newUser.id,
+        newUser.role as UserRole,
+        undefined,
+        trx,
+      );
+
+      const { avatarReference, ...userWithoutAvatar } = newUser;
+      const usersProfilePictureUrl =
+        await this.userService.getUsersProfilePictureUrl(avatarReference);
 
       const emailTemplate = new WelcomeEmail({ email, name: email });
-
       await this.emailService.sendEmail({
         to: email,
         subject: "Welcome to our platform",
@@ -77,11 +110,13 @@ export class AuthService {
         from: process.env.SES_EMAIL || "",
       });
 
-      return newUser;
+      this.eventBus.publish(new UserRegisteredEvent(newUser));
+
+      return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
     });
   }
 
-  public async login(data: { email: string; password: string }) {
+  public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
     const user = await this.validateUser(data.email, data.password);
     if (!user) {
       throw new UnauthorizedException("Invalid email or password");
@@ -89,10 +124,31 @@ export class AuthService {
 
     const { accessToken, refreshToken } = await this.getTokens(user);
 
+    const { avatarReference, ...userWithoutAvatar } = user;
+    const usersProfilePictureUrl =
+      await this.userService.getUsersProfilePictureUrl(avatarReference);
+
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+
+    if (
+      MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
+      userSettings.isMFAEnabled
+    ) {
+      return {
+        ...userWithoutAvatar,
+        profilePictureUrl: usersProfilePictureUrl,
+        accessToken,
+        refreshToken,
+        shouldVerifyMFA: true,
+      };
+    }
+
     return {
-      ...user,
+      ...userWithoutAvatar,
+      profilePictureUrl: usersProfilePictureUrl,
       accessToken,
       refreshToken,
+      shouldVerifyMFA: false,
     };
   }
 
@@ -103,7 +159,14 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
-    return user;
+    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+
+    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
+      return { ...user, shouldVerifyMFA: true };
+    }
+
+    return { ...user, shouldVerifyMFA: false };
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -137,6 +200,7 @@ export class AuthService {
         updatedAt: users.updatedAt,
         role: users.role,
         archived: users.archived,
+        avatarReference: users.avatarReference,
       })
       .from(users)
       .leftJoin(credentials, eq(users.id, credentials.userId))
@@ -153,7 +217,7 @@ export class AuthService {
     return user;
   }
 
-  private async getTokens(user: CommonUser) {
+  private async getTokens(user: CommonUser | UserResponse) {
     const { id: userId, email, role } = user;
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -209,7 +273,17 @@ export class AuthService {
     const createToken = await this.createPasswordService.getOneByToken(token);
 
     const [existingUser] = await this.db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        role: users.role,
+        archived: users.archived,
+        avatarReference: users.avatarReference,
+      })
       .from(users)
       .where(eq(users.id, createToken.userId));
 
@@ -221,6 +295,15 @@ export class AuthService {
       .insert(credentials)
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(token);
+
+    await this.settingsService.createSettingsIfNotExists(
+      createToken.userId,
+      existingUser.role as UserRole,
+    );
+
+    this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));
+
+    return existingUser;
   }
 
   public async resetPassword(token: string, newPassword: string) {
@@ -237,6 +320,7 @@ export class AuthService {
         email: users.email,
         oldCreateToken: createTokens.createToken,
         tokenExpiryDate: createTokens.expiryDate,
+        reminderCount: createTokens.reminderCount,
       })
       .from(createTokens)
       .leftJoin(credentials, eq(createTokens.userId, credentials.userId))
@@ -245,6 +329,7 @@ export class AuthService {
         and(
           isNull(credentials.userId),
           lte(sql`DATE(${createTokens.expiryDate})`, sql`CURRENT_DATE`),
+          lt(createTokens.reminderCount, 3),
         ),
       );
   }
@@ -265,6 +350,7 @@ export class AuthService {
     createToken: string,
     emailTemplate: { text: string; html: string },
     expiryDate: Date,
+    reminderCount: number,
   ) {
     await this.db.transaction(async (transaction) => {
       try {
@@ -272,6 +358,7 @@ export class AuthService {
           userId,
           createToken,
           expiryDate,
+          reminderCount,
         });
 
         await this.emailService.sendEmail({
@@ -297,7 +384,7 @@ export class AuthService {
     const expiryDate = new Date();
     expiryDate.setHours(expiryDate.getHours() + 24);
 
-    expiryTokens.map(async ({ userId, email, oldCreateToken }) => {
+    expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
       const { createToken, emailTemplate } = this.generateNewTokenAndEmail(email);
 
       await this.sendEmailAndUpdateDatabase(
@@ -307,7 +394,104 @@ export class AuthService {
         createToken,
         emailTemplate,
         expiryDate,
+        reminderCount + 1,
       );
     });
+  }
+
+  public async handleProviderLoginCallback(userCallback: MicrosoftUserType | GoogleUserType) {
+    if (!userCallback) {
+      throw new UnauthorizedException("User data is missing");
+    }
+
+    let [user] = await this.db.select().from(users).where(eq(users.email, userCallback.email));
+
+    if (!user) {
+      user = await this.userService.createUser({
+        email: userCallback.email,
+        firstName: userCallback.firstName,
+        lastName: userCallback.lastName,
+        role: USER_ROLES.STUDENT,
+      });
+
+      await this.settingsService.createSettingsIfNotExists(
+        user.id,
+        user.role as UserRole,
+        undefined,
+      );
+    }
+
+    const tokens = await this.getTokens(user);
+
+    const userSettings = await this.settingsService.getUserSettings(user.id);
+    const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+
+    if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
+      return {
+        ...tokens,
+        shouldVerifyMFA: true,
+      };
+    }
+
+    return {
+      ...tokens,
+      shouldVerifyMFA: false,
+    };
+  }
+
+  async generateMFASecret(userId: string) {
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+
+    const secret = authenticator.generateSecret();
+
+    const newSettings = await this.settingsService.updateUserSettings(userId, {
+      MFASecret: secret,
+    });
+
+    if (!newSettings.MFASecret) {
+      throw new BadRequestException("Failed to generate secret");
+    }
+
+    return {
+      secret,
+      otpauth: `otpauth://totp/Mentingo:${user.email}?secret=${secret}&issuer=Mentingo`,
+    };
+  }
+
+  async verifyMFACode(userId: string, token: string, response: Response) {
+    if (!userId || !token) {
+      throw new BadRequestException("User ID and token are required");
+    }
+
+    const settings = await this.settingsService.getUserSettings(userId);
+
+    if (!settings.MFASecret) return false;
+
+    const isValid = authenticator.check(token, settings.MFASecret);
+
+    if (!isValid) {
+      throw new BadRequestException("Invalid MFA token");
+    }
+
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException("Failed to retrieve user");
+    }
+
+    const { refreshToken, accessToken } = await this.getTokens(user);
+
+    this.tokenService.clearTokenCookies(response);
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    await this.settingsService.updateUserSettings(userId, {
+      isMFAEnabled: true,
+    });
+
+    return isValid;
   }
 }

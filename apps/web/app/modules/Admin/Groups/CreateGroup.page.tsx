@@ -6,13 +6,9 @@ import { useTranslation } from "react-i18next";
 import { useCreateGroup } from "~/api/mutations/admin/useCreateGroup";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
-import { Button } from "~/components/ui/button";
-import { DialogFooter } from "~/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
-import { CreatePageHeader } from "~/modules/Admin/components";
+import { PageWrapper } from "~/components/PageWrapper";
+import CreateGroupCard from "~/modules/Admin/Groups/components/CreateGroupCard";
+import { GroupHeader } from "~/modules/Admin/Groups/components/GroupHeader";
 import { groupFormSchema } from "~/modules/Admin/Groups/group.utils";
 
 import type { ReactElement } from "react";
@@ -27,7 +23,7 @@ const CreateGroup = (): ReactElement => {
     resolver: zodResolver(groupFormSchema),
     defaultValues: {
       name: "",
-      description: "",
+      characteristic: "",
     },
   });
 
@@ -42,51 +38,31 @@ const CreateGroup = (): ReactElement => {
   };
 
   return (
-    <div className="flex flex-col gap-y-6">
-      <CreatePageHeader
+    <PageWrapper
+      className="flex h-full flex-col"
+      backButton={{ href: "/admin/groups", title: t("adminGroupsView.breadcrumbs.back") }}
+      breadcrumbs={[
+        {
+          title: t("adminGroupsView.breadcrumbs.dashboard"),
+          href: "/",
+        },
+        {
+          title: t("adminGroupsView.breadcrumbs.groups"),
+          href: "/admin/groups",
+        },
+        {
+          title: t("adminGroupsView.newGroup.header"),
+          href: "/admin/groups/new",
+        },
+      ]}
+    >
+      <GroupHeader
         title={t("adminGroupsView.newGroup.header")}
-        description={t("adminGroupsView.newGroup.subheader")}
+        handlePublish={() => form.handleSubmit(handleSubmit)()}
+        handleCancel={() => navigate("/admin/groups")}
       />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="max-w-md space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="name" className="text">
-                  {t("adminGroupsView.newGroup.fields.name")}
-                </Label>
-                <FormControl>
-                  <Input id="name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="description" className="text">
-                  {t("adminGroupsView.newGroup.fields.description")}
-                </Label>
-                <FormControl>
-                  <Textarea id="description" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <DialogFooter>
-            <Button type="submit" disabled={!form.formState.isValid}>
-              {t("adminGroupsView.newGroup.submit")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </Form>
-    </div>
+      <CreateGroupCard form={form} handleSubmit={handleSubmit} />
+    </PageWrapper>
   );
 };
 

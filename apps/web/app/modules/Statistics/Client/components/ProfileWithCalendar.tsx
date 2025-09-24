@@ -2,12 +2,11 @@ import { Link } from "@remix-run/react";
 import { keys, pickBy } from "lodash-es";
 import { useTranslation } from "react-i18next";
 
-import { Gravatar } from "~/components/Gravatar";
 import { Icon } from "~/components/Icon";
-import { Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { Skeleton } from "~/components/ui/skeleton";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 
 import type { CurrentUserResponse, GetUserStatisticsResponse } from "~/api/generated-api";
 
@@ -56,9 +55,11 @@ export const ProfileWithCalendar = ({ user, isLoading = true, streak }: ProfileW
       <div className="w-full gap-y-6 rounded-lg bg-white p-6 md:p-8 2xl:p-0">
         <span className="body-lg-md text-neutral-900">{t("profileWithCalendarView.header")}</span>
         <div className="flex flex-col items-center gap-6">
-          <Avatar className="size-[124px]">
-            <Gravatar email={user?.email} />
-          </Avatar>
+          <UserAvatar
+            className="size-[124px]"
+            userName={`${user?.firstName} ${user?.lastName}`}
+            profilePictureUrl={user?.profilePictureUrl}
+          />
           <div className="text-center">
             <h2 className="h5">
               {user?.firstName} {user?.lastName}

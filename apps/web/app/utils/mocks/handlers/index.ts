@@ -4,6 +4,7 @@ import { categories } from "../data/categories";
 
 import { handlers as authHandlers } from "./auth";
 import { handlers as courseHandlers } from "./course";
+import { handlers as userHandlers } from "./userDetails";
 
 export const handlers = [
   http.get("/api/categories", () => {
@@ -11,4 +12,5 @@ export const handlers = [
   }),
   ...courseHandlers,
   ...authHandlers,
+  ...userHandlers,
 ];

@@ -1,12 +1,17 @@
 import { Link, Outlet } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
+import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
 import { Icon } from "~/components/Icon";
 import { Navigation } from "~/components/Navigation";
 import { Button } from "~/components/ui/button";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
+
+import Loader from "../common/Loader/Loader";
+
+import { LatestAnnouncementsPopup } from "./components";
 
 type DashboardProps = {
   isAuthenticated: boolean;
@@ -15,6 +20,17 @@ type DashboardProps = {
 export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   const { t } = useTranslation();
   const { currentUser } = useCurrentUserStore();
+
+  const { data: latestUnreadAnnouncements, isLoading } =
+    useLatestUnreadAnnouncements(isAuthenticated);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full">
+        <Loader />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -52,7 +68,8 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
             getNavigationConfig(currentUser?.id ?? "", currentUser?.role === "user", t),
           )}
         />
-        <main className="flex-1 overflow-y-auto bg-primary-50">
+        <main className="relative flex-1 overflow-y-auto bg-primary-50">
+          <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />
           <RouteGuard>
             <Outlet />
           </RouteGuard>

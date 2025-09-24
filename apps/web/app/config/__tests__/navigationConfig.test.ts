@@ -6,7 +6,7 @@ import type { NavigationItem } from "../navigationConfig";
 describe("findMatchingRoute", () => {
   it("should find exact matches", () => {
     const roles = findMatchingRoute("admin/courses");
-    expect(roles).toEqual([USER_ROLE.admin, USER_ROLE.teacher]);
+    expect(roles).toEqual([USER_ROLE.admin, USER_ROLE.contentCreator]);
   });
 
   it("should handle wildcard patterns", () => {
@@ -36,7 +36,7 @@ describe("mapNavigationItems", () => {
       path: "admin/courses",
       iconName: "Course",
       link: "/admin/courses",
-      roles: [USER_ROLE.admin, USER_ROLE.teacher],
+      roles: [USER_ROLE.admin, USER_ROLE.contentCreator],
     });
   });
 

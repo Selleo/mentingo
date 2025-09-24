@@ -1,20 +1,20 @@
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
+import { baseUserResponseSchema } from "src/user/schemas/user.schema";
 
 export const groupSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
-  description: Type.Union([Type.String(), Type.Null()]),
-  users: Type.Optional(Type.Array(commonUserSchema)),
+  characteristic: Type.Union([Type.String(), Type.Null()]),
+  users: Type.Optional(Type.Array(baseUserResponseSchema)),
   createdAt: Type.Optional(Type.String()),
   updatedAt: Type.Optional(Type.String()),
 });
 export const allGroupsSchema = Type.Array(groupSchema);
 export const baseGroupSchema = Type.Object({
   name: Type.String(),
-  description: Type.Optional(Type.String()),
+  characteristic: Type.Optional(Type.String()),
 });
 export const bulkDeleteGroupsSchema = Type.Array(UUIDSchema);
 

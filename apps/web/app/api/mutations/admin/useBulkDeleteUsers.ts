@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
+import { queryClient } from "../../queryClient";
 
 import type { DeleteBulkUsersBody } from "../../generated-api";
 
@@ -22,6 +23,8 @@ export function useBulkDeleteUsers() {
         userIds: options.data.userIds,
       });
 
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+
       return response.data;
     },
     onSuccess: () => {
@@ -34,7 +37,7 @@ export function useBulkDeleteUsers() {
       if (error instanceof AxiosError) {
         return toast({
           variant: "destructive",
-          description: error.response?.data.message,
+          description: t(error.response?.data.message),
         });
       }
       toast({

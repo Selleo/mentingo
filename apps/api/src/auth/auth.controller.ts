@@ -17,15 +17,25 @@ import { baseResponse, BaseResponse, nullResponse, type UUIDType } from "src/com
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
+import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
-import { commonUserSchema } from "src/common/schemas/common-user.schema";
 import { UserActivityEvent } from "src/events";
+import { SettingsService } from "src/settings/settings.service";
+import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
 import { type CreatePasswordBody, createPasswordSchema } from "./schemas/create-password.schema";
-import { LoginBody, loginSchema } from "./schemas/login.schema";
+import { LoginBody, loginResponseSchema, loginSchema } from "./schemas/login.schema";
+import {
+  MFASetupResponseSchema,
+  MFAVerifyBody,
+  MFAVerifyResponseSchema,
+  MFAVerifySchema,
+} from "./schemas/mfa.schema";
 import {
   ForgotPasswordBody,
   forgotPasswordSchema,
@@ -35,22 +45,38 @@ import {
 import { TokenService } from "./token.service";
 
 import type { Static } from "@sinclair/typebox";
+import type { GoogleUserType } from "src/utils/types/google-user.type";
+import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
 
 @Controller("auth")
 export class AuthController {
+  private CORS_ORIGIN: string;
+
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
+    private readonly userService: UserService,
     private readonly eventBus: EventBus,
-  ) {}
+    private readonly settingsService: SettingsService,
+  ) {
+    this.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
+  }
 
   @Public()
   @Post("register")
   @Validate({
     request: [{ type: "body", schema: createAccountSchema }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(baseUserResponseSchema),
   })
-  async register(data: CreateAccountBody): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  async register(
+    data: CreateAccountBody,
+  ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
+    const { enforceSSO } = await this.settingsService.getGlobalSettings();
+
+    if (enforceSSO) {
+      throw new UnauthorizedException("SSO is enforced, registration via email is not allowed");
+    }
+
     const account = await this.authService.register(data);
 
     return new BaseResponse(account);
@@ -61,17 +87,28 @@ export class AuthController {
   @Post("login")
   @Validate({
     request: [{ type: "body", schema: loginSchema }],
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(loginResponseSchema),
   })
   async login(
     @Body() data: LoginBody,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
-    const { accessToken, refreshToken, ...account } = await this.authService.login(data);
+  ): Promise<BaseResponse<Static<typeof loginResponseSchema>>> {
+    const { enforceSSO, MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
-    this.tokenService.setTokenCookies(response, accessToken, refreshToken, data?.rememberMe);
+    if (enforceSSO) {
+      throw new UnauthorizedException("SSO is enforced, login via email is not allowed");
+    }
 
-    return new BaseResponse(account);
+    const { accessToken, refreshToken, shouldVerifyMFA, ...account } = await this.authService.login(
+      data,
+      MFAEnforcedRoles,
+    );
+
+    shouldVerifyMFA
+      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, data.rememberMe);
+
+    return new BaseResponse({ ...account, shouldVerifyMFA });
   }
 
   @Post("logout")
@@ -116,11 +153,11 @@ export class AuthController {
 
   @Get("current-user")
   @Validate({
-    response: baseResponse(commonUserSchema),
+    response: baseResponse(currentUserResponseSchema),
   })
   async currentUser(
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<Static<typeof commonUserSchema>>> {
+  ): Promise<BaseResponse<Static<typeof currentUserResponseSchema>>> {
     const account = await this.authService.currentUser(currentUserId);
 
     this.eventBus.publish(new UserActivityEvent(currentUserId, "LOGIN"));
@@ -160,5 +197,88 @@ export class AuthController {
   async resetPassword(@Body() data: ResetPasswordBody): Promise<BaseResponse<{ message: string }>> {
     await this.authService.resetPassword(data.resetToken, data.newPassword);
     return new BaseResponse({ message: "Password reset successfully" });
+  }
+
+  @Public()
+  @Get("google")
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth(@Req() _request: Request): Promise<void> {
+    // Initiates the Google OAuth flow
+    // The actual redirection to Google happens in the AuthGuard
+  }
+
+  @Public()
+  @Get("google/callback")
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuthCallback(
+    @Req() request: Request & { user: GoogleUserType },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const googleUser = request.user;
+
+    const { accessToken, refreshToken, shouldVerifyMFA } =
+      await this.authService.handleProviderLoginCallback(googleUser);
+
+    shouldVerifyMFA
+      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    response.redirect(this.CORS_ORIGIN);
+  }
+
+  @Public()
+  @Get("microsoft")
+  @UseGuards(MicrosoftOAuthGuard)
+  async microsoftAuth() {
+    // Initiates the Microsoft OAuth flow
+  }
+
+  @Public()
+  @Get("microsoft/callback")
+  @UseGuards(MicrosoftOAuthGuard)
+  async microsoftAuthCallback(
+    @Req() request: Request & { user: MicrosoftUserType },
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const microsoftUser = request.user;
+
+    const { accessToken, refreshToken, shouldVerifyMFA } =
+      await this.authService.handleProviderLoginCallback(microsoftUser);
+
+    shouldVerifyMFA
+      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    response.redirect(this.CORS_ORIGIN);
+  }
+
+  @Post("mfa/setup")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    response: baseResponse(MFASetupResponseSchema),
+  })
+  async MFASetup(@CurrentUser("userId") userId: UUIDType) {
+    const { secret, otpauth } = await this.authService.generateMFASecret(userId);
+
+    return new BaseResponse({
+      secret,
+      otpauth,
+    });
+  }
+
+  @Post("mfa/verify")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    request: [{ type: "body", schema: MFAVerifySchema }],
+    response: baseResponse(MFAVerifyResponseSchema),
+  })
+  async MFAVerify(
+    @Body() body: MFAVerifyBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const isValid = await this.authService.verifyMFACode(userId, body.token, response);
+
+    return new BaseResponse({ isValid });
   }
 }

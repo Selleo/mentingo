@@ -33,7 +33,7 @@ export class ScormController {
 
   @Post("upload")
   @UseInterceptors(FileInterceptor("file"))
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.TEACHER)
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {

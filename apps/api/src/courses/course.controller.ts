@@ -8,12 +8,14 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Type } from "@sinclair/typebox";
+import { Request } from "express";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -29,12 +31,13 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CourseService } from "src/courses/course.service";
-import { allCoursesForTeacherSchema } from "src/courses/schemas/course.schema";
+import { allCoursesForContentCreatorSchema } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseEnrollmentScope,
   SortCourseFieldsOptions,
   SortEnrolledStudentsOptions,
+  CoursesStatusOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -57,7 +60,7 @@ import {
 
 import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
 import type {
-  AllCoursesForTeacherResponse,
+  AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
 } from "src/courses/schemas/course.schema";
@@ -76,14 +79,14 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Get("all")
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.TEACHER)
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate(allCoursesValidation)
   async getAllCourses(
     @Query("title") title: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange") creationDateRange: string[],
-    @Query("isPublished") isPublished: boolean,
+    @Query("status") status: CoursesStatusOptions,
     @Query("sort") sort: SortCourseFieldsOptions,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
@@ -95,7 +98,7 @@ export class CourseController {
       title,
       category,
       author,
-      isPublished,
+      status,
       creationDateRange:
         creationDateRangeStart && creationDateRangeEnd
           ? [creationDateRangeStart, creationDateRangeEnd]
@@ -192,7 +195,7 @@ export class CourseController {
   }
 
   @Public()
-  @Get("teacher-courses")
+  @Get("content-creator-courses")
   @Validate({
     request: [
       { type: "query", name: "authorId", schema: UUIDSchema, required: true },
@@ -203,17 +206,17 @@ export class CourseController {
       },
       { type: "query", name: "excludeCourseId", schema: UUIDSchema },
     ],
-    response: baseResponse(allCoursesForTeacherSchema),
+    response: baseResponse(allCoursesForContentCreatorSchema),
   })
-  async getTeacherCourses(
+  async getContentCreatorCourses(
     @Query("authorId") authorId: UUIDType,
     @Query("scope") scope: CourseEnrollmentScope = COURSE_ENROLLMENT_SCOPES.ALL,
     @Query("excludeCourseId") excludeCourseId: UUIDType,
     @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<BaseResponse<AllCoursesForTeacherResponse>> {
+  ): Promise<BaseResponse<AllCoursesForContentCreatorResponse>> {
     const query = { authorId, currentUserId, excludeCourseId, scope };
 
-    return new BaseResponse(await this.courseService.getTeacherCourses(query));
+    return new BaseResponse(await this.courseService.getContentCreatorCourses(query));
   }
 
   @Public()
@@ -230,17 +233,23 @@ export class CourseController {
   }
 
   @Get("beta-course-by-id")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
     response: baseResponse(commonShowBetaCourseSchema),
   })
-  async getBetaCourseById(@Query("id") id: UUIDType): Promise<BaseResponse<CommonShowBetaCourse>> {
-    return new BaseResponse(await this.courseService.getBetaCourseById(id));
+  async getBetaCourseById(
+    @Query("id") id: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<BaseResponse<CommonShowBetaCourse>> {
+    return new BaseResponse(
+      await this.courseService.getBetaCourseById(id, currentUserId, currentUserRole),
+    );
   }
 
   @Post()
-  @Roles(USER_ROLES.ADMIN, USER_ROLES.TEACHER)
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "body", schema: createCourseSchema }],
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
@@ -248,15 +257,21 @@ export class CourseController {
   async createCourse(
     @Body() createCourseBody: CreateCourseBody,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @Req() request: Request,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.courseService.createCourse(createCourseBody, currentUserId);
+    const isPlaywrightTest = request.headers["x-playwright-test"];
 
-    return new BaseResponse({ id, message: "Course created successfully" });
+    const { id } = await this.courseService.createCourse(
+      createCourseBody,
+      currentUserId,
+      !!isPlaywrightTest,
+    );
+    return new BaseResponse({ id, message: "Pomyślnie utworzono kurs" });
   }
 
   @Patch(":id")
   @UseInterceptors(FileInterceptor("image"))
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -269,10 +284,39 @@ export class CourseController {
     @Body() updateCourseBody: UpdateCourseBody,
     @UploadedFile() image: Express.Multer.File,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+    @Req() request: Request,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateCourse(id, updateCourseBody, image, currentUserId);
+    const isPlaywrightTest = request.headers["x-playwright-test"];
 
-    return new BaseResponse({ message: "Course updated successfully" });
+    await this.courseService.updateCourse(
+      id,
+      updateCourseBody,
+      currentUserId,
+      currentUserRole,
+      !!isPlaywrightTest,
+      image,
+    );
+
+    return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
+  }
+
+  @Patch("update-has-certificate/:id")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: Type.Object({ hasCertificate: Type.Boolean() }) },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateHasCertificate(
+    @Param("id") id: UUIDType,
+    @Body() body: { hasCertificate: boolean },
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.updateHasCertificate(id, body.hasCertificate);
+
+    return new BaseResponse({ message: "Pomyślnie_zaktualizowano_kurs" });
   }
 
   @Post("enroll-course")
@@ -288,7 +332,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourse(id, currentUserId, testKey);
 
-    return new BaseResponse({ message: "Course enrolled successfully" });
+    return new BaseResponse({ message: "Pomyślnie zapisano na kurs" });
   }
 
   @Post("/:courseId/enroll-courses")
@@ -313,7 +357,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourses(courseId, body);
 
-    return new BaseResponse({ message: "Courses enrolled successfully" });
+    return new BaseResponse({ message: "Pomyślnie zapisano na kursy" });
   }
 
   @Delete("deleteCourse/:id")

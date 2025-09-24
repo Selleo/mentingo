@@ -11,7 +11,9 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
-const baseURL = process.env.CI ? "http://localhost:5173" : "https://app.lms.localhost";
+const baseURL = process.env.CI
+  ? "http://localhost:5173"
+  : process.env.VITE_APP_URL || "http://localhost:5173";
 
 const config: PlaywrightTestConfig = {
   testDir: "./e2e",
@@ -22,6 +24,9 @@ const config: PlaywrightTestConfig = {
   use: {
     baseURL,
     ignoreHTTPSErrors: true,
+    extraHTTPHeaders: {
+      "x-playwright-test": "true",
+    },
     launchOptions: {
       args: [
         "--ignore-certificate-errors",
@@ -37,6 +42,16 @@ const config: PlaywrightTestConfig = {
     {
       name: "setup",
       testMatch: /.*\.setup\.ts/,
+    },
+    {
+      name: "language-guard",
+      testMatch: /.*\.lang-guard\.ts/,
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        storageState: "e2e/.auth/admin.json",
+      },
     },
     {
       name: "chromium-student",
@@ -63,13 +78,25 @@ const config: PlaywrightTestConfig = {
       fullyParallel: false,
     },
     {
-      name: "chromium-teacher",
-      testDir: "./e2e/tests/teacher",
+      name: "chromium-content-creator",
+      testDir: "./e2e/tests/content-creator",
       dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1920, height: 1080 },
-        storageState: "e2e/.auth/teacher.json",
+        storageState: "e2e/.auth/content-creator.json",
+      },
+      testMatch: /.*\.(spec|test)\.ts$/,
+      fullyParallel: false,
+    },
+    {
+      name: "chromium-admin-student",
+      testDir: "./e2e/tests/admin-student",
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1920, height: 1080 },
+        storageState: "e2e/.auth/admin.json",
       },
       testMatch: /.*\.(spec|test)\.ts$/,
       fullyParallel: false,

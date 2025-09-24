@@ -12,6 +12,7 @@ import {
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
+import { SupportedLanguages } from "src/ai/utils/ai.type";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -21,11 +22,15 @@ import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 import {
   AnswerQuestionBody,
   answerQuestionsForLessonBody,
+  CreateAiMentorLessonBody,
+  createAiMentorLessonSchema,
   CreateLessonBody,
   createLessonSchema,
   CreateQuizLessonBody,
   createQuizLessonSchema,
   lessonShowSchema,
+  UpdateAiMentorLessonBody,
+  updateAiMentorLessonSchema,
   UpdateLessonBody,
   updateLessonSchema,
   UpdateQuizLessonBody,
@@ -50,16 +55,17 @@ export class LessonController {
   })
   async getLessonById(
     @Param("id") id: UUIDType,
+    @Query("userLanguage") userLanguage: SupportedLanguages,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") userRole: UserRole,
   ): Promise<BaseResponse<LessonShow>> {
     return new BaseResponse(
-      await this.lessonService.getLessonById(id, userId, userRole === USER_ROLES.STUDENT),
+      await this.lessonService.getLessonById(id, userId, userRole, userLanguage),
     );
   }
 
   @Post("beta-create-lesson")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -77,8 +83,52 @@ export class LessonController {
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
 
+  @Post("beta-create-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "body",
+        schema: createAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
+  })
+  async betaCreateAiMentorLesson(
+    @Body() createAiMentorLessonBody: CreateAiMentorLessonBody,
+  ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
+    const id = await this.adminLessonsService.createAiMentorLesson(createAiMentorLessonBody);
+    return new BaseResponse({ id, message: "AI Mentor lesson created successfully" });
+  }
+
+  @Patch("beta-update-lesson/ai")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "id",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: updateAiMentorLessonSchema,
+        required: true,
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async betaUpdateAiMentorLesson(
+    @Query("id") id: UUIDType,
+    @Body() data: UpdateAiMentorLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.adminLessonsService.updateAiMentorLesson(id, data, userId);
+    return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
+  }
   @Post("beta-create-lesson/quiz")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -99,7 +149,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson/quiz")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -125,7 +175,7 @@ export class LessonController {
   }
 
   @Patch("beta-update-lesson")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {
@@ -149,7 +199,7 @@ export class LessonController {
   }
 
   @Delete()
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),
@@ -165,7 +215,7 @@ export class LessonController {
   }
 
   @Post("evaluation-quiz")
-  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.STUDENT)
   @Validate({
     request: [{ type: "body", schema: answerQuestionsForLessonBody, required: true }],
     response: baseResponse(
@@ -201,6 +251,20 @@ export class LessonController {
     });
   }
 
+  @Delete("delete-student-quiz-answers")
+  @Roles(USER_ROLES.STUDENT)
+  @Validate({
+    request: [{ type: "query", name: "lessonId", schema: UUIDSchema, required: true }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async deleteStudentQuizAnswers(
+    @Query("lessonId") lessonId: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUserId);
+    return new BaseResponse({ message: "Evaluation quiz answers removed successfully" });
+  }
+
   //   @Delete("clear-quiz-progress")
   //   @Roles(USER_ROLES.STUDENT)
   //   @Validate({
@@ -227,7 +291,7 @@ export class LessonController {
   //   }
 
   @Patch("update-lesson-display-order")
-  @Roles(USER_ROLES.TEACHER, USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
     request: [
       {

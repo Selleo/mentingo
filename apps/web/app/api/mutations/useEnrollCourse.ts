@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
 
@@ -11,6 +12,7 @@ type EnrollCourseOptions = {
 
 export function useEnrollCourse() {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (options: EnrollCourseOptions) => {
@@ -20,10 +22,10 @@ export function useEnrollCourse() {
 
       return response.data;
     },
-    onSuccess: ({ data }) => {
+    onSuccess: () => {
       toast({
         variant: "default",
-        description: data.message,
+        description: t("studentCoursesView.other.successfullyEnrolledToCourse"),
       });
     },
     onError: (error) => {

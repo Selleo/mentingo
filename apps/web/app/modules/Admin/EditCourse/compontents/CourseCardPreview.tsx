@@ -34,7 +34,7 @@ const CourseCardPreview = ({ imageUrl, title, description, category }: CourseCar
               />
               {category && (
                 <div className="absolute left-3 top-3 flex items-center space-x-2 rounded-lg bg-white px-4 py-2 text-sm text-black shadow-md">
-                  <div className="h-1 w-1 rounded-full bg-black"></div>
+                  <div className="size-1 rounded-full bg-black"></div>
                   <span>{category}</span>
                 </div>
               )}

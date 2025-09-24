@@ -68,7 +68,7 @@ export const SingleSelect = ({
       )}
     >
       <Input
-        className={cn("h-4 w-4", {
+        className={cn("size-4", {
           "not-sr-only": !isCompleted,
           "sr-only": isInputToggleHidden,
         })}

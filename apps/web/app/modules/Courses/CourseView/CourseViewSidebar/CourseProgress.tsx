@@ -1,13 +1,13 @@
 import { useNavigate } from "@remix-run/react";
-import { find, flatMap } from "lodash-es";
 import { useTranslation } from "react-i18next";
 
 import { CopyUrlButton } from "~/components/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
-import { cn } from "~/lib/utils";
 import { CourseProgressChart } from "~/modules/Courses/CourseView/components/CourseProgressChart";
+
+import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -15,23 +15,35 @@ type CourseProgressProps = {
   course: GetCourseResponse["data"];
 };
 
-const findFirstNotStartedLessonId = (course: CourseProgressProps["course"]) => {
-  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
-  return find(allLessons, (lesson) => lesson.status === "not_started")?.id;
-};
-
 export const CourseProgress = ({ course }: CourseProgressProps) => {
   const { isAdminLike } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const nonStartedLessonId = findFirstNotStartedLessonId(course);
+  const notStartedLessonId = findFirstNotStartedLessonId(course);
   const notStartedChapterId = course.chapters.find((chapter) => {
-    return chapter.lessons.some((lesson) => lesson.id === nonStartedLessonId);
+    return chapter.lessons.some(({ id }) => id === notStartedLessonId);
+  })?.id;
+
+  const firstInProgressLessonId = findFirstInProgressLessonId(course);
+  const firstInProgressChapterId = course.chapters.find((chapter) => {
+    return chapter.lessons.some(({ id }) => id === firstInProgressLessonId);
   })?.id;
 
   const hasCourseProgress = course.chapters.some(
     ({ completedLessonCount }) => completedLessonCount,
   );
+
+  const firstLessonId = course.chapters[0]?.lessons[0]?.id;
+
+  const handleNavigateToLesson = () => {
+    if (!notStartedLessonId && !firstInProgressLessonId) {
+      return navigate(`lesson/${firstLessonId}`);
+    }
+
+    navigate(`lesson/${firstInProgressLessonId ?? notStartedLessonId}`, {
+      state: { chapterId: firstInProgressChapterId ?? notStartedChapterId },
+    });
+  };
 
   return (
     <>
@@ -47,38 +59,22 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
         />
       )}
       <div className="flex flex-col gap-y-2">
-        <CopyUrlButton
-          className={cn("gap-x-2", {
-            "bg-primary-700 text-white hover:bg-primary-600 hover:text-white": isAdminLike,
-          })}
-          variant="outline"
-        >
-          <Icon
-            name="Share"
-            className={cn("h-auto w-6 text-primary-800", {
-              "text-white": isAdminLike,
-            })}
-          />
+        <CopyUrlButton className="gap-x-2" variant="outline">
+          <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
         <>
-          <Button
-            className="gap-x-2"
-            disabled={!nonStartedLessonId}
-            onClick={() =>
-              navigate(`lesson/${nonStartedLessonId}`, {
-                state: { chapterId: notStartedChapterId },
-              })
-            }
-          >
+          <Button className="gap-x-2" onClick={handleNavigateToLesson}>
             <Icon name="Play" className="h-auto w-6 text-white" />
             <span>
               {t(
                 isAdminLike
                   ? "adminCourseView.common.preview"
-                  : hasCourseProgress
-                    ? "studentCourseView.sideSection.button.continueLearning"
-                    : "studentCourseView.sideSection.button.startLearning",
+                  : !hasCourseProgress
+                    ? "studentCourseView.sideSection.button.startLearning"
+                    : notStartedLessonId || firstInProgressLessonId
+                      ? "studentCourseView.sideSection.button.continueLearning"
+                      : "studentCourseView.sideSection.button.repeatLessons",
               )}
             </span>
           </Button>

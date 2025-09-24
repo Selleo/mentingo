@@ -1,11 +1,13 @@
 import { type Static, Type } from "@sinclair/typebox";
 
+import { passwordSchema } from "./password.schema";
+
 export const forgotPasswordSchema = Type.Object({
   email: Type.String({ format: "email", minLength: 1 }),
 });
 
 export const resetPasswordSchema = Type.Object({
-  newPassword: Type.String({ minLength: 8, maxLength: 64 }),
+  newPassword: passwordSchema,
   resetToken: Type.String({ minLength: 1 }),
 });
 

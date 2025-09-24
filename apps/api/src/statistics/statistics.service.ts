@@ -36,7 +36,8 @@ export class StatisticsService {
 
     const quizStats = await this.statisticsRepository.getQuizStats(userId);
     const nextLesson = await this.getLastLesson(userId);
-    const activityStats = await this.statisticsRepository.getActivityStats(userId);
+
+    const activityStats = (await this.statisticsRepository.getActivityStats(userId)) ?? {};
 
     return {
       courses: this.formatStats(coursesStatsByMonth),
@@ -57,12 +58,12 @@ export class StatisticsService {
       streak: {
         current: activityStats.currentStreak ?? 0,
         longest: activityStats.longestStreak ?? 0,
-        activityHistory: activityStats?.activityHistory || {},
+        activityHistory: activityStats.activityHistory || {},
       },
     };
   }
 
-  async getTeacherStats(userId: UUIDType) {
+  async getContentCreatorStats(userId: UUIDType) {
     const fiveMostPopularCourses =
       await this.statisticsRepository.getFiveMostPopularCourses(userId);
     const [totalCoursesCompletionStats] =

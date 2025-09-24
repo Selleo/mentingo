@@ -8,7 +8,7 @@ interface ImageUploadProps {
   field: { value?: string };
   handleImageUpload: (file: File) => void;
   isUploading: boolean;
-  imageUrl?: string;
+  imageUrl?: string | null;
   fileInputRef?: React.RefObject<HTMLInputElement>;
 }
 
@@ -24,7 +24,7 @@ const ImageUploadInput = ({
   return (
     <div className="flex flex-col items-center justify-center gap-y-2">
       <div className="relative flex h-80 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100">
-        {field.value && (
+        {imageUrl && (
           <img
             src={imageUrl || field.value}
             alt="Uploaded"
@@ -56,6 +56,7 @@ const ImageUploadInput = ({
         </div>
         <input
           ref={fileInputRef}
+          data-testid="imageUpload"
           type="file"
           accept=".png, .jpg, .jpeg"
           onChange={(e) => {

@@ -5,6 +5,9 @@ import { QuestionType } from "../QuizLessonForm.types";
 export const quizLessonFormSchema = (t: (key: string) => string) =>
   z.object({
     title: z.string(),
+    thresholdScore: z.union([z.number().min(0).max(100), z.null()]).optional(),
+    attemptsLimit: z.union([z.number().min(1).max(100), z.null()]).optional(),
+    quizCooldownInHours: z.union([z.number().min(1).max(720), z.null()]).optional(),
     questions: z
       .array(
         z.object({

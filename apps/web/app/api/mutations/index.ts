@@ -14,3 +14,8 @@ export { useSubmitQuiz } from "./useSubmitQuiz";
 export { useUnenrollCourse } from "./useUnenrollCourse";
 export { useUpdateUser } from "./useUpdateUser";
 export { useUpsertUserDetails } from "./useUpsertUserDetails";
+export { useUpdateUserProfile } from "./useUpdateUserProfile";
+export { useRetakeQuiz } from "./useRetakeQuiz";
+export { useQuizRetakeStatus } from "./useQuizRetakeStatus";
+export { useSetupMFA } from "./useSetupMFA";
+export { useVerifyMFA } from "./useVerifyMFA";

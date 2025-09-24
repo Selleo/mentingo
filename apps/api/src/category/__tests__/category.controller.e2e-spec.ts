@@ -4,8 +4,9 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
+import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
-import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
+import { cookieFor, truncateAllTables, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -17,6 +18,7 @@ describe("CategoryController (e2e)", () => {
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let settingsFactory: ReturnType<typeof createSettingsFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -24,6 +26,7 @@ describe("CategoryController (e2e)", () => {
     db = app.get("DB");
     userFactory = createUserFactory(db);
     categoryFactory = createCategoryFactory(db);
+    settingsFactory = createSettingsFactory(db);
     categoryFactory.createList(CATEGORIES_COUNT);
   }, 30000);
 
@@ -33,11 +36,20 @@ describe("CategoryController (e2e)", () => {
 
   const password = "password123";
 
+  beforeEach(async () => {
+    await settingsFactory.create({ userId: null });
+  });
+
+  afterEach(async () => {
+    await truncateTables(db, ["settings"]);
+  });
+
   describe("POST /api/category", () => {
     describe("when user is a student", () => {
       it("returns archived and createdAt equal to null", async () => {
         const user = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
 
         const response = await request(app.getHttpServer())
@@ -58,6 +70,7 @@ describe("CategoryController (e2e)", () => {
       it("returns all filled category columns", async () => {
         const user = await userFactory
           .withCredentials({ password })
+          .withAdminSettings(db)
           .create({ role: USER_ROLES.ADMIN });
 
         const response = await request(app.getHttpServer())
@@ -81,6 +94,7 @@ describe("CategoryController (e2e)", () => {
         let page = 1;
         const user = await userFactory
           .withCredentials({ password })
+          .withUserSettings(db)
           .create({ role: USER_ROLES.STUDENT });
 
         const response = await request(app.getHttpServer())

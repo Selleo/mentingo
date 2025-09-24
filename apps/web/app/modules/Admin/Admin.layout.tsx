@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { currentUserQueryOptions } from "~/api/queries";
+import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
 import { queryClient } from "~/api/queryClient";
 import { Navigation } from "~/components/Navigation";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
@@ -13,6 +14,7 @@ import { cn } from "~/lib/utils";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import Loader from "../common/Loader/Loader";
+import { LatestAnnouncementsPopup } from "../Dashboard/components";
 
 import type { PropsWithChildren } from "react";
 
@@ -35,10 +37,12 @@ export const clientLoader = async () => {
 };
 
 const AdminGuard = ({ children }: PropsWithChildren) => {
-  const { isAdmin, isTeacher } = useUserRole();
+  const { isAdmin, isContentCreator } = useUserRole();
   const navigate = useNavigate();
 
-  const isAllowed = isAdmin || isTeacher;
+  const isAllowed = isAdmin || isContentCreator;
+
+  const { data: latestUnreadAnnouncements } = useLatestUnreadAnnouncements(isContentCreator);
 
   useLayoutEffect(() => {
     if (!isAllowed) {
@@ -48,7 +52,12 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
 
   if (!isAllowed) return null;
 
-  return <>{children}</>;
+  return (
+    <>
+      <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />
+      {children}
+    </>
+  );
 };
 
 const AdminLayout = () => {
@@ -70,7 +79,7 @@ const AdminLayout = () => {
           />
         )}
         <main
-          className={cn("max-h-dvh flex-1 overflow-y-auto bg-primary-50 p-6", {
+          className={cn("max-h-dvh flex-1 overflow-y-auto bg-primary-50", {
             "bg-white p-0": hideTopbarAndSidebar,
           })}
         >

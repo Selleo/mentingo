@@ -17,11 +17,38 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
   const { t } = useTranslation();
 
   return (
-    <menu className="grid w-full grid-cols-2 gap-2 md:grid-cols-6 md:gap-4 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
-      <li className="col-span-2 md:col-span-6 2xl:hidden">
-        <Separator className="bg-primary-200 2xl:h-[1px] 3xl:my-2" />
+    <menu className="grid w-full grid-cols-3 gap-2 md:grid-cols-6 md:gap-4 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
+      <li className="col-span-3 md:col-span-6 2xl:hidden">
+        <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
       </li>
-      <li className="col-span-2 md:col-span-3">
+      <li className="col-span-1 md:col-span-2">
+        <Tooltip>
+          <TooltipTrigger className="w-full">
+            <NavLink
+              onClick={() => setIsMobileNavOpen(false)}
+              to="/provider-information"
+              className={({ isActive }) =>
+                cn("flex w-full items-center gap-x-3 rounded-lg px-4 py-3.5 2xl:p-2", {
+                  "bg-primary-700 text-white": isActive,
+                  "bg-white text-neutral-900": !isActive,
+                })
+              }
+            >
+              <Icon name="Info" className="size-5" />
+              <span className="capitalize 2xl:sr-only 3xl:not-sr-only">
+                {t("navigationSideBar.providerInformation")}
+              </span>
+            </NavLink>
+          </TooltipTrigger>
+          <TooltipContent
+            side="right"
+            className="hidden 2xl:block 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white 3xl:hidden"
+          >
+            {t("navigationSideBar.providerInformation")}
+          </TooltipContent>
+        </Tooltip>
+      </li>
+      <li className="col-span-1 md:col-span-2">
         <Tooltip>
           <TooltipTrigger className="w-full">
             <NavLink
@@ -35,7 +62,9 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
               }
             >
               <Icon name="Settings" className="size-6" />
-              <span className="2xl:sr-only 3xl:not-sr-only">{t("navigationSideBar.settings")}</span>
+              <span className="capitalize 2xl:sr-only 3xl:not-sr-only">
+                {t("navigationSideBar.settings")}
+              </span>
             </NavLink>
           </TooltipTrigger>
           <TooltipContent
@@ -47,9 +76,9 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
         </Tooltip>
       </li>
       <li className="hidden 2xl:block">
-        <Separator className="bg-primary-200 2xl:h-[1px]" />
+        <Separator className="bg-primary-200 2xl:h-px" />
       </li>
-      <li className="col-span-2 md:col-span-3">
+      <li className="col-span-1 md:col-span-2">
         <Tooltip>
           <TooltipTrigger className="w-full">
             <button

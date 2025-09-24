@@ -1,12 +1,16 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { first, get, last, orderBy } from "lodash-es";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourse, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
+import { useUserRole } from "~/hooks/useUserRole";
+import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -27,12 +31,28 @@ const checkOverallLessonPosition = (chapters: Chapters, currentLessonId: string)
 
 export default function LessonPage() {
   const { courseId = "", lessonId = "" } = useParams();
-  const { data: lesson } = useLesson(lessonId);
+  const { language } = useLanguageStore();
+
+  const {
+    data: lesson,
+    isFetching: lessonLoading,
+    isError: lessonError,
+  } = useLesson(lessonId, language);
   const { data: course } = useCourse(courseId);
+  const { isStudent } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  if (!lesson || !course) return null;
+  useEffect(() => {
+    if (lessonError) navigate(`/course/${courseId}`);
+  }, [lessonError, navigate, courseId]);
+
+  if (!lesson || !course)
+    return (
+      <div className="fixed inset-0 grid place-items-center">
+        <Loader />
+      </div>
+    );
 
   const { isFirst, isLast } = checkOverallLessonPosition(course.chapters, lessonId);
 
@@ -107,11 +127,30 @@ export default function LessonPage() {
     return null;
   }
 
+  const breadcrumbs = [
+    {
+      title: isStudent
+        ? t("studentLessonView.breadcrumbs.yourCourses")
+        : t("studentLessonView.breadcrumbs.availableCourses"),
+      href: "/courses",
+    },
+    { title: course.title, href: `/course/${courseId}` },
+    {
+      title: currentChapter?.title ?? t("studentLessonView.other.chapter"),
+      href: `/course/${courseId}/lesson/${lessonId}`,
+    },
+  ];
+
+  const backButton = {
+    title: t("studentLessonView.breadcrumbs.back"),
+    href: `/course/${courseId}`,
+  };
+
   return (
-    <PageWrapper className="h-auto max-w-full">
-      <div className="flex h-full w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
-        <div className="flex h-full w-full flex-col divide-y rounded-lg bg-white">
-          <div className="flex items-center px-12 py-6">
+    <PageWrapper className="h-auto max-w-full" breadcrumbs={breadcrumbs} backButton={backButton}>
+      <div className="flex size-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
+        <div className="flex size-full flex-col divide-y rounded-lg bg-white">
+          <div className="flex items-center p-6 sm:px-10 3xl:px-8">
             <p className="h6 text-neutral-950">
               <span className="text-neutral-800">
                 {t("studentLessonView.other.chapter")} {currentChapter?.displayOrder}:
@@ -121,11 +160,13 @@ export default function LessonPage() {
           </div>
           <LessonContent
             lesson={lesson}
+            course={course}
             lessonsAmount={currentChapter?.lessons.length ?? 0}
             handlePrevious={() => handlePrevLesson(lessonId, course.chapters)}
             handleNext={() => handleNextLesson(lessonId, course.chapters)}
             isFirstLesson={isFirst}
             isLastLesson={isLast}
+            lessonLoading={lessonLoading}
           />
         </div>
         <LessonSidebar course={course} lessonId={lessonId} />

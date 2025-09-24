@@ -8,6 +8,7 @@ import hashPassword from "../common/helpers/hashPassword";
 import { credentials, users } from "../storage/schema";
 import { USER_ROLES } from "../user/schemas/userRoles";
 
+import { insertGlobalSettings, insertUserSettings } from "./seed";
 import { seedTruncateAllTables } from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
@@ -56,6 +57,8 @@ async function seedProduction() {
       role: USER_ROLES.ADMIN,
     });
     console.log("Created or found admin user:", adminUser);
+    const adminSettings = await insertUserSettings(db, adminUser.id, true);
+    console.log("Inserted admin user settings:", adminSettings);
 
     const studentUser = await createOrFindUser("user@example.com", "password", {
       id: faker.string.uuid(),
@@ -67,17 +70,24 @@ async function seedProduction() {
       role: USER_ROLES.STUDENT,
     });
     console.log("Created or found student user:", studentUser);
+    const studentSettings = await insertUserSettings(db, studentUser.id, false);
+    console.log("Inserted student user settings:", studentSettings);
 
-    const teacherUser = await createOrFindUser("teacher@example.com", "password", {
+    const contentCreatorUser = await createOrFindUser("contentcreator@example.com", "password", {
       id: faker.string.uuid(),
-      email: "teacher@example.com",
+      email: "contentcreator@example.com",
       firstName: faker.person.firstName(),
-      lastName: "Teacher",
+      lastName: "Content Creator",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      role: USER_ROLES.TEACHER,
+      role: USER_ROLES.CONTENT_CREATOR,
     });
-    console.log("Created or found teacher user:", teacherUser);
+    console.log("Created or found content creator user:", contentCreatorUser);
+    const contentCreatorSettings = await insertUserSettings(db, contentCreatorUser.id, false);
+    console.log("Inserted content creator user settings:", contentCreatorSettings);
+
+    const globalSettings = await insertGlobalSettings(db);
+    console.log("Inserted global settings:", globalSettings);
 
     console.log("Seeding completed successfully");
   } catch (error) {

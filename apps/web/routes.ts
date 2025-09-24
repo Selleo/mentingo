@@ -9,17 +9,20 @@ export const routes: (
       route("register", "modules/Auth/Register.page.tsx");
       route("create-new-password", "modules/Auth/CreateNewPassword.page.tsx");
       route("password-recovery", "modules/Auth/PasswordRecovery.page.tsx");
+      route("mfa", "modules/Auth/MFA.page.tsx");
     });
     route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
       route("courses", "modules/Courses/Courses.page.tsx");
       route("course/:id", "modules/Courses/CourseView/CourseView.page.tsx");
-      route("teachers/:id", "modules/Teacher/Teacher.page.tsx");
+      route("profile/:id", "modules/Profile/Profile.page.tsx");
     });
     route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
       route("", "modules/Statistics/Statistics.page.tsx", {
         index: true,
       });
       route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
+      route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
+      route("announcements", "modules/Announcements/Announcements.page.tsx");
     });
     route("course/:courseId/lesson", "modules/Courses/Lesson/Lesson.layout.tsx", () => {
       route(":lessonId", "modules/Courses/Lesson/Lesson.page.tsx");
@@ -40,6 +43,10 @@ export const routes: (
       route("groups", "modules/Admin/Groups/Groups.page.tsx");
       route("groups/new", "modules/Admin/Groups/CreateGroup.page.tsx");
       route("groups/:id", "modules/Admin/Groups/EditGroup.page.tsx");
+      route("announcements/new", "modules/Announcements/CreateAnnouncement.page.tsx");
+      route("promotion-codes", "modules/Admin/PromotionCodes/PromotionCodes.page.tsx");
+      route("promotion-codes/new", "modules/Admin/PromotionCodes/CreatePromotionCode.page.tsx");
+      route("promotion-codes/:id", "modules/Admin/PromotionCodes/PromotionCodeDetails.page.tsx");
     });
   });
 };

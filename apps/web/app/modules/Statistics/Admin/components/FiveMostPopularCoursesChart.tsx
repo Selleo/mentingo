@@ -6,9 +6,9 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useMediaQuery } from "~/hooks/useMediaQuery";
 import { ChartLegendBadge } from "~/modules/Statistics/Client/components";
 
-import type { GetTeacherStatsResponse } from "~/api/generated-api";
+import type { GetContentCreatorStatsResponse } from "~/api/generated-api";
 
-type Data = GetTeacherStatsResponse["data"]["fiveMostPopularCourses"];
+type Data = GetContentCreatorStatsResponse["data"]["fiveMostPopularCourses"];
 
 type MostPopularCoursesChartProps = { data: Data | undefined; isLoading: boolean | undefined };
 
@@ -46,9 +46,10 @@ export const FiveMostPopularCoursesChart = ({ data, isLoading }: MostPopularCour
       fill: chartColors[index % chartColors.length],
     }));
 
-    const chartConfig = input?.reduce((config, { courseName }, index) => {
-      const key = `desktop${index === 0 ? "" : index}`;
-      config[key] = { label: courseName };
+    // TODO: Needs to be refactor
+    const chartConfig = input?.reduce((config) => {
+      const key = `studentCount`;
+      config[key] = { label: t("mostPopularCoursesView.other.students") };
       return config;
     }, {} as ChartConfig);
 
@@ -83,13 +84,13 @@ export const FiveMostPopularCoursesChart = ({ data, isLoading }: MostPopularCour
             <Skeleton className="h-6 w-[34%] rounded-lg bg-neutral-100" />
             <div className="absolute left-0 top-0 flex h-full w-full justify-between">
               {Array.from({ length: 21 }).map((_, index) => (
-                <Skeleton key={index} className="h-full w-[1px]" />
+                <Skeleton key={index} className="h-full w-px" />
               ))}
             </div>
           </div>
         </div>
         <div className="flex justify-between pt-2 md:pl-[172px]">
-          <Skeleton className="h-2 w-2 rounded-lg bg-neutral-100" />
+          <Skeleton className="size-2 rounded-lg bg-neutral-100" />
           <Skeleton className="h-2 w-6 rounded-lg bg-neutral-100" />
           <Skeleton className="h-2 w-6 rounded-lg bg-neutral-100" />
           <Skeleton className="h-2 w-6 rounded-lg bg-neutral-100" />
@@ -120,7 +121,7 @@ export const FiveMostPopularCoursesChart = ({ data, isLoading }: MostPopularCour
         <div className="md:flex md:size-full md:gap-x-3">
           <div className="relative flex h-full min-h-[200px] w-full items-center justify-between gap-y-3 py-2 md:min-h-[316px] md:gap-y-10">
             {Array.from({ length: 21 }).map((_, index) => (
-              <div key={index} className="h-full w-[1px] bg-neutral-100" />
+              <div key={index} className="h-full w-px bg-neutral-100" />
             ))}
             <div className="h5 md:h3 absolute left-0 top-0 z-0 flex size-full items-center justify-center text-primary-950">
               {t("mostPopularCoursesView.other.noData")}

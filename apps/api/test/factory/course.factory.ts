@@ -6,7 +6,7 @@ import { categories, courses, users } from "../../src/storage/schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-type CourseTest = InferSelectModel<typeof courses>;
+export type CourseTest = InferSelectModel<typeof courses>;
 
 const ensureCategory = async (db: DatabasePg, categoryId?: UUIDType): Promise<UUIDType> => {
   if (categoryId) return categoryId;
@@ -69,13 +69,16 @@ export const createCourseFactory = (db: DatabasePg) => {
       title: faker.commerce.department() + randomHex,
       description: faker.commerce.productDescription(),
       thumbnailS3Key: faker.system.directoryPath(),
-      isPublished: true,
+      status: "published",
+      hasCertificate: false,
       priceInCents: faker.number.int({ min: 1000, max: 100000 }),
       currency: "usd",
       chapterCount: faker.number.int({ min: 1, max: 20 }),
       authorId: "", // Will be auto-created if empty
       categoryId: "", // Will be auto-created if empty
       isScorm: false,
+      stripeProductId: null,
+      stripePriceId: null,
     };
   });
 };

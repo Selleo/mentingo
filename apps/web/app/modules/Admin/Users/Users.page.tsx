@@ -9,14 +9,16 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { isEmpty } from "lodash-es";
-import { Trash } from "lucide-react";
+import { camelCase } from "lodash-es";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
+import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUsersGroups";
+import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
+import { PageWrapper } from "~/components/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -31,16 +33,23 @@ import {
 } from "~/components/ui/table";
 import { USER_ROLE } from "~/config/userRoles";
 import { cn } from "~/lib/utils";
+import { type DropdownItems, EditDropdown } from "~/modules/Admin/Users/components/EditDropdown";
+import { EditModal } from "~/modules/Admin/Users/components/EditModal";
 import {
   type FilterConfig,
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { USER_ROLES } from "~/utils/userRoles";
+
+import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
 
 type TUser = GetUsersResponse["data"][number];
+
+type ModalTypes = "group" | "role" | "delete" | null;
 
 export const clientLoader = async () => {
   queryClient.prefetchQuery(usersQueryOptions());
@@ -54,14 +63,46 @@ const Users = () => {
     role?: UserRole;
     archived?: boolean;
     status?: string;
-  }>({});
+    groupId?: string;
+  }>({ archived: false });
   const [isPending, startTransition] = React.useTransition();
 
   const { data } = useAllUsersSuspense(searchParams);
+  const { data: groupData } = useGroupsQuerySuspense();
+  const groups = groupData.map(({ id, name }) => ({ groupId: id, groupName: name }));
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [selectedValue, setSelectedValue] = React.useState<string>("");
+
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
+  const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
+
   const { t } = useTranslation();
+
+  const [showEditModal, setShowEditModal] = React.useState<ModalTypes>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+
+  const dropdownItems: DropdownItems[] = [
+    {
+      icon: "ArrowUpDown",
+      translationKey: "adminUsersView.dropdown.changeRole",
+      action: () => setShowEditModal("role"),
+      destructive: false,
+    },
+    {
+      icon: "ArrowUpDown",
+      translationKey: "adminUsersView.dropdown.changeGroup",
+      action: () => setShowEditModal("group"),
+      destructive: false,
+    },
+    {
+      icon: "TrashIcon",
+      translationKey: "adminUsersView.dropdown.delete",
+      action: () => setShowEditModal("delete"),
+      destructive: true,
+    },
+  ];
 
   const filterConfig: FilterConfig[] = [
     {
@@ -76,12 +117,22 @@ const Users = () => {
       options: [
         { value: USER_ROLE.admin, label: t("common.roles.admin") },
         { value: USER_ROLE.student, label: t("common.roles.student") },
-        { value: USER_ROLE.teacher, label: t("common.roles.teacher") },
+        { value: USER_ROLE.contentCreator, label: t("common.roles.contentCreator") },
       ],
     },
     {
       name: "archived",
       type: "status",
+    },
+    {
+      name: "groupId",
+      type: "select",
+      placeholder: t("adminUsersView.filters.placeholder.groups"),
+      options:
+        groupData.map((item) => ({
+          value: item.id,
+          label: item.name,
+        })) ?? [],
     },
   ];
 
@@ -109,6 +160,7 @@ const Users = () => {
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
+          data-testid={row.original.email}
           onClick={(e) => e.stopPropagation()}
         />
       ),
@@ -135,7 +187,14 @@ const Users = () => {
     {
       accessorKey: "role",
       header: t("adminUsersView.field.role"),
-      cell: ({ row }) => t(`common.roles.${row.original.role}`),
+      cell: ({ row }) => t(`common.roles.${camelCase(row.original.role)}`),
+    },
+    {
+      accessorKey: "groupName",
+      header: ({ column }) => (
+        <SortButton column={column}>{t("adminUsersView.field.group")}</SortButton>
+      ),
+      cell: ({ row }) => row.original.groupName,
     },
     {
       accessorKey: "archived",
@@ -159,6 +218,7 @@ const Users = () => {
   ];
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -176,7 +236,19 @@ const Users = () => {
   const handleDeleteUsers = () => {
     deleteUsers({ data: { userIds: selectedUsers } }).then(() => {
       table.resetRowSelection();
-      queryClient.invalidateQueries(usersQueryOptions());
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    });
+  };
+
+  const handleUsersGroups = () => {
+    updateUsersGroups({
+      data: {
+        userIds: selectedUsers,
+        groupId: selectedValue,
+      },
+    }).then(() => {
+      table.resetRowSelection();
+      setShowEditModal(null);
     });
   };
 
@@ -184,69 +256,96 @@ const Users = () => {
     navigate(userId);
   };
 
+  const editMutation = {
+    role: () => {},
+    group: handleUsersGroups,
+    delete: handleDeleteUsers,
+  };
+
   return (
-    <div className="flex flex-col">
-      <h4 className={"text-2xl font-bold"}>{t("navigationSideBar.users")}</h4>
-      <div className="flex items-center justify-between gap-2">
-        <Link to="new">
-          <Button variant="outline">{t("adminUsersView.button.createNew")}</Button>
-        </Link>
-        <SearchFilter
-          filters={filterConfig}
-          values={searchParams}
-          onChange={handleFilterChange}
-          isLoading={isPending}
-        />
-        <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
-          <p
-            className={cn("text-sm", {
-              "text-neutral-900": !isEmpty(selectedUsers),
-              "text-neutral-500": isEmpty(selectedUsers),
-            })}
-          >
-            {t("common.other.selected")} ({selectedUsers.length})
-          </p>
-          <Button
-            onClick={handleDeleteUsers}
-            size="sm"
-            className="flex items-center gap-x-2"
-            disabled={isEmpty(selectedUsers)}
-          >
-            <Trash className="h-3 w-3" />
-            <span className="text-xs">{t("adminUsersView.button.deleteSelected")}</span>
-          </Button>
+    <PageWrapper
+      breadcrumbs={[
+        {
+          title: t("adminUsersView.breadcrumbs.dashboard"),
+          href: "/",
+        },
+        {
+          title: t("adminUsersView.breadcrumbs.users"),
+          href: "/admin/users",
+        },
+      ]}
+    >
+      <div className="flex flex-col">
+        {showEditModal && (
+          <EditModal
+            type={showEditModal}
+            onConfirm={editMutation[showEditModal]}
+            onCancel={() => setShowEditModal(null)}
+            groupData={groups}
+            roleData={Object.values(USER_ROLES)}
+            selectedUsers={selectedUsers.length}
+            selectedValue={selectedValue}
+            setSelectedValue={setSelectedValue}
+          />
+        )}
+        {isImportModalOpen && (
+          <ImportUsersModal
+            open={isImportModalOpen}
+            onClose={() => setIsImportModalOpen(false)}
+            searchParams={searchParams}
+          />
+        )}
+        <div className="flex flex-wrap justify-between gap-3">
+          <h4 className="text-2xl font-bold">{t("navigationSideBar.users")}</h4>
+          <div className="flex gap-3">
+            <Button variant="primary" asChild>
+              <Link to="new">{t("adminUsersView.button.createNew")}</Link>
+            </Button>
+            <Button onClick={() => setIsImportModalOpen(true)}>
+              {t("adminUsersView.button.import")}
+            </Button>
+            <EditDropdown dropdownItems={dropdownItems} />
+          </div>
         </div>
+        <div className="flex items-center justify-between gap-2">
+          <SearchFilter
+            filters={filterConfig}
+            values={searchParams}
+            onChange={handleFilterChange}
+            isLoading={isPending}
+          />
+        </div>
+        <Table className="border bg-neutral-50">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={() => handleRowClick(row.original.id)}
+                className="cursor-pointer hover:bg-neutral-100"
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-      <Table className="border bg-neutral-50">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-              onClick={() => handleRowClick(row.original.id)}
-              className="cursor-pointer hover:bg-neutral-100"
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell key={cell.id} className={cn({ "!w-12": index === 0 })}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    </PageWrapper>
   );
 };
 

@@ -19,6 +19,7 @@ import { useDeleteManyCategories } from "~/api/mutations/admin/useDeleteManyCate
 import { useCategoriesSuspense, usersQueryOptions } from "~/api/queries";
 import { CATEGORIES_QUERY_KEY } from "~/api/queries/useCategories";
 import { queryClient } from "~/api/queryClient";
+import { PageWrapper } from "~/components/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -149,6 +150,7 @@ const Categories = () => {
   ];
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -162,7 +164,6 @@ const Categories = () => {
   });
 
   const selectedCategories = table.getSelectedRowModel().rows.map((row) => row.original.id);
-
   const handleDelete = () => {
     try {
       if (selectedCategories.length === 1) {
@@ -225,97 +226,104 @@ const Categories = () => {
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="flex items-center justify-between gap-2">
-        <Link to="new">
-          <Button variant="outline">{t("adminCategoriesView.button.createNew")}</Button>
-        </Link>
-        <SearchFilter
-          filters={filterConfig}
-          values={searchParams}
-          onChange={handleFilterChange}
-          isLoading={isPending}
-        />
-        <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
-          <p
-            className={cn("text-sm", {
-              "text-neutral-500": isEmpty(selectedCategories),
-              "text-neutral-900": !isEmpty(selectedCategories),
-            })}
-          >
-            {t("common.other.selected")} ({selectedCategories.length})
-          </p>
-
-          <Dialog>
-            <DialogTrigger disabled={isEmpty(selectedCategories)}>
-              <Button
-                size="sm"
-                className="flex items-center gap-x-2"
-                disabled={isEmpty(selectedCategories)}
-              >
-                <Trash className="h-3 w-3" />
-                <span className="text-xs">{t("adminCategoriesView.button.deleteSelected")}</span>
-              </Button>
-            </DialogTrigger>
-            <DialogPortal>
-              <DialogOverlay className="bg-primary-400 opacity-65" />
-              <DialogContent className="max-w-md">
-                <DialogTitle className="text-xl font-semibold text-neutral-900">
-                  {getDeleteModalTitle()}
-                </DialogTitle>
-                <DialogDescription className="mt-2 text-sm text-neutral-600">
-                  {getDeleteModalDescription()}
-                </DialogDescription>
-                <div className="mt-6 flex justify-end gap-4">
-                  <DialogClose>
-                    <Button variant="ghost" className="text-primary-800">
-                      {t("common.button.cancel")}
-                    </Button>
-                  </DialogClose>
-                  <DialogClose>
-                    <Button
-                      onClick={handleDelete}
-                      className="bg-error-500 text-white hover:bg-error-600"
-                    >
-                      {t("common.button.delete")}
-                    </Button>
-                  </DialogClose>
-                </div>
-              </DialogContent>
-            </DialogPortal>
-          </Dialog>
-        </div>
-      </div>
-      <Table className="border bg-neutral-50">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => (
-                <TableHead key={header.id} className={cn({ "size-12": index === 0 })}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              data-state={row.getIsSelected() && "selected"}
-              onClick={() => handleRowClick(row.original.id)}
-              className="cursor-pointer hover:bg-neutral-100"
+    <PageWrapper
+      breadcrumbs={[
+        { title: t("adminCategoriesView.breadcrumbs.dashboard"), href: "/" },
+        { title: t("adminCategoriesView.breadcrumbs.categories"), href: "/admin/categories" },
+      ]}
+    >
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between gap-2">
+          <Link to="new">
+            <Button variant="outline">{t("adminCategoriesView.button.createNew")}</Button>
+          </Link>
+          <SearchFilter
+            filters={filterConfig}
+            values={searchParams}
+            onChange={handleFilterChange}
+            isLoading={isPending}
+          />
+          <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
+            <p
+              className={cn("text-sm", {
+                "text-neutral-500": isEmpty(selectedCategories),
+                "text-neutral-900": !isEmpty(selectedCategories),
+              })}
             >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell key={cell.id} className={cn({ "size-12": index === 0 })}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+              {t("common.other.selected")} ({selectedCategories.length})
+            </p>
+
+            <Dialog>
+              <DialogTrigger disabled={isEmpty(selectedCategories)}>
+                <Button
+                  size="sm"
+                  className="flex items-center gap-x-2"
+                  disabled={isEmpty(selectedCategories)}
+                >
+                  <Trash className="size-3" />
+                  <span className="text-xs">{t("adminCategoriesView.button.deleteSelected")}</span>
+                </Button>
+              </DialogTrigger>
+              <DialogPortal>
+                <DialogOverlay className="bg-primary-400 opacity-65" />
+                <DialogContent className="max-w-md">
+                  <DialogTitle className="text-xl font-semibold text-neutral-900">
+                    {getDeleteModalTitle()}
+                  </DialogTitle>
+                  <DialogDescription className="mt-2 text-sm text-neutral-600">
+                    {getDeleteModalDescription()}
+                  </DialogDescription>
+                  <div className="mt-6 flex justify-end gap-4">
+                    <DialogClose>
+                      <Button variant="ghost" className="text-primary-800">
+                        {t("common.button.cancel")}
+                      </Button>
+                    </DialogClose>
+                    <DialogClose>
+                      <Button
+                        onClick={handleDelete}
+                        className="bg-error-500 text-white hover:bg-error-600"
+                      >
+                        {t("common.button.delete")}
+                      </Button>
+                    </DialogClose>
+                  </div>
+                </DialogContent>
+              </DialogPortal>
+            </Dialog>
+          </div>
+        </div>
+        <Table className="border bg-neutral-50">
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => (
+                  <TableHead key={header.id} className={cn({ "size-12": index === 0 })}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                onClick={() => handleRowClick(row.original.id)}
+                className="cursor-pointer hover:bg-neutral-100"
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell key={cell.id} className={cn({ "size-12": index === 0 })}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </PageWrapper>
   );
 };
 

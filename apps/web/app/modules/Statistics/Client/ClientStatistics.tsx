@@ -3,9 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
 import { useUserStatistics } from "~/api/queries/useUserStatistics";
-import { Gravatar } from "~/components/Gravatar";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Avatar } from "~/components/ui/avatar";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { parseRatesChartData } from "~/modules/Statistics/utils";
 
 import {
@@ -89,9 +88,11 @@ export default function ClientStatistics() {
           <p className="h5 2xl:h2 text-neutral-950">
             {t("clientStatisticsView.header")} {user?.firstName}
           </p>
-          <Avatar className="size-12">
-            <Gravatar email={user?.email} />
-          </Avatar>
+          <UserAvatar
+            className="size-12"
+            userName={`${user?.firstName} ${user?.lastName}`}
+            profilePictureUrl={user?.profilePictureUrl}
+          />
         </div>
         <div className="grid h-full grid-cols-1 flex-col-reverse items-center gap-x-7 gap-y-4 2xl:h-full 2xl:grid-cols-[1fr_384px]">
           <div className="flex h-full w-full flex-col gap-y-4 2xl:gap-x-4 2xl:gap-y-6">

@@ -26,11 +26,11 @@ export class StudentLessonProgressController {
     @CurrentUser("userId") currentUserId: UUIDType,
     @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.studentLessonProgressService.markLessonAsCompleted(
+    await this.studentLessonProgressService.markLessonAsCompleted({
       id,
-      currentUserId,
-      currentUserRole,
-    );
+      studentId: currentUserId,
+      userRole: currentUserRole,
+    });
 
     return new BaseResponse({ message: "Lesson marked as completed" });
   }

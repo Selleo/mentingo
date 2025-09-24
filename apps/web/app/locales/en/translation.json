@@ -2,6 +2,7 @@
   "common": {
     "button": {
       "save": "Save",
+      "saving": "Saving...",
       "delete": "Delete",
       "create": "Create",
       "cancel": "Cancel",
@@ -13,14 +14,16 @@
       "goBack": "Go back",
       "ignore": "Ignore",
       "clearAll": "Clear All",
-      "validate": "Validate"
+      "validate": "Validate",
+      "edit": "Edit",
+      "uploading": "Uploading..."
     },
     "tooltip": {
       "soon": "Cooming soon"
     },
     "roles": {
       "admin": "Admin",
-      "teacher": "Content creator",
+      "contentCreator": "Content creator",
       "student": "Student"
     },
     "error": {
@@ -30,15 +33,19 @@
       "active": "Active",
       "archived": "Archived",
       "selected": "Selected",
-      "allStatuses": "All statuses",
+      "allStatuses": "All Statuses",
       "draft": "Draft",
       "all": "All",
       "search": "Search",
       "published": "Published",
+      "private": "Private",
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
-      "copyUrl": "The URL address was copied to the clipboard"
-    }
+      "copyUrl": "The URL address was copied to the clipboard",
+      "appVersion": "App Version: {{version}}"
+    },
+    "continueWithGoogle": "Continue with Google",
+    "continueWithMicrosoft": "Continue with Microsoft"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -46,6 +53,19 @@
     "replace": "Click to replace",
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully"
+    },
+    "details": {
+      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 100MB)",
+      "presentation": "PPT/PPTX (max. to 100MB)"
+    },
+    "remove": {
+      "video": "Remove video",
+      "presentation": "Remove presentation"
+    }
+  },
+  "deleteFile": {
+    "toast": {
+      "success": "File deleted successfully"
     }
   },
   "adminScorm": {
@@ -111,9 +131,49 @@
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
+    "providerInformation": "Provider Info",
     "browseCourses": "Browse Courses",
+    "announcements": "Announcements",
+    "promotionCodes": "Promotion Codes",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
+    }
+  },
+  "providerInformation": {
+    "title": "Provider Information",
+    "description": "Information about your company that will be visible to users",
+    "editTitle": "Edit Provider Information",
+    "companyName": "Company Name",
+    "registeredAddress": "Registered Address",
+    "taxNumber": "Tax Number (NIP)",
+    "emailAddress": "Email Address",
+    "courtRegisterNumber": "Court Register Number (KRS)",
+    "noDataAvailable": "No provider information available",
+    "createSuccess": "Provider information created successfully",
+    "updateSuccess": "Provider information updated successfully",
+    "createError": "Failed to create provider information",
+    "updateError": "Failed to update provider information",
+    "saveError": "Failed to save provider information",
+    "validation": {
+      "nipMustBe10Digits": "NIP must be 10 digits",
+      "krsMustBe10Digits": "KRS must be 10 digits",
+      "invalidEmailFormat": "Invalid email format"
+    },
+    "noCompanyInformationAvailable": "No company information available",
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "providerInformation": "Provider Information"
+    }
+  },
+  "changeUserLanguageView": {
+    "header": "Change Language",
+    "subHeader": "Select your preferred language",
+    "field": {
+      "language": "Language"
+    },
+    "options": {
+      "english": "English",
+      "polish": "Polish"
     }
   },
   "changeUserEmailView": {
@@ -126,11 +186,25 @@
       "email": "Email is required"
     }
   },
+  "ssoEnforcementView": {
+    "header": "SSO Enforcement",
+    "subHeader": "Enforce SSO login for all users",
+    "description": "This switch will enforce Google/Microsoft login for all users. If disabled, users will be able to log in using the traditional login form.",
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "ssoEnforcementUpdatedSuccessfully": "SSO enforcement updated successfully",
+      "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement"
+    }
+  },
   "mostPopularCoursesView": {
     "header": "Most Popular",
     "subHeader": "Your top 5 Courses",
     "other": {
-      "noData": "No data available"
+      "noData": "No data available",
+      "students": "Students"
     }
   },
   "enrollmentChartView": {
@@ -149,11 +223,10 @@
       "confirmPassword": "Confirm password"
     },
     "validation": {
-      "passwordMinLength": "Password must be at least 8 characters",
-      "passwordsDontMatch": "Passwords don't match"
+      "passwordsDontMatch": "Passwords do not match"
     },
     "button": {
-      "changePassword": "Change password"
+      "changePassword": "Create password"
     }
   },
   "changePasswordView": {
@@ -172,15 +245,56 @@
       "passwordCreatedSuccessfully": "Password created successfully"
     }
   },
-  "teacherView": {
+  "passwordValidationDisplay": {
+    "title": "Password requirements",
+    "header": "Your password must contain:",
+    "passwordMinLength": "at least 8 characters",
+    "passwordUppercase": "at least one uppercase letter",
+    "passwordLowercase": "at least one lowercase letter",
+    "passwordNumber": "at least one number",
+    "passwordSpecial": "at least one special character",
+    "passwordsDontMatch": "Passwords do not match"
+  },
+  "contentCreatorView": {
     "button": {
       "collapse": "Collapse",
-      "showMore": "Show more"
+      "showMore": "Show more",
+      "edit": "Edit",
+      "share": "Share profile",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "deleteProfilePicture": "Delete profile picture"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard"
     },
+    "field": {
+      "firstName": "Name",
+      "firstNamePlaceholder": "Enter your name",
+      "lastName": "Surname",
+      "lastNamePlaceholder": "Enter your surname",
+      "contactEmail": "Email address",
+      "contactEmailPlaceholder": "Enter your email address",
+      "contactPhone": "Phone number",
+      "contactPhonePlaceholder": "Enter your phone number",
+      "jobTitle": "Title",
+      "jobTitlePlaceholder": "Enter your title",
+      "description": "Bio-note",
+      "descriptionPlaceholder": "Enter a brief bio-note",
+      "uploadThumbnailLabel": "Upload Thumbnail"
+    },
+    "toast": {
+      "profileLinkCopied": "Profile link copied!",
+      "profileLinkCopyError": "Error copying profile link!"
+    },
     "other": {
+      "personalInfoTitle": "Main information",
+      "personalInfoDescription": "Manage your basic account information",
+      "aboutTitle": "About",
+      "aboutDescription": "Tell more about yourself",
+      "appearanceTitle": "Appearance",
+      "appearanceDescription": "Upload your profile picture",
+      "pageTitle": "Profile",
       "about": "About",
       "contact": "Contact",
       "courses": "Courses",
@@ -193,6 +307,7 @@
     "toast": {
       "userUpdatedSuccessfully": "User updated successfully",
       "userDetailsUpdatedSuccessfully": "User details updated successfully",
+      "updatedSelectedUsersSuccessfully": "Successfully updated selected users",
       "deletedSelectedUsersSuccessfully": "Successfully deleted selected users"
     },
     "field": {
@@ -215,7 +330,8 @@
       "continue": "Continue",
       "start": "Start",
       "readMore": "Read More",
-      "tryAgain": "Try again"
+      "tryAgain": "Try again",
+      "view": "View"
     },
     "other": {
       "completedCourses": "Completed Courses",
@@ -260,6 +376,60 @@
       "noData": "No data"
     }
   },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Promotion code created successfully",
+      "updatedSuccessfully": "Promotion code updated successfully"
+    },
+    "headers": {
+      "create": "Create promotion code",
+      "update": "Update promotion code"
+    },
+    "status": {
+      "active": "Active",
+      "deactivated": "Deactivated",
+      "expired": "Expired",
+      "usageLimitReached": "Usage limit reached"
+    },
+    "field": {
+      "code": "Code",
+      "status": "Status",
+      "uses": "Uses count",
+      "associatedCourses": "Associated Courses",
+      "discountType": "Discount Type",
+      "discountTypePercent": "Percent",
+      "discountTypeFixed": "Fixed",
+      "discountValue": "Discount Value",
+      "maxRedemptions": "Max Redemptions",
+      "expiresAt": "Expires At",
+      "assignedCourses": "Assigned Courses",
+      "type": "Type",
+      "associateCourse": {
+        "checkAll": "Apply to all courses"
+      },
+      "discount": "Discount",
+      "createdAt": "Created At"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "promotionCodes": "Promotion Codes",
+      "createNew": "Create new",
+      "update": "Update",
+      "back": "Back"
+    },
+    "button": {
+      "createNew": "Create new",
+      "createCoupon": "Create promotion code",
+      "deactivatePromotionCode": "This promotion code is active",
+      "activatePromotionCode": "This promotion code is not active"
+    },
+    "other": {
+      "noCourses": "No courses",
+      "usageInfo": "Usage information",
+      "usageAmount": "Usage amount",
+      "baseInfo": "Basic information"
+    }
+  },
   "adminCoursesView": {
     "filters": {
       "placeholder": {
@@ -269,7 +439,8 @@
       },
       "other": {
         "draft": "Draft",
-        "published": "Published"
+        "published": "Published",
+        "private": "Private"
       }
     },
     "field": {
@@ -286,7 +457,8 @@
         "video": "Video",
         "presentation": "Presentation",
         "text": "Text",
-        "quiz": "Quiz"
+        "quiz": "Quiz",
+        "ai_mentor": "AI Mentor"
       }
     },
     "other": {
@@ -306,7 +478,8 @@
     },
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
-      "deleteCourseFailed": "Failed to delete course"
+      "deleteCourseFailed": "Failed to delete course",
+      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first."
     }
   },
   "adminCategoriesView": {
@@ -334,6 +507,12 @@
     "toast": {
       "deleteCategorySuccessfully": "Category deleted successfully",
       "deleteCategoryFailed": "Failed to delete category"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "categories": "Categories",
+      "createNew": "Create new category",
+      "back": "Back"
     }
   },
   "adminCategoryView": {
@@ -354,13 +533,19 @@
     "error": {
       "categoryNotFound": "Category not found",
       "categoryIdNotFound": "Category ID not found"
+    },
+    "breadcrumbs": {
+      "categories": "Categories",
+      "categoryDetails": "Category details",
+      "back": "Back"
     }
   },
   "adminUsersView": {
     "filters": {
       "placeholder": {
         "searchByKeyword": "Search by keyword...",
-        "roles": "Roles"
+        "roles": "Roles",
+        "groups": "Groups"
       }
     },
     "field": {
@@ -369,14 +554,70 @@
       "email": "Email",
       "role": "Role",
       "status": "Status",
-      "createdAt": "Created At"
+      "createdAt": "Created At",
+      "group": "Group"
     },
     "other": {
       "selected": "Selected"
     },
+    "import": {
+      "toast": {
+        "success": "Import completed successfully.\nImported {{ importedUsersAmount }} users.\nSkipped {{ skippedUsersAmount }} existing users."
+      }
+    },
     "button": {
       "createNew": "Create new",
-      "deleteSelected": "Delete selected"
+      "deleteSelected": "Delete selected",
+      "edit": "Edit",
+      "import": "Import users"
+    },
+    "dropdown": {
+      "changeRole": "Change role",
+      "changeGroup": "Change group",
+      "delete": "Delete"
+    },
+    "modal": {
+      "title": {
+        "delete": "Do you want to delete these accounts?",
+        "role": "Modify roles",
+        "group": "Modify groups",
+        "confirmation": "Are you sure you want to proceed?",
+        "import": "Import users",
+        "importResult": "Import result"
+      },
+      "button": {
+        "delete": "Delete",
+        "role": "Save",
+        "group": "Save",
+        "continue": "Confirm"
+      },
+      "description": {
+        "delete": "Are you sure you want to delete these accounts? This action is irreversible.",
+        "confirmationForGroup_one": "You will change group to {{ group }} for 1 user",
+        "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
+        "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
+        "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName.",
+        "noUsersImported": "No users were imported.",
+        "noUsersSkipped": "No users were skipped."
+      },
+      "placeholder": {
+        "group": "Select group",
+        "role": "Select role"
+      },
+      "note": {
+        "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created."
+      },
+      "tabs": {
+        "imported": "Imported",
+        "skipped": "Skipped"
+      }
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "createNew": "Create new user",
+      "back": "Back"
     }
   },
   "adminUserView": {
@@ -384,40 +625,55 @@
     "subHeader": "Fill in the details to create a new user. Click save when you're done.",
     "editUserHeader": "User Information",
     "placeholder": {
-      "role": "Select a role"
+      "role": "Select a role",
+      "groupId": "Select a group"
     },
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email",
       "role": "Role",
-      "status": "Status"
+      "status": "Status",
+      "groupId": "Group"
     },
     "toast": {
-      "userCreatedSuccessfully": "User created successfully"
+      "userCreatedSuccessfully": "User created successfully",
+      "userWithAttemptsError": "Cannot delete user with linked quiz results. Only anonymization and archiving are available.",
+      "userWithCreatedCoursesError": "Cannot delete a user who is the author of existing courses. Only anonymization and archiving are available."
     },
     "button": {
       "createUser": "Create user"
     },
     "error": {
       "userNotFound": "User not found"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "userDetails": "User details",
+      "back": "Back"
     }
   },
   "adminGroupsView": {
     "name": "Group name",
-    "description": "Description",
+    "characteristic": "Characteristic",
     "buttons": {
       "create": "Create new",
       "deleteSelected": "Delete selected"
     },
     "newGroup": {
       "header": "Create New Group",
-      "subheader": "Fill in the details to create a new group. Click save when you're done.",
+      "card": {
+        "header": "Detail information",
+        "subheader": "Define your group name and their characteristic",
+        "footer": "Remember, group members will see this description. AI Mentor will use it in conversations."
+      },
       "fields": {
         "name": "Name",
-        "description": "Description"
+        "characteristic": "Characteristic"
       },
-      "submit": "Create group"
+      "cancel": "Cancel",
+      "submit": "Publish"
     },
     "updateGroup": {
       "header": "Update group",
@@ -434,6 +690,13 @@
       "description": "Are you sure you want to delete these groups?",
       "cancel": "Cancel",
       "submit": "Delete"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "groups": "Groups",
+      "createNew": "Create new",
+      "editGroup": "Edit group",
+      "back": "Back"
     }
   },
   "enrollCourseView": {
@@ -459,11 +722,14 @@
       "status": "Status",
       "pricing": "Pricing",
       "preview": "Preview",
-      "enrolledStudents": "Enrolled students"
+      "enrolledStudents": "Enrolled students",
+      "testAiMentor": "Test AI Mentor"
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
-      "courseUpdatedSuccessfully": "Course updated successfully"
+      "courseUpdatedSuccessfully": "Course updated successfully",
+      "certificateUpdatedSuccessfully": "Certificate updated successfully",
+      "certificateUpdateError": "Error updating certificate"
     },
     "settings": {
       "breadcrumbs": {
@@ -472,7 +738,13 @@
         "createNew": "Create new"
       },
       "button": {
-        "removeThumbnail": "Remove Thumbnail"
+        "removeThumbnail": "Remove Thumbnail",
+        "includesCertificate": "Includes certificate",
+        "doesNotIncludeCertificate": "Does not include certificate"
+      },
+      "selectButton": {
+        "uploadFile": "Upload file",
+        "External": "External (URL)"
       },
       "sideSection": {
         "header": "Card Preview",
@@ -498,7 +770,8 @@
       },
       "other": {
         "charactersLeft": "Characters left",
-        "reachedCharactersLimit": "You have reached the character limit."
+        "reachedCharactersLimit": "You have reached the character limit.",
+        "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit."
       },
       "header": "Create new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
@@ -522,6 +795,7 @@
         "removePresentationLesson": "Are you sure you want to delete this presentation lesson from chapter?",
         "removeTextLesson": "Are you sure you want to delete this text lesson from chapter?",
         "removeQuizLesson": "Are you sure you want to delete this quiz lesson from chapter?",
+        "removeAiMentorLesson": "Are you sure you want to delete this AI Mentor lesson from chapter?",
         "removeChapter": "Are you sure you want to delete this chapter?",
         "removeQuestion": "Are you sure you want to delete question?",
         "removeContent": "Are you sure you want to delete content?"
@@ -557,17 +831,41 @@
         "breadcrumbs": {
           "back": "Back"
         },
+        "settings": {
+          "title": "Settings",
+          "passingThreshold": "Passing threshold (%)",
+          "attemptsLimit": "Attempts limit",
+          "quizCooldownInHours": "Time lock after failed attempts (in hours)",
+          "numberOfQuestions": "{{count1}} of {{count2}} questions",
+          "noQuestions": "No questions"
+        },
+        "tooltip": {
+          "switch": "If enabled, the student has a limited number of quiz attempts.",
+          "passingThreshold": "The percentage threshold for passing the quiz. If a student reaches this score, the quiz will be considered passed.",
+          "attemptsLimit": "Number of quiz attempts allowed before time lock is triggered.",
+          "quizCooldownInHours": "Duration of the quiz lock after all attempts are used."
+        },
         "validation": {
           "optionTextRequired": "Option text is required",
           "optionTextMaxLength": "Text cannot be longer than 250 characters.",
           "atLeastOneOptionRequired": "At least one option is required",
           "imageRequired": "Image is required",
           "descriptionLength": "Description must have at least 10 characters.",
-          "descritpionMaxLength": "Content can have a maximum of 5000 characters.",
+          "descriptionMaxLength": "Content can have a maximum of 5000 characters.",
           "atLeastOneOptionCorrect": "At least one option must be marked as correct for question.",
           "allOptionsCorrect": "All options must be correct",
           "titleRequired": "Title is required",
-          "descriptionRequired": "Description is required"
+          "descriptionRequired": "Description is required",
+          "aiMentorInstructionsRequired": "AI Mentor Instructions are required",
+          "aiMentorInstructionsMaxLength": "AI Mentor Instructions are too long (max 2000 characters)",
+          "completionConditionsRequired": "Completion Conditions are required",
+          "completionConditionsMaxLength": "Completion Conditions are too long (max 1000 characters)",
+          "passThresholdMin": "Pass threshold must be at least 1",
+          "passThresholdMax": "Pass threshold cannot exceed 10",
+          "titleMaxLength": "Title is too long (max 255 characters)",
+          "maxFileSize": "File size must be below {{ MAX_MB_PER_FILE }} MB",
+          "maxFileNumber_one": "You cannot upload more than 1 file",
+          "maxFileNumber_other": "You cannot upload more than {{ count }} files"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -577,6 +875,10 @@
           "fileLessonCreatedSuccessfully": "File item created successfully",
           "textLessonCreatedSuccessfully": "Text lesson created successfully",
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
+          "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
+          "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
+          "aiMentorLessonFileAddedSuccessfully": "AI Mentor lesson files uploaded successfully",
+          "aiMentorLessonFileDeletedSuccessfully": "AI Mentor lesson files deleted successfully",
           "lessonUpdatedSuccessfully": "Lesson updated successfully",
           "textLessonUpdatedSuccessfully": "Text lesson updated successfully",
           "fileLessonUpdatedSuccessfully": "File item updated successfully",
@@ -584,14 +886,22 @@
         },
         "field": {
           "title": "Title",
-          "description": "Description",
+          "sourceType": "Source Type",
           "video": "Upload video",
+          "presentation": "Upload presentation",
+          "description": "Description",
           "questions": "Questions",
           "options": "Options",
           "image": "Image",
           "type": "Type",
           "words": "Words",
-          "sentence": "Sentence"
+          "sentence": "Sentence",
+          "aiMentorInstructions": "AI Mentor Instructions",
+          "completionConditions": "Completion Conditions",
+          "passThreshold": "Pass Threshold",
+          "additionalContext": "Additional context",
+          "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
+          "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
         },
         "placeholder": {
           "title": "Provide lesson title...",
@@ -600,7 +910,11 @@
           "matchedWords": "Matched words",
           "singleChoice": "Single choice",
           "multipleChoice": "Multiple choice",
-          "enterWord": "Enter a word"
+          "enterWord": "Enter a word",
+          "enterURL": "Enter URL…",
+          "aiMentorInstructions": "Describe how the AI Mentor should behave during the lesson...",
+          "completionConditions": "List what the student must achieve to pass this lesson...",
+          "passThreshold": "e.g., 70%"
         },
         "other": {
           "lessonNumber": "Number of lessons",
@@ -608,6 +922,7 @@
           "text": "Text",
           "video": "Video",
           "quiz": "Quiz",
+          "aiMentor": "AI Mentor",
           "correct": "Correct",
           "true": "True",
           "false": "False",
@@ -628,9 +943,37 @@
           "videoLessonDescription": "Choose this type if you want to embed video content files like MP4.",
           "presentationLessonDescription": "Choose this type if you want to embed presentations files like PPTX.",
           "quizLessonDescription": "This type allows you to build quizzes for your chapter using different types of questions.",
+          "aiMentorLessonDescription": "Create interactive AI-powered lessons where students can engage with a virtual mentor.",
           "leaveContentHeader": "Are you sure you want to leave this question editor?",
           "leaveContentBody": "It will delete all unsaved progress",
-          "leaveContentBodyValidate": "If you want to save the changes, you must first validate the form"
+          "leaveContentBodyValidate": "If you want to save the changes, you must first validate the form",
+          "aiMentorInstructionsTooltip": "Describe how the AI Mentor should behave during the lesson. Include the context, role, or scenario that the AI should follow. This defines how the AI will guide the conversation.",
+          "completionConditionsTooltip": "List what the student must achieve to pass this lesson. Provide clear and measurable points. The AI will use this list to check progress. You can also define a pass threshold (e.g. percentage or minimum number of points to cover). If no threshold is provided, all conditions must be met to pass the lesson.",
+          "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
+          "suggestedExamples": "Suggested examples",
+          "charactersLeft": "characters left",
+          "optional": "optional",
+          "overwriteContent": "Overwrite content",
+          "overwriteContentDescription": "This will replace your current content with the selected example. Are you sure you want to continue?",
+          "scenarioSimulation": "Scenario Simulation",
+          "problemSolving": "Problem Solving",
+          "creativeTask": "Creative Task",
+          "knowledgeSharing": "Knowledge Sharing Dialogue",
+          "aiMentorSuggestionExamples": {
+            "instructions": {
+              "scenarioSimulation": "You play the role of a business client who is looking for a supplier of software development services. You have specific requirements: the app must be ready within 3 months, you have a limited budget, and you expect clear communication. The student plays the role of the sales representative who wants to win your business. The AI Mentor should respond as the client, asking questions and expressing concerns.",
+              "problemSolving": "You play the role of an employee who requests a salary increase. You believe you deserve it because of your recent contributions. However, the company currently has no available budget for raises. The student plays the manager who needs to handle the conversation constructively, showing empathy and trying to find an alternative solution.",
+              "creativeTask": "You ask the student to propose an idea for a new service that the company could offer to its customers. Your role is to encourage creativity, ask follow-up questions, and help the student refine their concept.",
+              "knowledgeSharing": "You play the role of an experienced mentor who shares knowledge about time management techniques. The conversation is informal: you introduce concepts, give examples, and encourage the student to reflect. Occasionally you ask light, open-ended questions to check understanding. The goal is to guide, not to test."
+            },
+            "conditions": {
+              "scenarioSimulation": "<ul><li>The student asks about the client's budget.</li><li>The student asks about the timeline.</li><li>The student uses SPIN selling or another sales technique.</li><li>The student identifies the client's key pain points.</li><li>The student offers a proposal that matches the client's constraints.</li></ul><strong>Threshold:</strong> at least 3 out of 5 conditions must be met.",
+              "problemSolving": "<ul><li>The student acknowledges the employee's contribution.</li><li>The student explains the budget situation honestly.</li><li>The student proposes a non-financial alternative (e.g. additional benefits, development opportunity).</li><li>The student agrees to revisit the topic at a later date.</li><li>The student maintains a respectful, supportive tone.</li></ul><strong>Threshold:</strong> at least 3 out of 5 conditions must be met.",
+              "creativeTask": "<ul><li>The student presents an original idea.</li><li>The student explains who the target audience is.</li><li>The student describes how the service could provide value to customers.</li><li>The student identifies potential challenges.</li></ul><em>(No threshold defined — all conditions must be met.)</em>",
+              "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined — all conditions recommended, but not mandatory for passing.)</em>"
+            }
+          },
+          "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
         }
       }
     },
@@ -640,7 +983,9 @@
       "draftHeader": "Draft",
       "draftBody": "Students cannot purchase or enroll in this course. For those already enrolled, the course will not appear in their Student Course List.",
       "publishedHeader": "Published",
-      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard."
+      "publishedBody": "Students can purchase, enroll in, and access the course content. Once enrolled, the course will be displayed on their Student Dashboard.",
+      "privateHeader": "Private",
+      "privateBody": "Students cannot purchase nor enroll in this course. For those enrolled (e.g. by admin), the course will appear in their Student Course list and they will be able to go through it."
     },
     "pricing": {
       "header": "Pricing",
@@ -682,11 +1027,17 @@
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
       },
       "successResponse": "students have been assigned to the course."
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "myCourses": "My courses",
+      "back": "Back"
     }
   },
   "registerView": {
     "header": "Sign Up",
     "subHeader": "Enter your information to create an account",
+    "subHeaderSSO": "Sign up using your Google/Microsoft account",
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
@@ -694,7 +1045,8 @@
       "password": "Password"
     },
     "other": {
-      "alreadyHaveAccount": "Already have an account?"
+      "alreadyHaveAccount": "Already have an account?",
+      "orContinueWith": "Or continue with"
     },
     "button": {
       "createAccount": "Create an account",
@@ -703,8 +1055,7 @@
     "validation": {
       "firstName": "First name is required",
       "lastName": "Last name is required",
-      "email": "Invalid email",
-      "password": "Password must be at least 8 characters"
+      "email": "Invalid email"
     }
   },
   "courseChapterView": {
@@ -736,6 +1087,7 @@
   "loginView": {
     "header": "Login",
     "subHeader": "Enter your email below to login to your account",
+    "subHeaderSSO": "Login using your Google/Microsoft account",
     "validation": {
       "email": "Invalid email",
       "password": "Password is required"
@@ -744,7 +1096,8 @@
       "forgotPassword": "Forgot your password?",
       "dontHaveAccount": "Don't have an account?",
       "rememberMe": "Remember me",
-      "signUp": "Sign up"
+      "signUp": "Sign up",
+      "orContinueWith": "Or continue with"
     },
     "button": {
       "login": "Login"
@@ -758,13 +1111,19 @@
     "other": {
       "cannotFindCourses": "We could not find any courses",
       "changeSearchCriteria": "Please change the search criteria or try again later",
-      "freeLessons": "Free Lessons!"
+      "freeLessons": "Free Lessons!",
+      "successfullyEnrolledToCourse": "Successfully enrolled in the course"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "availableCourses": "Available Courses"
     },
     "button": {
       "continue": "Continue",
       "enroll": "Enroll",
       "view": "View",
-      "readMore": "Read More"
+      "readMore": "Read More",
+      "playChapter": "Play chapter"
     },
     "enrolledCourses": {
       "header": "Your Courses",
@@ -779,6 +1138,13 @@
           "categories": "Categories",
           "sort": "Sort"
         }
+      },
+      "headerOptions": {
+        "image": "Image",
+        "title": "Course Name",
+        "category": "Category",
+        "description": "Description",
+        "author": "Author"
       }
     }
   },
@@ -806,26 +1172,42 @@
       "answers": "Answers:",
       "true": "True",
       "false": "False",
-      "briefResponseInstruction": "Instruction: Provide a brief response (1-2 sentences).",
-      "detailedResponseInstruction": "Instruction: Write a detailed response (3-5 sentences).",
+      "oneOrTwoWordSentence": "Instruction: Provide a brief response (1-2 sentences).",
+      "threeOrFiveWordSentence": "Instruction: Write a detailed response (3-5 sentences).",
       "single": "Single",
       "multiple": "Multiple",
       "fillInTheBlanks": "Fill in the blanks.",
       "selectQuestion": "select question.",
-      "trueOrFalseQuestion": "True or false question."
+      "trueOrFalseQuestion": "True or false question.",
+      "multipleChoice": "Multiple choice question.",
+      "singleChoice": "Single choice question",
+      "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
+      "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)"
+    },
+    "aiMentor": {
+      "title": "AI Mentor Session",
+      "description": "This is an AI-powered mentoring session. The AI will guide you through the lesson based on the instructor's guidelines."
     },
     "placeholder": {
       "openQuestion": "Type your answer here"
     },
+    "tooltip": {
+      "retakeAvailableIn": "Locked for {{time}} hours after last retake.",
+      "cooldown": "Quiz will be locked for {{time}} hours after the last attempt.",
+      "noCooldown": "No cooldown period.",
+      "beta": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
+    },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
-      "lessonTitle": "Lesson"
+      "availableCourses": "Available Courses",
+      "yourCourses": "Your Courses",
+      "back": "Back"
     },
     "button": {
       "previous": "Previous",
       "complete": "Complete",
       "next": "Next",
-      "submit": "Submit"
+      "submit": "Submit",
+      "retake": "Retake"
     },
     "sideSection": {
       "header": "Table of content:",
@@ -863,7 +1245,18 @@
       "multipleChoice": "Multiple choice question",
       "trueOfFalseChoice": "True or false question",
       "oneOrTwoWordSentence": "Provide a brief response (1-2 sentences).",
-      "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences)."
+      "threeOrFiveWordSentence": "Write a detailed response (3-5 sentences).",
+      "aiMentorLesson": {
+        "sendMessage": "Write a message...",
+        "check": "Check",
+        "aiMentorName": "AI Mentor",
+        "retake": "Retake",
+        "userName": "User",
+        "typing": "Typing a response...",
+        "send": "Send",
+        "retakeModalTitle": "Are you sure you want to retake the lesson?",
+        "retakeModalDescription": "This will reset your progress in this lesson. This action cannot be undone."
+      }
     },
     "sideSection": {
       "optionHeader": "Option",
@@ -885,14 +1278,255 @@
         "continueLearning": "Continue learning",
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
-        "goToTeacherPage": "Go to teacher page"
+        "goToContentCreatorPage": "Go to content creator page",
+        "repeatLessons": "Repeat lessons"
       }
+    },
+    "breadcrumbs": {
+      "availableCourses": "Available courses",
+      "yourCourses": "Your courses",
+      "back": "Back"
     }
   },
   "studentChapterView": {
     "chapterProgress": {
       "header": "Table of content:",
       "courseProgress": "Course progress"
+    },
+    "button": {
+      "open": "Open",
+      "continue": "Continue",
+      "playChapter": "Play chapter"
+    },
+    "other": {
+      "enrollmentRequired": "Enroll in the course to open.",
+      "purchaseRequired": "Unlock this lesson by purchasing the course."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "tabs": {
+      "account": "Account",
+      "organization": "Organization"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "settings": "Settings"
+    },
+    "toast": {
+      "error": {
+        "globalNotFound": "Global settings not found"
+      }
+    }
+  },
+  "certificateBackgroundUpload": {
+    "title": "Certificate Background Upload",
+    "description": "Upload a background image for the certificate.",
+    "button": {
+      "removeBackgroundImage": "Remove Background Image"
+    },
+    "other": {
+      "uploading": "Uploading..."
+    },
+    "toast": {
+      "success": "Certificate background image changed successfully",
+      "error": "Error changing certificate background image"
+    }
+  },
+  "adminPreferences": {
+    "header": "Administrator Global Preferences",
+    "subHeader": "Configure global system settings, user preferences, and administrative options",
+    "notificationSettings": "Notification Settings",
+    "courseSettings": "Course Settings",
+    "field": {
+      "newUserNotifications": "New User Notifications",
+      "newUserNotificationsDescription": "Receive notifications when a new user is created",
+      "coursesVisibility": "Show courses to visitors",
+      "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
+      "finishedCourseNotification": "Finished Course Notifications",
+      "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course"
+    },
+    "toast": {
+      "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
+      "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully",
+      "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
+      "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences"
+    }
+  },
+  "mfa": {
+    "setup": {
+      "title": "Setup Multi-Factor Authentication",
+      "description": "Follow the steps below to set up Multi-Factor Authentication (MFA) for your account.",
+      "scanQr": "Scan the QR code below with your authenticator app (Google Authenticator, Authy, etc).",
+      "manualEntry": "If you can't scan, enter the secret manually in your app.",
+      "enterCode": "Enter the 6-digit code from your app below and click 'Verify & Enable MFA'.",
+      "loadingQr": "Loading your QR code...",
+      "secretLabel": "Secret",
+      "tokenLabel": "MFA Token",
+      "verifyButton": "Verify & Enable MFA"
+    },
+    "verify": {
+      "title": "Verify Multi-Factor Authentication",
+      "description": "Follow the steps below to verify Multi-Factor Authentication (MFA) for your account.",
+      "openAuthenticator": "Open your authenticator app",
+      "enterCode": "Enter the 6-digit code from your app",
+      "verifyToken": "Verify your MFA token",
+      "tokenLabel": "MFA Token",
+      "toast": {
+        "success": "MFA has been successfully verified.",
+        "error": "MFA verification failed."
+      }
+    }
+  },
+  "MFAEnforcementView": {
+    "header": "Role based Multi-Factor Authentication Enforcement",
+    "subHeader": "Enforce MFA for specific user roles",
+    "description": "This setting allows you to enforce Multi-Factor Authentication (MFA) for specific user roles within your organization.",
+    "roles": {
+      "admin": "Administrator",
+      "student": "Student",
+      "content_creator": "Content Creator"
+    },
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "mfaEnforcementUpdatedSuccessfully": "MFA enforcement settings have been successfully updated.",
+      "mfaEnforcementUpdateFailed": "Failed to update MFA enforcement settings."
+    }
+  },
+  "progressBadge": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started",
+    "blocked": "Blocked"
+  },
+  "studentCertificateView": {
+    "header": "Certificates",
+    "informations": {
+      "loading": "Loading certificates...",
+      "noCertificates": "No certificates available yet. Complete courses to earn certificates.",
+      "failedToLoad": "Failed to load certificates. Please try again later.",
+      "failedToDownload": "Failed to download certificate. Please try again later."
+    },
+    "button": {
+      "download": "Download",
+      "preview": "Preview"
+    }
+  },
+  "announcements": {
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "announcements": "Announcements",
+      "createAnnouncement": "Create announcement"
+    },
+    "page": {
+      "header": "Announcements",
+      "tooltips": {
+        "markAsRead": "Mark as read"
+      },
+      "buttons": {
+        "new": "Create new"
+      }
+    },
+    "createPage": {
+      "header": "Create announcement",
+      "subheader": "Provide the details to set up an new announcement.",
+      "buttons": {
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      },
+      "fields": {
+        "title": "Title",
+        "content": "Content",
+        "group": "Group",
+        "everyone": "Everyone"
+      },
+      "placeholders": {
+        "title": "Enter title",
+        "content": "Write your announcement here...",
+        "group": "Select group",
+        "everyone": "Select everyone"
+      },
+      "validation": {
+        "title": {
+          "required": "Title is required",
+          "maxLength": "Title must be less than 120 characters"
+        },
+        "content": {
+          "required": "Content is required"
+        }
+      }
+    },
+    "buttons": {
+      "readMore": "Read more"
+    },
+    "other": {
+      "noNewAnnouncements": "No new announcements available for you today",
+      "of": "of"
+    },
+    "toast": {
+      "markedAsRead": "Announcements have been marked as read successfully",
+      "markAsReadFailed": "Failed to mark announcements as read",
+      "createdSuccessfully": "Announcement created successfully",
+      "createFailed": "Failed to create announcement"
+    }
+  },
+  "platformLogo": {
+    "header": "Platform Logo",
+    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logo Image"
+    },
+    "button": {
+      "removeLogo": "Remove Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Platform logo uploaded successfully",
+      "logoFetchError": "Error fetching platform logo"
+    }
+  },
+  "files": {
+    "import": {
+      "noFileUploaded": "No file uploaded",
+      "invalidFileData": "File upload failed - invalid file data",
+      "fileEmpty": "File is empty",
+      "requiredDataMissing": "Import failed – required data missing.",
+      "invalidFileType": "Invalid file type. Please upload a valid file.",
+      "userFailReason": {
+        "alreadyExists": "user with this email already exists"
+      }
+    }
+  },
+  "defaultCourseCurrencyView": {
+    "header": "Default Course Currency",
+    "subHeader": "Set the default currency for all new courses",
+    "toast": {
+      "defaultCourseCurrencyChangeSuccess": "Default course currency has been successfully updated",
+      "defaultCourseCurrencyChangeError": "Failed to update default course currency"
+    },
+    "select": {
+      "pln": {
+        "label": "Polish Zloty",
+        "sign": "zł"
+      },
+      "eur": {
+        "label": "Euro",
+        "sign": "€"
+      },
+      "usd": {
+        "label": "US Dollar",
+        "sign": "$"
+      },
+      "gbp": {
+        "label": "British Pound",
+        "sign": "£"
+      }
     }
   }
 }

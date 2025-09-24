@@ -2,6 +2,8 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
+import { coursesStatusOptions } from "./courseQuery";
+
 export const courseSchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
@@ -10,15 +12,18 @@ export const courseSchema = Type.Object({
   authorId: Type.Optional(UUIDSchema),
   author: Type.String(),
   authorEmail: Type.Optional(Type.String()),
+  authorAvatarUrl: Type.Union([Type.String(), Type.Null()]),
   category: Type.String(),
   courseChapterCount: Type.Number(),
   // completedChapterCount: Type.Number(),
   enrolledParticipantCount: Type.Number(),
   priceInCents: Type.Number(),
   currency: Type.String(),
-  isPublished: Type.Optional(Type.Boolean()),
+  status: Type.Optional(coursesStatusOptions),
   createdAt: Type.Optional(Type.String()),
   hasFreeChapters: Type.Optional(Type.Boolean()),
+  stripeProductId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  stripePriceId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const studentCourseSchema = Type.Object({
@@ -27,7 +32,7 @@ export const studentCourseSchema = Type.Object({
   enrolled: Type.Optional(Type.Boolean()),
 });
 
-export const coursesForTeacherSchema = Type.Object({
+export const coursesForContentCreatorSchema = Type.Object({
   ...studentCourseSchema.properties,
   authorId: UUIDSchema,
   authorEmail: Type.String(),
@@ -35,8 +40,8 @@ export const coursesForTeacherSchema = Type.Object({
 
 export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
-export const allCoursesForTeacherSchema = Type.Array(coursesForTeacherSchema);
+export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCreatorSchema);
 
 export type AllCoursesResponse = Static<typeof allCoursesSchema>;
 export type AllStudentCoursesResponse = Static<typeof allStudentCoursesSchema>;
-export type AllCoursesForTeacherResponse = Static<typeof allCoursesForTeacherSchema>;
+export type AllCoursesForContentCreatorResponse = Static<typeof allCoursesForContentCreatorSchema>;

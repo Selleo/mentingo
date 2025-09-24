@@ -18,27 +18,37 @@ A modern, scalable Learning Management System built with cutting-edge technologi
 
 </div>
 
-- [Overview](#overview)
-  - [Apps](#apps)
-  - [Packages](#packages)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Setup](#environment-setup)
-- [Database Setup](#database-setup)
-  - [Migrations](#migrations)
-  - [Database Seeding](#database-seeding)
-- [Development](#development)
-  - [Available Services](#available-services)
-- [Commands Reference](#commands-reference)
-  - [Database Commands](#database-commands)
-  - [HTTP Client Generation](#http-client-generation)
-  - [Email Templates](#email-templates)
-  - [Testing](#testing)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [Legal Notice](#legal-notice)
-- [About Selleo](#about-selleo)
+- [Mentingo LMS Core Project](#mentingo-lms-core-project)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Overview](#overview)
+    - [Apps](#apps)
+    - [Packages](#packages)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Environment Setup](#environment-setup)
+  - [Database Setup](#database-setup)
+    - [Migrations](#migrations)
+    - [Database Seeding](#database-seeding)
+    - [Default User Accounts](#default-user-accounts)
+  - [Development](#development)
+    - [Available Services](#available-services)
+  - [Commands Reference](#commands-reference)
+    - [Formatting](#formatting)
+    - [Database Commands](#database-commands)
+    - [HTTP Client Generation](#http-client-generation)
+    - [Email Templates](#email-templates)
+    - [Testing](#testing)
+  - [Project Structure](#project-structure)
+  - [Contributing](#contributing)
+    - [📚 Naming Conventions: Branches, Commits, and Pull Requests](#-naming-conventions-branches-commits-and-pull-requests)
+      - [🔀 Branch Naming](#-branch-naming)
+      - [✅ Commit Messages](#-commit-messages)
+      - [📦 Pull Requests](#-pull-requests)
+  - [Deployment](#deployment)
+  - [Legal notice](#legal-notice)
+  - [Partners](#partners)
 
 </br>
 <div align="center">
@@ -158,6 +168,21 @@ Populate the database with initial data:
 ```bash
 pnpm db:seed
 ```
+
+### Default User Accounts
+
+After running the database seeding **AFTER** renaming the `teacher` role to `content creator`, the following default accounts are available:
+
+| Role            | Email                       | Password |
+| --------------- | --------------------------- | -------- |
+| Student         | student@example.com         | password |
+| Student         | student2@example.com        | password |
+| Content Creator | contentcreator@example.com  | password |
+| Content Creator | contentcreator2@example.com | password |
+| Admin           | admin@example.com           | password |
+
+> [!NOTE]
+> These accounts are created during the seeding process and are intended for development and testing purposes only.
 
 </br>
 <div align="center">
@@ -315,14 +340,85 @@ lms-core
 
 We welcome contributions to LMS Core! Please check our Contributing Guide (coming soon) for guidelines about how to proceed.
 
+### 📚 Naming Conventions: Branches, Commits, and Pull Requests
+
+To ensure consistency and clarity across our development workflow, we follow the naming conventions outlined below.
+
+---
+
+#### 🔀 Branch Naming
+
+Each branch name should follow this pattern:
+
+`[initials]_[type]_[module]_[ticket]_[short_description]`
+
+**Components:**
+
+- `initials` – First letter of the author's first and last name, in lowercase (e.g., `jd` for _John Doe_)
+- `type` – Type of change:
+  - `feat` – New feature
+  - `fix` – Bug fix
+  - `chore` – Maintenance or build-related tasks
+  - `refactor` – Code refactoring without functional changes
+- `module` – Relevant module or system (e.g. `lms`)
+- `ticket` – Ticket or issue number (e.g. `459`)
+- `short_description` _(optional)_ – Brief description in `snake_case`
+
+**Example:**
+
+```
+jd_feat_lms_459_implement_sso
+```
+
+---
+
+#### ✅ Commit Messages
+
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+**Format:**
+
+```
+<prefix>: description of the change
+```
+
+**Examples:**
+
+```
+feat: implement SSO authentication
+fix: resolve token expiration issue
+```
+
+---
+
+#### 📦 Pull Requests
+
+Pull Requests should:
+
+- Use conventional title format:
+
+```
+feat(LMS-459): Implement SSO authentication
+fix(LMS-482): Resolve token expiration issue
+refactor(LMS-501): Simplify chart rendering logic
+```
+
+- Follow the project's PR template and fill out all required sections
+- Provide a brief description of the change and link to the related ticket
+- Include screenshots, test results, or instructions if applicable
+
+---
+
+## Deployment
+
+See [Deployment Guide](docs/deployment.md) for more details.
+
 ## Legal notice
 
 This project was generated using [Selleo LMS](https://github.com/Selleo/lms-core) which is licensed under the MIT license.
 
-## About Selleo
+## Partners
 
 ![selleo](https://raw.githubusercontent.com/Selleo/selleo-resources/master/public/github_footer.png)
 
-Software development teams with an entrepreneurial sense of ownership at their core delivering great digital products and building culture people want to belong to. We are a community of engaged co-workers passionate about crafting impactful web solutions which transform the way our clients do business.
-
-All names and logos for [Selleo](https://selleo.com/about) are trademark of Selleo Labs Sp. z o.o. (formerly Selleo Sp. z o.o. Sp.k.)
+Ready to scale your eLearning platform? [Selleo](https://selleo.com/lms-software-development) will help with product-minded dev teams who are here to make it happen.

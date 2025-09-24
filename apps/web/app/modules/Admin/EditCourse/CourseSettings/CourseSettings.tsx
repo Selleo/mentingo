@@ -2,11 +2,14 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
+import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
+import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
+import { queryClient } from "~/api/queryClient";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
-import { FormTextareaField } from "~/components/Form/FormTextareaFiled";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
+import Editor from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
@@ -17,7 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Toggle } from "~/components/ui/toggle";
+import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import {
+  MAX_COURSE_DESCRIPTION_HTML_LENGTH,
+  MAX_COURSE_DESCRIPTION_LENGTH,
+} from "../../AddCourse/constants";
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
@@ -29,6 +38,7 @@ type CourseSettingsProps = {
   categoryId?: string;
   thumbnailS3SingedUrl?: string | null;
   thumbnailS3Key?: string;
+  hasCertificate?: boolean;
 };
 const CourseSettings = ({
   courseId,
@@ -37,6 +47,7 @@ const CourseSettings = ({
   categoryId,
   thumbnailS3SingedUrl,
   thumbnailS3Key,
+  hasCertificate = false,
 }: CourseSettingsProps) => {
   const { form, onSubmit } = useCourseSettingsForm({
     title,
@@ -58,10 +69,14 @@ const CourseSettings = ({
   const watchedTitle = form.watch("title");
   const watchedDescription = form.watch("description");
   const watchedCategoryId = form.getValues("categoryId");
-  const maxDescriptionFieldLength = 800;
 
-  const watchedDescriptionLength = watchedDescription.length;
-  const descriptionFieldCharactersLeft = maxDescriptionFieldLength - watchedDescriptionLength;
+  const strippedDescriptionTextLength = stripHtmlTags(watchedDescription).length;
+  const descriptionFieldCharactersLeft =
+    MAX_COURSE_DESCRIPTION_LENGTH - strippedDescriptionTextLength;
+
+  const [isCertificateEnabled, setIsCertificateEnabled] = useState(hasCertificate);
+
+  const updateHasCertificate = useUpdateHasCertificate();
 
   const categoryName = useMemo(() => {
     return categories.find((category) => category.id === watchedCategoryId)?.title;
@@ -92,12 +107,45 @@ const CourseSettings = ({
     }
   };
 
+  const handleCertificateToggle = (newValue: boolean) => {
+    setIsCertificateEnabled(newValue);
+
+    if (courseId) {
+      updateHasCertificate.mutate(
+        { courseId, data: { hasCertificate: newValue } },
+        {
+          onSuccess: async () => {
+            await queryClient.invalidateQueries(courseQueryOptions(courseId));
+          },
+          onError: (error) => {
+            console.error(`Error updating certificate:`, error);
+            setIsCertificateEnabled(!newValue);
+          },
+        },
+      );
+    }
+  };
+
   return (
     <div className="flex h-full w-full gap-x-6">
       <div className="w-full basis-full">
         <div className="flex h-full w-full flex-col gap-y-6 overflow-y-auto rounded-lg border border-gray-200 bg-white p-8 shadow-md">
           <div className="flex flex-col gap-y-1">
-            <h5 className="h5 text-neutral-950">{t("adminCourseView.settings.editHeader")}</h5>
+            <div className="flex items-center justify-between">
+              <h5 className="h5 text-neutral-950">{t("adminCourseView.settings.editHeader")}</h5>
+              <Toggle
+                pressed={isCertificateEnabled}
+                onPressedChange={handleCertificateToggle}
+                disabled={updateHasCertificate.isPending}
+                aria-label="Enable certificate"
+              >
+                {isCertificateEnabled
+                  ? t("adminCourseView.settings.button.includesCertificate")
+                  : t("adminCourseView.settings.button.doesNotIncludeCertificate")}
+                {updateHasCertificate.isPending && t("common.button.saving")}
+              </Toggle>
+            </div>
+            <div className="flex items-center gap-x-2"></div>
             <p className="body-lg-md text-neutral-800">
               {t("adminCourseView.settings.editSubHeader")}
             </p>
@@ -139,13 +187,15 @@ const CourseSettings = ({
                   )}
                 />
               </div>
-              <FormTextareaField
-                control={form.control}
-                name="description"
-                label={t("adminCourseView.settings.field.description")}
-                required
-                maxLength={maxDescriptionFieldLength}
+              <Editor
+                content={description}
+                onChange={(value) => form.setValue("description", value)}
               />
+              {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
+                <p className="text-sm text-red-500">
+                  {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
+                </p>
+              )}
               {descriptionFieldCharactersLeft <= 0 ? (
                 <p className="text-sm text-red-500">You have reached the character limit.</p>
               ) : (

@@ -54,6 +54,8 @@ export const CourseEnrolled = (): ReactElement => {
   const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+
   const { data: usersData } = useAllUsersEnrolledSuspense(courseId, searchParams);
 
   const columns: ColumnDef<EnrolledStudent>[] = [
@@ -108,6 +110,13 @@ export const CourseEnrolled = (): ReactElement => {
       ),
     },
     {
+      accessorKey: "groupName",
+      header: ({ column }) => (
+        <SortButton column={column}>{t("adminUsersView.field.group")}</SortButton>
+      ),
+      cell: ({ row }) => row.original.groupName,
+    },
+    {
       accessorKey: "enrolledAt",
       header: ({ column }) => (
         <SortButton<EnrolledStudent> column={column}>
@@ -115,7 +124,7 @@ export const CourseEnrolled = (): ReactElement => {
         </SortButton>
       ),
       cell: ({ row }) => (
-        <Badge variant={"secondary"} className="w-max">
+        <Badge variant="secondary" className="w-max" data-testid={row.original.email}>
           {row.original.enrolledAt
             ? t("adminCourseView.enrolled.statuses.enrolled")
             : t("adminCourseView.enrolled.statuses.notEnrolled")}
@@ -136,6 +145,7 @@ export const CourseEnrolled = (): ReactElement => {
   ];
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data: usersData,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -170,11 +180,12 @@ export const CourseEnrolled = (): ReactElement => {
   };
 
   const handleFormSubmit = (event: FormEvent) => {
+    event.preventDefault();
+
     const mutationData = {
       studentIds: Object.keys(rowSelection)
-        .map((idx) => usersData[Number(idx)])
-        .filter((user) => !user.enrolledAt)
-        .map(({ id }) => id),
+        .map((idx) => idx)
+        .filter((id) => usersData.some((user) => user.id === id && !user.enrolledAt)),
     };
 
     if (mutationData.studentIds.length > 0) {
@@ -182,8 +193,10 @@ export const CourseEnrolled = (): ReactElement => {
     }
 
     setRowSelection({});
-    event.preventDefault();
+    setIsDialogOpen(false);
   };
+
+  const isDisabled = Object.values(rowSelection).length === 0;
 
   return (
     <div className="flex flex-col">
@@ -195,11 +208,11 @@ export const CourseEnrolled = (): ReactElement => {
           isLoading={false}
         />
 
-        <Dialog>
-          <DialogTrigger>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger disabled={isDisabled}>
             <Button
               className="border border-primary-500 bg-transparent text-primary-700"
-              disabled={Object.values(rowSelection).length === 0}
+              disabled={isDisabled}
             >
               {t("adminCourseView.enrolled.enrollSelected")}
             </Button>
@@ -212,15 +225,13 @@ export const CourseEnrolled = (): ReactElement => {
                 {t("adminCourseView.enrolled.confirmation.description")}
               </DialogDescription>
               <form onSubmit={handleFormSubmit}>
-                <div className={"flex justify-end gap-4"}>
+                <div className="flex justify-end gap-4">
                   <DialogClose>
-                    <Button type={"reset"} variant={"ghost"}>
+                    <Button type="reset" variant="ghost">
                       {t("common.button.cancel")}
                     </Button>
                   </DialogClose>
-                  <DialogClose>
-                    <Button type={"submit"}>{t("common.button.save")}</Button>
-                  </DialogClose>
+                  <Button type="submit">{t("common.button.save")}</Button>
                 </div>
               </form>
             </DialogContent>

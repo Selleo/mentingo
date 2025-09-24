@@ -1,10 +1,9 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCurrentUser, useTeacherStatistics } from "~/api/queries";
-import { Gravatar } from "~/components/Gravatar";
+import { useCurrentUser, useContentCreatorStatistics } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
-import { Avatar } from "~/components/ui/avatar";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { AvgScoreAcrossAllQuizzesChart } from "~/modules/Statistics/Admin/components/AvgScoreAcrossAllQuizzessChart";
 import { ConversionsAfterFreemiumLessonChart } from "~/modules/Statistics/Admin/components/ConversionsAfterFreemiumLessonChart";
 import { EnrollmentChart } from "~/modules/Statistics/Admin/components/EnrollmentChart";
@@ -15,7 +14,7 @@ import type { ChartConfig } from "~/components/ui/chart";
 
 export const AdminStatistics = () => {
   const { data: user } = useCurrentUser();
-  const { data: statistics, isLoading } = useTeacherStatistics();
+  const { data: statistics, isLoading } = useContentCreatorStatistics();
   const { t } = useTranslation();
   const totalCoursesCompletion =
     statistics?.totalCoursesCompletionStats.totalCoursesCompletion ?? 0;
@@ -114,9 +113,11 @@ export const AdminStatistics = () => {
         <p className="h5 xl:h2 text-neutral-950">
           {t("adminStatisticsView.header")} {user?.firstName}
         </p>
-        <Avatar className="size-12">
-          <Gravatar email={user?.email} />
-        </Avatar>
+        <UserAvatar
+          className="size-12"
+          userName={`${user?.firstName} ${user?.lastName}`}
+          profilePictureUrl={user?.profilePictureUrl}
+        />
       </div>
       <div className="grid grid-cols-1 gap-y-4 md:grid-cols-2 md:gap-x-4 md:gap-y-6 xl:h-full xl:grid-cols-4 xl:grid-rows-[minmax(min-content,_auto)]">
         <FiveMostPopularCoursesChart

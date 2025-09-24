@@ -10,6 +10,7 @@ import CourseProgress from "~/components/CourseProgress";
 import { Icon } from "~/components/Icon";
 import { Card, CardContent } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
+import { CHAPTER_PROGRESS_STATUSES } from "~/modules/Courses/CourseView/lessonTypes";
 
 import type { GetUserStatisticsResponse } from "~/api/generated-api";
 
@@ -22,6 +23,7 @@ const buttonVariants = cva("w-full transition", {
       not_started: "border-primary-200 hover:border-primary-500",
       in_progress: "border-secondary-200 hover:border-secondary-500",
       completed: "border-success-500",
+      blocked: "border-neutral-200 hover:border-neutral-500",
     },
   },
 });
@@ -29,7 +31,7 @@ const buttonVariants = cva("w-full transition", {
 const getButtonProps = (
   chapterProgress: NonNullable<GetUserStatisticsResponse["data"]["nextLesson"]>["chapterProgress"],
 ) => {
-  if (chapterProgress === "in_progress") {
+  if (chapterProgress === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS) {
     return { text: t("clientStatisticsView.button.continue"), colorClass: "text-secondary-500" };
   }
 
@@ -40,6 +42,7 @@ const cardBadgeIcon = {
   completed: "InputRoundedMarkerSuccess",
   in_progress: "InProgress",
   not_started: "NotStartedRounded",
+  blocked: "Blocked",
 } as const;
 
 const cardBadgeVariant: Record<string, "successOutlined" | "secondary" | "default"> = {
@@ -86,7 +89,7 @@ export const ChapterCard = (
                 {startCase(chapterDetails.chapterProgress)}
               </CardBadge>
             )}
-            <span className="absolute bottom-0 right-0 flex h-8 w-8 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-white text-primary-700">
+            <span className="absolute bottom-0 right-0 flex size-8 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-white text-primary-700">
               {chapterDetails.chapterDisplayOrder.toString().padStart(2, "0")}
             </span>
           </div>
@@ -95,7 +98,9 @@ export const ChapterCard = (
               <div className="flex h-full w-full flex-col bg-white">
                 <CourseProgress
                   label={t("studentChapterCardView.other.chapterProgress")}
-                  isCompleted={chapterDetails.chapterProgress === "completed"}
+                  isCompleted={
+                    chapterDetails.chapterProgress === CHAPTER_PROGRESS_STATUSES.COMPLETED
+                  }
                   completedLessonCount={chapterDetails.completedLessonCount}
                   courseLessonCount={chapterDetails.lessonCount}
                 />
@@ -112,7 +117,7 @@ export const ChapterCard = (
                 buttonColorClass,
               )}
             >
-              {buttonText} <Icon name="CarretRight" className="ml-1 h-4 w-4" />
+              {buttonText} <Icon name="CarretRight" className="ml-1 size-4" />
             </button>
           </div>
         </Link>

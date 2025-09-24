@@ -28,7 +28,7 @@ export const QuestionCard = ({
       </div>
       <div className="h6 text-neutral-950" dangerouslySetInnerHTML={{ __html: title }} />
       <div className="body-base text-neutral-900">
-        {t(`studentCourseView.lesson.${questionType}`)}
+        {t(`studentLessonView.other.${questionType}`)}
       </div>
       <div className="mt-4 flex flex-col gap-4">{children}</div>
     </div>

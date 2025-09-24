@@ -19,11 +19,11 @@ const emptyChartData = {
 
 const chartConfig = {
   completed: {
-    label: "remainingChapters.sideSection.other.completedChapters",
+    label: "studentCourseView.sideSection.other.completedChapters",
     color: "var(--success-500)",
   },
   notCompleted: {
-    label: "remainingChapters.sideSection.other.remainingChapters",
+    label: "studentCourseView.sideSection.other.remainingChapters",
     color: "var(--primary-100)",
   },
 } satisfies ChartConfig;
@@ -36,17 +36,17 @@ export const CourseProgressChart = ({
   const chartData = useMemo(
     () => [
       {
-        state: "Completed Chapters",
+        state: t(chartConfig.completed.label),
         chaptersCount: completedChaptersCount,
         fill: "var(--success-500)",
       },
       {
-        state: "Remaining chapters",
+        state: t(chartConfig.notCompleted.label),
         chaptersCount: chaptersCount - completedChaptersCount,
         fill: "var(--primary-100)",
       },
     ],
-    [completedChaptersCount, chaptersCount],
+    [completedChaptersCount, chaptersCount, t],
   );
 
   const isEmptyChart = chartData.every(({ chaptersCount }) => !chaptersCount);
@@ -65,7 +65,7 @@ export const CourseProgressChart = ({
             data={isEmptyChart ? [emptyChartData, ...chartData] : chartData}
             dataKey="chaptersCount"
             nameKey="state"
-            innerRadius={89}
+            innerRadius={84}
             strokeWidth={5}
             startAngle={90}
             endAngle={-270}

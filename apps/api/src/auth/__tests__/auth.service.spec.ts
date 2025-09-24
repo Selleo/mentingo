@@ -7,12 +7,11 @@ import { nanoid } from "nanoid";
 
 import { AuthService } from "src/auth/auth.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-import hashPassword from "src/common/helpers/hashPassword";
+import { credentials, resetTokens, users } from "src/storage/schema";
 import { createUnitTest, type TestContext } from "test/create-unit-test";
+import { createSettingsFactory } from "test/factory/settings.factory";
 import { createUserFactory } from "test/factory/user.factory";
 import { truncateAllTables } from "test/helpers/test-helpers";
-
-import { credentials, resetTokens, users } from "../../storage/schema";
 
 import type { DatabasePg } from "src/common";
 import type { EmailTestingAdapter } from "test/helpers/test-email.adapter";
@@ -23,6 +22,7 @@ describe("AuthService", () => {
   let jwtService: JwtService;
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
+  let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let emailAdapter: EmailTestingAdapter;
 
   beforeAll(async () => {
@@ -31,6 +31,7 @@ describe("AuthService", () => {
     jwtService = testContext.module.get(JwtService);
     db = testContext.db;
     userFactory = createUserFactory(db);
+    settingsFactory = createSettingsFactory(db);
     emailAdapter = testContext.module.get(EmailAdapter);
   }, 30000);
 
@@ -104,29 +105,42 @@ describe("AuthService", () => {
     it("should login user successfully", async () => {
       const password = "password123";
       const email = "example@test.com";
-      const user = await userFactory.withCredentials({ password }).create({ email });
+      const user = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ email });
 
-      const result = await authService.login({
-        email: user.email,
-        password,
-      });
+      const result = await authService.login(
+        {
+          email: user.email,
+          password,
+        },
+        [],
+      );
 
       const decodedToken = await jwtService.verifyAsync(result.accessToken);
 
+      const { avatarReference: _, ...userWithoutAvatar } = user;
+
       expect(decodedToken.userId).toBe(user.id);
       expect(result).toMatchObject({
-        ...omit(user, "credentials"),
+        ...omit(userWithoutAvatar, "credentials"),
+        profilePictureUrl: null,
         accessToken: expect.any(String),
         refreshToken: expect.any(String),
+        shouldVerifyMFA: false,
       });
     });
 
     it("should throw UnauthorizedException for invalid email", async () => {
       await expect(
-        authService.login({
-          email: "nonexistent@example.com",
-          password: "password123",
-        }),
+        authService.login(
+          {
+            email: "nonexistent@example.com",
+            password: "password123",
+          },
+          [],
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -134,10 +148,13 @@ describe("AuthService", () => {
       const user = await userFactory.create({ email: "example@test.com" });
 
       await expect(
-        authService.login({
-          email: user.email,
-          password: "wrongpassword",
-        }),
+        authService.login(
+          {
+            email: user.email,
+            password: "wrongpassword",
+          },
+          [],
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
@@ -146,12 +163,8 @@ describe("AuthService", () => {
     it("should validate user successfully", async () => {
       const email = "test@example.com";
       const password = "password123";
-      const firstName = "Tyler";
-      const lastName = "Durden";
-      const hashedPassword = await hashPassword(password);
 
-      const [user] = await db.insert(users).values({ email, firstName, lastName }).returning();
-      await db.insert(credentials).values({ userId: user.id, password: hashedPassword });
+      await userFactory.withCredentials({ password }).create({ email });
 
       const result = await authService.validateUser(email, password);
 
@@ -171,7 +184,8 @@ describe("AuthService", () => {
 
   describe("currentUser", () => {
     it("should return current user data", async () => {
-      const user = await userFactory.create();
+      await settingsFactory.create({ userId: null });
+      const user = await userFactory.withUserSettings(db).create();
 
       const result = await authService.currentUser(user.id);
 

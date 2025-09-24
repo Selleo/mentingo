@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm/sql";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
+  aiMentorLessons,
   categories,
   chapters,
   courses,
@@ -52,9 +53,10 @@ export async function createNiceCourses(
         title: courseData.title,
         description: courseData.description,
         thumbnailS3Key: courseData.thumbnailS3Key,
-        isPublished: courseData.isPublished,
+        status: courseData.status,
         priceInCents: courseData.priceInCents,
         chapterCount: courseData.chapters.length,
+        hasCertificate: courseData.hasCertificate,
         authorId: creatorUserId,
         categoryId: category.id,
         createdAt: createdAt,
@@ -94,12 +96,26 @@ export async function createNiceCourses(
                 : lessonData.type === LESSON_TYPES.VIDEO
                   ? "mp4"
                   : null,
+            thresholdScore: lessonData.type === LESSON_TYPES.QUIZ ? 0 : null,
             chapterId: chapter.id,
             createdAt: createdAt,
             updatedAt: createdAt,
           })
           .returning();
-
+        if (
+          lessonData.type === LESSON_TYPES.AI_MENTOR &&
+          lessonData.aiMentorInstructions &&
+          lessonData.completionConditions
+        ) {
+          await db
+            .insert(aiMentorLessons)
+            .values({
+              lessonId: lesson.id,
+              aiMentorInstructions: lessonData.aiMentorInstructions,
+              completionConditions: lessonData.completionConditions,
+            })
+            .returning();
+        }
         if (lessonData.type === LESSON_TYPES.QUIZ && lessonData.questions) {
           for (const [index, questionData] of lessonData.questions.entries()) {
             const questionId = crypto.randomUUID();
