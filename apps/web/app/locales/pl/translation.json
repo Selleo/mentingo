@@ -54,6 +54,14 @@
     "replace": "Kliknij, aby zastąpić",
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+    },
+    "details": {
+      "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 100MB)",
+      "presentation": "PPT/PPTX (maksymalnie 100MB)"
+    },
+    "remove": {
+      "video": "Usuń wideo",
+      "presentation": "Usuń prezentację"
     }
   },
   "deleteFile": {
@@ -550,13 +558,19 @@
       "createdAt": "Utworzono",
       "group": "Grupa"
     },
+    "import": {
+      "toast": {
+        "success": "Import zakończony pomyślnie.\nZaimportowano {{ importedUsersAmount }} użytkowników.\nPominieto {{ skippedUsersAmount }} istniejących użytkowników."
+      }
+    },
     "other": {
       "selected": "Wybrany"
     },
     "button": {
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane",
-      "edit": "Edytuj"
+      "edit": "Edytuj",
+      "import": "Importuj użytkowników"
     },
     "dropdown": {
       "changeRole": "Zmień role",
@@ -568,7 +582,9 @@
         "delete": "Czy chcesz usunąć te konta?",
         "role": "Modyfikuj role",
         "group": "Modyfikuj grupy",
-        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?"
+        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?",
+        "import": "Importuj użytkowników",
+        "importResult": "Wynik importu"
       },
       "button": {
         "delete": "Usuń",
@@ -585,11 +601,21 @@
         "confirmationForRole_one": "Zmienisz rolę na {{ role }} dla 1 użytkownika",
         "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
-        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników"
+        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne).",
+        "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
+        "noUsersSkipped": "Nie pominięto żadnych użytkowników."
       },
       "placeholder": {
         "group": "Wybierz grupę",
         "role": "Wybierz rolę"
+      },
+      "note": {
+        "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa."
+      },
+      "tabs": {
+        "imported": "Zaimportowani użytkownicy",
+        "skipped": "Pominięci użytkownicy"
       }
     },
     "breadcrumbs": {
@@ -1467,6 +1493,18 @@
     "toast": {
       "logoUploadedSuccessfully": "Logo platformy zostało pomyślnie wgrane",
       "logoFetchError": "Nie udało się pobrać logo platformy"
+    }
+  },
+  "files": {
+    "import": {
+      "noFileUploaded": "Nie przesłano pliku",
+      "invalidFileData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
+      "fileEmpty": "Przesłany plik jest pusty",
+      "requiredDataMissing": "Import nie powiódł się – brak wymaganych danych w pliku.",
+      "invalidFileType": "Nieprawidłowy typ pliku. Wybierz poprawny plik",
+      "userFailReason": {
+        "alreadyExists": "użytkownik o tym adresie e-mail już istnieje"
+      }
     }
   }
 }

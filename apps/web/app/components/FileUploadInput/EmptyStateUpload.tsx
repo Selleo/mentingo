@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { cn } from "~/lib/utils";
 import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { Icon } from "../Icon";
@@ -11,6 +12,7 @@ interface EmptyStateUploadProps {
   handleFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
   isUploading: boolean;
   contentTypeToDisplay: string;
+  className?: string;
 }
 
 const contentTypeFormats = {
@@ -23,12 +25,16 @@ const EmptyStateUpload = ({
   handleFileChange,
   isUploading,
   contentTypeToDisplay,
+  className,
 }: EmptyStateUploadProps) => {
   const { t } = useTranslation();
   return (
     <label
       htmlFor="file-upload"
-      className="flex h-[240px] w-full max-w-[440px] flex-col items-center justify-center gap-y-3 rounded-lg border border-neutral-200 bg-white"
+      className={cn(
+        "flex h-[240px] w-full max-w-[440px] flex-col items-center justify-center gap-y-3 rounded-lg border border-neutral-200 bg-white",
+        className,
+      )}
     >
       <Icon name="UploadImageIcon" className="size-10 text-primary-700" />
       <div className="body-sm flex flex-col gap-y-1">

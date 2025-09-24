@@ -30,7 +30,11 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { type CreateUserBody, createUserSchema } from "src/user/schemas/createUser.schema";
+import {
+  type CreateUserBody,
+  createUserSchema,
+  importUserResponseSchema,
+} from "src/user/schemas/createUser.schema";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
@@ -312,5 +316,29 @@ export class UserController {
       id,
       message: "User created successfully",
     });
+  }
+
+  @Post("import")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(FileInterceptor("usersFile"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        usersFile: {
+          type: "string",
+          format: "binary",
+        },
+      },
+    },
+  })
+  @Validate({
+    response: baseResponse(importUserResponseSchema),
+  })
+  async importUsers(@UploadedFile() usersFile: Express.Multer.File) {
+    const importStats = await this.usersService.importUsers(usersFile);
+
+    return new BaseResponse(importStats);
   }
 }

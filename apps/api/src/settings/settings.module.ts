@@ -18,6 +18,6 @@ import { SettingsService } from "./settings.service";
   imports: [EmailModule, FileModule, S3Module, BunnyStreamModule, StatisticsModule, AuthModule],
   controllers: [SettingsController],
   providers: [SettingsService, UserService, FileService, S3Service, BunnyStreamService],
-  exports: [SettingsModule],
+  exports: [SettingsService],
 })
 export class SettingsModule {}
