@@ -1,3 +1,4 @@
+import type { SUPPORTED_LOCALES } from "./constants";
 import type { CompanyInformationSchema } from "src/settings/schemas/settings.schema";
 
 export type ActivityHistory = {
@@ -20,3 +21,5 @@ export type StudentSettings = {
 export type AdminSettings = StudentSettings & { adminNewUserNotification: boolean };
 export type UserSettings = StudentSettings | AdminSettings;
 export type AllSettings = StudentSettings | AdminSettings | GlobalSettings;
+
+export type SupportedLocales = (typeof SUPPORTED_LOCALES)[number];

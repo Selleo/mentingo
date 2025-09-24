@@ -21,3 +21,13 @@ export const EXTENSION_TO_MIME_TYPE_MAP: Record<string, string> = {
   mp4: "video/mp4",
   mov: "video/quicktime",
 };
+
+export const ALLOWED_EXCEL_MIME_TYPES_MAP = {
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  csv: "text/csv",
+};
+
+export const ALLOWED_EXCEL_MIME_TYPES = [
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/csv",
+] as const;

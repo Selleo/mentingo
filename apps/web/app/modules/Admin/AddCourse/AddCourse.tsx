@@ -6,8 +6,8 @@ import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import SplashScreenImage from "~/assets/svgs/splash-screen-image.svg";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
-import { FormTextareaField } from "~/components/Form/FormTextareaFiled";
 import { Icon } from "~/components/Icon";
+import Editor from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
@@ -19,8 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import Breadcrumb from "./components/Breadcrumb";
+import { MAX_COURSE_DESCRIPTION_HTML_LENGTH, MAX_COURSE_DESCRIPTION_LENGTH } from "./constants";
 import { useAddCourseForm } from "./hooks/useAddCourseForm";
 
 const AddCourse = () => {
@@ -29,14 +31,16 @@ const AddCourse = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
   const { isValid: isFormValid } = form.formState;
-  const maxDescriptionFieldLength = 800;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(undefined);
 
-  const watchedDescriptionLength = form.watch("description").length;
-  const descriptionFieldCharactersLeft = maxDescriptionFieldLength - watchedDescriptionLength;
+  const watchedDescription = form.watch("description");
+
+  const strippedDescriptionTextLength = stripHtmlTags(watchedDescription).length;
+  const descriptionFieldCharactersLeft =
+    MAX_COURSE_DESCRIPTION_LENGTH - strippedDescriptionTextLength;
 
   const handleImageUpload = useCallback(
     async (file: File) => {
@@ -147,20 +151,16 @@ const AddCourse = () => {
                     <span className="text-red-500">*</span>{" "}
                     {t("adminCourseView.settings.field.description")}
                   </Label>
-                  <FormControl>
-                    <FormTextareaField
-                      control={form.control}
-                      id="description"
-                      maxLength={maxDescriptionFieldLength}
-                      placeholder={t("adminCourseView.settings.placeholder.description")}
-                      {...field}
-                      required
-                    />
-                  </FormControl>
+                  <Editor {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
+              <p className="text-sm text-red-500">
+                {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
+              </p>
+            )}
             {descriptionFieldCharactersLeft <= 0 ? (
               <p className="text-sm text-red-500">
                 {t("adminCourseView.settings.other.reachedCharactersLimit")}

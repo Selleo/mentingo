@@ -15,7 +15,8 @@
       "ignore": "Ignore",
       "clearAll": "Clear All",
       "validate": "Validate",
-      "edit": "Edit"
+      "edit": "Edit",
+      "uploading": "Uploading..."
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -52,6 +53,14 @@
     "replace": "Click to replace",
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully"
+    },
+    "details": {
+      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 100MB)",
+      "presentation": "PPT/PPTX (max. to 100MB)"
+    },
+    "remove": {
+      "video": "Remove video",
+      "presentation": "Remove presentation"
     }
   },
   "deleteFile": {
@@ -125,6 +134,7 @@
     "providerInformation": "Provider Info",
     "browseCourses": "Browse Courses",
     "announcements": "Announcements",
+    "promotionCodes": "Promotion Codes",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
@@ -366,6 +376,60 @@
       "noData": "No data"
     }
   },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Promotion code created successfully",
+      "updatedSuccessfully": "Promotion code updated successfully"
+    },
+    "headers": {
+      "create": "Create promotion code",
+      "update": "Update promotion code"
+    },
+    "status": {
+      "active": "Active",
+      "deactivated": "Deactivated",
+      "expired": "Expired",
+      "usageLimitReached": "Usage limit reached"
+    },
+    "field": {
+      "code": "Code",
+      "status": "Status",
+      "uses": "Uses count",
+      "associatedCourses": "Associated Courses",
+      "discountType": "Discount Type",
+      "discountTypePercent": "Percent",
+      "discountTypeFixed": "Fixed",
+      "discountValue": "Discount Value",
+      "maxRedemptions": "Max Redemptions",
+      "expiresAt": "Expires At",
+      "assignedCourses": "Assigned Courses",
+      "type": "Type",
+      "associateCourse": {
+        "checkAll": "Apply to all courses"
+      },
+      "discount": "Discount",
+      "createdAt": "Created At"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "promotionCodes": "Promotion Codes",
+      "createNew": "Create new",
+      "update": "Update",
+      "back": "Back"
+    },
+    "button": {
+      "createNew": "Create new",
+      "createCoupon": "Create promotion code",
+      "deactivatePromotionCode": "This promotion code is active",
+      "activatePromotionCode": "This promotion code is not active"
+    },
+    "other": {
+      "noCourses": "No courses",
+      "usageInfo": "Usage information",
+      "usageAmount": "Usage amount",
+      "baseInfo": "Basic information"
+    }
+  },
   "adminCoursesView": {
     "filters": {
       "placeholder": {
@@ -496,10 +560,16 @@
     "other": {
       "selected": "Selected"
     },
+    "import": {
+      "toast": {
+        "success": "Import completed successfully.\nImported {{ importedUsersAmount }} users.\nSkipped {{ skippedUsersAmount }} existing users."
+      }
+    },
     "button": {
       "createNew": "Create new",
       "deleteSelected": "Delete selected",
-      "edit": "Edit"
+      "edit": "Edit",
+      "import": "Import users"
     },
     "dropdown": {
       "changeRole": "Change role",
@@ -511,7 +581,9 @@
         "delete": "Do you want to delete these accounts?",
         "role": "Modify roles",
         "group": "Modify groups",
-        "confirmation": "Are you sure you want to proceed?"
+        "confirmation": "Are you sure you want to proceed?",
+        "import": "Import users",
+        "importResult": "Import result"
       },
       "button": {
         "delete": "Delete",
@@ -524,11 +596,21 @@
         "confirmationForGroup_one": "You will change group to {{ group }} for 1 user",
         "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
-        "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users"
+        "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName.",
+        "noUsersImported": "No users were imported.",
+        "noUsersSkipped": "No users were skipped."
       },
       "placeholder": {
         "group": "Select group",
         "role": "Select role"
+      },
+      "note": {
+        "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created."
+      },
+      "tabs": {
+        "imported": "Imported",
+        "skipped": "Skipped"
       }
     },
     "breadcrumbs": {
@@ -688,7 +770,8 @@
       },
       "other": {
         "charactersLeft": "Characters left",
-        "reachedCharactersLimit": "You have reached the character limit."
+        "reachedCharactersLimit": "You have reached the character limit.",
+        "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit."
       },
       "header": "Create new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
@@ -767,7 +850,7 @@
           "atLeastOneOptionRequired": "At least one option is required",
           "imageRequired": "Image is required",
           "descriptionLength": "Description must have at least 10 characters.",
-          "descritpionMaxLength": "Content can have a maximum of 5000 characters.",
+          "descriptionMaxLength": "Content can have a maximum of 5000 characters.",
           "atLeastOneOptionCorrect": "At least one option must be marked as correct for question.",
           "allOptionsCorrect": "All options must be correct",
           "titleRequired": "Title is required",
@@ -778,7 +861,10 @@
           "completionConditionsMaxLength": "Completion Conditions are too long (max 1000 characters)",
           "passThresholdMin": "Pass threshold must be at least 1",
           "passThresholdMax": "Pass threshold cannot exceed 10",
-          "titleMaxLength": "Title is too long (max 255 characters)"
+          "titleMaxLength": "Title is too long (max 255 characters)",
+          "maxFileSize": "File size must be below {{ MAX_MB_PER_FILE }} MB",
+          "maxFileNumber_one": "You cannot upload more than 1 file",
+          "maxFileNumber_other": "You cannot upload more than {{ count }} files"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Lesson display order updated successfully",
@@ -790,6 +876,8 @@
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
+          "aiMentorLessonFileAddedSuccessfully": "AI Mentor lesson files uploaded successfully",
+          "aiMentorLessonFileDeletedSuccessfully": "AI Mentor lesson files deleted successfully",
           "lessonUpdatedSuccessfully": "Lesson updated successfully",
           "textLessonUpdatedSuccessfully": "Text lesson updated successfully",
           "fileLessonUpdatedSuccessfully": "File item updated successfully",
@@ -809,7 +897,10 @@
           "sentence": "Sentence",
           "aiMentorInstructions": "AI Mentor Instructions",
           "completionConditions": "Completion Conditions",
-          "passThreshold": "Pass Threshold"
+          "passThreshold": "Pass Threshold",
+          "additionalContext": "Additional context",
+          "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
+          "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
         },
         "placeholder": {
           "title": "Provide lesson title...",
@@ -1383,6 +1474,32 @@
       "markAsReadFailed": "Failed to mark announcements as read",
       "createdSuccessfully": "Announcement created successfully",
       "createFailed": "Failed to create announcement"
+    }
+  },
+  "platformLogo": {
+    "header": "Platform Logo",
+    "subHeader": "Upload a custom logo for your platform. Supported formats: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logo Image"
+    },
+    "button": {
+      "removeLogo": "Remove Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Platform logo uploaded successfully",
+      "logoFetchError": "Error fetching platform logo"
+    }
+  },
+  "files": {
+    "import": {
+      "noFileUploaded": "No file uploaded",
+      "invalidFileData": "File upload failed - invalid file data",
+      "fileEmpty": "File is empty",
+      "requiredDataMissing": "Import failed – required data missing.",
+      "invalidFileType": "Invalid file type. Please upload a valid file.",
+      "userFailReason": {
+        "alreadyExists": "user with this email already exists"
+      }
     }
   },
   "defaultCourseCurrencyView": {

@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
 import {
@@ -30,8 +31,10 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
+import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
+import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
@@ -82,6 +85,7 @@ import type {
 import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
+import type Stripe from "stripe";
 
 @Injectable()
 export class CourseService {
@@ -93,6 +97,7 @@ export class CourseService {
     private readonly statisticsRepository: StatisticsRepository,
     private readonly userService: UserService,
     private readonly settingsService: SettingsService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -131,6 +136,8 @@ export class CourseService {
         currency: courses.currency,
         status: courses.status,
         createdAt: courses.createdAt,
+        stripeProductId: courses.stripeProductId,
+        stripePriceId: courses.stripePriceId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -471,6 +478,8 @@ export class CourseService {
             WHERE ${chapters.courseId} = ${courses.id}
               AND ${chapters.isFreemium} = TRUE
           )`,
+        stripeProductId: courses.stripeProductId,
+        stripePriceId: courses.stripePriceId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -778,7 +787,11 @@ export class CourseService {
     return updatedCourse;
   }
 
-  async createCourse(createCourseBody: CreateCourseBody, authorId: UUIDType) {
+  async createCourse(
+    createCourseBody: CreateCourseBody,
+    authorId: UUIDType,
+    isPlaywrightTest: boolean,
+  ) {
     return this.db.transaction(async (trx) => {
       const [category] = await trx
         .select()
@@ -788,8 +801,28 @@ export class CourseService {
       if (!category) {
         throw new NotFoundException("Category not found");
       }
-
       const globalSettings = await this.settingsService.getGlobalSettings();
+
+      const finalCurrency = globalSettings.defaultCourseCurrency || "usd";
+
+      let productId: string | null = null;
+      let priceId: string | null = null;
+
+      if (!isPlaywrightTest) {
+        const stripeResult = await this.stripeService.createProduct({
+          name: createCourseBody.title,
+          description: createCourseBody?.description ?? "",
+          currency: finalCurrency,
+          amountInCents: createCourseBody?.priceInCents ?? 0,
+        });
+
+        productId = stripeResult.productId;
+        priceId = stripeResult.priceId;
+
+        if (!productId || !priceId) {
+          throw new InternalServerErrorException("Failed to create product");
+        }
+      }
 
       const [newCourse] = await trx
         .insert(courses)
@@ -799,10 +832,12 @@ export class CourseService {
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
           status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
-          currency: globalSettings.defaultCourseCurrency || "usd",
+          currency: finalCurrency,
           isScorm: createCourseBody.isScorm,
           authorId,
           categoryId: createCourseBody.categoryId,
+          stripeProductId: productId,
+          stripePriceId: priceId,
         })
         .returning();
 
@@ -821,6 +856,7 @@ export class CourseService {
     updateCourseBody: UpdateCourseBody,
     currentUserId: UUIDType,
     currentUserRole: UserRole,
+    isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
     return this.db.transaction(async (trx) => {
@@ -872,6 +908,64 @@ export class CourseService {
         throw new ConflictException("Failed to update course");
       }
 
+      if (!isPlaywrightTest) {
+        // --- create stripe product if it doesn't exist yet ---
+        if (!updatedCourse.stripeProductId) {
+          const { productId, priceId } = await this.stripeService.createProduct({
+            name: updatedCourse.title,
+            description: updatedCourse.description ?? "",
+            amountInCents: updatedCourse.priceInCents ?? 0,
+            currency: updatedCourse.currency ?? "usd",
+          });
+
+          await trx
+            .update(courses)
+            .set({
+              stripeProductId: productId,
+              stripePriceId: priceId,
+            })
+            .where(eq(courses.id, id));
+        } else {
+          // --- stripe product update ---
+          const productUpdatePayload = {
+            ...(updateCourseBody.title && { name: updateCourseBody.title }),
+            ...(updateCourseBody.description && { description: updateCourseBody.description }),
+          };
+
+          if (hasDataToUpdate(productUpdatePayload)) {
+            await this.stripeService.updateProduct(
+              updatedCourse.stripeProductId,
+              productUpdatePayload,
+            );
+          }
+
+          // --- stripe price update ---
+          const hasPriceUpdate =
+            updateCourseBody.priceInCents !== undefined || updateCourseBody.currency !== undefined;
+
+          if (updatedCourse.stripePriceId && hasPriceUpdate) {
+            const pricePayload: Stripe.PriceCreateParams = {
+              product: updatedCourse.stripeProductId,
+              currency: updateCourseBody.currency ?? "usd",
+              ...(updateCourseBody.priceInCents !== undefined && {
+                unit_amount: updateCourseBody.priceInCents,
+              }),
+            };
+
+            const newStripePrice = await this.stripeService.createPrice(pricePayload);
+
+            if (newStripePrice.id) {
+              await this.stripeService.updatePrice(updatedCourse.stripePriceId, { active: false });
+
+              await trx
+                .update(courses)
+                .set({ stripePriceId: newStripePrice.id })
+                .where(eq(courses.id, id));
+            }
+          }
+        }
+      }
+
       return updatedCourse;
     });
   }
@@ -893,13 +987,6 @@ export class CourseService {
     if (!course) throw new NotFoundException("Course not found");
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
-
-    /*
-      For Playwright tests to bypass Stripe payment
-      Front-end interfaces, such as Stripe Checkout or the Payment Element, have security measures in place that prevent automated testing, and Stripe APIs are rate limited.
-   */
-    const isTest = testKey && testKey === process.env.TEST_KEY;
-    if (!isTest && Boolean(course.price)) throw new ForbiddenException();
 
     this.db.transaction(async (trx) => {
       await this.createStudentCourse(id, studentId);

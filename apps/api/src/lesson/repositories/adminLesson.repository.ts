@@ -31,7 +31,7 @@ export class AdminLessonRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
   async getLesson(id: UUIDType) {
-    return await this.db.select().from(lessons).where(eq(lessons.id, id));
+    return this.db.select().from(lessons).where(eq(lessons.id, id));
   }
 
   async createLessonForChapter(data: CreateLessonBody) {

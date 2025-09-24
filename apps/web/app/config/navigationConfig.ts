@@ -67,6 +67,11 @@ export const getNavigationConfig = (
     path: `announcements`,
     iconName: "Megaphone",
   },
+  {
+    label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
+    path: "admin/promotion-codes",
+    iconName: "HandCoins",
+  },
 ];
 
 /**

@@ -16,7 +16,8 @@
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
       "edit": "Edytuj",
-      "continue": "Kontynuuj"
+      "continue": "Kontynuuj",
+      "uploading": "Wgrywanie..."
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -53,6 +54,14 @@
     "replace": "Kliknij, aby zastąpić",
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+    },
+    "details": {
+      "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 100MB)",
+      "presentation": "PPT/PPTX (maksymalnie 100MB)"
+    },
+    "remove": {
+      "video": "Usuń wideo",
+      "presentation": "Usuń prezentację"
     }
   },
   "deleteFile": {
@@ -126,6 +135,7 @@
     "providerInformation": "O dostawcy",
     "browseCourses": "Przeglądaj kursy",
     "announcements": "Ogłoszenia",
+    "promotionCodes": "Kody promocyjne",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
@@ -367,6 +377,60 @@
       "noData": "Brak danych"
     }
   },
+  "adminPromotionCodesView": {
+    "notifications": {
+      "createdSuccessfully": "Kod promocyjny utworzony pomyślnie",
+      "updatedSuccessfully": "Kod promocyjny zaktualizowany pomyślnie"
+    },
+    "headers": {
+      "create": "Utwórz kod promocyjny",
+      "update": "Zaktualizuj kod promocyjny"
+    },
+    "status": {
+      "active": "Aktywny",
+      "deactivated": "Nieaktywny",
+      "expired": "Wygasły",
+      "usageLimitReached": "Osiągnięto limit użyć"
+    },
+    "field": {
+      "code": "Kod",
+      "status": "Status",
+      "uses": "Ilość użyć",
+      "associatedCourses": "Powiązane kursy",
+      "discountType": "Typ rabatu",
+      "discountTypePercent": "Procent",
+      "discountTypeFixed": "Kwota",
+      "discountValue": "Wartość zniżki",
+      "maxRedemptions": "Maksymalna liczba użyć",
+      "expiresAt": "Wygasa",
+      "assignedCourses": "Przypisane kursy",
+      "type": "Typ",
+      "associateCourse": {
+        "checkAll": "Zastosuj do wszystkich kursów"
+      },
+      "discount": "Rabat",
+      "createdAt": "Utworzono"
+    },
+    "breadcrumbs": {
+      "dashboard": "Panel główny",
+      "promotionCodes": "Kody promocyjne",
+      "createNew": "Utwórz nowy",
+      "update": "Edytuj",
+      "back": "Wstecz"
+    },
+    "button": {
+      "createNew": "Utwórz nowy",
+      "createCoupon": "Utwórz kod promocyjny",
+      "deactivatePromotionCode": "Ten kod promocyjny jest aktywny",
+      "activatePromotionCode": "Ten kod promocyjny nie jest aktywny"
+    },
+    "other": {
+      "noCourses": "Brak kursów",
+      "usageInfo": "Informacje o użyciach",
+      "usageAmount": "Liczba użyć",
+      "baseInfo": "Podstawowe informacje"
+    }
+  },
   "adminCoursesView": {
     "filters": {
       "placeholder": {
@@ -494,13 +558,19 @@
       "createdAt": "Utworzono",
       "group": "Grupa"
     },
+    "import": {
+      "toast": {
+        "success": "Import zakończony pomyślnie.\nZaimportowano {{ importedUsersAmount }} użytkowników.\nPominieto {{ skippedUsersAmount }} istniejących użytkowników."
+      }
+    },
     "other": {
       "selected": "Wybrany"
     },
     "button": {
       "createNew": "Utwórz nowego",
       "deleteSelected": "Usuń wybrane",
-      "edit": "Edytuj"
+      "edit": "Edytuj",
+      "import": "Importuj użytkowników"
     },
     "dropdown": {
       "changeRole": "Zmień role",
@@ -512,7 +582,9 @@
         "delete": "Czy chcesz usunąć te konta?",
         "role": "Modyfikuj role",
         "group": "Modyfikuj grupy",
-        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?"
+        "confirmation": "Czy jesteś pewny, że chcesz kontynuować?",
+        "import": "Importuj użytkowników",
+        "importResult": "Wynik importu"
       },
       "button": {
         "delete": "Usuń",
@@ -529,11 +601,21 @@
         "confirmationForRole_one": "Zmienisz rolę na {{ role }} dla 1 użytkownika",
         "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
-        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników"
+        "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne).",
+        "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
+        "noUsersSkipped": "Nie pominięto żadnych użytkowników."
       },
       "placeholder": {
         "group": "Wybierz grupę",
         "role": "Wybierz rolę"
+      },
+      "note": {
+        "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa."
+      },
+      "tabs": {
+        "imported": "Zaimportowani użytkownicy",
+        "skipped": "Pominięci użytkownicy"
       }
     },
     "breadcrumbs": {
@@ -692,7 +774,8 @@
       },
       "other": {
         "charactersLeft": "Pozostało znaków",
-        "reachedCharactersLimit": "Osiągnięto limit znaków."
+        "reachedCharactersLimit": "Osiągnięto limit znaków.",
+        "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie."
       },
       "header": "Utwórz nowy kurs",
       "subHeader": "Podaj szczegóły, aby utworzyć nowy kurs. Będziesz miał więcej opcji dostosowania później.",
@@ -771,7 +854,7 @@
           "atLeastOneOptionRequired": "Wymagana jest przynajmniej jedna opcja",
           "imageRequired": "Obrazek jest wymagany",
           "descriptionLength": "Opis musi mieć co najmniej 10 znaków.",
-          "descritpionMaxLength": "Treść może mieć maksymalnie 5000 znaków.",
+          "descriptionMaxLength": "Treść może mieć maksymalnie 5000 znaków.",
           "atLeastOneOptionCorrect": "Przynajmniej jedna opcja musi być oznaczona jako poprawna.",
           "allOptionsCorrect": "Wszystkie opcje muszą być poprawne",
           "titleRequired": "Tytuł jest wymagany",
@@ -782,7 +865,12 @@
           "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 1000 znaków)",
           "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
           "passThresholdMax": "Próg zaliczenia nie może przekroczyć 10",
-          "titleMaxLength": "Tytuł jest zbyt długi (maks. 255 znaków)"
+          "titleMaxLength": "Tytuł jest zbyt długi (maks. 255 znaków)",
+          "maxFileSize": "Rozmiar pliku musi być mniejszy niż {{ MAX_MB_PER_FILE }} MB",
+          "maxFileNumber_one": "Nie możesz przesłać więcej niż 1 plik",
+          "maxFileNumber_few": "Nie możesz przesłać więcej niż {{ count }} pliki",
+          "maxFileNumber_many": "Nie możesz przesłać więcej niż {{ count }} plików",
+          "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -794,6 +882,8 @@
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
+          "aiMentorLessonFileAddedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie przesłane",
+          "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
@@ -813,7 +903,12 @@
           "sentence": "Zdanie",
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
-          "passThreshold": "Próg zaliczenia"
+          "passThreshold": "Próg zaliczenia",
+          "additionalContext": "Dodatkowy kontekst",
+          "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{ MAX_FILE_SIZE }} MB, który będzie używany jako kontekst w lekcjach",
+          "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
+          "includeFiles_many": "Dołącz maksymalnie {{ count }} plików, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
+          "includeFiles_other": "Dołącz maksymalnie {{ count }} plików, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach"
         },
         "placeholder": {
           "title": "Podaj tytuł lekcji...",
@@ -1384,6 +1479,32 @@
       "markAsReadFailed": "Nie udało się oznaczyć ogłoszeń jako przeczytane",
       "createdSuccessfully": "Ogłoszenie zostało pomyślnie utworzone",
       "createFailed": "Nie udało się utworzyć ogłoszenia"
+    }
+  },
+  "platformLogo": {
+    "header": "Logo Platformy",
+    "subHeader": "Wgraj własne logo dla swojej platformy. Obsługiwane formaty: PNG, SVG",
+    "field": {
+      "uploadLabel": "Obraz Logo"
+    },
+    "button": {
+      "removeLogo": "Usuń Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Logo platformy zostało pomyślnie wgrane",
+      "logoFetchError": "Nie udało się pobrać logo platformy"
+    }
+  },
+  "files": {
+    "import": {
+      "noFileUploaded": "Nie przesłano pliku",
+      "invalidFileData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
+      "fileEmpty": "Przesłany plik jest pusty",
+      "requiredDataMissing": "Import nie powiódł się – brak wymaganych danych w pliku.",
+      "invalidFileType": "Nieprawidłowy typ pliku. Wybierz poprawny plik",
+      "userFailReason": {
+        "alreadyExists": "użytkownik o tym adresie e-mail już istnieje"
+      }
     }
   },
   "defaultCourseCurrencyView": {

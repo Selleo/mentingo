@@ -147,6 +147,19 @@ export class SettingsController {
       },
     }),
   )
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        logo: {
+          type: "string",
+          format: "binary",
+        },
+      },
+      required: ["logo"],
+    },
+  })
   async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File): Promise<void> {
     await this.settingsService.uploadPlatformLogo(logo);
   }

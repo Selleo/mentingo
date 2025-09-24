@@ -1,3 +1,4 @@
+import { PlatformLogoForm } from "../../forms/PlatformLogoForm";
 import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
@@ -31,6 +32,7 @@ export default function OrganizationTabContent({
       <CertificateBackgroundUpload
         certificateBackgroundImage={globalSettings.certificateBackgroundImage}
       />
+      <PlatformLogoForm />
     </>
   );
 }

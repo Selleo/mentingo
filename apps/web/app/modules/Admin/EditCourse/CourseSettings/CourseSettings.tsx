@@ -7,9 +7,9 @@ import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import { queryClient } from "~/api/queryClient";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
-import { FormTextareaField } from "~/components/Form/FormTextareaFiled";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
+import Editor from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
@@ -21,7 +21,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Toggle } from "~/components/ui/toggle";
+import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
+import {
+  MAX_COURSE_DESCRIPTION_HTML_LENGTH,
+  MAX_COURSE_DESCRIPTION_LENGTH,
+} from "../../AddCourse/constants";
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
@@ -64,10 +69,10 @@ const CourseSettings = ({
   const watchedTitle = form.watch("title");
   const watchedDescription = form.watch("description");
   const watchedCategoryId = form.getValues("categoryId");
-  const maxDescriptionFieldLength = 800;
 
-  const watchedDescriptionLength = watchedDescription.length;
-  const descriptionFieldCharactersLeft = maxDescriptionFieldLength - watchedDescriptionLength;
+  const strippedDescriptionTextLength = stripHtmlTags(watchedDescription).length;
+  const descriptionFieldCharactersLeft =
+    MAX_COURSE_DESCRIPTION_LENGTH - strippedDescriptionTextLength;
 
   const [isCertificateEnabled, setIsCertificateEnabled] = useState(hasCertificate);
 
@@ -182,13 +187,15 @@ const CourseSettings = ({
                   )}
                 />
               </div>
-              <FormTextareaField
-                control={form.control}
-                name="description"
-                label={t("adminCourseView.settings.field.description")}
-                required
-                maxLength={maxDescriptionFieldLength}
+              <Editor
+                content={description}
+                onChange={(value) => form.setValue("description", value)}
               />
+              {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
+                <p className="text-sm text-red-500">
+                  {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
+                </p>
+              )}
               {descriptionFieldCharactersLeft <= 0 ? (
                 <p className="text-sm text-red-500">You have reached the character limit.</p>
               ) : (

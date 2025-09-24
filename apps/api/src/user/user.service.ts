@@ -11,6 +11,7 @@ import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
+import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -18,7 +19,9 @@ import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
+import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
+import { importUserSchema } from "src/user/schemas/createUser.schema";
 
 import {
   createTokens,
@@ -47,7 +50,7 @@ import type {
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
-import type { CreateUserBody } from "src/user/schemas/createUser.schema";
+import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 
 @Injectable()
 export class UserService {
@@ -57,6 +60,8 @@ export class UserService {
     private fileService: FileService,
     private s3Service: S3Service,
     private statisticsService: StatisticsService,
+    private createPasswordService: CreatePasswordService,
+    private settingsService: SettingsService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -314,7 +319,7 @@ export class UserService {
       .where(eq(credentials.userId, id));
 
     if (!userCredentials) {
-      throw new NotFoundException("User credentials not found");
+      return await this.createPasswordService.createUserPassword(id, newPassword);
     }
 
     const isOldPasswordValid = await bcrypt.compare(oldPassword, userCredentials.password);
@@ -370,8 +375,10 @@ export class UserService {
     }
   }
 
-  public async createUser(data: CreateUserBody) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.email, data.email));
+  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    const [existingUser] = await db.select().from(users).where(eq(users.email, data.email));
 
     if (existingUser) {
       throw new ConflictException("User already exists");
@@ -461,6 +468,64 @@ export class UserService {
       .where(and(eq(users.role, USER_ROLES.ADMIN)));
 
     return adminsWithSettings;
+  }
+
+  async importUsers(usersDataFile: Express.Multer.File) {
+    const importStats: ImportUserResponse = {
+      importedUsersAmount: 0,
+      skippedUsersAmount: 0,
+      importedUsersList: [],
+      skippedUsersList: [],
+    };
+
+    const usersData = await this.fileService.parseExcelFile<typeof importUserSchema>(
+      usersDataFile,
+      importUserSchema,
+    );
+
+    for (const userData of usersData) {
+      const [existingUser] = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.email, userData.email));
+
+      if (existingUser) {
+        importStats.skippedUsersAmount++;
+        importStats.skippedUsersList.push({
+          email: userData.email,
+          reason: "files.import.userFailReason.alreadyExists",
+        });
+        continue;
+      }
+
+      await this.db.transaction(async (trx) => {
+        const { groupName, ...userInfo } = userData;
+
+        const createdUser = await this.createUser({ ...userInfo }, trx);
+        await this.settingsService.createSettingsIfNotExists(
+          createdUser.id,
+          createdUser.role as UserRole,
+          undefined,
+          trx,
+        );
+
+        importStats.importedUsersAmount++;
+        importStats.importedUsersList.push(userData.email);
+
+        if (!groupName) return;
+
+        const [group] = await trx.select().from(groups).where(eq(groups.name, groupName));
+
+        if (!group) return;
+
+        await trx
+          .insert(groupUsers)
+          .values({ userId: createdUser.id, groupId: group.id })
+          .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
+      });
+    }
+
+    return importStats;
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {

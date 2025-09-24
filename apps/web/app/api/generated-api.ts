@@ -61,7 +61,7 @@ export interface LoginResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
-    navigateTo: string;
+    shouldVerifyMFA: boolean;
   };
 }
 
@@ -80,6 +80,7 @@ export interface CurrentUserResponse {
     role: string;
     archived: boolean;
     profilePictureUrl: string | null;
+    shouldVerifyMFA: boolean;
   };
 }
 
@@ -363,6 +364,191 @@ export interface CreateUserResponse {
   };
 }
 
+export interface ImportUsersResponse {
+  data: {
+    importedUsersAmount: number;
+    skippedUsersAmount: number;
+    importedUsersList: string[];
+    skippedUsersList: {
+      /** @format email */
+      email: string;
+      reason: string;
+    }[];
+  };
+}
+
+export interface GetPublicGlobalSettingsResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+  };
+}
+
+export interface GetUserSettingsResponse {
+  data:
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+      }
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+        adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
+      };
+}
+
+export type UpdateUserSettingsBody =
+  | {
+      language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
+    }
+  | {
+      language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
+      adminNewUserNotification?: boolean;
+      adminFinishedCourseNotification?: boolean;
+    };
+
+export interface UpdateUserSettingsResponse {
+  data:
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+      }
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+        adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
+      };
+}
+
+export interface UpdateAdminNewUserNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+  };
+}
+
+export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+  };
+}
+
+export interface UpdateEnforceSSOResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+  };
+}
+
+export interface UpdateAdminFinishedCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+  };
+}
+
+export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetCompanyInformationResponse {
+  data: {
+    companyName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
+  };
+}
+
+export interface UpdateCompanyInformationBody {
+  companyName?: string;
+  registeredAddress?: string;
+  taxNumber?: string;
+  emailAddress?: string;
+  courtRegisterNumber?: string;
+}
+
+export interface UpdateCompanyInformationResponse {
+  data: {
+    companyName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
+  };
+}
+
+export interface UpdateMFAEnforcedRolesBody {
+  admin?: boolean;
+  student?: boolean;
+  content_creator?: boolean;
+}
+
+export interface UpdateDefaultCourseCurrencyBody {
+  defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+}
+
 export interface GetAllCategoriesResponse {
   data: {
     /** @format uuid */
@@ -452,6 +638,8 @@ export interface GetAllCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -481,6 +669,8 @@ export interface GetStudentCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
   }[];
@@ -525,6 +715,8 @@ export interface GetAvailableCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
   }[];
@@ -556,6 +748,8 @@ export interface GetContentCreatorCoursesResponse {
     status?: "draft" | "published" | "private";
     createdAt?: string;
     hasFreeChapters?: boolean;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
   }[];
@@ -608,6 +802,8 @@ export interface GetCourseResponse {
     priceInCents: number;
     thumbnailUrl?: string;
     title: string;
+    stripeProductId: string | null;
+    stripePriceId: string | null;
   };
 }
 
@@ -1509,178 +1705,6 @@ export interface DownloadCertificateBody {
   filename?: string;
 }
 
-export interface GetPublicGlobalSettingsResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-  };
-}
-
-export interface GetUserSettingsResponse {
-  data:
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-      }
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-        adminNewUserNotification: boolean;
-        adminFinishedCourseNotification: boolean;
-      };
-}
-
-export type UpdateUserSettingsBody =
-  | {
-      language?: string;
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-    }
-  | {
-      language?: string;
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-      adminNewUserNotification?: boolean;
-      adminFinishedCourseNotification?: boolean;
-    };
-
-export interface UpdateUserSettingsResponse {
-  data:
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-      }
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-        adminNewUserNotification: boolean;
-        adminFinishedCourseNotification: boolean;
-      };
-}
-
-export interface UpdateAdminNewUserNotificationResponse {
-  data: {
-    language: string;
-    /** @default false */
-    isMFAEnabled: boolean;
-    MFASecret: string | null;
-    adminNewUserNotification: boolean;
-    adminFinishedCourseNotification: boolean;
-  };
-}
-
-export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-  };
-}
-
-export interface UpdateEnforceSSOResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-  };
-}
-
-export interface UpdateAdminFinishedCourseNotificationResponse {
-  data: {
-    language: string;
-    /** @default false */
-    isMFAEnabled: boolean;
-    MFASecret: string | null;
-    adminNewUserNotification: boolean;
-    adminFinishedCourseNotification: boolean;
-  };
-}
-
-export interface GetPlatformLogoResponse {
-  data: {
-    url: string | null;
-  };
-}
-
-export interface GetCompanyInformationResponse {
-  data: {
-    companyName?: string;
-    registeredAddress?: string;
-    taxNumber?: string;
-    emailAddress?: string;
-    courtRegisterNumber?: string;
-  };
-}
-
-export interface UpdateCompanyInformationBody {
-  companyName?: string;
-  registeredAddress?: string;
-  taxNumber?: string;
-  emailAddress?: string;
-  courtRegisterNumber?: string;
-}
-
-export interface UpdateCompanyInformationResponse {
-  data: {
-    companyName?: string;
-    registeredAddress?: string;
-    taxNumber?: string;
-    emailAddress?: string;
-    courtRegisterNumber?: string;
-  };
-}
-
-export interface UpdateMFAEnforcedRolesBody {
-  admin?: boolean;
-  student?: boolean;
-  content_creator?: boolean;
-}
-
-export interface UpdateDefaultCourseCurrencyBody {
-  defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-}
-
 export interface GetThreadResponse {
   data: {
     /** @format uuid */
@@ -1720,6 +1744,164 @@ export interface JudgeThreadResponse {
   data: {
     summary: string;
     passed: boolean;
+  };
+}
+
+export interface GetAllAssignedDocumentsForLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    type: string;
+    size: number;
+  }[];
+}
+
+export interface CreatePaymentIntentResponse {
+  data: {
+    clientSecret: string;
+  };
+}
+
+export interface CreateCheckoutSessionBody {
+  amountInCents: number;
+  allowPromotionCode?: boolean;
+  quantity?: number;
+  productName: string;
+  productDescription?: string;
+  courseId: string;
+  customerId: string;
+  locale?: string;
+  priceId: string;
+}
+
+export interface CreateCheckoutSessionResponse {
+  data: {
+    clientSecret: string;
+  };
+}
+
+export interface GetPromotionCodesResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      maxRedemptions?: number | null;
+      metadata?: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+      appliesTo: string[];
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    maxRedemptions?: number | null;
+    metadata?: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  }[];
+}
+
+export interface GetPromotionCodeResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      maxRedemptions?: number | null;
+      metadata?: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+      appliesTo: string[];
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    maxRedemptions?: number | null;
+    metadata?: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
+  };
+}
+
+export interface CreatePromotionCouponBody {
+  code: string;
+  amountOff?: number;
+  percentOff?: number;
+  maxRedemptions?: number;
+  assignedStripeCourseIds?: string[];
+  currency?: string;
+  expiresAt?: string;
+  courseId?: string[];
+}
+
+export interface CreatePromotionCouponResponse {
+  data: string;
+}
+
+export interface UpdatePromotionCodeBody {
+  active?: boolean;
+}
+
+export interface UpdatePromotionCodeResponse {
+  data: {
+    id: string;
+    active: boolean;
+    code: string;
+    coupon: {
+      id: string;
+      amountOff?: number | null;
+      percentOff?: number | null;
+      created: number;
+      currency?: string | null;
+      duration: string;
+      durationInMonths?: number | null;
+      maxRedemptions?: number | null;
+      metadata?: Record<string, any>;
+      name?: string | null;
+      redeemBy?: number | null;
+      timesRedeemed: number;
+      valid: boolean;
+      appliesTo: string[];
+    };
+    created: number;
+    customer?: string | null;
+    expiresAt?: number | null;
+    maxRedemptions?: number | null;
+    metadata?: Record<string, any>;
+    restrictions: {
+      firstTimeTransaction: boolean;
+      minimumAmount?: number | null;
+      minimumAmountCurrency?: string | null;
+    };
+    timesRedeemed: number;
   };
 }
 
@@ -1849,12 +2031,6 @@ export interface AssignUserToGroupResponse {
 export interface UnassignUserFromGroupResponse {
   data: {
     message: string;
-  };
-}
-
-export interface CreatePaymentIntentResponse {
-  data: {
-    clientSecret: string;
   };
 }
 
@@ -2728,6 +2904,256 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<void, any>({
         path: `/api/user/bulk/groups`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerImportUsers
+     * @request POST:/api/user/import
+     */
+    userControllerImportUsers: (
+      data: {
+        /** @format binary */
+        usersFile?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ImportUsersResponse, any>({
+        path: `/api/user/import`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPublicGlobalSettings
+     * @request GET:/api/settings/global
+     */
+    settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
+      this.request<GetPublicGlobalSettingsResponse, any>({
+        path: `/api/settings/global`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetUserSettings
+     * @request GET:/api/settings
+     */
+    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
+      this.request<GetUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUserSettings
+     * @request PUT:/api/settings
+     */
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminNewUserNotification
+     * @request PATCH:/api/settings/admin/new-user-notification
+     */
+    settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminNewUserNotificationResponse, any>({
+        path: `/api/settings/admin/new-user-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
+     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
+     */
+    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
+      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
+        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateEnforceSso
+     * @request PATCH:/api/settings/admin/enforce-sso
+     */
+    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
+      this.request<UpdateEnforceSSOResponse, any>({
+        path: `/api/settings/admin/enforce-sso`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminFinishedCourseNotification
+     * @request PATCH:/api/settings/admin/finished-course-notification
+     */
+    settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
+        path: `/api/settings/admin/finished-course-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPlatformLogo
+     * @request GET:/api/settings/platform-logo
+     */
+    settingsControllerGetPlatformLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformLogoResponse, any>({
+        path: `/api/settings/platform-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformLogo
+     * @request PATCH:/api/settings/platform-logo
+     */
+    settingsControllerUpdatePlatformLogo: (
+      data: {
+        /** @format binary */
+        logo: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetCompanyInformation
+     * @request GET:/api/settings/company-information
+     */
+    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
+      this.request<GetCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCompanyInformation
+     * @request PATCH:/api/settings/company-information
+     */
+    settingsControllerUpdateCompanyInformation: (
+      data: UpdateCompanyInformationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateMfaEnforcedRoles
+     * @request PATCH:/api/settings/admin/mfa-enforced-roles
+     */
+    settingsControllerUpdateMfaEnforcedRoles: (
+      data: UpdateMFAEnforcedRolesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/mfa-enforced-roles`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCertificateBackground
+     * @request PATCH:/api/settings/certificate-background
+     */
+    settingsControllerUpdateCertificateBackground: (
+      data: {
+        /** @format binary */
+        "certificate-background"?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/certificate-background`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateDefaultCourseCurrency
+     * @request PATCH:/api/settings/admin/default-course-currency
+     */
+    settingsControllerUpdateDefaultCourseCurrency: (
+      data: UpdateDefaultCourseCurrencyBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/default-course-currency`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
@@ -3665,226 +4091,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerGetPublicGlobalSettings
-     * @request GET:/api/settings/global
-     */
-    settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
-      this.request<GetPublicGlobalSettingsResponse, any>({
-        path: `/api/settings/global`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetUserSettings
-     * @request GET:/api/settings
-     */
-    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
-      this.request<GetUserSettingsResponse, any>({
-        path: `/api/settings`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateUserSettings
-     * @request PUT:/api/settings
-     */
-    settingsControllerUpdateUserSettings: (
-      data: UpdateUserSettingsBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateUserSettingsResponse, any>({
-        path: `/api/settings`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateAdminNewUserNotification
-     * @request PATCH:/api/settings/admin/new-user-notification
-     */
-    settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<UpdateAdminNewUserNotificationResponse, any>({
-        path: `/api/settings/admin/new-user-notification`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
-     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
-     */
-    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
-      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
-        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateEnforceSso
-     * @request PATCH:/api/settings/admin/enforce-sso
-     */
-    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
-      this.request<UpdateEnforceSSOResponse, any>({
-        path: `/api/settings/admin/enforce-sso`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateAdminFinishedCourseNotification
-     * @request PATCH:/api/settings/admin/finished-course-notification
-     */
-    settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
-      this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
-        path: `/api/settings/admin/finished-course-notification`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetPlatformLogo
-     * @request GET:/api/settings/platform-logo
-     */
-    settingsControllerGetPlatformLogo: (params: RequestParams = {}) =>
-      this.request<GetPlatformLogoResponse, any>({
-        path: `/api/settings/platform-logo`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdatePlatformLogo
-     * @request PATCH:/api/settings/platform-logo
-     */
-    settingsControllerUpdatePlatformLogo: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/settings/platform-logo`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetCompanyInformation
-     * @request GET:/api/settings/company-information
-     */
-    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
-      this.request<GetCompanyInformationResponse, any>({
-        path: `/api/settings/company-information`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateCompanyInformation
-     * @request PATCH:/api/settings/company-information
-     */
-    settingsControllerUpdateCompanyInformation: (
-      data: UpdateCompanyInformationBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateCompanyInformationResponse, any>({
-        path: `/api/settings/company-information`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateMfaEnforcedRoles
-     * @request PATCH:/api/settings/admin/mfa-enforced-roles
-     */
-    settingsControllerUpdateMfaEnforcedRoles: (
-      data: UpdateMFAEnforcedRolesBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/admin/mfa-enforced-roles`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateCertificateBackground
-     * @request PATCH:/api/settings/certificate-background
-     */
-    settingsControllerUpdateCertificateBackground: (
-      data: {
-        /** @format binary */
-        "certificate-background"?: File;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/certificate-background`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateDefaultCourseCurrency
-     * @request PATCH:/api/settings/admin/default-course-currency
-     */
-    settingsControllerUpdateDefaultCourseCurrency: (
-      data: UpdateDefaultCourseCurrencyBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/admin/default-course-currency`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name AiControllerGetThread
      * @request GET:/api/ai/thread
      */
@@ -3963,6 +4169,180 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/ai/retake/${lessonId}`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerIngest
+     * @request POST:/api/ingestion/ingest
+     */
+    ingestionControllerIngest: (
+      data: {
+        /** @format uuid */
+        lessonId: string;
+        files: File[];
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/ingestion/ingest`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerGetAllAssignedDocumentsForLesson
+     * @request GET:/api/ingestion/{lessonId}
+     */
+    ingestionControllerGetAllAssignedDocumentsForLesson: (
+      lessonId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllAssignedDocumentsForLessonResponse, any>({
+        path: `/api/ingestion/${lessonId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name IngestionControllerDeleteDocumentLink
+     * @request DELETE:/api/ingestion/{documentLinkId}
+     */
+    ingestionControllerDeleteDocumentLink: (documentLinkId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/ingestion/${documentLinkId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerCreatePaymentIntent
+     * @request POST:/api/stripe
+     */
+    stripeControllerCreatePaymentIntent: (
+      query: {
+        amount: number;
+        currency: string;
+        customerId: string;
+        courseId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePaymentIntentResponse, any>({
+        path: `/api/stripe`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerCreateCheckoutSession
+     * @request POST:/api/stripe/checkout-session
+     */
+    stripeControllerCreateCheckoutSession: (
+      data: CreateCheckoutSessionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateCheckoutSessionResponse, any>({
+        path: `/api/stripe/checkout-session`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeWebhookControllerHandleWebhook
+     * @request POST:/api/stripe/webhook
+     */
+    stripeWebhookControllerHandleWebhook: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/stripe/webhook`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerGetPromotionCodes
+     * @request GET:/api/stripe/promotion-codes
+     */
+    stripeControllerGetPromotionCodes: (params: RequestParams = {}) =>
+      this.request<GetPromotionCodesResponse, any>({
+        path: `/api/stripe/promotion-codes`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerGetPromotionCode
+     * @request GET:/api/stripe/promotion-code/{id}
+     */
+    stripeControllerGetPromotionCode: (id: string, params: RequestParams = {}) =>
+      this.request<GetPromotionCodeResponse, any>({
+        path: `/api/stripe/promotion-code/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerUpdatePromotionCode
+     * @request PATCH:/api/stripe/promotion-code/{id}
+     */
+    stripeControllerUpdatePromotionCode: (
+      id: string,
+      data: UpdatePromotionCodeBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdatePromotionCodeResponse, any>({
+        path: `/api/stripe/promotion-code/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StripeControllerCreatePromotionCoupon
+     * @request POST:/api/stripe/promotion-code
+     */
+    stripeControllerCreatePromotionCoupon: (
+      data: CreatePromotionCouponBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreatePromotionCouponResponse, any>({
+        path: `/api/stripe/promotion-code`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -4138,42 +4518,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StripeControllerCreatePaymentIntent
-     * @request POST:/api/stripe
-     */
-    stripeControllerCreatePaymentIntent: (
-      query: {
-        amount: number;
-        currency: string;
-        customerId: string;
-        courseId: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<CreatePaymentIntentResponse, any>({
-        path: `/api/stripe`,
-        method: "POST",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StripeWebhookControllerHandleWebhook
-     * @request POST:/api/stripe/webhook
-     */
-    stripeWebhookControllerHandleWebhook: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/stripe/webhook`,
-        method: "POST",
         ...params,
       }),
 

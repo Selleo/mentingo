@@ -299,6 +299,11 @@ const ChaptersList = ({
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const { mutateAsync: mutateChapterDisplayOrder } = useChangeChapterDisplayOrder();
   const chapterId = getChapterWithLatestLesson(chapters ?? []);
+  const [chapterList, setChapterList] = useState<Sortable<Chapter>[]>(chapters ?? []);
+
+  useEffect(() => {
+    setChapterList(chapters);
+  }, [chapters]);
 
   useEffect(() => {
     if (canRefetchChapterList) {
@@ -312,6 +317,8 @@ const ChaptersList = ({
       newChapterPosition: number,
       newDisplayOrder: number,
     ) => {
+      setChapterList(updatedItems);
+
       await mutateChapterDisplayOrder({
         chapter: {
           chapterId: updatedItems[newChapterPosition].sortableId,
@@ -320,8 +327,12 @@ const ChaptersList = ({
       });
 
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+
+      setTimeout(() => {
+        setOpenItem(openItem);
+      }, 0);
     },
-    [courseId, mutateChapterDisplayOrder],
+    [courseId, mutateChapterDisplayOrder, openItem],
   );
 
   if (!chapters) return;
@@ -335,7 +346,7 @@ const ChaptersList = ({
       defaultValue={openItem}
     >
       <SortableList
-        items={chapters}
+        items={chapterList}
         onChange={handleChapterOrderChange}
         className="grid grid-cols-1"
         renderItem={(chapter) => (

@@ -5,7 +5,7 @@ import { ApiClient } from "../api-client";
 import type { GetUsersResponse } from "../generated-api";
 import type { UserRole } from "~/config/userRoles";
 
-type UsersParams = {
+export type UsersParams = {
   keyword?: string;
   role?: UserRole;
   archived?: boolean;

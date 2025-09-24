@@ -37,18 +37,30 @@ export function formatPrice(
  * @param currency - The currency code (uppercase).
  * @returns The amount in major units.
  */
-function convertToMajorUnits(amount: number, currency: CurrencyCode): number {
-  const conversionRates: Record<CurrencyCode, number> = {
-    USD: 100,
-    EUR: 100,
-    GBP: 100,
-    JPY: 1,
-    KRW: 1,
-    BHD: 1000,
-  };
+const conversionRates: Record<CurrencyCode, number> = {
+  USD: 100,
+  EUR: 100,
+  GBP: 100,
+  JPY: 1,
+  KRW: 1,
+  BHD: 1000,
+  PLN: 100,
+};
 
+function convertToMajorUnits(amount: number, currency: CurrencyCode): number {
   const rate = conversionRates[currency] || 100;
   return amount / rate;
+}
+
+/**
+ * Converts major units to minor units based on the currency.
+ * @param amount - The amount in major units.
+ * @param currency - The currency code (uppercase).
+ * @returns The amount in minor units.
+ */
+export function convertToMinorUnits(amount: number, currency?: CurrencyCode): number {
+  const rate = conversionRates?.[currency as CurrencyCode] || 100;
+  return amount * rate;
 }
 
 /**
@@ -73,4 +85,14 @@ function getMaximumFractionDigits(currency: CurrencyCode): number {
   if (noFractionCurrencies.includes(currency)) return 0;
   if (threeFractionCurrencies.includes(currency)) return 3;
   return 2; // Default for most currencies
+}
+
+export function getCurrencySymbol(language: string): CurrencyCode {
+  const loweCaseLanguage = language.toLowerCase();
+  const languageCurrencyMap: Record<string, CurrencyCode> = {
+    pl: "PLN",
+    en: "USD",
+  };
+
+  return languageCurrencyMap[loweCaseLanguage];
 }
