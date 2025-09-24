@@ -10,12 +10,17 @@ import {
   Strikethrough,
   Undo,
   CheckSquare,
+  Link2,
 } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { ToggleGroup, Toolbar } from "~/components/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+
+import { InsertLinkDialog } from "../components/InsertLinkDialog";
 
 import { FormatType } from "./FormatType";
 
@@ -26,10 +31,22 @@ type EditorToolbarProps = {
 };
 
 const EditorToolbar = ({ editor }: EditorToolbarProps) => {
+  const { t } = useTranslation();
+
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+
   const handleToggle = (action: () => void) => (event: React.MouseEvent) => {
     event.preventDefault();
     action();
   };
+
+  const handleLink = handleToggle(() => {
+    if (editor.isActive("link")) {
+      editor.chain().focus().unsetLink().run();
+    } else {
+      setIsLinkDialogOpen(true);
+    }
+  });
 
   return (
     <Toolbar
@@ -38,6 +55,18 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
     >
       <TooltipProvider>
         <ToggleGroup className="flex flex-row items-center gap-x-1" type="multiple">
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                size="sm"
+                className={`bg-transparent text-black ${editor.isActive("link") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                onClick={handleLink}
+              >
+                <Link2 className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t("richTextEditor.toolbar.link.tooltip")}</TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger>
               <Button
@@ -180,6 +209,11 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
           </Button>
         </ToggleGroup>
       </TooltipProvider>
+      <InsertLinkDialog
+        open={isLinkDialogOpen}
+        onClose={() => setIsLinkDialogOpen(false)}
+        editor={editor}
+      />
     </Toolbar>
   );
 };

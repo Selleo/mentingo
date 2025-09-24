@@ -1532,5 +1532,21 @@
         "sign": "£"
       }
     }
+  },
+  "richTextEditor": {
+    "toolbar": {
+      "link": {
+        "tooltip": "Link: Wstaw lub edytuj link",
+        "dialog": {
+          "title": "Wstaw link",
+          "urlLabel": "Wprowadź adres URL linku",
+          "linkTextLabel": "Wprowadź tekst linku",
+          "linkTextPlaceholder": "Tekst linku...",
+          "urlRequired": "Link jest wymagany",
+          "urlInvalid": "Nieprawidłowy format linku",
+          "linkTextRequired": "Tekst linku jest wymagany"
+        }
+      }
+    }
   }
 }
