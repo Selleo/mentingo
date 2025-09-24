@@ -175,6 +175,7 @@ export class CertificatesService {
           overflow: hidden;
           ${backgroundStyle}
         }
+       
         body > * {
           transform: scale(2.2);
         }
