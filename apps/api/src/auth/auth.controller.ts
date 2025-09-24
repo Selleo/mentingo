@@ -105,8 +105,8 @@ export class AuthController {
     );
 
     shouldVerifyMFA
-      ? this.tokenService.setTokenCookies(response, accessToken, refreshToken)
-      : this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
+      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, data.rememberMe);
 
     return new BaseResponse({ ...account, shouldVerifyMFA });
   }
@@ -220,8 +220,8 @@ export class AuthController {
       await this.authService.handleProviderLoginCallback(googleUser);
 
     shouldVerifyMFA
-      ? this.tokenService.setTokenCookies(response, accessToken, refreshToken, true)
-      : this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
+      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
     response.redirect(this.CORS_ORIGIN);
   }
@@ -246,8 +246,8 @@ export class AuthController {
       await this.authService.handleProviderLoginCallback(microsoftUser);
 
     shouldVerifyMFA
-      ? this.tokenService.setTokenCookies(response, accessToken, refreshToken, true)
-      : this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
+      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
     response.redirect(this.CORS_ORIGIN);
   }
