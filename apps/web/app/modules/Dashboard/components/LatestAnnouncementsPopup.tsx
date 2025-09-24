@@ -4,7 +4,6 @@ import { useUserRole } from "~/hooks/useUserRole";
 import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
 
 import LatestAnnouncementCard from "./LatestAnnouncementCard";
-import NoNewAnnouncementsCard from "./NoNewAnnouncementsCard";
 
 import type { GetLatestUnreadAnnouncementsResponse } from "~/api/generated-api";
 
@@ -22,14 +21,7 @@ export default function LatestAnnouncementsPopup({
   const isVisible = useAnnouncementsPopupStore((state) => state.isVisible);
   const setIsVisible = useAnnouncementsPopupStore((state) => state.setIsVisible);
 
-  if (!isVisible || isAdmin) return null;
-
-  if (!latestUnreadAnnouncements.length)
-    return (
-      <div className="absolute z-10 mt-2 w-full space-y-4 md:mt-8">
-        <NoNewAnnouncementsCard setIsVisible={setIsVisible} />
-      </div>
-    );
+  if (!isVisible || isAdmin || !latestUnreadAnnouncements.length) return null;
 
   return (
     <div className="absolute z-10 mt-2 w-full space-y-4 md:mt-8">
