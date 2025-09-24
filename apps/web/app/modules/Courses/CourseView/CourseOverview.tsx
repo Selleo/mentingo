@@ -32,7 +32,11 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
         <div className="flex w-full flex-col gap-y-2">
           <CategoryChip category={course?.category} className="bg-primary-50" />
           <h5 className="h5">{title}</h5>
-          <Viewer content={description} className="body-base mt-2 text-neutral-900" />
+          <Viewer
+            content={description}
+            className="body-base mt-2 text-neutral-900"
+            variant="lesson"
+          />
         </div>
       </CardContent>
     </Card>
