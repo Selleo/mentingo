@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
+import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 
 type CourseCardButtonProps = {
   currency: string;
@@ -35,7 +36,7 @@ const CourseCardButton = ({
     if (isAdmin) return t("studentCoursesView.button.view");
 
     if (priceInCents)
-      return `${t("studentCoursesView.button.enroll")} - ${formatPrice(priceInCents, currency)}`;
+      return `${t("studentCoursesView.button.enroll")} - ${formatPrice(priceInCents, currency, getCurrencyLocale(currency))}`;
 
     return t("studentCoursesView.button.enroll");
   };

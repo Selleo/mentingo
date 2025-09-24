@@ -2,6 +2,7 @@ import { PlatformLogoForm } from "../../forms/PlatformLogoForm";
 import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
+import { DefaultCourseCurrencySelect } from "./DefaultCourseCurrencySelect";
 import AdminPreferences from "./Preferences";
 import RoleBasedMFAEnforcementSwitch from "./RoleBasedMFAEnforcementSwitch";
 
@@ -24,14 +25,13 @@ export default function OrganizationTabContent({
 
   return (
     <>
-      {isAdmin && <AdminPreferences globalSettings={globalSettings} />}
+      <AdminPreferences globalSettings={globalSettings} />
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
       <RoleBasedMFAEnforcementSwitch MFAEnforcedRoles={globalSettings.MFAEnforcedRoles} />
-      {isAdmin && (
-        <CertificateBackgroundUpload
-          certificateBackgroundImage={globalSettings.certificateBackgroundImage}
-        />
-      )}
+      <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />
+      <CertificateBackgroundUpload
+        certificateBackgroundImage={globalSettings.certificateBackgroundImage}
+      />
       <PlatformLogoForm />
     </>
   );

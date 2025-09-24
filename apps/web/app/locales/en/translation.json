@@ -1315,6 +1315,11 @@
     "breadcrumbs": {
       "dashboard": "Dashboard",
       "settings": "Settings"
+    },
+    "toast": {
+      "error": {
+        "globalNotFound": "Global settings not found"
+      }
     }
   },
   "certificateBackgroundUpload": {
@@ -1494,6 +1499,32 @@
       "invalidFileType": "Invalid file type. Please upload a valid file.",
       "userFailReason": {
         "alreadyExists": "user with this email already exists"
+      }
+    }
+  },
+  "defaultCourseCurrencyView": {
+    "header": "Default Course Currency",
+    "subHeader": "Set the default currency for all new courses",
+    "toast": {
+      "defaultCourseCurrencyChangeSuccess": "Default course currency has been successfully updated",
+      "defaultCourseCurrencyChangeError": "Failed to update default course currency"
+    },
+    "select": {
+      "pln": {
+        "label": "Polish Zloty",
+        "sign": "zł"
+      },
+      "eur": {
+        "label": "Euro",
+        "sign": "€"
+      },
+      "usd": {
+        "label": "US Dollar",
+        "sign": "$"
+      },
+      "gbp": {
+        "label": "British Pound",
+        "sign": "£"
       }
     }
   }

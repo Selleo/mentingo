@@ -1,3 +1,4 @@
+import type { ALLOWED_CURRENCIES } from "./constants";
 import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
 
 export type GlobalSettings = {
@@ -6,6 +7,7 @@ export type GlobalSettings = {
   platformLogoS3Key: string | null;
   MFAEnforcedRoles: GetPublicGlobalSettingsResponse["data"]["MFAEnforcedRoles"];
   certificateBackgroundImage: string | null;
+  defaultCourseCurrency: GetPublicGlobalSettingsResponse["data"]["defaultCourseCurrency"];
 };
 
 export type UserSettings = {
@@ -18,3 +20,5 @@ export type AdminSettings = UserSettings & {
 };
 
 export type AllSettings = UserSettings | AdminSettings | GlobalSettings;
+
+export type AllowedCurrency = (typeof ALLOWED_CURRENCIES)[number];

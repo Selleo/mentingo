@@ -1217,6 +1217,27 @@
         }
       }
     },
+    "/api/settings/admin/default-course-currency": {
+      "patch": {
+        "operationId": "SettingsController_updateDefaultCourseCurrency",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDefaultCourseCurrencyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/test-config/setup": {
       "post": {
         "operationId": "TestConfigController_setup",
@@ -5540,6 +5561,26 @@
                     }
                   ]
                 }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
@@ -5547,7 +5588,8 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
-              "MFAEnforcedRoles"
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency"
             ]
           }
         },
@@ -5877,6 +5919,26 @@
                     }
                   ]
                 }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
@@ -5884,7 +5946,8 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
-              "MFAEnforcedRoles"
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency"
             ]
           }
         },
@@ -5962,6 +6025,26 @@
                     }
                   ]
                 }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
@@ -5969,7 +6052,8 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
-              "MFAEnforcedRoles"
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency"
             ]
           }
         },
@@ -6136,6 +6220,34 @@
             "type": "boolean"
           }
         }
+      },
+      "UpdateDefaultCourseCurrencyBody": {
+        "type": "object",
+        "properties": {
+          "defaultCourseCurrency": {
+            "anyOf": [
+              {
+                "const": "pln",
+                "type": "string"
+              },
+              {
+                "const": "eur",
+                "type": "string"
+              },
+              {
+                "const": "gbp",
+                "type": "string"
+              },
+              {
+                "const": "usd",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "defaultCourseCurrency"
+        ]
       },
       "GetAllCategoriesResponse": {
         "type": "object",

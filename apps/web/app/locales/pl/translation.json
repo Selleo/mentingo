@@ -1506,5 +1506,31 @@
         "alreadyExists": "użytkownik o tym adresie e-mail już istnieje"
       }
     }
+  },
+  "defaultCourseCurrencyView": {
+    "header": "Domyślna waluta kursów",
+    "subHeader": "Ustaw domyślną walutę dla wszystkich nowych kursów",
+    "toast": {
+      "defaultCourseCurrencyChangeSuccess": "Domyślna waluta kursów została pomyślnie zaktualizowana",
+      "defaultCourseCurrencyChangeError": "Nie udało się zaktualizować domyślnej waluty kursów"
+    },
+    "select": {
+      "pln": {
+        "label": "Polski Złoty",
+        "sign": "zł"
+      },
+      "eur": {
+        "label": "Euro",
+        "sign": "€"
+      },
+      "usd": {
+        "label": "Dolar amerykański",
+        "sign": "$"
+      },
+      "gbp": {
+        "label": "Funt brytyjski",
+        "sign": "£"
+      }
+    }
   }
 }

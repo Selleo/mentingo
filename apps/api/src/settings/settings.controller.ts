@@ -31,6 +31,8 @@ import {
   userSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import {
+  UpdateDefaultCourseCurrencyBody,
+  updateDefaultCourseCurrencySchema,
   UpdateMFAEnforcedRolesRequest,
   updateMFAEnforcedRolesSchema,
   UpdateSettingsBody,
@@ -214,5 +216,20 @@ export class SettingsController {
     return new BaseResponse(
       await this.settingsService.updateCertificateBackground(certificateBackground),
     );
+  }
+
+  @Patch("admin/default-course-currency")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: updateDefaultCourseCurrencySchema }],
+  })
+  async updateDefaultCourseCurrency(
+    @Body() newSettings: UpdateDefaultCourseCurrencyBody,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const updatedGlobalSettings = await this.settingsService.updateDefaultCourseCurrency(
+      newSettings.defaultCourseCurrency,
+    );
+
+    return new BaseResponse(updatedGlobalSettings);
   }
 }

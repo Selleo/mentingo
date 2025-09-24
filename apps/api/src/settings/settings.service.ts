@@ -23,6 +23,7 @@ import type {
   UserSettingsJSONContentSchema,
 } from "./schemas/settings.schema";
 import type {
+  AllowedCurrency,
   UpdateMFAEnforcedRolesRequest,
   UpdateSettingsBody,
 } from "./schemas/update-settings.schema";
@@ -433,6 +434,34 @@ export class SettingsService {
       .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
 
     return updatedUserSettings;
+  }
+
+  async updateDefaultCourseCurrency(
+    currency: AllowedCurrency,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const [existingGlobalSettings] = await this.db
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!existingGlobalSettings) {
+      throw new NotFoundException("settings.toast.error.globalNotFound");
+    }
+
+    const [{ settings: updatedSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`jsonb_set(
+          settings.settings,
+          '{defaultCourseCurrency}',
+          to_jsonb(${currency}::text),
+          true
+        )`,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedSettings;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {

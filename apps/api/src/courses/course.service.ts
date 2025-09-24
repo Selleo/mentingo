@@ -29,6 +29,7 @@ import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
+import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -95,6 +96,7 @@ export class CourseService {
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
     private readonly userService: UserService,
+    private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
   ) {}
 
@@ -799,7 +801,9 @@ export class CourseService {
       if (!category) {
         throw new NotFoundException("Category not found");
       }
-      const finalCurrency = createCourseBody.currency || "usd";
+      const globalSettings = await this.settingsService.getGlobalSettings();
+
+      const finalCurrency = globalSettings.defaultCourseCurrency || "usd";
 
       let productId: string | null = null;
       let priceId: string | null = null;

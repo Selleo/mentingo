@@ -2,6 +2,8 @@ import { Type } from "@sinclair/typebox";
 
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
+
 import type { Static } from "@sinclair/typebox";
 
 export const companyInformationJSONSchema = Type.Object({
@@ -19,6 +21,7 @@ export const globalSettingsJSONSchema = Type.Object({
   companyInformation: Type.Optional(companyInformationJSONSchema),
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
   MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
+  defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

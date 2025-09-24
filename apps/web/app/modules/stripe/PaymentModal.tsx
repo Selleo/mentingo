@@ -9,6 +9,7 @@ import { queryClient } from "~/api/queryClient";
 import { Enroll } from "~/assets/svgs";
 import { Button } from "~/components/ui/button";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
+import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 
 import { useStripePromise } from "./hooks/useStripePromise";
 
@@ -65,7 +66,8 @@ export function PaymentModal({
           <Enroll />
           <span>
             {" "}
-            {t("paymentView.other.enrollCourse")} - {formatPrice(coursePrice, courseCurrency)}
+            {t("paymentView.other.enrollCourse")} -{" "}
+            {formatPrice(coursePrice, courseCurrency, getCurrencyLocale(courseCurrency))}
           </span>
         </Button>
       ) : (
