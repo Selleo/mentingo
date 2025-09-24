@@ -302,6 +302,10 @@ const ChaptersList = ({
   const [chapterList, setChapterList] = useState<Sortable<Chapter>[]>(chapters ?? []);
 
   useEffect(() => {
+    setChapterList(chapters);
+  }, [chapters]);
+
+  useEffect(() => {
     if (canRefetchChapterList) {
       chapterId && setOpenItem(chapterId);
     }
@@ -323,8 +327,12 @@ const ChaptersList = ({
       });
 
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+
+      setTimeout(() => {
+        setOpenItem(openItem);
+      }, 0);
     },
-    [courseId, mutateChapterDisplayOrder],
+    [courseId, mutateChapterDisplayOrder, openItem],
   );
 
   if (!chapters) return;
