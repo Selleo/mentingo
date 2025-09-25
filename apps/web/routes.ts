@@ -31,6 +31,7 @@ export const routes: (
       route("courses", "modules/Admin/Courses/Courses.page.tsx", {
         index: true,
       });
+      route("envs", "modules/Admin/Envs/Envs.page.tsx");
       route("beta-courses/new", "modules/Admin/AddCourse/AddCourse.tsx");
       route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");
       route("beta-courses/:id", "modules/Admin/EditCourse/EditCourse.tsx");
