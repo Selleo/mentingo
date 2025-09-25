@@ -39,8 +39,7 @@ import { TokenService } from "./token.service";
 import type { Response } from "express";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { UserResponse } from "src/user/schemas/user.schema";
-import type { GoogleUserType } from "src/utils/types/google-user.type";
-import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
+import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Injectable()
 export class AuthService {
@@ -399,7 +398,7 @@ export class AuthService {
     });
   }
 
-  public async handleProviderLoginCallback(userCallback: MicrosoftUserType | GoogleUserType) {
+  public async handleProviderLoginCallback(userCallback: ProviderLoginUserType) {
     if (!userCallback) {
       throw new UnauthorizedException("User data is missing");
     }

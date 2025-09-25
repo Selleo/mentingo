@@ -20,11 +20,11 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
+import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
 import { UserActivityEvent } from "src/events";
 import { SettingsService } from "src/settings/settings.service";
 import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
-import { UserService } from "src/user/user.service";
 
 import { AuthService } from "./auth.service";
 import { CreateAccountBody, createAccountSchema } from "./schemas/create-account.schema";
@@ -45,8 +45,7 @@ import {
 import { TokenService } from "./token.service";
 
 import type { Static } from "@sinclair/typebox";
-import type { GoogleUserType } from "src/utils/types/google-user.type";
-import type { MicrosoftUserType } from "src/utils/types/microsoft-user.type";
+import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Controller("auth")
 export class AuthController {
@@ -55,7 +54,6 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
-    private readonly userService: UserService,
     private readonly eventBus: EventBus,
     private readonly settingsService: SettingsService,
   ) {
@@ -211,7 +209,7 @@ export class AuthController {
   @Get("google/callback")
   @UseGuards(GoogleOAuthGuard)
   async googleAuthCallback(
-    @Req() request: Request & { user: GoogleUserType },
+    @Req() request: Request & { user: ProviderLoginUserType },
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const googleUser = request.user;
@@ -237,13 +235,39 @@ export class AuthController {
   @Get("microsoft/callback")
   @UseGuards(MicrosoftOAuthGuard)
   async microsoftAuthCallback(
-    @Req() request: Request & { user: MicrosoftUserType },
+    @Req() request: Request & { user: ProviderLoginUserType },
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
     const microsoftUser = request.user;
 
     const { accessToken, refreshToken, shouldVerifyMFA } =
       await this.authService.handleProviderLoginCallback(microsoftUser);
+
+    shouldVerifyMFA
+      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+
+    response.redirect(this.CORS_ORIGIN);
+  }
+
+  @Public()
+  @Get("slack")
+  @UseGuards(SlackOAuthGuard)
+  async slackAuth() {
+    // Initiates the Slack OAuth flow
+  }
+
+  @Public()
+  @Get("slack/callback")
+  @UseGuards(SlackOAuthGuard)
+  async slackAuthCallback(
+    @Req() request: Request & { user: ProviderLoginUserType },
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const slackUser = request.user;
+
+    const { accessToken, refreshToken, shouldVerifyMFA } =
+      await this.authService.handleProviderLoginCallback(slackUser);
 
     shouldVerifyMFA
       ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)

@@ -2489,6 +2489,32 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AuthControllerSlackAuth
+     * @request GET:/api/auth/slack
+     */
+    authControllerSlackAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/slack`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerSlackAuthCallback
+     * @request GET:/api/auth/slack/callback
+     */
+    authControllerSlackAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/slack/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name AuthControllerMfaSetup
      * @request POST:/api/auth/mfa/setup
      */
