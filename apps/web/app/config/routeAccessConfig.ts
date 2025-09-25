@@ -118,4 +118,5 @@ export const routeAccessConfig = createRouteConfig({
   "admin/promotion-codes": ADMIN_ONLY,
   "admin/promotion-codes/new": ADMIN_ONLY,
   "admin/promotion-codes/:id": ADMIN_ONLY,
+  "admin/envs": ADMIN_ONLY,
 });

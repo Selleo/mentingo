@@ -656,6 +656,33 @@
       "back": "Back"
     }
   },
+  "adminEnvsView": {
+    "name": "Environment Variables",
+    "keysTitle": "Keys",
+    "form": {
+      "openai": {
+        "label": "OpenAI API",
+        "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "bunny": {
+        "label": "Bunny CDN",
+        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "googleSSO": {
+        "label": "Google SSO",
+        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "microsoftSSO": {
+        "label": "Microsoft SSO",
+        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "save": "Save"
+    },
+    "breadcrumbs": {
+      "envs": "Environment Variables"
+    }
+  },
+
   "adminGroupsView": {
     "name": "Group name",
     "characteristic": "Characteristic",

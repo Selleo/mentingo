@@ -660,6 +660,32 @@
       "back": "Wstecz"
     }
   },
+  "adminEnvsView": {
+    "name": "Zmienne środowiskowe",
+    "keysTitle": "Klucze",
+    "form": {
+      "openai": {
+        "label": "OpenAI API",
+        "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "bunny": {
+        "label": "Bunny CDN",
+        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "googleSSO": {
+        "label": "Google SSO",
+        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "microsoftSSO": {
+        "label": "Microsoft SSO",
+        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "save": "Zapisz"
+    },
+    "breadcrumbs": {
+      "envs": "Zmienne środowiskowe"
+    }
+  },
   "adminGroupsView": {
     "name": "Nazwa grupy",
     "characteristic": "Charakterystyka",
