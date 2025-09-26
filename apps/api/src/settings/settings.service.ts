@@ -56,13 +56,21 @@ export class SettingsService {
         : JSON.parse(globalSettings.settings.MFAEnforcedRoles ?? "[]"),
     };
 
-    const { certificateBackgroundImage, ...restOfSettings } = parsedSettings;
+    const { certificateBackgroundImage, platformLogoS3Key, ...restOfSettings } = parsedSettings;
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
       ? await this.fileService.getFileUrl(certificateBackgroundImage)
       : null;
 
-    return { ...restOfSettings, certificateBackgroundImage: certificateBackgroundSignedUrl };
+    const platformLogoUrl = platformLogoS3Key
+      ? await this.fileService.getFileUrl(platformLogoS3Key)
+      : null;
+
+    return {
+      ...restOfSettings,
+      platformLogoS3Key: platformLogoUrl,
+      certificateBackgroundImage: certificateBackgroundSignedUrl,
+    };
   }
 
   public async createSettingsIfNotExists(

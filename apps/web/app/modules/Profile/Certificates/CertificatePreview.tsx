@@ -32,7 +32,6 @@ const CertificatePreview = ({
         courseName={courseName}
         completionDate={completionDate}
         platformLogo={platformLogo}
-        backgroundImageUrl={certificateBackgroundImageUrl}
       />
 
       <div className="mx-auto w-full max-w-[95vw] overflow-hidden rounded-t-lg">

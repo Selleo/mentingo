@@ -2,6 +2,7 @@ import { useParams } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useCertificates } from "~/api/queries/useCertificates";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 
 import { default as CertificateComponent } from "./Certificate";
 
@@ -18,6 +19,8 @@ interface CertificatesProps {
 const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
   const { id = "" } = useParams();
   const { data: certificates, isLoading, error } = useCertificates({ userId: id });
+
+  const { data: globalSettings } = useGlobalSettings();
 
   const { t } = useTranslation();
 
@@ -75,6 +78,7 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
                 certData={certData}
                 courseCompletionDate={formattedDate}
                 onOpenCertificatePreview={onOpenCertificatePreview}
+                platformLogo={globalSettings?.platformLogoS3Key}
               />
             </div>
           );
