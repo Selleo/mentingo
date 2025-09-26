@@ -1,3 +1,15 @@
+<a name="v3.6.0"></a>
+
+## [v3.6.0] - 26.09.2025
+
+### Bug Fixes:
+
+- added path to cookie deletion ([#690](https://github.com/Selleo/mentingo/issues/690))
+
+- login using providers on deployed apps ([#692](https://github.com/Selleo/mentingo/issues/692))
+
+- version generation on deploy to client instances ([#691](https://github.com/Selleo/mentingo/issues/691))
+
 <a name="v3.5.0"></a>
 
 ## [v3.5.0] - 24.09.2025
@@ -25,6 +37,8 @@
 - adjust makefile release for tag releases ([#642](https://github.com/Selleo/mentingo/issues/642))
 
 ### Documentation:
+
+- update changelog for version v3.5.0
 
 - update changelog for version learn-v2025.09.16
 
@@ -1446,7 +1460,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.5.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.6.0...HEAD
+[v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
 [v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
 [v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
 [v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
