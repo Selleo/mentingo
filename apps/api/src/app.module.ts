@@ -11,6 +11,7 @@ import { AnnouncementsModule } from "./announcements/announcements.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
+import { SlackStrategy } from "./auth/strategy/slack.strategy";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
@@ -133,6 +134,7 @@ import { UserModule } from "./user/user.module";
     },
     ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
     ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
+    ...(process.env.SLACK_OAUTH_ENABLED === "true" ? [SlackStrategy] : []),
   ],
 })
 export class AppModule {}

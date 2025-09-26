@@ -1,9 +1,3 @@
-export interface MicrosoftUserType {
-  email: string;
-  firstName: string;
-  lastName: string;
-}
-
 export interface MicrosoftProfile {
   id: string;
   displayName: string;

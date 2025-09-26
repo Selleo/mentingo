@@ -2,6 +2,7 @@ import { hasRequiredEnvsConfig } from "src/utils/hasRequiredEnvsConfig";
 
 import awsConfig from "./aws";
 import googleConfig from "./google";
+import slackConfig from "./slack";
 
 const hasAwsConfig = hasRequiredEnvsConfig([
   "AWS_BUCKET_NAME",
@@ -16,6 +17,16 @@ export const hasGoogleConfig = hasRequiredEnvsConfig([
   "GOOGLE_OAUTH_ENABLED",
 ]);
 
+const hasSlackConfig = hasRequiredEnvsConfig([
+  "SLACK_CLIENT_ID",
+  "SLACK_CLIENT_SECRET",
+  "SLACK_OAUTH_ENABLED",
+]);
+
 export const getOptionalConfigs = () => {
-  return [...(hasAwsConfig ? [awsConfig] : []), ...(hasGoogleConfig ? [googleConfig] : [])];
+  return [
+    ...(hasAwsConfig ? [awsConfig] : []),
+    ...(hasGoogleConfig ? [googleConfig] : []),
+    ...(hasSlackConfig ? [slackConfig] : []),
+  ];
 };

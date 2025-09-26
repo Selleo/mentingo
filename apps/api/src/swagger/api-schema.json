@@ -213,6 +213,28 @@
         }
       }
     },
+    "/api/auth/slack": {
+      "get": {
+        "operationId": "AuthController_slackAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/slack/callback": {
+      "get": {
+        "operationId": "AuthController_slackAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/auth/mfa/setup": {
       "post": {
         "operationId": "AuthController_MFASetup",

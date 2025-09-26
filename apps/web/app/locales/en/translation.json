@@ -45,7 +45,8 @@
       "appVersion": "App Version: {{version}}"
     },
     "continueWithGoogle": "Continue with Google",
-    "continueWithMicrosoft": "Continue with Microsoft"
+    "continueWithMicrosoft": "Continue with Microsoft",
+    "continueWithSlack": "Continue with Slack"
   },
   "uploadFile": {
     "header": "Click to upload",

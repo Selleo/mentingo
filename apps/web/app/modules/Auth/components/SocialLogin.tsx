@@ -6,19 +6,21 @@ interface SocialLoginProps {
   isSSOEnforced?: boolean;
   isGoogleOAuthEnabled?: boolean;
   isMicrosoftOAuthEnabled?: boolean;
+  isSlackOAuthEnabled?: boolean;
 }
 
 export function SocialLogin({
   isSSOEnforced,
   isGoogleOAuthEnabled,
   isMicrosoftOAuthEnabled,
+  isSlackOAuthEnabled,
 }: SocialLoginProps) {
   const { t } = useTranslation();
 
-  const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const baseUrl = import.meta.env.VITE_APP_URL || "http://localhost:5173";
 
-  const handleGoogleSignIn = () => (window.location.href = `${baseUrl}/api/auth/google`);
-  const handleMicrosoftSignIn = () => (window.location.href = `${baseUrl}/api/auth/microsoft`);
+  const handleProviderSignIn = (provider: string) => () =>
+    (window.location.href = `${baseUrl}/api/auth/${provider}`);
 
   return (
     <>
@@ -39,14 +41,21 @@ export function SocialLogin({
         <ProviderOAuthLoginButton
           iconName="Google"
           buttonTextTranslationKey="common.continueWithGoogle"
-          handleSignIn={handleGoogleSignIn}
+          handleSignIn={handleProviderSignIn("google")}
         />
       )}
       {isMicrosoftOAuthEnabled && (
         <ProviderOAuthLoginButton
           iconName="Microsoft"
           buttonTextTranslationKey="common.continueWithMicrosoft"
-          handleSignIn={handleMicrosoftSignIn}
+          handleSignIn={handleProviderSignIn("microsoft")}
+        />
+      )}
+      {isSlackOAuthEnabled && (
+        <ProviderOAuthLoginButton
+          iconName="Slack"
+          buttonTextTranslationKey="common.continueWithSlack"
+          handleSignIn={handleProviderSignIn("slack")}
         />
       )}
     </>
