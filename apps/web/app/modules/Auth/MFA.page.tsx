@@ -1,5 +1,6 @@
 import { Navigate } from "@remix-run/react";
 
+import { useCurrentUserSuspense } from "~/api/queries";
 import { useUserSettings } from "~/api/queries/useUserSettings";
 
 import Loader from "../common/Loader/Loader";
@@ -9,7 +10,12 @@ import { SetupMFACard, VerifyMFACard } from "./components";
 
 export default function MFAPage() {
   const { data: userSettings, isLoading, isFetching } = useUserSettings();
+  const { data: currentUser } = useCurrentUserSuspense();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
+
+  if (!currentUser) {
+    return <Navigate to="/auth/login" />;
+  }
 
   if (hasVerifiedMFA) {
     return <Navigate to="/" />;
