@@ -3,7 +3,7 @@ name: Deploy Learn (Production)
 on:
   push:
     tags:
-      - 'learn-v*'
+      - 'v*'
 
 jobs:
   deploy_api:

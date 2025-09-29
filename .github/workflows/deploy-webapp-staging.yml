@@ -11,6 +11,7 @@ on:
     paths:
       - apps/web/**
       - .github/workflows/deploy-webapp-staging.yml
+      - CHANGELOG.md
 
 jobs:
   build-web:
