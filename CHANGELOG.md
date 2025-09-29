@@ -1,3 +1,29 @@
+<a name="v3.7.0"></a>
+
+## [v3.7.0] - 29.09.2025
+
+### Bug Fixes:
+
+- fixed platform logo for certificates and unified background image rendering ([#681](https://github.com/Selleo/mentingo/issues/681))
+
+- fixed redirect on course edit mode ([#682](https://github.com/Selleo/mentingo/issues/682))
+
+- logout with mfa enabled triggering infinite loader ([#698](https://github.com/Selleo/mentingo/issues/698))
+
+### Chores:
+
+- add stripe to create course seeds ([#699](https://github.com/Selleo/mentingo/issues/699))
+
+- update github workflows to fix version mismatch ([#697](https://github.com/Selleo/mentingo/issues/697))
+
+### Features:
+
+- improve inserting links in rich text editor ([#684](https://github.com/Selleo/mentingo/issues/684))
+
+- change max letter value in input, create better ux for error ha… ([#466](https://github.com/Selleo/mentingo/issues/466))
+
+- implement slack authentication ([#686](https://github.com/Selleo/mentingo/issues/686))
+
 <a name="v3.6.0"></a>
 
 ## [v3.6.0] - 26.09.2025
@@ -9,6 +35,10 @@
 - login using providers on deployed apps ([#692](https://github.com/Selleo/mentingo/issues/692))
 
 - version generation on deploy to client instances ([#691](https://github.com/Selleo/mentingo/issues/691))
+
+### Documentation:
+
+- update changelog for version v3.6.0
 
 <a name="v3.5.0"></a>
 
@@ -1460,7 +1490,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.7.0...HEAD
+[v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
 [v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
 [v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
