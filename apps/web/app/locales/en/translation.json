@@ -1529,5 +1529,21 @@
         "sign": "£"
       }
     }
+  },
+  "richTextEditor": {
+    "toolbar": {
+      "link": {
+        "tooltip": "Link: Makes selected text a hyperlink",
+        "dialog": {
+          "title": "Insert Link",
+          "urlLabel": "Enter link URL",
+          "linkTextLabel": "Enter link text",
+          "linkTextPlaceholder": "Link text...",
+          "urlRequired": "URL is required",
+          "urlInvalid": "Invalid URL format",
+          "linkTextRequired": "Link text is required"
+        }
+      }
+    }
   }
 }
