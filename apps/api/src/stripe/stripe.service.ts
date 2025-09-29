@@ -99,6 +99,16 @@ export class StripeService {
     };
   }
 
+  async searchProducts(params: Stripe.ProductSearchParams) {
+    const products = await this.client.products.search(params);
+    return products;
+  }
+
+  async searchPrices(params: Stripe.PriceSearchParams) {
+    const prices = await this.client.prices.search(params);
+    return prices;
+  }
+
   async createPrice(data: Stripe.PriceCreateParams) {
     const price = await this.client.prices.create(data);
     return price;

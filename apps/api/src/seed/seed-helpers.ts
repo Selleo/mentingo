@@ -11,6 +11,7 @@ import {
   questionAnswerOptions,
   questions,
 } from "src/storage/schema";
+import { StripeService } from "src/stripe/stripe.service";
 
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
@@ -46,6 +47,36 @@ export async function createNiceCourses(
 
     const createdAt = faker.date.past({ years: 1, refDate: new Date() }).toISOString();
 
+    // --- create stripe product and price ---
+    let stripeProductId = null;
+    let stripePriceId = null;
+
+    const stripeService = new StripeService();
+    const existingStripeProduct = await stripeService.searchProducts({
+      query: `name:\'${courseData.title}\'`,
+    });
+
+    // if product exists, search for price
+    if (existingStripeProduct.data.length > 0) {
+      const price = await stripeService.searchPrices({
+        query: `product:\'${existingStripeProduct.data?.[0].id}\' AND active:\'true\'`,
+      });
+
+      stripeProductId = existingStripeProduct.data?.[0]?.id;
+      stripePriceId = price.data?.[0]?.id;
+    } else {
+      // create product and price
+      const { productId, priceId } = await stripeService.createProduct({
+        name: courseData.title,
+        description: courseData.description,
+        amountInCents: courseData.priceInCents ? courseData.priceInCents : 0,
+        currency: courseData.currency ? courseData.currency : "usd",
+      });
+
+      stripeProductId = productId;
+      stripePriceId = priceId;
+    }
+
     const [course] = await db
       .insert(courses)
       .values({
@@ -61,6 +92,8 @@ export async function createNiceCourses(
         categoryId: category.id,
         createdAt: createdAt,
         updatedAt: createdAt,
+        stripeProductId,
+        stripePriceId,
       })
       .returning();
 
