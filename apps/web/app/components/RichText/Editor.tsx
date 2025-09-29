@@ -57,7 +57,7 @@ const Editor = ({
       <EditorToolbar editor={editor} />
       <div
         className={cn(
-          "relative max-h-[600px] min-h-[200px] resize-y overflow-auto [&_.ProseMirror]:max-h-full [&_.ProseMirror]:min-h-full",
+          "relative h-[200px] max-h-[600px] min-h-[200px] resize-y overflow-auto [&_.ProseMirror]:h-full [&_.ProseMirror]:max-h-full [&_.ProseMirror]:min-h-full",
           className,
         )}
       >
