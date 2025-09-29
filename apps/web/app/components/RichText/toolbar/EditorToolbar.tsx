@@ -59,7 +59,10 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("link") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={cn("bg-transparent text-black", {
+                  "bg-blue-100": editor.isActive("link"),
+                  "hover:bg-blue-100": !editor.isActive("link"),
+                })}
                 onClick={handleLink}
               >
                 <Link2 className="size-4" />
