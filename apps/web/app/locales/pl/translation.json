@@ -46,7 +46,8 @@
       "appVersion": "Wersja aplikacji: {{version}}"
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
-    "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"
+    "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
+    "continueWithSlack": "Kontynuuj z użyciem Slack"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",

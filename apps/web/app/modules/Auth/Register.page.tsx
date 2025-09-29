@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "@remix-run/react";
+import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -28,6 +29,7 @@ const registerSchema = z.object({
 
 const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
 const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
+const isSlackOAuthEnabled = import.meta.env.VITE_SLACK_OAUTH_ENABLED === "true";
 
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
@@ -54,7 +56,14 @@ export default function RegisterPage() {
     formState: { errors, isValid },
   } = methods;
 
+  const isAnyProviderEnabled = useMemo(
+    () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
+    [],
+  );
+
   const onSubmit = async (data: RegisterBody) => {
+    if (isSSOEnforced && isAnyProviderEnabled) return;
+
     registerUser({ data });
   };
 
@@ -109,11 +118,12 @@ export default function RegisterPage() {
             </form>
           )}
 
-          {(isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && (
+          {isAnyProviderEnabled && (
             <SocialLogin
               isSSOEnforced={isSSOEnforced}
               isGoogleOAuthEnabled={isGoogleOAuthEnabled}
               isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+              isSlackOAuthEnabled={isSlackOAuthEnabled}
             />
           )}
 

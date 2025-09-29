@@ -3,7 +3,8 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-microsoft";
 
-import type { MicrosoftProfile, MicrosoftUserType } from "src/utils/types/microsoft-user.type";
+import type { MicrosoftProfile } from "src/utils/types/microsoft-auth.type";
+import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
 @Injectable()
 export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
@@ -32,7 +33,7 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
     accessToken: string,
     refreshToken: string,
     profile: MicrosoftProfile,
-  ): Promise<MicrosoftUserType> {
+  ): Promise<ProviderLoginUserType> {
     return {
       email: profile.userPrincipalName,
       firstName: profile.name.givenName,

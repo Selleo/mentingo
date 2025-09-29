@@ -66,6 +66,7 @@ jobs:
           VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
           VITE_GOOGLE_OAUTH_ENABLED: ${{secrets.VITE_GOOGLE_OAUTH_ENABLED}}
           VITE_MICROSOFT_OAUTH_ENABLED: ${{secrets.VITE_MICROSOFT_OAUTH_ENABLED}}
+          VITE_SLACK_OAUTH_ENABLED: ${{secrets.VITE_SLACK_OAUTH_ENABLED}}
         run: |
           docker build -f ./web.Dockerfile \
             --build-arg VERSION=$IMAGE_TAG \
@@ -76,6 +77,7 @@ jobs:
             --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
             --build-arg VITE_GOOGLE_OAUTH_ENABLED=$VITE_GOOGLE_OAUTH_ENABLED \
             --build-arg VITE_MICROSOFT_OAUTH_ENABLED=$VITE_MICROSOFT_OAUTH_ENABLED \
+            --build-arg VITE_SLACK_OAUTH_ENABLED=$VITE_SLACK_OAUTH_ENABLED \
             -t $ECR_REGISTRY:$IMAGE_TAG .
           docker tag $ECR_REGISTRY:$IMAGE_TAG $ECR_REGISTRY:latest
           docker push $ECR_REGISTRY:$IMAGE_TAG

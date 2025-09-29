@@ -24,6 +24,7 @@ env:
   STRIPE_WEBHOOK_SECRET: "test_secret"
   GOOGLE_OAUTH_ENABLED: "false"
   MICROSOFT_OAUTH_ENABLED: "false"
+  SLACK_OAUTH_ENABLED: "false"
 
 on:
   pull_request:
