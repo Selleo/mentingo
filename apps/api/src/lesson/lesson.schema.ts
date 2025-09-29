@@ -11,7 +11,7 @@ import type { Static } from "@sinclair/typebox";
 
 export const adminOptionSchema = Type.Object({
   id: Type.Optional(UUIDSchema),
-  optionText: Type.String(),
+  optionText: Type.String({ maxLength: 250 }),
   displayOrder: Type.Union([Type.Number(), Type.Null()]),
   isStudentAnswer: Type.Optional(Type.Union([Type.Boolean(), Type.Null()])),
   isCorrect: Type.Boolean(),
@@ -33,7 +33,7 @@ export const adminQuestionSchema = Type.Object({
 
 export const optionSchema = Type.Object({
   id: UUIDSchema,
-  optionText: Type.Union([Type.String(), Type.Null()]),
+  optionText: Type.Union([Type.String({ maxLength: 250 }), Type.Null()]),
   displayOrder: Type.Union([Type.Number(), Type.Null()]),
   isStudentAnswer: Type.Union([Type.Boolean(), Type.Null()]),
   studentAnswer: Type.Union([Type.String(), Type.Null()]),

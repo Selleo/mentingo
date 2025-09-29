@@ -852,6 +852,7 @@
         },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
+          "optionTextMaxLength": "Tekst nie może być dłuższy niż 250 znaków.",
           "atLeastOneOptionRequired": "Wymagana jest przynajmniej jedna opcja",
           "imageRequired": "Obrazek jest wymagany",
           "descriptionLength": "Opis musi mieć co najmniej 10 znaków.",

@@ -267,6 +267,13 @@
       "when": 1758708809061,
       "tag": "0037_add_default_course_currency_setting",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1758718286824,
+      "tag": "0038_change_option_text_to_text_type",
+      "breakpoints": true
     }
   ]
 }

@@ -848,6 +848,7 @@
         },
         "validation": {
           "optionTextRequired": "Option text is required",
+          "optionTextMaxLength": "Text cannot be longer than 250 characters.",
           "atLeastOneOptionRequired": "At least one option is required",
           "imageRequired": "Image is required",
           "descriptionLength": "Description must have at least 10 characters.",
