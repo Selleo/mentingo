@@ -12,6 +12,7 @@ import CourseLessonEmptyState from "./components/CourseLessonEmptyState";
 import NewChapter from "./NewChapter/NewChapter";
 import AiMentorLessonForm from "./NewLesson/AiMentorLessonForm/AiMentorLessonForm";
 import SelectLessonType from "./NewLesson/components/SelectLessonType";
+import { EmbedLessonForm } from "./NewLesson/EmbedLessonForm/EmbedLessonForm";
 import FileLessonForm from "./NewLesson/FileLessonForm/FileLessonForm";
 import QuizLessonForm from "./NewLesson/QuizLessonForm/QuizLessonForm";
 import TextLessonForm from "./NewLesson/TextLessonForm/TextLessonForm";
@@ -105,6 +106,14 @@ const CourseLessons = ({ chapters, canRefetchChapterList }: CourseLessonsProps) 
           setContentTypeToDisplay={setContentTypeToDisplay}
           chapterToEdit={selectedChapter}
           lessonToEdit={selectedLesson}
+          setSelectedLesson={setSelectedLesson}
+        />
+      ),
+      [ContentTypes.EMBED_FORM]: (
+        <EmbedLessonForm
+          lessonToEdit={selectedLesson}
+          chapterToEdit={selectedChapter}
+          setContentTypeToDisplay={setContentTypeToDisplay}
           setSelectedLesson={setSelectedLesson}
         />
       ),

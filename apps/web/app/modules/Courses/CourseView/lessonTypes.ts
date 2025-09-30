@@ -4,6 +4,7 @@ export const LessonTypes = {
   video: "Video",
   quiz: "Quiz",
   ai_mentor: "AiMentor",
+  embed: "Embed",
 } as const;
 
 export const LessonTypesIcons = {
@@ -12,6 +13,7 @@ export const LessonTypesIcons = {
   video: "Video",
   quiz: "Quiz",
   ai_mentor: "AiMentor",
+  embed: "Embed",
 } as const;
 
 export const CHAPTER_PROGRESS_STATUSES = {

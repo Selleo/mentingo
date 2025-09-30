@@ -558,3 +558,16 @@ export const documentToAiMentorLesson = pgTable(
     unq: unique().on(t.documentId, t.aiMentorLessonId),
   }),
 );
+
+export const lessonResources = pgTable("lesson_resources", {
+  ...id,
+  ...timestamps,
+  source: varchar("source", { length: 1000 }).notNull(),
+  isExternal: boolean("is_external").notNull().default(false),
+  displayOrder: integer("display_order").notNull().default(0),
+  allowFullscreen: boolean("allow_fullscreen").notNull().default(false),
+  type: varchar("type", { length: 50 }).default("embed").notNull(),
+  lessonId: uuid("lesson_id")
+    .references(() => lessons.id, { onDelete: "cascade" })
+    .notNull(),
+});

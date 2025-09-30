@@ -35,6 +35,10 @@ import {
   updateLessonSchema,
   UpdateQuizLessonBody,
   updateQuizLessonSchema,
+  createEmbedLessonSchema,
+  updateEmbedLessonSchema,
+  CreateEmbedLessonBody,
+  UpdateEmbedLessonBody,
 } from "./lesson.schema";
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
@@ -263,6 +267,36 @@ export class LessonController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.lessonService.deleteStudentQuizAnswers(lessonId, currentUserId);
     return new BaseResponse({ message: "Evaluation quiz answers removed successfully" });
+  }
+
+  @Post("create-lesson/embed")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: createEmbedLessonSchema, required: true }],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async createEmbedLesson(
+    @Body() data: CreateEmbedLessonBody,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.adminLessonsService.createEmbedLesson(data);
+    return new BaseResponse({ message: "Embed lesson created successfully" });
+  }
+
+  @Patch("update-lesson/embed/:id")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema, required: true },
+      { type: "body", schema: updateEmbedLessonSchema, required: true },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateEmbedLesson(
+    @Param("id") id: UUIDType,
+    @Body() data: UpdateEmbedLessonBody,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.adminLessonsService.updateEmbedLesson(id, data);
+    return new BaseResponse({ message: "Embed lesson updated successfully" });
   }
 
   //   @Delete("clear-quiz-progress")

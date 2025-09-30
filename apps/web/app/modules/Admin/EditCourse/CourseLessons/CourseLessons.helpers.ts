@@ -9,6 +9,7 @@ export const mapItemType = (itemType: string | undefined): string =>
     .with("presentation", () => "Presentation")
     .with("question", () => "Quiz")
     .with("ai_mentor", () => "AiMentor")
+    .with("embed", () => "Embed")
     .otherwise(() => "Quiz");
 
 export const mapTypeToIcon = (itemType: string): string =>
@@ -18,6 +19,7 @@ export const mapTypeToIcon = (itemType: string): string =>
     .with("presentation", () => "Presentation")
     .with("question", () => "Quiz")
     .with("ai_mentor", () => "AiMentor")
+    .with("embed", () => "Embed")
     .otherwise(() => "Quiz");
 
 export const mapQuestionTypeToLabel = (questionType: QuestionType): string =>

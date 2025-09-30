@@ -8,6 +8,17 @@ type AiMentorType = {
   aiMentorInstructions: string;
   completionConditions: string;
 };
+
+export interface LessonResource {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  source: string;
+  isExternal: boolean;
+  displayOrder: number;
+  allowFullscreen: boolean;
+  type: string;
+}
 export interface Lesson {
   updatedAt: string;
   type: string;
@@ -23,6 +34,7 @@ export interface Lesson {
   fileType?: string;
   chapterId?: string;
   questions?: Question[];
+  lessonResources?: LessonResource[];
   isExternal?: boolean;
   aiMentor?: AiMentorType;
 }
@@ -48,9 +60,10 @@ export const ContentTypes = {
   PRESENTATION_FORM: "PRESENTATION_FORM",
   QUIZ_FORM: "QUIZ_FORM",
   AI_MENTOR_FORM: "AI_MENTOR_FORM",
+  EMBED_FORM: "EMBED_FORM",
 };
 
-export type LessonIcons = "Text" | "Video" | "Presentation" | "Quiz" | "AiMentor";
+export type LessonIcons = "Text" | "Video" | "Presentation" | "Quiz" | "AiMentor" | "Embed";
 
 export const LessonType = {
   VIDEO: "video",
@@ -58,6 +71,7 @@ export const LessonType = {
   PRESENTATION: "presentation",
   QUIZ: "quiz",
   AI_MENTOR: "ai_mentor",
+  EMBED: "embed",
 } as const;
 
 export type LessonType = (typeof LessonType)[keyof typeof LessonType];

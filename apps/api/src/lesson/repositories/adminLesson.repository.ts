@@ -1,10 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
   aiMentorLessons,
   chapters,
+  lessonResources,
   lessons,
   questionAnswerOptions,
   questions,
@@ -18,7 +19,9 @@ import type {
   AdminQuestionBody,
   CreateAiMentorLessonBody,
   CreateLessonBody,
+  CreateLessonResourceBody,
   CreateQuizLessonBody,
+  LessonResourceType,
   UpdateAiMentorLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
@@ -383,5 +386,71 @@ export class AdminLessonRepository {
           displayOrder: option.displayOrder,
         },
       });
+  }
+
+  async getLessonResourcesForLesson(lessonId: UUIDType) {
+    return this.db
+      .select({
+        ...getTableColumns(lessonResources),
+        type: sql<LessonResourceType>`${lessonResources.type}`,
+      })
+      .from(lessonResources)
+      .where(eq(lessonResources.lessonId, lessonId))
+      .orderBy(lessonResources.displayOrder);
+  }
+
+  async getMaxLessonResourceDisplayOrder(lessonId: UUIDType) {
+    const [result] = await this.db
+      .select({
+        maxOrder: sql<number>`COALESCE(max(${lessonResources.displayOrder}), 0)`,
+      })
+      .from(lessonResources)
+      .where(eq(lessonResources.lessonId, lessonId));
+
+    return result.maxOrder;
+  }
+
+  createLessonResources = async (data: CreateLessonResourceBody[]) => {
+    return this.db.insert(lessonResources).values(data).returning();
+  };
+
+  async deleteLessonResources(lessonId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {
+    const dbInstance = trx ?? this.db;
+
+    const [result] = await dbInstance
+      .delete(lessonResources)
+      .where(eq(lessonResources.lessonId, lessonId))
+      .returning();
+
+    return result.lessonId;
+  }
+
+  async deleteLessonResourcesByIds(ids: UUIDType[], trx?: PostgresJsDatabase<typeof schema>) {
+    const dbInstance = trx ?? this.db;
+
+    return dbInstance.delete(lessonResources).where(inArray(lessonResources.id, ids)).returning();
+  }
+
+  async upsertLessonResources(
+    data: CreateLessonResourceBody[],
+    trx?: PostgresJsDatabase<typeof schema>,
+  ) {
+    const dbInstance = trx ?? this.db;
+
+    return dbInstance
+      .insert(lessonResources)
+      .values(data)
+      .onConflictDoUpdate({
+        target: lessonResources.id,
+        set: {
+          lessonId: sql`EXCLUDED.lesson_id`,
+          type: sql`EXCLUDED.type`,
+          source: sql`EXCLUDED.source`,
+          isExternal: sql`EXCLUDED.is_external`,
+          allowFullscreen: sql`EXCLUDED.allow_fullscreen`,
+          displayOrder: sql`EXCLUDED.display_order`,
+        },
+      })
+      .returning();
   }
 }

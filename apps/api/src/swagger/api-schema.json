@@ -2797,6 +2797,70 @@
         }
       }
     },
+    "/api/lesson/create-lesson/embed": {
+      "post": {
+        "operationId": "LessonController_createEmbedLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmbedLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateEmbedLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/update-lesson/embed/{id}": {
+      "patch": {
+        "operationId": "LessonController_updateEmbedLesson",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmbedLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEmbedLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/update-lesson-display-order": {
       "patch": {
         "operationId": "LessonController_updateLessonDisplayOrder",
@@ -7253,6 +7317,10 @@
                               {
                                 "const": "ai_mentor",
                                 "type": "string"
+                              },
+                              {
+                                "const": "embed",
+                                "type": "string"
                               }
                             ]
                           },
@@ -7291,6 +7359,43 @@
                           },
                           "isExternal": {
                             "type": "boolean"
+                          },
+                          "lessonResources": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "source": {
+                                  "type": "string"
+                                },
+                                "isExternal": {
+                                  "type": "boolean"
+                                },
+                                "allowFullscreen": {
+                                  "type": "boolean"
+                                },
+                                "type": {
+                                  "const": "embed",
+                                  "type": "string"
+                                },
+                                "lessonId": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "source",
+                                "isExternal",
+                                "allowFullscreen",
+                                "type",
+                                "lessonId"
+                              ]
+                            }
                           }
                         },
                         "required": [
@@ -7517,6 +7622,10 @@
                               },
                               {
                                 "const": "ai_mentor",
+                                "type": "string"
+                              },
+                              {
+                                "const": "embed",
                                 "type": "string"
                               }
                             ]
@@ -8212,6 +8321,10 @@
                         {
                           "const": "ai_mentor",
                           "type": "string"
+                        },
+                        {
+                          "const": "embed",
+                          "type": "string"
                         }
                       ]
                     },
@@ -8250,6 +8363,43 @@
                     },
                     "isExternal": {
                       "type": "boolean"
+                    },
+                    "lessonResources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "isExternal": {
+                            "type": "boolean"
+                          },
+                          "allowFullscreen": {
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "const": "embed",
+                            "type": "string"
+                          },
+                          "lessonId": {
+                            "format": "uuid",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "source",
+                          "isExternal",
+                          "allowFullscreen",
+                          "type",
+                          "lessonId"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -8361,6 +8511,10 @@
                         },
                         {
                           "const": "ai_mentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "embed",
                           "type": "string"
                         }
                       ]
@@ -8724,6 +8878,10 @@
                         },
                         {
                           "const": "ai_mentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "embed",
                           "type": "string"
                         }
                       ]
@@ -9152,6 +9310,10 @@
                   },
                   {
                     "const": "ai_mentor",
+                    "type": "string"
+                  },
+                  {
+                    "const": "embed",
                     "type": "string"
                   }
                 ]
@@ -9582,6 +9744,10 @@
                   },
                   {
                     "const": "ai_mentor",
+                    "type": "string"
+                  },
+                  {
+                    "const": "embed",
                     "type": "string"
                   }
                 ]
@@ -10950,6 +11116,10 @@
                   {
                     "const": "ai_mentor",
                     "type": "string"
+                  },
+                  {
+                    "const": "embed",
+                    "type": "string"
                   }
                 ]
               },
@@ -11351,6 +11521,162 @@
         ]
       },
       "DeleteStudentQuizAnswersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateEmbedLessonBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "const": "embed",
+            "type": "string"
+          },
+          "chapterId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "isExternal": {
+                  "type": "boolean"
+                },
+                "displayOrder": {
+                  "type": "number"
+                },
+                "allowFullscreen": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "type": "string",
+                  "maxLength": 50
+                }
+              },
+              "required": [
+                "source"
+              ]
+            }
+          }
+        },
+        "required": [
+          "title",
+          "type",
+          "chapterId",
+          "resources"
+        ]
+      },
+      "CreateEmbedLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateEmbedLessonBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "const": "embed",
+            "type": "string"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "isExternal": {
+                  "type": "boolean"
+                },
+                "displayOrder": {
+                  "type": "number"
+                },
+                "allowFullscreen": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "type": "string",
+                  "maxLength": 50
+                }
+              },
+              "required": [
+                "source"
+              ]
+            }
+          },
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "type",
+          "resources",
+          "lessonId"
+        ]
+      },
+      "UpdateEmbedLessonResponse": {
         "type": "object",
         "properties": {
           "data": {
