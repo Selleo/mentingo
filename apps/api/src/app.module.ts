@@ -6,6 +6,8 @@ import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
+import { EnvModule } from "src/env/env.module";
+
 import { AiModule } from "./ai/ai.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { AuthModule } from "./auth/auth.module";
@@ -116,6 +118,7 @@ import { UserModule } from "./user/user.module";
     CertificatesModule,
     AnnouncementsModule,
     IngestionModule,
+    EnvModule,
   ],
   controllers: [],
   providers: [
@@ -131,8 +134,8 @@ import { UserModule } from "./user/user.module";
       provide: APP_GUARD,
       useClass: StagingGuard,
     },
-    ...(process.env.GOOGLE_OAUTH_ENABLED === "true" ? [GoogleStrategy] : []),
-    ...(process.env.MICROSOFT_OAUTH_ENABLED === "true" ? [MicrosoftStrategy] : []),
+    GoogleStrategy,
+    MicrosoftStrategy,
   ],
 })
 export class AppModule {}

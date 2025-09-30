@@ -2154,6 +2154,18 @@ export interface MarkAnnouncementAsReadResponse {
   };
 }
 
+export interface GetEnvKeyResponse {
+  data: {
+    name: string;
+    value: string;
+  };
+}
+
+export type BulkUpsertEnvBody = {
+  name: string;
+  value: string;
+}[];
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -4669,6 +4681,35 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/announcements/${id}/read`,
         method: "PATCH",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetEnvKey
+     * @request GET:/api/env/{envName}
+     */
+    envControllerGetEnvKey: (envName: string, params: RequestParams = {}) =>
+      this.request<GetEnvKeyResponse, any>({
+        path: `/api/env/${envName}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerBulkUpsertEnv
+     * @request POST:/api/env/bulk
+     */
+    envControllerBulkUpsertEnv: (data: BulkUpsertEnvBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/env/bulk`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
