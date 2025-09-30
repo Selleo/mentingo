@@ -355,6 +355,8 @@ export class AdminLessonService {
 
     if (!lesson) throw new BadRequestException("Failed to create embed lesson");
 
+    await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
+
     if (data.resources && data.resources.length > 0) {
       const resourcesToInsert = data.resources.map((resource: LessonResource, index) => ({
         lessonId: lesson.id,
