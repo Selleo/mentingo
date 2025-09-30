@@ -663,29 +663,27 @@
   "adminEnvsView": {
     "name": "Zmienne środowiskowe",
     "keysTitle": "Klucze",
+    "updateSuccessful": "Sekrety zostały pomyślnie zaktualizowane",
     "form": {
-      "openai": {
-        "label": "OpenAI API",
-        "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      },
-      "bunny": {
-        "label": "Bunny CDN",
-        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      },
-      "googleSSO": {
-        "label": "Google SSO",
-        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      },
-      "microsoftSSO": {
-        "label": "Microsoft SSO",
-        "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      },
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "MICROSOFT_CLIENT_ID": { "label": "Microsoft Client ID" },
+      "MICROSOFT_CLIENT_SECRET": { "label": "Microsoft Client Secret" },
+      "MICROSOFT_OAUTH_ENABLED": { "label": "Microsoft OAuth Enabled (true/false)" },
+      "OPENAI_API_KEY": { "label": "OpenAI API Key" },
+      "BUNNY_STREAM_API_KEY": { "label": "Bunny Stream API Key" },
+      "BUNNY_STREAM_SIGNING_KEY": { "label": "Bunny Stream Signing Key" },
+      "BUNNY_STREAM_LIBRARY_ID": { "label": "Bunny Stream Library ID" },
+      "BUNNY_STREAM_CDN_URL": { "label": "Bunny Stream CDN URL" },
+      "GOOGLE_CLIENT_ID": { "label": "Google Client ID" },
+      "GOOGLE_CLIENT_SECRET": { "label": "Google Client Secret" },
+      "GOOGLE_OAUTH_ENABLED": { "label": "Google OAuth Enabled (true/false)" },
       "save": "Zapisz"
     },
     "breadcrumbs": {
       "envs": "Zmienne środowiskowe"
     }
   },
+
   "adminGroupsView": {
     "name": "Nazwa grupy",
     "characteristic": "Charakterystyka",

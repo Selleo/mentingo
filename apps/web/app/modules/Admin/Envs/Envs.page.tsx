@@ -1,48 +1,65 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, type UseFormRegister, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { useBulkUpsertSecret } from "~/api/mutations/admin/useBulkUpsertSecret";
+import { useSecret } from "~/api/queries/admin/useSecret";
+import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { SECRET_METADATA } from "~/modules/Admin/Envs/Envs.constants";
 
 import type React from "react";
 
-interface InputElementProps {
+type SecretKey = keyof typeof SECRET_METADATA;
+type FormValues = Partial<Record<SecretKey, string>>;
+
+interface SecretFieldProps {
+  name: SecretKey;
   labelKey: string;
-  inputPlaceholderKey: string;
-  inputName: string;
-  register: ReturnType<typeof useForm>["register"];
+  placeholderKey: string;
+  register: UseFormRegister<FormValues>;
+  setValue: UseFormSetValue<FormValues>;
 }
 
-const InputElement = ({
-  labelKey,
-  inputPlaceholderKey,
-  inputName,
-  register,
-}: InputElementProps) => {
+const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: SecretFieldProps) => {
   const { t } = useTranslation();
   const [viewSecret, setViewSecret] = useState(false);
 
-  const toggleSecret = () => setViewSecret(!viewSecret);
+  const { data: secretData, isFetching } = useSecret(name, viewSecret);
+
+  useEffect(() => {
+    if (viewSecret && secretData?.data.value !== undefined) {
+      setValue(name, secretData.data.value);
+    }
+    if (!viewSecret) {
+      setValue(name, "");
+    }
+  }, [viewSecret, secretData?.data.value, name, setValue]);
 
   return (
     <div className="w-full">
-      <Label className="text-xl">{t(labelKey)}</Label>
+      <Label className="text-xl" htmlFor={name}>
+        {t(labelKey)}
+      </Label>
       <div className="relative">
         <Input
-          {...register(inputName)}
-          disabled={!viewSecret}
-          type="text"
-          placeholder={!viewSecret ? t(inputPlaceholderKey) : undefined}
+          id={name}
+          {...register(name)}
+          disabled={!viewSecret || isFetching}
+          placeholder={!viewSecret ? t(placeholderKey) : undefined}
+          aria-busy={isFetching}
         />
+
         <Button
           type="button"
           variant="ghost"
-          onClick={toggleSecret}
+          onClick={() => setViewSecret((v) => !v)}
           className="absolute right-0 top-1/2 -translate-y-1/2 rounded-l-none"
+          aria-label={viewSecret ? t("adminEnvsView.form.hide") : t("adminEnvsView.form.show")}
         >
           <Icon name="Eye" className="size-4" />
         </Button>
@@ -54,13 +71,23 @@ const InputElement = ({
 const Envs = (): React.ReactElement => {
   const { t } = useTranslation();
 
-  const onSubmit = () => console.log("submit");
-
-  const { register, handleSubmit, watch } = useForm();
+  const { register, handleSubmit, watch, setValue } = useForm<FormValues>({ defaultValues: {} });
 
   const secrets = watch();
-
   const hasAnyValue = Object.values(secrets).some(Boolean);
+
+  const { mutateAsync: upsertSecrets } = useBulkUpsertSecret();
+
+  const onSubmit = async (data: FormValues) => {
+    const secretPairs = Object.entries(data)
+      .filter(([, value]) => Boolean(value))
+      .map(([name, value]) => ({ name, value: value as string }));
+
+    if (!secretPairs.length) return;
+
+    await upsertSecrets(secretPairs);
+    await queryClient.invalidateQueries({ queryKey: ["secrets"] });
+  };
 
   return (
     <PageWrapper
@@ -92,33 +119,21 @@ const Envs = (): React.ReactElement => {
                 )}
               </div>
 
-              <InputElement
-                labelKey="adminEnvsView.form.openai.label"
-                inputName="OPENAI_API_KEY"
-                register={register}
-                inputPlaceholderKey="adminEnvsView.form.openai.placeholder"
-              />
+              {(Object.keys(SECRET_METADATA) as SecretKey[]).map((key) => {
+                const meta = SECRET_METADATA[key];
+                if (!meta) return null;
 
-              <InputElement
-                labelKey="adminEnvsView.form.bunny.label"
-                inputName="BUNNY_KEY"
-                register={register}
-                inputPlaceholderKey="adminEnvsView.form.bunny.placeholder"
-              />
-
-              <InputElement
-                labelKey="adminEnvsView.form.googleSSO.label"
-                inputName="GOOGLE_SSO_KEY"
-                register={register}
-                inputPlaceholderKey="adminEnvsView.form.googleSSO.placeholder"
-              />
-
-              <InputElement
-                labelKey="adminEnvsView.form.microsoftSSO.label"
-                inputName="MICROSOFT_SSO_KEY"
-                register={register}
-                inputPlaceholderKey="adminEnvsView.form.microsoftSSO.placeholder"
-              />
+                return (
+                  <SecretField
+                    key={key}
+                    name={key}
+                    labelKey={meta.labelKey}
+                    placeholderKey={meta.placeholderKey}
+                    register={register}
+                    setValue={setValue}
+                  />
+                );
+              })}
             </form>
           </div>
         </div>
