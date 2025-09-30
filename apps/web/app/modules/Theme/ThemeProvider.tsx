@@ -1,10 +1,48 @@
-import { useEffect, type ReactNode } from "react";
+import { createContext, useEffect, type ReactNode, useState, useCallback } from "react";
 import { match } from "ts-pattern";
 
+import { hexToHslTuple, hslToHex } from "./helpers";
 import { useThemeStore } from "./themeStore";
+
+type ThemeContextType = {
+  primaryColor: string;
+  setPrimaryColor: (color: string) => void;
+};
+
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const theme = useThemeStore((state) => state.theme);
+
+  const [primaryColor, setPrimaryColor] = useState(
+    getComputedStyle(document.documentElement).getPropertyValue("--primary-700").trim(),
+  );
+
+  const handleSetPrimaryColor = useCallback((color: string) => {
+    setPrimaryColor(color);
+
+    const [h, s, l] = hexToHslTuple(color);
+
+    const shades = {
+      50: 97,
+      100: 90,
+      200: 80,
+      300: 70,
+      400: 60,
+      500: 50,
+      600: 40,
+      700: l, // selected color
+      800: 25,
+      900: 15,
+      950: 10,
+    };
+
+    Object.entries(shades).forEach(([key, lightness]) => {
+      const hexShade = hslToHex(h, s, lightness);
+
+      document.documentElement.style.setProperty(`--primary-${key}`, hexShade);
+    });
+  }, []);
 
   useEffect(() => {
     match(theme)
@@ -17,5 +55,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       .exhaustive();
   }, [theme]);
 
-  return <>{children}</>;
+  return (
+    <ThemeContext.Provider value={{ primaryColor, setPrimaryColor: handleSetPrimaryColor }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
