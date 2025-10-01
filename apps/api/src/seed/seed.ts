@@ -303,7 +303,7 @@ async function seed() {
     console.log("Created or found content creators user:", createdContentCreators);
 
     const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses);
-    console.log("✨✨✨Created created nice courses✨✨✨");
+    console.log("✨✨✨Created nice courses✨✨✨");
     await createNiceCourses([createdAdmin.id], db, e2eCourses);
     console.log("🧪 Created e2e courses");
 

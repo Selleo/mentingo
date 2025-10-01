@@ -865,6 +865,7 @@ export interface GetBetaCourseByIdResponse {
           options?: {
             /** @format uuid */
             id?: string;
+            /** @maxLength 250 */
             optionText: string;
             displayOrder: number | null;
             isStudentAnswer?: boolean | null;
@@ -1067,6 +1068,7 @@ export type BetaCreateChapterBody = {
       options?: {
         /** @format uuid */
         id?: string;
+        /** @maxLength 250 */
         optionText: string;
         displayOrder: number | null;
         isStudentAnswer?: boolean | null;
@@ -1141,6 +1143,7 @@ export type UpdateChapterBody = {
       options?: {
         /** @format uuid */
         id?: string;
+        /** @maxLength 250 */
         optionText: string;
         displayOrder: number | null;
         isStudentAnswer?: boolean | null;
@@ -1314,6 +1317,7 @@ export type BetaCreateLessonBody = {
     options?: {
       /** @format uuid */
       id?: string;
+      /** @maxLength 250 */
       optionText: string;
       displayOrder: number | null;
       isStudentAnswer?: boolean | null;
@@ -1375,6 +1379,7 @@ export type BetaCreateAiMentorLessonBody = {
     options?: {
       /** @format uuid */
       id?: string;
+      /** @maxLength 250 */
       optionText: string;
       displayOrder: number | null;
       isStudentAnswer?: boolean | null;
@@ -1438,6 +1443,7 @@ export type BetaUpdateAiMentorLessonBody = {
     options?: {
       /** @format uuid */
       id?: string;
+      /** @maxLength 250 */
       optionText: string;
       displayOrder: number | null;
       isStudentAnswer?: boolean | null;
@@ -1501,6 +1507,7 @@ export type BetaCreateQuizLessonBody = {
     options?: {
       /** @format uuid */
       id?: string;
+      /** @maxLength 250 */
       optionText: string;
       displayOrder: number | null;
       isStudentAnswer?: boolean | null;
@@ -1558,6 +1565,7 @@ export type BetaUpdateQuizLessonBody = {
     options?: {
       /** @format uuid */
       id?: string;
+      /** @maxLength 250 */
       optionText: string;
       displayOrder: number | null;
       isStudentAnswer?: boolean | null;
@@ -1609,6 +1617,7 @@ export type BetaUpdateLessonBody = {
     options?: {
       /** @format uuid */
       id?: string;
+      /** @maxLength 250 */
       optionText: string;
       displayOrder: number | null;
       isStudentAnswer?: boolean | null;
@@ -2571,6 +2580,32 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     authControllerMicrosoftAuthCallback: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/auth/microsoft/callback`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerSlackAuth
+     * @request GET:/api/auth/slack
+     */
+    authControllerSlackAuth: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/slack`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AuthControllerSlackAuthCallback
+     * @request GET:/api/auth/slack/callback
+     */
+    authControllerSlackAuthCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/slack/callback`,
         method: "GET",
         ...params,
       }),

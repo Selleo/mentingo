@@ -31,7 +31,8 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
                 sortableId: z.string(),
                 optionText: z
                   .string()
-                  .min(1, t("adminCourseView.curriculum.lesson.validation.optionTextRequired")),
+                  .min(1, t("adminCourseView.curriculum.lesson.validation.optionTextRequired"))
+                  .max(250, t("adminCourseView.curriculum.lesson.validation.optionTextMaxLength")),
                 isCorrect: z.boolean(),
                 displayOrder: z.number(),
                 matchedWord: z.optional(z.string()),

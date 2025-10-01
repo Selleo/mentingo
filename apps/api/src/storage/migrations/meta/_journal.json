@@ -271,8 +271,15 @@
     {
       "idx": 38,
       "version": "7",
-      "when": 1759147506530,
-      "tag": "0038_add_lesson_resources_table",
+      "when": 1758718286824,
+      "tag": "0038_change_option_text_to_text_type",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1759307692136,
+      "tag": "0039_add_lesson_resources_table",
       "breakpoints": true
     }
   ]

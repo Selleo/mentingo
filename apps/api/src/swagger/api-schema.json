@@ -213,6 +213,28 @@
         }
       }
     },
+    "/api/auth/slack": {
+      "get": {
+        "operationId": "AuthController_slackAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/slack/callback": {
+      "get": {
+        "operationId": "AuthController_slackAuthCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/auth/mfa/setup": {
       "post": {
         "operationId": "AuthController_MFASetup",
@@ -7771,6 +7793,7 @@
                                         "type": "string"
                                       },
                                       "optionText": {
+                                        "maxLength": 250,
                                         "type": "string"
                                       },
                                       "displayOrder": {
@@ -8672,6 +8695,7 @@
                                   "type": "string"
                                 },
                                 "optionText": {
+                                  "maxLength": 250,
                                   "type": "string"
                                 },
                                 "displayOrder": {
@@ -9039,6 +9063,7 @@
                                   "type": "string"
                                 },
                                 "optionText": {
+                                  "maxLength": 250,
                                   "type": "string"
                                 },
                                 "displayOrder": {
@@ -9480,6 +9505,7 @@
                               "optionText": {
                                 "anyOf": [
                                   {
+                                    "maxLength": 250,
                                     "type": "string"
                                   },
                                   {
@@ -9951,6 +9977,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -10232,6 +10259,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -10520,6 +10548,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -10803,6 +10832,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -11060,6 +11090,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {
@@ -11322,6 +11353,7 @@
                             "type": "string"
                           },
                           "optionText": {
+                            "maxLength": 250,
                             "type": "string"
                           },
                           "displayOrder": {

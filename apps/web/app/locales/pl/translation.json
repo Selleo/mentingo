@@ -46,7 +46,8 @@
       "appVersion": "Wersja aplikacji: {{version}}"
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
-    "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft"
+    "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
+    "continueWithSlack": "Kontynuuj z użyciem Slack"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -856,6 +857,7 @@
         },
         "validation": {
           "optionTextRequired": "Tekst opcji jest wymagany",
+          "optionTextMaxLength": "Tekst nie może być dłuższy niż 250 znaków.",
           "atLeastOneOptionRequired": "Wymagana jest przynajmniej jedna opcja",
           "imageRequired": "Obrazek jest wymagany",
           "descriptionLength": "Opis musi mieć co najmniej 10 znaków.",
@@ -1551,6 +1553,22 @@
       "gbp": {
         "label": "Funt brytyjski",
         "sign": "£"
+      }
+    }
+  },
+  "richTextEditor": {
+    "toolbar": {
+      "link": {
+        "tooltip": "Link: Wstaw lub edytuj link",
+        "dialog": {
+          "title": "Wstaw link",
+          "urlLabel": "Wprowadź adres URL linku",
+          "linkTextLabel": "Wprowadź tekst linku",
+          "linkTextPlaceholder": "Tekst linku...",
+          "urlRequired": "Link jest wymagany",
+          "urlInvalid": "Nieprawidłowy format linku",
+          "linkTextRequired": "Tekst linku jest wymagany"
+        }
       }
     }
   }

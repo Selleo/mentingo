@@ -45,7 +45,8 @@
       "appVersion": "App Version: {{version}}"
     },
     "continueWithGoogle": "Continue with Google",
-    "continueWithMicrosoft": "Continue with Microsoft"
+    "continueWithMicrosoft": "Continue with Microsoft",
+    "continueWithSlack": "Continue with Slack"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -852,6 +853,7 @@
         },
         "validation": {
           "optionTextRequired": "Option text is required",
+          "optionTextMaxLength": "Text cannot be longer than 250 characters.",
           "atLeastOneOptionRequired": "At least one option is required",
           "imageRequired": "Image is required",
           "descriptionLength": "Description must have at least 10 characters.",
@@ -1543,6 +1545,22 @@
       "gbp": {
         "label": "British Pound",
         "sign": "£"
+      }
+    }
+  },
+  "richTextEditor": {
+    "toolbar": {
+      "link": {
+        "tooltip": "Link: Makes selected text a hyperlink",
+        "dialog": {
+          "title": "Insert Link",
+          "urlLabel": "Enter link URL",
+          "linkTextLabel": "Enter link text",
+          "linkTextPlaceholder": "Link text...",
+          "urlRequired": "URL is required",
+          "urlInvalid": "Invalid URL format",
+          "linkTextRequired": "Link text is required"
+        }
       }
     }
   }
