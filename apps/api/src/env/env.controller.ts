@@ -3,9 +3,15 @@ import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { BulkUpsertEnvBody, bulkUpsertEnvSchema, getEnvResponseSchema } from "src/env/env.schema";
+import {
+  BulkUpsertEnvBody,
+  bulkUpsertEnvSchema,
+  frontendSSOEnabledResponseSchema,
+  getEnvResponseSchema,
+} from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -32,5 +38,14 @@ export class EnvController {
   async bulkUpsertEnv(@Body() data: BulkUpsertEnvBody) {
     await this.envService.bulkUpsertEnv(data);
     return new BaseResponse({ message: "Upserted secrets successfully" });
+  }
+
+  @Public()
+  @Get("frontend/sso")
+  @Validate({
+    response: baseResponse(frontendSSOEnabledResponseSchema),
+  })
+  async getFrontendSSOEnabled() {
+    return new BaseResponse(await this.envService.getSSOEnabled());
   }
 }

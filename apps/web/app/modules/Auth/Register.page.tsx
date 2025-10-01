@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -27,13 +28,19 @@ const registerSchema = z.object({
   password: passwordSchema,
 });
 
-const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
-const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 const isSlackOAuthEnabled = import.meta.env.VITE_SLACK_OAUTH_ENABLED === "true";
 
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
   const { t } = useTranslation();
+
+  const { data: ssoEnabled } = useSSOEnabled();
+
+  const isGoogleOAuthEnabled =
+    (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
+
+  const isMicrosoftOAuthEnabled =
+    (ssoEnabled?.data.microsoft ?? import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED) === "true";
 
   const methods = useForm<RegisterBody>({
     resolver: zodResolver(registerSchema),

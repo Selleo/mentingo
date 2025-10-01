@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBulkUpsertSecret } from "~/api/mutations/admin/useBulkUpsertSecret";
 import { useSecret } from "~/api/queries/admin/useSecret";
+import { ssoEnabledQueryOptions } from "~/api/queries/useSSOEnabled";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -87,6 +88,7 @@ const Envs = (): React.ReactElement => {
 
     await upsertSecrets(secretPairs);
     await queryClient.invalidateQueries({ queryKey: ["secrets"] });
+    await queryClient.invalidateQueries({ queryKey: ssoEnabledQueryOptions().queryKey });
   };
 
   return (

@@ -669,6 +669,7 @@
       "MICROSOFT_CLIENT_ID": { "label": "Microsoft Client ID" },
       "MICROSOFT_CLIENT_SECRET": { "label": "Microsoft Client Secret" },
       "MICROSOFT_OAUTH_ENABLED": { "label": "Microsoft OAuth Enabled (true/false)" },
+      "VITE_MICROSOFT_OAUTH_ENABLED": { "label": "Vite Microsoft OAuth Enabled (true/false)" },
       "OPENAI_API_KEY": { "label": "OpenAI API Key" },
       "BUNNY_STREAM_API_KEY": { "label": "Bunny Stream API Key" },
       "BUNNY_STREAM_SIGNING_KEY": { "label": "Bunny Stream Signing Key" },
@@ -677,6 +678,7 @@
       "GOOGLE_CLIENT_ID": { "label": "Google Client ID" },
       "GOOGLE_CLIENT_SECRET": { "label": "Google Client Secret" },
       "GOOGLE_OAUTH_ENABLED": { "label": "Google OAuth Enabled (true/false)" },
+      "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
       "save": "Zapisz"
     },
     "breadcrumbs": {

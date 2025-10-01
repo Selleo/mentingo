@@ -11,6 +11,10 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.MICROSOFT_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  VITE_MICROSOFT_OAUTH_ENABLED: {
+    labelKey: "adminEnvsView.form.VITE_MICROSOFT_OAUTH_ENABLED.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
   OPENAI_API_KEY: {
     labelKey: "adminEnvsView.form.OPENAI_API_KEY.label",
     placeholderKey: "adminEnvsView.form.placeholder",
@@ -41,6 +45,10 @@ export const SECRET_METADATA = {
   },
   GOOGLE_OAUTH_ENABLED: {
     labelKey: "adminEnvsView.form.GOOGLE_OAUTH_ENABLED.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  VITE_GOOGLE_OAUTH_ENABLED: {
+    labelKey: "adminEnvsView.form.VITE_GOOGLE_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
 };

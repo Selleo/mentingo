@@ -2264,6 +2264,13 @@ export type BulkUpsertEnvBody = {
   value: string;
 }[];
 
+export interface GetFrontendSSOEnabledResponse {
+  data: {
+    google?: string;
+    microsoft?: string;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -4870,6 +4877,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetFrontendSsoEnabled
+     * @request GET:/api/env/frontend/sso
+     */
+    envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
+      this.request<GetFrontendSSOEnabledResponse, any>({
+        path: `/api/env/frontend/sso`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };

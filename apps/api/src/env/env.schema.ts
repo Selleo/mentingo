@@ -26,5 +26,11 @@ export const encryptedEnvSchema = Type.Object({
   alg: Type.Optional(Type.String({ default: "aes-256-gcm" })),
 });
 
+export const frontendSSOEnabledResponseSchema = Type.Object({
+  google: Type.Optional(Type.String()),
+  microsoft: Type.Optional(Type.String()),
+});
+
 export type EncryptedEnvBody = Static<typeof encryptedEnvSchema>;
 export type BulkUpsertEnvBody = Static<typeof bulkUpsertEnvSchema>;
+export type FrontendSSOEnabledResponseBody = Static<typeof frontendSSOEnabledResponseSchema>;

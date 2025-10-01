@@ -50,7 +50,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
           {
             clientID: id,
             clientSecret: secret,
-            callbackURL: this.configService.get<string>("google_authorization.callbackURL"),
+            callbackURL: "http://localhost:5173/api/auth/google/callback",
             scope: ["email", "profile"],
           },
           (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) =>

@@ -4042,6 +4042,23 @@
           }
         }
       }
+    },
+    "/api/env/frontend/sso": {
+      "get": {
+        "operationId": "EnvController_getFrontendSSOEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFrontendSSOEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -14043,6 +14060,25 @@
             "value"
           ]
         }
+      },
+      "GetFrontendSSOEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "google": {
+                "type": "string"
+              },
+              "microsoft": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
       }
     }
   }

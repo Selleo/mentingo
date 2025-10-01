@@ -82,4 +82,21 @@ export class EnvService {
 
     return { name: envName, value: plaintext };
   }
+
+  async getSSOEnabled() {
+    const [google, microsoft] = await Promise.all([
+      this.getEnv("VITE_GOOGLE_OAUTH_ENABLED")
+        .then((r) => r.value)
+        .catch(() => undefined),
+
+      this.getEnv("VITE_MICROSOFT_OAUTH_ENABLED")
+        .then((r) => r.value)
+        .catch(() => undefined),
+    ]);
+
+    return {
+      google,
+      microsoft,
+    };
+  }
 }
