@@ -399,17 +399,6 @@ export class AdminLessonRepository {
       .orderBy(lessonResources.displayOrder);
   }
 
-  async getMaxLessonResourceDisplayOrder(lessonId: UUIDType) {
-    const [result] = await this.db
-      .select({
-        maxOrder: sql<number>`COALESCE(max(${lessonResources.displayOrder}), 0)`,
-      })
-      .from(lessonResources)
-      .where(eq(lessonResources.lessonId, lessonId));
-
-    return result.maxOrder;
-  }
-
   createLessonResources = async (data: CreateLessonResourceBody[]) => {
     return this.db.insert(lessonResources).values(data).returning();
   };
