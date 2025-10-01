@@ -38,6 +38,12 @@ const lessonTypes = [
     description: "adminCourseView.curriculum.lesson.other.quizLessonDescription",
   },
   {
+    type: ContentTypes.EMBED_FORM,
+    icon: "Embed",
+    title: "adminCourseView.curriculum.lesson.other.embed",
+    description: "adminCourseView.curriculum.lesson.other.embedLessonDescription",
+  },
+  {
     type: ContentTypes.AI_MENTOR_FORM,
     icon: "AiMentor",
     title: "adminCourseView.curriculum.lesson.other.aiMentor",

@@ -17,6 +17,7 @@ import type {
   AdminLessonWithContentSchema,
   AdminQuestionBody,
   AiMentorBody,
+  LessonResource,
 } from "src/lesson/lesson.schema";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type * as schema from "src/storage/schema";
@@ -140,6 +141,21 @@ export class AdminChapterRepository {
           WHERE lessons.id = aml.lesson_id 
           LIMIT 1
         )
+      `,
+        lessonResources: sql<LessonResource[]>`
+            ARRAY(
+              SELECT json_build_object(
+                'id', lr.id,
+                'type', lr.type,
+                'source', lr.source,
+                'isExternal', lr.is_external,
+                'allowFullscreen', lr.allow_fullscreen,
+                'lessonId', lr.lesson_id
+              )
+              FROM lesson_resources lr
+              WHERE lr.lesson_id = lessons.id
+              ORDER BY lr.created_at
+            )
       `,
       })
       .from(lessons)

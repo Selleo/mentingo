@@ -460,7 +460,8 @@
         "presentation": "Prezentacja",
         "text": "Tekst",
         "quiz": "Quiz",
-        "aiMentor": "AI Mentor"
+        "aiMentor": "AI Mentor",
+        "embed": "Osadzenie"
       }
     },
     "other": {
@@ -794,6 +795,7 @@
         "lesson": "Lekcja",
         "edit": "Edytuj",
         "create": "Utwórz",
+        "resources": "Zasoby",
         "removeContentQuestionBody": "To usunie pytanie z quizu",
         "removeContentBody": "To usunie wszystkie dane, w tym przesłane media.",
         "removeVideoLesson": "Czy na pewno chcesz usunąć tę lekcję wideo z rozdziału?",
@@ -801,6 +803,7 @@
         "removeTextLesson": "Czy na pewno chcesz usunąć tę lekcję tekstową z rozdziału?",
         "removeQuizLesson": "Czy na pewno chcesz usunąć tę lekcję quizową z rozdziału?",
         "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
+        "removeEmbedLesson": "Czy na pewno chcesz usunąć tę lekcję z osadzeniem z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -831,7 +834,9 @@
           "addOption": "Dodaj opcję",
           "deleteQuestion": "Usuń pytanie",
           "addWords": "Dodaj słowa",
-          "saveLesson": "Zapisz lekcje"
+          "saveLesson": "Zapisz lekcje",
+          "addResource": "Dodaj zasób",
+          "removeResource": "Usuń zasób"
         },
         "breadcrumbs": {
           "back": "Wstecz"
@@ -872,7 +877,9 @@
           "maxFileNumber_one": "Nie możesz przesłać więcej niż 1 plik",
           "maxFileNumber_few": "Nie możesz przesłać więcej niż {{ count }} pliki",
           "maxFileNumber_many": "Nie możesz przesłać więcej niż {{ count }} plików",
-          "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików"
+          "maxFileNumber_other": "Nie możesz przesłać więcej niż {{ count }} plików",
+          "maxResources": "Nie możesz dodać więcej niż {{ count }} zasobów do lekcji",
+          "sourceUrlRequired": "Adres URL źródła jest wymagany"
         },
         "toast": {
           "lessonDisplayOrderUpdatedSuccessfully": "Kolejność wyświetlania lekcji została pomyślnie zaktualizowana",
@@ -889,7 +896,11 @@
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
-          "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane"
+          "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane",
+          "embedLessonCreatedSuccessfully": "Lekcja z osadzeniem została pomyślnie utworzona",
+          "embedLessonUpdatedSuccessfully": "Lekcja z osadzeniem została pomyślnie zaktualizowana",
+          "embedLessonCreateError": "Nie udało się utworzyć lekcji z osadzeniem. Sprawdź wszystkie pola i spróbuj ponownie.",
+          "embedLessonUpdateError": "Nie udało się zaktualizować lekcji z osadzeniem. Sprawdź wszystkie pola i spróbuj ponownie."
         },
         "field": {
           "title": "Tytuł",
@@ -903,6 +914,7 @@
           "type": "Typ",
           "words": "Słowa",
           "sentence": "Zdanie",
+          "sourceUrl": "Adres URL źródła",
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
           "passThreshold": "Próg zaliczenia",
@@ -921,6 +933,8 @@
           "multipleChoice": "Wielokrotny wybór",
           "enterWord": "Wprowadź słowo",
           "enterURL": "Wpisz link",
+          "sourceUrl": "Wprowadź adres URL źródła...",
+          "allowFullscreen": "Zezwól na pełny ekran",
           "aiMentorInstructions": "Opisz jak AI Mentor powinien zachowywać się podczas lekcji...",
           "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
           "passThreshold": "np. 70%"
@@ -932,6 +946,7 @@
           "video": "Wideo",
           "quiz": "Quiz",
           "aiMentor": "AI Mentor",
+          "embed": "Osadzenie",
           "correct": "Poprawna",
           "true": "Prawda",
           "false": "Fałsz",
@@ -953,6 +968,7 @@
           "presentationLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki prezentacji, takie jak PPTX.",
           "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
           "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
+          "embedLessonDescription": "Ten typ pozwala na osadzenie zewnętrznej treści za pomocą iframe.",
           "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
           "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
           "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
@@ -984,6 +1000,9 @@
           },
           "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
         }
+      },
+      "validation": {
+        "titleRequired": ""
       }
     },
     "status": {
@@ -1192,7 +1211,9 @@
       "multipleChoice": "Pytanie wielokrotnego wyboru.",
       "singleChoice": "Pytanie jednokrotnego wyboru.",
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
-      "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)"
+      "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
+      "contentCantBeEmbedded": "Treść nie może być osadzona",
+      "openInNewTab": "Otwórz w nowej karcie"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",

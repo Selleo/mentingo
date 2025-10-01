@@ -14,9 +14,12 @@ import type {
   CreateAiMentorLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
+  LessonResource,
   UpdateAiMentorLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
+  CreateEmbedLessonBody,
+  UpdateEmbedLessonBody,
 } from "../lesson.schema";
 import type { UUIDType } from "src/common";
 
@@ -340,5 +343,72 @@ export class AdminLessonService {
 
       return id;
     });
+  }
+
+  async createEmbedLesson(data: CreateEmbedLessonBody) {
+    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
+
+    const lesson = await this.adminLessonRepository.createLessonForChapter({
+      ...data,
+      displayOrder: maxDisplayOrder + 1,
+    });
+
+    if (!lesson) throw new BadRequestException("Failed to create embed lesson");
+
+    await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
+
+    if (data.resources && data.resources.length > 0) {
+      const resourcesToInsert = data.resources.map((resource: LessonResource, index) => ({
+        lessonId: lesson.id,
+        type: resource.type,
+        source: resource.source,
+        isExternal: resource.isExternal,
+        allowFullscreen: resource.allowFullscreen,
+        displayOrder: index + 1,
+      }));
+
+      await this.adminLessonRepository.createLessonResources(resourcesToInsert);
+    }
+
+    return lesson;
+  }
+
+  async updateEmbedLesson(lessonId: UUIDType, data: UpdateEmbedLessonBody) {
+    const lesson = await this.lessonRepository.getLesson(lessonId);
+
+    if (!lesson) throw new NotFoundException("Lesson not found");
+
+    const updatedLesson = await this.adminLessonRepository.updateLesson(lessonId, data);
+
+    if (data.resources && data.resources.length === 0) {
+      await this.adminLessonRepository.deleteLessonResources(lessonId);
+      return updatedLesson.id;
+    }
+
+    const existingResourcesIds = (
+      await this.adminLessonRepository.getLessonResourcesForLesson(lessonId)
+    ).map((r) => r.id);
+
+    const resourceIdsToDelete = existingResourcesIds.filter(
+      (existingId) =>
+        !data.resources
+          .map((res) => res.id)
+          .filter((id): id is UUIDType => id !== undefined)
+          .includes(existingId),
+    );
+
+    if (resourceIdsToDelete.length > 0)
+      await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
+
+    const resourcesToUpdate = data.resources.map((resource: LessonResource, index) => ({
+      ...resource,
+      lessonId,
+      displayOrder: index + 1,
+    }));
+
+    if (resourcesToUpdate.length > 0)
+      await this.adminLessonRepository.upsertLessonResources(resourcesToUpdate);
+
+    return updatedLesson.id;
   }
 }

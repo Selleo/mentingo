@@ -55,6 +55,7 @@ export class LessonService {
     const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
+
     if (isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("You don't have access");
 
@@ -68,7 +69,11 @@ export class LessonService {
       this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
     }
 
-    if (lesson.type !== LESSON_TYPES.QUIZ && lesson.type !== LESSON_TYPES.AI_MENTOR) {
+    if (
+      lesson.type !== LESSON_TYPES.QUIZ &&
+      lesson.type !== LESSON_TYPES.AI_MENTOR &&
+      lesson.type !== LESSON_TYPES.EMBED
+    ) {
       if (!lesson.fileUrl) throw new NotFoundException("Lesson file not found");
 
       if (lesson.fileUrl.startsWith("https://")) return lesson;
@@ -96,6 +101,12 @@ export class LessonService {
         userLanguage: thread.userLanguage,
         status: thread.status,
       };
+    }
+
+    if (lesson.type === LESSON_TYPES.EMBED) {
+      const lessonResources = await this.lessonRepository.getLessonResources(lesson.id);
+
+      return { ...lesson, lessonResources: lessonResources };
     }
 
     const questionList = await this.questionRepository.getQuestionsForLesson(

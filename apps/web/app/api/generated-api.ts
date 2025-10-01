@@ -772,11 +772,24 @@ export interface GetCourseResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
         displayOrder: number;
         status: "not_started" | "in_progress" | "completed" | "blocked";
         quizQuestionCount: number | null;
         isExternal?: boolean;
+        lessonResources?: {
+          /** @format uuid */
+          id: string;
+          source: string;
+          isExternal: boolean;
+          allowFullscreen: boolean;
+          type: "embed";
+          /** @format uuid */
+          lessonId: string;
+          displayOrder: number;
+          createdAt: string;
+          updatedAt: string;
+        }[];
       }[];
       completedLessonCount?: number;
       chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -824,7 +837,7 @@ export interface GetBetaCourseByIdResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
@@ -990,11 +1003,24 @@ export interface GetChapterWithLessonResponse {
       /** @format uuid */
       id: string;
       title: string;
-      type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+      type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
       displayOrder: number;
       status: "not_started" | "in_progress" | "completed" | "blocked";
       quizQuestionCount: number | null;
       isExternal?: boolean;
+      lessonResources?: {
+        /** @format uuid */
+        id: string;
+        source: string;
+        isExternal: boolean;
+        allowFullscreen: boolean;
+        type: "embed";
+        /** @format uuid */
+        lessonId: string;
+        displayOrder: number;
+        createdAt: string;
+        updatedAt: string;
+      }[];
     }[];
     completedLessonCount?: number;
     chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -1014,7 +1040,7 @@ export type BetaCreateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -1089,7 +1115,7 @@ export type UpdateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -1189,7 +1215,7 @@ export interface GetLessonByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
     description: string | null;
     fileType: string | null;
     fileUrl: string | null;
@@ -1246,12 +1272,25 @@ export interface GetLessonByIdResponse {
     status?: "active" | "completed" | "archived";
     /** @format uuid */
     threadId?: string;
+    lessonResources?: {
+      /** @format uuid */
+      id: string;
+      source: string;
+      isExternal: boolean;
+      allowFullscreen: boolean;
+      type: "embed";
+      /** @format uuid */
+      lessonId: string;
+      displayOrder: number;
+      createdAt: string;
+      updatedAt: string;
+    }[];
   };
 }
 
 export type BetaCreateLessonBody = {
   title: string;
-  type: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+  type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
   fileType?: string | null;
@@ -1551,7 +1590,7 @@ export interface BetaUpdateQuizLessonResponse {
 
 export type BetaUpdateLessonBody = {
   title?: string;
-  type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor";
+  type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
   fileType?: string | null;
@@ -1652,6 +1691,56 @@ export interface EvaluationQuizResponse {
 }
 
 export interface DeleteStudentQuizAnswersResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface CreateEmbedLessonBody {
+  title: string;
+  type: "embed";
+  /** @format uuid */
+  chapterId: string;
+  resources: {
+    id?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    /** @maxLength 1000 */
+    source: string;
+    isExternal?: boolean;
+    displayOrder?: number;
+    allowFullscreen?: boolean;
+    /** @maxLength 50 */
+    type?: string;
+  }[];
+}
+
+export interface CreateEmbedLessonResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UpdateEmbedLessonBody {
+  title: string;
+  type: "embed";
+  resources: {
+    id?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    /** @maxLength 1000 */
+    source: string;
+    isExternal?: boolean;
+    displayOrder?: number;
+    allowFullscreen?: boolean;
+    /** @maxLength 50 */
+    type?: string;
+  }[];
+  /** @format uuid */
+  lessonId: string;
+}
+
+export interface UpdateEmbedLessonResponse {
   data: {
     message: string;
   };
@@ -4013,6 +4102,42 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/lesson/delete-student-quiz-answers`,
         method: "DELETE",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerCreateEmbedLesson
+     * @request POST:/api/lesson/create-lesson/embed
+     */
+    lessonControllerCreateEmbedLesson: (data: CreateEmbedLessonBody, params: RequestParams = {}) =>
+      this.request<CreateEmbedLessonResponse, any>({
+        path: `/api/lesson/create-lesson/embed`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerUpdateEmbedLesson
+     * @request PATCH:/api/lesson/update-lesson/embed/{id}
+     */
+    lessonControllerUpdateEmbedLesson: (
+      id: string,
+      data: UpdateEmbedLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateEmbedLessonResponse, any>({
+        path: `/api/lesson/update-lesson/embed/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
