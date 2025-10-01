@@ -31,13 +31,15 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
           this.envService
             .getEnv("MICROSOFT_CLIENT_ID")
             .then((r) => r.value)
-            .catch(() => undefined) ||
-            this.configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_ID"),
+            .catch(() =>
+              this.configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_ID"),
+            ),
           this.envService
             .getEnv("MICROSOFT_CLIENT_SECRET")
             .then((r) => r.value)
-            .catch(() => undefined) ||
-            this.configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_SECRET"),
+            .catch(() =>
+              this.configService.get<string>("microsoft_authorization.MICROSOFT_CLIENT_SECRET"),
+            ),
         ]);
 
         if (!id || !secret) {

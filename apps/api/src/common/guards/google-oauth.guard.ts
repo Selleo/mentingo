@@ -14,11 +14,10 @@ export class GoogleOAuthGuard extends AuthGuard("google") {
   }
 
   private async isEnabled(): Promise<boolean> {
-    const enabled =
-      (await this.envService
-        .getEnv("GOOGLE_OAUTH_ENABLED")
-        .then((r) => r.value)
-        .catch(() => undefined)) || this.configService.get<string>("GOOGLE_OAUTH_ENABLED");
+    const enabled = await this.envService
+      .getEnv("GOOGLE_OAUTH_ENABLED")
+      .then((r) => r.value)
+      .catch(() => this.configService.get<string>("GOOGLE_OAUTH_ENABLED"));
 
     return enabled === "true";
   }

@@ -3,7 +3,6 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-google-oauth20";
 
-
 import { EnvService } from "src/env/services/env.service";
 
 import type { Request } from "express";
@@ -31,14 +30,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
           this.envService
             .getEnv("GOOGLE_CLIENT_ID")
             .then((r) => r.value)
-            .catch(() => undefined) ||
-          this.configService.get<string>("google_authorization.GOOGLE_CLIENT_ID"),
+            .catch(() => this.configService.get<string>("google_authorization.GOOGLE_CLIENT_ID")),
 
           this.envService
             .getEnv("GOOGLE_CLIENT_SECRET")
             .then((r) => r.value)
-            .catch(() => undefined) ||
-          this.configService.get<string>("google_authorization.GOOGLE_CLIENT_SECRET"),
+            .catch(() =>
+              this.configService.get<string>("google_authorization.GOOGLE_CLIENT_SECRET"),
+            ),
         ]);
 
         if (!id || !secret) {
