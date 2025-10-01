@@ -16,7 +16,7 @@ export class StudentLessonProgressController {
   constructor(private readonly studentLessonProgressService: StudentLessonProgressService) {}
 
   @Post()
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(USER_ROLES.STUDENT, USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
     response: baseResponse(Type.Object({ message: Type.String() })),

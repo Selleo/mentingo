@@ -889,7 +889,10 @@
           "textLessonUpdatedSuccessfully": "Text lesson updated successfully",
           "fileLessonUpdatedSuccessfully": "File item updated successfully",
           "questionOptionsUpdatedSuccessfully": "Question options updated successfully",
-          "lessonResourceCreatedSuccessfully": "Lesson resource created successfully"
+          "embedLessonCreatedSuccessfully": "Embed lesson created successfully",
+          "embedLessonUpdatedSuccessfully": "Embed lesson updated successfully",
+          "embedLessonCreateError": "Failed to create embed lesson. Please check all the fields and try again.",
+          "embedLessonUpdateError": "Failed to update embed lesson. Please check all the fields and try again."
         },
         "field": {
           "title": "Title",
@@ -1194,7 +1197,9 @@
       "multipleChoice": "Multiple choice question.",
       "singleChoice": "Single choice question",
       "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
-      "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)"
+      "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
+      "contentCantBeEmbedded": "This content can’t be embedded.",
+      "openInNewTab": "Open in new tab"
     },
     "aiMentor": {
       "title": "AI Mentor Session",

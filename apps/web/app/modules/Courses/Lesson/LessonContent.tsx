@@ -19,6 +19,7 @@ import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 import Presentation from "../../../components/Presentation/Presentation";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
+import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
@@ -116,10 +117,17 @@ export const LessonContent = ({
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
       .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
+      .with("embed", () => (
+        <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
+      ))
       .otherwise(() => null);
 
   useEffect(() => {
-    if (lesson.type === LessonType.TEXT || lesson.type === LessonType.PRESENTATION) {
+    if (
+      lesson.type === LessonType.TEXT ||
+      lesson.type === LessonType.PRESENTATION ||
+      lesson.type === LessonType.EMBED
+    ) {
       markLessonAsCompleted({ lessonId: lesson.id });
     }
 

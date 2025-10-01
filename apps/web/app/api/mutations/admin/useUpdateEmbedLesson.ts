@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { courseQueryOptions } from "~/api/queries";
+import { courseQueryOptions, lessonQueryOptions } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -30,15 +30,16 @@ export function useUpdateEmbedLesson() {
     },
     onSuccess: (_, variables) => {
       toast({
-        description: t("adminCourseView.curriculum.lesson.toast.lessonUpdatedSuccessfully"),
+        description: t("adminCourseView.curriculum.lesson.toast.embedLessonUpdatedSuccessfully"),
       });
 
       queryClient.invalidateQueries(courseQueryOptions(variables.courseId));
+      queryClient.invalidateQueries(lessonQueryOptions(variables.lessonId));
     },
-    onError: (error) => {
+    onError: () => {
       toast({
-        description: error.message,
         variant: "destructive",
+        description: t("adminCourseView.curriculum.lesson.toast.embedLessonUpdateError"),
       });
     },
   });

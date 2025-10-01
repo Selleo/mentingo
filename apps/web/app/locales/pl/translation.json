@@ -895,7 +895,10 @@
           "textLessonUpdatedSuccessfully": "Lekcja tekstowa zaktualizowany pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
           "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane",
-          "lessonResourceCreatedSuccessfully": "Zasób lekcji został pomyślnie utworzony"
+          "embedLessonCreatedSuccessfully": "Lekcja z osadzeniem została pomyślnie utworzona",
+          "embedLessonUpdatedSuccessfully": "Lekcja z osadzeniem została pomyślnie zaktualizowana",
+          "embedLessonCreateError": "Nie udało się utworzyć lekcji z osadzeniem. Sprawdź wszystkie pola i spróbuj ponownie.",
+          "embedLessonUpdateError": "Nie udało się zaktualizować lekcji z osadzeniem. Sprawdź wszystkie pola i spróbuj ponownie."
         },
         "field": {
           "title": "Tytuł",
@@ -1206,7 +1209,9 @@
       "multipleChoice": "Pytanie wielokrotnego wyboru.",
       "singleChoice": "Pytanie jednokrotnego wyboru.",
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
-      "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)"
+      "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
+      "contentCantBeEmbedded": "Treść nie może być osadzona",
+      "openInNewTab": "Otwórz w nowej karcie"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",

@@ -1,7 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
+import { courseQueryOptions } from "~/api/queries";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -10,6 +11,7 @@ import type { CreateEmbedLessonBody } from "~/api/generated-api";
 
 type CreateLessonOptions = {
   data: CreateEmbedLessonBody;
+  courseId: string;
 };
 
 export function useCreateEmbedLesson() {
@@ -22,22 +24,18 @@ export function useCreateEmbedLesson() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast({
         variant: "default",
-        description: t("adminCourseView.curriculum.lesson.toast.lessonCreatedSuccessfully"),
+        description: t("adminCourseView.curriculum.lesson.toast.embedLessonCreatedSuccessfully"),
       });
+
+      queryClient.invalidateQueries(courseQueryOptions(variables.courseId));
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: error.response?.data.message,
-        });
-      }
+    onError: () => {
       toast({
         variant: "destructive",
-        description: error.message,
+        description: t("adminCourseView.curriculum.lesson.toast.embedLessonCreateError"),
       });
     },
   });

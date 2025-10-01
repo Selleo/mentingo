@@ -2,6 +2,10 @@ import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLess
 
 export type NavigationTab = "Settings" | "Curriculum" | "Pricing" | "Status";
 
+export const LessonResourceType = {
+  EMBED: "embed",
+} as const;
+
 type AiMentorType = {
   id: string;
   lessonId: string;
@@ -17,7 +21,7 @@ export interface LessonResource {
   isExternal: boolean;
   displayOrder: number;
   allowFullscreen: boolean;
-  type: string;
+  type: (typeof LessonResourceType)[keyof typeof LessonResourceType];
 }
 export interface Lesson {
   updatedAt: string;

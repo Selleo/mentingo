@@ -786,6 +786,9 @@ export interface GetCourseResponse {
           type: "embed";
           /** @format uuid */
           lessonId: string;
+          displayOrder: number;
+          createdAt: string;
+          updatedAt: string;
         }[];
       }[];
       completedLessonCount?: number;
@@ -1013,6 +1016,9 @@ export interface GetChapterWithLessonResponse {
         type: "embed";
         /** @format uuid */
         lessonId: string;
+        displayOrder: number;
+        createdAt: string;
+        updatedAt: string;
       }[];
     }[];
     completedLessonCount?: number;
@@ -1263,6 +1269,19 @@ export interface GetLessonByIdResponse {
     status?: "active" | "completed" | "archived";
     /** @format uuid */
     threadId?: string;
+    lessonResources?: {
+      /** @format uuid */
+      id: string;
+      source: string;
+      isExternal: boolean;
+      allowFullscreen: boolean;
+      type: "embed";
+      /** @format uuid */
+      lessonId: string;
+      displayOrder: number;
+      createdAt: string;
+      updatedAt: string;
+    }[];
   };
 }
 

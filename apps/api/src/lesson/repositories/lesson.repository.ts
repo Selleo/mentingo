@@ -1,10 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
   chapters,
   courses,
+  lessonResources,
   lessons,
   questions,
   quizAttempts,
@@ -14,7 +15,7 @@ import {
 
 import type { LessonTypes } from "../lesson.type";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { AdminQuestionBody, QuestionBody } from "src/lesson/lesson.schema";
+import type { AdminQuestionBody, LessonResourceType, QuestionBody } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
@@ -287,6 +288,17 @@ export class LessonRepository {
       )
       .orderBy(desc(quizAttempts.createdAt))
       .limit(1);
+  }
+
+  async getLessonResources(lessonId: UUIDType) {
+    return await this.db
+      .select({
+        ...getTableColumns(lessonResources),
+        type: sql<LessonResourceType>`${lessonResources.type}`,
+      })
+      .from(lessonResources)
+      .where(eq(lessonResources.lessonId, lessonId))
+      .orderBy(lessonResources.displayOrder);
   }
 
   //   async retireQuizProgress(

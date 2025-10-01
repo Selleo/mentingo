@@ -82,6 +82,9 @@ export const lessonResourceSchema = Type.Object({
   allowFullscreen: Type.Boolean(),
   type: lessonResourceType,
   lessonId: UUIDSchema,
+  displayOrder: Type.Number(),
+  createdAt: Type.String(),
+  updatedAt: Type.String(),
 });
 
 export const adminLessonSchema = Type.Object({
@@ -172,6 +175,7 @@ export const lessonShowSchema = Type.Object({
   userLanguage: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
   status: Type.Optional(Type.Enum(THREAD_STATUS)),
   threadId: Type.Optional(UUIDSchema),
+  lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
 });
 
 export const updateLessonSchema = Type.Partial(createLessonSchema);
@@ -234,14 +238,14 @@ const createLessonResourceSchema = createInsertSchema(lessonResources);
 
 export const createEmbedLessonSchema = Type.Object({
   title: Type.String(),
-  type: Type.Literal("embed"),
+  type: lessonResourceType,
   chapterId: UUIDSchema,
   resources: Type.Array(Type.Omit(createLessonResourceSchema, ["lessonId"])),
 });
 
 export const updateEmbedLessonSchema = Type.Object({
   title: Type.String(),
-  type: Type.Literal("embed"),
+  type: lessonResourceType,
   resources: Type.Array(Type.Omit(createLessonResourceSchema, ["lessonId"])),
   lessonId: UUIDSchema,
 });

@@ -62,7 +62,7 @@ export const useEmbedLessonForm = ({
           resources: values.resources || [],
         },
         lessonId: lessonToEdit.id,
-        courseId: courseId,
+        courseId,
       });
     } else {
       await createLesson({
@@ -71,6 +71,7 @@ export const useEmbedLessonForm = ({
           chapterId: chapterToEdit.id,
           resources: values.resources || [],
         },
+        courseId,
       });
     }
 
