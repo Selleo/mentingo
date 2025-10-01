@@ -4,6 +4,7 @@ import { HexColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
 import { useUnmount } from "react-use";
 
+import { useUpdatePrimaryColor } from "~/api/mutations";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -21,8 +22,9 @@ export const OrganizationTheme = () => {
 
   const { primaryColor, setPrimaryColor } = useTheme();
   const currentPrimaryColor = useRef(primaryColor);
-
   const disableSubmit = lowerCase(primaryColor) === lowerCase(currentPrimaryColor.current);
+
+  const { mutate: updatePrimaryColor } = useUpdatePrimaryColor();
 
   useUnmount(() => {
     setPrimaryColor(currentPrimaryColor.current);
@@ -62,6 +64,7 @@ export const OrganizationTheme = () => {
           disabled={disableSubmit}
           onClick={() => {
             currentPrimaryColor.current = primaryColor;
+            updatePrimaryColor({ primaryColor });
           }}
         >
           {t("common.button.save")}

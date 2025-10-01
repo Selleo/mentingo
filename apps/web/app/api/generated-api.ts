@@ -508,6 +508,30 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
   };
 }
 
+export interface UpdatePrimaryColorBody {
+  /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
+  primaryColor: string;
+}
+
+export interface UpdatePrimaryColorResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    primaryColor: string | null;
+  };
+}
+
 export interface GetPlatformLogoResponse {
   data: {
     url: string | null;
@@ -3034,6 +3058,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
         path: `/api/settings/admin/finished-course-notification`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePrimaryColor
+     * @request PATCH:/api/settings/admin/primary-color
+     */
+    settingsControllerUpdatePrimaryColor: (
+      data: UpdatePrimaryColorBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdatePrimaryColorResponse, any>({
+        path: `/api/settings/admin/primary-color`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

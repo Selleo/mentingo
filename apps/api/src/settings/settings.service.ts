@@ -215,6 +215,45 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
+  public async updateGlobalPrimaryColor(
+    primaryColor: string,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.db
+      .select({
+        primaryColor: sql`settings.settings->>'primaryColor'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{primaryColor}',
+            to_jsonb(${primaryColor}::text),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const parsedSettings = {
+      ...updatedGlobalSettings,
+      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
+        ? updatedGlobalSettings.MFAEnforcedRoles
+        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
+    };
+
+    return parsedSettings;
+  }
+
   public async updateGlobalEnforceSSO(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
       .select({
