@@ -3,6 +3,7 @@ import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
 import { DefaultCourseCurrencySelect } from "./DefaultCourseCurrencySelect";
+import { OrganizationTheme } from "./OrganizationTheme";
 import AdminPreferences from "./Preferences";
 import RoleBasedMFAEnforcementSwitch from "./RoleBasedMFAEnforcementSwitch";
 
@@ -33,6 +34,7 @@ export default function OrganizationTabContent({
         certificateBackgroundImage={globalSettings.certificateBackgroundImage}
       />
       <PlatformLogoForm />
+      <OrganizationTheme />
     </>
   );
 }

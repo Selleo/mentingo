@@ -5,7 +5,7 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "../../../i18n";
 import { queryClient } from "../../api/queryClient";
 import { LanguageProvider } from "../Dashboard/Settings/Language/LanguageProvider";
-import { ThemeProvider } from "../Theme/ThemeProvider";
+import { ThemeProvider } from "../Theme";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
