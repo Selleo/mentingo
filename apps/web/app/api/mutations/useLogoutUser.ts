@@ -5,15 +5,19 @@ import { AxiosError } from "axios";
 import { useToast } from "~/components/ui/use-toast";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
+import { useTheme } from "~/modules/Theme";
 
 import { requestManager, ApiClient } from "../api-client";
 import { queryClient } from "../queryClient";
 
 import { useAuthStore } from "./../../modules/Auth/authStore";
 
+const defaultPrimaryColor = "#3f58b6";
+
 export function useLogoutUser() {
   const { toast } = useToast();
   const { setLoggedIn } = useAuthStore();
+  const { setPrimaryColor } = useTheme();
   const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
   const setIsVisible = useAnnouncementsPopupStore((state) => state.setIsVisible);
 
@@ -34,6 +38,7 @@ export function useLogoutUser() {
 
       queryClient.invalidateQueries();
 
+      setPrimaryColor(defaultPrimaryColor);
       navigate("/auth/login");
     },
     onError: (error) => {

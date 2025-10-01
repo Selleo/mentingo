@@ -392,6 +392,7 @@ export interface GetPublicGlobalSettingsResponse {
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    primaryColor: string | null;
   };
 }
 
@@ -473,6 +474,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    primaryColor: string | null;
   };
 }
 
@@ -491,6 +493,7 @@ export interface UpdateEnforceSSOResponse {
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    primaryColor: string | null;
   };
 }
 
