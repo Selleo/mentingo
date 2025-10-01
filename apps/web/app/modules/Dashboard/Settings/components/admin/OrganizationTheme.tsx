@@ -63,8 +63,16 @@ export const OrganizationTheme = () => {
         <Button
           disabled={disableSubmit}
           onClick={() => {
-            currentPrimaryColor.current = primaryColor;
-            updatePrimaryColor({ primaryColor });
+            updatePrimaryColor(
+              { primaryColor },
+              {
+                onSuccess: ({ data }) => {
+                  if (data?.primaryColor) {
+                    currentPrimaryColor.current = data.primaryColor;
+                  }
+                },
+              },
+            );
           }}
         >
           {t("common.button.save")}
