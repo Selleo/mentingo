@@ -5581,6 +5581,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -5589,7 +5599,8 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles",
-              "defaultCourseCurrency"
+              "defaultCourseCurrency",
+              "primaryColor"
             ]
           }
         },
@@ -5939,6 +5950,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -5947,7 +5968,8 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles",
-              "defaultCourseCurrency"
+              "defaultCourseCurrency",
+              "primaryColor"
             ]
           }
         },
@@ -6045,6 +6067,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6053,7 +6085,8 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles",
-              "defaultCourseCurrency"
+              "defaultCourseCurrency",
+              "primaryColor"
             ]
           }
         },
