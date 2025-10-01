@@ -16,6 +16,8 @@ import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "./constants";
+
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
 
@@ -42,7 +44,7 @@ const ButtonNode = Node.create({
 
       {
         type: "button",
-        class: "bg-primary-200 text-white px-4 rounded-xl cursor-pointer align-baseline",
+        class: FILL_IN_THE_BLANKS_BUTTON_CLASSNAME,
       },
       node.textContent,
     ];
@@ -85,7 +87,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
     const escapedWord = word.replace(/[.*+?^=!:${}()|[\]/\\]/g, "\\$&");
 
     const regex = new RegExp(
-      `<button type="button" class="bg-primary-200 text-white px-4 rounded-xl cursor-pointer align-baseline">[\\s\\S]*?\\b${escapedWord}\\b[\\s\\S]*?<\\/button>`,
+      `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}">[\\s\\S]*?\\b${escapedWord}\\b[\\s\\S]*?<\\/button>`,
       "s",
     );
 
@@ -108,7 +110,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
       const buttonRegex = new RegExp(
         // TODO: Needs to be fixed
         // eslint-disable-next-line
-        `<button[^>]*class="[^"]*bg-primary-200[^"]*"[^>]*>[^<]*${escapedWord}[^<]*<\/button>`,
+        `<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>[^<]*${escapedWord}[^<]*<\/button>`,
         "gi",
       );
 
@@ -130,11 +132,11 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
 
     if (containsButtonWithWord(word)) return;
 
-    const buttonHTML = `<button type="button" class="bg-primary-200 text-white px-4 rounded-xl cursor-pointer align-baseline">${word} <span class="text-white cursor-pointer" data-word="${word}" onmousedown="event.preventDefault(); handleDelete(event)">X</span></button>`;
+    const buttonHTML = `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}">${word} <span class="text-white cursor-pointer" data-word="${word}" onmousedown="event.preventDefault(); handleDelete(event)">X</span></button>`;
 
     editor.chain().focus().insertContent(buttonHTML).run();
 
-    const regex = /<button[^>]*class="[^"]*bg-primary-200[^"]*"[^>]*>([^<]+)<\/button>/g;
+    const regex = /<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>([^<]+)<\/button>/g;
 
     const currentValue = form.getValues(`questions.${questionIndex}.description`) as string;
 
@@ -195,7 +197,9 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
 
     editor.on("update", () => {
       const html = editor.getHTML();
-      form.setValue(`questions.${questionIndex}.description`, html, { shouldDirty: true });
+      form.setValue(`questions.${questionIndex}.description`, html, {
+        shouldDirty: true,
+      });
     });
 
     return () => {
@@ -206,7 +210,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
   useEffect(() => {
     if (!editor) return;
 
-    const regex = /<button[^>]*class="[^"]*bg-primary-200[^"]*"[^>]*>([^<]+)<\/button>/g;
+    const regex = /<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>([^<]+)<\/button>/g;
     const buttonValues = currentDescription
       ? [...currentDescription.matchAll(regex)]
           .map((match) => match[1]?.trim() || "")
@@ -256,7 +260,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
 
         const currentValue = form.getValues(`questions.${questionIndex}.description`) as string;
 
-        const regex = /<button[^>]*class="[^"]*bg-primary-200[^"]*"[^>]*>([^<]+)<\/button>/g;
+        const regex = /<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>([^<]+)<\/button>/g;
 
         const buttonValues = currentValue
           ? [...currentValue.matchAll(regex)]
@@ -299,85 +303,11 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
       <Accordion.Item value={`item-${questionIndex}`}>
         <div className="rounded-xl border-0 p-3 transition-all duration-300">
           <div className="ml-14">
-            <span className="mr-1 text-red-500">*</span>
-            <Label className="body-sm-md">
-              {t("adminCourseView.curriculum.lesson.field.words")}
-            </Label>
-            <div className="flex flex-wrap items-center gap-2">
-              {currentOptions.map((option, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "flex items-center justify-between space-x-2 rounded-full px-4",
-                    option.isCorrect ? "bg-success-100" : "bg-primary-200",
-                  )}
-                  draggable={!containsButtonWithWord(option.optionText)}
-                  onDragStart={(e) => handleDragStart(option.optionText, e)}
-                >
-                  <Icon name="DragAndDropIcon" />
-                  {option.isCorrect && <Icon name="Success" />}
-                  <span>{option.optionText}</span>
-                  <Button
-                    onClick={() => handleRemoveWord(index)}
-                    type="button"
-                    className="text-color-black rounded-full bg-transparent p-0"
-                  >
-                    X
-                  </Button>
-                </div>
-              ))}
-              <div className="flex items-center">
-                {!isAddingWord && (
-                  <Button
-                    onClick={() => setIsAddingWord(true)}
-                    type="button"
-                    className="mb-4 mt-4 flex items-center rounded-full bg-primary-700 text-white"
-                  >
-                    <Icon name="Plus" />
-                    {t("adminCourseView.curriculum.lesson.button.addWords")}
-                  </Button>
-                )}
-              </div>
-            </div>
-            {isAddingWord && (
-              <div className="mt-4 flex w-1/3 items-center gap-2">
-                <Input
-                  data-testid="new-word-input"
-                  type="text"
-                  value={newWord}
-                  onChange={(e) => setNewWord(e.target.value)}
-                  placeholder={t("adminCourseView.curriculum.lesson.placeholder.enterWord")}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={handleAddWord}
-                  data-testid="add-word"
-                  type="button"
-                  className="bg-primary-700 text-white"
-                >
-                  {t("common.button.add")}
-                </Button>
-                <Button
-                  onClick={() => setIsAddingWord(false)}
-                  type="button"
-                  className="bg-color-transparent border border-neutral-200 bg-red-500 text-white"
-                >
-                  {t("common.button.cancel")}
-                </Button>
-              </div>
-            )}
-            <>
-              {errors?.questions?.[questionIndex] && (
-                <p className="text-sm text-red-500">
-                  {errors?.questions?.[questionIndex]?.options?.message}
-                </p>
-              )}
-            </>
             <FormField
               control={form.control}
               name={`questions.${questionIndex}.description`}
               render={() => (
-                <FormItem className="mt-5">
+                <FormItem>
                   <Label htmlFor="description" className="body-sm-md">
                     <span className="mr-1 text-red-500">*</span>
                     {t("adminCourseView.curriculum.lesson.field.sentence")}
@@ -398,6 +328,85 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
                 </FormItem>
               )}
             />
+            <div className="mb-1.5 mt-5">
+              <span className="mr-1 text-red-500">*</span>
+              <Label className="body-sm-md">
+                {t("adminCourseView.curriculum.lesson.field.words")}
+              </Label>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {currentOptions.map((option, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "flex items-center justify-between gap-x-1 rounded-lg border border-primary-500 pr-3",
+                    option.isCorrect ? "bg-success-100" : "bg-primary-100",
+                  )}
+                  draggable={!containsButtonWithWord(option.optionText)}
+                  onDragStart={(e) => handleDragStart(option.optionText, e)}
+                >
+                  <Icon name="DragAndDropIcon" className="pl-1.5" />
+                  {option.isCorrect && <Icon name="Success" />}
+                  <span className="mr-1.5 text-primary-500">{option.optionText}</span>
+                  <Button
+                    onClick={() => handleRemoveWord(index)}
+                    type="button"
+                    className="rounded-full bg-transparent p-0 text-primary-500"
+                  >
+                    <Icon name="X" className="size-2.5" />
+                  </Button>
+                </div>
+              ))}
+              <div className="flex items-center">
+                {!isAddingWord && (
+                  <Button
+                    onClick={() => setIsAddingWord(true)}
+                    type="button"
+                    className="mb-4 mt-4 flex items-center gap-2 rounded-full bg-primary-700 text-white"
+                  >
+                    <Icon name="Plus" />
+                    {t("adminCourseView.curriculum.lesson.button.addWords")}
+                  </Button>
+                )}
+              </div>
+            </div>
+            {isAddingWord && (
+              <div
+                className={cn(
+                  "flex items-center gap-2",
+                  currentOptions.length === 0 ? "mt-0" : "mt-2",
+                )}
+              >
+                <Input
+                  data-testid="new-word-input"
+                  type="text"
+                  value={newWord}
+                  onChange={(e) => setNewWord(e.target.value)}
+                  placeholder={t("adminCourseView.curriculum.lesson.placeholder.enterWord")}
+                  className="grow"
+                />
+                <Button
+                  onClick={handleAddWord}
+                  data-testid="add-word"
+                  type="button"
+                  className="bg-primary-700 text-white"
+                >
+                  {t("common.button.add")}
+                </Button>
+                <Button
+                  onClick={() => setIsAddingWord(false)}
+                  type="button"
+                  className="bg-color-transparent border border-neutral-200 bg-red-500 text-white"
+                >
+                  {t("common.button.cancel")}
+                </Button>
+              </div>
+            )}
+            {errors?.questions?.[questionIndex] && (
+              <p className="mt-1.5 text-sm text-red-500">
+                {errors?.questions?.[questionIndex]?.options?.message}
+              </p>
+            )}
             <Button
               type="button"
               className="bg-color-white mb-4 mt-4 border border-neutral-300 text-error-700"
