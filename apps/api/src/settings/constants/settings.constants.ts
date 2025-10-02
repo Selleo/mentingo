@@ -14,6 +14,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   platformLogoS3Key: null,
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
+  inviteOnlyRegistration: false,
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {

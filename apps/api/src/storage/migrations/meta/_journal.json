@@ -281,6 +281,13 @@
       "when": 1759307692136,
       "tag": "0039_add_lesson_resources_table",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1759407126194,
+      "tag": "0040_added_invite_only_registration_setting",
+      "breakpoints": true
     }
   ]
 }

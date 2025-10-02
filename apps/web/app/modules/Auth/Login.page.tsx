@@ -37,7 +37,7 @@ export default function LoginPage() {
   const { mutateAsync: loginUser } = useLoginUser();
 
   const {
-    data: { enforceSSO: isSSOEnforced },
+    data: { enforceSSO: isSSOEnforced, inviteOnlyRegistration: inviteOnlyRegistration },
   } = useGlobalSettingsSuspense();
 
   const {
@@ -125,12 +125,14 @@ export default function LoginPage() {
           />
         )}
 
-        <div className="mt-4 text-center text-sm">
-          {t("loginView.other.dontHaveAccount")}{" "}
-          <Link to="/auth/register" className="underline">
-            {t("loginView.other.signUp")}
-          </Link>
-        </div>
+        {!inviteOnlyRegistration && (
+          <div className="mt-4 text-center text-sm">
+            {t("loginView.other.dontHaveAccount")}{" "}
+            <Link to="/auth/register" className="underline">
+              {t("loginView.other.signUp")}
+            </Link>
+          </div>
+        )}
         <p className="bottom-4 mt-4 text-center text-sm text-neutral-300">
           {t("common.other.appVersion", { version })}
         </p>
