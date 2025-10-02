@@ -15,7 +15,14 @@ type CourseParams = {
   userRole?: UserRole;
 };
 
-export const availableCoursesQueryOptions = (searchParams?: CourseParams) => ({
+type QueryOptions = {
+  enabled?: boolean;
+};
+
+export const availableCoursesQueryOptions = (
+  searchParams?: CourseParams,
+  options: QueryOptions = { enabled: true },
+) => ({
   queryKey: ["available-courses", searchParams],
   queryFn: async () => {
     const response = await ApiClient.api.courseControllerGetAvailableCourses({
@@ -30,6 +37,7 @@ export const availableCoursesQueryOptions = (searchParams?: CourseParams) => ({
     return response.data;
   },
   select: (data: GetAvailableCoursesResponse) => data.data,
+  ...options,
 });
 
 export function useAvailableCourses(searchParams?: CourseParams) {

@@ -10,9 +10,10 @@ import { cn } from "~/lib/utils";
 
 type NavigationFooterProps = {
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
+  showLabelsOn2xl?: boolean;
 };
 
-export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) {
+export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: NavigationFooterProps) {
   const { mutate: logout } = useLogoutUser();
   const { t } = useTranslation();
 
@@ -35,7 +36,12 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
               }
             >
               <Icon name="Info" className="size-5" />
-              <span className="capitalize 2xl:sr-only 3xl:not-sr-only">
+              <span
+                className={cn(
+                  "line-clamp-1 truncate whitespace-nowrap capitalize 2xl:sr-only 3xl:not-sr-only",
+                  showLabelsOn2xl ? "2xl:not-sr-only" : undefined,
+                )}
+              >
                 {t("navigationSideBar.providerInformation")}
               </span>
             </NavLink>
@@ -62,7 +68,12 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
               }
             >
               <Icon name="Settings" className="size-6" />
-              <span className="capitalize 2xl:sr-only 3xl:not-sr-only">
+              <span
+                className={cn(
+                  "line-clamp-1 truncate whitespace-nowrap capitalize 2xl:sr-only 3xl:not-sr-only",
+                  showLabelsOn2xl ? "2xl:not-sr-only" : undefined,
+                )}
+              >
                 {t("navigationSideBar.settings")}
               </span>
             </NavLink>
@@ -90,7 +101,14 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
               className="flex w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 2xl:p-2"
             >
               <Icon name="Logout" className="size-6" />
-              <span className="2xl:sr-only 3xl:not-sr-only">{t("navigationSideBar.logout")}</span>
+              <span
+                className={cn(
+                  "line-clamp-1 truncate whitespace-nowrap 2xl:sr-only 3xl:not-sr-only",
+                  showLabelsOn2xl ? "2xl:not-sr-only" : undefined,
+                )}
+              >
+                {t("navigationSideBar.logout")}
+              </span>
             </button>
           </TooltipTrigger>
           <TooltipContent

@@ -129,6 +129,7 @@
     "profile": "Profil",
     "dashboard": "Panel główny",
     "courses": "Kursy",
+    "findInApplication": "Znajdź w aplikacji",
     "myCourses": "Moje kursy",
     "categories": "Kategorie",
     "users": "Użytkownicy",
@@ -140,6 +141,15 @@
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
+  },
+  "globalSearch": {
+    "users": "Użytkownicy",
+    "categories": "Kategorie",
+    "groups": "Grupy",
+    "allCourses": "Wszystkie kursy",
+    "myCourses": "Moje kursy",
+    "availableCourses": "Dostępne kursy",
+    "noSearchResults": "Brak wyników wyszukiwania dla:"
   },
   "providerInformation": {
     "title": "Informacje o Dostawcy",

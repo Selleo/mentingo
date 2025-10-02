@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import * as icons from "~/assets/svgs";
+import * as icons from "../assets/svgs";
 
 import type { IconName, SVGComponentProps } from "~/types/shared";
 

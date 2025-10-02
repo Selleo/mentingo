@@ -10,9 +10,14 @@ import type { MenuItemType } from "~/config/navigationConfig";
 type NavigationMenuItemProps = {
   item: MenuItemType;
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
+  showLabelOn2xl?: boolean;
 };
 
-export function NavigationMenuItem({ item, setIsMobileNavOpen }: NavigationMenuItemProps) {
+export function NavigationMenuItem({
+  item,
+  setIsMobileNavOpen,
+  showLabelOn2xl,
+}: NavigationMenuItemProps) {
   return (
     <li key={item.label}>
       <Tooltip>
@@ -31,12 +36,23 @@ export function NavigationMenuItem({ item, setIsMobileNavOpen }: NavigationMenuI
             }
           >
             <Icon name={item.iconName} className="size-6" />
-            <span className="capitalize 2xl:sr-only 3xl:not-sr-only">{item.label}</span>
+            <span
+              className={cn(
+                "line-clamp-1 truncate whitespace-nowrap capitalize 2xl:sr-only 3xl:not-sr-only",
+                showLabelOn2xl ? "2xl:not-sr-only" : undefined,
+              )}
+            >
+              {item.label}
+            </span>
           </NavLink>
         </TooltipTrigger>
         <TooltipContent
           side="right"
-          className="hidden 2xl:block 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white 3xl:hidden"
+          className={cn(
+            "hidden 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white",
+            showLabelOn2xl ? "2xl:hidden" : "2xl:block",
+            "3xl:hidden",
+          )}
         >
           {item.label}
         </TooltipContent>

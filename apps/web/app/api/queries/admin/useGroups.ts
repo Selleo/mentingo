@@ -11,8 +11,15 @@ export type GroupsSearchParams = {
 
 export const GROUPS_QUERY_KEY = "groups";
 
-export const useGroupsQuery = (searchParams?: GroupsSearchParams) => ({
-  queryKey: [GROUPS_QUERY_KEY],
+type QueryOptions = {
+  enabled?: boolean;
+};
+
+export const useGroupsQuery = (
+  searchParams?: GroupsSearchParams,
+  options: QueryOptions = { enabled: true },
+) => ({
+  queryKey: [GROUPS_QUERY_KEY, searchParams],
   queryFn: async () => {
     const { data } = await ApiClient.api.groupControllerGetAllGroups({
       ...(searchParams?.name && { name: searchParams.name }),
@@ -21,6 +28,7 @@ export const useGroupsQuery = (searchParams?: GroupsSearchParams) => ({
     return data;
   },
   select: ({ data }: GetAllGroupsResponse) => data,
+  ...options,
 });
 
 export function useGroupsQuerySuspense(searchParams?: GroupsSearchParams) {
