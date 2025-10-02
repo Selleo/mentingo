@@ -5,6 +5,8 @@ import { queryClient } from "~/api/queryClient";
 
 import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
+import { LOGIN_REDIRECT_URL } from "./constants";
+
 import type { CurrentUserResponse } from "~/api/generated-api";
 
 export const clientLoader = async () => {
@@ -17,7 +19,7 @@ export const clientLoader = async () => {
   }
 
   if (user) {
-    throw redirect("/");
+    throw redirect(LOGIN_REDIRECT_URL);
   }
 
   return null;
