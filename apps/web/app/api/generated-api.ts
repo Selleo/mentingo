@@ -392,6 +392,7 @@ export interface GetPublicGlobalSettingsResponse {
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
   };
 }
 
@@ -473,6 +474,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
   };
 }
 
@@ -491,6 +493,7 @@ export interface UpdateEnforceSSOResponse {
     platformLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
   };
 }
 
@@ -3300,6 +3303,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateInviteOnlyRegistration
+     * @request PATCH:/api/settings/admin/invite-only-registration
+     */
+    settingsControllerUpdateInviteOnlyRegistration: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/invite-only-registration`,
+        method: "PATCH",
         ...params,
       }),
 

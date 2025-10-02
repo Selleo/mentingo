@@ -403,9 +403,14 @@ export class AuthService {
       throw new UnauthorizedException("User data is missing");
     }
 
+    const { inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
     let [user] = await this.db.select().from(users).where(eq(users.email, userCallback.email));
 
-    if (!user) {
+    if (!user && inviteOnlyRegistration) {
+      throw new UnauthorizedException("Registration is invite-only.");
+    }
+
+    if (!user && !inviteOnlyRegistration) {
       user = await this.userService.createUser({
         email: userCallback.email,
         firstName: userCallback.firstName,

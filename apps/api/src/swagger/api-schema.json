@@ -1260,6 +1260,17 @@
         }
       }
     },
+    "/api/settings/admin/invite-only-registration": {
+      "patch": {
+        "operationId": "SettingsController_updateInviteOnlyRegistration",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/test-config/setup": {
       "post": {
         "operationId": "TestConfigController_setup",
@@ -5731,6 +5742,9 @@
                     "type": "string"
                   }
                 ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -5739,7 +5753,8 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles",
-              "defaultCourseCurrency"
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration"
             ]
           }
         },
@@ -6089,6 +6104,9 @@
                     "type": "string"
                   }
                 ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -6097,7 +6115,8 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles",
-              "defaultCourseCurrency"
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration"
             ]
           }
         },
@@ -6195,6 +6214,9 @@
                     "type": "string"
                   }
                 ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -6203,7 +6225,8 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "MFAEnforcedRoles",
-              "defaultCourseCurrency"
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration"
             ]
           }
         },

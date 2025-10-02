@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "@remix-run/react";
-import { useMemo } from "react";
+import { Link, useNavigate } from "@remix-run/react";
+import { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { useToast } from "~/components/ui/use-toast";
 
 import { passwordSchema } from "../Dashboard/Settings/schema/password.schema";
 
@@ -33,6 +34,8 @@ const isSlackOAuthEnabled = import.meta.env.VITE_SLACK_OAUTH_ENABLED === "true";
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: ssoEnabled } = useSSOEnabled();
 
@@ -54,7 +57,7 @@ export default function RegisterPage() {
   });
 
   const {
-    data: { enforceSSO: isSSOEnforced },
+    data: { enforceSSO: isSSOEnforced, inviteOnlyRegistration: inviteOnlyRegistration },
   } = useGlobalSettingsSuspense();
 
   const {
@@ -67,6 +70,16 @@ export default function RegisterPage() {
     () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
     [],
   );
+
+  useEffect(() => {
+    if (inviteOnlyRegistration) {
+      toast({
+        description: t("inviteOnlyRegistrationView.toast.registerRedirect"),
+        variant: "destructive",
+      });
+      return navigate("/auth/login");
+    }
+  }, [inviteOnlyRegistration, navigate, toast]);
 
   const onSubmit = async (data: RegisterBody) => {
     if (isSSOEnforced && isAnyProviderEnabled) return;
