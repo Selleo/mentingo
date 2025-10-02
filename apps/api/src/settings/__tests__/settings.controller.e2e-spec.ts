@@ -350,5 +350,89 @@ describe("SettingsController (e2e)", () => {
         await request(app.getHttpServer()).patch("/api/settings/admin/enforce-sso").expect(401);
       });
     });
+
+    describe("PATCH /api/settings/admin/primary-color", () => {
+      let adminUser: UserWithCredentials;
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(db, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(async () => {
+        await truncateTables(db, ["settings"]);
+      });
+
+      it("should update the global primary color setting (as Admin)", async () => {
+        const newColor = "#123456";
+
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/primary-color")
+          .set("Cookie", adminCookies)
+          .send({ primaryColor: newColor })
+          .expect(200);
+
+        expect(response.body.data.primaryColor).toBe(newColor);
+
+        const updatedGlobalSettings = await db.query.settings.findFirst({
+          where: (s, { isNull }) => isNull(s.userId),
+        });
+
+        const globalSettings = updatedGlobalSettings?.settings as GlobalSettings;
+        expect(globalSettings?.primaryColor).toBe(newColor);
+      });
+
+      it("should return 400 if invalid color format is provided", async () => {
+        const invalidColor = "123456";
+
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/primary-color")
+          .set("Cookie", adminCookies)
+          .send({ primaryColor: invalidColor })
+          .expect(400);
+
+        expect(response.body).toEqual(
+          expect.objectContaining({
+            message: "Validation failed (body)",
+            errors: expect.arrayContaining([
+              expect.objectContaining({
+                message: expect.stringMatching(/Expected string to match/i),
+                value: invalidColor,
+              }),
+            ]),
+          }),
+        );
+      });
+
+      it("should return 403 if user is not an admin", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        const nonAdminCookies = await cookieFor(nonAdminUser, app);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/primary-color")
+          .set("Cookie", nonAdminCookies)
+          .send({ primaryColor: "#123456" })
+          .expect(403);
+      });
+
+      it("should return 401 if not authenticated", async () => {
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/primary-color")
+          .send({ primaryColor: "#123456" })
+          .expect(401);
+      });
+    });
   });
 });
