@@ -11,7 +11,14 @@ type CategorySearchParams = {
 
 export const CATEGORIES_QUERY_KEY = ["categories"];
 
-export const categoriesQueryOptions = (searchParams?: CategorySearchParams) => ({
+type QueryOptions = {
+  enabled?: boolean;
+};
+
+export const categoriesQueryOptions = (
+  searchParams?: CategorySearchParams,
+  options: QueryOptions = { enabled: true },
+) => ({
   queryKey: [...CATEGORIES_QUERY_KEY, searchParams],
   queryFn: async () => {
     const response = await ApiClient.api.categoryControllerGetAllCategories({
@@ -25,6 +32,7 @@ export const categoriesQueryOptions = (searchParams?: CategorySearchParams) => (
     return response.data;
   },
   select: (data: GetAllCategoriesResponse) => data.data,
+  ...options,
 });
 
 export function useCategories(searchParams?: CategorySearchParams) {

@@ -127,6 +127,7 @@
     "close": "Close",
     "profile": "Profile",
     "dashboard": "Dashboard",
+    "findInApplication": "Find in application",
     "courses": "Courses",
     "myCourses": "My courses",
     "categories": "Categories",
@@ -139,6 +140,15 @@
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
+  },
+  "globalSearch": {
+    "users": "Users",
+    "categories": "Categories",
+    "groups": "Groups",
+    "allCourses": "All Courses",
+    "myCourses": "My Courses",
+    "availableCourses": "Available Courses",
+    "noSearchResults": "No search results for:"
   },
   "providerInformation": {
     "title": "Provider Information",

@@ -13,7 +13,14 @@ export type UsersParams = {
   groupId?: string;
 };
 
-export const usersQueryOptions = (searchParams?: UsersParams) => ({
+type QueryOptions = {
+  enabled?: boolean;
+};
+
+export const usersQueryOptions = (
+  searchParams?: UsersParams,
+  options: QueryOptions = { enabled: true },
+) => ({
   queryKey: ["users", searchParams],
   queryFn: async () => {
     const response = await ApiClient.api.userControllerGetUsers({
@@ -30,6 +37,7 @@ export const usersQueryOptions = (searchParams?: UsersParams) => ({
     return response.data;
   },
   select: (data: GetUsersResponse) => data.data,
+  ...options,
 });
 
 export function useAllUsers(searchParams?: UsersParams) {

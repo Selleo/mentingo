@@ -55,6 +55,11 @@ export { default as ExclamationTriangle } from "./exclamation-triangle.svg?react
 export { default as Ribbon } from "./ribbon.svg?react";
 export { default as Megaphone } from "./megaphone.svg?react";
 export { default as Slack } from "./slack.svg?react";
+export { default as Search } from "./search.svg?react";
+export { default as GlobalSearchMac } from "./CMD+K.svg?react";
+export { default as GlobalSearchWin } from "./CTRL+K.svg?react";
+
+export { SegmentedRing } from "./segmented-ring";
 
 export * from "./lesson-types";
 export * from "./question-types";

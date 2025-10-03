@@ -12,7 +12,14 @@ type CourseParams = {
   userId?: string;
 };
 
-export const studentCoursesQueryOptions = (searchParams?: CourseParams) => ({
+type QueryOptions = {
+  enabled?: boolean;
+};
+
+export const studentCoursesQueryOptions = (
+  searchParams?: CourseParams,
+  options: QueryOptions = { enabled: true },
+) => ({
   queryKey: ["get-student-courses", searchParams],
   queryFn: async () => {
     const response = await ApiClient.api.courseControllerGetStudentCourses({
@@ -26,6 +33,7 @@ export const studentCoursesQueryOptions = (searchParams?: CourseParams) => ({
     return response.data;
   },
   select: (data: GetStudentCoursesResponse) => data.data,
+  ...options,
 });
 
 export function useStudentCourses(searchParams?: CourseParams) {
