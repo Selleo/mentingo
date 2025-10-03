@@ -17,6 +17,11 @@ import {
 import { Input } from "~/components/ui/input";
 import { useTheme } from "~/modules/Theme";
 
+/**
+ * Regex for validating hex colors (#RGB or #RRGGBB).
+ */
+const HEX_COLOR_REGEX = /^#([0-9A-Fa-f]{3}){1,2}$/;
+
 export const OrganizationTheme = () => {
   const { t } = useTranslation();
 
@@ -50,7 +55,7 @@ export const OrganizationTheme = () => {
                   ? event.target.value
                   : `#${event.target.value}`;
 
-                if (/^#([0-9A-Fa-f]{3}){1,2}$/.test(value)) {
+                if (HEX_COLOR_REGEX.test(value)) {
                   setPrimaryColor(value);
                 }
               }}

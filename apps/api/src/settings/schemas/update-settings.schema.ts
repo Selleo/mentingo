@@ -11,6 +11,11 @@ import {
 
 import type { Static } from "@sinclair/typebox";
 
+/**
+ * Regex for validating hex colors (#RGB or #RRGGBB).
+ */
+const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
+
 export type AllowedCurrency = (typeof ALLOWED_CURRENCIES)[number];
 
 export const updateSettingsBodySchema = Type.Partial(
@@ -28,7 +33,7 @@ export const updateDefaultCourseCurrencySchema = Type.Object({
 
 export const updateGlobalPrimaryColorSchema = Type.Object({
   primaryColor: Type.String({
-    pattern: "^#(?:[0-9a-fA-F]{3}){1,2}$",
+    pattern: HEX_COLOR_REGEX.source,
   }),
 });
 
