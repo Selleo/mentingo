@@ -71,7 +71,7 @@ export default function CreateNewPasswordPage() {
         data: { password: data.newPassword, createToken: createToken },
       }).then(() => {
         toast({
-          description: t("changePasswordView.toast.passwordCreatedsuccessfuly"),
+          description: t("changePasswordView.toast.passwordCreatedSuccessfully"),
         });
         navigate("/auth/login");
       });

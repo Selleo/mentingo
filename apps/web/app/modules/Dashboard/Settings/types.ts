@@ -8,6 +8,7 @@ export type GlobalSettings = {
   MFAEnforcedRoles: GetPublicGlobalSettingsResponse["data"]["MFAEnforcedRoles"];
   certificateBackgroundImage: string | null;
   defaultCourseCurrency: GetPublicGlobalSettingsResponse["data"]["defaultCourseCurrency"];
+  inviteOnlyRegistration: boolean;
 };
 
 export type UserSettings = {
