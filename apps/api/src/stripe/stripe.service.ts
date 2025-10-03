@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import Stripe from "stripe";
 
+import { EnvService } from "src/env/services/env.service";
 import { isSupportedLocale } from "src/utils/isSupportedLocale";
 
 import type { CreateCheckoutSessionBody } from "./schemas/checkoutSession.schema";
@@ -12,27 +13,37 @@ import type { SupportedLocales } from "src/common/types";
 
 @Injectable()
 export class StripeService {
-  private stripeClient: Stripe | null;
+  constructor(private readonly envService: EnvService) {}
 
-  constructor() {
-    const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } = process.env;
+  private async getStripeClient() {
+    const [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET] = await Promise.all([
+      this.envService
+        .getEnv("STRIPE_SECRET_KEY")
+        .then((r) => r.value)
+        .catch(() => process.env.STRIPE_SECRET_KEY ?? null),
+      this.envService
+        .getEnv("STRIPE_WEBHOOK_SECRET")
+        .then((r) => r.value)
+        .catch(() => process.env.STRIPE_WEBHOOK_SECRET ?? null),
+    ]);
 
-    if (STRIPE_SECRET_KEY && STRIPE_WEBHOOK_SECRET) {
-      this.stripeClient = new Stripe(STRIPE_SECRET_KEY);
-    } else {
-      this.stripeClient = null;
-    }
+    if (!STRIPE_SECRET_KEY || !STRIPE_WEBHOOK_SECRET) return null;
+
+    return new Stripe(STRIPE_SECRET_KEY);
   }
 
-  get client(): Stripe {
-    if (!this.stripeClient) {
+  async getClient(): Promise<Stripe> {
+    const stripeClient = await this.getStripeClient();
+    if (!stripeClient) {
       throw new InternalServerErrorException("Stripe is not configured");
     }
-    return this.stripeClient;
+    return stripeClient;
   }
 
   async payment(amount: number, currency: string, customerId: UUIDType, courseId: UUIDType) {
-    const { client_secret } = await this.client.paymentIntents.create({
+    const client = await this.getClient();
+
+    const { client_secret } = await client.paymentIntents.create({
       amount,
       currency,
       metadata: {
@@ -55,8 +66,9 @@ export class StripeService {
     } = body;
 
     const finalLocale: SupportedLocales = isSupportedLocale(locale) ? locale : "en";
+    const client = await this.getClient();
 
-    const session = await this.client.checkout.sessions.create({
+    const session = await client.checkout.sessions.create({
       line_items: [
         {
           price: priceId,
@@ -82,7 +94,8 @@ export class StripeService {
   async createProduct(
     data: Stripe.ProductCreateParams & { amountInCents: number; currency: string },
   ) {
-    const product = await this.client.products.create({
+    const client = await this.getClient();
+    const product = await client.products.create({
       name: data?.name,
       description: data?.description,
     });
@@ -100,42 +113,50 @@ export class StripeService {
   }
 
   async searchProducts(params: Stripe.ProductSearchParams) {
-    const products = await this.client.products.search(params);
+    const client = await this.getClient();
+    const products = await client.products.search(params);
     return products;
   }
 
   async searchPrices(params: Stripe.PriceSearchParams) {
-    const prices = await this.client.prices.search(params);
+    const client = await this.getClient();
+    const prices = await client.prices.search(params);
     return prices;
   }
 
   async createPrice(data: Stripe.PriceCreateParams) {
-    const price = await this.client.prices.create(data);
+    const client = await this.getClient();
+    const price = await client.prices.create(data);
     return price;
   }
 
   async updateProduct(id: string, data: Stripe.ProductUpdateParams) {
-    const product = await this.client.products.update(id, data);
+    const client = await this.getClient();
+    const product = await client.products.update(id, data);
     return product;
   }
 
   async updatePrice(id: string, data: Stripe.PriceUpdateParams) {
-    const price = await this.client.prices.update(id, data);
+    const client = await this.getClient();
+    const price = await client.prices.update(id, data);
     return price;
   }
 
   async getCoupon(id: string) {
-    const coupon = await this.client.coupons.retrieve(id);
+    const client = await this.getClient();
+    const coupon = await client.coupons.retrieve(id);
     return coupon;
   }
 
   async getPromotionCodes() {
-    const promotionCodes = await this.client.promotionCodes.list();
+    const client = await this.getClient();
+    const promotionCodes = await client.promotionCodes.list();
     return promotionCodes?.data?.map(this.promotionCodeToCamelCase) ?? [];
   }
 
   async getPromotionCode(id: string) {
-    const promotionCode = await this.client.promotionCodes.retrieve(id, {
+    const client = await this.getClient();
+    const promotionCode = await client.promotionCodes.retrieve(id, {
       expand: ["coupon.applies_to"],
     });
 
@@ -158,7 +179,8 @@ export class StripeService {
     }
 
     try {
-      const coupon = await this.client.coupons.create({
+      const client = await this.getClient();
+      const coupon = await client.coupons.create({
         amount_off: amountOff,
         percent_off: percentOff,
         applies_to: { products: assignedStripeCourseIds },
@@ -166,7 +188,7 @@ export class StripeService {
       });
       const stripeExpiresAt = Math.floor(new Date(expiresAt as string).getTime() / 1000);
 
-      await this.client.promotionCodes.create({
+      await client.promotionCodes.create({
         coupon: coupon.id,
         code,
         expires_at: expiresAt ? stripeExpiresAt : undefined,
@@ -189,14 +211,15 @@ export class StripeService {
       ...(active !== undefined && { active }),
     };
 
-    const promotionCode = await this.client.promotionCodes.retrieve(id);
+    const client = await this.getClient();
+    const promotionCode = await client.promotionCodes.retrieve(id);
 
     if (!promotionCode) {
       throw new BadRequestException("Invalid promotion code");
     }
 
     try {
-      const promoCode = await this.client.promotionCodes.update(
+      const promoCode = await client.promotionCodes.update(
         promotionCode.id,
         updatePromotionCodeData,
       );

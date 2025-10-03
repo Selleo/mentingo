@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { eq, sql } from "drizzle-orm/sql";
 
+import { EnvRepository } from "src/env/repositories/env.repository";
+import { EnvService } from "src/env/services/env.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
   aiMentorLessons,
@@ -51,7 +53,7 @@ export async function createNiceCourses(
     let stripeProductId = null;
     let stripePriceId = null;
 
-    const stripeService = new StripeService();
+    const stripeService = new StripeService(new EnvService(new EnvRepository(db)));
     const existingStripeProduct = await stripeService.searchProducts({
       query: `name:\'${courseData.title}\'`,
     });

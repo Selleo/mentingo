@@ -675,6 +675,8 @@
       "GOOGLE_CLIENT_SECRET": { "label": "Google Client Secret" },
       "GOOGLE_OAUTH_ENABLED": { "label": "Google OAuth Enabled (true/false)" },
       "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
+      "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
+      "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
       "save": "Save"
     },
     "breadcrumbs": {

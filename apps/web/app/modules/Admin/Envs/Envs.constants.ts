@@ -51,4 +51,12 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.VITE_GOOGLE_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  STRIPE_WEBHOOK_SECRET: {
+    labelKey: "adminEnvsView.form.STRIPE_WEBHOOK_SECRET.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  STRIPE_SECRET_KEY: {
+    labelKey: "adminEnvsView.form.STRIPE_SECRET_KEY.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
 };
