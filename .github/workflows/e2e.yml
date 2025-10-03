@@ -177,4 +177,5 @@ jobs:
           path: |
             playwright-report
             test-results
-            **/*.zip
+            /apps/web/**/*.zip
+          retention-days: 3
