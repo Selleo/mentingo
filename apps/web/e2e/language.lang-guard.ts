@@ -22,7 +22,9 @@ const checkValidSidebarLanguage = async (
   const object = Object.values(LANGUAGE_PAGE_UI.languages[prefix]?.sidebarItems ?? []);
 
   for (const element of object) {
-    const translation = page.getByRole("link", { name: new RegExp(element, "i") });
+    const translation = page
+      .getByRole("button", { name: new RegExp(element, "i") })
+      .getByRole("link");
     await expect(translation).toHaveText(new RegExp(element, "i"));
   }
 };

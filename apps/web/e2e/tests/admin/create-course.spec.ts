@@ -143,7 +143,7 @@ export class CreateCourseActions {
     await page.getByLabel(NEW_COURSE.label.category).click();
     await page.locator('[data-testid="category-option-E2E Testing"]').click();
 
-    await page.getByLabel(NEW_COURSE.label.description).fill(NEW_COURSE.description);
+    await page.locator("#description").getByRole("paragraph").fill(NEW_COURSE.description);
 
     // const fileInput = await page.locator('input[type="file"]');
     // const filePath = "app/assets/thumbnail-e2e.jpg";
