@@ -43,10 +43,10 @@ export default function CourseViewPage() {
   const canShowCertificate =
     course?.hasCertificate && certificate !== undefined && certificate.length > 0;
 
-  if (!course || !currentUser) return null;
+  if (!course) return null;
 
   const studentName: string =
-    certificate?.[0]?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
+    certificate?.[0]?.fullName || `${currentUser?.firstName} ${currentUser?.lastName}`;
   const courseName: string = certificate?.[0]?.courseTitle || course.title;
   const completionDate =
     certificate && certificate.length > 0

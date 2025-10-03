@@ -188,6 +188,7 @@ const CourseSettings = ({
                 />
               </div>
               <Editor
+                id="description"
                 content={description}
                 onChange={(value) => form.setValue("description", value)}
               />
