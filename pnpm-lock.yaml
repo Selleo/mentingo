@@ -399,7 +399,7 @@ importers:
         specifier: 3.9.0
         version: 3.9.0(react-hook-form@7.52.1(react@18.3.1))
       '@popperjs/core':
-        specifier: ^2.11.8
+        specifier: 2.11.8
         version: 2.11.8
       '@radix-ui/react-accordion':
         specifier: 1.2.1
@@ -585,7 +585,7 @@ importers:
         specifier: 1.10.0
         version: 1.10.0
       motion:
-        specifier: ^12.23.22
+        specifier: 12.23.22
         version: 12.23.22(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       qrcode.react:
         specifier: 4.2.0
@@ -609,7 +609,7 @@ importers:
         specifier: 2.16.0
         version: 2.16.0(react@18.3.1)
       react-popper:
-        specifier: ^2.3.0
+        specifier: 2.3.0
         version: 2.3.0(@popperjs/core@2.11.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-use:
         specifier: 17.5.1
