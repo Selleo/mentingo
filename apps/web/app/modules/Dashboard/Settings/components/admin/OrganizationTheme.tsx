@@ -20,7 +20,7 @@ import { useTheme } from "~/modules/Theme";
 /**
  * Regex for validating hex colors (#RGB or #RRGGBB).
  */
-const HEX_COLOR_REGEX = /^#([0-9A-Fa-f]{3}){1,2}$/;
+const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
 
 export const OrganizationTheme = () => {
   const { t } = useTranslation();
