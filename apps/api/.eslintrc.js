@@ -60,6 +60,7 @@ module.exports = {
         "src/stripe/stripeWebhook.handler.ts",
         "test/jest-setup.ts",
         "test/test-database.ts",
+        "test/jest-e2e-setup.ts",
       ],
       rules: {
         "no-console": "off",
