@@ -17,7 +17,10 @@ export function SocialLogin({
 }: SocialLoginProps) {
   const { t } = useTranslation();
 
-  const baseUrl = import.meta.env.VITE_APP_URL || "http://localhost:5173";
+  const baseUrl =
+    typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.host}`
+      : "http://localhost:5173";
 
   const handleProviderSignIn = (provider: string) => () =>
     (window.location.href = `${baseUrl}/api/auth/${provider}`);
