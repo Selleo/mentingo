@@ -1,12 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
-import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import * as z from "zod";
 
-import { useCreateCategory } from "~/api/mutations/admin/useCreateCategory";
-import { CATEGORIES_QUERY_KEY } from "~/api/queries/useCategories";
-import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
@@ -15,33 +9,15 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { CreatePageHeader } from "~/modules/Admin/components";
 
-const formSchema = z.object({
-  title: z.string().min(2, "Title must be at least 2 characters."),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useCreateCategoryForm } from "./hooks/useCreateCategoryForm";
 
 export default function CreateNewCategoryPage() {
-  const { mutateAsync: createCategory } = useCreateCategory();
-  const navigate = useNavigate();
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-    },
+  const { form, onSubmit } = useCreateCategoryForm(({ data }) => {
+    if (data.id) navigate(`/admin/categories/${data.id}`);
   });
+  const navigate = useNavigate();
 
   const { t } = useTranslation();
-
-  const onSubmit = (values: FormValues) => {
-    createCategory({
-      data: values,
-    }).then(({ data }) => {
-      queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
-
-      if (data.id) navigate(`/admin/categories/${data.id}`);
-    });
-  };
 
   const isFormValid = form.formState.isValid;
 
