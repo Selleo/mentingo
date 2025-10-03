@@ -79,6 +79,8 @@ export default function RegisterPage() {
       });
       return navigate("/auth/login");
     }
+    // intentional
+    // eslint-disable-next-line
   }, [inviteOnlyRegistration, navigate, toast]);
 
   const onSubmit = async (data: RegisterBody) => {
