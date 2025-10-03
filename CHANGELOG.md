@@ -1,3 +1,15 @@
+<a name="v3.8.0"></a>
+
+## [v3.8.0] - 03.10.2025
+
+### Bug Fixes:
+
+- sso redirect on login to use current url ([#706](https://github.com/Selleo/mentingo/issues/706))
+
+### Features:
+
+- create embed lesson type ([#705](https://github.com/Selleo/mentingo/issues/705))
+
 <a name="v3.7.0"></a>
 
 ## [v3.7.0] - 29.09.2025
@@ -15,6 +27,10 @@
 - add stripe to create course seeds ([#699](https://github.com/Selleo/mentingo/issues/699))
 
 - update github workflows to fix version mismatch ([#697](https://github.com/Selleo/mentingo/issues/697))
+
+### Documentation:
+
+- update changelog for version v3.7.0
 
 ### Features:
 
@@ -1490,7 +1506,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.7.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.8.0...HEAD
+[v3.8.0]: https://github.com/Selleo/mentingo/compare/v3.7.0...v3.8.0
 [v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
 [v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
