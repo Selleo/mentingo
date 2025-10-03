@@ -1,3 +1,4 @@
+import { HEX_COLOR_REGEX } from "@repo/shared";
 import lowerCase from "lodash-es/lowerCase";
 import { useRef } from "react";
 import { HexColorPicker } from "react-colorful";
@@ -16,11 +17,6 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { useTheme } from "~/modules/Theme";
-
-/**
- * Regex for validating hex colors (#RGB or #RRGGBB).
- */
-const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
 
 export const OrganizationTheme = () => {
   const { t } = useTranslation();

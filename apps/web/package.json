@@ -48,6 +48,7 @@
     "@remix-run/express": "2.15.0",
     "@remix-run/node": "2.15.0",
     "@remix-run/react": "2.15.0",
+    "@repo/shared": "workspace:*",
     "@sentry/react": "8.40.0",
     "@sentry/replay": "7.116.0",
     "@sentry/tracing": "7.114.0",

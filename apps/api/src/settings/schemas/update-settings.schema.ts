@@ -1,3 +1,4 @@
+import { HEX_COLOR_REGEX } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -10,11 +11,6 @@ import {
 } from "./settings.schema";
 
 import type { Static } from "@sinclair/typebox";
-
-/**
- * Regex for validating hex colors (#RGB or #RRGGBB).
- */
-const HEX_COLOR_REGEX = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
 
 export type AllowedCurrency = (typeof ALLOWED_CURRENCIES)[number];
 
