@@ -1,6 +1,7 @@
 import {
   bigint,
   boolean,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -8,6 +9,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -556,6 +558,28 @@ export const documentToAiMentorLesson = pgTable(
   },
   (t) => ({
     unq: unique().on(t.documentId, t.aiMentorLessonId),
+  }),
+);
+
+export const secrets = pgTable(
+  "secrets",
+  {
+    ...id,
+    ...timestamps,
+    secretName: text("secret_name").notNull(),
+    version: integer("version").default(1).notNull(),
+    ciphertext: text("ciphertext").notNull(),
+    iv: text("iv").notNull(),
+    tag: text("tag").notNull(),
+    encryptedDek: text("encrypted_dek").notNull(),
+    encryptedDekIV: text("encrypted_dek_iv").notNull(),
+    encryptedDekTag: text("encrypted_dek_tag").notNull(),
+    alg: text("alg").notNull().default("AES-256-GCM"),
+    metadata: jsonb("metadata"),
+  },
+  (t) => ({
+    nameUnique: uniqueIndex("secrets_name_uq").on(t.secretName),
+    nameIdx: index("secrets_name_idx").on(t.secretName),
   }),
 );
 

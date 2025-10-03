@@ -25,6 +25,7 @@ env:
   GOOGLE_OAUTH_ENABLED: "false"
   MICROSOFT_OAUTH_ENABLED: "false"
   SLACK_OAUTH_ENABLED: "false"
+  MASTER_KEY: "+iFu6dFP3uc8WFAB22Ebhh9GJjnmrv/bLxOv3L/n3zw="
 
 on:
   pull_request:

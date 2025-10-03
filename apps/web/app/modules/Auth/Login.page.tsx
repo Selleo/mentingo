@@ -8,6 +8,7 @@ import { z } from "zod";
 import { version } from "~/../version.json";
 import { useLoginUser } from "~/api/mutations/useLoginUser";
 import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import { FormCheckbox } from "~/components/Form/FormCheckbox";
 import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
@@ -27,12 +28,18 @@ const loginSchema = (t: (key: string) => string) =>
     rememberMe: z.boolean().optional(),
   });
 
-const isGoogleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === "true";
-const isMicrosoftOAuthEnabled = import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED === "true";
 const isSlackOAuthEnabled = import.meta.env.VITE_SLACK_OAUTH_ENABLED === "true";
 
 export default function LoginPage() {
   const { t } = useTranslation();
+
+  const { data: ssoEnabled } = useSSOEnabled();
+
+  const isGoogleOAuthEnabled =
+    (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
+
+  const isMicrosoftOAuthEnabled =
+    (ssoEnabled?.data.microsoft ?? import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED) === "true";
 
   const { mutateAsync: loginUser } = useLoginUser();
 

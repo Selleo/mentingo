@@ -670,6 +670,34 @@
       "back": "Wstecz"
     }
   },
+  "adminEnvsView": {
+    "name": "Zmienne środowiskowe",
+    "keysTitle": "Klucze",
+    "updateSuccessful": "Sekrety zostały pomyślnie zaktualizowane",
+    "form": {
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "MICROSOFT_CLIENT_ID": { "label": "Microsoft Client ID" },
+      "MICROSOFT_CLIENT_SECRET": { "label": "Microsoft Client Secret" },
+      "MICROSOFT_OAUTH_ENABLED": { "label": "Microsoft OAuth Enabled (true/false)" },
+      "VITE_MICROSOFT_OAUTH_ENABLED": { "label": "Vite Microsoft OAuth Enabled (true/false)" },
+      "OPENAI_API_KEY": { "label": "OpenAI API Key" },
+      "BUNNY_STREAM_API_KEY": { "label": "Bunny Stream API Key" },
+      "BUNNY_STREAM_SIGNING_KEY": { "label": "Bunny Stream Signing Key" },
+      "BUNNY_STREAM_LIBRARY_ID": { "label": "Bunny Stream Library ID" },
+      "BUNNY_STREAM_CDN_URL": { "label": "Bunny Stream CDN URL" },
+      "GOOGLE_CLIENT_ID": { "label": "Google Client ID" },
+      "GOOGLE_CLIENT_SECRET": { "label": "Google Client Secret" },
+      "GOOGLE_OAUTH_ENABLED": { "label": "Google OAuth Enabled (true/false)" },
+      "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
+      "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
+      "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
+      "save": "Zapisz"
+    },
+    "breadcrumbs": {
+      "envs": "Zmienne środowiskowe"
+    }
+  },
+
   "adminGroupsView": {
     "name": "Nazwa grupy",
     "characteristic": "Charakterystyka",

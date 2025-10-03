@@ -90,4 +90,8 @@ export class PromptService {
       throw new BadRequestException("At least one message required");
     }
   }
+
+  async getOpenAI() {
+    return this.ragService.getOpenAI();
+  }
 }

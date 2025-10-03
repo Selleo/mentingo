@@ -3995,6 +3995,70 @@
           }
         }
       }
+    },
+    "/api/env/{envName}": {
+      "get": {
+        "operationId": "EnvController_getEnvKey",
+        "parameters": [
+          {
+            "name": "envName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnvKeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/bulk": {
+      "post": {
+        "operationId": "EnvController_bulkUpsertEnv",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bulkUpsertEnvBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/env/frontend/sso": {
+      "get": {
+        "operationId": "EnvController_getFrontendSSOEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFrontendSSOEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -13950,6 +14014,66 @@
               "isRead",
               "readAt"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetEnvKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "bulkUpsertEnvBody": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ]
+        }
+      },
+      "GetFrontendSSOEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "google": {
+                "type": "string"
+              },
+              "microsoft": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [

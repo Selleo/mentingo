@@ -1,4 +1,3 @@
-import { openai } from "@ai-sdk/openai";
 import { Injectable } from "@nestjs/common";
 import { generateObject, generateText, jsonSchema } from "ai";
 
@@ -16,10 +15,10 @@ export class ChatService {
   constructor(private readonly promptService: PromptService) {}
   async generatePrompt(prompt: string, model: OpenAIModels = OPENAI_MODELS.BASIC): Promise<string> {
     await this.promptService.isNotEmpty(prompt);
-
+    const provider = await this.promptService.getOpenAI();
     try {
       const { text } = await generateText({
-        model: openai(model),
+        model: provider(model),
         prompt: prompt,
         maxTokens: MAX_TOKENS,
       });
@@ -33,10 +32,10 @@ export class ChatService {
 
   async judge(system: string, prompt: string) {
     await this.promptService.isNotEmpty(prompt);
-
+    const provider = await this.promptService.getOpenAI();
     try {
       const result = await generateObject({
-        model: openai(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
+        model: provider(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
         schema: jsonSchema({ ...aiJudgeJudgementSchema, additionalProperties: false }),
         temperature: 0.5,
         topK: 10,

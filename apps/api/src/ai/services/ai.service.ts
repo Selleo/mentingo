@@ -1,4 +1,3 @@
-import { openai } from "@ai-sdk/openai";
 import {
   BadRequestException,
   ForbiddenException,
@@ -77,9 +76,10 @@ export class AiService {
     await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
 
     const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
+    const provider = await this.promptService.getOpenAI();
 
     return streamText({
-      model: openai(model),
+      model: provider(model),
       messages: prompt.map((m) => ({
         content: m.content,
         role: this.mapRole(m.role),
