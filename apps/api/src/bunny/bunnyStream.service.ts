@@ -32,28 +32,22 @@ export class BunnyStreamService {
       this.envService
         .getEnv("BUNNY_STREAM_API_KEY")
         .then((r) => r.value)
-        .catch(() => null) ||
-        this.configService.get("BUNNY_STREAM_API_KEY") ||
-        "",
+        .catch(() => this.configService.get("BUNNY_STREAM_API_KEY")),
 
       this.envService
         .getEnv("BUNNY_STREAM_SIGNING_KEY")
         .then((r) => r.value)
-        .catch(() => null) ||
-        this.configService.get("BUNNY_STREAM_SIGNING_KEY") ||
-        "",
+        .catch(() => this.configService.get("BUNNY_STREAM_SIGNING_KEY")),
 
       this.envService
         .getEnv("BUNNY_STREAM_LIBRARY_ID")
         .then((r) => r.value)
-        .catch(() => null) ||
-        this.configService.get("BUNNY_STREAM_LIBRARY_ID") ||
-        "",
+        .catch(() => this.configService.get("BUNNY_STREAM_LIBRARY_ID")),
 
       this.envService
         .getEnv("BUNNY_STREAM_CDN_URL")
         .then((r) => r.value)
-        .catch(() => null) || this.configService.get("BUNNY_STREAM_CDN_URL"),
+        .catch(() => this.configService.get("BUNNY_STREAM_CDN_URL")),
     ]);
 
     if (!apiKey || !libraryId) {
