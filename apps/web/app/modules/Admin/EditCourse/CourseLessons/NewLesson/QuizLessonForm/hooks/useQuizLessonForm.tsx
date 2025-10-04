@@ -15,6 +15,7 @@ import { queryClient } from "~/api/queryClient";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
 import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
 import { QuestionType } from "../QuizLessonForm.types";
 import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
@@ -73,7 +74,7 @@ export const useQuizLessonForm = ({
               const option = question.options?.find((opt) => opt.displayOrder === displayOrder);
 
               if (option) {
-                const buttonHtml = `<button type="button" class="bg-primary-200 text-white px-4 rounded-xl cursor-pointer align-baseline">${option.optionText} X</button>`;
+                const buttonHtml = `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}">${option.optionText} X</button>`;
 
                 processedDescription = processedDescription.replace(match[0], buttonHtml);
               }
