@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -90,6 +91,14 @@ export class CategoryService {
   }
 
   public async createCategory(createCategoryBody: CategoryInsert) {
+    const category = await this.db.query.categories.findFirst({
+      where: ({ title }) => eq(title, createCategoryBody.title),
+    });
+
+    if (category) {
+      throw new ConflictException("Category already exists");
+    }
+
     const [newCategory] = await this.db.insert(categories).values(createCategoryBody).returning();
 
     if (!newCategory) throw new UnprocessableEntityException("Category not created");
