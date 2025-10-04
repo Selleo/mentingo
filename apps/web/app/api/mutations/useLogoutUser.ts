@@ -29,10 +29,10 @@ export function useLogoutUser() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       requestManager.abortAll();
 
-      queryClient.invalidateQueries();
+      await queryClient.invalidateQueries();
 
       navigate("/auth/login");
     },

@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
+import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
 
 import { ApiClient } from "../api-client";
 import { currentUserQueryOptions } from "../queries/useCurrentUser";
@@ -36,7 +37,7 @@ export function useLoginUser() {
       queryClient.invalidateQueries(userSettingsQueryOptions);
       queryClient.invalidateQueries(mfaSetupQueryOptions);
 
-      navigate(shouldVerifyMFA ? "/auth/mfa" : "/");
+      navigate(shouldVerifyMFA ? "/auth/mfa" : LOGIN_REDIRECT_URL);
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
