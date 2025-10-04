@@ -3,12 +3,14 @@ import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
-import { useCategoriesSuspense } from "~/api/queries/useCategories";
+import { categoriesQueryOptions, useCategoriesSuspense } from "~/api/queries/useCategories";
+import { queryClient } from "~/api/queryClient";
 import SplashScreenImage from "~/assets/svgs/splash-screen-image.svg";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { Icon } from "~/components/Icon";
 import Editor from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
+import { DialogFooter } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -19,7 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
+
+import { useCreateCategoryForm } from "../Categories/hooks/useCreateCategoryForm";
 
 import Breadcrumb from "./components/Breadcrumb";
 import { MAX_COURSE_DESCRIPTION_HTML_LENGTH, MAX_COURSE_DESCRIPTION_LENGTH } from "./constants";
@@ -27,10 +32,19 @@ import { useAddCourseForm } from "./hooks/useAddCourseForm";
 
 const AddCourse = () => {
   const { form, onSubmit } = useAddCourseForm();
+  const { form: createCategoryForm, onSubmit: createCategoryOnSubmit } = useCreateCategoryForm(
+    ({ data }) => {
+      if (data.id) {
+        queryClient.fetchQuery(categoriesQueryOptions());
+        createCategoryForm.reset();
+      }
+    },
+  );
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
   const { isValid: isFormValid } = form.formState;
+  const { isValid: createCategoryIsFormValid } = createCategoryForm.formState;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -134,6 +148,39 @@ const AddCourse = () => {
                               {category.title}
                             </SelectItem>
                           ))}
+                          <Separator className="my-1" />
+                          <Form {...createCategoryForm}>
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                createCategoryForm.handleSubmit(createCategoryOnSubmit)();
+                              }}
+                              className="flex gap-1"
+                            >
+                              <FormField
+                                control={createCategoryForm.control}
+                                name="title"
+                                render={({ field }) => (
+                                  <FormItem className="w-full">
+                                    <FormControl>
+                                      <Input
+                                        id="title"
+                                        {...field}
+                                        onKeyDown={(e) => e.stopPropagation()}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <DialogFooter>
+                                <Button type="submit" disabled={!createCategoryIsFormValid}>
+                                  {t("adminCategoryView.button.createCategory")}
+                                </Button>
+                              </DialogFooter>
+                            </form>
+                          </Form>
                         </SelectContent>
                       </Select>
                     </FormControl>
