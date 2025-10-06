@@ -121,6 +121,10 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password");
     }
 
+    if (user.archived) {
+      throw new UnauthorizedException("Your account has been archived");
+    }
+
     const { accessToken, refreshToken } = await this.getTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
