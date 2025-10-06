@@ -34,12 +34,12 @@ const Options = ({ handlePreviewClick, handleDownloadClick }: OptionsProps) => {
       <ul className="py-1">
         <button onClick={handlePreviewClick} className="hidden w-full sm:block">
           <li className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-100">
-            <Eye className="size-6 text-blue-800" /> {t("studentCertificateView.button.preview")}
+            <Eye className="size-6 text-primary-800" /> {t("studentCertificateView.button.preview")}
           </li>
         </button>
         <button onClick={handleDownloadClick} className="w-full">
           <li className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-100">
-            <Download className="size-6 text-blue-800" />{" "}
+            <Download className="size-6 text-primary-800" />{" "}
             {t("studentCertificateView.button.download")}
           </li>
         </button>

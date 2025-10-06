@@ -1,15 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
   font-family: "DM Sans", sans-serif;
+  height: 100%;
 }
 
 .ProseMirror:focus {
   outline: none;
-  box-shadow: none; 
+  box-shadow: none;
 }
 
 @layer base {
@@ -71,7 +73,7 @@ html, body {
     --error-300: #ff8f9a;
     --error-400: #ff686c;
     --error-500: #fb3b40;
-    --error-600: #E9191E;
+    --error-600: #e9191e;
     --error-700: #c41116;
     --error-800: #a21216;
     --error-900: #861619;

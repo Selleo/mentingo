@@ -1570,6 +1570,10 @@
       "logoFetchError": "Nie udało się pobrać logo platformy"
     }
   },
+  "organizationTheme": {
+    "title": "Motyw organizacji",
+    "description": "Dostosuj wygląd swojej platformy, wybierając kolor, który odzwierciedla tożsamość Twojej marki."
+  },
   "files": {
     "import": {
       "noFileUploaded": "Nie przesłano pliku",

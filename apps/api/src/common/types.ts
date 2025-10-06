@@ -10,6 +10,7 @@ export type GlobalSettings = {
   enforceSSO: boolean;
   companyInformation?: CompanyInformationSchema;
   platformLogoS3Key: string | null;
+  primaryColor: string | null;
 };
 
 export type StudentSettings = {

@@ -328,6 +328,7 @@ lms-core
 └── packages
     ├── email-templates
     ├── eslint-config
+    ├── shared
     └── typescript-config
 ```
 

@@ -49,12 +49,7 @@ export class SettingsService {
       throw new NotFoundException("Global settings not found");
     }
 
-    const parsedSettings = {
-      ...globalSettings.settings,
-      MFAEnforcedRoles: Array.isArray(globalSettings.settings.MFAEnforcedRoles)
-        ? globalSettings.settings.MFAEnforcedRoles
-        : JSON.parse(globalSettings.settings.MFAEnforcedRoles ?? "[]"),
-    };
+    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
 
     const { certificateBackgroundImage, platformLogoS3Key, ...restOfSettings } = parsedSettings;
 
@@ -180,14 +175,7 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    const parsedSettings = {
-      ...updatedGlobalSettings,
-      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
-        ? updatedGlobalSettings.MFAEnforcedRoles
-        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
-    };
-
-    return parsedSettings;
+    return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
   public async updateAdminNewUserNotification(
@@ -223,6 +211,38 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
+  public async updateGlobalPrimaryColor(
+    primaryColor: string,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.db
+      .select({
+        primaryColor: sql`settings.settings->>'primaryColor'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{primaryColor}',
+            to_jsonb(${primaryColor}::text),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async updateGlobalEnforceSSO(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
       .select({
@@ -250,14 +270,7 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    const parsedSettings = {
-      ...updatedGlobalSettings,
-      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
-        ? updatedGlobalSettings.MFAEnforcedRoles
-        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
-    };
-
-    return parsedSettings;
+    return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
   public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
@@ -511,5 +524,16 @@ export class SettingsService {
       default:
         return DEFAULT_STUDENT_SETTINGS;
     }
+  }
+
+  private parseGlobalSettings(
+    settings: GlobalSettingsJSONContentSchema,
+  ): GlobalSettingsJSONContentSchema {
+    return {
+      ...settings,
+      MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
+        ? settings.MFAEnforcedRoles
+        : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),
+    };
   }
 }

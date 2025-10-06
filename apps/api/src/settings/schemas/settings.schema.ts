@@ -23,6 +23,7 @@ export const globalSettingsJSONSchema = Type.Object({
   MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
   inviteOnlyRegistration: Type.Boolean(),
+  primaryColor: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

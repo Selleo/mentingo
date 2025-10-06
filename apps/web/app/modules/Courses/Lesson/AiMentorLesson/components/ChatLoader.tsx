@@ -7,11 +7,11 @@ const ChatLoader = () => {
 
   return (
     <div className="flex items-start gap-x-3">
-      <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-600">
-        <Icon name="AiMentor" className="size-5 text-blue-600" />
+      <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-lg font-bold text-primary-600">
+        <Icon name="AiMentor" className="size-5 text-primary-600" />
       </div>
       <div className="max-w-4/5 flex flex-col">
-        <span className="mb-1 text-sm font-semibold text-blue-900">
+        <span className="mb-1 text-sm font-semibold text-primary-900">
           {t("studentCourseView.lesson.aiMentorLesson.aiMentorName")}
         </span>
         <div className="flex items-center gap-2 text-sm text-gray-500">
