@@ -308,6 +308,10 @@ export class CourseService {
       );
     }
 
+    if (filters.groupId) {
+      conditions.push(eq(groupUsers.groupId, filters.groupId));
+    }
+
     const data = await this.db
       .select({
         firstName: users.firstName,

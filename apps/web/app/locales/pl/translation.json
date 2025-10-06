@@ -1087,7 +1087,8 @@
     "enrolled": {
       "filters": {
         "placeholder": {
-          "searchByKeyword": "Szukaj po słowie kluczowym..."
+          "searchByKeyword": "Szukaj po słowie kluczowym...",
+          "groups": "Grupy"
         }
       },
       "enrollSelected": "Zapisz wybranych na kurs",

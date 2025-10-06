@@ -10,6 +10,7 @@ import { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkCourseEnroll } from "~/api/mutations/admin/useBulkCourseEnroll";
+import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useAllUsersEnrolledSuspense } from "~/api/queries/admin/useUsersEnrolled";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
@@ -49,6 +50,7 @@ export const CourseEnrolled = (): ReactElement => {
   const { t } = useTranslation();
   const { id: courseId } = useParams();
   const { mutate: bulkEnroll } = useBulkCourseEnroll(courseId);
+  const { data: groupData } = useGroupsQuerySuspense();
 
   const [searchParams, setSearchParams] = useState<UsersEnrolledSearchParams>({});
   const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: true }]);
@@ -163,6 +165,16 @@ export const CourseEnrolled = (): ReactElement => {
       type: "text",
       name: "keyword",
       placeholder: t("adminCourseView.enrolled.filters.placeholder.searchByKeyword"),
+    },
+    {
+      name: "groupId",
+      type: "select",
+      placeholder: t("adminCourseView.enrolled.filters.placeholder.groups"),
+      options:
+        groupData.map((item) => ({
+          value: item.id,
+          label: item.name,
+        })) ?? [],
     },
   ];
 
