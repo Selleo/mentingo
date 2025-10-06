@@ -95,6 +95,7 @@ export default function CoursesPage() {
       placeholder: t("studentCoursesView.availableCourses.filters.placeholder.sort"),
       options: createSortOptions(t),
       default: DEFAULT_STATE.sort,
+      hideAll: true,
     },
   ];
 
