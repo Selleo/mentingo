@@ -69,10 +69,14 @@ export class AuthController {
   async register(
     data: CreateAccountBody,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
-    const { enforceSSO } = await this.settingsService.getGlobalSettings();
+    const { enforceSSO, inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
 
     if (enforceSSO) {
       throw new UnauthorizedException("SSO is enforced, registration via email is not allowed");
+    }
+
+    if (inviteOnlyRegistration) {
+      throw new UnauthorizedException("Registration is invite-only.");
     }
 
     const account = await this.authService.register(data);

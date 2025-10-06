@@ -232,4 +232,10 @@ export class SettingsController {
 
     return new BaseResponse(updatedGlobalSettings);
   }
+
+  @Patch("admin/invite-only-registration")
+  @Roles(USER_ROLES.ADMIN)
+  async updateInviteOnlyRegistration() {
+    return new BaseResponse(await this.settingsService.updateGlobalInviteOnlyRegistration());
+  }
 }

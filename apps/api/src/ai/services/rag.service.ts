@@ -46,7 +46,10 @@ export class RagService {
 
   async getOpenAI() {
     return createOpenAI({
-      apiKey: (await this.envService.getEnv("OPENAI_API_KEY")).value || process.env.OPENAI_API_KEY,
+      apiKey: await this.envService
+        .getEnv("OPENAI_API_KEY")
+        .then((r) => r.value)
+        .catch(() => process.env.OPENAI_API_KEY),
     });
   }
 }

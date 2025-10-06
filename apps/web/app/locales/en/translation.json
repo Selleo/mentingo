@@ -210,6 +210,20 @@
       "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement"
     }
   },
+  "inviteOnlyRegistrationView": {
+    "header": "Invite-Only Registration Enforcement",
+    "subHeader": "Require an invitation to register",
+    "description": "Enable this setting to restrict registration to invited users only. When disabled, anyone can register without an invitation.",
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "inviteOnlyRegistrationUpdatedSuccessfully": "Invite-only registration settings updated successfully",
+      "inviteOnlyRegistrationUpdateFailed": "Failed to update invite-only registration settings",
+      "registerRedirect": "Registration is only possible by invitation."
+    }
+  },
   "mostPopularCoursesView": {
     "header": "Most Popular",
     "subHeader": "Your top 5 Courses",

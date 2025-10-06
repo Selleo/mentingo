@@ -211,6 +211,20 @@
       "ssoEnforcementUpdateFailed": "Nie udało się zaktualizować wymuszenia SSO"
     }
   },
+  "inviteOnlyRegistrationView": {
+    "header": "Wymuszenie rejestracji tylko na zaproszenie",
+    "subHeader": "Wymagaj zaproszenia do rejestracji",
+    "description": "Włącz tę opcję, aby ograniczyć rejestrację wyłącznie do zaproszonych użytkowników. Po wyłączeniu każdy będzie mógł się zarejestrować bez zaproszenia.",
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "inviteOnlyRegistrationUpdatedSuccessfully": "Ustawienia rejestracji tylko na zaproszenie zostały pomyślnie zaktualizowane",
+      "inviteOnlyRegistrationUpdateFailed": "Nie udało się zaktualizować ustawień rejestracji tylko na zaproszenie",
+      "registerRedirect": "Rejestracja możliwa wyłącznie na podstawie zaproszenia."
+    }
+  },
   "mostPopularCoursesView": {
     "header": "Najpopularniejsze",
     "subHeader": "Twoje 5 najlepszych kursów",

@@ -288,6 +288,13 @@
       "when": 1759330427110,
       "tag": "0040_added_secrets_table",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1759735638660,
+      "tag": "0041_added_invite_only_registration_setting",
+      "breakpoints": true
     }
   ]
 }
