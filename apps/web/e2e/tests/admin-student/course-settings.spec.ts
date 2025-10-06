@@ -160,7 +160,14 @@ test.describe("Course settings flow", () => {
       await page.getByRole("tab", { name: COURSE_SETTINGS_UI.button.curriculum }).click();
       const freemiumToggle = page.locator("#freemiumToggle").first();
 
-      if (!(await freemiumToggle.isChecked())) await freemiumToggle.click();
+      if (!(await freemiumToggle.isChecked())) {
+        await freemiumToggle.click();
+        await page.waitForResponse(
+          (response) =>
+            response.url().includes("api/course/beta-course-by-id") && response.status() === 200,
+        );
+      }
+
       await expect(freemiumToggle).toBeChecked();
     });
 
@@ -195,10 +202,7 @@ test.describe("Course settings flow", () => {
       await expect(nextLessonButton).toBeVisible();
 
       await test.step("unregistered user tries to access free chapter", async () => {
-        await logout(page);
-
-        const newPage = await browser.newPage();
-        newPage.context().clearCookies();
+        const newPage = await logout(browser);
 
         await newPage.goto("/courses");
 
@@ -220,6 +224,7 @@ test.describe("Course settings flow", () => {
 
   test("should set course as free and check if a student can enroll and check if an unregistered user must sign up", async ({
     page,
+    browser,
   }) => {
     await test.step("admin sets course as free", async () => {
       await selectCourseAndOpenEnrollmentTab(
@@ -255,21 +260,21 @@ test.describe("Course settings flow", () => {
     });
 
     await test.step("unregistered user tries to enroll", async () => {
-      await logout(page);
+      const newPage = await logout(browser);
 
-      await page.goto("/courses");
+      await newPage.goto("/courses");
 
-      const header = page.getByRole("heading", {
+      const header = newPage.getByRole("heading", {
         name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.availableCourses, "i"),
       });
       await expect(header).toBeVisible();
 
       await studentEnrollToCourse(
-        page,
+        newPage,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
       );
 
-      const signupHeader = page.getByRole("heading", {
+      const signupHeader = newPage.getByRole("heading", {
         name: new RegExp(COURSE_SETTINGS_UI.header.signup, "i"),
       });
 
