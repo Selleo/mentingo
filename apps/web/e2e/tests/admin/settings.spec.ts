@@ -97,6 +97,7 @@ test.describe("Admin settings", () => {
   });
 
   test("should redirect to login when courses accessibility is disabled and user is logged out", async ({
+    browser,
     page,
   }) => {
     await page
@@ -122,10 +123,13 @@ test.describe("Admin settings", () => {
       .first()
       .click();
 
-    await page.goto("/courses");
+    const newPage = await browser.newPage();
+    newPage.context().clearCookies();
 
-    await page.waitForURL(/\/login/);
-    await expect(page).toHaveURL(/\/login/);
+    await newPage.goto("/courses");
+
+    await newPage.waitForURL(/\/login/);
+    await expect(newPage).toHaveURL(/\/login/);
   });
 
   test("should allow access to courses when courses accessibility is enabled and user is logged out", async ({

@@ -153,6 +153,7 @@ test.describe("Course settings flow", () => {
 
   test("should set first chapter as freemium and check if a student can access it and check if an unregistered user must log in", async ({
     page,
+    browser,
   }) => {
     await test.step("admin sets course as freemium", async () => {
       await selectCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
@@ -196,19 +197,22 @@ test.describe("Course settings flow", () => {
       await test.step("unregistered user tries to access free chapter", async () => {
         await logout(page);
 
-        await page.goto("/courses");
+        const newPage = await browser.newPage();
+        newPage.context().clearCookies();
 
-        await page.waitForLoadState("networkidle");
+        await newPage.goto("/courses");
 
-        await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
+        await newPage.waitForLoadState("networkidle");
 
-        await page.getByTestId(new RegExp(COURSE_SETTINGS_UI.header.chapterTitle, "i")).click();
+        await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
 
-        await page
+        await newPage.getByTestId(new RegExp(COURSE_SETTINGS_UI.header.chapterTitle, "i")).click();
+
+        await newPage
           .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
           .click();
 
-        const header = page.getByRole("heading", { name: new RegExp("Login") });
+        const header = newPage.getByRole("heading", { name: new RegExp("Login") });
         await expect(header).toBeVisible();
       });
     });
