@@ -140,6 +140,12 @@ cp .env.example .env
 </br>
 <div align="center">
 
+### Build shared packages
+
+```bash
+pnpm run --filter=@repo/shared build
+```
+
 ## Database Setup
 
 </div>

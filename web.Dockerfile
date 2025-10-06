@@ -20,6 +20,7 @@ WORKDIR /app
 COPY . .
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+RUN pnpm --filter="@repo/shared" run build
 RUN pnpm build --filter=web
 # TODO: Move pnpm deploy to turbo prune workflow
 RUN pnpm deploy --filter=web pnpm-deploy-output --prod
