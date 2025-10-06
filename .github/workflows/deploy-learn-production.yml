@@ -82,6 +82,7 @@ jobs:
             SLACK_CLIENT_ID
             SLACK_CLIENT_SECRET
             SLACK_OAUTH_ENABLED
+            MASTER_KEY
 
           paths: |
             /learn/production/api/terraform/
@@ -138,6 +139,7 @@ jobs:
             SLACK_CLIENT_ID
             SLACK_CLIENT_SECRET
             SLACK_OAUTH_ENABLED
+            MASTER_KEY
 
           paths: |
             /learn/production/api/terraform/
