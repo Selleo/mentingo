@@ -4,7 +4,7 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { EditorContent, Node, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
@@ -16,6 +16,8 @@ import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { QuestionType } from "../QuizLessonForm.types";
+
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "./constants";
 
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
@@ -24,6 +26,7 @@ import type { UseFormReturn } from "react-hook-form";
 type FillInTheBlankQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
+  questionType: QuestionType;
 };
 
 const ButtonNode = Node.create({
@@ -51,7 +54,11 @@ const ButtonNode = Node.create({
   },
 });
 
-const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestionProps) => {
+const FillInTheBlanksQuestion = ({
+  form,
+  questionIndex,
+  questionType,
+}: FillInTheBlankQuestionProps) => {
   const [newWord, setNewWord] = useState("");
   const [isAddingWord, setIsAddingWord] = useState(false);
   const currentOptions = form.getValues(`questions.${questionIndex}.options`) || [];
@@ -298,11 +305,18 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
     }
   }, []);
 
+  const descriptionKey = useMemo(() => {
+    return questionType === QuestionType.FILL_IN_THE_BLANKS_DND
+      ? "adminCourseView.curriculum.lesson.other.fillInTheBlanksDescription"
+      : "adminCourseView.curriculum.lesson.other.gapFillDescription";
+  }, [questionType]);
+
   return (
     <Accordion.Root key={questionIndex} type="single" collapsible>
       <Accordion.Item value={`item-${questionIndex}`}>
-        <div className="rounded-xl border-0 p-3 transition-all duration-300">
+        <div className="rounded-xl border-0 px-3 pb-3 transition-all duration-300">
           <div className="ml-14">
+            <p className="body-sm-md pb-4 text-neutral-700">{t(descriptionKey)}</p>
             <FormField
               control={form.control}
               name={`questions.${questionIndex}.description`}

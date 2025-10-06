@@ -1012,6 +1012,8 @@
           "presentationLessonDescription": "Choose this type if you want to embed presentations files like PPTX.",
           "quizLessonDescription": "This type allows you to build quizzes for your chapter using different types of questions.",
           "aiMentorLessonDescription": "Create interactive AI-powered lessons where students can engage with a virtual mentor.",
+          "fillInTheBlanksDescription": "This question will have sentence and students will need to drag and drop the word in to right place.",
+          "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
           "embedLessonDescription": "This type allows you to embed content from external platforms using iframe code.",
           "leaveContentHeader": "Are you sure you want to leave this question editor?",
           "leaveContentBody": "It will delete all unsaved progress",
