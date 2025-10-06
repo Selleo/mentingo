@@ -21,7 +21,7 @@ const AiMentorLessonPreview = ({ onClose, lesson }: AiMentorPreviewProps) => {
       <div className="flex w-full max-w-6xl flex-col">
         <div className="flex items-center justify-between rounded-t-lg bg-white p-4">
           <div>
-            <h2 className="font-medium text-blue-800">{lesson.title}</h2>
+            <h2 className="font-medium text-primary-800">{lesson.title}</h2>
             <h2 className="text-sm text-gray-400">AI Mentor</h2>
           </div>
 

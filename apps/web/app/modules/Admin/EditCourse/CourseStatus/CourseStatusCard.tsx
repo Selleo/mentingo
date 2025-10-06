@@ -20,7 +20,7 @@ const CourseStatusCard = ({ checked, onChange, headerKey, bodyKey, id }: CourseS
       className={cn(
         "flex cursor-pointer items-start gap-x-4 rounded-md border px-6 py-4 text-left",
         {
-          "border-blue-500": checked,
+          "border-primary-500": checked,
         },
       )}
       onClick={onChange}

@@ -234,7 +234,7 @@ const FileLessonForm = ({
             })}
           />
           <div className="flex gap-x-3">
-            <Button type="submit" className="bg-primary-700 text-white hover:bg-blue-600">
+            <Button type="submit" className="bg-primary-700 text-white hover:bg-primary-600">
               {t("common.button.save")}
             </Button>
             <Button

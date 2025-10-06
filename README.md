@@ -140,6 +140,12 @@ cp .env.example .env
 </br>
 <div align="center">
 
+### Build shared packages
+
+```bash
+pnpm run --filter=@repo/shared build
+```
+
 ## Database Setup
 
 </div>
@@ -328,6 +334,7 @@ lms-core
 └── packages
     ├── email-templates
     ├── eslint-config
+    ├── shared
     └── typescript-config
 ```
 

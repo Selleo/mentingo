@@ -122,7 +122,7 @@ const TextLessonForm = ({
             </p>
           )}
           <div className="flex gap-x-3">
-            <Button type="submit" className="mt-6 bg-primary-700 text-white hover:bg-blue-600">
+            <Button type="submit" className="mt-6 bg-primary-700 text-white hover:bg-primary-600">
               {t("adminCourseView.curriculum.lesson.button.saveLesson")}
             </Button>
             <Button

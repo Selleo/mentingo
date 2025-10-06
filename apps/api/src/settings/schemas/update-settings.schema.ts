@@ -1,3 +1,4 @@
+import { HEX_COLOR_REGEX } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -26,6 +27,13 @@ export const updateDefaultCourseCurrencySchema = Type.Object({
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
 });
 
+export const updateGlobalPrimaryColorSchema = Type.Object({
+  primaryColor: Type.String({
+    pattern: HEX_COLOR_REGEX.source,
+  }),
+});
+
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateMFAEnforcedRolesRequest = Static<typeof updateMFAEnforcedRolesSchema>;
 export type UpdateDefaultCourseCurrencyBody = Static<typeof updateDefaultCourseCurrencySchema>;
+export type UpdateGlobalPrimaryColorBody = Static<typeof updateGlobalPrimaryColorSchema>;

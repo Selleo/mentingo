@@ -1562,6 +1562,10 @@
       "logoFetchError": "Error fetching platform logo"
     }
   },
+  "organizationTheme": {
+    "title": "Organization Theme",
+    "description": "Customize the appearance of your platform by selecting a theme color that reflects your organization's branding."
+  },
   "files": {
     "import": {
       "noFileUploaded": "No file uploaded",

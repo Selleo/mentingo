@@ -1104,6 +1104,33 @@
         }
       }
     },
+    "/api/settings/admin/primary-color": {
+      "patch": {
+        "operationId": "SettingsController_updatePrimaryColor",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrimaryColorBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrimaryColorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/platform-logo": {
       "get": {
         "operationId": "SettingsController_getPlatformLogo",
@@ -5745,6 +5772,16 @@
               },
               "inviteOnlyRegistration": {
                 "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -5754,7 +5791,8 @@
               "platformLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
-              "inviteOnlyRegistration"
+              "inviteOnlyRegistration",
+              "primaryColor"
             ]
           }
         },
@@ -6107,6 +6145,16 @@
               },
               "inviteOnlyRegistration": {
                 "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6116,7 +6164,8 @@
               "platformLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
-              "inviteOnlyRegistration"
+              "inviteOnlyRegistration",
+              "primaryColor"
             ]
           }
         },
@@ -6217,6 +6266,16 @@
               },
               "inviteOnlyRegistration": {
                 "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6226,7 +6285,8 @@
               "platformLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
-              "inviteOnlyRegistration"
+              "inviteOnlyRegistration",
+              "primaryColor"
             ]
           }
         },
@@ -6271,6 +6331,139 @@
               "MFASecret",
               "adminNewUserNotification",
               "adminFinishedCourseNotification"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdatePrimaryColorBody": {
+        "type": "object",
+        "properties": {
+          "primaryColor": {
+            "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "primaryColor"
+        ]
+      },
+      "UpdatePrimaryColorResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "admin",
+                      "type": "string"
+                    },
+                    {
+                      "const": "student",
+                      "type": "string"
+                    },
+                    {
+                      "const": "content_creator",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "primaryColor"
             ]
           }
         },

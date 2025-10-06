@@ -33,6 +33,8 @@ import {
 import {
   UpdateDefaultCourseCurrencyBody,
   updateDefaultCourseCurrencySchema,
+  UpdateGlobalPrimaryColorBody,
+  updateGlobalPrimaryColorSchema,
   UpdateMFAEnforcedRolesRequest,
   updateMFAEnforcedRolesSchema,
   UpdateSettingsBody,
@@ -125,6 +127,19 @@ export class SettingsController {
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateAdminFinishedCourseNotification(userId);
+    return new BaseResponse(result);
+  }
+
+  @Patch("admin/primary-color")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+    request: [{ type: "body", schema: updateGlobalPrimaryColorSchema }],
+  })
+  async updatePrimaryColor(
+    @Body() body: UpdateGlobalPrimaryColorBody,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalPrimaryColor(body.primaryColor!);
     return new BaseResponse(result);
   }
 

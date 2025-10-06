@@ -122,7 +122,7 @@ const QuizSettingsSection = ({
                 checked={isAttemptsLimitEnabled}
                 onCheckedChange={onSwitchChange}
                 className={cn("relative h-6 w-11 rounded-full transition-colors", {
-                  "bg-blue-500": isAttemptsLimitEnabled,
+                  "bg-primary-500": isAttemptsLimitEnabled,
                   "bg-gray-200": !isAttemptsLimitEnabled,
                 })}
               >

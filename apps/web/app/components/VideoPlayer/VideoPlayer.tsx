@@ -68,7 +68,7 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
     <div className="relative aspect-video w-full">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-          <div className="size-12 animate-spin rounded-full border-y-2 border-blue-500" />
+          <div className="size-12 animate-spin rounded-full border-y-2 border-primary-500" />
         </div>
       )}
       <iframe
