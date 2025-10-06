@@ -1,3 +1,39 @@
+<a name="v3.9.0"></a>
+
+## [v3.9.0] - 06.10.2025
+
+### Bug Fixes:
+
+- e2e tests ([#737](https://github.com/Selleo/mentingo/issues/737))
+
+- add checks if category already exists and return a meaningful error ([#729](https://github.com/Selleo/mentingo/issues/729))
+
+- show course overview for unregistered user if global setting is enabled ([#727](https://github.com/Selleo/mentingo/issues/727))
+
+- add redirect from auth page if user is logged in ([#712](https://github.com/Selleo/mentingo/issues/712))
+
+- editor initial height ([#701](https://github.com/Selleo/mentingo/issues/701))
+
+### Code Refactoring:
+
+- day streak translations ([#734](https://github.com/Selleo/mentingo/issues/734))
+
+### Features:
+
+- added settings to allow invite only registration ([#714](https://github.com/Selleo/mentingo/issues/714))
+
+- allow creating category from course level ([#726](https://github.com/Selleo/mentingo/issues/726))
+
+- Implemented Env Config Page to edit env's via platform ([#708](https://github.com/Selleo/mentingo/issues/708))
+
+- implement global search functionality ([#717](https://github.com/Selleo/mentingo/issues/717))
+
+### Tests:
+
+- add config validator unit tests ([#720](https://github.com/Selleo/mentingo/issues/720))
+
+- verify quiz access rules for attempts and cooldown ([#716](https://github.com/Selleo/mentingo/issues/716))
+
 <a name="v3.8.0"></a>
 
 ## [v3.8.0] - 03.10.2025
@@ -5,6 +41,10 @@
 ### Bug Fixes:
 
 - sso redirect on login to use current url ([#706](https://github.com/Selleo/mentingo/issues/706))
+
+### Documentation:
+
+- update changelog for version v3.8.0
 
 ### Features:
 
@@ -1506,7 +1546,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.8.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.9.0...HEAD
+[v3.9.0]: https://github.com/Selleo/mentingo/compare/v3.8.0...v3.9.0
 [v3.8.0]: https://github.com/Selleo/mentingo/compare/v3.7.0...v3.8.0
 [v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
