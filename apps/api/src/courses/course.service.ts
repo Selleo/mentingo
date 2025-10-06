@@ -329,7 +329,7 @@ export class CourseService {
       )
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT)))
+      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
       .orderBy(sortOrder(studentCourses.createdAt));
 
     return {
