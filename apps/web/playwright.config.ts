@@ -20,8 +20,10 @@ const config: PlaywrightTestConfig = {
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 3,
+  workers: process.env.CI ? 2 : 4,
   use: {
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
     baseURL,
     ignoreHTTPSErrors: true,
     extraHTTPHeaders: {
@@ -107,31 +109,30 @@ const config: PlaywrightTestConfig = {
 if (process.env.CI) {
   config.webServer = [
     {
-      command: "cd ../api && pnpm run start:dev",
+      command: "cd ../api && pnpm run build && pnpm db:migrate && pnpm db:seed",
+      env: {
+        DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
+        MODE: "test",
+      },
+      reuseExistingServer: false,
+      stderr: "pipe",
+      stdout: "pipe",
+    },
+    {
+      command: "cd ../api && pnpm build && pnpm run start",
       url: "http://localhost:3000/api/healthcheck",
       timeout: 120 * 1000,
       reuseExistingServer: false,
       env: {
         DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
-        REDIS_HOST: "localhost",
-        REDIS_PORT: "6380",
+        REDIS_URL: "redis://localhost:6380",
         MODE: "test",
       },
       stderr: "pipe",
       stdout: "pipe",
     },
     {
-      command: "cd ../api && pnpm db:migrate && pnpm db:seed",
-      env: {
-        DATABASE_URL: `postgresql://test_user:test_password@localhost:54321/test_db`,
-        MODE: "test",
-      },
-      reuseExistingServer: false,
-      stderr: "pipe",
-      stdout: "pipe",
-    },
-    {
-      command: "cd ../web && pnpm run dev:test",
+      command: "cd ../web && pnpm build && caddy run --config Caddyfile.e2e",
       url: "http://localhost:5173/",
       timeout: 120 * 1000,
       reuseExistingServer: false,

@@ -8,7 +8,7 @@ env:
   CORS_ORIGIN: ""
   EMAIL_ADAPTER: "mailhog"
   DATABASE_URL: ""
-  REDIS_URL: ""
+  REDIS_URL: "redis://localhost:6380"
   SMTP_HOST: ""
   SMTP_PORT: "1025"
   SMTP_USER: ""
@@ -19,28 +19,25 @@ env:
   AWS_BUCKET_NAME: "test-bucket"
   AWS_ENDPOINT_URL: "http://localhost:4566"
   SES_EMAIL: "noreply@lms.selleo.app"
-  STRIPE_SECRET_KEY: "test_secret"
-  STRIPE_PUBLISHABLE_KEY: "test_secret"
-  STRIPE_WEBHOOK_SECRET: "test_secret"
-
 
 on:
-    workflow_call:
-    push:
-        branches:
-        - main
-        - "deploy-staging/**"
-    workflow_dispatch:
-
+  workflow_call:
+  push:
+    branches:
+      - main
+      - "deploy-staging/**"
+  workflow_dispatch:
 
 jobs:
   playwright:
     name: Playwright Tests
     runs-on: ubuntu-latest
+    environment:
+      name: e2e
 
     services:
       postgres:
-        image: postgres:16
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_password
@@ -77,10 +74,25 @@ jobs:
             DATA_DIR=/tmp/localstack/data
             PERSISTENCE=0
 
+      - name: Install Caddy
+        run: |
+          curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+          curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+          sudo apt update
+          sudo apt install caddy -y
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.2.1
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -91,12 +103,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright
+          restore-keys: |
+            ${{ runner.os }}-playwright
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
         working-directory: ./apps/web
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
-      
+
       - name: Setup local S3 bucket
         run: |
           echo "Checking LocalStack setup..."
@@ -112,20 +132,19 @@ jobs:
             echo "Waiting for LocalStack... (attempt $attempt/$max_attempts, waiting ${wait_time}s)"
             sleep $wait_time
           done
-          
+
           if [ $attempt -eq $max_attempts ]; then
             echo "LocalStack failed to start after $max_attempts attempts"
             curl -v http://localhost:4566/_localstack/health || true
             exit 1
           fi
-          
+
           echo "Creating S3 bucket..."
           if ! awslocal s3 mb s3://test-bucket; then
             echo "Failed to create S3 bucket"
             exit 1
           fi
-          
-          # Set bucket CORS (non-critical)
+
           echo "Configuring bucket CORS..."
           awslocal s3api put-bucket-cors --bucket test-bucket --cors-configuration '{
             "CORSRules": [{
@@ -134,37 +153,8 @@ jobs:
               "AllowedHeaders": ["*"]
             }]
           }' || echo "Warning: Failed to set CORS configuration"
-          
+
           echo "S3 setup completed successfully!"
-
-    #   - name: Setup Caddy
-    #     run: |
-    #       sudo apt-get update
-    #       sudo apt-get install -y debian-keyring debian-archive-keyring apt-transport-https curl
-    #       curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-    #       curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
-    #       sudo apt-get update
-    #       sudo apt-get install caddy=2.8.4
-
-    #   - name: Setup hosts
-    #     run: |
-    #       echo "127.0.0.1 app.lms.localhost" | sudo tee -a /etc/hosts
-
-    #   - name: Debug Caddy
-    #     working-directory: ./apps/reverse-proxy
-    #     run: |
-    #       caddy version
-    #       caddy adapt --config Caddyfile
-    #       caddy validate --config Caddyfile
-
-    #   - name: Start Caddy
-    #     working-directory: ./apps/reverse-proxy
-    #     run: |
-    #       sudo caddy run --config Caddyfile &
-
-    #   - name: Ensure Caddy is running
-    #     run: |
-    #       pgrep -af caddy || exit 1
 
       - name: Run tests
         run: pnpm playwright test
@@ -172,12 +162,21 @@ jobs:
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
           DATABASE_URL: postgresql://test_user:test_password@localhost:54321/test_db
-          REDIS_HOST: localhost
-          REDIS_PORT: 6380
+          REDIS_URL: "redis://localhost:6380"
           NODE_ENV: test
-          AWS_ENDPOINT_URL: http://localhost:4566
-          AWS_ACCESS_KEY_ID: test
-          AWS_SECRET_ACCESS_KEY: test
-          AWS_REGION: us-east-1
-          AWS_BUCKET_NAME: test-bucket
           API_URL: http://localhost:3000
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          MASTER_KEY: ${{ secrets.MASTER_KEY }}
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report
+            test-results
+            **/*.zip
+          retention-days: 3

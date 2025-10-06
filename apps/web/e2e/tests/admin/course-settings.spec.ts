@@ -69,7 +69,7 @@ test.describe.serial("Course E2E", () => {
 
     await page.getByText("Free").click();
     await page.getByText("Paid course").click();
-    await expect(page.getByPlaceholder("Amount")).toHaveValue("42,069.00");
+    await expect(page.getByPlaceholder("Amount")).toHaveValue("42,069");
   });
 
   test("should change course status to draft", async ({ page }) => {
@@ -110,20 +110,23 @@ test.describe.serial("Course E2E", () => {
 
   test("should change course description", async ({ page }) => {
     await page.getByRole("tab", { name: "Settings" }).click();
-    await page.getByLabel("Description").fill(`${TEST_COURSE.course_description} test`);
+
+    const descriptionField = page.locator("#description .tiptap");
+
+    await descriptionField.fill(`${TEST_COURSE.course_description} test`);
 
     await page.getByRole("button", { name: "Save" }).click();
     await page.reload();
 
-    await expect(page.getByLabel("Description")).toHaveValue(
-      `${TEST_COURSE.course_description} test`,
-    );
+    await expect(descriptionField).toHaveText(`${TEST_COURSE.course_description} test`);
   });
 
   test("should change course values to defults all at once", async ({ page }) => {
     await page.getByRole("tab", { name: "Settings" }).click();
+
     await page.getByLabel("Course title").fill(TEST_COURSE.name);
-    await page.getByLabel("Description").fill(TEST_COURSE.course_description);
+    const descriptionField = page.locator("#description .tiptap");
+    await descriptionField.fill(TEST_COURSE.course_description);
     await page.getByRole("button", { name: "Save" }).click();
     await expect(
       page
@@ -131,7 +134,7 @@ test.describe.serial("Course E2E", () => {
         .getByText("Course updated successfully", { exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("heading", { name: TEST_COURSE.name, level: 4 })).toBeVisible();
-    await expect(page.getByLabel("Description")).toHaveValue(TEST_COURSE.course_description);
+    await expect(descriptionField).toHaveText(TEST_COURSE.course_description);
 
     await page.getByRole("tab", { name: "Pricing" }).click();
     await page.getByText("Free").click();

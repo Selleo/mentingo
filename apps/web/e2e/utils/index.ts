@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { type Browser, expect, type Page } from "@playwright/test";
 
 import { AuthFixture } from "../fixture/auth.fixture";
 import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "../tests/admin-student/data/assigning-student-data";
@@ -9,9 +9,11 @@ export const login = async (page: Page, email: string, password: string) => {
   await authFixture.login(email, password);
 };
 
-export const logout = async (page: Page) => {
-  const authFixture = new AuthFixture(page);
-  await authFixture.logout();
+export const logout = async (browser: Browser) => {
+  const newPage = await browser.newPage();
+  newPage.context().clearCookies();
+
+  return newPage;
 };
 
 export const navigateToPage = async (page: Page, name: string, headerText: string) => {
