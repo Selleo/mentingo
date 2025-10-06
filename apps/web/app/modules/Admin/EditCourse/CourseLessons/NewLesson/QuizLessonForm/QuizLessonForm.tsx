@@ -169,6 +169,16 @@ const QuizLessonForm = ({
           ];
         }
 
+        if (type === QuestionType.SCALE_1_5) {
+          return [1, 2, 3, 4, 5].map((scaleValue) => ({
+            sortableId: crypto.randomUUID(),
+            optionText: "",
+            isCorrect: false,
+            displayOrder: scaleValue,
+            scaleAnswer: scaleValue,
+          }));
+        }
+
         if (singleChoiceTypes.includes(type)) {
           return [
             { sortableId: crypto.randomUUID(), optionText: "", isCorrect: false, displayOrder: 1 },
@@ -255,9 +265,7 @@ const QuizLessonForm = ({
             .with(QuestionType.FILL_IN_THE_BLANKS_TEXT, QuestionType.FILL_IN_THE_BLANKS_DND, () => (
               <FillInTheBlanksQuestion questionIndex={questionIndex} form={form} />
             ))
-            .with(QuestionType.SCALE_1_5, () => (
-              <ScaleQuestion questionIndex={questionIndex} isAdminQuestion />
-            ))
+            .with(QuestionType.SCALE_1_5, () => <ScaleQuestion questionIndex={questionIndex} />)
             .otherwise(() => null)}
         </QuestionWrapper>
       );

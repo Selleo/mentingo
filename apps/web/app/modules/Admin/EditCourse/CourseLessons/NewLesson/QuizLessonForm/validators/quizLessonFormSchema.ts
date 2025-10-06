@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import { QuestionType } from "../QuizLessonForm.types";
 
-export const quizLessonFormSchema = (t: (key: string) => string) =>
-  z.object({
+export const quizLessonFormSchema = (t: (key: string) => string) => {
+  return z.object({
     title: z.string(),
     thresholdScore: z.union([z.number().min(0).max(100), z.null()]).optional(),
     attemptsLimit: z.union([z.number().min(1).max(100), z.null()]).optional(),
@@ -29,9 +29,7 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
               z.object({
                 id: z.string().optional(),
                 sortableId: z.string(),
-                optionText: z
-                  .string()
-                  .min(1, t("adminCourseView.curriculum.lesson.validation.optionTextRequired")),
+                optionText: z.string(),
                 isCorrect: z.boolean(),
                 displayOrder: z.number(),
                 matchedWord: z.optional(z.string()),
@@ -92,8 +90,26 @@ export const quizLessonFormSchema = (t: (key: string) => string) =>
               code: z.ZodIssueCode.custom,
             });
           }
+
+          if (
+            question.type !== QuestionType.SCALE_1_5 &&
+            question.type !== QuestionType.BRIEF_RESPONSE &&
+            question.type !== QuestionType.DETAILED_RESPONSE &&
+            question.options
+          ) {
+            question.options.forEach((option, optionIndex) => {
+              if (!option.optionText || option.optionText.trim().length === 0) {
+                ctx.addIssue({
+                  path: [index, "options", optionIndex, "optionText"],
+                  message: t("adminCourseView.curriculum.lesson.validation.optionTextRequired"),
+                  code: z.ZodIssueCode.custom,
+                });
+              }
+            });
+          }
         });
       }),
   });
+};
 
 export type QuizLessonFormValues = z.infer<ReturnType<typeof quizLessonFormSchema>>;

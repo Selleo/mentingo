@@ -186,18 +186,19 @@ export class LessonService {
           userId,
           trx,
         );
-
+        console.log("evaluationResult", evaluationResult);
         const requiredCorrect = Math.ceil(
           ((quizSettings?.thresholdScore ?? 0) *
             (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) /
             100,
         );
 
-        const quizScore = Math.floor(
-          (evaluationResult.correctAnswerCount /
-            (evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount)) *
-            100,
-        );
+        const totalScoredQuestions =
+          evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount;
+        const quizScore =
+          totalScoredQuestions > 0
+            ? Math.floor((evaluationResult.correctAnswerCount / totalScoredQuestions) * 100)
+            : 100;
 
         const isQuizPassed = quizSettings?.thresholdScore
           ? requiredCorrect <= evaluationResult.correctAnswerCount
@@ -214,7 +215,7 @@ export class LessonService {
           true,
           trx,
         );
-
+        console.log("elo 2");
         await this.studentLessonProgressService.markLessonAsCompleted({
           id: studentQuizAnswers.lessonId,
           studentId: userId,
@@ -223,7 +224,7 @@ export class LessonService {
             evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
           dbInstance: trx,
         });
-
+        console.log("elo 3");
         this.eventBus.publish(
           new QuizCompletedEvent(
             userId,
@@ -234,7 +235,7 @@ export class LessonService {
             quizScore,
           ),
         );
-
+        console.log("elo 4");
         return {
           correctAnswerCount: evaluationResult.correctAnswerCount,
           wrongAnswerCount: evaluationResult.wrongAnswerCount,
@@ -283,13 +284,11 @@ export class LessonService {
 
     const questions = await this.questionRepository.getQuestionsIdsByLessonId(lessonId);
 
-    if (questions.length === 0) {
-      return;
-    }
-
     return await this.db.transaction(async (trx) => {
       try {
-        await this.questionRepository.deleteStudentQuizAnswers(questions, userId, trx);
+        if (questions.length > 0) {
+          await this.questionRepository.deleteStudentQuizAnswers(questions, userId, trx);
+        }
 
         await this.studentLessonProgressService.updateQuizProgress(
           accessCourseLessonWithDetails.chapterId,

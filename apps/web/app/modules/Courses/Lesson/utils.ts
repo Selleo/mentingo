@@ -22,7 +22,7 @@ type GetUserAnswersResult = {
   fillInTheBlanksText: Record<string, Record<string, string>> | Record<string, string>;
   fillInTheBlanksDnd: Record<string, Record<string, string>> | Record<string, string>;
   matchWords: Record<string, Record<string, string>> | Record<string, string>;
-  scaleQuestions: Record<string, Record<string, string>> | Record<string, string>;
+  scaleQuestions: Record<string, string>;
   briefResponses: Record<string, string> | Record<string, Record<string, string>>;
   detailedResponses: Record<string, string> | Record<string, Record<string, string>>;
 };
@@ -45,7 +45,7 @@ export const getUserAnswers = (questions: Questions): GetUserAnswersResult => {
     fillInTheBlanksText: prepareAnswers(groupedQuestions.fill_in_the_blanks_text, "options"),
     fillInTheBlanksDnd: prepareAnswers(groupedQuestions.fill_in_the_blanks_dnd, "options"),
     matchWords: prepareAnswers(groupedQuestions.match_words, "options"),
-    scaleQuestions: prepareAnswers(groupedQuestions.scale_1_5, "options"),
+    scaleQuestions: prepareScaleAnswers(groupedQuestions.scale_1_5),
     briefResponses: prepareAnswers(groupedQuestions.brief_response, "open"),
     detailedResponses: prepareAnswers(groupedQuestions.detailed_response, "open"),
   } as const;
@@ -69,6 +69,18 @@ const groupQuestionsByType = (questions: Questions) => {
     brief_response: questions.filter(({ type }) => type === "brief_response"),
     detailed_response: questions.filter(({ type }) => type === "detailed_response"),
   };
+};
+
+const prepareScaleAnswers = (questions: Questions): Record<string, string> => {
+  return questions.reduce(
+    (result, question) => {
+      // For scale questions, find the selected option and return its optionText as the value
+      const selectedOption = question.options?.find((option) => option.isStudentAnswer);
+      result[question.id ?? ""] = selectedOption?.optionText ?? "";
+      return result;
+    },
+    {} as Record<string, string>,
+  );
 };
 
 const prepareAnswers = (

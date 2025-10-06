@@ -289,6 +289,10 @@ export class QuestionRepository {
     }[],
     trx: PostgresJsDatabase<typeof schema>,
   ) {
+    if (answers.length === 0) {
+      return;
+    }
+
     return trx.insert(studentQuestionAnswers).values(answers);
   }
 

@@ -47,19 +47,20 @@ export class QuestionService {
         const answers = this.formatAnswer(question, questionAnswerList);
         const formattedAnswer = this.questionAnswerToString(answers);
 
-        const validAnswer = {
-          questionId: question.id,
-          studentId: userId,
-          answer: formattedAnswer,
-          isCorrect: passQuestion,
-        };
-
-        // Scale questions are saved but don't affect quiz scoring
         const isScaleQuestion = question.type === QUESTION_TYPE.SCALE_1_5;
+
+        const validAnswer = isScaleQuestion
+          ? null
+          : {
+              questionId: question.id,
+              studentId: userId,
+              answer: formattedAnswer,
+              isCorrect: passQuestion,
+            };
 
         return {
           ...quizStats,
-          answers: [...quizStats.answers, validAnswer],
+          answers: validAnswer ? [...quizStats.answers, validAnswer] : quizStats.answers,
           correctAnswerCount:
             passQuestion && !isScaleQuestion
               ? quizStats.correctAnswerCount + 1
@@ -163,13 +164,32 @@ export class QuestionService {
       });
   }
 
-  private formatAnswer(question: QuizQuestion, studentAnswer: StudentQuestionAnswer): string[] {
+  private formatAnswer(
+    question: QuizQuestion,
+    studentAnswer: StudentQuestionAnswer,
+  ): string[] | number[] {
     if (
       question.type === QUESTION_TYPE.BRIEF_RESPONSE ||
       question.type === QUESTION_TYPE.DETAILED_RESPONSE
     ) {
       const answer = studentAnswer.answers[0];
       return ["value" in answer ? answer.value : ""];
+    }
+
+    if (question.type === QUESTION_TYPE.SCALE_1_5) {
+      const answer = studentAnswer.answers[0];
+
+      console.log("answer scale 1.5", answer);
+
+      if ("value" in answer) {
+        const scaleValue = parseInt(answer.value, 10);
+        if (isNaN(scaleValue)) {
+          throw new Error(`Invalid scale value: ${answer.value}`);
+        }
+        return [scaleValue];
+      }
+
+      throw new Error("Scale question must have a value");
     }
 
     return studentAnswer.answers.map((answer) => {
@@ -193,7 +213,8 @@ export class QuestionService {
     });
   }
 
-  private questionAnswerToString(answers: string[]): SQL<unknown> {
+  private questionAnswerToString(answers: string[] | number[]): SQL<unknown> {
+    console.log("answers question to string", answers);
     const convertedAnswers: (SQL<unknown> | string)[] = answers.flatMap((answer, index) => [
       sql`(${index + 1}::int)`,
       sql`${answer}::text`,

@@ -1,5 +1,4 @@
 import { useFormContext } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
@@ -16,7 +15,6 @@ type ScaleQuestionProps = {
 
 export const ScaleQuestion = ({ question, isCompleted }: ScaleQuestionProps) => {
   const { register, setValue, watch } = useFormContext<QuizForm>();
-  const { t } = useTranslation();
 
   const currentValue = watch(`scaleQuestions.${question.id}`);
 
@@ -28,8 +26,8 @@ export const ScaleQuestion = ({ question, isCompleted }: ScaleQuestionProps) => 
     >
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-5 gap-4">
-          {[1, 2, 3, 4, 5].map((scaleValue) => (
-            <div key={scaleValue} className="flex flex-col items-center gap-3">
+          {Array.from({ length: 5 }).map((scaleValue, index) => (
+            <div key={index} className="flex flex-col items-center gap-3">
               <Label
                 htmlFor={`scale-${question.id}-${scaleValue}`}
                 className={cn(
@@ -52,21 +50,8 @@ export const ScaleQuestion = ({ question, isCompleted }: ScaleQuestionProps) => 
                   value={String(scaleValue)}
                   className="sr-only"
                 />
-                <span className="text-2xl font-bold">{scaleValue}</span>
+                <span className="text-2xl font-bold">{index + 1}</span>
               </Label>
-
-              <div className="flex min-h-[32px] items-center justify-center">
-                {scaleValue === 1 && (
-                  <span className="text-center text-xs leading-tight text-neutral-600">
-                    {t("studentLessonView.scale.stronglyDisagree")}
-                  </span>
-                )}
-                {scaleValue === 5 && (
-                  <span className="text-center text-xs leading-tight text-neutral-600">
-                    {t("studentLessonView.scale.stronglyAgree")}
-                  </span>
-                )}
-              </div>
             </div>
           ))}
         </div>

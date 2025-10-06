@@ -236,6 +236,7 @@ export class StudentLessonProgressService {
     isCompleted: boolean,
     trx: PostgresJsDatabase<typeof schema>,
   ) {
+    console.log("elo 5");
     return trx
       .insert(studentLessonProgress)
       .values({
