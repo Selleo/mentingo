@@ -1,3 +1,11 @@
+<a name="v3.8.1"></a>
+
+## [v3.8.1] - 07.10.2025
+
+### Bug Fixes:
+
+- learn deploy workflow missing env ([#739](https://github.com/Selleo/mentingo/issues/739))
+
 <a name="v3.9.0"></a>
 
 ## [v3.9.0] - 06.10.2025
@@ -17,6 +25,10 @@
 ### Code Refactoring:
 
 - day streak translations ([#734](https://github.com/Selleo/mentingo/issues/734))
+
+### Documentation:
+
+- update changelog for version v3.9.0
 
 ### Features:
 
@@ -1546,7 +1558,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.9.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.8.1...HEAD
+[v3.8.1]: https://github.com/Selleo/mentingo/compare/v3.9.0...v3.8.1
 [v3.9.0]: https://github.com/Selleo/mentingo/compare/v3.8.0...v3.9.0
 [v3.8.0]: https://github.com/Selleo/mentingo/compare/v3.7.0...v3.8.0
 [v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
