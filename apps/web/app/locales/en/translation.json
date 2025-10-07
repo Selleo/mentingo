@@ -1566,6 +1566,18 @@
     "title": "Organization Theme",
     "description": "Customize the appearance of your platform by selecting a theme color that reflects your organization's branding."
   },
+  "organizationLoginBackgroundImageUpload": {
+    "title": "Login Background Image Upload",
+    "description": "Upload a custom background image for the organization login page.",
+    "button": {
+      "removeBackgroundImage": "Remove Background Image"
+    },
+
+    "toast": {
+      "success": "Login background image changed successfully",
+      "error": "Error changing login background image"
+    }
+  },
   "files": {
     "import": {
       "noFileUploaded": "No file uploaded",

@@ -44,7 +44,11 @@ export default function LoginPage() {
   const { mutateAsync: loginUser } = useLoginUser();
 
   const {
-    data: { enforceSSO: isSSOEnforced, inviteOnlyRegistration: inviteOnlyRegistration },
+    data: {
+      enforceSSO: isSSOEnforced,
+      inviteOnlyRegistration: inviteOnlyRegistration,
+      loginBackgroundImageS3Key,
+    },
   } = useGlobalSettingsSuspense();
 
   const {
@@ -66,84 +70,96 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="mx-auto max-w-sm">
-      <CardHeader>
-        <CardTitle role="heading" className="text-2xl">
-          <div className="mb-6 flex justify-center">
-            <PlatformLogo className="h-16 w-auto py-3" alt="Platform Logo" />
-          </div>
-          {t("loginView.header")}
-        </CardTitle>
-        <CardDescription>
-          {isSSOEnforced ? t("loginView.subHeaderSSO") : t("loginView.subHeader")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {!isSSOEnforced && (
-          <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid gap-2">
-              <Label htmlFor="email">{t("loginView.field.email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="user@example.com"
-                className={cn({ "border-red-500": errors.email })}
-                {...register("email")}
-              />
-              {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
+    <>
+      {loginBackgroundImageS3Key && (
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            backgroundImage: `url(${loginBackgroundImageS3Key}) `,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+      )}
+      <Card className="mx-auto max-w-sm">
+        <CardHeader>
+          <CardTitle role="heading" className="text-2xl">
+            <div className="mb-6 flex justify-center">
+              <PlatformLogo className="h-16 w-auto py-3" alt="Platform Logo" />
             </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">{t("loginView.field.password")}</Label>
-                <Link
-                  to="/auth/password-recovery"
-                  className="ml-auto inline-block text-sm underline"
-                >
-                  {t("loginView.other.forgotPassword")}
-                </Link>
+            {t("loginView.header")}
+          </CardTitle>
+          <CardDescription>
+            {isSSOEnforced ? t("loginView.subHeaderSSO") : t("loginView.subHeader")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!isSSOEnforced && (
+            <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+              <div className="grid gap-2">
+                <Label htmlFor="email">{t("loginView.field.email")}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  className={cn({ "border-red-500": errors.email })}
+                  {...register("email")}
+                />
+                {errors.email && <div className="text-sm text-red-500">{errors.email.message}</div>}
               </div>
-              <Input
-                id="password"
-                type="password"
-                className={cn({ "border-red-500": errors.password })}
-                {...register("password")}
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">{t("loginView.field.password")}</Label>
+                  <Link
+                    to="/auth/password-recovery"
+                    className="ml-auto inline-block text-sm underline"
+                  >
+                    {t("loginView.other.forgotPassword")}
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  className={cn({ "border-red-500": errors.password })}
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <div className="text-sm text-red-500">{errors.password.message}</div>
+                )}
+              </div>
+              <FormCheckbox
+                control={control}
+                name="rememberMe"
+                label={t("loginView.other.rememberMe")}
               />
-              {errors.password && (
-                <div className="text-sm text-red-500">{errors.password.message}</div>
-              )}
-            </div>
-            <FormCheckbox
-              control={control}
-              name="rememberMe"
-              label={t("loginView.other.rememberMe")}
+              <Button type="submit" className="w-full">
+                {t("loginView.button.login")}
+              </Button>
+            </form>
+          )}
+
+          {isAnyProviderEnabled && (
+            <SocialLogin
+              isSSOEnforced={isSSOEnforced}
+              isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+              isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
+              isSlackOAuthEnabled={isSlackOAuthEnabled}
             />
-            <Button type="submit" className="w-full">
-              {t("loginView.button.login")}
-            </Button>
-          </form>
-        )}
+          )}
 
-        {isAnyProviderEnabled && (
-          <SocialLogin
-            isSSOEnforced={isSSOEnforced}
-            isGoogleOAuthEnabled={isGoogleOAuthEnabled}
-            isMicrosoftOAuthEnabled={isMicrosoftOAuthEnabled}
-            isSlackOAuthEnabled={isSlackOAuthEnabled}
-          />
-        )}
-
-        {!inviteOnlyRegistration && (
-          <div className="mt-4 text-center text-sm">
-            {t("loginView.other.dontHaveAccount")}{" "}
-            <Link to="/auth/register" className="underline">
-              {t("loginView.other.signUp")}
-            </Link>
-          </div>
-        )}
-        <p className="bottom-4 mt-4 text-center text-sm text-neutral-300">
-          {t("common.other.appVersion", { version })}
-        </p>
-      </CardContent>
-    </Card>
+          {!inviteOnlyRegistration && (
+            <div className="mt-4 text-center text-sm">
+              {t("loginView.other.dontHaveAccount")}{" "}
+              <Link to="/auth/register" className="underline">
+                {t("loginView.other.signUp")}
+              </Link>
+            </div>
+          )}
+          <p className="bottom-4 mt-4 text-center text-sm text-neutral-300">
+            {t("common.other.appVersion", { version })}
+          </p>
+        </CardContent>
+      </Card>
+    </>
   );
 }

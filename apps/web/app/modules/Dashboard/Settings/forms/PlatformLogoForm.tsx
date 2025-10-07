@@ -29,13 +29,11 @@ export const PlatformLogoForm = () => {
   const { data: currentLogoUrl } = usePlatformLogo();
   const { mutate: uploadLogo, isPending } = useUploadPlatformLogo();
 
-  const { control, handleSubmit, setValue, watch } = useForm<PlatformLogoFormData>({
+  const { control, handleSubmit, setValue } = useForm<PlatformLogoFormData>({
     defaultValues: {
       logo: null,
     },
   });
-
-  const watchedLogo = watch("logo");
 
   const {
     imageUrl: logoUrl,
@@ -56,9 +54,7 @@ export const PlatformLogoForm = () => {
   });
 
   const onSubmit = (data: PlatformLogoFormData) => {
-    if (data.logo) {
-      uploadLogo({ logo: data.logo });
-    }
+    uploadLogo({ logo: data.logo ?? null });
   };
 
   return (
@@ -97,7 +93,7 @@ export const PlatformLogoForm = () => {
           )}
         </CardContent>
         <CardFooter className="border-t px-6 py-4">
-          <Button type="submit" disabled={!watchedLogo || isPending}>
+          <Button type="submit" disabled={isPending}>
             {isPending ? t("common.button.uploading") : t("common.button.save")}
           </Button>
         </CardFooter>
