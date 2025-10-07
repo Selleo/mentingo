@@ -16,6 +16,7 @@ import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
+import { X_ICON_SVG } from "../components/FillInTheBlanksButtonNode";
 import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
 import { QuestionType } from "../QuizLessonForm.types";
 import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
@@ -43,6 +44,11 @@ export const useQuizLessonForm = ({
   const { isLeavingContent, setIsCurrectFormDirty } = useLeaveModal();
   const { id: courseId } = useParams();
   const { t } = useTranslation();
+
+  const createButtonHtml = (word: string) => {
+    return `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}" data-word="${word}"><span>${word}</span><span>${X_ICON_SVG}</span></button>`;
+  };
+
   const form = useForm<QuizLessonFormValues>({
     resolver: zodResolver(quizLessonFormSchema(t)),
     defaultValues: {
@@ -74,8 +80,7 @@ export const useQuizLessonForm = ({
               const option = question.options?.find((opt) => opt.displayOrder === displayOrder);
 
               if (option) {
-                const buttonHtml = `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}">${option.optionText} X</button>`;
-
+                const buttonHtml = createButtonHtml(option.optionText);
                 processedDescription = processedDescription.replace(match[0], buttonHtml);
               }
             });

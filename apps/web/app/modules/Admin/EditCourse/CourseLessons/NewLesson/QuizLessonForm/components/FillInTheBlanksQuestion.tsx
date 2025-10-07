@@ -2,7 +2,7 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { Color } from "@tiptap/extension-color";
 import { Highlight } from "@tiptap/extension-highlight";
 import { TextStyle } from "@tiptap/extension-text-style";
-import { EditorContent, Node, useEditor } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,7 +18,7 @@ import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { QuestionType } from "../QuizLessonForm.types";
 
-import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "./constants";
+import { FillInTheBlanksButtonNode } from "./FillInTheBlanksButtonNode";
 
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { UseFormReturn } from "react-hook-form";
@@ -28,31 +28,6 @@ type FillInTheBlankQuestionProps = {
   questionIndex: number;
   questionType: QuestionType;
 };
-
-const ButtonNode = Node.create({
-  name: "button",
-  group: "inline",
-  inline: true,
-  content: "text*",
-  parseHTML() {
-    return [
-      {
-        tag: "button",
-      },
-    ];
-  },
-  renderHTML({ node }) {
-    return [
-      "button",
-
-      {
-        type: "button",
-        class: FILL_IN_THE_BLANKS_BUTTON_CLASSNAME,
-      },
-      node.textContent,
-    ];
-  },
-});
 
 const FillInTheBlanksQuestion = ({
   form,
@@ -73,7 +48,7 @@ const FillInTheBlanksQuestion = ({
       StarterKit,
       Color,
       TextStyle,
-      ButtonNode,
+      FillInTheBlanksButtonNode,
       Highlight.configure({ multicolor: true }),
     ],
     content: form.getValues(`questions.${questionIndex}.description`) || "",
@@ -93,10 +68,7 @@ const FillInTheBlanksQuestion = ({
 
     const escapedWord = word.replace(/[.*+?^=!:${}()|[\]/\\]/g, "\\$&");
 
-    const regex = new RegExp(
-      `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}">[\\s\\S]*?\\b${escapedWord}\\b[\\s\\S]*?<\\/button>`,
-      "s",
-    );
+    const regex = new RegExp(`<button[^>]*data-word="${escapedWord}"[^>]*>`, "s");
 
     return regex.test(currentValue as string);
   }
@@ -115,9 +87,7 @@ const FillInTheBlanksQuestion = ({
       const escapedWord = wordToRemove.replace(/[.*+?^=!:${}()|[\]/\\]/g, "\\$&");
 
       const buttonRegex = new RegExp(
-        // TODO: Needs to be fixed
-        // eslint-disable-next-line
-        `<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>[^<]*${escapedWord}[^<]*<\/button>`,
+        `<button[^>]*data-word="${escapedWord}"[^>]*>[\\s\\S]*?<\\/button>`,
         "gi",
       );
 
@@ -139,18 +109,21 @@ const FillInTheBlanksQuestion = ({
 
     if (containsButtonWithWord(word)) return;
 
-    const buttonHTML = `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}">${word} <span class="text-white cursor-pointer" data-word="${word}" onmousedown="event.preventDefault(); handleDelete(event)">X</span></button>`;
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: "button",
+        attrs: { word },
+      })
+      .run();
 
-    editor.chain().focus().insertContent(buttonHTML).run();
-
-    const regex = /<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>([^<]+)<\/button>/g;
+    const regex = /<button[^>]*data-word="([^"]*)"[^>]*>/g;
 
     const currentValue = form.getValues(`questions.${questionIndex}.description`) as string;
 
     const buttonValues = currentValue
-      ? [...currentValue.matchAll(regex)]
-          .map((match) => match[1]?.trim() || "")
-          .map((text) => text.replace(/\n/g, "").slice(0, -2))
+      ? [...currentValue.matchAll(regex)].map((match) => match[1] || "")
       : [];
 
     const updatedOptions = [...currentOptions];
@@ -207,6 +180,21 @@ const FillInTheBlanksQuestion = ({
       form.setValue(`questions.${questionIndex}.description`, html, {
         shouldDirty: true,
       });
+
+      const regex = /<button[^>]*data-word="([^"]*)"[^>]*>/g;
+      const buttonValues = html ? [...html.matchAll(regex)].map((match) => match[1] || "") : [];
+
+      const updatedOptions = form.getValues(`questions.${questionIndex}.options`)?.map((option) => {
+        return {
+          ...option,
+          displayOrder: buttonValues.indexOf(option.optionText) + 1,
+          isCorrect: buttonValues.includes(option.optionText),
+        };
+      });
+
+      form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
+        shouldDirty: true,
+      });
     });
 
     return () => {
@@ -217,11 +205,9 @@ const FillInTheBlanksQuestion = ({
   useEffect(() => {
     if (!editor) return;
 
-    const regex = /<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>([^<]+)<\/button>/g;
+    const regex = /<button[^>]*data-word="([^"]*)"[^>]*>/g;
     const buttonValues = currentDescription
-      ? [...currentDescription.matchAll(regex)]
-          .map((match) => match[1]?.trim() || "")
-          .map((text) => text.replace(/\n/g, "").slice(0, -2))
+      ? [...currentDescription.matchAll(regex)].map((match) => match[1] || "")
       : [];
 
     const updatedOptions = form.getValues(`questions.${questionIndex}.options`)?.map((option) => {
@@ -235,68 +221,6 @@ const FillInTheBlanksQuestion = ({
       shouldDirty: true,
     });
   }, [currentDescription, form, questionIndex, editor]);
-
-  useEffect(() => {
-    if (!editor) return;
-
-    const handleEditorClick = (event: MouseEvent) => {
-      const button = (event?.target as HTMLElement).closest("button");
-
-      if (button) {
-        button.removeAttribute("contenteditable");
-        const buttonHtml = button.outerHTML;
-        form.setValue(
-          `questions.${questionIndex}.description`,
-          form.getValues(`questions.${questionIndex}.description`)?.replace(buttonHtml, ""),
-          { shouldDirty: true },
-        );
-
-        const optionValue = button.innerText.trim().replace(/\s+/g, " ").slice(0, -2);
-
-        if (optionValue) {
-          const updatedOptions = form
-            .getValues(`questions.${questionIndex}.options`)
-            ?.map((option) =>
-              option.optionText === optionValue ? { ...option, isCorrect: false } : option,
-            );
-          form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
-            shouldDirty: true,
-          });
-        }
-        button.remove();
-
-        const currentValue = form.getValues(`questions.${questionIndex}.description`) as string;
-
-        const regex = /<button[^>]*class="[^"]*bg-primary-100[^"]*"[^>]*>([^<]+)<\/button>/g;
-
-        const buttonValues = currentValue
-          ? [...currentValue.matchAll(regex)]
-              .map((match) => match[1]?.trim() || "")
-              .map((text) => text.replace(/\n/g, "").slice(0, -2))
-          : [];
-
-        const updatedOptions = form
-          .getValues(`questions.${questionIndex}.options`)
-          ?.map((option) => {
-            return {
-              ...option,
-              displayOrder: buttonValues.indexOf(option.optionText) + 1,
-              isCorrect: buttonValues.includes(option.optionText),
-            };
-          });
-
-        form.setValue(`questions.${questionIndex}.options`, updatedOptions, {
-          shouldDirty: true,
-        });
-      }
-    };
-
-    editor.view.dom.addEventListener("click", handleEditorClick);
-
-    return () => {
-      editor.view.dom.removeEventListener("click", handleEditorClick);
-    };
-  }, [editor, form, questionIndex]);
 
   useEffect(() => {
     const editorElement = document.querySelector(".ProseMirror") as HTMLElement;
