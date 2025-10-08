@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import { useAllAnnouncements } from "~/api/queries/admin/useAllAnnouncements";
+import { useScrollToElementWithId } from "~/hooks/useScrollToElementWithId";
 import Loader from "~/modules/common/Loader/Loader";
 
 import AnnouncementsList from "./AnnouncementsList";
@@ -16,6 +17,8 @@ export default function AdminAnnouncements() {
       })),
     [announcements],
   );
+
+  useScrollToElementWithId(!isLoading && !!announcements);
 
   if (isLoading) {
     return (

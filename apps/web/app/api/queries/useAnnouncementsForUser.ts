@@ -4,19 +4,41 @@ import { ApiClient } from "../api-client";
 
 import type { GetAnnouncementsForUserResponse } from "../generated-api";
 
-export const announcementsForUserOptions = () => ({
-  queryKey: ["announcements-for-user"],
+export type AnnouncementFilters = {
+  title?: string;
+  content?: string;
+  authorName?: string;
+  search?: string;
+  isRead?: string;
+};
+
+type QueryOptions = {
+  enabled?: boolean;
+};
+
+export const announcementsForUserOptions = (
+  searchParams?: AnnouncementFilters,
+  options: QueryOptions = { enabled: true },
+) => ({
+  queryKey: ["announcements-for-user", searchParams],
   queryFn: async () => {
-    const response = await ApiClient.api.announcementsControllerGetAnnouncementsForUser();
+    const response = await ApiClient.api.announcementsControllerGetAnnouncementsForUser({
+      ...(searchParams?.title && { title: searchParams.title }),
+      ...(searchParams?.content && { content: searchParams.content }),
+      ...(searchParams?.authorName && { authorName: searchParams.authorName }),
+      ...(searchParams?.search && { search: searchParams.search }),
+      ...(searchParams?.isRead && { isRead: searchParams.isRead }),
+    });
     return response.data;
   },
   select: (data: GetAnnouncementsForUserResponse) => data.data,
+  ...options,
 });
 
-export function useAnnouncementsForUser() {
-  return useQuery(announcementsForUserOptions());
+export function useAnnouncementsForUser(searchParams?: AnnouncementFilters) {
+  return useQuery(announcementsForUserOptions(searchParams));
 }
 
-export function useAnnouncementsForUserSuspense() {
-  return useSuspenseQuery(announcementsForUserOptions());
+export function useAnnouncementsForUserSuspense(searchParams?: AnnouncementFilters) {
+  return useSuspenseQuery(announcementsForUserOptions(searchParams));
 }

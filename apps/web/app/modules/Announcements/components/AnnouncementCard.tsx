@@ -34,7 +34,7 @@ export default function AnnouncementCard({ announcement, isAdminView }: Announce
   };
 
   return (
-    <Card className={cn(!isRead && "border-2 border-primary-800")}>
+    <Card className={cn(!isRead && "border-2 border-primary-800")} id={id}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="size-10 rounded-lg bg-primary-100 p-2">
