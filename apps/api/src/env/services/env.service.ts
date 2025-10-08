@@ -84,7 +84,7 @@ export class EnvService {
   }
 
   async getSSOEnabled() {
-    const [google, microsoft] = await Promise.all([
+    const [google, microsoft, slack] = await Promise.all([
       this.getEnv("VITE_GOOGLE_OAUTH_ENABLED")
         .then((r) => r.value)
         .catch(() => undefined),
@@ -92,11 +92,16 @@ export class EnvService {
       this.getEnv("VITE_MICROSOFT_OAUTH_ENABLED")
         .then((r) => r.value)
         .catch(() => undefined),
+
+      this.getEnv("VITE_SLACK_OAUTH_ENABLED")
+        .then((r) => r.value)
+        .catch(() => undefined),
     ]);
 
     return {
       google,
       microsoft,
+      slack,
     };
   }
 }
