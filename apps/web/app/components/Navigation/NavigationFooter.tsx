@@ -30,7 +30,7 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
               to="/provider-information"
               className={({ isActive }) =>
                 cn("flex w-full items-center gap-x-3 rounded-lg px-4 py-3.5 2xl:p-2", {
-                  "bg-primary-700 text-white": isActive,
+                  "text-contrast bg-primary-700": isActive,
                   "bg-white text-neutral-900": !isActive,
                 })
               }
@@ -64,7 +64,7 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
               to="/settings"
               className={({ isActive }) =>
                 cn("flex w-full items-center gap-x-3 rounded-lg px-4 py-3.5 2xl:p-2", {
-                  "bg-primary-700 text-white": isActive,
+                  "text-contrast bg-primary-700": isActive,
                   "bg-white text-neutral-900": !isActive,
                 })
               }

@@ -331,7 +331,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
                   <Button
                     onClick={() => setIsAddingWord(true)}
                     type="button"
-                    className="mb-4 mt-4 flex items-center rounded-full bg-primary-700 text-white"
+                    className="mb-4 mt-4 flex items-center"
                   >
                     <Icon name="Plus" />
                     {t("adminCourseView.curriculum.lesson.button.addWords")}
@@ -349,12 +349,7 @@ const FillInTheBlanksQuestion = ({ form, questionIndex }: FillInTheBlankQuestion
                   placeholder={t("adminCourseView.curriculum.lesson.placeholder.enterWord")}
                   className="flex-1"
                 />
-                <Button
-                  onClick={handleAddWord}
-                  data-testid="add-word"
-                  type="button"
-                  className="bg-primary-700 text-white"
-                >
+                <Button onClick={handleAddWord} data-testid="add-word" type="button">
                   {t("common.button.add")}
                 </Button>
                 <Button
