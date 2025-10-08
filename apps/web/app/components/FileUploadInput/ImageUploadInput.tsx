@@ -23,7 +23,7 @@ const ImageUploadInput = ({
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-2">
-      <div className="relative flex h-80 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100">
+      <div className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100">
         {imageUrl && (
           <img
             src={imageUrl || field.value}
@@ -51,7 +51,7 @@ const ImageUploadInput = ({
               "text-gray-600": !field.value,
             })}
           >
-            {field.value ? "SVG, PNG, JPG (max. to 20MB)" : "PNG, JPG or JPEG (max. 800x400px)"}
+            PNG, JPG or JPEG (max. 20 MB, 800x800px)
           </div>
         </div>
         <input
