@@ -150,7 +150,8 @@
     "allCourses": "Wszystkie kursy",
     "myCourses": "Moje kursy",
     "availableCourses": "Dostępne kursy",
-    "noSearchResults": "Brak wyników wyszukiwania dla:"
+    "noSearchResults": "Brak wyników wyszukiwania dla:",
+    "announcements": "Powiadomienia"
   },
   "providerInformation": {
     "title": "Informacje o Dostawcy",

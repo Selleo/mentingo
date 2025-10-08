@@ -1,6 +1,4 @@
-import { Link } from "@remix-run/react";
 import { useQueries } from "@tanstack/react-query";
-import { replace, toLower, upperFirst } from "lodash-es";
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePopper } from "react-popper";
@@ -11,14 +9,21 @@ import {
   studentCoursesQueryOptions,
 } from "../../api/queries";
 import { useGroupsQuery } from "../../api/queries/admin/useGroups";
+import { announcementsForUserOptions } from "../../api/queries/useAnnouncementsForUser";
 import { allCoursesQueryOptions } from "../../api/queries/useCourses";
 import { usersQueryOptions } from "../../api/queries/useUsers";
 import { GlobalSearchMac, GlobalSearchWin } from "../../assets/svgs";
-import { SegmentedRing } from "../../assets/svgs/segmented-ring";
 import { useDebounce } from "../../hooks/useDebounce";
 import { useUserRole } from "../../hooks/useUserRole";
 import { cn } from "../../lib/utils";
 import { SearchInput } from "../SearchInput/SearchInput";
+
+import { AnnouncementEntry } from "./GlobalSearchEntries/AnnouncementEntry";
+import { CategoryEntry } from "./GlobalSearchEntries/CategoryEntry";
+import { CourseEntry } from "./GlobalSearchEntries/CourseEntry";
+import { GroupEntry } from "./GlobalSearchEntries/GroupEntry";
+import { MyCourseEntry } from "./GlobalSearchEntries/MyCourseEntry";
+import { UserEntry } from "./GlobalSearchEntries/UserEntry";
 
 import type {
   GetAllCategoriesResponse,
@@ -27,14 +32,9 @@ import type {
   GetUsersResponse,
   GetStudentCoursesResponse,
   GetAvailableCoursesResponse,
+  GetAnnouncementsForUserResponse,
 } from "../../api/generated-api";
 import type { SearchInputProps } from "../SearchInput/SearchInput";
-
-const normalizeText = (value?: string | null): string => {
-  if (!value) return "";
-  const spaced = replace(value, /[_-]+/g, " ");
-  return upperFirst(toLower(spaced));
-};
 
 type NavigationGlobalSearchProps = SearchInputProps & {
   containerClassName?: string;
@@ -89,6 +89,14 @@ type GlobalSearchItem =
         item: GetAllGroupsResponse["data"][number];
         onSelect: () => void;
       }) => JSX.Element;
+    }
+  | {
+      resultType: "announcements";
+      resultData: GetAnnouncementsForUserResponse["data"];
+      Component: (props: {
+        item: GetAnnouncementsForUserResponse["data"][number];
+        onSelect: () => void;
+      }) => JSX.Element;
     };
 
 export const NavigationGlobalSearch = forwardRef<HTMLDivElement, NavigationGlobalSearchProps>(
@@ -97,10 +105,11 @@ export const NavigationGlobalSearch = forwardRef<HTMLDivElement, NavigationGloba
     const [isFocused, setIsFocused] = useState(false);
     const debouncedSearch = useDebounce(searchParams, 300);
     const { isAdmin, isContentCreator } = useUserRole();
-    const isAdminOrContentCreator = isAdmin || isContentCreator;
     const searchContainerRef = useRef<HTMLDivElement | null>(null);
     const [referenceElement, setReferenceElement] = useState<HTMLElement | null>(null);
     const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
+
+    const isAdminOrContentCreator = isAdmin || isContentCreator;
 
     const { styles, attributes } = usePopper(referenceElement, popperElement, {
       placement: "bottom-start",
@@ -230,9 +239,13 @@ const AdminResults = ({
         { name: debouncedSearch },
         { enabled: isAllowed && debouncedSearch.length >= 3 },
       ),
+      announcementsForUserOptions(
+        { title: debouncedSearch },
+        { enabled: isAllowed && debouncedSearch.length >= 3 },
+      ),
     ],
     combine: (results) => {
-      const [courses, users, categories, groups] = results as Array<{
+      const [courses, users, categories, groups, announcements] = results as Array<{
         data?: unknown[];
         isFetching?: boolean;
       }>;
@@ -266,6 +279,13 @@ const AdminResults = ({
             ([] as GetAllGroupsResponse["data"]),
           Component: GroupEntry,
         },
+        {
+          resultType: "announcements",
+          resultData:
+            (announcements?.data as GetAnnouncementsForUserResponse["data"] | undefined) ??
+            ([] as GetAnnouncementsForUserResponse["data"]),
+          Component: AnnouncementEntry,
+        },
       ];
 
       const isFetching = (results as Array<{ isFetching?: boolean }>).some((r) =>
@@ -298,27 +318,32 @@ const StudentResults = ({
         { title: debouncedSearch },
         { enabled: debouncedSearch.length >= 3 },
       ),
+      announcementsForUserOptions(
+        { search: debouncedSearch },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
     ],
     combine: (results) => {
-      const [studentCourses, availableCourses] = results as Array<{
-        data?: unknown[];
-        isFetching?: boolean;
-      }>;
+      const [studentCourses, availableCourses, announcements] = results;
+      const studentCoursesData = studentCourses?.data;
+      const availableCoursesData = availableCourses?.data;
+      const announcementsData = announcements?.data;
 
       const mapped: GlobalSearchItem[] = [
         {
           resultType: "myCourses",
-          resultData:
-            (studentCourses?.data as GetStudentCoursesResponse["data"] | undefined) ??
-            ([] as GetStudentCoursesResponse["data"]),
-          Component: CourseEntryMyCourses,
+          resultData: studentCoursesData ?? [],
+          Component: MyCourseEntry,
         },
         {
           resultType: "availableCourses",
-          resultData:
-            (availableCourses?.data as GetAvailableCoursesResponse["data"] | undefined) ??
-            ([] as GetAvailableCoursesResponse["data"]),
+          resultData: availableCoursesData ?? [],
           Component: CourseEntry,
+        },
+        {
+          resultType: "announcements",
+          resultData: announcementsData ?? [],
+          Component: AnnouncementEntry,
         },
       ];
 
@@ -385,119 +410,5 @@ const Content = ({
         <div className="py-4 text-center text-sm text-neutral-500">Searching…</div>
       )}
     </>
-  );
-};
-
-const CourseEntry = ({
-  item,
-  onSelect,
-}: {
-  item: GetAllCoursesResponse["data"][number];
-  onSelect: () => void;
-}) => {
-  const { isStudent } = useUserRole();
-
-  return (
-    <Link
-      to={isStudent ? `/course/${item.id}` : `/admin/beta-courses/${item.id}`}
-      onClick={onSelect}
-    >
-      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50">
-        <img
-          src={item?.thumbnailUrl ?? ""}
-          alt={item.title}
-          className="size-4 rounded-sm bg-[#D9D9D9]"
-        />
-        <span className="line-clamp-1 flex-1">{item.title}</span>
-        <span className="text-md ps-3 text-neutral-600">{item.category}</span>
-      </li>
-    </Link>
-  );
-};
-
-const CourseEntryMyCourses = ({
-  item,
-  onSelect,
-}: {
-  item: GetStudentCoursesResponse["data"][number];
-  onSelect: () => void;
-}) => {
-  const { isStudent } = useUserRole();
-
-  return (
-    <Link
-      to={isStudent ? `/course/${item.id}` : `/admin/beta-courses/${item.id}`}
-      onClick={onSelect}
-    >
-      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50">
-        <img
-          src={item?.thumbnailUrl ?? ""}
-          alt={item.title}
-          className="size-4 rounded-sm bg-[#D9D9D9]"
-        />
-        <span className="line-clamp-1 flex-1">{item.title}</span>
-        <span className="flex items-center gap-2 ps-3 text-neutral-600">
-          <SegmentedRing
-            segments={item.courseChapterCount}
-            completed={item.completedChapterCount}
-            size={16}
-          />
-          <span className="text-md text-neutral-950">{`${item.completedChapterCount}/${item.courseChapterCount}`}</span>
-        </span>
-      </li>
-    </Link>
-  );
-};
-const UserEntry = ({
-  item,
-  onSelect,
-}: {
-  item: GetUsersResponse["data"][number];
-  onSelect: () => void;
-}) => {
-  return (
-    <Link to={`/admin/users/${item.id}`} onClick={onSelect}>
-      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50">
-        <img
-          src={item?.profilePictureUrl ?? ""}
-          alt={item.firstName}
-          className="size-4 rounded-full bg-[#D9D9D9]"
-        />
-        <span className="line-clamp-1 flex-1">
-          {item.firstName} {item.lastName}
-        </span>
-        <span className="text-md ps-3 text-neutral-600">{normalizeText(item.role)}</span>
-      </li>
-    </Link>
-  );
-};
-const CategoryEntry = ({
-  item,
-  onSelect,
-}: {
-  item: GetAllCategoriesResponse["data"][number];
-  onSelect: () => void;
-}) => {
-  return (
-    <Link to={`/admin/categories/${item.id}`} onClick={onSelect}>
-      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50">
-        <span className="line-clamp-1">{item.title}</span>
-      </li>
-    </Link>
-  );
-};
-const GroupEntry = ({
-  item,
-  onSelect,
-}: {
-  item: GetAllGroupsResponse["data"][number];
-  onSelect: () => void;
-}) => {
-  return (
-    <Link to={`/admin/groups/${item.id}`} onClick={onSelect}>
-      <li className="rounded-md px-[8px] py-[6px] text-sm text-neutral-800 hover:bg-primary-50">
-        <span className="line-clamp-1">{item.name}</span>
-      </li>
-    </Link>
   );
 };

@@ -149,7 +149,8 @@
     "allCourses": "All Courses",
     "myCourses": "My Courses",
     "availableCourses": "Available Courses",
-    "noSearchResults": "No search results for:"
+    "noSearchResults": "No search results for:",
+    "announcements": "Announcements"
   },
   "providerInformation": {
     "title": "Provider Information",

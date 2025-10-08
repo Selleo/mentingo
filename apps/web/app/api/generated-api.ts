@@ -4946,10 +4946,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AnnouncementsControllerGetAnnouncementsForUser
      * @request GET:/api/announcements/user/me
      */
-    announcementsControllerGetAnnouncementsForUser: (params: RequestParams = {}) =>
+    announcementsControllerGetAnnouncementsForUser: (
+      query?: {
+        title?: string;
+        content?: string;
+        authorName?: string;
+        search?: string;
+        isRead?: string;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetAnnouncementsForUserResponse, any>({
         path: `/api/announcements/user/me`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
