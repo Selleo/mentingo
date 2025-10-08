@@ -78,14 +78,6 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
     })();
   }
 
-  // super({
-  //   authorizationURL: "https://slack.com/openid/connect/authorize",
-  //   tokenURL: "https://slack.com/api/openid.connect.token",
-  //   clientID: clientID || "test_slack_client_id",
-  //   clientSecret: clientSecret || "test_slack_client_secret",
-  //   callbackURL: configService.get<string>("slack_authorization.callbackURL"),
-  //   scope: ["openid", "profile", "email"],
-  // });
   async validate(accessToken: string): Promise<ProviderLoginUserType> {
     const response = await axios.get("https://slack.com/api/users.identity", {
       headers: { Authorization: `Bearer ${accessToken}` },
