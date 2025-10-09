@@ -14288,6 +14288,9 @@
               },
               "microsoft": {
                 "type": "string"
+              },
+              "slack": {
+                "type": "string"
               }
             }
           }

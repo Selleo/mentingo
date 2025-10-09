@@ -2299,6 +2299,7 @@ export interface GetFrontendSSOEnabledResponse {
   data: {
     google?: string;
     microsoft?: string;
+    slack?: string;
   };
 }
 

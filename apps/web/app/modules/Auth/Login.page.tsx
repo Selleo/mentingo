@@ -28,8 +28,6 @@ const loginSchema = (t: (key: string) => string) =>
     rememberMe: z.boolean().optional(),
   });
 
-const isSlackOAuthEnabled = import.meta.env.VITE_SLACK_OAUTH_ENABLED === "true";
-
 export default function LoginPage() {
   const { t } = useTranslation();
 
@@ -40,6 +38,9 @@ export default function LoginPage() {
 
   const isMicrosoftOAuthEnabled =
     (ssoEnabled?.data.microsoft ?? import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED) === "true";
+
+  const isSlackOAuthEnabled =
+    (ssoEnabled?.data.slack ?? import.meta.env.VITE_SLACK_OAUTH_ENABLED) === "true";
 
   const { mutateAsync: loginUser } = useLoginUser();
 
@@ -56,7 +57,7 @@ export default function LoginPage() {
 
   const isAnyProviderEnabled = useMemo(
     () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
-    [],
+    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled],
   );
 
   const onSubmit = (data: LoginBody) => {
