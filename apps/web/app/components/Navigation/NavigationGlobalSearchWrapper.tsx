@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 
 import { useGlobalSettings } from "../../api/queries/useGlobalSettings";
 import {
@@ -19,25 +22,34 @@ import { Separator } from "../ui/separator";
 import { GlobalSearchAdminResults } from "./GlobalSearch/GlobalSearchAdminResults";
 import { GlobalSearchContentCreatorResults } from "./GlobalSearch/GlobalSearchContentCreatorResults";
 import { GlobalSearchStudentResults } from "./GlobalSearch/GlobalSearchStudentResults";
+import { NavigationMenuButton } from "./NavigationMenuButton";
 
 export type NavigationGlobalSearchWrapperProps = {
   containerClassName?: string;
   autoFocusOnMount?: boolean;
-  isDialogOpen: boolean;
-  setIsDialogOpen: (isDialogOpen: boolean) => void;
 };
 
 export const NavigationGlobalSearchWrapper = ({
   containerClassName,
-  isDialogOpen,
-  setIsDialogOpen,
 }: NavigationGlobalSearchWrapperProps) => {
   const [searchParams, setSearchParams] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const debouncedSearch = useDebounce(searchParams, 300);
   const { isAdmin, isContentCreator } = useUserRole();
   const totalItemsRef = useRef(0);
+  const { t } = useTranslation();
   const { data: globalSettings } = useGlobalSettings();
+  const [isGlobalSearchDialogOpen, setIsGlobalSearchDialogOpen] = useState(false);
+
+  useHandleKeyboardShortcut({
+    shortcuts: [
+      { key: "k", metaKey: true },
+      { key: "k", ctrlKey: true },
+    ],
+    onShortcut: () => {
+      setIsGlobalSearchDialogOpen((prev) => !prev);
+    },
+  });
 
   const companyName =
     globalSettings?.companyInformation?.companyName &&
@@ -60,10 +72,10 @@ export const NavigationGlobalSearchWrapper = ({
 
   useEffect(() => {
     setSearchParams("");
-    if (isDialogOpen) {
+    if (isGlobalSearchDialogOpen) {
       setActiveIndex(0);
     }
-  }, [isDialogOpen]);
+  }, [isGlobalSearchDialogOpen]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
@@ -82,7 +94,7 @@ export const NavigationGlobalSearchWrapper = ({
 
         if (clickableElement instanceof HTMLElement) {
           clickableElement.click();
-          setIsDialogOpen(false);
+          setIsGlobalSearchDialogOpen(false);
           setSearchParams("");
         }
       }
@@ -91,13 +103,26 @@ export const NavigationGlobalSearchWrapper = ({
 
   return (
     <div className={cn("relative", containerClassName)}>
+      <NavigationMenuButton
+        item={{ iconName: "Search", label: t("navigationSideBar.findInApplication") }}
+        onClick={() => setIsGlobalSearchDialogOpen(true)}
+        wrapperClassName={cn("list-none visible sm:hidden 2xl:block 3xl:hidden")}
+        className="justify-center bg-neutral-50 p-2 2xl:h-[42px] 2xl:w-[42px] 2xl:bg-white"
+        labelClassName="hidden"
+      />
+
       <button
-        onClick={() => setIsDialogOpen(true)}
-        className="h-[42px] w-full max-w-[320px] rounded-lg border border-neutral-300 py-2 pl-8 pr-8 text-neutral-800 transition-colors hover:border-primary-500 hover:text-primary-500 md:max-w-none"
+        onClick={() => setIsGlobalSearchDialogOpen(true)}
+        className={cn(
+          "h-[42px] w-full min-w-[160px] max-w-[320px] py-2 pl-8 pr-8 md:max-w-none",
+          "text-neutral-800 transition-colors hover:border-primary-500 hover:text-primary-500",
+          "rounded-lg border border-neutral-300",
+          "hidden sm:block 2xl:hidden 3xl:block",
+        )}
       >
         <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform transition-colors" />
         <span className="body-base inline-block w-full text-start text-current transition-colors">
-          Search...
+          {t("globalSearch.search")}
         </span>
         {isMac ? (
           <GlobalSearchMac className="absolute right-2 top-1/2 -translate-y-1/2 transform" />
@@ -106,7 +131,7 @@ export const NavigationGlobalSearchWrapper = ({
         )}
       </button>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isGlobalSearchDialogOpen} onOpenChange={setIsGlobalSearchDialogOpen}>
         <DialogContent
           noCloseButton
           style={{ padding: 0, overflow: "hidden" }}
@@ -122,10 +147,10 @@ export const NavigationGlobalSearchWrapper = ({
             {debouncedSearch.length < 3 && (
               <div className="flex flex-col px-6 pt-4">
                 <span className="text-center text-sm font-semibold text-neutral-950">
-                  Search in {companyName}
+                  {t("globalSearch.searchIn", { companyName })}
                 </span>
                 <span className="text-normal-800 text-center text-[12px] font-normal leading-[160%]">
-                  Start typing to search through courses, announcements and more.
+                  {t("globalSearch.searchInDescription")}
                 </span>
               </div>
             )}
@@ -144,13 +169,13 @@ export const NavigationGlobalSearchWrapper = ({
             <div className="text-md flex h-5 items-center gap-[6px]">
               <KeyboardArrows />
               <span className="text-md text-[12px] font-semibold leading-[160%] text-neutral-800">
-                Navigate
+                {t("globalSearch.navigate")}
               </span>
             </div>
             <div className="flex h-5 items-center gap-[6px]">
               <KeyboardEnter />
               <span className="text-md text-[12px] font-semibold leading-[160%] text-neutral-800">
-                Go to
+                {t("globalSearch.goTo")}
               </span>
             </div>
             <div className="flex h-5 items-center gap-[6px] text-[12px] font-semibold leading-[160%] text-neutral-800">
@@ -163,7 +188,7 @@ export const NavigationGlobalSearchWrapper = ({
                   <GlobalSearchWin height={20} fill="#FCFCFC" />
                 )}
               </div>
-              <span>Close</span>
+              <span>{t("globalSearch.close")}</span>
             </div>
           </div>
         </DialogContent>

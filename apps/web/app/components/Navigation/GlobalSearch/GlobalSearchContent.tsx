@@ -11,6 +11,7 @@ import type {
   GetAllGroupsResponse,
   GetAnnouncementsForUserResponse,
   GetAvailableCoursesResponse,
+  GetEnrolledLessonsResponse,
   GetStudentCoursesResponse,
   GetUsersResponse,
 } from "~/api/generated-api";
@@ -71,6 +72,14 @@ export type GlobalSearchItem =
         item: GetAnnouncementsForUserResponse["data"][number];
         onSelect: () => void;
       }) => JSX.Element;
+    }
+  | {
+      resultType: "lessons";
+      resultData: GetEnrolledLessonsResponse["data"];
+      Component: (props: {
+        item: GetEnrolledLessonsResponse["data"][number];
+        onSelect: () => void;
+      }) => JSX.Element;
     };
 
 export const GlobalSearchContent = ({
@@ -117,10 +126,10 @@ export const GlobalSearchContent = ({
                 <div className="flex flex-col px-6 py-[50px]">
                   <NoData className="mx-auto" />
                   <span className="pt-4 text-center text-sm font-semibold text-neutral-950">
-                    Niestety nic nie znaleziono
+                    {t("globalSearch.notFound")}
                   </span>
                   <span className="text-normal-800 text-center text-[12px] font-normal leading-[160%]">
-                    Spróbuj ponownie użyć innych słów kluczowych
+                    {t("globalSearch.tryAgain")}
                   </span>
                 </div>
               );
@@ -131,7 +140,7 @@ export const GlobalSearchContent = ({
               return (
                 <div key={section.resultType} className="w-full">
                   <h3 id={sectionId} className="details-md px-[8px] py-[2px] text-neutral-600">
-                    {t(`globalSearch.${section.resultType}`)}
+                    {t(`globalSearch.entries.${section.resultType}`)}
                   </h3>
                   <ul aria-labelledby={sectionId} className="space-y-1">
                     {section.resultData.map((item, index) => {

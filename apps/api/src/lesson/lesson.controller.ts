@@ -39,11 +39,12 @@ import {
   updateEmbedLessonSchema,
   CreateEmbedLessonBody,
   UpdateEmbedLessonBody,
+  enrolledLessonSchema,
 } from "./lesson.schema";
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
 
-import type { LessonShow } from "./lesson.schema";
+import type { EnrolledLesson, EnrolledLessonsFilters, LessonShow } from "./lesson.schema";
 
 @Controller("lesson")
 @UseGuards(RolesGuard)
@@ -52,6 +53,34 @@ export class LessonController {
     private readonly adminLessonsService: AdminLessonService,
     private readonly lessonService: LessonService,
   ) {}
+
+  @Get("student-lessons")
+  @Roles(USER_ROLES.STUDENT)
+  @Validate({
+    request: [
+      { type: "query", name: "title", schema: Type.String() },
+      { type: "query", name: "description", schema: Type.String() },
+      { type: "query", name: "searchQuery", schema: Type.String() },
+      { type: "query", name: "lessonCompleted", schema: Type.String() },
+    ],
+    response: baseResponse(Type.Array(enrolledLessonSchema)),
+  })
+  async getEnrolledLessons(
+    @Query("title") title: string,
+    @Query("description") description: string,
+    @Query("searchQuery") searchQuery: string,
+    @Query("lessonCompleted") lessonCompleted: string,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<EnrolledLesson[]>> {
+    const filters: EnrolledLessonsFilters = {
+      title,
+      description,
+      searchQuery,
+      lessonCompleted: lessonCompleted ? lessonCompleted === "true" : undefined,
+    };
+    const lessons = await this.lessonService.getEnrolledLessons(userId, filters);
+    return new BaseResponse(lessons);
+  }
 
   @Get(":id")
   @Validate({

@@ -24,6 +24,8 @@ import { LessonRepository } from "../repositories/lesson.repository";
 
 import type {
   AnswerQuestionBody,
+  EnrolledLesson,
+  EnrolledLessonsFilters,
   LessonShow,
   QuestionBody,
   QuestionDetails,
@@ -317,6 +319,13 @@ export class LessonService {
         throw new ConflictException(`Failed to delete student quiz answers: ${error.message}`);
       }
     });
+  }
+
+  async getEnrolledLessons(
+    userId: UUIDType,
+    filters: EnrolledLessonsFilters,
+  ): Promise<EnrolledLesson[]> {
+    return await this.lessonRepository.getEnrolledLessons(userId, filters);
   }
 
   // async studentAnswerOnQuestion(
