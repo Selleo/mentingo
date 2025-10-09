@@ -57,6 +57,7 @@
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
     },
     "details": {
+      "imageCrop": "PNG, JPG, JPEG lub SVG",
       "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 100MB)",
       "presentation": "PPT/PPTX (maksymalnie 100MB)"
     },

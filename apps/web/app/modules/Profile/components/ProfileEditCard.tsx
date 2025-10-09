@@ -2,11 +2,11 @@ import { useMemo, useRef } from "react";
 import { Controller, type Control, type UseFormSetValue } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
+import { ImageCropUploadInput } from "~/components/FileUploadInput/ImageCropUploadInput";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
+import { useHandleImageCropUpload } from "~/hooks/useHandleImageCropUpload";
 
 import { type EditProfileFieldType, ProfileEditFieldRenderer } from "./ProfileEditFieldRenderer";
 
@@ -46,9 +46,11 @@ export const ProfileEditCard = ({
   const {
     imageUrl: userAvatarUrl,
     isUploading,
+    isCroppable,
     handleImageUpload,
+    handleImageCropUpload,
     removeImage,
-  } = useHandleImageUpload({
+  } = useHandleImageCropUpload({
     onUpload: (file) => {
       setValue("userAvatar", file);
     },
@@ -59,6 +61,7 @@ export const ProfileEditCard = ({
       }
     },
     initialImageUrl: initialUserAvatarUrl,
+    isInitialImageCroppable: false,
   });
 
   const visiblePersonalFields = useMemo(() => {
@@ -122,20 +125,19 @@ export const ProfileEditCard = ({
           key="userAvatar"
           name="userAvatar"
           control={control}
-          render={({ field }) => (
+          render={() => (
             <div className="mb-4 flex flex-col gap-y-2">
               <Label htmlFor="fileUrl">{t("contentCreatorView.field.uploadThumbnailLabel")}</Label>
-              <ImageUploadInput
-                field={{
-                  ...field,
-                  value: userAvatarUrl || undefined,
-                }}
-                handleImageUpload={handleImageUpload}
-                isUploading={isUploading}
-                imageUrl={userAvatarUrl}
-                fileInputRef={fileInputRef}
-              />
-              {isUploading && <p>{t("common.other.uploadingImage")}</p>}
+              <div className="relative aspect-square">
+                <ImageCropUploadInput
+                  handleImageUpload={handleImageUpload}
+                  handleImageCropUpload={handleImageCropUpload}
+                  isUploading={isUploading}
+                  isCroppable={isCroppable}
+                  imageUrl={userAvatarUrl}
+                  fileInputRef={fileInputRef}
+                />
+              </div>
             </div>
           )}
         />
