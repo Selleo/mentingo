@@ -22,8 +22,6 @@ export function useHandleImageCropUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [isCroppable, setIsCroppable] = useState(isInitialImageCroppable);
 
-  console.log(initialImageUrl, imageUrl);
-
   const handleImageUpload = useCallback(async (file: File) => {
     setImageUrl(URL.createObjectURL(file));
   }, []);
