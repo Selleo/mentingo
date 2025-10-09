@@ -10,10 +10,9 @@ import { cn } from "~/lib/utils";
 
 type NavigationFooterProps = {
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
-  showLabelsOn2xl?: boolean;
 };
 
-export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: NavigationFooterProps) {
+export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) {
   const { mutate: logout } = useLogoutUser();
   const { t } = useTranslation();
 
@@ -39,9 +38,6 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
               <span
                 className={cn(
                   "line-clamp-1 truncate whitespace-nowrap capitalize 2xl:sr-only 3xl:not-sr-only",
-                  {
-                    "2xl:not-sr-only": showLabelsOn2xl,
-                  },
                 )}
               >
                 {t("navigationSideBar.providerInformation")}
@@ -73,9 +69,6 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
               <span
                 className={cn(
                   "line-clamp-1 truncate whitespace-nowrap capitalize 2xl:sr-only 3xl:not-sr-only",
-                  {
-                    "2xl:not-sr-only": showLabelsOn2xl,
-                  },
                 )}
               >
                 {t("navigationSideBar.settings")}
@@ -108,9 +101,6 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
               <span
                 className={cn(
                   "line-clamp-1 truncate whitespace-nowrap 2xl:sr-only 3xl:not-sr-only",
-                  {
-                    "2xl:not-sr-only": showLabelsOn2xl,
-                  },
                 )}
               >
                 {t("navigationSideBar.logout")}

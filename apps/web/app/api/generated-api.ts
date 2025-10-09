@@ -3510,6 +3510,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetAllCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         creationDateRange?: string[];
@@ -3550,6 +3552,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetStudentCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -3612,6 +3616,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetAvailableCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -3658,6 +3664,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         scope?: "all" | "enrolled" | "available";
         /** @format uuid */
         excludeCourseId?: string;
+        title?: string;
+        description?: string;
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>

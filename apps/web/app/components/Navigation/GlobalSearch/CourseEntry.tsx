@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 
-import { useUserRole } from "~/hooks/useUserRole";
+import { useUserRole } from "../../../hooks/useUserRole";
 
 import type { GetAllCoursesResponse } from "~/api/generated-api";
 
@@ -17,8 +17,9 @@ export const CourseEntry = ({
     <Link
       to={isStudent ? `/course/${item.id}` : `/admin/beta-courses/${item.id}`}
       onClick={onSelect}
+      className="group focus:outline-none focus-visible:outline-none"
     >
-      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50">
+      <li className="flex items-center gap-3 rounded-md px-[8px] py-[6px] text-sm text-neutral-900 hover:bg-primary-50 group-focus:bg-primary-100">
         <img
           src={item?.thumbnailUrl ?? ""}
           alt={item.title}
