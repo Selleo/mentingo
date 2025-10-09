@@ -143,14 +143,25 @@
     }
   },
   "globalSearch": {
-    "users": "Users",
-    "categories": "Categories",
-    "groups": "Groups",
-    "allCourses": "All Courses",
-    "myCourses": "My Courses",
-    "availableCourses": "Available Courses",
-    "noSearchResults": "No search results for:",
-    "announcements": "Announcements"
+    "notFound": "Unfortunately nothing was found",
+    "tryAgain": "Try again using different keywords",
+    "search": "Search...",
+    "searchIn": "Search in {{companyName}}",
+    "searchInDescription": "Start typing to search through courses, announcements and more.",
+    "navigate": "Navigate",
+    "goTo": "Go to",
+    "close": "Close",
+    "entries": {
+      "users": "Users",
+      "categories": "Categories",
+      "groups": "Groups",
+      "allCourses": "All Courses",
+      "myCourses": "My Courses",
+      "availableCourses": "Available Courses",
+      "noSearchResults": "No search results for:",
+      "announcements": "Announcements",
+      "lessons": "Lessons"
+    }
   },
   "providerInformation": {
     "title": "Provider Information",

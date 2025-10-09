@@ -1,5 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 
+import { studentLessonsQueryOptions } from "~/api/queries";
 import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
 import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
 import { studentCoursesQueryOptions } from "~/api/queries/useStudentCourses";
@@ -7,6 +8,7 @@ import { studentCoursesQueryOptions } from "~/api/queries/useStudentCourses";
 import { AnnouncementEntry } from "./AnnouncementEntry";
 import { CourseEntry } from "./CourseEntry";
 import { GlobalSearchContent } from "./GlobalSearchContent";
+import { LessonEntry } from "./LessonEntry";
 import { MyCourseEntry } from "./MyCourseEntry";
 
 import type { GlobalSearchItem } from "./GlobalSearchContent";
@@ -36,12 +38,17 @@ export const GlobalSearchStudentResults = ({
         { search: debouncedSearch },
         { enabled: debouncedSearch.length >= 3 },
       ),
+      studentLessonsQueryOptions(
+        { searchQuery: debouncedSearch, lessonCompleted: false },
+        { enabled: debouncedSearch.length >= 3 },
+      ),
     ],
     combine: (results) => {
-      const [studentCourses, availableCourses, announcements] = results;
+      const [studentCourses, availableCourses, announcements, studentLessons] = results;
       const studentCoursesData = studentCourses?.data;
       const availableCoursesData = availableCourses?.data;
       const announcementsData = announcements?.data;
+      const studentLessonsData = studentLessons?.data;
 
       const mapped: GlobalSearchItem[] = [
         {
@@ -58,6 +65,11 @@ export const GlobalSearchStudentResults = ({
           resultType: "announcements",
           resultData: announcementsData ?? [],
           Component: AnnouncementEntry,
+        },
+        {
+          resultType: "lessons",
+          resultData: studentLessonsData ?? [],
+          Component: LessonEntry,
         },
       ];
 

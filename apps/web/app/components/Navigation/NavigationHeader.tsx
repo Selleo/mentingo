@@ -4,7 +4,7 @@ import { MobileMenuToggle } from "~/components/Navigation/MobileMenuToggle";
 
 import { PlatformLogo } from "../PlatformLogo";
 
-// import { NavigationGlobalSearch } from "./NavigationGlobalSearch";
+import { NavigationGlobalSearchWrapper } from "./NavigationGlobalSearchWrapper";
 
 import type { Dispatch, SetStateAction } from "react";
 
@@ -30,7 +30,7 @@ export function NavigationHeader({ isMobileNavOpen, setIsMobileNavOpen }: Naviga
         />
       </Link>
       <div className="flex gap-x-2">
-        {/* <NavigationGlobalSearch wrapperClassName="not-sr-only 2xl:sr-only" className="h-10" /> */}
+        <NavigationGlobalSearchWrapper containerClassName="block 2xl:hidden" />
 
         <MobileMenuToggle
           isMobileNavOpen={isMobileNavOpen}

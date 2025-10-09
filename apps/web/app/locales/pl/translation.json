@@ -144,14 +144,25 @@
     }
   },
   "globalSearch": {
-    "users": "Użytkownicy",
-    "categories": "Kategorie",
-    "groups": "Grupy",
-    "allCourses": "Wszystkie kursy",
-    "myCourses": "Moje kursy",
-    "availableCourses": "Dostępne kursy",
-    "noSearchResults": "Brak wyników wyszukiwania dla:",
-    "announcements": "Powiadomienia"
+    "notFound": "Niestety nic nie znaleziono",
+    "tryAgain": "Spróbuj ponownie użyć innych słów kluczowych",
+    "search": "Szukaj...",
+    "searchIn": "Szukaj w {{companyName}}",
+    "searchInDescription": "Rozpocznij pisanie, aby wyszukać kursy, ogłoszenia i więcej.",
+    "navigate": "Nawigacja",
+    "goTo": "Przejdź do",
+    "close": "Zamknij",
+    "entries": {
+      "users": "Użytkownicy",
+      "categories": "Kategorie",
+      "groups": "Grupy",
+      "allCourses": "Wszystkie kursy",
+      "myCourses": "Moje kursy",
+      "availableCourses": "Dostępne kursy",
+      "noSearchResults": "Brak wyników wyszukiwania dla:",
+      "announcements": "Powiadomienia",
+      "lessons": "Lekcje"
+    }
   },
   "providerInformation": {
     "title": "Informacje o Dostawcy",

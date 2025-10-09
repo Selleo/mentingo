@@ -1,9 +1,7 @@
-import { useState, Fragment } from "react";
-import { useTranslation } from "react-i18next";
+import { Fragment } from "react";
 
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
-import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 
@@ -11,7 +9,6 @@ import { NavigationFooter } from "./NavigationFooter";
 import { NavigationGlobalSearchWrapper } from "./NavigationGlobalSearchWrapper";
 import { NavigationHeader } from "./NavigationHeader";
 import { NavigationMenu } from "./NavigationMenu";
-import { NavigationMenuButton } from "./NavigationMenuButton";
 import { useMobileNavigation } from "./useMobileNavigation";
 
 import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
@@ -22,18 +19,6 @@ type DashboardNavigationProps = { menuItems: NavigationGroups[] };
 export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
   const { role } = useUserRole();
-  const { t } = useTranslation();
-  const [isGlobalSearchDialogOpen, setIsGlobalSearchDialogOpen] = useState(false);
-
-  useHandleKeyboardShortcut({
-    shortcuts: [
-      { key: "k", metaKey: true },
-      { key: "k", ctrlKey: true },
-    ],
-    onShortcut: () => {
-      setIsGlobalSearchDialogOpen((prev) => !prev);
-    },
-  });
 
   if (!role) return null;
 
@@ -51,20 +36,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           setIsMobileNavOpen={setIsMobileNavOpen}
         />
 
-        <div className="hidden 2xl:block 3xl:hidden">
-          <NavigationMenuButton
-            item={{ iconName: "Search", label: t("navigationSideBar.findInApplication") }}
-            onClick={() => setIsGlobalSearchDialogOpen(true)}
-            wrapperClassName="list-none h-[42px] w-[42px]"
-            className="justify-center"
-          />
-        </div>
-
-        <NavigationGlobalSearchWrapper
-          containerClassName="hidden 3xl:block"
-          isDialogOpen={isGlobalSearchDialogOpen}
-          setIsDialogOpen={setIsGlobalSearchDialogOpen}
-        />
+        <NavigationGlobalSearchWrapper containerClassName="hidden 2xl:block" />
 
         <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav
