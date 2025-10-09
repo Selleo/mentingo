@@ -74,6 +74,8 @@ export const ProfileEditCard = ({
         );
   }, [isAdminLike]);
 
+  console.log(isCroppable);
+
   return (
     <section className="flex w-full max-w-[720px] flex-col gap-y-8 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
       <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-6">

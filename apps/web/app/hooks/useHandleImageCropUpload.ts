@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useToast } from "~/components/ui/use-toast";
 
@@ -22,13 +22,15 @@ export function useHandleImageCropUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [isCroppable, setIsCroppable] = useState(isInitialImageCroppable);
 
-  const handleImageUpload = useCallback(
-    async (file: File) => {
-      setImageUrl(URL.createObjectURL(file));
-      setIsCroppable(imageUrl !== initialImageUrl);
-    },
-    [imageUrl, initialImageUrl],
-  );
+  console.log(initialImageUrl, imageUrl);
+
+  const handleImageUpload = useCallback(async (file: File) => {
+    setImageUrl(URL.createObjectURL(file));
+  }, []);
+
+  useEffect(() => {
+    setIsCroppable(imageUrl !== initialImageUrl);
+  }, [imageUrl, initialImageUrl]);
 
   const handleImageCropUpload = useCallback(
     async (file: File) => {
