@@ -1,3 +1,11 @@
+<a name="v3.8.2"></a>
+
+## [v3.8.2] - 09.10.2025
+
+### Bug Fixes:
+
+- google oauth on all instances and update slack envs to be editable ([#755](https://github.com/Selleo/mentingo/issues/755))
+
 <a name="v3.8.1"></a>
 
 ## [v3.8.1] - 07.10.2025
@@ -5,6 +13,10 @@
 ### Bug Fixes:
 
 - learn deploy workflow missing env ([#739](https://github.com/Selleo/mentingo/issues/739))
+
+### Documentation:
+
+- update changelog for version v3.8.1
 
 <a name="v3.9.0"></a>
 
@@ -1558,7 +1570,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.8.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.8.2...HEAD
+[v3.8.2]: https://github.com/Selleo/mentingo/compare/v3.8.1...v3.8.2
 [v3.8.1]: https://github.com/Selleo/mentingo/compare/v3.9.0...v3.8.1
 [v3.9.0]: https://github.com/Selleo/mentingo/compare/v3.8.0...v3.9.0
 [v3.8.0]: https://github.com/Selleo/mentingo/compare/v3.7.0...v3.8.0
