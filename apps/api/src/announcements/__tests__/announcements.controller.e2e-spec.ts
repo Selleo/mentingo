@@ -3,7 +3,7 @@ import request from "supertest";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createAnnouncementFactory } from "../../../test/factory/announcement.factory";
-import { createSettingsFactory } from "../../../test/factory/settings.factory";
+import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables, truncateAllTables, cookieFor } from "../../../test/helpers/test-helpers";
 
@@ -14,7 +14,7 @@ describe("AnnouncementsController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
-  let settingsFactory: ReturnType<typeof createSettingsFactory>;
+  let groupFactory: ReturnType<typeof createGroupFactory>;
   let announcementsFactory: ReturnType<typeof createAnnouncementFactory>;
 
   const password = "Password123@";
@@ -26,10 +26,8 @@ describe("AnnouncementsController (e2e)", () => {
     db = app.get("DB");
 
     userFactory = createUserFactory(db);
-    settingsFactory = createSettingsFactory(db);
+    groupFactory = createGroupFactory(db);
     announcementsFactory = createAnnouncementFactory(db);
-
-    await settingsFactory.create({ userId: null });
   });
 
   afterEach(async () => {
@@ -43,7 +41,8 @@ describe("AnnouncementsController (e2e)", () => {
   describe("GET /api/announcements", () => {
     it("admin can fetch all announcements", async () => {
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
-      await announcementsFactory.create({ authorId: admin.id, isEveryone: true });
+
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
 
       const adminCookies = await cookieFor(admin, app);
 
@@ -58,9 +57,9 @@ describe("AnnouncementsController (e2e)", () => {
     it("student can fetch all announcements", async () => {
       const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
-      await announcementsFactory.create({ authorId: student.id, isEveryone: true });
-      await announcementsFactory.create({ authorId: student.id, isEveryone: true });
-      await announcementsFactory.create({ authorId: student.id, isEveryone: true });
+      await announcementsFactory.withEveryone().create({ authorId: student.id });
+      await announcementsFactory.withEveryone().create({ authorId: student.id });
+      await announcementsFactory.withEveryone().create({ authorId: student.id });
 
       const studentCookies = await cookieFor(student, app);
 
@@ -81,10 +80,9 @@ describe("AnnouncementsController (e2e)", () => {
   describe("GET /api/announcements/latest", () => {
     it("returns latest unread announcements for user", async () => {
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
-
       const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
-      await announcementsFactory.create({ authorId: admin.id, isEveryone: true });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
 
       const studentCookies = await cookieFor(student, app);
 
@@ -115,8 +113,8 @@ describe("AnnouncementsController (e2e)", () => {
 
       const adminCookies = await cookieFor(admin, app);
 
-      await announcementsFactory.create({ authorId: admin.id, isEveryone: true });
-      await announcementsFactory.create({ authorId: admin.id, isEveryone: false });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
 
       const response = await request(app.getHttpServer())
         .get("/api/announcements/latest")
@@ -138,7 +136,7 @@ describe("AnnouncementsController (e2e)", () => {
 
       const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
-      await announcementsFactory.create({ authorId: admin.id, isEveryone: true });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
 
       const studentCookies = await cookieFor(student, app);
 
@@ -161,7 +159,7 @@ describe("AnnouncementsController (e2e)", () => {
 
       const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
-      await announcementsFactory.create({ authorId: admin.id, isEveryone: true });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
 
       const studentCookies = await cookieFor(student, app);
       const response = await request(app.getHttpServer())
@@ -170,6 +168,58 @@ describe("AnnouncementsController (e2e)", () => {
         .expect(200);
 
       expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it("returns empty array for user with no announcements", async () => {
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+
+      const studentCookies = await cookieFor(student, app);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/announcements/user/me")
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("stundent sees announcements for his groups", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const group = await groupFactory.withMembers([student.id]).create();
+
+      await announcementsFactory.withGroup(group.id).create({ authorId: admin.id });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+
+      const studentCookies = await cookieFor(student, app);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/announcements/user/me")
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(2);
+    });
+
+    it("student does not see announcements for other groups", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const group = await groupFactory.create();
+
+      await announcementsFactory.withGroup(group.id).create({ authorId: admin.id });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+
+      const studentCookies = await cookieFor(student, app);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/announcements/user/me")
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBe(1);
     });
 
     it("unauthenticated request returns 401", async () => {
@@ -205,6 +255,20 @@ describe("AnnouncementsController (e2e)", () => {
         .expect(201);
     });
 
+    it("admin can create group-specific announcement", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+
+      const group = await groupFactory.create();
+
+      const adminCookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .post("/api/announcements")
+        .set("Cookie", adminCookies)
+        .send({ title: "Group announcement", content: "Hello group", groupId: group.id })
+        .expect(201);
+    });
+
     it("student cannot create announcement (403)", async () => {
       const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
@@ -224,9 +288,8 @@ describe("AnnouncementsController (e2e)", () => {
 
       const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
-      const announcement = await announcementsFactory.create({
+      const announcement = await announcementsFactory.withEveryone().create({
         authorId: admin.id,
-        isEveryone: true,
       });
 
       const studentCookies = await cookieFor(student, app);

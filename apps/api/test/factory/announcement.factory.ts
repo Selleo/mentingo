@@ -12,30 +12,41 @@ import {
   users,
 } from "../../src/storage/schema";
 
-import type { InferSelectModel } from "drizzle-orm";
+import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";
 
 type Announcement = InferSelectModel<typeof announcements>;
+type AnnouncementInsert = InferInsertModel<typeof announcements>;
+
+type AnnouncementWithAssoc = Announcement & {
+  groupId?: string;
+  isEveryone?: boolean;
+};
+
+class AnnouncementFactory extends Factory<AnnouncementWithAssoc> {
+  withGroup(groupId: string) {
+    return this.associations({ groupId } as Partial<AnnouncementWithAssoc>);
+  }
+
+  withEveryone() {
+    return this.associations({ isEveryone: true } as Partial<AnnouncementWithAssoc>);
+  }
+}
 
 export const createAnnouncementFactory = (db: DatabasePg) => {
-  return Factory.define<Announcement>(({ onCreate }) => {
-    onCreate(async (announcement) => {
-      const { groupId, ...announcementData } = announcement as any;
+  return AnnouncementFactory.define(({ onCreate, associations }) => {
+    onCreate(async (announcement: AnnouncementInsert) => {
+      const [inserted] = await db.insert(announcements).values(announcement).returning();
 
-      const [createdAnnouncement] = await db
-        .insert(announcements)
-        .values({ ...announcementData, groupId })
-        .returning();
+      const groupId = associations?.groupId;
 
       if (groupId) {
-        await createUserAnnouncementsForGroup(db, groupId, createdAnnouncement.id);
-
-        return createdAnnouncement;
+        await createUserAnnouncementsForGroup(db, groupId, inserted.id);
+        return inserted;
       }
 
-      await createUserAnnouncementsForAll(db, createdAnnouncement.authorId, createdAnnouncement.id);
-
-      return createdAnnouncement;
+      await createUserAnnouncementsForAll(db, inserted.authorId, inserted.id);
+      return inserted;
     });
 
     return {
@@ -43,11 +54,10 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
       title: faker.lorem.sentence(3),
       content: faker.lorem.paragraph(),
       authorId: faker.string.uuid(),
-      groupId: null,
       isEveryone: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    };
+    } as Announcement;
   });
 };
 
@@ -82,7 +92,7 @@ async function createUserAnnouncementsForAll(
   const allUserIds = await db
     .select({ id: users.id })
     .from(users)
-    .where(not(eq(users.id, authorId)));
+    .where(and(not(eq(users.id, authorId)), not(eq(users.role, USER_ROLES.ADMIN))));
 
   const userAnnouncementsToInsert = allUserIds.map((u) => ({
     userId: u.id,
