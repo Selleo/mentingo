@@ -17,6 +17,9 @@ type ImageCropUploadProps = {
   isCroppable: boolean;
   imageUrl?: string | null;
   fileInputRef?: React.RefObject<HTMLInputElement>;
+  aspect?: number;
+  cropShape?: "rect" | "round";
+  maxResolution?: { width?: number; height?: number };
 };
 
 export const ImageCropUploadInput = ({
@@ -26,6 +29,9 @@ export const ImageCropUploadInput = ({
   isCroppable,
   imageUrl,
   fileInputRef,
+  aspect,
+  cropShape,
+  maxResolution,
 }: ImageCropUploadProps) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -40,7 +46,7 @@ export const ImageCropUploadInput = ({
 
   const onCropComplete = async (_croppedArea: Area, croppedAreaPixels: Area) => {
     if (imageUrl) {
-      handleImageCropUpload(await generateImageCrop(imageUrl, croppedAreaPixels));
+      handleImageCropUpload(await generateImageCrop(imageUrl, croppedAreaPixels, maxResolution));
     }
   };
 
@@ -54,8 +60,8 @@ export const ImageCropUploadInput = ({
                 image={imageUrl}
                 crop={crop}
                 zoom={zoom}
-                aspect={1}
-                cropShape="round"
+                aspect={aspect}
+                cropShape={cropShape}
                 showGrid={false}
                 onCropChange={onCropChange}
                 onZoomChange={onZoomChange}

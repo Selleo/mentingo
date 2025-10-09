@@ -9,7 +9,11 @@ export const createImage = (url: string): Promise<HTMLImageElement> => {
   });
 };
 
-export const generateImageCrop = async (imageUrl: string, pixelCrop: Area): Promise<File> => {
+export const generateImageCrop = async (
+  imageUrl: string,
+  pixelCrop: Area,
+  maxResolution?: { width?: number; height?: number },
+): Promise<File> => {
   const image = await createImage(imageUrl);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -18,8 +22,22 @@ export const generateImageCrop = async (imageUrl: string, pixelCrop: Area): Prom
     return Promise.reject("Canvas not supported");
   }
 
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  let targetWidth = pixelCrop.width;
+  let targetHeight = pixelCrop.height;
+
+  if (maxResolution && (maxResolution.width || maxResolution.height)) {
+    const scale = Math.min(
+      1,
+      maxResolution.width ? maxResolution.width / pixelCrop.width : 1,
+      maxResolution.height ? maxResolution.height / pixelCrop.height : 1,
+    );
+
+    targetWidth = Math.round(pixelCrop.width * scale);
+    targetHeight = Math.round(pixelCrop.height * scale);
+  }
+
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
 
   ctx.drawImage(
     image,
@@ -29,8 +47,8 @@ export const generateImageCrop = async (imageUrl: string, pixelCrop: Area): Prom
     pixelCrop.height,
     0,
     0,
-    pixelCrop.width,
-    pixelCrop.height,
+    targetWidth,
+    targetHeight,
   );
 
   return new Promise((resolve, reject) => {

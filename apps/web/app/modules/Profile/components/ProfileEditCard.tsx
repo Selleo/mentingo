@@ -8,6 +8,8 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useHandleImageCropUpload } from "~/hooks/useHandleImageCropUpload";
 
+import { AVATAR_MAX_RESOLUTION } from "../profile.const";
+
 import { type EditProfileFieldType, ProfileEditFieldRenderer } from "./ProfileEditFieldRenderer";
 
 import type { UpdateUserProfileBody } from "../types";
@@ -136,6 +138,9 @@ export const ProfileEditCard = ({
                   isCroppable={isCroppable}
                   imageUrl={userAvatarUrl}
                   fileInputRef={fileInputRef}
+                  aspect={1 / 1}
+                  cropShape="round"
+                  maxResolution={AVATAR_MAX_RESOLUTION}
                 />
               </div>
             </div>
