@@ -83,6 +83,8 @@ export class CourseController {
   @Validate(allCoursesValidation)
   async getAllCourses(
     @Query("title") title: string,
+    @Query("description") description: string,
+    @Query("searchQuery") searchQuery: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange") creationDateRange: string[],
@@ -96,6 +98,8 @@ export class CourseController {
     const [creationDateRangeStart, creationDateRangeEnd] = creationDateRange || [];
     const filters: CoursesFilterSchema = {
       title,
+      description,
+      searchQuery,
       category,
       author,
       status,
@@ -123,6 +127,8 @@ export class CourseController {
   @Validate(studentCoursesValidation)
   async getStudentCourses(
     @Query("title") title: string,
+    @Query("description") description: string,
+    @Query("searchQuery") searchQuery: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange[0]") creationDateRangeStart: string,
@@ -134,6 +140,8 @@ export class CourseController {
   ): Promise<PaginatedResponse<AllStudentCoursesResponse>> {
     const filters: CoursesFilterSchema = {
       title,
+      description,
+      searchQuery,
       category,
       author,
       creationDateRange:
@@ -170,6 +178,8 @@ export class CourseController {
   @Public()
   async getAvailableCourses(
     @Query("title") title: string,
+    @Query("description") description: string,
+    @Query("searchQuery") searchQuery: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange[0]") creationDateRangeStart: string,
@@ -182,6 +192,8 @@ export class CourseController {
   ): Promise<PaginatedResponse<AllStudentCoursesResponse>> {
     const filters: CoursesFilterSchema = {
       title,
+      description,
+      searchQuery,
       category,
       author,
       creationDateRange:
@@ -207,6 +219,9 @@ export class CourseController {
         schema: Type.Enum(COURSE_ENROLLMENT_SCOPES),
       },
       { type: "query", name: "excludeCourseId", schema: UUIDSchema },
+      { type: "query", name: "title", schema: Type.String() },
+      { type: "query", name: "description", schema: Type.String() },
+      { type: "query", name: "searchQuery", schema: Type.String() },
     ],
     response: baseResponse(allCoursesForContentCreatorSchema),
   })
@@ -214,9 +229,20 @@ export class CourseController {
     @Query("authorId") authorId: UUIDType,
     @Query("scope") scope: CourseEnrollmentScope = COURSE_ENROLLMENT_SCOPES.ALL,
     @Query("excludeCourseId") excludeCourseId: UUIDType,
+    @Query("title") title: string,
+    @Query("description") description: string,
+    @Query("searchQuery") searchQuery: string,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<AllCoursesForContentCreatorResponse>> {
-    const query = { authorId, currentUserId, excludeCourseId, scope };
+    const query = {
+      authorId,
+      currentUserId,
+      excludeCourseId,
+      scope,
+      title,
+      description,
+      searchQuery,
+    };
 
     return new BaseResponse(await this.courseService.getContentCreatorCourses(query));
   }

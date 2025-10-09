@@ -10,14 +10,12 @@ import type { MenuItemType } from "~/config/navigationConfig";
 type NavigationMenuItemProps = {
   item: MenuItemType;
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
-  showLabelOn2xl?: boolean;
   className?: string;
 };
 
 export function NavigationMenuItem({
   item,
   setIsMobileNavOpen,
-  showLabelOn2xl,
   className,
 }: NavigationMenuItemProps) {
   return (
@@ -62,11 +60,7 @@ export function NavigationMenuItem({
         <TooltipContent
           side="right"
           className={cn(
-            "hidden 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white",
-            {
-              "2xl:hidden": showLabelOn2xl,
-              "2xl:block": !showLabelOn2xl,
-            },
+            "hidden 2xl:block 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white",
             "3xl:hidden",
           )}
         >

@@ -24,10 +24,9 @@ import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
 
 type NavigationFooterProps = {
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
-  showLabelsOn2xl?: boolean;
 };
 
-export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: NavigationFooterProps) {
+export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { mutate: logout } = useLogoutUser();
@@ -47,7 +46,6 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
             link: "/announcements",
           }}
           setIsMobileNavOpen={setIsMobileNavOpen}
-          showLabelOn2xl={showLabelsOn2xl}
         />
       )}
 
@@ -55,11 +53,7 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
         <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
       </li>
 
-      <MobileNavigationFooterItems
-        setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelsOn2xl={showLabelsOn2xl}
-        userId={user?.id}
-      />
+      <MobileNavigationFooterItems setIsMobileNavOpen={setIsMobileNavOpen} userId={user?.id} />
 
       <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
