@@ -10,7 +10,6 @@ const slackAuthCallbackURL = `${
 const schema = Type.Object({
   SLACK_CLIENT_ID: Type.String(),
   SLACK_CLIENT_SECRET: Type.String(),
-  callbackURL: Type.String(),
 });
 
 type SlackConfigSchema = Static<typeof schema>;

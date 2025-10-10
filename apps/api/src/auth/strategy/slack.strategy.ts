@@ -21,7 +21,7 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
       tokenURL: "https://slack.com/api/openid.connect.token",
       clientID: "test_slack_client_id",
       clientSecret: "test_slack_client_secret",
-      callbackURL: configService.get<string>("slack_authorization.callbackURL"),
+      callbackURL: configService.get<string>("callback_url.SLACK"),
       scope: ["openid", "profile", "email"],
     });
   }
@@ -52,7 +52,7 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
             tokenURL: "https://slack.com/api/openid.connect.token",
             clientID: id,
             clientSecret: secret,
-            callbackURL: this.configService.get<string>("slack_authorization.callbackURL"),
+            callbackURL: this.configService.get<string>("callback_url.SLACK"),
             scope: ["openid", "profile", "email"],
           },
           async (accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) => {
