@@ -17,7 +17,7 @@ import type { CourseTest } from "../../../test/factory/course.factory";
 import type { AiMentorLessonTest } from "src/ai/__tests__/createAiMentorLesson";
 import type { DatabasePg } from "src/common";
 
-describe("AiRepository (e2e)", () => {
+describe("AiRepository (unit)", () => {
   let testContext: TestContext;
   let db: DatabasePg;
   let aiRepository: AiRepository;
