@@ -1023,6 +1023,8 @@
           "embedLessonDescription": "Ten typ pozwala na osadzenie zewnętrznej treści za pomocą iframe.",
           "fillInTheBlanksDescription": "To pytanie będzie miało zdanie, a studenci będą musieli przeciągnąć i upuścić słowo w odpowiednie miejsce.",
           "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
+          "fillInTheBlanksSentenceTip": "Napisz zdanie i przeciągnij słowa do niego.",
+          "fillInTheBlanksWordTip": "Utwórz i przeciągnij słowo do zdania.",
           "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
           "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
           "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",

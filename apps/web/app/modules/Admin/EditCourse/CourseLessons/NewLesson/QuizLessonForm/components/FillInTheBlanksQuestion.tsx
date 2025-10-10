@@ -249,6 +249,9 @@ const FillInTheBlanksQuestion = ({
                   <Label htmlFor="description" className="body-sm-md">
                     <span className="mr-1 text-red-500">*</span>
                     {t("adminCourseView.curriculum.lesson.field.sentence")}
+                    <p className="body-sm-md pb-1 text-neutral-700">
+                      {t("adminCourseView.curriculum.lesson.other.fillInTheBlanksSentenceTip")}
+                    </p>
                   </Label>
                   <FormControl>
                     <EditorContent
@@ -270,6 +273,9 @@ const FillInTheBlanksQuestion = ({
               <span className="mr-1 text-red-500">*</span>
               <Label className="body-sm-md">
                 {t("adminCourseView.curriculum.lesson.field.words")}
+                <p className="body-sm-md pb-1 text-neutral-700">
+                  {t("adminCourseView.curriculum.lesson.other.fillInTheBlanksWordTip")}
+                </p>
               </Label>
             </div>
             <div className="flex flex-wrap items-center gap-2">
