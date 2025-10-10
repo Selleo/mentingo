@@ -1159,12 +1159,53 @@
                 "properties": {
                   "logo": {
                     "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "nullable": true
                   }
-                },
-                "required": [
-                  "logo"
-                ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/login-background": {
+      "get": {
+        "operationId": "SettingsController_getLoginBackground",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLoginBackgroundResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateLoginBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "login-background": {
+                    "type": "string",
+                    "format": "binary",
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -5739,6 +5780,16 @@
                   }
                 ]
               },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -5797,6 +5848,7 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6112,6 +6164,16 @@
                   }
                 ]
               },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6170,6 +6232,7 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6233,6 +6296,16 @@
                   }
                 ]
               },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6291,6 +6364,7 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6480,6 +6554,32 @@
         ]
       },
       "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLoginBackgroundResponse": {
         "type": "object",
         "properties": {
           "data": {

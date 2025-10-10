@@ -390,6 +390,7 @@ export interface GetPublicGlobalSettingsResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -473,6 +474,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -493,6 +495,7 @@ export interface UpdateEnforceSSOResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -537,6 +540,12 @@ export interface UpdatePrimaryColorResponse {
 }
 
 export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetLoginBackgroundResponse {
   data: {
     url: string | null;
   };
@@ -3252,12 +3261,47 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdatePlatformLogo: (
       data: {
         /** @format binary */
-        logo: File;
+        logo?: File | null;
       },
       params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/settings/platform-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetLoginBackground
+     * @request GET:/api/settings/login-background
+     */
+    settingsControllerGetLoginBackground: (params: RequestParams = {}) =>
+      this.request<GetLoginBackgroundResponse, any>({
+        path: `/api/settings/login-background`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLoginBackground
+     * @request PATCH:/api/settings/login-background
+     */
+    settingsControllerUpdateLoginBackground: (
+      data: {
+        /** @format binary */
+        "login-background"?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/login-background`,
         method: "PATCH",
         body: data,
         type: ContentType.FormData,

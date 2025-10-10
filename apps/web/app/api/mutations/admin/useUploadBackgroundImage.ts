@@ -5,24 +5,27 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
-import { platformLogoQueryOptions } from "~/hooks/usePlatformLogo";
+import { loginBackgroundQueryOptions } from "~/hooks/useLoginBackground";
 
-interface UploadPlatformLogoOptions {
-  logo?: File | null;
+interface UploadBackgroundImageOptions {
+  backgroundImage: File | null;
 }
 
-export function useUploadPlatformLogo() {
+export function useUploadBackgroundImage() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ logo }: UploadPlatformLogoOptions) => {
-      const response = await ApiClient.api.settingsControllerUpdatePlatformLogo({ logo });
+    mutationFn: async ({ backgroundImage }: UploadBackgroundImageOptions) => {
+      const response = await ApiClient.api.settingsControllerUpdateLoginBackground({
+        "login-background": backgroundImage,
+      });
+
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(platformLogoQueryOptions(t));
-      toast({ description: t("platformLogo.toast.logoUploadedSuccessfully") });
+      queryClient.invalidateQueries(loginBackgroundQueryOptions(t));
+      toast({ description: t("backgroundImage.toast.backgroundImageUploadedSuccessfully") });
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

@@ -58,7 +58,11 @@ export default function RegisterPage() {
   });
 
   const {
-    data: { enforceSSO: isSSOEnforced, inviteOnlyRegistration: inviteOnlyRegistration },
+    data: {
+      enforceSSO: isSSOEnforced,
+      inviteOnlyRegistration: inviteOnlyRegistration,
+      loginBackgroundImageS3Key,
+    },
   } = useGlobalSettingsSuspense();
 
   const {
@@ -92,6 +96,16 @@ export default function RegisterPage() {
 
   return (
     <FormProvider {...methods}>
+      {loginBackgroundImageS3Key && (
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            backgroundImage: `url(${loginBackgroundImageS3Key}) `,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+      )}
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>
