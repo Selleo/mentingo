@@ -14,9 +14,9 @@ import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { StringifiedIcons } from "~/utils/stringifiedIcons";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
-import { X_ICON_SVG } from "../components/FillInTheBlanksButtonNode";
 import { defaultQuizLessonValues } from "../defaults/defaultQuizLessonValues";
 import { QuestionType } from "../QuizLessonForm.types";
 import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
@@ -46,7 +46,7 @@ export const useQuizLessonForm = ({
   const { t } = useTranslation();
 
   const createButtonHtml = (word: string) => {
-    return `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}" data-word="${word}"><span>${word}</span><span>${X_ICON_SVG}</span></button>`;
+    return `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}" data-word="${word}"><span>${word}</span><span>${StringifiedIcons.X}</span></button>`;
   };
 
   const form = useForm<QuizLessonFormValues>({
