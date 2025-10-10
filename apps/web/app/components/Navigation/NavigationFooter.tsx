@@ -135,7 +135,7 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
           <DropdownMenuContent
             align="start"
             className={cn("w-80 p-1", {
-              "absolute bottom-0 left-6": isBetween1440And1680,
+              "absolute bottom-0 left-16": isBetween1440And1680,
             })}
           >
             <menu className="flex flex-col gap-2 p-1">
