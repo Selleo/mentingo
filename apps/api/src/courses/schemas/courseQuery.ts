@@ -59,6 +59,7 @@ export const coursesFilterFiled = Type.Union([
 export type CoursesFilterFiled = Static<typeof coursesFilterFiled>;
 
 export const coursesFilterSchema = Type.Object({
+  /** Filter by course title only */
   title: Type.Optional(Type.String()),
   category: Type.Optional(Type.String()),
   status: Type.Optional(coursesStatusOptions),
@@ -66,6 +67,10 @@ export const coursesFilterSchema = Type.Object({
     Type.Tuple([Type.String({ format: "date-time" }), Type.String({ format: "date-time" })]),
   ),
   author: Type.Optional(Type.String()),
+  /** Filter by course description only */
+  description: Type.Optional(Type.String()),
+  /** Search across both title AND description fields simultaneously */
+  searchQuery: Type.Optional(Type.String()),
 });
 
 export type CoursesFilterSchema = Static<typeof coursesFilterSchema>;

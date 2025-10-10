@@ -9,6 +9,11 @@ body {
   height: 100%;
 }
 
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
 .ProseMirror:focus {
   outline: none;
   box-shadow: none;

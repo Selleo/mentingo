@@ -20,7 +20,9 @@ export default function AnnouncementsPage() {
         <div className="mt-4 flex justify-center">
           <section className="flex w-full max-w-[720px] flex-col items-center gap-4">
             <div className="flex w-full flex-wrap items-center justify-between gap-x-4">
-              <h1 className="h5 md:h3 text-neutral-950">{t("announcements.page.header")}</h1>
+              <h1 className="h5 md:h3 w-full text-center text-neutral-950">
+                {t("announcements.page.header")}
+              </h1>
               <div className="flex items-center gap-4">
                 {isAdmin && (
                   <Link to="/admin/announcements/new">

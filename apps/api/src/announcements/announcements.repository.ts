@@ -1,5 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, and, getTableColumns, countDistinct, isNotNull, sql, not, desc } from "drizzle-orm";
+import {
+  eq,
+  and,
+  getTableColumns,
+  countDistinct,
+  isNotNull,
+  sql,
+  not,
+  desc,
+  ilike,
+  or,
+} from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import {
@@ -14,7 +25,11 @@ import { UserService } from "src/user/user.service";
 
 import { LATEST_ANNOUNCEMENTS_LIMIT } from "./consts";
 
-import type { Announcement, CreateAnnouncement } from "./types/announcement.types";
+import type {
+  Announcement,
+  CreateAnnouncement,
+  AnnouncementFilters,
+} from "./types/announcement.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -121,8 +136,8 @@ export class AnnouncementsRepository {
       .returning();
   }
 
-  async getAnnouncementsForUser(userId: UUIDType) {
-    const announcementsData = await this.db
+  async getAnnouncementsForUser(userId: UUIDType, filters?: AnnouncementFilters) {
+    const baseQuery = this.db
       .select({
         ...getTableColumns(announcements),
         ...this.getAuthorFields(),
@@ -136,11 +151,43 @@ export class AnnouncementsRepository {
           eq(userAnnouncements.userId, userId),
         ),
       )
-      .leftJoin(users, eq(announcements.authorId, users.id))
-      .where(isNotNull(userAnnouncements.userId))
+      .leftJoin(users, eq(announcements.authorId, users.id));
+
+    const filterConditions = this.getFiltersConditions(filters);
+
+    const announcementsData = await baseQuery
+      .where(and(isNotNull(userAnnouncements.userId), ...(filterConditions as any)))
       .orderBy(desc(announcements.createdAt));
 
     return await this.mapAnnouncementsWithProfilePictures(announcementsData);
+  }
+
+  private getFiltersConditions(filters?: AnnouncementFilters) {
+    const conditions = [] as unknown[];
+
+    if (!filters) return [sql`1=1`];
+
+    if (filters.title)
+      conditions.push(ilike(announcements.title, `%${filters.title.toLowerCase()}%`));
+    if (filters.content)
+      conditions.push(ilike(announcements.content, `%${filters.content.toLowerCase()}%`));
+    if (filters.isRead !== undefined) conditions.push(eq(userAnnouncements.isRead, filters.isRead));
+    if (filters.authorName)
+      conditions.push(
+        or(
+          ilike(users.firstName, `%${filters.authorName.toLowerCase()}%`),
+          ilike(users.lastName, `%${filters.authorName.toLowerCase()}%`),
+        ),
+      );
+    if (filters.search)
+      conditions.push(
+        or(
+          ilike(announcements.title, `%${filters.search.toLowerCase()}%`),
+          ilike(announcements.content, `%${filters.search.toLowerCase()}%`),
+        ),
+      );
+
+    return conditions.length ? conditions : [sql`1=1`];
   }
 
   async createUserAnnouncementRecords(userIds: UUIDType[], announcementId: UUIDType) {
