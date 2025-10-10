@@ -12,6 +12,7 @@ interface ProviderOAuthLoginButtonProps {
   buttonTextTranslationKey: string;
   handleSignIn: () => void;
   buttonClassName?: string;
+  testId: string;
 }
 
 export function ProviderOAuthLoginButton({
@@ -19,6 +20,7 @@ export function ProviderOAuthLoginButton({
   buttonTextTranslationKey,
   handleSignIn,
   buttonClassName,
+  testId,
 }: ProviderOAuthLoginButtonProps) {
   const { t } = useTranslation();
   return (
@@ -27,6 +29,7 @@ export function ProviderOAuthLoginButton({
       variant="outline"
       className={cn(buttonClassName, "mt-4 w-full")}
       onClick={handleSignIn}
+      data-testid={testId}
     >
       <Icon name={iconName} className="mr-2 size-4" />
       {t(buttonTextTranslationKey)}

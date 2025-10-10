@@ -11,7 +11,7 @@ export const login = async (page: Page, email: string, password: string) => {
 
 export const logout = async (browser: Browser) => {
   const newPage = await browser.newPage();
-  newPage.context().clearCookies();
+  await newPage.context().clearCookies();
 
   return newPage;
 };

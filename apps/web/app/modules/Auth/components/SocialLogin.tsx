@@ -45,6 +45,7 @@ export function SocialLogin({
           iconName="Google"
           buttonTextTranslationKey="common.continueWithGoogle"
           handleSignIn={handleProviderSignIn("google")}
+          testId="google-sso"
         />
       )}
       {isMicrosoftOAuthEnabled && (
@@ -52,6 +53,7 @@ export function SocialLogin({
           iconName="Microsoft"
           buttonTextTranslationKey="common.continueWithMicrosoft"
           handleSignIn={handleProviderSignIn("microsoft")}
+          testId="microsoft-sso"
         />
       )}
       {isSlackOAuthEnabled && (
@@ -59,6 +61,7 @@ export function SocialLogin({
           iconName="Slack"
           buttonTextTranslationKey="common.continueWithSlack"
           handleSignIn={handleProviderSignIn("slack")}
+          testId="slack-sso"
         />
       )}
     </>
