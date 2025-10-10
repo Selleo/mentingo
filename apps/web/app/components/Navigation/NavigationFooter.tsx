@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { type Dispatch, type SetStateAction, startTransition } from "react";
+import { type Dispatch, type SetStateAction, startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useLogoutUser } from "~/api/mutations";
@@ -27,6 +27,8 @@ type NavigationFooterProps = {
 };
 
 export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: NavigationFooterProps) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const { mutate: logout } = useLogoutUser();
   const { data: user } = useCurrentUser();
   const { t } = useTranslation();
@@ -34,9 +36,13 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
   const isBetween1440And1680 = useIsWidthBetween(1440, 1680, false);
 
   return (
-    <menu className="grid w-full grid-cols-3 gap-3 md:grid-cols-6 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
+    <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
+      <li className="col-span-4 md:col-span-8 2xl:hidden">
+        <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
+      </li>
+
       <NavigationMenuItem
-        className="col-span-3 md:col-span-6"
+        className="col-span-1 md:col-span-2 2xl:hidden"
         item={{
           iconName: "Info",
           label: t("navigationSideBar.providerInformation"),
@@ -45,15 +51,12 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
         setIsMobileNavOpen={setIsMobileNavOpen}
         showLabelOn2xl={showLabelsOn2xl}
       />
-      <li className="col-span-3 md:col-span-6 2xl:hidden">
-        <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
-      </li>
 
       <NavigationMenuItem
         className="col-span-1 md:col-span-2 2xl:hidden"
         item={{
           label: t("navigationSideBar.profile"),
-          link: `profile/${user?.id}`,
+          link: `/profile/${user?.id}`,
           iconName: "User",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
@@ -107,8 +110,9 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
         </Tooltip>
       </li>
       <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
-        <DropdownMenu>
+        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
+            onClick={() => setIsDropdownOpen((prev) => !prev)}
             className={cn("flex w-full items-center justify-between gap-2 p-2", {
               "justify-center": isBetween1440And1680,
             })}
@@ -139,17 +143,27 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
             })}
           >
             <menu className="flex flex-col gap-2 p-1">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
                 <NavigationMenuItemLink
                   item={{
-                    iconName: "User",
-                    label: t("navigationSideBar.profile"),
-                    link: `profile/${user?.id}`,
+                    iconName: "Info",
+                    label: t("navigationSideBar.providerInformation"),
+                    link: "/provider-information",
                   }}
                 />
               </DropdownMenuItem>
 
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+                <NavigationMenuItemLink
+                  item={{
+                    iconName: "User",
+                    label: t("navigationSideBar.profile"),
+                    link: `/profile/${user?.id}`,
+                  }}
+                />
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
                 <NavigationMenuItemLink
                   item={{
                     iconName: "Settings",

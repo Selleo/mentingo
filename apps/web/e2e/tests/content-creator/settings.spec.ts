@@ -18,16 +18,16 @@ test.describe("Content creator settings", () => {
     await page.goto("/");
   });
   test("should change content creator informations", async ({ page }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_SETTINGS.button.settings, "i") })
-      .click();
+    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
 
     await page.locator('label[for="Bio - note"] + textarea').fill(TEST_SETTINGS.description);
     await page.locator('label[for="jobTitle"] + input').fill(TEST_SETTINGS.jobTitle);
     await page.locator('#user-details button[type="submit"]').click();
 
-    await page.getByRole("button", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
+    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
 
     const description = page.getByTestId("description");
