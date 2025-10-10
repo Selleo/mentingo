@@ -42,7 +42,7 @@ const QuestionTitle = ({
     [QuestionType.DETAILED_RESPONSE]: QuestionIcons.DetailedResponse,
     [QuestionType.PHOTO_QUESTION_SINGLE_CHOICE]: QuestionIcons.PhotoQuestion,
     [QuestionType.PHOTO_QUESTION_MULTIPLE_CHOICE]: QuestionIcons.PhotoQuestion,
-    [QuestionType.FILL_IN_THE_BLANKS_TEXT]: QuestionIcons.FillInTheBlanks,
+    [QuestionType.FILL_IN_THE_BLANKS_TEXT]: QuestionIcons.GapFill,
     [QuestionType.FILL_IN_THE_BLANKS_DND]: QuestionIcons.FillInTheBlanks,
     [QuestionType.MATCH_WORDS]: QuestionIcons.MatchWords,
     [QuestionType.SCALE_1_5]: QuestionIcons.Scale_1_5,
