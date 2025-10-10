@@ -133,10 +133,11 @@
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
-    "providerInformation": "Provider Info",
+    "providerInformation": "Provider Information",
     "browseCourses": "Browse Courses",
     "announcements": "Announcements",
     "promotionCodes": "Promotion Codes",
+    "manage": "Manage",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
     }
