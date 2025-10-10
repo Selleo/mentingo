@@ -70,8 +70,6 @@ export default function CoursesPage() {
 
   const { courseListLayout, setCourseListLayout } = useLayoutsStore();
 
-  if (isCategoriesLoading || isAvailableCoursesLoading) return null;
-
   const filterConfig: FilterConfig[] = [
     {
       name: "title",
