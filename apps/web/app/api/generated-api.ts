@@ -3592,6 +3592,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
+        groupId?: string;
       },
       params: RequestParams = {},
     ) =>

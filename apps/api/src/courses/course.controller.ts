@@ -155,10 +155,12 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @Query("keyword") keyword: string,
     @Query("sort") sort: SortEnrolledStudentsOptions,
+    @Query("groupId") groupId: string,
   ): Promise<BaseResponse<EnrolledStudent[]>> {
     const filters: EnrolledStudentFilterSchema = {
       keyword,
       sort,
+      groupId,
     };
     return await this.courseService.getStudentsWithEnrollmentDate(courseId, filters);
   }

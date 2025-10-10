@@ -1,6 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 
-import type { UUIDType } from "src/common";
+import { UUIDSchema, type UUIDType } from "src/common";
+
 import type { UserRole } from "src/user/schemas/userRoles";
 
 export const courseSortFields = [
@@ -108,6 +109,7 @@ export type SortEnrolledStudentsOptions = Static<typeof sortEnrolledStudentsOpti
 export const enrolledStudentFilterSchema = Type.Object({
   keyword: Type.String(),
   sort: sortEnrolledStudentsOptions,
+  groupId: Type.Optional(UUIDSchema),
 });
 
 export type EnrolledStudentFilterSchema = Static<typeof enrolledStudentFilterSchema>;

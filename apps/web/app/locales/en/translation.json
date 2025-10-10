@@ -1080,7 +1080,8 @@
     "enrolled": {
       "filters": {
         "placeholder": {
-          "searchByKeyword": "Search by keyword..."
+          "searchByKeyword": "Search by keyword...",
+          "groups": "Groups"
         }
       },
       "enrollSelected": "Enroll selected",
