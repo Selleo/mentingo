@@ -1012,7 +1012,7 @@
           "presentationLessonDescription": "Choose this type if you want to embed presentations files like PPTX.",
           "quizLessonDescription": "This type allows you to build quizzes for your chapter using different types of questions.",
           "aiMentorLessonDescription": "Create interactive AI-powered lessons where students can engage with a virtual mentor.",
-          "fillInTheBlanksDescription": "This question will have sentence and students will need to drag and drop the word in to right place.",
+          "fillInTheBlanksDescription": "This question contains a sentence; students must drag and drop the correct word into the blank.",
           "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
           "embedLessonDescription": "This type allows you to embed content from external platforms using iframe code.",
           "fillInTheBlanksSentenceTip": "Write a sentence and drop words in to it.",
