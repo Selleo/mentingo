@@ -10,6 +10,8 @@ const TEST_NAVIGATION = {
     users: "users",
     profile: "profile",
     settings: "settings",
+    announcements: "announcements",
+    manage: "manage",
   },
   header: {
     welcomeBack: "Welcome back",
@@ -40,6 +42,17 @@ test.describe("Admin navigation", () => {
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });
 
+    const announcementsButton = page.getByRole("link", {
+      name: new RegExp(TEST_NAVIGATION.button.announcements, "i"),
+    });
+
+    if (!(await announcementsButton.isVisible())) {
+      await page
+        .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.manage, "i") })
+        .first()
+        .click();
+    }
+
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.browseCourses, "i") })
       .click();
@@ -61,15 +74,19 @@ test.describe("Admin navigation", () => {
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });
 
-    await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.profile, "i") })
-      .click();
+    const userAvatar = page.getByRole("button", { name: /(avatar for|profile test)/i });
+
+    await userAvatar.click();
+
+    await page.getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
     const currentURL = page.url();
     expect(currentURL).toMatch(/\/profile\/[a-f0-9-]{36}/);
 
+    await userAvatar.click();
+
     await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })
+      .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })
       .click();
     await page.waitForURL("/settings");
     const settingsHeader = page.locator("h3", {

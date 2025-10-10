@@ -20,19 +20,20 @@ const TEST_SETTINGS = {
 test.describe("Admin settings", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+
+    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
   });
 
   test("should change admin information", async ({ page }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_SETTINGS.button.settings, "i") })
-      .click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
 
     await page.locator('label[for="Bio - note"] + textarea').fill(TEST_SETTINGS.description);
     await page.locator('label[for="jobTitle"] + input').fill(TEST_SETTINGS.jobTitle);
     await page.locator('#user-details button[type="submit"]').click();
 
-    await page.getByRole("button", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
+    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
 
     const description = page.getByTestId("description");
@@ -43,9 +44,7 @@ test.describe("Admin settings", () => {
   });
 
   test("should change admin new user notification setting", async ({ page }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_SETTINGS.button.settings, "i") })
-      .click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
 
     const newUserNotificationSwitch = page.locator("#newUserNotifications");
@@ -54,9 +53,7 @@ test.describe("Admin settings", () => {
   });
 
   test("should switch between Account and Organization tabs", async ({ page }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_SETTINGS.button.settings, "i") })
-      .click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
@@ -77,9 +74,7 @@ test.describe("Admin settings", () => {
   });
 
   test("should toggle courses accessibility on Organization tab", async ({ page }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_SETTINGS.button.settings, "i") })
-      .click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
@@ -100,9 +95,7 @@ test.describe("Admin settings", () => {
     browser,
     page,
   }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_SETTINGS.button.settings, "i") })
-      .click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
@@ -117,10 +110,11 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "unchecked");
 
+    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+
     await page
-      .getByRole("button", { name: /logout/i })
-      .filter({ hasText: "Logout" })
-      .first()
+      .getByRole("menuitem", { name: /logout/i })
+      .locator("div")
       .click();
 
     const newPage = await browser.newPage();
@@ -135,9 +129,7 @@ test.describe("Admin settings", () => {
   test("should allow access to courses when courses accessibility is enabled and user is logged out", async ({
     page,
   }) => {
-    await page
-      .getByRole("button", { name: new RegExp(TEST_SETTINGS.button.settings, "i") })
-      .click();
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
 
     const tablist = page.getByRole("tablist");
@@ -152,10 +144,11 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
 
+    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+
     await page
-      .getByRole("button", { name: /logout/i })
-      .filter({ hasText: "Logout" })
-      .first()
+      .getByRole("menuitem", { name: /logout/i })
+      .locator("div")
       .click();
 
     await page.goto("/courses");

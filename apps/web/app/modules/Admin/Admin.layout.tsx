@@ -11,7 +11,6 @@ import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConf
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import Loader from "../common/Loader/Loader";
 import { LatestAnnouncementsPopup } from "../Dashboard/components";
@@ -62,7 +61,6 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
 
 const AdminLayout = () => {
   const { t } = useTranslation();
-  const { currentUser } = useCurrentUserStore();
   const { pathname } = useLocation();
 
   const hideTopbarAndSidebar = match(pathname)
@@ -74,9 +72,7 @@ const AdminLayout = () => {
     <div className="flex h-screen flex-col">
       <div className="flex flex-1 flex-col overflow-hidden 2xl:flex-row">
         {!hideTopbarAndSidebar && (
-          <Navigation
-            menuItems={mapNavigationItems(getNavigationConfig(currentUser?.id ?? "", false, t))}
-          />
+          <Navigation menuItems={mapNavigationItems(getNavigationConfig(false, t))} />
         )}
         <main
           className={cn("max-h-dvh flex-1 overflow-y-auto bg-primary-50", {

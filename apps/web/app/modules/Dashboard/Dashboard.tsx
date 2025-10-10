@@ -64,9 +64,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
     <div className="flex h-screen flex-col">
       <div className="flex flex-1 flex-col overflow-hidden 2xl:flex-row">
         <Navigation
-          menuItems={mapNavigationItems(
-            getNavigationConfig(currentUser?.id ?? "", currentUser?.role === "user", t),
-          )}
+          menuItems={mapNavigationItems(getNavigationConfig(currentUser?.role === "user", t))}
         />
         <main className="relative flex-1 overflow-y-auto bg-primary-50">
           <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />

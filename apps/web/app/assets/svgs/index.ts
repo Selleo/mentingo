@@ -58,6 +58,8 @@ export { default as Slack } from "./slack.svg?react";
 export { default as Search } from "./search.svg?react";
 export { default as GlobalSearchMac } from "./CMD+K.svg?react";
 export { default as GlobalSearchWin } from "./CTRL+K.svg?react";
+export { default as Manage } from "./manage.svg?react";
+export { default as Bell } from "./bell.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 

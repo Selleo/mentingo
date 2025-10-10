@@ -14,11 +14,8 @@ import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-dat
 import { COURSE_SETTINGS_UI } from "./data/course-settings-data";
 
 const allowUnregisteredUsersToBrowseCourses = async (page: Page) => {
-  await navigateToPage(
-    page,
-    COURSE_SETTINGS_UI.button.settings,
-    COURSE_SETTINGS_UI.header.settings,
-  );
+  await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+  await page.getByRole("link", { name: /settings/i }).click();
 
   await page
     .getByRole("tab", { name: new RegExp(COURSE_SETTINGS_UI.button.organization, "i") })

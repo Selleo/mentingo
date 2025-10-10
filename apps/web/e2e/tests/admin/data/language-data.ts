@@ -16,7 +16,6 @@ export const LANGUAGE_PAGE_UI = {
         categories: "kategorie",
         users: "użytkownicy",
         groups: "grupy",
-        profile: "profil",
       },
     },
     english: {
@@ -28,7 +27,6 @@ export const LANGUAGE_PAGE_UI = {
         categories: "categories",
         users: "users",
         groups: "groups",
-        profile: "profile",
       },
     },
   },
