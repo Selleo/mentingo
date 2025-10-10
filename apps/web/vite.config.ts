@@ -56,6 +56,9 @@ export default defineConfig(({ mode }) => {
         telemetry: false,
       }),
     ],
+    ssr: {
+      noExternal: ["posthog-js", "posthog-js/react"],
+    },
     // https://github.com/remix-run/remix/issues/10156
     server: {
       warmup: {
@@ -88,10 +91,11 @@ export default defineConfig(({ mode }) => {
       },
       commonjsOptions: {
         transformMixedEsModules: true,
+        include: [/node_modules\/posthog-js/, /node_modules\/posthog-js\/react/, /node_modules/],
       },
     },
     optimizeDeps: {
-      include: ["@remix-run/react", "crypto-js"],
+      include: ["@remix-run/react", "crypto-js", "posthog-js", "posthog-js/react"],
       exclude: ["fsevents"],
     },
   };
