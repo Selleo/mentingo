@@ -69,7 +69,7 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
             >
               <div className="flex w-full items-center gap-x-1 px-2 py-4 md:gap-x-4 md:p-4">
                 <div className="grid size-8 place-items-center">
-                  <Icon name="CarretDownLarge" className="h-auto w-6 text-primary-700" />
+                  <Icon name="CarretDownLarge" className="h-auto w-6 text-accent-foreground" />
                 </div>
                 <div className="flex w-full flex-col">
                   <div className="details text-neutral-800">

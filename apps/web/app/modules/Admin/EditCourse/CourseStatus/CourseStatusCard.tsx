@@ -32,7 +32,7 @@ const CourseStatusCard = ({ checked, onChange, headerKey, bodyKey, id }: CourseS
           name="status"
           checked={checked}
           onChange={onChange}
-          className="size-4 cursor-pointer p-1"
+          className="size-4 cursor-pointer"
           id={id}
         />
       </div>

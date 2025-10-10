@@ -37,7 +37,7 @@ export const TextBlank = ({
   const isCorrectAnswer = studentAnswer?.isCorrect && studentAnswer.isStudentAnswer;
 
   const textBlankClasses = cn(
-    "bg-transparent border-dashed border-b mx-1.5 w-20 focus:ring-0 focus:outline-none text-primary-700 border-b-primary-700",
+    "bg-transparent border-dashed border-b mx-1.5 w-20 focus:ring-0 focus:outline-none text-accent-foreground border-b-accent-foreground",
     {
       "border-b-success-500 text-success-500": isCorrectAnswer && studentAnswer?.isStudentAnswer,
       "border-b-error-500 text-error-500":

@@ -19,7 +19,7 @@ type CourseChapterLessonProps = {
 export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   return (
     <div className="flex w-full gap-x-2 p-2">
-      <Icon name={LessonTypesIcons[lesson.type]} className="size-6 text-primary-700" />
+      <Icon name={LessonTypesIcons[lesson.type]} className="size-6 text-accent-foreground" />
       <div className="flex w-full flex-col justify-center">
         <p className="body-sm-md text-neutral-950">
           {lesson.title}{" "}

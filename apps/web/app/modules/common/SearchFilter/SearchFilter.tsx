@@ -182,7 +182,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
       {isAnyFilterApplied && (
         <Button
-          className="border border-primary-500 bg-transparent text-primary-700"
+          className="border border-primary-500 bg-transparent text-accent-foreground"
           onClick={handleClearAll}
           disabled={isLoading}
         >

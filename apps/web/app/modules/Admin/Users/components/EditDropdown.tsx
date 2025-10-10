@@ -52,7 +52,7 @@ export const EditDropdown = ({ dropdownItems }: EditDropdownProps) => {
               >
                 <Icon
                   name={item.icon}
-                  className={cn("size-4 text-primary-700 hover:text-primary-700", {
+                  className={cn("size-4 text-accent-foreground", {
                     "text-error-700 hover:text-error-700": item.destructive,
                   })}
                 />

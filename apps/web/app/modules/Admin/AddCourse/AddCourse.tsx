@@ -264,11 +264,7 @@ const AddCourse = () => {
                 >
                   {t("common.button.cancel")}
                 </Button>
-                <Button
-                  type="submit"
-                  className="rounded bg-primary-700 px-6 py-2 text-white"
-                  disabled={!isFormValid || isUploading}
-                >
+                <Button type="submit" disabled={!isFormValid || isUploading}>
                   {t("common.button.proceed")}
                 </Button>
               </div>

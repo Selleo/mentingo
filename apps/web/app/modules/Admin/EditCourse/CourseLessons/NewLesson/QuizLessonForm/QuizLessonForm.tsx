@@ -361,9 +361,7 @@ const QuizLessonForm = ({
 
             <QuestionSelector addQuestion={addQuestion} />
             <div className="mt-4 flex space-x-4">
-              <Button type="submit" className="bg-primary-700">
-                {t("common.button.save")}
-              </Button>
+              <Button type="submit">{t("common.button.save")}</Button>
               {lessonToEdit ? (
                 <Button
                   type="button"
