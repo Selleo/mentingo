@@ -16,7 +16,11 @@ type UpdateUserProfileOptions = {
   userAvatar?: File;
 };
 
-export function useUpdateUserProfile() {
+type UpdateUserProfileProps = {
+  handleOnSuccess: () => void;
+};
+
+export function useUpdateUserProfile({ handleOnSuccess }: UpdateUserProfileProps) {
   const { toast } = useToast();
   const { t } = useTranslation();
   return useMutation({
@@ -47,6 +51,8 @@ export function useUpdateUserProfile() {
       queryClient.invalidateQueries({ queryKey: ["user-details", variables.id] });
 
       toast({ description: t("changeUserInformationView.toast.userDetailsUpdatedSuccessfully") });
+
+      handleOnSuccess();
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

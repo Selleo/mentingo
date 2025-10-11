@@ -68,7 +68,12 @@ export default function ProfilePage() {
     resolver: zodResolver(updateUserProfileSchema),
   });
 
-  const { mutate: updateUserProfile } = useUpdateUserProfile();
+  const { mutate: updateUserProfile } = useUpdateUserProfile({
+    handleOnSuccess: () => {
+      reset();
+      toggleEditing();
+    },
+  });
 
   const onSubmit = (data: UpdateUserProfileBody) => {
     if (isDirty || data.userAvatar || data.userAvatar === null) {
@@ -83,9 +88,6 @@ export default function ProfilePage() {
         id,
         userAvatar: data.userAvatar || undefined,
       });
-
-      reset();
-      setIsEditing(false);
     }
   };
 

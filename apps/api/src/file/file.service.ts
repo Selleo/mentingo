@@ -11,12 +11,13 @@ import { S3Service } from "src/s3/s3.service";
 
 import {
   MAX_FILE_SIZE,
-  EXTENSION_TO_MIME_TYPE_MAP,
   ALLOWED_EXCEL_MIME_TYPES,
   ALLOWED_EXCEL_MIME_TYPES_MAP,
+  ALLOWED_MIME_TYPES,
 } from "./file.constants";
-import { MimeTypeGuard } from "./guards/mime-type.guard";
+import { FileGuard } from "./guards/file.guard";
 
+import type { FileValidationOptions } from "./guards/file.guard";
 import type { Static, TSchema } from "@sinclair/typebox";
 
 @Injectable()
@@ -37,7 +38,7 @@ export class FileService {
     return await this.s3Service.getSignedUrl(fileKey);
   }
 
-  async uploadFile(file: Express.Multer.File, resource: string) {
+  async uploadFile(file: Express.Multer.File, resource: string, options?: FileValidationOptions) {
     if (!file) {
       throw new BadRequestException("No file uploaded");
     }
@@ -46,19 +47,10 @@ export class FileService {
       throw new BadRequestException("File upload failed - invalid file data");
     }
 
-    if (file.size && file.size > MAX_FILE_SIZE) {
-      throw new BadRequestException(
-        `File size exceeds the maximum allowed size of ${MAX_FILE_SIZE} bytes`,
-      );
-    }
-
-    let mimetype: string | undefined = file.mimetype;
-    if (!mimetype) {
-      const extension = file.originalname.split(".").pop()?.toLowerCase();
-      mimetype = extension ? EXTENSION_TO_MIME_TYPE_MAP[extension] : undefined;
-    }
-
-    MimeTypeGuard.validateMimeType(mimetype);
+    const { type } = await FileGuard.validateFile(
+      file,
+      options ?? { allowedTypes: ALLOWED_MIME_TYPES, maxSize: MAX_FILE_SIZE },
+    );
 
     try {
       if (file.mimetype.startsWith("video/")) {
@@ -73,7 +65,7 @@ export class FileService {
       const fileExtension = file.originalname.split(".").pop();
       const fileKey = `${resource}/${randomUUID()}.${fileExtension}`;
 
-      await this.s3Service.uploadFile(file.buffer, fileKey, mimetype);
+      await this.s3Service.uploadFile(file.buffer, fileKey, type);
 
       const fileUrl = await this.s3Service.getSignedUrl(fileKey);
 
