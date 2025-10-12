@@ -39,7 +39,7 @@ const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: Sec
     if (!viewSecret) {
       setValue(name, "");
     }
-  }, [viewSecret, secretData?.data.value, name, setValue]);
+  }, [viewSecret, secretData?.data?.value, name, setValue]);
 
   return (
     <div className="w-full" data-testid={name}>
