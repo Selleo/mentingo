@@ -42,12 +42,13 @@ const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: Sec
   }, [viewSecret, secretData?.data.value, name, setValue]);
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-testid={name}>
       <Label className="text-xl" htmlFor={name}>
         {t(labelKey)}
       </Label>
       <div className="relative">
         <Input
+          data-testid={`${name}-input`}
           id={name}
           {...register(name)}
           disabled={!viewSecret || isFetching}
@@ -58,6 +59,7 @@ const SecretField = ({ name, labelKey, placeholderKey, register, setValue }: Sec
         <Button
           type="button"
           variant="ghost"
+          data-testid={`${name}-toggle`}
           onClick={() => setViewSecret((v) => !v)}
           className="absolute right-0 top-1/2 -translate-y-1/2 rounded-l-none"
           aria-label={viewSecret ? t("adminEnvsView.form.hide") : t("adminEnvsView.form.show")}
@@ -112,7 +114,7 @@ const Envs = (): React.ReactElement => {
               <div className="flex w-full items-center justify-between">
                 <h4 className="h4">{t("adminEnvsView.keysTitle")}</h4>
                 {hasAnyValue ? (
-                  <Button type="submit" className="flex gap-2">
+                  <Button type="submit" data-testid="env-submit" className="flex gap-2">
                     <Icon name="Checkmark" className="size-4" />
                     {t("adminEnvsView.form.save")}
                   </Button>
