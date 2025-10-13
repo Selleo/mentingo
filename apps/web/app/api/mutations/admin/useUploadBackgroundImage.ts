@@ -25,7 +25,7 @@ export function useUploadBackgroundImage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(loginBackgroundQueryOptions(t));
-      toast({ description: t("backgroundImage.toast.backgroundImageUploadedSuccessfully") });
+      toast({ description: t("organizationLoginBackgroundImageUpload.toast.success") });
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

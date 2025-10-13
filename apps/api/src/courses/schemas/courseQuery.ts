@@ -109,7 +109,7 @@ export type SortEnrolledStudentsOptions = Static<typeof sortEnrolledStudentsOpti
 export const enrolledStudentFilterSchema = Type.Object({
   keyword: Type.String(),
   sort: sortEnrolledStudentsOptions,
-  groupId: Type.Optional(UUIDSchema),
+  groupId: UUIDSchema,
 });
 
 export type EnrolledStudentFilterSchema = Static<typeof enrolledStudentFilterSchema>;

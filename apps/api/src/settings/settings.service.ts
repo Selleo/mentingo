@@ -24,6 +24,7 @@ import type {
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
+import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -337,10 +338,10 @@ export class SettingsService {
       .where(isNull(settings.userId));
   }
 
-  public async getLoginBackgroundImageUrl(): Promise<string | null> {
+  public async getLoginBackgroundImageUrl(): Promise<LoginBackgroundResponseBody> {
     const globalSettings = await this.getGlobalSettings();
 
-    return globalSettings.loginBackgroundImageS3Key ?? null;
+    return { url: globalSettings.loginBackgroundImageS3Key ?? null };
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {

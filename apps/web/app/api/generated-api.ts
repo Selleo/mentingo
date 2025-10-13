@@ -532,6 +532,7 @@ export interface UpdatePrimaryColorResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
