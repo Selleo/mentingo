@@ -15,9 +15,10 @@ env:
   SMTP_USER: ""
   SMTP_PASSWORD: ""
   AWS_REGION: "us-east-1"
-  AWS_ACCESS_KEY_ID: ""
-  AWS_SECRET_ACCESS_KEY: ""
-  AWS_BUCKET_NAME: ""
+  AWS_ACCESS_KEY_ID: "test"
+  AWS_SECRET_ACCESS_KEY: "test"
+  AWS_BUCKET_NAME: "test-bucket"
+  AWS_ENDPOINT_URL: "http://localhost:4566"
   SES_EMAIL: "noreply@lms.selleo.app"
   STRIPE_SECRET_KEY: "test_secret"
   STRIPE_PUBLISHABLE_KEY: "test_secret"
@@ -97,6 +98,56 @@ jobs:
         with:
           node-version: 20.9.0
           cache: pnpm
+
+      - name: Install and Start LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
+          install-awslocal: 'true'
+          configuration: |
+            SERVICES=s3
+            DEBUG=0
+            DATA_DIR=/tmp/localstack/data
+            PERSISTENCE=0
+
+      - name: Setup local S3 bucket
+        run: |
+          echo "Checking LocalStack setup..."
+          max_attempts=5
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -sf http://localhost:4566/_localstack/health >/dev/null 2>&1; then
+              echo "LocalStack is ready"
+              break
+            fi
+            attempt=$((attempt + 1))
+            wait_time=$((2 ** (attempt > 4 ? 4 : attempt)))
+            echo "Waiting for LocalStack... (attempt $attempt/$max_attempts, waiting ${wait_time}s)"
+            sleep $wait_time
+          done
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "LocalStack failed to start after $max_attempts attempts"
+            curl -v http://localhost:4566/_localstack/health || true
+            exit 1
+          fi
+          
+          echo "Creating S3 bucket..."
+          if ! awslocal s3 mb s3://test-bucket; then
+            echo "Failed to create S3 bucket"
+            exit 1
+          fi
+          
+          echo "Configuring bucket CORS..."
+          awslocal s3api put-bucket-cors --bucket test-bucket --cors-configuration '{
+            "CORSRules": [{
+              "AllowedOrigins": ["*"],
+              "AllowedMethods": ["GET", "PUT", "POST", "DELETE"],
+              "AllowedHeaders": ["*"]
+            }]
+          }' || echo "Warning: Failed to set CORS configuration"
+          
+          echo "S3 setup completed successfully!"
 
       - name: Install dependencies
         run: pnpm install
