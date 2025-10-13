@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { cn } from "~/lib/utils";
@@ -77,11 +78,12 @@ export const ExpandableNavigationMenu = ({
   }, [closeOnClickOutside, isExpanded, handleExpandChange]);
 
   return (
-    <DropdownMenu open={isExpanded} defaultOpen={isExpanded}>
-      <DropdownMenuTrigger
-        className="w-full"
-        onClick={() => handleExpandChange(isBetween1440And1680 ? true : !isExpanded)}
-      >
+    <DropdownMenu
+      open={isExpanded}
+      defaultOpen={isExpanded}
+      onOpenChange={() => handleExpandChange(isBetween1440And1680 ? true : !isExpanded)}
+    >
+      <DropdownMenuTrigger className="w-full">
         <button
           type="button"
           className={cn(
@@ -122,20 +124,34 @@ export const ExpandableNavigationMenu = ({
         </DropdownMenuContent>
       )}
 
-      {isExpanded && !isBetween1440And1680 && (
-        <menu className="ml-4 flex flex-col gap-y-3 2xl:h-min">
-          {items.map((item) => {
-            return (
-              <NavigationMenuItem
-                key={item.label}
-                item={item}
-                showLabelOn2xl={showLabelsOn2xl}
-                setIsMobileNavOpen={setIsMobileNavOpen}
-              />
-            );
-          })}
-        </menu>
-      )}
+      <AnimatePresence mode="wait">
+        {!isBetween1440And1680 && isExpanded && (
+          <motion.menu
+            className="ml-4 flex flex-col gap-y-3"
+            animate={{ opacity: 1 }}
+            initial={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            {items.map((item, index) => {
+              return (
+                <motion.div
+                  key={item.label}
+                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ y: -20, opacity: 0 }}
+                  exit={{ y: -20, opacity: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <NavigationMenuItem
+                    item={item}
+                    showLabelOn2xl={showLabelsOn2xl}
+                    setIsMobileNavOpen={setIsMobileNavOpen}
+                  />
+                </motion.div>
+              );
+            })}
+          </motion.menu>
+        )}
+      </AnimatePresence>
     </DropdownMenu>
   );
 };
