@@ -1,6 +1,22 @@
+<a name="v3.11.0"></a>
+
+## [v3.11.0] - 13.10.2025
+
+### Features:
+
+- collect number of page views using posthog ([#752](https://github.com/Selleo/mentingo/issues/752))
+
+### Bug Fixes:
+
+- adjust font color ([#753](https://github.com/Selleo/mentingo/issues/753))
+
+- implemented callback url config and replaced usages ([#768](https://github.com/Selleo/mentingo/issues/768))
+
+- fixed tests, types and translation ([#770](https://github.com/Selleo/mentingo/issues/770))
+
 <a name="v3.10.0"></a>
 
-## [v3.10.0] - 12.10.2025
+## [v3.10.0] - 13.10.2025
 
 ### Features:
 
@@ -27,6 +43,8 @@
 - add e2e run on merge me label ([#765](https://github.com/Selleo/mentingo/issues/765))
 
 ### Documentation:
+
+- update changelog for version v3.10.0
 
 - update installation in readme ([#748](https://github.com/Selleo/mentingo/issues/748))
 
@@ -1612,7 +1630,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.10.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.11.0...HEAD
+[v3.11.0]: https://github.com/Selleo/mentingo/compare/v3.10.0...v3.11.0
 [v3.10.0]: https://github.com/Selleo/mentingo/compare/v3.8.2...v3.10.0
 [v3.8.2]: https://github.com/Selleo/mentingo/compare/v3.8.1...v3.8.2
 [v3.8.1]: https://github.com/Selleo/mentingo/compare/v3.9.0...v3.8.1
