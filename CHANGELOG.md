@@ -1,3 +1,11 @@
+<a name="v3.12.0"></a>
+
+## [v3.12.0] - 13.10.2025
+
+### Styles:
+
+- adjust sidebar design ([#766](https://github.com/Selleo/mentingo/issues/766))
+
 <a name="v3.11.0"></a>
 
 ## [v3.11.0] - 13.10.2025
@@ -13,6 +21,10 @@
 - implemented callback url config and replaced usages ([#768](https://github.com/Selleo/mentingo/issues/768))
 
 - fixed tests, types and translation ([#770](https://github.com/Selleo/mentingo/issues/770))
+
+### Documentation:
+
+- update changelog for version v3.11.0
 
 <a name="v3.10.0"></a>
 
@@ -1630,7 +1642,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.11.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.12.0...HEAD
+[v3.12.0]: https://github.com/Selleo/mentingo/compare/v3.11.0...v3.12.0
 [v3.11.0]: https://github.com/Selleo/mentingo/compare/v3.10.0...v3.11.0
 [v3.10.0]: https://github.com/Selleo/mentingo/compare/v3.8.2...v3.10.0
 [v3.8.2]: https://github.com/Selleo/mentingo/compare/v3.8.1...v3.8.2
