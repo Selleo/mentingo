@@ -346,7 +346,9 @@
       "userUpdatedSuccessfully": "User updated successfully",
       "userDetailsUpdatedSuccessfully": "User details updated successfully",
       "updatedSelectedUsersSuccessfully": "Successfully updated selected users",
-      "deletedSelectedUsersSuccessfully": "Successfully deleted selected users"
+      "deletedSelectedUsersSuccessfully": "Successfully deleted selected users",
+      "archivedSelectedUsersSuccessfully": "Successfully archived selected users",
+      "archiveSelectedUsersError": "Failed to archive selected users"
     },
     "field": {
       "description": "Description",
@@ -613,13 +615,15 @@
     "dropdown": {
       "changeRole": "Change role",
       "changeGroup": "Change group",
-      "delete": "Delete"
+      "delete": "Delete",
+      "archive": "Archive"
     },
     "modal": {
       "title": {
         "delete": "Do you want to delete these accounts?",
         "role": "Modify roles",
         "group": "Modify groups",
+        "archive": "Archive user accounts",
         "confirmation": "Are you sure you want to proceed?",
         "import": "Import users",
         "importResult": "Import result"
@@ -628,6 +632,7 @@
         "delete": "Delete",
         "role": "Save",
         "group": "Save",
+        "archive": "Archive",
         "continue": "Confirm"
       },
       "description": {
@@ -636,6 +641,7 @@
         "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
+        "archive": "Are you sure you want to archive these accounts?",
         "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName.",
         "noUsersImported": "No users were imported.",
         "noUsersSkipped": "No users were skipped."

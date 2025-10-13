@@ -67,7 +67,8 @@ export const EditModal = ({
   const getValue = (item: GroupItem | RoleItem) =>
     type === "group" ? (item as GroupItem).groupId : (item as string);
 
-  const handleSubmit = () => (type === "delete" ? onConfirm() : setShowConfirmationModal(true));
+  const handleSubmit = () =>
+    type === "delete" || type === "archive" ? onConfirm() : setShowConfirmationModal(true);
 
   return (
     <>
@@ -89,7 +90,7 @@ export const EditModal = ({
             </DialogTitle>
 
             <DialogDescription>
-              {type === "delete" ? (
+              {type === "delete" || type === "archive" ? (
                 t(`adminUsersView.modal.description.${type}`)
               ) : (
                 <Select onValueChange={handleValueChange} value={selectedValue}>

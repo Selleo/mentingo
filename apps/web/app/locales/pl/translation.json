@@ -347,7 +347,9 @@
       "userUpdatedSuccessfully": "Użytkownik zaktualizowany pomyślnie",
       "userDetailsUpdatedSuccessfully": "Szczegóły użytkownika zaktualizowane pomyślnie",
       "updatedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie zaktualizowani",
-      "deletedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie usunięci"
+      "deletedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie usunięci",
+      "archivedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie zarchiwizowani",
+      "archiveSelectedUsersError": "Nie udało się zarchiwizować wybranych użytkowników"
     },
     "field": {
       "description": "Opis",
@@ -614,13 +616,15 @@
     "dropdown": {
       "changeRole": "Zmień role",
       "changeGroup": "Zmień grupy",
-      "delete": "Usuń"
+      "delete": "Usuń",
+      "archive": "Archiwizuj"
     },
     "modal": {
       "title": {
         "delete": "Czy chcesz usunąć te konta?",
         "role": "Modyfikuj role",
         "group": "Modyfikuj grupy",
+        "archive": "Archiwizuj konta użytkowników",
         "confirmation": "Czy jesteś pewny, że chcesz kontynuować?",
         "import": "Importuj użytkowników",
         "importResult": "Wynik importu"
@@ -629,6 +633,7 @@
         "delete": "Usuń",
         "role": "Zapisz",
         "group": "Zapisz",
+        "archive": "Archiwizuj",
         "continue": "Zatwierdź"
       },
       "description": {
@@ -641,6 +646,7 @@
         "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "archive": "Czy na pewno chcesz zarchiwizować te konta?",
         "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne).",
         "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
         "noUsersSkipped": "Nie pominięto żadnych użytkowników."

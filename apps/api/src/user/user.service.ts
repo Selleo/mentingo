@@ -528,6 +528,28 @@ export class UserService {
     return importStats;
   }
 
+  public async bulkArchiveUsers(userIds: UUIDType[]) {
+    const usersToArchive = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(inArray(users.id, userIds), eq(users.archived, false)));
+
+    if (!usersToArchive.length) throw new NotFoundException("No users found to archive");
+
+    const usersToArchiveIds = usersToArchive.map(({ id }) => id);
+
+    const archivedUsers = await this.db
+      .update(users)
+      .set({ archived: true })
+      .where(inArray(users.id, usersToArchiveIds))
+      .returning();
+
+    return {
+      archivedUsersCount: archivedUsers.length,
+      usersAlreadyArchivedCount: userIds.length - usersToArchive.length,
+    };
+  }
+
   private getFiltersConditions(filters: UsersFilterSchema) {
     const conditions = [];
 

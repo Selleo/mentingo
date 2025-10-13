@@ -37,6 +37,11 @@ import {
 } from "src/user/schemas/createUser.schema";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
+import {
+  ArchiveUsersSchema,
+  archiveUsersSchema,
+  archiveUsersSchemaResponse,
+} from "./schemas/archiveUsers.schema";
 import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
 import {
@@ -62,6 +67,7 @@ import { SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
 import { UserService } from "./user.service";
 
+import type { ArchiveUsersSchemaResponse } from "./schemas/archiveUsers.schema";
 import type { UsersFilterSchema } from "./schemas/userQuery";
 import type { Static } from "@sinclair/typebox";
 
@@ -299,6 +305,20 @@ export class UserController {
     return new BaseResponse({
       message: "User groups upserted successfully",
     });
+  }
+
+  @Patch("bulk/archive")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: archiveUsersSchema }],
+    response: baseResponse(archiveUsersSchemaResponse),
+  })
+  async archiveBulkUsers(
+    @Body() body: ArchiveUsersSchema,
+  ): Promise<BaseResponse<ArchiveUsersSchemaResponse>> {
+    const archivedUsers = await this.usersService.bulkArchiveUsers(body.userIds);
+
+    return new BaseResponse(archivedUsers);
   }
 
   @Post()
