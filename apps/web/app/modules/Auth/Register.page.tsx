@@ -20,7 +20,18 @@ import { passwordSchema } from "../Dashboard/Settings/schema/password.schema";
 
 import { SocialLogin } from "./components";
 
+import type { ParentRouteData } from "../layout";
+import type { MetaFunction } from "@remix-run/react";
 import type { RegisterBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Register` : "Register";
+
+  return [{ title }];
+};
 
 const registerSchema = z.object({
   firstName: z.string().min(2, { message: "registerView.validation.firstName" }),

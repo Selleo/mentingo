@@ -51,9 +51,20 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { GetAllCategoriesResponse } from "~/api/generated-api";
+import type { ParentRouteData } from "~/modules/layout";
 
 type TCategory = GetAllCategoriesResponse["data"][number];
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Categories` : "Categories";
+
+  return [{ title }];
+};
 
 export const clientLoader = async () => {
   await queryClient.prefetchQuery(usersQueryOptions());

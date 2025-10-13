@@ -8,6 +8,18 @@ import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConf
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
+import type { MetaFunction } from "@remix-run/react";
+import type { ParentRouteData } from "~/modules/layout";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Lesson` : "Lesson";
+
+  return [{ title }];
+};
+
 export const clientLoader = async () => {
   try {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);

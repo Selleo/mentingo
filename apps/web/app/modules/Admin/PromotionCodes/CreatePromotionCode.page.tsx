@@ -19,6 +19,20 @@ import { convertToMinorUnits } from "~/lib/formatters/priceFormatter";
 
 import { CreatePageHeader } from "../components";
 
+import type { MetaFunction } from "@remix-run/react";
+import type { ParentRouteData } from "~/modules/layout";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName
+    ? `${companyShortName} - Create promotion code`
+    : "Create promotion code";
+
+  return [{ title }];
+};
+
 const formSchema = z
   .object({
     code: z.string().min(1, "Code is required."),

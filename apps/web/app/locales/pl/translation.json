@@ -170,6 +170,7 @@
     "description": "Informacje o Twojej firmie, które będą widoczne dla użytkowników",
     "editTitle": "Edytuj Informacje o Dostawcy",
     "companyName": "Nazwa firmy",
+    "companyShortName": "Skrócona nazwa firmy",
     "registeredAddress": "Adres siedziby",
     "taxNumber": "Numer NIP",
     "emailAddress": "Adres email",

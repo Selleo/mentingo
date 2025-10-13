@@ -10,7 +10,18 @@ import { EnrollmentChart } from "~/modules/Statistics/Admin/components/Enrollmen
 
 import { CourseCompletionPercentageChart, FiveMostPopularCoursesChart } from "./components";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { ChartConfig } from "~/components/ui/chart";
+import type { ParentRouteData } from "~/modules/layout";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Dashboard` : "Dashboard";
+
+  return [{ title }];
+};
 
 export const AdminStatistics = () => {
   const { data: user } = useCurrentUser();
