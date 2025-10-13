@@ -19,9 +19,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     getComputedStyle(document.documentElement).getPropertyValue("--primary-700").trim(),
   );
   const [contrastColor, setContrastColor] = useState(
-    getComputedStyle(document.documentElement)
-      .getPropertyValue(getContrastColor(primaryColor, "--color-black", "--color-white"))
-      .trim(),
+    getComputedStyle(document.documentElement).getPropertyValue("--color-white").trim(),
   );
 
   const handleSetColorSchema = useCallback((primaryColor: string, contrastColor: string) => {

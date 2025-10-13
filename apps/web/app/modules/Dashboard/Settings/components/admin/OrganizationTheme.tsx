@@ -59,7 +59,7 @@ export const OrganizationTheme = () => {
                     : `#${event.target.value}`;
 
                   if (HEX_COLOR_REGEX.test(value)) {
-                    setColorSchema(value, value);
+                    setColorSchema(value, contrastColor);
                   }
                 }}
                 className="w-24"
@@ -75,15 +75,15 @@ export const OrganizationTheme = () => {
               <span className="text-sm text-gray-500">#</span>
               <Input
                 type="text"
-                id="primary-color-input"
-                value={primaryColor.replace(/^#/, "")}
+                id="contrast-color-input"
+                value={contrastColor.replace(/^#/, "")}
                 onChange={(event) => {
                   const value = event.target.value.startsWith("#")
                     ? event.target.value
                     : `#${event.target.value}`;
 
                   if (HEX_COLOR_REGEX.test(value)) {
-                    setColorSchema(value, value);
+                    setColorSchema(primaryColor, value);
                   }
                 }}
                 className="w-24"
