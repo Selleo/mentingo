@@ -1,3 +1,41 @@
+<a name="v3.10.0"></a>
+
+## [v3.10.0] - 12.10.2025
+
+### Features:
+
+- login background upload ([#747](https://github.com/Selleo/mentingo/issues/747))
+
+- add filtering students by group in enrolled tab ([#742](https://github.com/Selleo/mentingo/issues/742))
+
+### Bug Fixes:
+
+- fix input losing focus while typing ([#749](https://github.com/Selleo/mentingo/issues/749))
+
+- set default filter in course list ([#740](https://github.com/Selleo/mentingo/issues/740))
+
+### Chores:
+
+- added frontend and backend tests for env manager ([#759](https://github.com/Selleo/mentingo/issues/759))
+
+- implemented e2e tests for env manager ([#760](https://github.com/Selleo/mentingo/issues/760))
+
+- adjust gap fills and fill in the blanks creation to be more intuitive ([#707](https://github.com/Selleo/mentingo/issues/707))
+
+- update changelog groups order ([#751](https://github.com/Selleo/mentingo/issues/751))
+
+- add e2e run on merge me label ([#765](https://github.com/Selleo/mentingo/issues/765))
+
+### Documentation:
+
+- update installation in readme ([#748](https://github.com/Selleo/mentingo/issues/748))
+
+### Tests:
+
+- add announcements controller in e2e tests ([#758](https://github.com/Selleo/mentingo/issues/758))
+
+- add unit test for remaining api utils ([#738](https://github.com/Selleo/mentingo/issues/738))
+
 <a name="v3.8.2"></a>
 
 ## [v3.8.2] - 09.10.2025
@@ -5,6 +43,10 @@
 ### Bug Fixes:
 
 - google oauth on all instances and update slack envs to be editable ([#755](https://github.com/Selleo/mentingo/issues/755))
+
+### Documentation:
+
+- update changelog for version v3.8.2
 
 <a name="v3.8.1"></a>
 
@@ -178,11 +220,27 @@
 
 - implement admin notifications about finished course ([#630](https://github.com/Selleo/mentingo/issues/630))
 
+### Bug Fixes:
+
+- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
+
+### Documentation:
+
+- update changelog for version v3.4.0
+
+<a name="v3.3.0"></a>
+
+## [v3.3.0] - 16.09.2025
+
+### Features:
+
 - generate certificates ([#538](https://github.com/Selleo/mentingo/issues/538))
 
 ### Bug Fixes:
 
-- archiving user and change default filter to archived user ([#643](https://github.com/Selleo/mentingo/issues/643))
+- failing api tests and api e2e tests
+
+- mfa after sso login
 
 - add fetch depth of 0 to deploy ([#645](https://github.com/Selleo/mentingo/issues/645))
 
@@ -190,7 +248,7 @@
 
 ### Documentation:
 
-- update changelog for version v3.4.0
+- update changelog for version v3.3.0
 
 - update changelog for version learn-v2025.09.12
 
@@ -374,14 +432,6 @@
 
 - improve confusing translation in confirmation modal ([#433](https://github.com/Selleo/mentingo/issues/433))
 
-### Code Refactoring:
-
-- clean up student and content creator profile according to design ([#508](https://github.com/Selleo/mentingo/issues/508))
-
-- change h-_ w-_ classes to size-\* when the element is square ([#498](https://github.com/Selleo/mentingo/issues/498))
-
-- rename teacher to content creator and migrate roles in database ([#484](https://github.com/Selleo/mentingo/issues/484))
-
 ### Chores:
 
 - added e2e tests for enrolling students to freemium lessons ([#606](https://github.com/Selleo/mentingo/issues/606))
@@ -411,6 +461,14 @@
 - add hyperlinks to text editor ([#435](https://github.com/Selleo/mentingo/issues/435))
 
 - increase file size upload limit ([#432](https://github.com/Selleo/mentingo/issues/432))
+
+### Code Refactoring:
+
+- clean up student and content creator profile according to design ([#508](https://github.com/Selleo/mentingo/issues/508))
+
+- change h-_ w-_ classes to size-\* when the element is square ([#498](https://github.com/Selleo/mentingo/issues/498))
+
+- rename teacher to content creator and migrate roles in database ([#484](https://github.com/Selleo/mentingo/issues/484))
 
 ### Documentation:
 
@@ -684,6 +742,10 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - update lesson sidebar to use lessonId and fetch course data dynamically ([#353](https://github.com/Selleo/mentingo/issues/353))
 
+### Chores:
+
+- add seed for production ([#354](https://github.com/Selleo/mentingo/issues/354))
+
 ### Code Refactoring:
 
 - Batch of fixes ([#363](https://github.com/Selleo/mentingo/issues/363))
@@ -691,10 +753,6 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 - Batch of fixes related to chapter view ([#361](https://github.com/Selleo/mentingo/issues/361))
 
 - fix appearance of dropdown questions ([#355](https://github.com/Selleo/mentingo/issues/355))
-
-### Chores:
-
-- add seed for production ([#354](https://github.com/Selleo/mentingo/issues/354))
 
 ### Documentation:
 
@@ -864,6 +922,10 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - remove sidebar from splashscreen ([#264](https://github.com/Selleo/mentingo/issues/264))
 
+### Chores:
+
+- enable next lesson ([#326](https://github.com/Selleo/mentingo/issues/326))
+
 ### Code Refactoring:
 
 - Batch of Fill In The Blanks dnd improvements and bug fixes ([#347](https://github.com/Selleo/mentingo/issues/347))
@@ -897,10 +959,6 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 - change updateLessonItemCompletion function logic ([#274](https://github.com/Selleo/mentingo/issues/274))
 
 - add profile tab to navigation and rename tutor components to teacher ([#275](https://github.com/Selleo/mentingo/issues/275))
-
-### Chores:
-
-- enable next lesson ([#326](https://github.com/Selleo/mentingo/issues/326))
 
 <a name="v2.2.3"></a>
 
@@ -1024,13 +1082,13 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - saving options for the question ([#225](https://github.com/Selleo/mentingo/issues/225))
 
-### Code Refactoring:
-
-- Quiz and dashboard appearance adjustments ([#223](https://github.com/Selleo/mentingo/issues/223))
-
 ### Chores:
 
 - udpate deploy production config ([#221](https://github.com/Selleo/mentingo/issues/221))
+
+### Code Refactoring:
+
+- Quiz and dashboard appearance adjustments ([#223](https://github.com/Selleo/mentingo/issues/223))
 
 <a name="v2.1.1"></a>
 
@@ -1056,10 +1114,6 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - disable dnd on completed quiz ([#209](https://github.com/Selleo/mentingo/issues/209))
 
-### Code Refactoring:
-
-- simplify error handling in queryClient retry function ([#208](https://github.com/Selleo/mentingo/issues/208))
-
 ### Chores:
 
 - revert refactor seed directory ([#218](https://github.com/Selleo/mentingo/issues/218))
@@ -1067,6 +1121,10 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 - add missing seed path ([#217](https://github.com/Selleo/mentingo/issues/217))
 
 - prettier setup with code style fixes ([#211](https://github.com/Selleo/mentingo/issues/211))
+
+### Code Refactoring:
+
+- simplify error handling in queryClient retry function ([#208](https://github.com/Selleo/mentingo/issues/208))
 
 ### Styles:
 
@@ -1456,30 +1514,6 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - LC-85 resolve migration conflicts
 
-### Code Refactoring:
-
-- remove navigation from settings view ([#164](https://github.com/Selleo/mentingo/issues/164))
-
-- CourseLessonsShow component appearance adjustment ([#154](https://github.com/Selleo/mentingo/issues/154))
-
-- change Breadcrumb component position to static ([#149](https://github.com/Selleo/mentingo/issues/149))
-
-- Production seeds adjustment ([#147](https://github.com/Selleo/mentingo/issues/147))
-
-- validation adjustment ([#109](https://github.com/Selleo/mentingo/issues/109))
-
-- update package.json dependencies and devDependencies ([#55](https://github.com/Selleo/mentingo/issues/55))
-
-- apply review feedback
-
-- apply review feedback
-
-- Moved links to wrap the entire dropdown in LessonItemsButton.tsx.
-
-- improve module closure in unit test creation
-
-- update eslint ignore patterns for ui directories
-
 ### Chores:
 
 - rename directory ([#78](https://github.com/Selleo/mentingo/issues/78))
@@ -1532,6 +1566,30 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - LC-73 Update with boilerplate
 
+### Code Refactoring:
+
+- remove navigation from settings view ([#164](https://github.com/Selleo/mentingo/issues/164))
+
+- CourseLessonsShow component appearance adjustment ([#154](https://github.com/Selleo/mentingo/issues/154))
+
+- change Breadcrumb component position to static ([#149](https://github.com/Selleo/mentingo/issues/149))
+
+- Production seeds adjustment ([#147](https://github.com/Selleo/mentingo/issues/147))
+
+- validation adjustment ([#109](https://github.com/Selleo/mentingo/issues/109))
+
+- update package.json dependencies and devDependencies ([#55](https://github.com/Selleo/mentingo/issues/55))
+
+- apply review feedback
+
+- apply review feedback
+
+- Moved links to wrap the entire dropdown in LessonItemsButton.tsx.
+
+- improve module closure in unit test creation
+
+- update eslint ignore patterns for ui directories
+
 ### Documentation:
 
 - Legal notice ([#132](https://github.com/Selleo/mentingo/issues/132))
@@ -1554,7 +1612,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.8.2...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.10.0...HEAD
+[v3.10.0]: https://github.com/Selleo/mentingo/compare/v3.8.2...v3.10.0
 [v3.8.2]: https://github.com/Selleo/mentingo/compare/v3.8.1...v3.8.2
 [v3.8.1]: https://github.com/Selleo/mentingo/compare/v3.9.0...v3.8.1
 [v3.9.0]: https://github.com/Selleo/mentingo/compare/v3.8.0...v3.9.0
@@ -1562,7 +1621,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 [v3.7.0]: https://github.com/Selleo/mentingo/compare/v3.6.0...v3.7.0
 [v3.6.0]: https://github.com/Selleo/mentingo/compare/v3.5.0...v3.6.0
 [v3.5.0]: https://github.com/Selleo/mentingo/compare/v3.4.0...v3.5.0
-[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.4.0
+[v3.4.0]: https://github.com/Selleo/mentingo/compare/v3.3.0...v3.4.0
+[v3.3.0]: https://github.com/Selleo/mentingo/compare/v3.2.1...v3.3.0
 [v3.2.1]: https://github.com/Selleo/mentingo/compare/v3.2.0...v3.2.1
 [v3.2.0]: https://github.com/Selleo/mentingo/compare/v3.1.0...v3.2.0
 [v3.1.0]: https://github.com/Selleo/mentingo/compare/v3.0.6...v3.1.0
