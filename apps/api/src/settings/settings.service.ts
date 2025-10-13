@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -30,6 +24,7 @@ import type {
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
+import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -49,14 +44,14 @@ export class SettingsService {
       throw new NotFoundException("Global settings not found");
     }
 
-    const parsedSettings = {
-      ...globalSettings.settings,
-      MFAEnforcedRoles: Array.isArray(globalSettings.settings.MFAEnforcedRoles)
-        ? globalSettings.settings.MFAEnforcedRoles
-        : JSON.parse(globalSettings.settings.MFAEnforcedRoles ?? "[]"),
-    };
+    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
 
-    const { certificateBackgroundImage, platformLogoS3Key, ...restOfSettings } = parsedSettings;
+    const {
+      certificateBackgroundImage,
+      platformLogoS3Key,
+      loginBackgroundImageS3Key,
+      ...restOfSettings
+    } = parsedSettings;
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
       ? await this.fileService.getFileUrl(certificateBackgroundImage)
@@ -66,9 +61,14 @@ export class SettingsService {
       ? await this.fileService.getFileUrl(platformLogoS3Key)
       : null;
 
+    const loginBackgroundSignedUrl = loginBackgroundImageS3Key
+      ? await this.fileService.getFileUrl(loginBackgroundImageS3Key)
+      : null;
+
     return {
       ...restOfSettings,
       platformLogoS3Key: platformLogoUrl,
+      loginBackgroundImageS3Key: loginBackgroundSignedUrl,
       certificateBackgroundImage: certificateBackgroundSignedUrl,
     };
   }
@@ -180,14 +180,7 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    const parsedSettings = {
-      ...updatedGlobalSettings,
-      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
-        ? updatedGlobalSettings.MFAEnforcedRoles
-        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
-    };
-
-    return parsedSettings;
+    return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
   public async updateAdminNewUserNotification(
@@ -223,6 +216,38 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
+  public async updateGlobalPrimaryColor(
+    primaryColor: string,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const [globalSettings] = await this.db
+      .select({
+        primaryColor: sql`settings.settings->>'primaryColor'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{primaryColor}',
+            to_jsonb(${primaryColor}::text),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async updateGlobalEnforceSSO(): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
       .select({
@@ -250,23 +275,16 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
-    const parsedSettings = {
-      ...updatedGlobalSettings,
-      MFAEnforcedRoles: Array.isArray(updatedGlobalSettings.MFAEnforcedRoles)
-        ? updatedGlobalSettings.MFAEnforcedRoles
-        : JSON.parse(updatedGlobalSettings.MFAEnforcedRoles ?? "[]"),
-    };
-
-    return parsedSettings;
+    return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
-  public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
-    if (!file) {
-      throw new BadRequestException("No logo file provided");
+  public async uploadPlatformLogo(file: Express.Multer.File | null | undefined): Promise<void> {
+    let newValue: string | null = null;
+    if (file) {
+      const resource = "platform-logos";
+      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      newValue = fileKey;
     }
-
-    const resource = "platform-logos";
-    const { fileKey } = await this.fileService.uploadFile(file, resource);
 
     await this.db
       .update(settings)
@@ -275,7 +293,7 @@ export class SettingsService {
           jsonb_set(
             settings.settings,
             '{platformLogoS3Key}',
-            to_jsonb(${fileKey}::text),
+            ${newValue ? sql`to_jsonb(${newValue}::text)` : sql`'null'::jsonb`},
             true
           )
         `,
@@ -293,6 +311,37 @@ export class SettingsService {
     }
 
     return await this.fileService.getFileUrl(platformLogoS3Key);
+  }
+
+  public async uploadLoginBackgroundImage(
+    file: Express.Multer.File | null | undefined,
+  ): Promise<void> {
+    let newValue: string | null = null;
+    if (file) {
+      const resource = "login-backgrounds";
+      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      newValue = fileKey;
+    }
+
+    await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{loginBackgroundImageS3Key}',
+            ${newValue ? sql`to_jsonb(${newValue}::text)` : sql`'null'::jsonb`},
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId));
+  }
+
+  public async getLoginBackgroundImageUrl(): Promise<LoginBackgroundResponseBody> {
+    const globalSettings = await this.getGlobalSettings();
+
+    return { url: globalSettings.loginBackgroundImageS3Key ?? null };
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {
@@ -511,5 +560,16 @@ export class SettingsService {
       default:
         return DEFAULT_STUDENT_SETTINGS;
     }
+  }
+
+  private parseGlobalSettings(
+    settings: GlobalSettingsJSONContentSchema,
+  ): GlobalSettingsJSONContentSchema {
+    return {
+      ...settings,
+      MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
+        ? settings.MFAEnforcedRoles
+        : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),
+    };
   }
 }

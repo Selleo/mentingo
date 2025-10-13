@@ -12,6 +12,7 @@ export { useRegisterUser } from "./useRegisterUser";
 export { useStripePaymentIntent } from "./useStripePaymentIntent";
 export { useSubmitQuiz } from "./useSubmitQuiz";
 export { useUnenrollCourse } from "./useUnenrollCourse";
+export { useUpdatePrimaryColor } from "./useUpdatePrimaryColor";
 export { useUpdateUser } from "./useUpdateUser";
 export { useUpsertUserDetails } from "./useUpsertUserDetails";
 export { useUpdateUserProfile } from "./useUpdateUserProfile";

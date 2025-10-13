@@ -18,7 +18,7 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
     super({
       clientID: "placeholder",
       clientSecret: "placeholder",
-      callbackURL: configService.get<string>("microsoft_authorization.callbackURL"),
+      callbackURL: configService.get<string>("callback_url.MICROSOFT"),
       scope: ["user.read"],
       tenant: "common",
     });
@@ -51,7 +51,7 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
           {
             clientID: id,
             clientSecret: secret,
-            callbackURL: this.configService.get<string>("microsoft_authorization.callbackURL"),
+            callbackURL: this.configService.get<string>("callback_url.MICROSOFT"),
             scope: ["user.read"],
             tenant: "common",
           },

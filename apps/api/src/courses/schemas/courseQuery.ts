@@ -1,6 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 
-import type { UUIDType } from "src/common";
+import { UUIDSchema, type UUIDType } from "src/common";
+
 import type { UserRole } from "src/user/schemas/userRoles";
 
 export const courseSortFields = [
@@ -58,6 +59,7 @@ export const coursesFilterFiled = Type.Union([
 export type CoursesFilterFiled = Static<typeof coursesFilterFiled>;
 
 export const coursesFilterSchema = Type.Object({
+  /** Filter by course title only */
   title: Type.Optional(Type.String()),
   category: Type.Optional(Type.String()),
   status: Type.Optional(coursesStatusOptions),
@@ -65,6 +67,10 @@ export const coursesFilterSchema = Type.Object({
     Type.Tuple([Type.String({ format: "date-time" }), Type.String({ format: "date-time" })]),
   ),
   author: Type.Optional(Type.String()),
+  /** Filter by course description only */
+  description: Type.Optional(Type.String()),
+  /** Search across both title AND description fields simultaneously */
+  searchQuery: Type.Optional(Type.String()),
 });
 
 export type CoursesFilterSchema = Static<typeof coursesFilterSchema>;
@@ -108,6 +114,7 @@ export type SortEnrolledStudentsOptions = Static<typeof sortEnrolledStudentsOpti
 export const enrolledStudentFilterSchema = Type.Object({
   keyword: Type.String(),
   sort: sortEnrolledStudentsOptions,
+  groupId: UUIDSchema,
 });
 
 export type EnrolledStudentFilterSchema = Static<typeof enrolledStudentFilterSchema>;

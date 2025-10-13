@@ -66,6 +66,8 @@ jobs:
           VITE_GOOGLE_OAUTH_ENABLED: ${{secrets.VITE_GOOGLE_OAUTH_ENABLED}}
           VITE_MICROSOFT_OAUTH_ENABLED: ${{secrets.VITE_MICROSOFT_OAUTH_ENABLED}}
           VITE_SLACK_OAUTH_ENABLED: ${{secrets.VITE_SLACK_OAUTH_ENABLED}}
+          VITE_POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
         run: |
           docker build -f ./web.Dockerfile \
             --build-arg VERSION=$IMAGE_TAG \
@@ -77,6 +79,8 @@ jobs:
             --build-arg VITE_GOOGLE_OAUTH_ENABLED=$VITE_GOOGLE_OAUTH_ENABLED \
             --build-arg VITE_MICROSOFT_OAUTH_ENABLED=$VITE_MICROSOFT_OAUTH_ENABLED \
             --build-arg VITE_SLACK_OAUTH_ENABLED=$VITE_SLACK_OAUTH_ENABLED \
+            --build-arg VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY \
+            --build-arg VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST \
             -t $ECR_REGISTRY:$IMAGE_TAG .
           docker tag $ECR_REGISTRY:$IMAGE_TAG $ECR_REGISTRY:latest
           docker push $ECR_REGISTRY:$IMAGE_TAG

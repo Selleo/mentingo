@@ -14,6 +14,7 @@ import { Toaster } from "~/components/ui/toaster";
 import "./index.css";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
 import { Providers } from "./modules/Global/Providers";
+import { ThemeWrapper } from "./modules/Global/ThemeWrapper";
 
 import type { LinksFunction } from "@remix-run/node";
 
@@ -51,7 +52,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function Root() {
   return (
     <Providers>
-      <Outlet />
+      <ThemeWrapper>
+        <Outlet />
+      </ThemeWrapper>
     </Providers>
   );
 }

@@ -73,7 +73,7 @@ export const ProfileWithCalendar = ({ user, isLoading = true, streak }: ProfileW
           </Link>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-y-2 rounded-lg bg-white p-6 md:p-8 2xl:p-0 2xl:pt-6">
+      <div className="flex w-full flex-col gap-y-2 bg-white p-6 md:p-8 2xl:p-0 2xl:pt-6">
         <div className="flex flex-row-reverse items-center justify-between 2xl:flex-row">
           <div className="flex items-center gap-x-2 py-2">
             <Icon name="Flame" />

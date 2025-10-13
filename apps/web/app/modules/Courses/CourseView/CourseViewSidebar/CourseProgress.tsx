@@ -65,7 +65,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
         </CopyUrlButton>
         <>
           <Button className="gap-x-2" onClick={handleNavigateToLesson}>
-            <Icon name="Play" className="h-auto w-6 text-white" />
+            <Icon name="Play" className="text-contrast h-auto w-6" />
             <span>
               {t(
                 isAdminLike

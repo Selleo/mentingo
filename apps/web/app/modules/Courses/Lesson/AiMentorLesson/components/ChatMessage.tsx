@@ -30,8 +30,8 @@ const ChatMessage = (message: ChatMessageProps) => {
     <div key={message.id} className="flex items-start gap-x-3">
       <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full">
         {isAI ? (
-          <div className="flex size-full items-center justify-center rounded-full bg-blue-100">
-            <Icon name="AiMentor" className="size-5 text-blue-600" />
+          <div className="flex size-full items-center justify-center rounded-full bg-primary-100">
+            <Icon name="AiMentor" className="size-5 text-primary-600" />
           </div>
         ) : (
           <div className="flex size-full items-center justify-center rounded-full bg-gray-200">
@@ -40,7 +40,7 @@ const ChatMessage = (message: ChatMessageProps) => {
         )}
       </div>
       <div className="max-w-4/5 flex flex-col">
-        <span className="mb-1 text-sm font-semibold text-blue-900">{userName}</span>
+        <span className="mb-1 text-sm font-semibold text-primary-900">{userName}</span>
         <p className="break-words text-sm leading-relaxed text-gray-800">{message.content}</p>
       </div>
     </div>

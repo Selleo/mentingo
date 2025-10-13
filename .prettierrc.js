@@ -1,3 +1,5 @@
+const path = require("path");
+
 /** @type {import('prettier').Config} */
 module.exports = {
   trailingComma: "all",
@@ -15,8 +17,7 @@ module.exports = {
     {
       files: ["apps/web/**/*.{ts,tsx,js,jsx}"],
       options: {
-        plugins: ["prettier-plugin-tailwindcss"],
-        tailwindConfig: "./apps/web/tailwind.config.ts",
+        tailwindConfig: path.resolve(__dirname, "apps/web/tailwind.config.ts"),
       },
     },
   ],

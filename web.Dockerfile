@@ -10,6 +10,8 @@ ARG VITE_SENTRY_DSN
 ARG VITE_GOOGLE_OAUTH_ENABLED
 ARG VITE_MICROSOFT_OAUTH_ENABLED
 ARG VITE_SLACK_OAUTH_ENABLED
+ARG VITE_POSTHOG_KEY
+ARG VITE_POSTHOG_HOST
 
 ENV VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY
 
@@ -20,6 +22,7 @@ WORKDIR /app
 COPY . .
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
+RUN pnpm --filter="@repo/shared" run build
 RUN pnpm build --filter=web
 # TODO: Move pnpm deploy to turbo prune workflow
 RUN pnpm deploy --filter=web pnpm-deploy-output --prod

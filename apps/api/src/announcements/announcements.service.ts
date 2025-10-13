@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AnnouncementsRepository } from "./announcements.repository";
 
-import type { CreateAnnouncement } from "./types/announcement.types";
+import type { CreateAnnouncement, AnnouncementFilters } from "./types/announcement.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -36,8 +36,8 @@ export class AnnouncementsService {
     return readAnnouncements;
   }
 
-  async getAnnouncementsForUser(userId: UUIDType) {
-    return await this.announcementsRepository.getAnnouncementsForUser(userId);
+  async getAnnouncementsForUser(userId: UUIDType, filters?: AnnouncementFilters) {
+    return await this.announcementsRepository.getAnnouncementsForUser(userId, filters);
   }
 
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, authorId: UUIDType) {

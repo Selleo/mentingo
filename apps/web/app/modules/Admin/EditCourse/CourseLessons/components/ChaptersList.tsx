@@ -208,7 +208,7 @@ const ChapterCard = ({
                 <Switch.Root
                   data-testid={`Freemium - ${chapter.id}`}
                   className={cn("relative h-6 w-11 rounded-full transition-colors", {
-                    "bg-blue-500": chapter.isFree,
+                    "bg-primary-500": chapter.isFree,
                     "bg-gray-200": !chapter.isFree,
                   })}
                   id="freemiumToggle"

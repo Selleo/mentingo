@@ -44,7 +44,6 @@ const NewChapter = ({ setContentTypeToDisplay, chapter }: NewChapterProps) => {
   };
 
   const buttonStyles = "bg-transparent text-red-500 border border-red-500 hover:bg-red-100";
-  const saveButtonStyles = "bg-primary-700 hover:bg-blue-600 text-white";
 
   return (
     <div className="flex h-min w-full flex-col gap-y-6 rounded-lg bg-white p-8">
@@ -86,9 +85,7 @@ const NewChapter = ({ setContentTypeToDisplay, chapter }: NewChapterProps) => {
             )}
           />
           <div className="mt-4 flex space-x-4">
-            <Button type="submit" className={saveButtonStyles}>
-              {t("common.button.save")}
-            </Button>
+            <Button type="submit">{t("common.button.save")}</Button>
             {chapter ? (
               <Button
                 aria-label="Delete chapter"

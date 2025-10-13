@@ -60,8 +60,8 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
               <Button
                 size="sm"
                 className={cn("bg-transparent text-black", {
-                  "bg-blue-100": editor.isActive("link"),
-                  "hover:bg-blue-100": !editor.isActive("link"),
+                  "bg-primary-100": editor.isActive("link"),
+                  "hover:bg-primary-100": !editor.isActive("link"),
                 })}
                 onClick={handleLink}
               >
@@ -74,7 +74,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("bold") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={`bg-transparent text-black ${editor.isActive("bold") ? "bg-primary-100" : "hover:bg-primary-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleBold().run())}
               >
                 <Bold className="size-4" />
@@ -87,7 +87,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("italic") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={`bg-transparent text-black ${editor.isActive("italic") ? "bg-primary-100" : "hover:bg-primary-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleItalic().run())}
               >
                 <Italic className="size-4" />
@@ -100,7 +100,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("strike") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={`bg-transparent text-black ${editor.isActive("strike") ? "bg-primary-100" : "hover:bg-primary-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleStrike().run())}
               >
                 <Strikethrough className="size-4" />
@@ -113,7 +113,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("bulletList") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={`bg-transparent text-black ${editor.isActive("bulletList") ? "bg-primary-100" : "hover:bg-primary-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleBulletList().run())}
               >
                 <List className="size-4" />
@@ -126,7 +126,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("orderedList") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={`bg-transparent text-black ${editor.isActive("orderedList") ? "bg-primary-100" : "hover:bg-primary-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleOrderedList().run())}
               >
                 <ListOrdered className="size-4" />
@@ -139,7 +139,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("codeBlock") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={`bg-transparent text-black ${editor.isActive("codeBlock") ? "bg-primary-100" : "hover:bg-primary-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleCodeBlock().run())}
               >
                 <Code className="size-4" />
@@ -152,7 +152,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             <TooltipTrigger>
               <Button
                 size="sm"
-                className={`bg-transparent text-black ${editor.isActive("blockquote") ? "bg-blue-100" : "hover:bg-blue-100"}`}
+                className={`bg-transparent text-black ${editor.isActive("blockquote") ? "bg-primary-100" : "hover:bg-primary-100"}`}
                 onClick={handleToggle(() => editor.chain().focus().toggleBlockquote().run())}
               >
                 <Quote className="size-4" />
@@ -165,7 +165,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
               <Button
                 size="sm"
                 onClick={handleToggle(() => editor.chain().focus().setHorizontalRule().run())}
-                className={`bg-transparent text-black hover:bg-blue-100`}
+                className={`bg-transparent text-black hover:bg-primary-100`}
               >
                 <Minus className="size-4" />
               </Button>
@@ -178,8 +178,8 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
               <Button
                 size="sm"
                 className={cn("bg-transparent text-black", {
-                  "bg-blue-100": editor.isActive("taskList"),
-                  "hover:bg-blue-100": !editor.isActive("taskList"),
+                  "bg-primary-100": editor.isActive("taskList"),
+                  "hover:bg-primary-100": !editor.isActive("taskList"),
                 })}
                 onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
               >
@@ -198,7 +198,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
           <Button
             size="sm"
             onClick={handleToggle(() => editor.chain().focus().undo().run())}
-            className={`bg-transparent text-black ${editor.can().chain().focus().undo().run() ? "hover:bg-blue-100" : ""}`}
+            className={`bg-transparent text-black ${editor.can().chain().focus().undo().run() ? "hover:bg-primary-100" : ""}`}
           >
             <Undo className="size-4" />
           </Button>
@@ -206,7 +206,7 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
           <Button
             size="sm"
             onClick={handleToggle(() => editor.chain().focus().redo().run())}
-            className={`bg-transparent text-black ${editor.can().chain().focus().redo().run() ? "hover:bg-blue-100" : ""}`}
+            className={`bg-transparent text-black ${editor.can().chain().focus().redo().run() ? "hover:bg-primary-100" : ""}`}
           >
             <Redo className="size-4" />
           </Button>

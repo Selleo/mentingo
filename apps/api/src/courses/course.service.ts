@@ -308,6 +308,10 @@ export class CourseService {
       );
     }
 
+    if (filters.groupId) {
+      conditions.push(eq(groupUsers.groupId, filters.groupId));
+    }
+
     const data = await this.db
       .select({
         firstName: users.firstName,
@@ -325,7 +329,7 @@ export class CourseService {
       )
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT)))
+      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
       .orderBy(sortOrder(studentCourses.createdAt));
 
     return {
@@ -673,11 +677,17 @@ export class CourseService {
     authorId,
     scope,
     excludeCourseId,
+    title,
+    description,
+    searchQuery,
   }: {
     currentUserId: UUIDType;
     authorId: UUIDType;
     scope: CourseEnrollmentScope;
     excludeCourseId?: UUIDType;
+    title?: string;
+    description?: string;
+    searchQuery?: string;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
@@ -696,6 +706,24 @@ export class CourseService {
       if (!availableCourseIds.length) return [];
 
       conditions.push(inArray(courses.id, availableCourseIds));
+    }
+
+    if (title) {
+      conditions.push(ilike(courses.title, `%${title}%`));
+    }
+
+    if (description) {
+      conditions.push(ilike(courses.description, `%${description}%`));
+    }
+
+    if (searchQuery) {
+      const searchCondition = or(
+        ilike(courses.title, `%${searchQuery}%`),
+        ilike(courses.description, `%${searchQuery}%`),
+      );
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     const contentCreatorCourses = await this.db
@@ -1348,6 +1376,18 @@ export class CourseService {
     const conditions = [];
     if (filters.title) {
       conditions.push(ilike(courses.title, `%${filters.title.toLowerCase()}%`));
+    }
+    if (filters.description) {
+      conditions.push(ilike(courses.description, `%${filters.description}%`));
+    }
+    if (filters.searchQuery) {
+      const searchCondition = or(
+        ilike(courses.title, `%${filters.searchQuery}%`),
+        ilike(courses.description, `%${filters.searchQuery}%`),
+      );
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
     if (filters.category) {
       conditions.push(like(categories.title, `%${filters.category}%`));

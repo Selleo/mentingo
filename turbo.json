@@ -23,12 +23,21 @@
       "persistent": true,
       "dependsOn": ["@repo/email-templates#build"]
     },
+    "dev:sm": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["@repo/email-templates#build", "@repo/shared#build"]
+    },
     "dev:test": {
       "cache": false,
       "persistent": true,
       "dependsOn": ["@repo/email-templates#build"]
     },
     "@repo/email-templates#build": {
+      "cache": false,
+      "outputs": ["dist/**"]
+    },
+    "@repo/shared#build": {
       "cache": false,
       "outputs": ["dist/**"]
     }

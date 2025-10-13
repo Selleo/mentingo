@@ -3,7 +3,16 @@ import { test, expect, type Page } from "@playwright/test";
 import { LANGUAGE_PAGE_UI } from "./tests/admin/data/language-data";
 
 const navigateToPage = async (page: Page, name: string, headerText: string) => {
-  await page.getByRole("button", { name: new RegExp(name, "i") }).click();
+  const userAvatar = page.getByRole("button", { name: /(avatar for|profile test)/i });
+  const pageLinkButton = page.getByRole("link", { name: new RegExp(name, "i") });
+
+  if (!(await pageLinkButton.isVisible())) {
+    await userAvatar.click();
+  }
+
+  await pageLinkButton.click();
+
+  await page.waitForURL(/.*/);
 
   const header = page.getByRole("heading", { name: new RegExp(headerText, "i") });
 
@@ -32,6 +41,16 @@ const checkValidSidebarLanguage = async (
 test.describe("Switch language flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+
+    const announcementsButton = page.getByRole("link", { name: /announcements/i });
+
+    if (!(await announcementsButton.isVisible())) {
+      await page
+        .getByRole("button", { name: /manage/i })
+        .first()
+        .click();
+    }
+
     await navigateToPage(
       page,
       LANGUAGE_PAGE_UI.button.settings,

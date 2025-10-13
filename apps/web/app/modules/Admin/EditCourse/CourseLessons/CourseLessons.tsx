@@ -140,10 +140,7 @@ const CourseLessons = ({ chapters, canRefetchChapterList }: CourseLessonsProps) 
             selectedLesson={selectedLesson}
           />
         </div>
-        <Button
-          onClick={addChapter}
-          className="rounded-lg bg-primary-700 px-4 py-2 text-white hover:bg-blue-600"
-        >
+        <Button onClick={addChapter} className="rounded-lg px-4 py-2">
           <Icon name="Plus" className="mr-2" />
           {t("adminCourseView.curriculum.chapter.button.addChapter")}
         </Button>

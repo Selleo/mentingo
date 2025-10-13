@@ -44,7 +44,7 @@ const QuestionWrapper = ({
             errors?.questions?.[questionIndex]
               ? "border-red-500"
               : isOpen && !isOpenQuestion
-                ? "border-blue-500"
+                ? "border-primary-500"
                 : "border-gray-200",
           )}
         >

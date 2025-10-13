@@ -17,11 +17,11 @@ const Options = () => {
       <ul className="py-1">
         <button onClick={() => handlePreviewClick}>
           <li className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-100">
-            <Eye className="size-6 text-blue-800" /> {t("studentCertificateView.button.preview")}
+            <Eye className="size-6 text-primary-800" /> {t("studentCertificateView.button.preview")}
           </li>
         </button>
         <li className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-100">
-          <Download className="size-6 text-blue-800" />
+          <Download className="size-6 text-primary-800" />
           {t("studentCertificateView.button.download")}
         </li>
       </ul>

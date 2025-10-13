@@ -24,6 +24,8 @@ import { createSortOptions, type SortOption } from "~/types/sorting";
 
 import { CoursesAccessGuard } from "./Courses.layout";
 
+const DEFAULT_STATE = { searchTitle: undefined, sort: "title", category: undefined };
+
 export default function CoursesPage() {
   const { isStudent } = useUserRole();
   const { t } = useTranslation();
@@ -56,11 +58,7 @@ export default function CoursesPage() {
       .exhaustive();
   }
 
-  const [state, dispatch] = useReducer(reducer, {
-    searchTitle: undefined,
-    sort: undefined,
-    category: undefined,
-  });
+  const [state, dispatch] = useReducer(reducer, DEFAULT_STATE as State);
 
   const { data: userAvailableCourses, isLoading: isAvailableCoursesLoading } = useAvailableCourses({
     title: state.searchTitle,
@@ -72,13 +70,12 @@ export default function CoursesPage() {
 
   const { courseListLayout, setCourseListLayout } = useLayoutsStore();
 
-  if (isCategoriesLoading || isAvailableCoursesLoading) return null;
-
   const filterConfig: FilterConfig[] = [
     {
       name: "title",
       type: "text",
       placeholder: t("studentCoursesView.availableCourses.filters.placeholder.title"),
+      default: DEFAULT_STATE.searchTitle,
     },
     {
       name: "category",
@@ -88,12 +85,15 @@ export default function CoursesPage() {
         value: title,
         label: title,
       })),
+      default: DEFAULT_STATE.category,
     },
     {
       name: "sort",
       type: "select",
       placeholder: t("studentCoursesView.availableCourses.filters.placeholder.sort"),
       options: createSortOptions(t),
+      default: DEFAULT_STATE.sort,
+      hideAll: true,
     },
   ];
 

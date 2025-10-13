@@ -12,9 +12,11 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   enforceSSO: false,
   certificateBackgroundImage: null,
   platformLogoS3Key: null,
+  loginBackgroundImageS3Key: null,
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
   inviteOnlyRegistration: false,
+  primaryColor: null,
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {

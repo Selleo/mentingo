@@ -59,4 +59,28 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.STRIPE_SECRET_KEY.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  SLACK_CLIENT_ID: {
+    labelKey: "adminEnvsView.form.SLACK_CLIENT_ID.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  SLACK_CLIENT_SECRET: {
+    labelKey: "adminEnvsView.form.SLACK_CLIENT_SECRET.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  SLACK_OAUTH_ENABLED: {
+    labelKey: "adminEnvsView.form.SLACK_OAUTH_ENABLED.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  VITE_SLACK_OAUTH_ENABLED: {
+    labelKey: "adminEnvsView.form.VITE_SLACK_OAUTH_ENABLED.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  VITE_POSTHOG_KEY: {
+    labelKey: "adminEnvsView.form.VITE_POSTHOG_KEY.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  VITE_POSTHOG_HOST: {
+    labelKey: "adminEnvsView.form.VITE_POSTHOG_HOST.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
 };

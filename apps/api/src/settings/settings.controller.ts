@@ -20,8 +20,10 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 const PLATFORM_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const LOGIN_BACKGROUND_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
+import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import {
   adminSettingsJSONContentSchema,
@@ -33,6 +35,8 @@ import {
 import {
   UpdateDefaultCourseCurrencyBody,
   updateDefaultCourseCurrencySchema,
+  UpdateGlobalPrimaryColorBody,
+  updateGlobalPrimaryColorSchema,
   UpdateMFAEnforcedRolesRequest,
   updateMFAEnforcedRolesSchema,
   UpdateSettingsBody,
@@ -128,6 +132,19 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/primary-color")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+    request: [{ type: "body", schema: updateGlobalPrimaryColorSchema }],
+  })
+  async updatePrimaryColor(
+    @Body() body: UpdateGlobalPrimaryColorBody,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalPrimaryColor(body.primaryColor!);
+    return new BaseResponse(result);
+  }
+
   @Get("platform-logo")
   @Public()
   @Validate({
@@ -155,13 +172,51 @@ export class SettingsController {
         logo: {
           type: "string",
           format: "binary",
+          nullable: true,
         },
       },
-      required: ["logo"],
     },
   })
-  async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File): Promise<void> {
+  async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File | null): Promise<void> {
     await this.settingsService.uploadPlatformLogo(logo);
+  }
+
+  @Get("login-background")
+  @Public()
+  @Validate({
+    response: baseResponse(loginBackgroundResponseSchema),
+  })
+  async getLoginBackground() {
+    const loginBackgroundImageS3Key = await this.settingsService.getLoginBackgroundImageUrl();
+    return new BaseResponse(loginBackgroundImageS3Key);
+  }
+
+  @Patch("login-background")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(
+    FileInterceptor("login-background", {
+      limits: {
+        fileSize: LOGIN_BACKGROUND_MAX_SIZE_BYTES,
+      },
+    }),
+  )
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        "login-background": {
+          type: "string",
+          format: "binary",
+          nullable: true,
+        },
+      },
+    },
+  })
+  async updateLoginBackground(
+    @UploadedFile() loginBackground: Express.Multer.File | null,
+  ): Promise<void> {
+    await this.settingsService.uploadLoginBackgroundImage(loginBackground);
   }
 
   @Get("company-information")

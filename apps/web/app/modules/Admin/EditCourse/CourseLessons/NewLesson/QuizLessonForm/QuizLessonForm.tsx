@@ -253,7 +253,11 @@ const QuizLessonForm = ({
               <MatchWordsQuestion questionIndex={questionIndex} form={form} />
             ))
             .with(QuestionType.FILL_IN_THE_BLANKS_TEXT, QuestionType.FILL_IN_THE_BLANKS_DND, () => (
-              <FillInTheBlanksQuestion questionIndex={questionIndex} form={form} />
+              <FillInTheBlanksQuestion
+                questionIndex={questionIndex}
+                questionType={question.type}
+                form={form}
+              />
             ))
             .with(QuestionType.SCALE_1_5, () => (
               <ScaleQuestion questionIndex={questionIndex} form={form} />
@@ -361,9 +365,7 @@ const QuizLessonForm = ({
 
             <QuestionSelector addQuestion={addQuestion} />
             <div className="mt-4 flex space-x-4">
-              <Button type="submit" className="bg-primary-700">
-                {t("common.button.save")}
-              </Button>
+              <Button type="submit">{t("common.button.save")}</Button>
               {lessonToEdit ? (
                 <Button
                   type="button"
