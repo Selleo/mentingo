@@ -38,7 +38,7 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
 
   return (
     <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
-      {user?.role === USER_ROLE.student && (
+      {user?.role !== USER_ROLE.admin && (
         <NavigationMenuItem
           className="col-span-4 md:col-span-8 2xl:block"
           item={{

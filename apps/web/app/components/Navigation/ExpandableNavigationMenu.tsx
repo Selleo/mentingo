@@ -124,7 +124,7 @@ export const ExpandableNavigationMenu = ({
         </DropdownMenuContent>
       )}
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {!isBetween1440And1680 && isExpanded && (
           <motion.menu
             className="ml-4 flex flex-col gap-y-3"
