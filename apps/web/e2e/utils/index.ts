@@ -17,9 +17,12 @@ export const logout = async (browser: Browser) => {
 };
 
 export const navigateToPage = async (page: Page, name: string, headerText: string) => {
-  const announcementsButton = page.getByRole("link", { name: /announcements/i });
+  const announcementsButton = page
+    .getByRole("link", { name: /announcements/i })
+    .waitFor({ state: "visible", timeout: 5000 })
+    .catch(() => null);
 
-  if (!(await announcementsButton.isVisible())) {
+  if (!announcementsButton) {
     await page
       .getByRole("button", { name: /manage/i })
       .first()
