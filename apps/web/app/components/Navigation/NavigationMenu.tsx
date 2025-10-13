@@ -11,7 +11,6 @@ type NavigationMenuProps = {
   role: string;
   restrictedRoles?: UserRole[];
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
-  showLabelsOn2xl?: boolean;
   expandableLabel?: string;
   expandableIcon?: IconName;
   isExpandable?: boolean;
@@ -21,7 +20,6 @@ export function NavigationMenu({
   menuItems,
   role,
   setIsMobileNavOpen,
-  showLabelsOn2xl,
   expandableLabel,
   expandableIcon,
   isExpandable = false,
@@ -35,7 +33,6 @@ export function NavigationMenu({
       <ExpandableNavigationMenu
         items={filteredMenuItems}
         setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelsOn2xl={showLabelsOn2xl}
         expandableLabel={expandableLabel}
         expandableIcon={expandableIcon as IconName}
         isExpandable={isExpandable}
@@ -50,7 +47,6 @@ export function NavigationMenu({
           <NavigationMenuItem
             key={item.label}
             item={item}
-            showLabelOn2xl={showLabelsOn2xl}
             setIsMobileNavOpen={setIsMobileNavOpen}
           />
         );

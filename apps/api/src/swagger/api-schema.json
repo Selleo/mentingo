@@ -1590,6 +1590,22 @@
             }
           },
           {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "category",
             "required": false,
             "in": "query",
@@ -1731,6 +1747,22 @@
         "parameters": [
           {
             "name": "title",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -1931,6 +1963,22 @@
             }
           },
           {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "category",
             "required": false,
             "in": "query",
@@ -2099,6 +2147,30 @@
             "in": "query",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
               "type": "string"
             }
           }
@@ -2593,6 +2665,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateFreemiumStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/student-lessons": {
+      "get": {
+        "operationId": "LessonController_getEnrolledLessons",
+        "parameters": [
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lessonCompleted",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnrolledLessonsResponse"
                 }
               }
             }
@@ -4044,7 +4166,48 @@
     "/api/announcements/user/me": {
       "get": {
         "operationId": "AnnouncementsController_getAnnouncementsForUser",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "authorName",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isRead",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -9737,6 +9900,103 @@
             "required": [
               "message"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetEnrolledLessonsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "type": {
+                  "anyOf": [
+                    {
+                      "const": "text",
+                      "type": "string"
+                    },
+                    {
+                      "const": "presentation",
+                      "type": "string"
+                    },
+                    {
+                      "const": "video",
+                      "type": "string"
+                    },
+                    {
+                      "const": "quiz",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai_mentor",
+                      "type": "string"
+                    },
+                    {
+                      "const": "embed",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "displayOrder": {
+                  "type": "number"
+                },
+                "lessonCompleted": {
+                  "type": "boolean"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "type": "string"
+                },
+                "chapterId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "chapterTitle": {
+                  "type": "string"
+                },
+                "chapterDisplayOrder": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "type",
+                "description",
+                "displayOrder",
+                "lessonCompleted",
+                "courseId",
+                "courseTitle",
+                "chapterId",
+                "chapterTitle",
+                "chapterDisplayOrder"
+              ]
+            }
           }
         },
         "required": [

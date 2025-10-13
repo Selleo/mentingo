@@ -15,14 +15,14 @@ type QueryOptions = {
   enabled?: boolean;
 };
 
-export const useGroupsQuery = (
+export const groupsQueryOptions = (
   searchParams?: GroupsSearchParams,
   options: QueryOptions = { enabled: true },
 ) => ({
   queryKey: [GROUPS_QUERY_KEY, searchParams],
   queryFn: async () => {
     const { data } = await ApiClient.api.groupControllerGetAllGroups({
-      ...(searchParams?.name && { name: searchParams.name }),
+      ...(searchParams?.name && { keyword: searchParams.name }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
     });
     return data;
@@ -32,5 +32,5 @@ export const useGroupsQuery = (
 });
 
 export function useGroupsQuerySuspense(searchParams?: GroupsSearchParams) {
-  return useSuspenseQuery(useGroupsQuery(searchParams));
+  return useSuspenseQuery(groupsQueryOptions(searchParams));
 }

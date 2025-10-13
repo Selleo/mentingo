@@ -1251,6 +1251,25 @@ export interface UpdateFreemiumStatusResponse {
   };
 }
 
+export interface GetEnrolledLessonsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+    description: string | null;
+    displayOrder: number;
+    lessonCompleted: boolean;
+    /** @format uuid */
+    courseId: string;
+    courseTitle: string;
+    /** @format uuid */
+    chapterId: string;
+    chapterTitle: string;
+    chapterDisplayOrder: number;
+  }[];
+}
+
 export interface GetLessonByIdResponse {
   data: {
     /** @format uuid */
@@ -3562,6 +3581,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetAllCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         creationDateRange?: string[];
@@ -3602,6 +3623,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetStudentCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -3665,6 +3688,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetAvailableCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -3711,6 +3736,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         scope?: "all" | "enrolled" | "available";
         /** @format uuid */
         excludeCourseId?: string;
+        title?: string;
+        description?: string;
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -4033,6 +4061,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         query: query,
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerGetEnrolledLessons
+     * @request GET:/api/lesson/student-lessons
+     */
+    lessonControllerGetEnrolledLessons: (
+      query?: {
+        title?: string;
+        description?: string;
+        searchQuery?: string;
+        lessonCompleted?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetEnrolledLessonsResponse, any>({
+        path: `/api/lesson/student-lessons`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -4946,10 +4997,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AnnouncementsControllerGetAnnouncementsForUser
      * @request GET:/api/announcements/user/me
      */
-    announcementsControllerGetAnnouncementsForUser: (params: RequestParams = {}) =>
+    announcementsControllerGetAnnouncementsForUser: (
+      query?: {
+        title?: string;
+        content?: string;
+        authorName?: string;
+        search?: string;
+        isRead?: string;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetAnnouncementsForUserResponse, any>({
         path: `/api/announcements/user/me`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
