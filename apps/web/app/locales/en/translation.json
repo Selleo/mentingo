@@ -705,6 +705,8 @@
       "SLACK_CLIENT_SECRET": { "label": "Slack Client Secret" },
       "SLACK_OAUTH_ENABLED": { "label": "Slack OAuth Enabled (true/false)" },
       "VITE_SLACK_OAUTH_ENABLED": { "label": "Vite Slack OAuth Enabled (true/false)" },
+      "VITE_POSTHOG_KEY": { "label": "PostHog Key" },
+      "VITE_POSTHOG_HOST": { "label": "PostHog Host" },
       "save": "Save"
     },
     "breadcrumbs": {

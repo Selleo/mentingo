@@ -75,4 +75,12 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.VITE_SLACK_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  VITE_POSTHOG_KEY: {
+    labelKey: "adminEnvsView.form.VITE_POSTHOG_KEY.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  VITE_POSTHOG_HOST: {
+    labelKey: "adminEnvsView.form.VITE_POSTHOG_HOST.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
 };
