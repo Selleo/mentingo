@@ -39,7 +39,7 @@ const EmptyStateUpload = ({
       <Icon name="UploadImageIcon" className="size-10 text-primary-700" />
       <div className="body-sm flex flex-col gap-y-1">
         <div className="text-center">
-          <span className="text-primary-700">{t("uploadFile.header")}</span>{" "}
+          <span className="text-accent-foreground">{t("uploadFile.header")}</span>{" "}
           <span className="text-neutral-950">{t("uploadFile.subHeader")}</span>
         </div>
         <div className="details text-center text-neutral-600">

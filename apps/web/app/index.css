@@ -152,7 +152,7 @@ body {
     --muted: var(--primary-100);
     --muted-foreground: var(--neutral-600);
     --accent: var(--primary-100);
-    --accent-foreground: var(--primary-700);
+    --accent-foreground: var(--primary-800);
     --destructive: var(--error-500);
     --destructive-foreground: var(--primary-50);
     --border: var(--neutral-200);

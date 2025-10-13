@@ -9,6 +9,7 @@ export type GlobalSettings = {
   certificateBackgroundImage: string | null;
   defaultCourseCurrency: GetPublicGlobalSettingsResponse["data"]["defaultCourseCurrency"];
   inviteOnlyRegistration: boolean;
+  loginBackgroundImageS3Key: string | null;
 };
 
 export type UserSettings = {

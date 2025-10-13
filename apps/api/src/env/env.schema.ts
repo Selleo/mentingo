@@ -29,6 +29,12 @@ export const encryptedEnvSchema = Type.Object({
 export const frontendSSOEnabledResponseSchema = Type.Object({
   google: Type.Optional(Type.String()),
   microsoft: Type.Optional(Type.String()),
+  slack: Type.Optional(Type.String()),
+});
+
+export const frontendPosthogConfigResponseSchema = Type.Object({
+  key: Type.Optional(Type.String()),
+  host: Type.Optional(Type.String()),
 });
 
 export type EncryptedEnvBody = Static<typeof encryptedEnvSchema>;

@@ -98,7 +98,7 @@ const EditCourse = () => {
             </h4>
             <Button
               asChild
-              className="flex justify-end border border-neutral-200 bg-transparent text-primary-700"
+              className="flex justify-end border border-neutral-200 bg-transparent text-accent-foreground"
             >
               <Link to={`/course/${course?.id}`}>
                 <Icon name="Eye" className="mr-2" />

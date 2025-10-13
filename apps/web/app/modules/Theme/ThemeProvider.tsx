@@ -1,7 +1,7 @@
 import { createContext, useEffect, type ReactNode, useState, useCallback } from "react";
 import { match } from "ts-pattern";
 
-import { hexToHslTuple, hslToHex } from "./helpers";
+import { getContrastColor, hexToHslTuple, hslToHex } from "./helpers";
 import { useThemeStore } from "./themeStore";
 
 type ThemeContextType = {
@@ -42,6 +42,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
       document.documentElement.style.setProperty(`--primary-${key}`, hexShade);
     });
+
+    document.documentElement.style.setProperty(
+      `--contrast`,
+      getComputedStyle(document.documentElement)
+        .getPropertyValue(getContrastColor(color, "--color-black", "--color-white"))
+        .trim(),
+    );
+    document.documentElement.style.setProperty(
+      `--color-contrast`,
+      getComputedStyle(document.documentElement)
+        .getPropertyValue(getContrastColor(color, "--primary-800", "--primary-100"))
+        .trim(),
+    );
   }, []);
 
   useEffect(() => {

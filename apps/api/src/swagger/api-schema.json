@@ -1159,12 +1159,53 @@
                 "properties": {
                   "logo": {
                     "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "nullable": true
                   }
-                },
-                "required": [
-                  "logo"
-                ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/login-background": {
+      "get": {
+        "operationId": "SettingsController_getLoginBackground",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLoginBackgroundResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updateLoginBackground",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "login-background": {
+                    "type": "string",
+                    "format": "binary",
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -1852,6 +1893,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -4097,6 +4147,23 @@
           }
         }
       }
+    },
+    "/api/env/frontend/posthog": {
+      "get": {
+        "operationId": "EnvController_getPostHogConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPostHogConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -5731,6 +5798,16 @@
                   }
                 ]
               },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -5789,6 +5866,7 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6104,6 +6182,16 @@
                   }
                 ]
               },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6162,6 +6250,7 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6225,6 +6314,16 @@
                   }
                 ]
               },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6283,6 +6382,7 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6402,6 +6502,16 @@
                   }
                 ]
               },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6460,6 +6570,7 @@
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6472,6 +6583,32 @@
         ]
       },
       "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLoginBackgroundResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -14287,6 +14424,28 @@
                 "type": "string"
               },
               "microsoft": {
+                "type": "string"
+              },
+              "slack": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPostHogConfigResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "host": {
                 "type": "string"
               }
             }

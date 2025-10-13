@@ -22,6 +22,15 @@ env:
 
 on:
   workflow_call:
+    secrets:
+        STRIPE_SECRET_KEY:
+          required: true
+        STRIPE_PUBLISHABLE_KEY:
+          required: true
+        STRIPE_WEBHOOK_SECRET:
+          required: true
+        MASTER_KEY:
+          required: true
   push:
     branches:
       - main

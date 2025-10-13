@@ -390,6 +390,7 @@ export interface GetPublicGlobalSettingsResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -473,6 +474,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -493,6 +495,7 @@ export interface UpdateEnforceSSOResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -529,6 +532,7 @@ export interface UpdatePrimaryColorResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -537,6 +541,12 @@ export interface UpdatePrimaryColorResponse {
 }
 
 export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetLoginBackgroundResponse {
   data: {
     url: string | null;
   };
@@ -2299,6 +2309,14 @@ export interface GetFrontendSSOEnabledResponse {
   data: {
     google?: string;
     microsoft?: string;
+    slack?: string;
+  };
+}
+
+export interface GetPostHogConfigResponse {
+  data: {
+    key?: string;
+    host?: string;
   };
 }
 
@@ -3251,12 +3269,47 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdatePlatformLogo: (
       data: {
         /** @format binary */
-        logo: File;
+        logo?: File | null;
       },
       params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/settings/platform-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetLoginBackground
+     * @request GET:/api/settings/login-background
+     */
+    settingsControllerGetLoginBackground: (params: RequestParams = {}) =>
+      this.request<GetLoginBackgroundResponse, any>({
+        path: `/api/settings/login-background`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLoginBackground
+     * @request PATCH:/api/settings/login-background
+     */
+    settingsControllerUpdateLoginBackground: (
+      data: {
+        /** @format binary */
+        "login-background"?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/login-background`,
         method: "PATCH",
         body: data,
         type: ContentType.FormData,
@@ -3591,6 +3644,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
+        groupId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -4952,6 +5006,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
       this.request<GetFrontendSSOEnabledResponse, any>({
         path: `/api/env/frontend/sso`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetPostHogConfig
+     * @request GET:/api/env/frontend/posthog
+     */
+    envControllerGetPostHogConfig: (params: RequestParams = {}) =>
+      this.request<GetPostHogConfigResponse, any>({
+        path: `/api/env/frontend/posthog`,
         method: "GET",
         format: "json",
         ...params,
