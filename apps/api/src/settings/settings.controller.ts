@@ -188,7 +188,7 @@ export class SettingsController {
   })
   async getLoginBackground() {
     const loginBackgroundImageS3Key = await this.settingsService.getLoginBackgroundImageUrl();
-    return new BaseResponse({ loginBackgroundImageS3Key });
+    return new BaseResponse(loginBackgroundImageS3Key);
   }
 
   @Patch("login-background")

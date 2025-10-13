@@ -103,5 +103,10 @@ export const studentsWithEnrolmentValidation = {
       name: "sort",
       schema: sortEnrolledStudentsOptions,
     },
+    {
+      type: "query" as const,
+      name: "groupId",
+      schema: UUIDSchema,
+    },
   ],
 };
