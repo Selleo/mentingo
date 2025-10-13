@@ -16,6 +16,7 @@ import { NavigationMenuButton } from "./NavigationMenuButton";
 import { useMobileNavigation } from "./useMobileNavigation";
 
 import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
+import type { UserRole } from "~/utils/userRoles";
 
 type DashboardNavigationProps = { menuItems: NavigationGroups[] };
 
@@ -122,20 +123,26 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           })}
         >
           <div className="flex flex-col gap-y-3">
-            {menuItems.map((group) => (
-              <Fragment key={group.title}>
-                <NavigationMenu
-                  menuItems={group.items as unknown as LeafMenuItem[]}
-                  role={role}
-                  setIsMobileNavOpen={setIsMobileNavOpen}
-                  showLabelsOn2xl={labelsVisible}
-                  isExpandable={group.isExpandable}
-                  expandableLabel={group.title}
-                  expandableIcon={group.icon}
-                />
-                <Separator className="bg-neutral-200 2xl:h-px" />
-              </Fragment>
-            ))}
+            {menuItems.map((group) => {
+              const { restrictedRoles } = group;
+
+              if (restrictedRoles && !restrictedRoles.includes(role as UserRole)) return null;
+
+              return (
+                <Fragment key={group.title}>
+                  <NavigationMenu
+                    menuItems={group.items as unknown as LeafMenuItem[]}
+                    role={role}
+                    setIsMobileNavOpen={setIsMobileNavOpen}
+                    showLabelsOn2xl={labelsVisible}
+                    isExpandable={group.isExpandable}
+                    expandableLabel={group.title}
+                    expandableIcon={group.icon}
+                  />
+                  <Separator className="bg-neutral-200 2xl:h-px" />
+                </Fragment>
+              );
+            })}
           </div>
 
           <NavigationFooter

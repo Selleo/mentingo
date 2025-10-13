@@ -9,6 +9,7 @@ import type { IconName } from "~/types/shared";
 type NavigationMenuProps = {
   menuItems: MenuItemType[];
   role: string;
+  restrictedRoles?: UserRole[];
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
   showLabelsOn2xl?: boolean;
   expandableLabel?: string;

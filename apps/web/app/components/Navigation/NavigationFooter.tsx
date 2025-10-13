@@ -6,7 +6,7 @@ import { useLogoutUser } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { USER_ROLE } from "~/config/userRoles";
 import { cn } from "~/lib/utils";
 
 import {
@@ -18,6 +18,7 @@ import {
 import { UserAvatar } from "../UserProfile/UserAvatar";
 
 import { useIsWidthBetween } from "./hooks/useIsWidthBetween";
+import { MobileNavigationFooterItems } from "./MobileNavigationFooterItems";
 import { NavigationMenuItem } from "./NavigationMenuItem";
 import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
 
@@ -37,78 +38,29 @@ export function NavigationFooter({ setIsMobileNavOpen, showLabelsOn2xl }: Naviga
 
   return (
     <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
+      {user?.role === USER_ROLE.student && (
+        <NavigationMenuItem
+          className="col-span-4 md:col-span-8 2xl:block"
+          item={{
+            iconName: "Bell",
+            label: t("navigationSideBar.announcements"),
+            link: "/announcements",
+          }}
+          setIsMobileNavOpen={setIsMobileNavOpen}
+          showLabelOn2xl={showLabelsOn2xl}
+        />
+      )}
+
       <li className="col-span-4 md:col-span-8 2xl:hidden">
         <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
       </li>
 
-      <NavigationMenuItem
-        className="col-span-1 md:col-span-2 2xl:hidden"
-        item={{
-          iconName: "Info",
-          label: t("navigationSideBar.providerInformation"),
-          link: "/provider-information",
-        }}
+      <MobileNavigationFooterItems
         setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelOn2xl={showLabelsOn2xl}
+        showLabelsOn2xl={showLabelsOn2xl}
+        userId={user?.id}
       />
 
-      <NavigationMenuItem
-        className="col-span-1 md:col-span-2 2xl:hidden"
-        item={{
-          label: t("navigationSideBar.profile"),
-          link: `/profile/${user?.id}`,
-          iconName: "User",
-        }}
-        setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelOn2xl={showLabelsOn2xl}
-      />
-
-      <NavigationMenuItem
-        className="col-span-1 md:col-span-2 2xl:hidden"
-        item={{
-          iconName: "Settings",
-          label: t("navigationSideBar.settings"),
-          link: "/settings",
-        }}
-        setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelOn2xl={showLabelsOn2xl}
-      />
-
-      <li className="hidden 2xl:block">
-        <Separator className="bg-neutral-200 2xl:h-px" />
-      </li>
-      <li className="col-span-1 md:col-span-2 2xl:hidden">
-        <Tooltip>
-          <TooltipTrigger className="w-full">
-            <button
-              onClick={() => {
-                startTransition(() => {
-                  logout();
-                });
-              }}
-              className="flex w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 2xl:p-2"
-            >
-              <Icon name="Logout" className="size-6" />
-              <span
-                className={cn(
-                  "line-clamp-1 truncate whitespace-nowrap 2xl:sr-only 3xl:not-sr-only",
-                  {
-                    "2xl:not-sr-only": showLabelsOn2xl,
-                  },
-                )}
-              >
-                {t("navigationSideBar.logout")}
-              </span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent
-            side="right"
-            className="hidden 2xl:block 2xl:bg-neutral-950 2xl:capitalize 2xl:text-white 3xl:hidden"
-          >
-            {t("navigationSideBar.logout")}
-          </TooltipContent>
-        </Tooltip>
-      </li>
       <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger

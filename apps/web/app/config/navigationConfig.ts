@@ -1,6 +1,6 @@
 import { routeAccessConfig } from "./routeAccessConfig";
+import { USER_ROLE, type UserRole } from "./userRoles";
 
-import type { UserRole } from "./userRoles";
 import type i18next from "i18next";
 import type { IconName } from "~/types/shared";
 
@@ -26,6 +26,7 @@ export type NavigationGroups = {
   title: string;
   icon?: IconName;
   isExpandable?: boolean;
+  restrictedRoles?: UserRole[];
   items: NavigationItem[];
 };
 
@@ -55,6 +56,7 @@ export const getNavigationConfig = (isUser = true, t: typeof i18next.t): Navigat
     title: t("navigationSideBar.manage"),
     icon: "Manage",
     isExpandable: true,
+    restrictedRoles: [USER_ROLE.admin],
     items: [
       {
         label: t("navigationSideBar.announcements"),
