@@ -11,9 +11,14 @@ import type { Dispatch, SetStateAction } from "react";
 type NavigationHeaderProps = {
   isMobileNavOpen: boolean;
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
+  is2xlBreakpoint: boolean;
 };
 
-export function NavigationHeader({ isMobileNavOpen, setIsMobileNavOpen }: NavigationHeaderProps) {
+export function NavigationHeader({
+  isMobileNavOpen,
+  setIsMobileNavOpen,
+  is2xlBreakpoint,
+}: NavigationHeaderProps) {
   return (
     <div className="flex w-full items-center justify-between px-4 py-3 md:px-6 2xl:h-20 2xl:justify-center 2xl:p-0 3xl:px-8">
       <Link to="/" aria-label="Go to homepage">
@@ -30,7 +35,7 @@ export function NavigationHeader({ isMobileNavOpen, setIsMobileNavOpen }: Naviga
         />
       </Link>
       <div className="flex gap-x-2">
-        <NavigationGlobalSearchWrapper containerClassName="block 2xl:hidden" />
+        {!is2xlBreakpoint && <NavigationGlobalSearchWrapper />}
 
         <MobileMenuToggle
           isMobileNavOpen={isMobileNavOpen}

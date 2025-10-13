@@ -19,7 +19,6 @@ import type { IconName } from "~/types/shared";
 interface ExpandableNavigationMenuProps {
   items: MenuItemType[];
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
-  showLabelsOn2xl?: boolean;
   expandableLabel?: string;
   expandableIcon: IconName;
   isExpandable: boolean;
@@ -29,7 +28,6 @@ interface ExpandableNavigationMenuProps {
 export const ExpandableNavigationMenu = ({
   items,
   setIsMobileNavOpen,
-  showLabelsOn2xl,
   expandableLabel,
   expandableIcon,
   closeOnClickOutside = true,
@@ -94,9 +92,6 @@ export const ExpandableNavigationMenu = ({
           <span
             className={cn(
               "line-clamp-1 grow truncate whitespace-nowrap text-left font-normal capitalize 2xl:sr-only 3xl:not-sr-only",
-              {
-                "2xl:not-sr-only": showLabelsOn2xl,
-              },
             )}
           >
             {expandableLabel}
@@ -141,11 +136,7 @@ export const ExpandableNavigationMenu = ({
                   exit={{ y: -20, opacity: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <NavigationMenuItem
-                    item={item}
-                    showLabelOn2xl={showLabelsOn2xl}
-                    setIsMobileNavOpen={setIsMobileNavOpen}
-                  />
+                  <NavigationMenuItem item={item} setIsMobileNavOpen={setIsMobileNavOpen} />
                 </motion.div>
               );
             })}

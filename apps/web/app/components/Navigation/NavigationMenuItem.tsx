@@ -46,9 +46,6 @@ export function NavigationMenuItem({
                 <span
                   className={cn(
                     "line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize 2xl:sr-only 3xl:not-sr-only",
-                    {
-                      "2xl:not-sr-only": showLabelOn2xl,
-                    },
                   )}
                 >
                   {item.label}

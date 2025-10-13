@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { useEffect, useState, Fragment } from "react";
 
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -19,6 +19,18 @@ type DashboardNavigationProps = { menuItems: NavigationGroups[] };
 export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
   const { role } = useUserRole();
+  const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
+
+  useEffect(() => {
+    const updateBreakpoint = () => {
+      setIs2xlBreakpoint(window.innerWidth >= 1440);
+    };
+    updateBreakpoint();
+    window.addEventListener("resize", updateBreakpoint);
+    return () => {
+      window.removeEventListener("resize", updateBreakpoint);
+    };
+  }, []);
 
   if (!role) return null;
 
@@ -34,9 +46,10 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         <NavigationHeader
           isMobileNavOpen={isMobileNavOpen}
           setIsMobileNavOpen={setIsMobileNavOpen}
+          is2xlBreakpoint={is2xlBreakpoint}
         />
 
-        <NavigationGlobalSearchWrapper containerClassName="hidden 2xl:block" />
+        {is2xlBreakpoint && <NavigationGlobalSearchWrapper />}
 
         <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav

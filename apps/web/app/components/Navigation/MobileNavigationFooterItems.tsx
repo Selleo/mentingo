@@ -35,7 +35,6 @@ export const MobileNavigationFooterItems = ({
           link: "/provider-information",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelOn2xl={showLabelsOn2xl}
       />
 
       <NavigationMenuItem
@@ -46,7 +45,6 @@ export const MobileNavigationFooterItems = ({
           iconName: "User",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelOn2xl={showLabelsOn2xl}
       />
 
       <NavigationMenuItem
@@ -57,7 +55,6 @@ export const MobileNavigationFooterItems = ({
           link: "/settings",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
-        showLabelOn2xl={showLabelsOn2xl}
       />
 
       <li className="hidden 2xl:block">
