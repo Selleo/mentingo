@@ -88,6 +88,8 @@ export default function ProfilePage() {
         id,
         userAvatar: data.userAvatar || undefined,
       });
+    } else {
+      toggleEditing();
     }
   };
 
