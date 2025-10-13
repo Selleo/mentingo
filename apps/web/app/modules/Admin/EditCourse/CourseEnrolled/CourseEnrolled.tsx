@@ -223,7 +223,7 @@ export const CourseEnrolled = (): ReactElement => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger disabled={isDisabled}>
             <Button
-              className="border border-primary-500 bg-transparent text-primary-700"
+              className="border border-primary-500 bg-transparent text-accent-foreground"
               disabled={isDisabled}
             >
               {t("adminCourseView.enrolled.enrollSelected")}

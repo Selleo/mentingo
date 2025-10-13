@@ -306,7 +306,7 @@ const FillInTheBlanksQuestion = ({
                   <Button
                     onClick={() => setIsAddingWord(true)}
                     type="button"
-                    className="mb-4 mt-4 flex items-center gap-2 rounded-full bg-primary-700 text-white"
+                    className="mb-4 mt-4 flex items-center gap-2"
                   >
                     <Icon name="Plus" />
                     {t("adminCourseView.curriculum.lesson.button.addWords")}
@@ -329,12 +329,7 @@ const FillInTheBlanksQuestion = ({
                   placeholder={t("adminCourseView.curriculum.lesson.placeholder.enterWord")}
                   className="grow"
                 />
-                <Button
-                  onClick={handleAddWord}
-                  data-testid="add-word"
-                  type="button"
-                  className="bg-primary-700 text-white"
-                >
+                <Button onClick={handleAddWord} data-testid="add-word" type="button">
                   {t("common.button.add")}
                 </Button>
                 <Button

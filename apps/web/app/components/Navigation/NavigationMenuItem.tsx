@@ -27,9 +27,9 @@ export function NavigationMenuItem({
             onClick={() => setIsMobileNavOpen(false)}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-x-3 rounded-lg px-4 py-3.5 hover:bg-primary-700 hover:text-white 2xl:p-2",
+                "hover:text-contrast flex items-center gap-x-3 rounded-lg px-4 py-3.5 hover:bg-primary-700 2xl:p-2",
                 {
-                  "bg-primary-700 text-white": isActive,
+                  "text-contrast bg-primary-700": isActive,
                   "bg-white text-neutral-900": !isActive,
                 },
               )
