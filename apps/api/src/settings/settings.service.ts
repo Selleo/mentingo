@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -51,7 +45,12 @@ export class SettingsService {
 
     const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
 
-    const { certificateBackgroundImage, platformLogoS3Key, ...restOfSettings } = parsedSettings;
+    const {
+      certificateBackgroundImage,
+      platformLogoS3Key,
+      loginBackgroundImageS3Key,
+      ...restOfSettings
+    } = parsedSettings;
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
       ? await this.fileService.getFileUrl(certificateBackgroundImage)
@@ -61,9 +60,14 @@ export class SettingsService {
       ? await this.fileService.getFileUrl(platformLogoS3Key)
       : null;
 
+    const loginBackgroundSignedUrl = loginBackgroundImageS3Key
+      ? await this.fileService.getFileUrl(loginBackgroundImageS3Key)
+      : null;
+
     return {
       ...restOfSettings,
       platformLogoS3Key: platformLogoUrl,
+      loginBackgroundImageS3Key: loginBackgroundSignedUrl,
       certificateBackgroundImage: certificateBackgroundSignedUrl,
     };
   }
@@ -273,13 +277,13 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
-  public async uploadPlatformLogo(file: Express.Multer.File): Promise<void> {
-    if (!file) {
-      throw new BadRequestException("No logo file provided");
+  public async uploadPlatformLogo(file: Express.Multer.File | null | undefined): Promise<void> {
+    let newValue: string | null = null;
+    if (file) {
+      const resource = "platform-logos";
+      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      newValue = fileKey;
     }
-
-    const resource = "platform-logos";
-    const { fileKey } = await this.fileService.uploadFile(file, resource);
 
     await this.db
       .update(settings)
@@ -288,7 +292,7 @@ export class SettingsService {
           jsonb_set(
             settings.settings,
             '{platformLogoS3Key}',
-            to_jsonb(${fileKey}::text),
+            ${newValue ? sql`to_jsonb(${newValue}::text)` : sql`'null'::jsonb`},
             true
           )
         `,
@@ -306,6 +310,37 @@ export class SettingsService {
     }
 
     return await this.fileService.getFileUrl(platformLogoS3Key);
+  }
+
+  public async uploadLoginBackgroundImage(
+    file: Express.Multer.File | null | undefined,
+  ): Promise<void> {
+    let newValue: string | null = null;
+    if (file) {
+      const resource = "login-backgrounds";
+      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      newValue = fileKey;
+    }
+
+    await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{loginBackgroundImageS3Key}',
+            ${newValue ? sql`to_jsonb(${newValue}::text)` : sql`'null'::jsonb`},
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId));
+  }
+
+  public async getLoginBackgroundImageUrl(): Promise<string | null> {
+    const globalSettings = await this.getGlobalSettings();
+
+    return globalSettings.loginBackgroundImageS3Key ?? null;
   }
 
   public async getCompanyInformation(): Promise<CompanyInformaitonJSONSchema> {

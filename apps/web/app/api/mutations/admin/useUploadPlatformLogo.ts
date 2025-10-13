@@ -8,7 +8,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { platformLogoQueryOptions } from "~/hooks/usePlatformLogo";
 
 interface UploadPlatformLogoOptions {
-  logo: File;
+  logo?: File | null;
 }
 
 export function useUploadPlatformLogo() {
@@ -18,7 +18,6 @@ export function useUploadPlatformLogo() {
   return useMutation({
     mutationFn: async ({ logo }: UploadPlatformLogoOptions) => {
       const response = await ApiClient.api.settingsControllerUpdatePlatformLogo({ logo });
-
       return response.data;
     },
     onSuccess: () => {

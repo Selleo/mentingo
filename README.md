@@ -123,6 +123,13 @@ caddy run
 > First run has to be run by hand to configure caddy. Later on it will automatically
 > start with the app start script.
 
+> [!NOTE]
+> Caddy tries to bind to port 443. On Unix/Linux systems, ports below 1024 are privileged, meaning only processes with special permissions (or root) can use them. If you encounter an error, you might have to grant it permission to bind to privileged ports by running:
+>
+> ```bash
+> sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
+> ```
+
 ### Environment Setup
 
 Configure environment variables for both applications:
@@ -158,7 +165,7 @@ pnpm run --filter=@repo/shared build
 1. Start the database:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 2. Run migrations:
@@ -174,6 +181,9 @@ Populate the database with initial data:
 ```bash
 pnpm db:seed
 ```
+
+> [!NOTE]
+> Make sure your `.env` variables are set correctly. Otherwise, you might run into errors when running E2E tests.
 
 ### Default User Accounts
 

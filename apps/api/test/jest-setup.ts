@@ -23,6 +23,10 @@ const filteredLog = (...args: any[]) => {
 beforeAll(async () => {
   applyFormats();
   setupValidation();
+  if (!process.env.MASTER_KEY) {
+    // 32-byte deterministic test key
+    process.env.MASTER_KEY = Buffer.from("0123456789abcdef0123456789abcdef").toString("base64");
+  }
   jest.spyOn(console, "log").mockImplementation(filteredLog);
 });
 

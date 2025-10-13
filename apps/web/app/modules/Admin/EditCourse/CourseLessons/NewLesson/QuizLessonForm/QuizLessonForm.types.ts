@@ -6,6 +6,7 @@ export enum QuestionIcons {
   DetailedResponse = "DetailedResponse",
   PhotoQuestion = "PhotoQuestion",
   FillInTheBlanks = "FillInTheBlanks",
+  GapFill = "GapFill",
   MatchWords = "Equal",
   Scale_1_5 = "Questionnaire",
 }

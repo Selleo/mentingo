@@ -59,7 +59,7 @@ const QuestionSelector = ({ addQuestion }: QuestionSelectorProps) => {
     {
       type: QuestionType.FILL_IN_THE_BLANKS_TEXT,
       label: t("adminCourseView.curriculum.lesson.other.fillInTheBlanksText"),
-      icon: QuestionIcons.FillInTheBlanks,
+      icon: QuestionIcons.GapFill,
     },
     {
       type: QuestionType.BRIEF_RESPONSE,

@@ -701,6 +701,10 @@
       "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
       "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
       "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
+      "SLACK_CLIENT_ID": { "label": "Slack Client ID" },
+      "SLACK_CLIENT_SECRET": { "label": "Slack Client Secret" },
+      "SLACK_OAUTH_ENABLED": { "label": "Slack OAuth Enabled (true/false)" },
+      "VITE_SLACK_OAUTH_ENABLED": { "label": "Vite Slack OAuth Enabled (true/false)" },
       "save": "Save"
     },
     "breadcrumbs": {
@@ -1012,7 +1016,11 @@
           "presentationLessonDescription": "Choose this type if you want to embed presentations files like PPTX.",
           "quizLessonDescription": "This type allows you to build quizzes for your chapter using different types of questions.",
           "aiMentorLessonDescription": "Create interactive AI-powered lessons where students can engage with a virtual mentor.",
+          "fillInTheBlanksDescription": "This question contains a sentence; students must drag and drop the correct word into the blank.",
+          "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
           "embedLessonDescription": "This type allows you to embed content from external platforms using iframe code.",
+          "fillInTheBlanksSentenceTip": "Write a sentence and drop words in to it.",
+          "fillInTheBlanksWordTip": "Create and drop the word into sentence.",
           "leaveContentHeader": "Are you sure you want to leave this question editor?",
           "leaveContentBody": "It will delete all unsaved progress",
           "leaveContentBodyValidate": "If you want to save the changes, you must first validate the form",
@@ -1076,7 +1084,8 @@
     "enrolled": {
       "filters": {
         "placeholder": {
-          "searchByKeyword": "Search by keyword..."
+          "searchByKeyword": "Search by keyword...",
+          "groups": "Groups"
         }
       },
       "enrollSelected": "Enroll selected",
@@ -1565,6 +1574,18 @@
   "organizationTheme": {
     "title": "Organization Theme",
     "description": "Customize the appearance of your platform by selecting a theme color that reflects your organization's branding."
+  },
+  "organizationLoginBackgroundImageUpload": {
+    "title": "Login Background Image Upload",
+    "description": "Upload a custom background image for the organization login page.",
+    "button": {
+      "removeBackgroundImage": "Remove Background Image"
+    },
+
+    "toast": {
+      "success": "Login background image changed successfully",
+      "error": "Error changing login background image"
+    }
   },
   "files": {
     "import": {

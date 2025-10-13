@@ -5,6 +5,7 @@ import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
 import { DefaultCourseCurrencySelect } from "./DefaultCourseCurrencySelect";
+import { OrganizationLoginBackgroundUpload } from "./OrganizationLoginBackgroundUpload";
 import { OrganizationTheme } from "./OrganizationTheme";
 import AdminPreferences from "./Preferences";
 import RoleBasedMFAEnforcementSwitch from "./RoleBasedMFAEnforcementSwitch";
@@ -35,6 +36,9 @@ export default function OrganizationTabContent({
       <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />
       <CertificateBackgroundUpload
         certificateBackgroundImage={globalSettings.certificateBackgroundImage}
+      />
+      <OrganizationLoginBackgroundUpload
+        backgroundImage={globalSettings.loginBackgroundImageS3Key}
       />
       <PlatformLogoForm />
       <OrganizationTheme />
