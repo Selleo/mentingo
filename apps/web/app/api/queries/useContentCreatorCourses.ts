@@ -7,12 +7,23 @@ import type { GetContentCreatorCoursesResponse } from "../generated-api";
 type SearchParams = {
   scope?: "all" | "enrolled" | "available";
   excludeCourseId?: string;
+  /** Filter by course title only */
+  title?: string;
+  /** Filter by course description only */
+  description?: string;
+  /** Search across both title AND description fields simultaneously */
+  searchQuery?: string;
 };
 
-export const ContentCreatorCoursesOptions = (
+type QueryOptions = {
+  enabled?: boolean;
+};
+
+export const contentCreatorCoursesOptions = (
   authorId?: string,
   searchParams?: SearchParams,
   isContentCreator?: boolean,
+  options: QueryOptions = { enabled: true },
 ) => {
   return {
     enabled: !!authorId && isContentCreator,
@@ -30,11 +41,15 @@ export const ContentCreatorCoursesOptions = (
         authorId,
         ...(searchParams?.scope && { scope: searchParams.scope }),
         ...(searchParams?.excludeCourseId && { excludeCourseId: searchParams.excludeCourseId }),
+        ...(searchParams?.title && { title: searchParams.title }),
+        ...(searchParams?.description && { description: searchParams.description }),
+        ...(searchParams?.searchQuery && { searchQuery: searchParams.searchQuery }),
       });
 
       return response.data;
     },
     select: (data: GetContentCreatorCoursesResponse) => data.data,
+    ...options,
   };
 };
 
@@ -43,5 +58,5 @@ export function useContentCreatorCourses(
   searchParams?: SearchParams,
   isContentCreator?: boolean,
 ) {
-  return useQuery(ContentCreatorCoursesOptions(authorId, searchParams, isContentCreator));
+  return useQuery(contentCreatorCoursesOptions(authorId, searchParams, isContentCreator));
 }

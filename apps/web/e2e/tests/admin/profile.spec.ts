@@ -33,7 +33,9 @@ const PROFILE_PAGE_UI = {
 const PROFILE_PAGE_FILE_PATH = "e2e/data/images/profile_icon_test.png";
 
 const navigateToProfilePage = async (page: Page) => {
-  await page.getByRole("button", { name: new RegExp(PROFILE_PAGE_UI.button.profile, "i") }).click();
+  await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+
+  await page.getByRole("link", { name: new RegExp(PROFILE_PAGE_UI.button.profile, "i") }).click();
 
   const header = page
     .getByRole("heading")

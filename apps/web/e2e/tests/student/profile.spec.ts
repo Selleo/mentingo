@@ -5,7 +5,9 @@ import { fillAndAssertTextField } from "../../utils";
 import { PROFILE_PAGE_FILE_PATH, PROFILE_PAGE_UI } from "./data/profile-data";
 
 const navigateToProfilePage = async (page: Page) => {
-  await page.getByRole("button", { name: new RegExp(PROFILE_PAGE_UI.button.profile, "i") }).click();
+  await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+
+  await page.getByRole("link", { name: new RegExp(PROFILE_PAGE_UI.button.profile, "i") }).click();
 
   const header = page
     .getByRole("heading")
@@ -68,7 +70,7 @@ const editProfilePicture = async (page: Page) => {
 
   await confirmEditMode(page);
 
-  const profileImage = page.getByRole("img", {
+  const profileImage = page.locator("main").getByRole("img", {
     name: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName} profile`,
   });
 
@@ -96,7 +98,7 @@ test.describe("Student profile page flow", () => {
     await deleteProfilePicture(page);
     await confirmEditMode(page);
 
-    const profileImage = page.getByRole("img", {
+    const profileImage = page.locator("main").getByRole("img", {
       name: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName} profile`,
     });
     await expect(profileImage).not.toBeVisible();

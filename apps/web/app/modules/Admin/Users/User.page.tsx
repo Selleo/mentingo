@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { useAdminUpdateUser } from "~/api/mutations/admin/useAdminUpdateUser";
 import { userQueryOptions, useUserById } from "~/api/queries/admin/useUserById";
+import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
@@ -52,6 +53,7 @@ const User = () => {
   const onSubmit = (data: UpdateUserBody) => {
     updateUser({ data, userId: id }).then(() => {
       queryClient.invalidateQueries(userQueryOptions(id));
+      queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY], exact: false });
     });
   };
 

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, desc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, ilike, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
@@ -15,7 +15,12 @@ import {
 
 import type { LessonTypes } from "../lesson.type";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { AdminQuestionBody, LessonResourceType, QuestionBody } from "src/lesson/lesson.schema";
+import type {
+  AdminQuestionBody,
+  EnrolledLessonsFilters,
+  LessonResourceType,
+  QuestionBody,
+} from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
@@ -299,6 +304,63 @@ export class LessonRepository {
       .from(lessonResources)
       .where(eq(lessonResources.lessonId, lessonId))
       .orderBy(lessonResources.displayOrder);
+  }
+
+  async getEnrolledLessons(userId: UUIDType, filters: EnrolledLessonsFilters) {
+    const conditions = [eq(studentCourses.studentId, userId)];
+
+    if (filters.title) {
+      conditions.push(ilike(lessons.title, `%${filters.title}%`));
+    }
+
+    if (filters.description) {
+      conditions.push(ilike(lessons.description, `%${filters.description}%`));
+    }
+
+    if (filters.searchQuery) {
+      conditions.push(
+        or(
+          ilike(lessons.title, `%${filters.searchQuery}%`),
+          ilike(lessons.description, `%${filters.searchQuery}%`),
+        )!,
+      );
+    }
+
+    if (filters.lessonCompleted !== undefined) {
+      if (filters.lessonCompleted) {
+        conditions.push(sql`${studentLessonProgress.completedAt} IS NOT NULL`);
+      } else {
+        conditions.push(sql`${studentLessonProgress.completedAt} IS NULL`);
+      }
+    }
+
+    return await this.db
+      .select({
+        id: lessons.id,
+        title: lessons.title,
+        type: sql<LessonTypes>`${lessons.type}`,
+        description: sql<string | null>`${lessons.description}`,
+        displayOrder: sql<number>`${lessons.displayOrder}`,
+        lessonCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
+        courseId: courses.id,
+        courseTitle: courses.title,
+        chapterId: chapters.id,
+        chapterTitle: chapters.title,
+        chapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .innerJoin(studentCourses, eq(studentCourses.courseId, courses.id))
+      .leftJoin(
+        studentLessonProgress,
+        and(
+          eq(studentLessonProgress.lessonId, lessons.id),
+          eq(studentLessonProgress.studentId, userId),
+        ),
+      )
+      .where(and(...conditions))
+      .orderBy(chapters.displayOrder, lessons.displayOrder);
   }
 
   //   async retireQuizProgress(

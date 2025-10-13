@@ -7,7 +7,12 @@ import type { UserRole } from "~/config/userRoles";
 import type { SortOption } from "~/types/sorting";
 
 type CourseParams = {
+  /** Filter by course title only */
   title?: string;
+  /** Filter by course description only */
+  description?: string;
+  /** Search across both title AND description fields simultaneously */
+  searchQuery?: string;
   category?: string;
   sort?: SortOption;
   userId?: string;
@@ -29,6 +34,8 @@ export const availableCoursesQueryOptions = (
       page: 1,
       perPage: 100,
       ...(searchParams?.title && { title: searchParams.title }),
+      ...(searchParams?.description && { description: searchParams.description }),
+      ...(searchParams?.searchQuery && { searchQuery: searchParams.searchQuery }),
       ...(searchParams?.category && { category: searchParams.category }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
       ...(searchParams?.userId && { userId: searchParams.userId }),

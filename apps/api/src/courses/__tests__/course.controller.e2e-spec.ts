@@ -207,6 +207,80 @@ describe("CourseController (e2e)", () => {
           expect(response.body.data[0].title).toContain("Python");
         });
 
+        it("filters by description", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .create({ role: USER_ROLES.ADMIN });
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          await courseFactory.create({
+            title: "Course One",
+            description: "Learn advanced Python programming",
+            authorId: admin.id,
+            categoryId: category.id,
+            thumbnailS3Key: null,
+          });
+          await courseFactory.create({
+            title: "Course Two",
+            description: "Learn JavaScript basics",
+            authorId: admin.id,
+            categoryId: category.id,
+            thumbnailS3Key: null,
+          });
+
+          const response = await request(app.getHttpServer())
+            .get("/api/course/all?description=Python")
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data.length).toBe(1);
+          expect(response.body.data[0].description).toContain("Python");
+        });
+
+        it("filters by searchQuery (searches both title and description)", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .create({ role: USER_ROLES.ADMIN });
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          await courseFactory.create({
+            title: "Python Basics",
+            description: "Introduction to programming",
+            authorId: admin.id,
+            categoryId: category.id,
+            thumbnailS3Key: null,
+          });
+          await courseFactory.create({
+            title: "JavaScript Course",
+            description: "Learn Python and JavaScript",
+            authorId: admin.id,
+            categoryId: category.id,
+            thumbnailS3Key: null,
+          });
+          await courseFactory.create({
+            title: "Ruby Course",
+            description: "Learn Ruby on Rails",
+            authorId: admin.id,
+            categoryId: category.id,
+            thumbnailS3Key: null,
+          });
+
+          const response = await request(app.getHttpServer())
+            .get("/api/course/all?searchQuery=Python")
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data.length).toBe(2);
+          expect(
+            response.body.data.every(
+              (course: CourseTest) =>
+                course.title.includes("Python") || course.description?.includes("Python"),
+            ),
+          ).toBe(true);
+        });
+
         it("filters by date range", async () => {
           const admin = await userFactory
             .withCredentials({ password })
@@ -435,6 +509,120 @@ describe("CourseController (e2e)", () => {
 
         expect(response.body.data.length).toBe(1);
         expect(response.body.data[0].title).toBe("Python Course");
+      });
+
+      it("filters by description", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: USER_ROLES.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+
+        const course1 = await courseFactory.create({
+          title: "Course One",
+          description: "Learn advanced Python programming",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        const course2 = await courseFactory.create({
+          title: "Course Two",
+          description: "Learn JavaScript basics",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await db.insert(studentCourses).values([
+          {
+            studentId: student.id,
+            courseId: course1.id,
+            finishedChapterCount: 0,
+          },
+          {
+            studentId: student.id,
+            courseId: course2.id,
+            finishedChapterCount: 0,
+          },
+        ]);
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/get-student-courses?description=Python")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data.length).toBe(1);
+        expect(response.body.data[0].description).toContain("Python");
+      });
+
+      it("filters by searchQuery (searches both title and description)", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: USER_ROLES.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+
+        const course1 = await courseFactory.create({
+          title: "Python Basics",
+          description: "Introduction to programming",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        const course2 = await courseFactory.create({
+          title: "JavaScript Course",
+          description: "Learn Python and JavaScript",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        const course3 = await courseFactory.create({
+          title: "Ruby Course",
+          description: "Learn Ruby on Rails",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await db.insert(studentCourses).values([
+          {
+            studentId: student.id,
+            courseId: course1.id,
+            finishedChapterCount: 0,
+          },
+          {
+            studentId: student.id,
+            courseId: course2.id,
+            finishedChapterCount: 0,
+          },
+          {
+            studentId: student.id,
+            courseId: course3.id,
+            finishedChapterCount: 0,
+          },
+        ]);
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/get-student-courses?searchQuery=Python")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data.length).toBe(2);
+        expect(
+          response.body.data.every(
+            (course: CourseTest) =>
+              course.title.includes("Python") || course.description?.includes("Python"),
+          ),
+        ).toBe(true);
       });
 
       it("returns only published and private courses", async () => {
@@ -960,6 +1148,89 @@ describe("CourseController (e2e)", () => {
 
         expect(response.body.data.length).toBe(1);
         expect(response.body.data[0].title).toBe("Python Course");
+      });
+
+      it("filters by description", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: USER_ROLES.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+
+        await courseFactory.create({
+          title: "Course One",
+          description: "Learn advanced Python programming",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        await courseFactory.create({
+          title: "Course Two",
+          description: "Learn JavaScript basics",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/available-courses?description=Python")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data.length).toBe(1);
+        expect(response.body.data[0].description).toContain("Python");
+      });
+
+      it("filters by searchQuery (searches both title and description)", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: USER_ROLES.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+
+        await courseFactory.create({
+          title: "Python Basics",
+          description: "Introduction to programming",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        await courseFactory.create({
+          title: "JavaScript Course",
+          description: "Learn Python and JavaScript",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        await courseFactory.create({
+          title: "Ruby Course",
+          description: "Learn Ruby on Rails",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/available-courses?searchQuery=Python")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data.length).toBe(2);
+        expect(
+          response.body.data.every(
+            (course: CourseTest) =>
+              course.title.includes("Python") || course.description?.includes("Python"),
+          ),
+        ).toBe(true);
       });
 
       it("excludes specified course", async () => {

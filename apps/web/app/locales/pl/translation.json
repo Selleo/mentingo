@@ -135,22 +135,35 @@
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
-    "providerInformation": "O dostawcy",
+    "providerInformation": "Informacje",
     "browseCourses": "Przeglądaj kursy",
     "announcements": "Ogłoszenia",
     "promotionCodes": "Kody promocyjne",
+    "manage": "Zarządzaj",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
   },
   "globalSearch": {
-    "users": "Użytkownicy",
-    "categories": "Kategorie",
-    "groups": "Grupy",
-    "allCourses": "Wszystkie kursy",
-    "myCourses": "Moje kursy",
-    "availableCourses": "Dostępne kursy",
-    "noSearchResults": "Brak wyników wyszukiwania dla:"
+    "notFound": "Niestety nic nie znaleziono",
+    "tryAgain": "Spróbuj ponownie użyć innych słów kluczowych",
+    "search": "Szukaj...",
+    "searchIn": "Szukaj w {{companyName}}",
+    "searchInDescription": "Rozpocznij pisanie, aby wyszukać kursy, ogłoszenia i więcej.",
+    "navigate": "Nawigacja",
+    "goTo": "Przejdź do",
+    "close": "Zamknij",
+    "entries": {
+      "users": "Użytkownicy",
+      "categories": "Kategorie",
+      "groups": "Grupy",
+      "allCourses": "Wszystkie kursy",
+      "myCourses": "Moje kursy",
+      "availableCourses": "Dostępne kursy",
+      "noSearchResults": "Brak wyników wyszukiwania dla:",
+      "announcements": "Powiadomienia",
+      "lessons": "Lekcje"
+    }
   },
   "providerInformation": {
     "title": "Informacje o Dostawcy",
@@ -706,6 +719,10 @@
       "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
       "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
       "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
+      "SLACK_CLIENT_ID": { "label": "Slack Client ID" },
+      "SLACK_CLIENT_SECRET": { "label": "Slack Client Secret" },
+      "SLACK_OAUTH_ENABLED": { "label": "Slack OAuth Enabled (true/false)" },
+      "VITE_SLACK_OAUTH_ENABLED": { "label": "Vite Slack OAuth Enabled (true/false)" },
       "save": "Zapisz"
     },
     "breadcrumbs": {
@@ -1022,6 +1039,10 @@
           "quizLessonDescription": "Ten typ pozwala na tworzenie quizów w ramach kursu z różnymi rodzajami pytań.",
           "aiMentorLessonDescription": "Stwórz interaktywne lekcje AI, gdzie studenci mogą współpracować z wirtualnym mentorem.",
           "embedLessonDescription": "Ten typ pozwala na osadzenie zewnętrznej treści za pomocą iframe.",
+          "fillInTheBlanksDescription": "To pytanie zawiera zdanie, a studenci będą musieli przeciągnąć i upuścić słowo w odpowiednie miejsce.",
+          "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
+          "fillInTheBlanksSentenceTip": "Napisz zdanie i przeciągnij słowa do niego.",
+          "fillInTheBlanksWordTip": "Utwórz i przeciągnij słowo do zdania.",
           "leaveContentHeader": "Czy na pewno chcesz opuścić ten edytor pytań?",
           "leaveContentBody": "Spowoduje to utratę niezapisanych postępów",
           "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
@@ -1088,7 +1109,8 @@
     "enrolled": {
       "filters": {
         "placeholder": {
-          "searchByKeyword": "Szukaj po słowie kluczowym..."
+          "searchByKeyword": "Szukaj po słowie kluczowym...",
+          "groups": "Grupy"
         }
       },
       "enrollSelected": "Zapisz wybranych na kurs",
@@ -1574,6 +1596,19 @@
   "organizationTheme": {
     "title": "Motyw organizacji",
     "description": "Dostosuj wygląd swojej platformy, wybierając kolor, który odzwierciedla tożsamość Twojej marki."
+  },
+
+  "organizationLoginBackgroundImageUpload": {
+    "title": "Przesyłanie obrazu tła logowania",
+    "description": "Wgraj własny obraz tła dla strony logowania organizacji.",
+    "button": {
+      "removeBackgroundImage": "Usuń obraz tła"
+    },
+
+    "toast": {
+      "success": "Obraz tła logowania został pomyślnie zmieniony",
+      "error": "Nie udało się zmienić obrazu tła logowania"
+    }
   },
   "files": {
     "import": {

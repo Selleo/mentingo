@@ -390,6 +390,7 @@ export interface GetPublicGlobalSettingsResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -473,6 +474,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -493,6 +495,7 @@ export interface UpdateEnforceSSOResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -529,6 +532,7 @@ export interface UpdatePrimaryColorResponse {
       courtRegisterNumber?: string;
     };
     platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -537,6 +541,12 @@ export interface UpdatePrimaryColorResponse {
 }
 
 export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetLoginBackgroundResponse {
   data: {
     url: string | null;
   };
@@ -1239,6 +1249,25 @@ export interface UpdateFreemiumStatusResponse {
   data: {
     message: string;
   };
+}
+
+export interface GetEnrolledLessonsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+    description: string | null;
+    displayOrder: number;
+    lessonCompleted: boolean;
+    /** @format uuid */
+    courseId: string;
+    courseTitle: string;
+    /** @format uuid */
+    chapterId: string;
+    chapterTitle: string;
+    chapterDisplayOrder: number;
+  }[];
 }
 
 export interface GetLessonByIdResponse {
@@ -2299,6 +2328,14 @@ export interface GetFrontendSSOEnabledResponse {
   data: {
     google?: string;
     microsoft?: string;
+    slack?: string;
+  };
+}
+
+export interface GetPostHogConfigResponse {
+  data: {
+    key?: string;
+    host?: string;
   };
 }
 
@@ -3251,12 +3288,47 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdatePlatformLogo: (
       data: {
         /** @format binary */
-        logo: File;
+        logo?: File | null;
       },
       params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/settings/platform-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetLoginBackground
+     * @request GET:/api/settings/login-background
+     */
+    settingsControllerGetLoginBackground: (params: RequestParams = {}) =>
+      this.request<GetLoginBackgroundResponse, any>({
+        path: `/api/settings/login-background`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLoginBackground
+     * @request PATCH:/api/settings/login-background
+     */
+    settingsControllerUpdateLoginBackground: (
+      data: {
+        /** @format binary */
+        "login-background"?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/login-background`,
         method: "PATCH",
         body: data,
         type: ContentType.FormData,
@@ -3509,6 +3581,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetAllCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         creationDateRange?: string[];
@@ -3549,6 +3623,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetStudentCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -3591,6 +3667,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
+        groupId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -3611,6 +3688,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetAvailableCourses: (
       query?: {
         title?: string;
+        description?: string;
+        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -3657,6 +3736,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         scope?: "all" | "enrolled" | "available";
         /** @format uuid */
         excludeCourseId?: string;
+        title?: string;
+        description?: string;
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -3979,6 +4061,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         query: query,
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerGetEnrolledLessons
+     * @request GET:/api/lesson/student-lessons
+     */
+    lessonControllerGetEnrolledLessons: (
+      query?: {
+        title?: string;
+        description?: string;
+        searchQuery?: string;
+        lessonCompleted?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetEnrolledLessonsResponse, any>({
+        path: `/api/lesson/student-lessons`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -4892,10 +4997,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AnnouncementsControllerGetAnnouncementsForUser
      * @request GET:/api/announcements/user/me
      */
-    announcementsControllerGetAnnouncementsForUser: (params: RequestParams = {}) =>
+    announcementsControllerGetAnnouncementsForUser: (
+      query?: {
+        title?: string;
+        content?: string;
+        authorName?: string;
+        search?: string;
+        isRead?: string;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetAnnouncementsForUserResponse, any>({
         path: `/api/announcements/user/me`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -4952,6 +5067,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
       this.request<GetFrontendSSOEnabledResponse, any>({
         path: `/api/env/frontend/sso`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetPostHogConfig
+     * @request GET:/api/env/frontend/posthog
+     */
+    envControllerGetPostHogConfig: (params: RequestParams = {}) =>
+      this.request<GetPostHogConfigResponse, any>({
+        path: `/api/env/frontend/posthog`,
         method: "GET",
         format: "json",
         ...params,

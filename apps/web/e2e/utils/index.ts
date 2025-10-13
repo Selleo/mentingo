@@ -11,12 +11,24 @@ export const login = async (page: Page, email: string, password: string) => {
 
 export const logout = async (browser: Browser) => {
   const newPage = await browser.newPage();
-  newPage.context().clearCookies();
+  await newPage.context().clearCookies();
 
   return newPage;
 };
 
 export const navigateToPage = async (page: Page, name: string, headerText: string) => {
+  const announcementsButton = page
+    .getByRole("link", { name: /announcements/i })
+    .waitFor({ state: "visible", timeout: 5000 })
+    .catch(() => null);
+
+  if (!announcementsButton) {
+    await page
+      .getByRole("button", { name: /manage/i })
+      .first()
+      .click();
+  }
+
   await page.getByRole("button", { name: new RegExp(name, "i") }).click();
 
   const header = page

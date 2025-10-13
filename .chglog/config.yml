@@ -16,6 +16,16 @@ options:
         - docs
         - test
   commit_groups:
+    group_by: Type
+    sort_by: Custom
+    title_order:
+      - feat
+      - fix
+      - chore
+      - refactor
+      - docs
+      - style
+      - test
     title_maps:
       chore: "Chores:"
       feat: "Features:"

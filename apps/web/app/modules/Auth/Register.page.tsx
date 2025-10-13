@@ -29,8 +29,6 @@ const registerSchema = z.object({
   password: passwordSchema,
 });
 
-const isSlackOAuthEnabled = import.meta.env.VITE_SLACK_OAUTH_ENABLED === "true";
-
 export default function RegisterPage() {
   const { mutate: registerUser } = useRegisterUser();
   const { t } = useTranslation();
@@ -45,6 +43,9 @@ export default function RegisterPage() {
   const isMicrosoftOAuthEnabled =
     (ssoEnabled?.data.microsoft ?? import.meta.env.VITE_MICROSOFT_OAUTH_ENABLED) === "true";
 
+  const isSlackOAuthEnabled =
+    (ssoEnabled?.data.slack ?? import.meta.env.VITE_SLACK_OAUTH_ENABLED) === "true";
+
   const methods = useForm<RegisterBody>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
@@ -57,7 +58,11 @@ export default function RegisterPage() {
   });
 
   const {
-    data: { enforceSSO: isSSOEnforced, inviteOnlyRegistration: inviteOnlyRegistration },
+    data: {
+      enforceSSO: isSSOEnforced,
+      inviteOnlyRegistration: inviteOnlyRegistration,
+      loginBackgroundImageS3Key,
+    },
   } = useGlobalSettingsSuspense();
 
   const {
@@ -68,7 +73,7 @@ export default function RegisterPage() {
 
   const isAnyProviderEnabled = useMemo(
     () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
-    [],
+    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled, isSlackOAuthEnabled],
   );
 
   useEffect(() => {
@@ -91,6 +96,16 @@ export default function RegisterPage() {
 
   return (
     <FormProvider {...methods}>
+      {loginBackgroundImageS3Key && (
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            backgroundImage: `url(${loginBackgroundImageS3Key}) `,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+      )}
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">{t("registerView.header")}</CardTitle>

@@ -1,6 +1,6 @@
 import { debounce } from "lodash-es";
 import { Search } from "lucide-react";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -31,6 +31,8 @@ export type FilterOption = {
 export type BaseFilterConfig = {
   name: string;
   placeholder?: string;
+  default?: FilterValue;
+  hideAll?: boolean;
 };
 
 export type TextFilterConfig = BaseFilterConfig & {
@@ -87,11 +89,19 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
       inputRef.current.value = "";
     }
     filters.forEach((filter) => {
-      onChange(filter?.name, undefined);
+      onChange(filter.name, filter.default);
     });
   };
 
-  const isAnyFilterApplied = values ? Object.values(values).some((v) => v !== undefined) : false;
+  const isAnyFilterApplied = useMemo(() => {
+    for (const filter of filters) {
+      if (values[filter.name] !== filter.default) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [filters, values]);
 
   return (
     <div className="flex grow flex-wrap items-center gap-2 py-6">
@@ -126,9 +136,11 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
                 <SelectValue placeholder={filter?.placeholder || t("common.other.all")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">
-                  {t("common.other.all")} {filter?.placeholder}
-                </SelectItem>
+                {!filter.hideAll && (
+                  <SelectItem value="all">
+                    {t("common.other.all")} {filter?.placeholder}
+                  </SelectItem>
+                )}
                 {filter?.options?.map(({ value, label }) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -157,7 +169,9 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
                 <SelectValue placeholder={t("common.other.allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t("common.other.allStatuses")}</SelectItem>
+                {!filter.hideAll && (
+                  <SelectItem value="all">{t("common.other.allStatuses")}</SelectItem>
+                )}
                 <SelectItem value="active">{t("common.other.active")}</SelectItem>
                 <SelectItem value="archived">{t("common.other.archived")}</SelectItem>
               </SelectContent>
@@ -168,7 +182,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
       {isAnyFilterApplied && (
         <Button
-          className="border border-primary-500 bg-transparent text-primary-700"
+          className="border border-primary-500 bg-transparent text-accent-foreground"
           onClick={handleClearAll}
           disabled={isLoading}
         >

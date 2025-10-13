@@ -46,14 +46,11 @@ const LeaveConfirmationModal = ({
             )}
             <div className="mt-8 flex gap-4">
               {!isValidated ? (
-                <Button
-                  onClick={onValidate}
-                  className="rounded bg-primary-700 px-4 py-2 text-white"
-                >
+                <Button onClick={onValidate} className="rounded px-4 py-2">
                   {t("common.button.validate")}
                 </Button>
               ) : (
-                <Button onClick={onSave} className="rounded bg-primary-700 px-4 py-2 text-white">
+                <Button onClick={onSave} className="rounded px-4 py-2">
                   {t("common.button.save")}
                 </Button>
               )}
