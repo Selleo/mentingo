@@ -32,6 +32,11 @@ export const frontendSSOEnabledResponseSchema = Type.Object({
   slack: Type.Optional(Type.String()),
 });
 
+export const frontendPosthogConfigResponseSchema = Type.Object({
+  key: Type.Optional(Type.String()),
+  host: Type.Optional(Type.String()),
+});
+
 export type EncryptedEnvBody = Static<typeof encryptedEnvSchema>;
 export type BulkUpsertEnvBody = Static<typeof bulkUpsertEnvSchema>;
 export type FrontendSSOEnabledResponseBody = Static<typeof frontendSSOEnabledResponseSchema>;

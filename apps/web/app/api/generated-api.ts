@@ -2313,6 +2313,13 @@ export interface GetFrontendSSOEnabledResponse {
   };
 }
 
+export interface GetPostHogConfigResponse {
+  data: {
+    key?: string;
+    host?: string;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -4999,6 +5006,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
       this.request<GetFrontendSSOEnabledResponse, any>({
         path: `/api/env/frontend/sso`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetPostHogConfig
+     * @request GET:/api/env/frontend/posthog
+     */
+    envControllerGetPostHogConfig: (params: RequestParams = {}) =>
+      this.request<GetPostHogConfigResponse, any>({
+        path: `/api/env/frontend/posthog`,
         method: "GET",
         format: "json",
         ...params,
