@@ -27,8 +27,11 @@ export const updateDefaultCourseCurrencySchema = Type.Object({
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
 });
 
-export const updateGlobalPrimaryColorSchema = Type.Object({
+export const updateGlobalColorSchema = Type.Object({
   primaryColor: Type.String({
+    pattern: HEX_COLOR_REGEX.source,
+  }),
+  contrastColor: Type.String({
     pattern: HEX_COLOR_REGEX.source,
   }),
 });
@@ -36,4 +39,4 @@ export const updateGlobalPrimaryColorSchema = Type.Object({
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateMFAEnforcedRolesRequest = Static<typeof updateMFAEnforcedRolesSchema>;
 export type UpdateDefaultCourseCurrencyBody = Static<typeof updateDefaultCourseCurrencySchema>;
-export type UpdateGlobalPrimaryColorBody = Static<typeof updateGlobalPrimaryColorSchema>;
+export type UpdateGlobalColorSchemaBody = Static<typeof updateGlobalColorSchema>;

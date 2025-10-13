@@ -5,14 +5,14 @@ import Loader from "~/modules/common/Loader/Loader";
 import { useTheme } from "~/modules/Theme";
 
 export const ThemeWrapper: FC<PropsWithChildren> = ({ children }) => {
-  const { setPrimaryColor } = useTheme();
+  const { setColorSchema } = useTheme();
   const { data: globalSettingsData, isLoading, isSuccess } = useGlobalSettings();
 
   useEffect(() => {
-    if (isSuccess && globalSettingsData?.primaryColor) {
-      setPrimaryColor(globalSettingsData.primaryColor);
+    if (isSuccess && globalSettingsData?.primaryColor && globalSettingsData?.contrastColor) {
+      setColorSchema(globalSettingsData.primaryColor, globalSettingsData.contrastColor);
     }
-  }, [isSuccess, globalSettingsData, setPrimaryColor]);
+  }, [isSuccess, globalSettingsData, setColorSchema]);
 
   if (isLoading) {
     return (

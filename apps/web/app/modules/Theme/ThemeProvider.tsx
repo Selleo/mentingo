@@ -6,7 +6,8 @@ import { useThemeStore } from "./themeStore";
 
 type ThemeContextType = {
   primaryColor: string;
-  setPrimaryColor: (color: string) => void;
+  contrastColor: string;
+  setColorSchema: (primaryColor: string, contrastColor: string) => void;
 };
 
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -17,11 +18,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [primaryColor, setPrimaryColor] = useState(
     getComputedStyle(document.documentElement).getPropertyValue("--primary-700").trim(),
   );
+  const [contrastColor, setContrastColor] = useState(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue(getContrastColor(primaryColor, "--color-black", "--color-white"))
+      .trim(),
+  );
 
-  const handleSetPrimaryColor = useCallback((color: string) => {
-    setPrimaryColor(color);
+  const handleSetColorSchema = useCallback((primaryColor: string, contrastColor: string) => {
+    setPrimaryColor(primaryColor);
+    setContrastColor(contrastColor);
 
-    const [h, s, l] = hexToHslTuple(color);
+    const [h, s, l] = hexToHslTuple(primaryColor);
 
     const shades = {
       50: 97,
@@ -43,16 +50,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       document.documentElement.style.setProperty(`--primary-${key}`, hexShade);
     });
 
-    document.documentElement.style.setProperty(
-      `--contrast`,
-      getComputedStyle(document.documentElement)
-        .getPropertyValue(getContrastColor(color, "--color-black", "--color-white"))
-        .trim(),
-    );
+    document.documentElement.style.setProperty(`--contrast`, contrastColor);
     document.documentElement.style.setProperty(
       `--color-contrast`,
       getComputedStyle(document.documentElement)
-        .getPropertyValue(getContrastColor(color, "--primary-800", "--primary-100"))
+        .getPropertyValue(getContrastColor(primaryColor, "--primary-800", "--primary-100"))
         .trim(),
     );
   }, []);
@@ -69,7 +71,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ primaryColor, setPrimaryColor: handleSetPrimaryColor }}>
+    <ThemeContext.Provider
+      value={{ primaryColor, contrastColor, setColorSchema: handleSetColorSchema }}
+    >
       {children}
     </ThemeContext.Provider>
   );

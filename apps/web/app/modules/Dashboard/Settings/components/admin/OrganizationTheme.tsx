@@ -5,7 +5,7 @@ import { HexColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
 import { useUnmount } from "react-use";
 
-import { useUpdatePrimaryColor } from "~/api/mutations";
+import { useUpdateColorSchema } from "~/api/mutations";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -21,14 +21,17 @@ import { useTheme } from "~/modules/Theme";
 export const OrganizationTheme = () => {
   const { t } = useTranslation();
 
-  const { primaryColor, setPrimaryColor } = useTheme();
+  const { primaryColor, contrastColor, setColorSchema } = useTheme();
   const currentPrimaryColor = useRef(primaryColor);
-  const disableSubmit = lowerCase(primaryColor) === lowerCase(currentPrimaryColor.current);
+  const currentContrastColor = useRef(contrastColor);
+  const disableSubmit =
+    lowerCase(primaryColor) === lowerCase(currentPrimaryColor.current) &&
+    lowerCase(contrastColor) === lowerCase(currentContrastColor.current);
 
-  const { mutate: updatePrimaryColor } = useUpdatePrimaryColor();
+  const { mutate: updateColorSchema } = useUpdateColorSchema();
 
   useUnmount(() => {
-    setPrimaryColor(currentPrimaryColor.current);
+    setColorSchema(currentPrimaryColor.current, currentContrastColor.current);
   });
 
   return (
@@ -38,25 +41,54 @@ export const OrganizationTheme = () => {
         <CardDescription>{t("organizationTheme.description")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col items-center space-y-4">
-          <HexColorPicker color={primaryColor} onChange={setPrimaryColor} />
-          <div className="flex items-center justify-center space-x-1">
-            <span className="text-sm text-gray-500">#</span>
-            <Input
-              type="text"
-              id="primary-color-input"
-              value={primaryColor.replace(/^#/, "")}
-              onChange={(event) => {
-                const value = event.target.value.startsWith("#")
-                  ? event.target.value
-                  : `#${event.target.value}`;
-
-                if (HEX_COLOR_REGEX.test(value)) {
-                  setPrimaryColor(value);
-                }
-              }}
-              className="w-24"
+        <div className="flex flex-col items-center md:flex-row justify-center gap-4">
+          <div className="flex flex-col gap-2">
+            <HexColorPicker
+              color={primaryColor}
+              onChange={(color) => setColorSchema(color, contrastColor)}
             />
+            <div className="flex items-center justify-center space-x-1">
+              <span className="text-sm text-gray-500">#</span>
+              <Input
+                type="text"
+                id="primary-color-input"
+                value={primaryColor.replace(/^#/, "")}
+                onChange={(event) => {
+                  const value = event.target.value.startsWith("#")
+                    ? event.target.value
+                    : `#${event.target.value}`;
+
+                  if (HEX_COLOR_REGEX.test(value)) {
+                    setColorSchema(value, value);
+                  }
+                }}
+                className="w-24"
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <HexColorPicker
+              color={contrastColor}
+              onChange={(color) => setColorSchema(primaryColor, color)}
+            />
+            <div className="flex items-center justify-center space-x-1">
+              <span className="text-sm text-gray-500">#</span>
+              <Input
+                type="text"
+                id="primary-color-input"
+                value={primaryColor.replace(/^#/, "")}
+                onChange={(event) => {
+                  const value = event.target.value.startsWith("#")
+                    ? event.target.value
+                    : `#${event.target.value}`;
+
+                  if (HEX_COLOR_REGEX.test(value)) {
+                    setColorSchema(value, value);
+                  }
+                }}
+                className="w-24"
+              />
+            </div>
           </div>
         </div>
       </CardContent>
@@ -64,12 +96,16 @@ export const OrganizationTheme = () => {
         <Button
           disabled={disableSubmit}
           onClick={() => {
-            updatePrimaryColor(
-              { primaryColor },
+            updateColorSchema(
+              { primaryColor, contrastColor },
               {
                 onSuccess: ({ data }) => {
                   if (data?.primaryColor) {
                     currentPrimaryColor.current = data.primaryColor;
+                  }
+
+                  if (data?.contrastColor) {
+                    currentContrastColor.current = data.contrastColor;
                   }
                 },
               },
@@ -82,7 +118,7 @@ export const OrganizationTheme = () => {
           variant="outline"
           disabled={disableSubmit}
           onClick={() => {
-            setPrimaryColor(currentPrimaryColor.current);
+            setColorSchema(currentPrimaryColor.current, currentContrastColor.current);
           }}
         >
           {t("common.button.cancel")}
