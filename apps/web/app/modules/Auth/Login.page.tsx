@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "@remix-run/react";
-import { useMemo } from "react";
+import { Link, useSearchParams } from "@remix-run/react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -15,6 +15,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { toast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 
 import { SocialLogin } from "./components";
@@ -31,6 +32,19 @@ const loginSchema = (t: (key: string) => string) =>
 const isSlackOAuthEnabled = import.meta.env.VITE_SLACK_OAUTH_ENABLED === "true";
 
 export default function LoginPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const error = searchParams.get("error");
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        description: error,
+      });
+      setSearchParams({});
+    }
+  }, [error, setSearchParams]);
+
   const { t } = useTranslation();
 
   const { data: ssoEnabled } = useSSOEnabled();
@@ -56,7 +70,7 @@ export default function LoginPage() {
 
   const isAnyProviderEnabled = useMemo(
     () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
-    [],
+    [isGoogleOAuthEnabled, isMicrosoftOAuthEnabled],
   );
 
   const onSubmit = (data: LoginBody) => {

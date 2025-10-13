@@ -414,6 +414,10 @@ export class AuthService {
       throw new UnauthorizedException("Registration is invite-only.");
     }
 
+    if (user.archived) {
+      throw new UnauthorizedException("Your account has been archived");
+    }
+
     if (!user && !inviteOnlyRegistration) {
       user = await this.userService.createUser({
         email: userCallback.email,
