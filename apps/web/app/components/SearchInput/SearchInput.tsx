@@ -30,7 +30,7 @@ export const SearchInput = ({
         {...props}
         placeholder={props.placeholder || `${t("common.other.search")}...`}
         className={cn(
-          "w-full max-w-[320px] border border-neutral-300 py-2 pl-8 focus:border-primary-500 md:max-w-none",
+          "w-full max-w-[320px] border border-neutral-200 py-2 pl-8 focus:border-primary-500 md:max-w-none",
           clearable ? "pr-8" : "pr-4",
           props.className,
         )}

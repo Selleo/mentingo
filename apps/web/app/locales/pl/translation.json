@@ -134,10 +134,11 @@
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
-    "providerInformation": "O dostawcy",
+    "providerInformation": "Informacje",
     "browseCourses": "Przeglądaj kursy",
     "announcements": "Ogłoszenia",
     "promotionCodes": "Kody promocyjne",
+    "manage": "Zarządzaj",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }

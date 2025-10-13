@@ -92,6 +92,15 @@ const createBasicGroup = async (page: Page) => {
 test.describe("Admin groups page flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+
+    const announcementsButton = page.getByRole("link", { name: /announcements/i });
+
+    if (!(await announcementsButton.isVisible())) {
+      await page
+        .getByRole("button", { name: /manage/i })
+        .first()
+        .click();
+    }
   });
 
   test.describe("Group CRUD", () => {

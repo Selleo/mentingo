@@ -1,7 +1,7 @@
 import { findMatchingRoute, mapNavigationItems } from "../navigationConfig";
 import { USER_ROLE } from "../userRoles";
 
-import type { NavigationItem } from "../navigationConfig";
+import type { NavigationItem, NavigationGroups } from "../navigationConfig";
 
 describe("findMatchingRoute", () => {
   it("should find exact matches", () => {
@@ -30,7 +30,16 @@ describe("mapNavigationItems", () => {
       },
     ];
 
-    const mapped = mapNavigationItems(items);
+    const groups: NavigationGroups[] = [
+      {
+        title: "test",
+        items,
+      },
+    ];
+
+    const mappedGroups = mapNavigationItems(groups);
+    const mapped = mappedGroups[0].items;
+
     expect(mapped[0]).toEqual({
       label: "courses",
       path: "admin/courses",
@@ -49,7 +58,16 @@ describe("mapNavigationItems", () => {
       },
     ];
 
-    const mapped = mapNavigationItems(items);
+    const groups: NavigationGroups[] = [
+      {
+        title: "test",
+        items,
+      },
+    ];
+
+    const mappedGroups = mapNavigationItems(groups);
+    const mapped = mappedGroups[0].items;
+
     expect(mapped[0].roles).toEqual([USER_ROLE.admin]);
   });
 
@@ -62,7 +80,16 @@ describe("mapNavigationItems", () => {
       },
     ];
 
-    const mapped = mapNavigationItems(items);
+    const groups: NavigationGroups[] = [
+      {
+        title: "test",
+        items,
+      },
+    ];
+
+    const mappedGroups = mapNavigationItems(groups);
+    const mapped = mappedGroups[0].items;
+
     expect(mapped[0]).toMatchObject({
       label: "dashboard",
       path: "",
@@ -81,7 +108,16 @@ describe("mapNavigationItems", () => {
       },
     ];
 
-    const mapped = mapNavigationItems(items);
+    const groups: NavigationGroups[] = [
+      {
+        title: "test",
+        items,
+      },
+    ];
+
+    const mappedGroups = mapNavigationItems(groups);
+    const mapped = mappedGroups[0].items;
+
     expect(mapped[0].roles).toBeUndefined();
   });
 });

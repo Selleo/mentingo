@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Separator } from "~/components/ui/separator";
@@ -15,9 +15,10 @@ import { NavigationMenu } from "./NavigationMenu";
 import { NavigationMenuButton } from "./NavigationMenuButton";
 import { useMobileNavigation } from "./useMobileNavigation";
 
-import type { MenuItemType } from "~/config/navigationConfig";
+import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
+import type { UserRole } from "~/utils/userRoles";
 
-type DashboardNavigationProps = { menuItems: MenuItemType[] };
+type DashboardNavigationProps = { menuItems: NavigationGroups[] };
 
 export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
@@ -63,7 +64,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     <TooltipProvider>
       <header
         className={cn(
-          "sticky top-0 z-10 h-min w-full transition-all duration-300 ease-in-out 2xl:flex 2xl:h-dvh 2xl:flex-col 2xl:gap-y-6 2xl:px-2 2xl:py-4 3xl:static 3xl:p-4",
+          "sticky top-0 z-10 h-min w-full transition-all duration-300 ease-in-out 2xl:flex 2xl:h-dvh 2xl:flex-col 2xl:gap-y-3 2xl:px-2 2xl:py-4 3xl:static 3xl:p-4",
           {
             "2xl:w-14 3xl:w-64": !isExpanded,
             "2xl:w-64": isExpanded,
@@ -111,9 +112,9 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           </AnimatePresence>
         </div>
 
-        <NavigationGlobalSearch ref={searchInputRef} containerClassName="hidden 3xl:block" />
+        <NavigationGlobalSearch ref={searchInputRef} containerClassName="hidden 3xl:block mb-3" />
 
-        <Separator className="sr-only bg-primary-200 2xl:not-sr-only 2xl:h-px" />
+        <Separator className="sr-only bg-neutral-200 2xl:not-sr-only 2xl:h-px" />
         <nav
           className={cn("2xl:flex 2xl:h-full 2xl:flex-col 2xl:justify-between", {
             "flex h-[calc(100dvh-4rem)] flex-col justify-between gap-y-3 bg-primary-50 px-4 pb-4 pt-7 2xl:bg-transparent 2xl:p-0":
@@ -121,12 +122,29 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
             "sr-only 2xl:not-sr-only": !isMobileNavOpen,
           })}
         >
-          <NavigationMenu
-            menuItems={menuItems}
-            role={role}
-            setIsMobileNavOpen={setIsMobileNavOpen}
-            showLabelsOn2xl={labelsVisible}
-          />
+          <div className="flex flex-col gap-y-3">
+            {menuItems.map((group) => {
+              const { restrictedRoles } = group;
+
+              if (restrictedRoles && !restrictedRoles.includes(role as UserRole)) return null;
+
+              return (
+                <Fragment key={group.title}>
+                  <NavigationMenu
+                    menuItems={group.items as unknown as LeafMenuItem[]}
+                    role={role}
+                    setIsMobileNavOpen={setIsMobileNavOpen}
+                    showLabelsOn2xl={labelsVisible}
+                    isExpandable={group.isExpandable}
+                    expandableLabel={group.title}
+                    expandableIcon={group.icon}
+                  />
+                  <Separator className="bg-neutral-200 2xl:h-px" />
+                </Fragment>
+              );
+            })}
+          </div>
+
           <NavigationFooter
             setIsMobileNavOpen={setIsMobileNavOpen}
             showLabelsOn2xl={labelsVisible}

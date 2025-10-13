@@ -12,7 +12,7 @@ export class AuthFixture {
     this.emailInput = page.getByLabel("email");
     this.passwordInput = page.locator('input[type="password"]');
     this.loginButton = page.getByRole("button", { name: /login/i });
-    this.logoutButton = page.getByRole("button", { name: /logout/i }).nth(1);
+    this.logoutButton = page.getByRole("menuitem", { name: /logout/i }).locator("div");
   }
 
   async login(email: string, password: string) {
@@ -25,6 +25,7 @@ export class AuthFixture {
   }
 
   async logout() {
+    await this.page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
     await this.logoutButton.click();
     await this.page.waitForURL("/auth/login");
     await expect(this.page).toHaveURL("/auth/login");

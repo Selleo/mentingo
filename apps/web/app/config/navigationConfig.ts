@@ -1,6 +1,6 @@
 import { routeAccessConfig } from "./routeAccessConfig";
+import { USER_ROLE, type UserRole } from "./userRoles";
 
-import type { UserRole } from "./userRoles";
 import type i18next from "i18next";
 import type { IconName } from "~/types/shared";
 
@@ -22,55 +22,68 @@ export type NavigationItem = {
   iconName: IconName;
 };
 
-export const getNavigationConfig = (
-  userId: string,
-  isUser = true,
-  t: typeof i18next.t,
-): NavigationItem[] => [
+export type NavigationGroups = {
+  title: string;
+  icon?: IconName;
+  isExpandable?: boolean;
+  restrictedRoles?: UserRole[];
+  items: NavigationItem[];
+};
+
+export const getNavigationConfig = (isUser = true, t: typeof i18next.t): NavigationGroups[] => [
   {
-    label: t("navigationSideBar.dashboard"),
-    path: "",
-    iconName: "Dashboard",
+    title: t("navigationSideBar.courses"),
+    isExpandable: false,
+    items: [
+      {
+        label: t("navigationSideBar.dashboard"),
+        path: "",
+        iconName: "Dashboard",
+      },
+      {
+        label: t("navigationSideBar.myCourses"),
+        path: "admin/courses",
+        iconName: "Course",
+      },
+      {
+        label: isUser ? t("navigationSideBar.courses") : t("navigationSideBar.browseCourses"),
+        path: "courses",
+        iconName: isUser ? "Course" : "Multi",
+      },
+    ],
   },
   {
-    label: t("navigationSideBar.myCourses"),
-    path: "admin/courses",
-    iconName: "Course",
-  },
-  {
-    label: isUser ? t("navigationSideBar.courses") : t("navigationSideBar.browseCourses"),
-    path: "courses",
-    iconName: isUser ? "Course" : "Multi",
-  },
-  {
-    label: t("navigationSideBar.categories"),
-    path: "admin/categories",
-    iconName: "Category",
-  },
-  {
-    label: t("navigationSideBar.users"),
-    path: "admin/users",
-    iconName: "Hat",
-  },
-  {
-    label: t("navigationSideBar.groups"),
-    path: "admin/groups",
-    iconName: "Share",
-  },
-  {
-    label: t("navigationSideBar.profile"),
-    path: `profile/${userId}`,
-    iconName: "User",
-  },
-  {
-    label: t("navigationSideBar.announcements"),
-    path: `announcements`,
-    iconName: "Megaphone",
-  },
-  {
-    label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
-    path: "admin/promotion-codes",
-    iconName: "HandCoins",
+    title: t("navigationSideBar.manage"),
+    icon: "Manage",
+    isExpandable: true,
+    restrictedRoles: [USER_ROLE.admin],
+    items: [
+      {
+        label: t("navigationSideBar.announcements"),
+        path: `announcements`,
+        iconName: "Bell",
+      },
+      {
+        label: t("navigationSideBar.users"),
+        path: "admin/users",
+        iconName: "Hat",
+      },
+      {
+        label: t("navigationSideBar.groups"),
+        path: "admin/groups",
+        iconName: "Share",
+      },
+      {
+        label: t("navigationSideBar.categories"),
+        path: "admin/categories",
+        iconName: "Category",
+      },
+      {
+        label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
+        path: "admin/promotion-codes",
+        iconName: "HandCoins",
+      },
+    ],
   },
 ];
 
@@ -138,7 +151,7 @@ export const findMatchingRoute = (path: string) => {
   return undefined;
 };
 
-export const mapNavigationItems = (items: NavigationItem[]) => {
+const mapMenuItemsWithRolesAndLink = (items: NavigationItem[]) => {
   return items.map((item) => {
     const roles = findMatchingRoute(item.path);
 
@@ -146,6 +159,15 @@ export const mapNavigationItems = (items: NavigationItem[]) => {
       ...item,
       link: `/${item.path}`,
       roles,
+    };
+  });
+};
+
+export const mapNavigationItems = (groups: NavigationGroups[]) => {
+  return groups.map((group) => {
+    return {
+      ...group,
+      items: mapMenuItemsWithRolesAndLink(group.items),
     };
   });
 };
