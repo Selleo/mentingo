@@ -13,7 +13,18 @@ import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 
+import type { ParentRouteData } from "../layout";
+import type { MetaFunction } from "@remix-run/react";
 import type { ForgotPasswordBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Password Recovery` : "Password Recovery";
+
+  return [{ title }];
+};
 
 const passwordRecoverySchema = (t: (key: string) => string) =>
   z.object({

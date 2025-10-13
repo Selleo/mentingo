@@ -1,5 +1,6 @@
 const DEFAULT_COMPANY_INFORMATION = {
   companyName: "",
+  companyShortName: "",
   registeredAddress: "",
   taxNumber: "",
   emailAddress: "",

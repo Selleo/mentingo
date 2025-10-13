@@ -13,9 +13,20 @@ import Loader from "~/modules/common/Loader/Loader";
 
 import { CategoryDetails } from "./CategoryDetails";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { UpdateCategoryBody } from "~/api/generated-api";
+import type { ParentRouteData } from "~/modules/layout";
 
 const displayedFields: Array<keyof UpdateCategoryBody> = ["title", "archived"];
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Category details` : "Category details";
+
+  return [{ title }];
+};
 
 const Category = () => {
   const { id = "" } = useParams();

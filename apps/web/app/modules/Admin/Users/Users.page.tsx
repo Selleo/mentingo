@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
 import {
   type ColumnDef,
   flexRender,
@@ -47,10 +47,20 @@ import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal
 
 import type { GetUsersResponse } from "~/api/generated-api";
 import type { UserRole } from "~/config/userRoles";
+import type { ParentRouteData } from "~/modules/layout";
 
 type TUser = GetUsersResponse["data"][number];
 
 type ModalTypes = "group" | "role" | "delete" | "archive" | null;
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Users` : "Users";
+
+  return [{ title }];
+};
 
 export const clientLoader = async () => {
   queryClient.prefetchQuery(usersQueryOptions());

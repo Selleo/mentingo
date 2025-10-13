@@ -19,7 +19,18 @@ import { cn } from "~/lib/utils";
 
 import { SocialLogin } from "./components";
 
+import type { ParentRouteData } from "../layout";
+import type { MetaFunction } from "@remix-run/react";
 import type { LoginBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Login` : "Login";
+
+  return [{ title }];
+};
 
 const loginSchema = (t: (key: string) => string) =>
   z.object({

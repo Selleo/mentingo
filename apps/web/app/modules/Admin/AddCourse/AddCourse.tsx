@@ -30,6 +30,18 @@ import Breadcrumb from "./components/Breadcrumb";
 import { MAX_COURSE_DESCRIPTION_HTML_LENGTH, MAX_COURSE_DESCRIPTION_LENGTH } from "./constants";
 import { useAddCourseForm } from "./hooks/useAddCourseForm";
 
+import type { MetaFunction } from "@remix-run/react";
+import type { ParentRouteData } from "~/modules/layout";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Create new course` : "Create new course";
+
+  return [{ title }];
+};
+
 const AddCourse = () => {
   const { form, onSubmit } = useAddCourseForm();
   const { form: createCategoryForm, onSubmit: createCategoryOnSubmit } = useCreateCategoryForm(

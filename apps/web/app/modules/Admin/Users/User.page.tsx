@@ -14,7 +14,18 @@ import Loader from "~/modules/common/Loader/Loader";
 
 import { UserInfo } from "./components/UserInfo";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { UpdateUserBody } from "~/api/generated-api";
+import type { ParentRouteData } from "~/modules/layout";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - User details` : "User details";
+
+  return [{ title }];
+};
 
 const displayedFields: Array<keyof UpdateUserBody> = [
   "firstName",

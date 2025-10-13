@@ -395,6 +395,8 @@ export interface GetPublicGlobalSettingsResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -480,6 +482,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -502,6 +506,8 @@ export interface UpdateEnforceSSOResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -542,6 +548,8 @@ export interface UpdateColorSchemaResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -572,6 +580,8 @@ export interface GetLoginBackgroundResponse {
 export interface GetCompanyInformationResponse {
   data: {
     companyName?: string;
+    /** @maxLength 10 */
+    companyShortName?: string;
     registeredAddress?: string;
     taxNumber?: string;
     emailAddress?: string;
@@ -581,6 +591,8 @@ export interface GetCompanyInformationResponse {
 
 export interface UpdateCompanyInformationBody {
   companyName?: string;
+  /** @maxLength 10 */
+  companyShortName?: string;
   registeredAddress?: string;
   taxNumber?: string;
   emailAddress?: string;
@@ -590,6 +602,8 @@ export interface UpdateCompanyInformationBody {
 export interface UpdateCompanyInformationResponse {
   data: {
     companyName?: string;
+    /** @maxLength 10 */
+    companyShortName?: string;
     registeredAddress?: string;
     taxNumber?: string;
     emailAddress?: string;

@@ -12,7 +12,20 @@ import { CreateAnnouncementForm } from "./components";
 import { getAnnouncementsPageBreadcrumbs } from "./components/getAnnouncementsBreadcrumbs";
 import { createAnnouncementSchema } from "./schemas/createAnnouncement.schema";
 
+import type { ParentRouteData } from "../layout";
+import type { MetaFunction } from "@remix-run/react";
 import type { CreateAnnouncementBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName
+    ? `${companyShortName} - Create Announcement`
+    : "Create Announcement";
+
+  return [{ title }];
+};
 
 export default function AnnouncementsPage() {
   const { t } = useTranslation();

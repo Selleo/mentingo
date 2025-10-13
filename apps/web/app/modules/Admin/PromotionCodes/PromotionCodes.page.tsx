@@ -19,8 +19,18 @@ import { formatPrice } from "~/lib/formatters/priceFormatter";
 import { useGetPromotionCodeStatus } from "./hooks/useGetPromotionCodes";
 
 import type { TPromotionCode } from "./types";
-import type { ClientLoaderFunctionArgs } from "@remix-run/react";
+import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 import type { CurrencyCode } from "~/lib/formatters/priceFormatter";
+import type { ParentRouteData } from "~/modules/layout";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Promotion codes` : "Promotion codes";
+
+  return [{ title }];
+};
 
 export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
   try {

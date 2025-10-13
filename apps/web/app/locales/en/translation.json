@@ -169,6 +169,7 @@
     "description": "Information about your company that will be visible to users",
     "editTitle": "Edit Provider Information",
     "companyName": "Company Name",
+    "companyShortName": "Company Short Name",
     "registeredAddress": "Registered Address",
     "taxNumber": "Tax Number (NIP)",
     "emailAddress": "Email Address",

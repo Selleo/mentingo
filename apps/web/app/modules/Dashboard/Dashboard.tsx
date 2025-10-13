@@ -13,8 +13,20 @@ import Loader from "../common/Loader/Loader";
 
 import { LatestAnnouncementsPopup } from "./components";
 
+import type { ParentRouteData } from "../layout";
+import type { MetaFunction } from "@remix-run/react";
+
 type DashboardProps = {
   isAuthenticated: boolean;
+};
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Dashboard` : "Dashboard";
+
+  return [{ title }];
 };
 
 export const Dashboard = ({ isAuthenticated }: DashboardProps) => {

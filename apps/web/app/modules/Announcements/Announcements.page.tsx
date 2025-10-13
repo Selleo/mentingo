@@ -10,6 +10,18 @@ import { cn } from "~/lib/utils";
 import { AdminAnnouncements, UserAnnouncements } from "./components";
 import { getAnnouncementsPageBreadcrumbs } from "./components/getAnnouncementsBreadcrumbs";
 
+import type { ParentRouteData } from "../layout";
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Announcements` : "Announcements";
+
+  return [{ title }];
+};
+
 export default function AnnouncementsPage() {
   const { t } = useTranslation();
 

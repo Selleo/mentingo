@@ -35,8 +35,19 @@ import {
 import { cn } from "~/lib/utils";
 import { useGroupTable } from "~/modules/Admin/Groups/hooks/useGroupTable";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { SortingState, RowSelectionState } from "@tanstack/react-table";
 import type { ReactElement, FormEvent } from "react";
+import type { ParentRouteData } from "~/modules/layout";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Groups` : "Groups";
+
+  return [{ title }];
+};
 
 const Groups = (): ReactElement => {
   const { t } = useTranslation();

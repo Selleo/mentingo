@@ -57,11 +57,21 @@ import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 
 import { getCourseBadgeVariant, getCourseStatus } from "./utils";
 
-import type { ClientLoaderFunctionArgs } from "@remix-run/react";
+import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
 import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
+import type { ParentRouteData } from "~/modules/layout";
 
 type TCourse = GetAllCoursesResponse["data"][number];
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Courses` : "Courses";
+
+  return [{ title }];
+};
 
 export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
   try {

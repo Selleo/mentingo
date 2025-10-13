@@ -8,6 +8,7 @@ import type { Static } from "@sinclair/typebox";
 
 export const companyInformationJSONSchema = Type.Object({
   companyName: Type.Optional(Type.String()),
+  companyShortName: Type.Optional(Type.String({ maxLength: 10 })),
   registeredAddress: Type.Optional(Type.String()),
   taxNumber: Type.Optional(Type.String()),
   emailAddress: Type.Optional(Type.String()),

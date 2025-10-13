@@ -14,7 +14,18 @@ import {
   RatesChart,
 } from "./components";
 
+import type { ParentRouteData } from "../../layout";
+import type { MetaFunction } from "@remix-run/react";
 import type { ChartConfig } from "~/components/ui/chart";
+
+export const meta: MetaFunction = ({ matches }) => {
+  const parentMatch = matches.find((match) => match.id.includes("layout"));
+  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
+    ?.companyShortName;
+  const title = companyShortName ? `${companyShortName} - Dashboard` : "Dashboard";
+
+  return [{ title }];
+};
 
 export default function ClientStatistics() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();

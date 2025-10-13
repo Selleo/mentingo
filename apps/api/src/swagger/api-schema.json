@@ -5985,6 +5985,10 @@
                   "companyName": {
                     "type": "string"
                   },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
                   "registeredAddress": {
                     "type": "string"
                   },
@@ -6380,6 +6384,10 @@
                   "companyName": {
                     "type": "string"
                   },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
                   "registeredAddress": {
                     "type": "string"
                   },
@@ -6521,6 +6529,10 @@
                 "type": "object",
                 "properties": {
                   "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
                     "type": "string"
                   },
                   "registeredAddress": {
@@ -6727,6 +6739,10 @@
                   "companyName": {
                     "type": "string"
                   },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
                   "registeredAddress": {
                     "type": "string"
                   },
@@ -6903,6 +6919,10 @@
               "companyName": {
                 "type": "string"
               },
+              "companyShortName": {
+                "maxLength": 10,
+                "type": "string"
+              },
               "registeredAddress": {
                 "type": "string"
               },
@@ -6928,6 +6948,10 @@
           "companyName": {
             "type": "string"
           },
+          "companyShortName": {
+            "maxLength": 10,
+            "type": "string"
+          },
           "registeredAddress": {
             "type": "string"
           },
@@ -6949,6 +6973,10 @@
             "type": "object",
             "properties": {
               "companyName": {
+                "type": "string"
+              },
+              "companyShortName": {
+                "maxLength": 10,
                 "type": "string"
               },
               "registeredAddress": {
