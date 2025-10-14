@@ -1,3 +1,4 @@
+import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
@@ -49,14 +50,17 @@ export class PromptService {
       });
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
+    const contextInfo = content + history[history.length - 1].content;
 
-    const context = await this.ragService.getContext(
-      content + history[history.length - 1].content,
-      lessonId,
-    );
+    const { chunks: context } = await observe(
+      async () => {
+        return this.ragService.getContext(contextInfo, lessonId);
+      },
+      { name: "RAG", asType: "retriever" },
+    )();
 
     history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, content });
-    history.push(...context);
+    history.push(...context.map(({ role, content }) => ({ id: "", role, content })));
 
     return history;
   }

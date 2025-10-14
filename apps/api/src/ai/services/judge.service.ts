@@ -36,6 +36,7 @@ export class JudgeService {
     const system = SYSTEM_PROMPT_FOR_JUDGE(mentorLesson, messages.userLanguage);
 
     const judged = await this.chatService.judge(system, content);
+
     const { status } = await this.aiRepository.updateThread(data.threadId, {
       status: THREAD_STATUS.COMPLETED,
     });

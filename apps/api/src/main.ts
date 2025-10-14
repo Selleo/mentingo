@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as Sentry from "@sentry/node";
@@ -6,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { patchNestJsSwagger, applyFormats } from "nestjs-typebox";
 
 import { AppModule } from "./app.module";
+import { startInstrumentation } from "./langfuse/instrumentation";
 import { environmentValidation } from "./utils/environment-validation";
 import { exportSchemaToFile } from "./utils/save-swagger-to-file";
 import { setupValidation } from "./utils/setup-validation";
@@ -14,6 +16,7 @@ patchNestJsSwagger();
 applyFormats();
 
 async function bootstrap() {
+  startInstrumentation();
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     integrations: [nodeProfilingIntegration()],
