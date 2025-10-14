@@ -9,16 +9,12 @@ env:
   CORS_ORIGIN: ""
   EMAIL_ADAPTER: "mailhog"
   DATABASE_URL: ""
-  REDIS_URL: ""
+  REDIS_URL: "redis://redis:6379"
   SMTP_HOST: ""
   SMTP_PORT: "1025"
   SMTP_USER: ""
   SMTP_PASSWORD: ""
-  AWS_REGION: "us-east-1"
-  AWS_ACCESS_KEY_ID: "test"
-  AWS_SECRET_ACCESS_KEY: "test"
-  AWS_BUCKET_NAME: "test-bucket"
-  AWS_ENDPOINT_URL: "http://localhost:4566"
+
   SES_EMAIL: "noreply@lms.selleo.app"
   STRIPE_SECRET_KEY: "test_secret"
   STRIPE_PUBLISHABLE_KEY: "test_secret"
@@ -26,7 +22,31 @@ env:
   GOOGLE_OAUTH_ENABLED: "false"
   MICROSOFT_OAUTH_ENABLED: "false"
   SLACK_OAUTH_ENABLED: "false"
-  MASTER_KEY: "+iFu6dFP3uc8WFAB22Ebhh9GJjnmrv/bLxOv3L/n3zw="
+  MASTER_KEY: "+iFu6dFP3uc8WFAB22Ebhh9GJjnmrv/bLxOv3L/n3zw=" # openssl rand --base64 32
+  LANGFUSE_POSTGRES_USER: "langfuse_user"
+  LANGFUSE_POSTGRES_DB: "langfuse_db"
+  LANGFUSE_POSTGRES_PASSWORD: "lf_strong_pass"
+
+  LANGFUSE_CLICKHOUSE_USER: "clickhouse"
+  LANGFUSE_CLICKHOUSE_PASSWORD: "lf_strong_pass"
+
+  LANGFUSE_S3_MEDIA_PREFIX: "media/"
+  LANGFUSE_S3_EVENT_PREFIX: "events/"
+
+  LANGFUSE_NEXTAUTH_URL: "http://localhost:3001"
+  LANGFUSE_NEXTAUTH_SECRET: "087191cb93797cbd14ad2703c13cbd3ecf84d80bc832c268e23bef1f23a50a8e" #  openssl rand --hex 32
+  LANGFUSE_DATABASE_URL: "postgresql://postgres:guidebook@project-db:5432/langfuse_db"
+  LANGFUSE_SALT: "b4fa2282c1f0f8f7" # openssl rand --hex 8
+  LANGFUSE_ENCRYPTION_KEY: "73fedae7fbc4c7d1f47fcbee15b95f73d3e9766eda05a5c630e73232786a6127" # openssl rand --hex 32
+  LANGFUSE_CLICKHOUSE_MIGRATION_URL: "clickhouse://langfuse_clickhouse_user:lf_strong_pass@clickhouse:9000"
+  CLICKHOUSE_URL: "http://clickhouse:8123"
+  AWS_REGION: "us-east-1"
+  AWS_ACCESS_KEY_ID: "test"
+  AWS_SECRET_ACCESS_KEY: "test"
+  AWS_BUCKET_NAME: "test-bucket"
+  AWS_ENDPOINT_URL: "http://localhost:4566"
+  CLICKHOUSE_CLUSTER_ENABLED: "false"
+
   PUPPETEER_EXECUTABLE_PATH: "/usr/bin/google-chrome"
 
 on:
@@ -117,14 +137,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
 
-      - name: Start containers
-        run: docker compose -f "docker-compose.yml" up -d --build
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.9.0
-          cache: pnpm
-
       - name: Install and Start LocalStack
         uses: LocalStack/setup-localstack@v0.2.3
         with:
@@ -151,19 +163,19 @@ jobs:
             echo "Waiting for LocalStack... (attempt $attempt/$max_attempts, waiting ${wait_time}s)"
             sleep $wait_time
           done
-          
+
           if [ $attempt -eq $max_attempts ]; then
             echo "LocalStack failed to start after $max_attempts attempts"
             curl -v http://localhost:4566/_localstack/health || true
             exit 1
           fi
-          
+
           echo "Creating S3 bucket..."
           if ! awslocal s3 mb s3://test-bucket; then
             echo "Failed to create S3 bucket"
             exit 1
           fi
-          
+
           echo "Configuring bucket CORS..."
           awslocal s3api put-bucket-cors --bucket test-bucket --cors-configuration '{
             "CORSRules": [{
@@ -172,8 +184,16 @@ jobs:
               "AllowedHeaders": ["*"]
             }]
           }' || echo "Warning: Failed to set CORS configuration"
-          
+
           echo "S3 setup completed successfully!"
+
+      - name: Start containers
+        run: docker compose -f "docker-compose.yml" up -d --build
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.9.0
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install
