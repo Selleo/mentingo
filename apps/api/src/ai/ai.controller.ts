@@ -67,7 +67,6 @@ export class AiController {
     @Res() res: Response,
   ) {
     const response = await this.aiService.streamMessage(data, OPENAI_MODELS.BASIC, userId);
-
     return response.pipeDataStreamToResponse(res);
   }
 

@@ -1,3 +1,4 @@
+import { observe } from "@langfuse/tracing";
 import { Injectable } from "@nestjs/common";
 
 import { THRESHOLD } from "src/ai/ai.constants";
@@ -23,7 +24,12 @@ export class SummaryService {
     const tokens = await this.aiRepository.getTokenSumForThread(threadId, false);
 
     if (Number(tokens) > THRESHOLD) {
-      await this.summarize(threadId);
+      return observe(
+        async () => {
+          return await this.summarize(threadId);
+        },
+        { name: "Summary", asType: "generation" },
+      )();
     }
   }
 
@@ -57,6 +63,7 @@ export class SummaryService {
       .join("\n");
 
     const summaryPrompt = SUMMARY_PROMPT(mappedHistory, userLanguage);
+
     const summarized = await this.chatService.generatePrompt(summaryPrompt, OPENAI_MODELS.BASIC);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, summarized);
 

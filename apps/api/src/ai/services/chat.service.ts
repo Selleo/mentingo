@@ -1,3 +1,4 @@
+import { observe, updateActiveObservation } from "@langfuse/tracing";
 import { Injectable } from "@nestjs/common";
 import { generateObject, generateText, jsonSchema } from "ai";
 
@@ -14,40 +15,63 @@ import { OPENAI_MODELS, type OpenAIModels } from "src/ai/utils/ai.type";
 export class ChatService {
   constructor(private readonly promptService: PromptService) {}
   async generatePrompt(prompt: string, model: OpenAIModels = OPENAI_MODELS.BASIC): Promise<string> {
-    await this.promptService.isNotEmpty(prompt);
-    const provider = await this.promptService.getOpenAI();
-    try {
-      const { text } = await generateText({
-        model: provider(model),
-        prompt: prompt,
-        maxTokens: MAX_TOKENS,
-      });
-      return text;
-    } catch (error) {
-      throw new Error(
-        `Failed to generate message: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
-    }
+    return observe(
+      async () => {
+        await this.promptService.isNotEmpty(prompt);
+        const provider = await this.promptService.getOpenAI();
+
+        try {
+          const { text } = await generateText({
+            model: provider(model),
+            prompt: prompt,
+            maxTokens: MAX_TOKENS,
+            experimental_telemetry: { isEnabled: true },
+          });
+
+          return text;
+        } catch (error) {
+          throw new Error(
+            `Failed to generate message: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          );
+        }
+      },
+      { name: "Generate Prompt", asType: "generation" },
+    )();
   }
 
   async judge(system: string, prompt: string) {
-    await this.promptService.isNotEmpty(prompt);
-    const provider = await this.promptService.getOpenAI();
-    try {
-      const result = await generateObject({
-        model: provider(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
-        schema: jsonSchema({ ...aiJudgeJudgementSchema, additionalProperties: false }),
-        temperature: 0.5,
-        topK: 10,
-        topP: 0.9,
-        system,
-        prompt,
-      });
+    return observe(
+      async () => {
+        await this.promptService.isNotEmpty(prompt);
+        const provider = await this.promptService.getOpenAI();
+        try {
+          const result = await generateObject({
+            model: provider(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
+            schema: jsonSchema({ ...aiJudgeJudgementSchema, additionalProperties: false }),
+            temperature: 0.5,
+            topK: 10,
+            topP: 0.9,
+            system,
+            prompt,
+            experimental_telemetry: { isEnabled: true },
+          });
 
-      return await this.evaluate(result.object as AiJudgeJudgementBody);
-    } catch (error) {
-      throw new Error(`Failed to generate result ${error}`);
-    }
+          const judged = this.evaluate(result.object as AiJudgeJudgementBody);
+          updateActiveObservation({ input: { system, prompt }, output: judged });
+
+          return judged;
+        } catch (error) {
+          updateActiveObservation({
+            level: "ERROR",
+            statusMessage: error.message,
+          });
+          throw new Error(`Failed to generate result ${error}`);
+        }
+      },
+      { name: "Generate Evaluation", asType: "generation" },
+    )();
   }
 
   private async evaluate(result: AiJudgeJudgementBody): Promise<ResponseAiJudgeJudgementBody> {
