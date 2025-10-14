@@ -1174,6 +1174,49 @@
         }
       }
     },
+    "/api/settings/platform-simple-logo": {
+      "get": {
+        "operationId": "SettingsController_getPlatformSimpleLogo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformSimpleLogoResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "SettingsController_updatePlatformSimpleLogo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "logo": {
+                    "type": "string",
+                    "format": "binary",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/settings/login-background": {
       "get": {
         "operationId": "SettingsController_getLoginBackground",
@@ -5975,6 +6018,16 @@
                   }
                 ]
               },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6044,6 +6097,7 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6374,6 +6428,16 @@
                   }
                 ]
               },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6443,6 +6507,7 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6521,6 +6586,16 @@
                   }
                 ]
               },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6590,6 +6665,7 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6729,6 +6805,16 @@
                   }
                 ]
               },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "MFAEnforcedRoles": {
                 "type": "array",
                 "items": {
@@ -6798,6 +6884,7 @@
               "certificateBackgroundImage",
               "platformLogoS3Key",
               "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
@@ -6811,6 +6898,32 @@
         ]
       },
       "GetPlatformLogoResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformSimpleLogoResponse": {
         "type": "object",
         "properties": {
           "data": {

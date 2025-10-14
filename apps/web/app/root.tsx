@@ -8,9 +8,8 @@ import {
   useRouteError,
 } from "@remix-run/react";
 
-import faviconHref from "~/assets/favicon.ico";
-import { Toaster } from "~/components/ui/toaster";
-
+import { PlatformFavicon } from "./components/PlatformFavicon";
+import { Toaster } from "./components/ui/toaster";
 import "./index.css";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
 import { Providers } from "./modules/Global/Providers";
@@ -19,7 +18,11 @@ import { ThemeWrapper } from "./modules/Global/ThemeWrapper";
 import type { LinksFunction } from "@remix-run/node";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "icon", href: faviconHref, type: "image/x-icon" }];
+  return [
+    { rel: "icon", href: "/app-signet.svg", type: "image/svg+xml" },
+    { rel: "shortcut icon", href: "/app-signet.svg", type: "image/svg+xml" },
+    { rel: "apple-touch-icon", href: "/app-signet.svg" },
+  ];
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -53,6 +56,7 @@ export default function Root() {
   return (
     <Providers>
       <ThemeWrapper>
+        <PlatformFavicon />
         <Outlet />
       </ThemeWrapper>
     </Providers>

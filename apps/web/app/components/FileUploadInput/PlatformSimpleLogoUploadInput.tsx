@@ -4,7 +4,7 @@ import { cn } from "~/lib/utils";
 
 import { Icon } from "../Icon";
 
-interface PlatformLogoUploadProps {
+interface PlatformSimpleLogoUploadProps {
   field: { value?: string };
   handleImageUpload: (file: File) => void;
   isUploading: boolean;
@@ -12,13 +12,13 @@ interface PlatformLogoUploadProps {
   fileInputRef?: React.RefObject<HTMLInputElement>;
 }
 
-const PlatformLogoUploadInput = ({
+const PlatformSimpleLogoUploadInput = ({
   field,
   handleImageUpload,
   isUploading,
   imageUrl,
   fileInputRef,
-}: PlatformLogoUploadProps) => {
+}: PlatformSimpleLogoUploadProps) => {
   const { t } = useTranslation();
 
   return (
@@ -27,7 +27,7 @@ const PlatformLogoUploadInput = ({
         {imageUrl && (
           <img
             src={imageUrl || field.value}
-            alt="Platform Logo"
+            alt="Platform Simple Logo"
             className="size-full object-contain p-4"
           />
         )}
@@ -55,7 +55,7 @@ const PlatformLogoUploadInput = ({
           </div>
         </div>
         <input
-          id="platform-logo"
+          id="simple-logo"
           ref={fileInputRef}
           type="file"
           accept=".png, .svg"
@@ -73,4 +73,4 @@ const PlatformLogoUploadInput = ({
   );
 };
 
-export default PlatformLogoUploadInput;
+export default PlatformSimpleLogoUploadInput;

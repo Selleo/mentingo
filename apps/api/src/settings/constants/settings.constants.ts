@@ -14,6 +14,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   certificateBackgroundImage: null,
   platformLogoS3Key: null,
   loginBackgroundImageS3Key: null,
+  platformSimpleLogoS3Key: null,
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
   inviteOnlyRegistration: false,
