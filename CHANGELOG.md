@@ -1,6 +1,20 @@
+<a name="v3.13.0"></a>
+
+## [v3.13.0] - 14.10.2025
+
+### Chores:
+
+- update create user tokens to expire after a year ([#789](https://github.com/Selleo/mentingo/issues/789))
+
+- extend iframe load time to 30 secs ([#792](https://github.com/Selleo/mentingo/issues/792))
+
 <a name="v3.12.0"></a>
 
 ## [v3.12.0] - 13.10.2025
+
+### Documentation:
+
+- update changelog for version v3.12.0
 
 ### Styles:
 
@@ -1642,7 +1656,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.12.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.13.0...HEAD
+[v3.13.0]: https://github.com/Selleo/mentingo/compare/v3.12.0...v3.13.0
 [v3.12.0]: https://github.com/Selleo/mentingo/compare/v3.11.0...v3.12.0
 [v3.11.0]: https://github.com/Selleo/mentingo/compare/v3.10.0...v3.11.0
 [v3.10.0]: https://github.com/Selleo/mentingo/compare/v3.8.2...v3.10.0
