@@ -40,7 +40,9 @@ export default function CourseViewPage() {
     { title: course.title, href: `/course/${id}` },
   ];
 
-  const backButton = { title: t("studentCourseView.breadcrumbs.back"), href: "/courses" };
+  const backButton = {
+    title: t("studentCourseView.breadcrumbs.back"),
+  };
 
   const canShowCertificate =
     course?.hasCertificate && certificate !== undefined && certificate.length > 0;

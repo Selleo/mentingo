@@ -20,7 +20,7 @@ type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   className?: string;
 };
 
-type BackButton = { href: string; title: string };
+type BackButton = { href?: string; title: string };
 
 type Breadcrumb = { title: string; href: string };
 
@@ -43,7 +43,7 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
           <BreadcrumbLink className="body-base-md cursor-pointer text-primary-800">
             <Button
               variant="outline"
-              onClick={() => navigate(backButton.href)}
+              onClick={() => (backButton.href ? navigate(backButton.href) : navigate(-1))}
               className="h-min w-auto text-sm"
             >
               <Icon name="ChevronLeft" className="mr-2 size-3" />
