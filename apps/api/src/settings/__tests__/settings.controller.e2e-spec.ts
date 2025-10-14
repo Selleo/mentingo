@@ -351,7 +351,7 @@ describe("SettingsController (e2e)", () => {
       });
     });
 
-    describe("PATCH /api/settings/admin/primary-color", () => {
+    describe("PATCH /api/settings/admin/color-schema", () => {
       let adminUser: UserWithCredentials;
       let adminCookies: string;
 
@@ -371,32 +371,36 @@ describe("SettingsController (e2e)", () => {
         await truncateTables(db, ["settings"]);
       });
 
-      it("should update the global primary color setting (as Admin)", async () => {
-        const newColor = "#123456";
+      it("should update the global color schema setting (as Admin)", async () => {
+        const primaryColor = "#123456";
+        const contrastColor = "#654321";
 
         const response = await request(app.getHttpServer())
-          .patch("/api/settings/admin/primary-color")
+          .patch("/api/settings/admin/color-schema")
           .set("Cookie", adminCookies)
-          .send({ primaryColor: newColor })
+          .send({ primaryColor, contrastColor })
           .expect(200);
 
-        expect(response.body.data.primaryColor).toBe(newColor);
+        expect(response.body.data.primaryColor).toBe(primaryColor);
+        expect(response.body.data.contrastColor).toBe(contrastColor);
 
         const updatedGlobalSettings = await db.query.settings.findFirst({
           where: (s, { isNull }) => isNull(s.userId),
         });
 
         const globalSettings = updatedGlobalSettings?.settings as GlobalSettings;
-        expect(globalSettings?.primaryColor).toBe(newColor);
+        expect(globalSettings?.primaryColor).toBe(primaryColor);
+        expect(globalSettings?.contrastColor).toBe(contrastColor);
       });
 
       it("should return 400 if invalid color format is provided", async () => {
         const invalidColor = "123456";
+        const contrastColor = "#654321";
 
         const response = await request(app.getHttpServer())
-          .patch("/api/settings/admin/primary-color")
+          .patch("/api/settings/admin/color-schema")
           .set("Cookie", adminCookies)
-          .send({ primaryColor: invalidColor })
+          .send({ primaryColor: invalidColor, contrastColor })
           .expect(400);
 
         expect(response.body).toEqual(
@@ -421,16 +425,16 @@ describe("SettingsController (e2e)", () => {
         const nonAdminCookies = await cookieFor(nonAdminUser, app);
 
         await request(app.getHttpServer())
-          .patch("/api/settings/admin/primary-color")
+          .patch("/api/settings/admin/color-schema")
           .set("Cookie", nonAdminCookies)
-          .send({ primaryColor: "#123456" })
+          .send({ primaryColor: "#123456", contrastColor: "#654321" })
           .expect(403);
       });
 
       it("should return 401 if not authenticated", async () => {
         await request(app.getHttpServer())
-          .patch("/api/settings/admin/primary-color")
-          .send({ primaryColor: "#123456" })
+          .patch("/api/settings/admin/color-schema")
+          .send({ primaryColor: "#123456", contrastColor: "#654321" })
           .expect(401);
       });
     });
