@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import AnnouncementCard from "./AnnouncementCard";
 
 import type { GetAnnouncementsForUserResponse } from "~/api/generated-api";
@@ -8,6 +10,8 @@ interface AnnouncementsListProps {
 }
 
 export default function AnnouncementsList({ announcements, isAdminView }: AnnouncementsListProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex w-full flex-col gap-6">
       {announcements.length ? (
@@ -19,7 +23,9 @@ export default function AnnouncementsList({ announcements, isAdminView }: Announ
           />
         ))
       ) : (
-        <div className="flex justify-center mt-8">You&apos;re up to date</div>
+        <div className="flex justify-center mt-8">
+          {t("announcements.other.noNewAnnouncements")}
+        </div>
       )}
     </div>
   );
