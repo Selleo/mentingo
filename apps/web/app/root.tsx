@@ -12,6 +12,7 @@ import faviconHref from "~/assets/favicon.ico";
 import { Toaster } from "~/components/ui/toaster";
 
 import "./index.css";
+import { useNavigationTracker } from "./hooks/useNavigationHistory";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
 import { Providers } from "./modules/Global/Providers";
 import { ThemeWrapper } from "./modules/Global/ThemeWrapper";
@@ -50,6 +51,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function Root() {
+  useNavigationTracker();
+
   return (
     <Providers>
       <ThemeWrapper>

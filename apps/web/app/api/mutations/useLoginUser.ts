@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
+import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
 
 import { ApiClient } from "../api-client";
@@ -22,6 +23,11 @@ export function useLoginUser() {
   const { toast } = useToast();
 
   const navigate = useNavigate();
+  const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
+  const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
+
+  mergeNavigationHistory();
+  const lastEntry = getLastEntry();
 
   return useMutation({
     mutationFn: async (options: LoginUserOptions) => {
@@ -37,7 +43,9 @@ export function useLoginUser() {
       queryClient.invalidateQueries(userSettingsQueryOptions);
       queryClient.invalidateQueries(mfaSetupQueryOptions);
 
-      navigate(shouldVerifyMFA ? "/auth/mfa" : LOGIN_REDIRECT_URL);
+      console.log("Redirecting to:", lastEntry?.pathname || LOGIN_REDIRECT_URL);
+
+      navigate(shouldVerifyMFA ? "/auth/mfa" : lastEntry?.pathname || LOGIN_REDIRECT_URL);
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
