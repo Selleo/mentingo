@@ -31,7 +31,7 @@ export const EmbedFrame = ({ resource, title }: EmbedFrameProps) => {
 
     const failTimeout = setTimeout(() => {
       setHasFailed(true);
-    }, 5000);
+    }, 30000); // 30 seconds
 
     return () => clearTimeout(failTimeout);
   }, [isloaded, hasFailed]);
