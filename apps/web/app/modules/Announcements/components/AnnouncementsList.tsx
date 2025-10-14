@@ -10,13 +10,17 @@ interface AnnouncementsListProps {
 export default function AnnouncementsList({ announcements, isAdminView }: AnnouncementsListProps) {
   return (
     <div className="flex w-full flex-col gap-6">
-      {announcements.map((announcement) => (
-        <AnnouncementCard
-          key={announcement.id}
-          announcement={announcement}
-          isAdminView={isAdminView}
-        />
-      ))}
+      {announcements.length ? (
+        announcements.map((announcement) => (
+          <AnnouncementCard
+            key={announcement.id}
+            announcement={announcement}
+            isAdminView={isAdminView}
+          />
+        ))
+      ) : (
+        <div className="flex justify-center mt-8">You&apos;re up to date</div>
+      )}
     </div>
   );
 }
