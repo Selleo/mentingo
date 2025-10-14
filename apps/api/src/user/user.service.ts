@@ -388,8 +388,9 @@ export class UserService {
       const [createdUser] = await trx.insert(users).values(data).returning();
 
       const token = nanoid(64);
+
       const expiryDate = new Date();
-      expiryDate.setHours(expiryDate.getHours() + 24);
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
       await trx.insert(createTokens).values({
         userId: createdUser.id,
