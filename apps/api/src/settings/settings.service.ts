@@ -49,6 +49,7 @@ export class SettingsService {
     const {
       certificateBackgroundImage,
       platformLogoS3Key,
+      platformSimpleLogoS3Key,
       loginBackgroundImageS3Key,
       ...restOfSettings
     } = parsedSettings;
@@ -61,6 +62,10 @@ export class SettingsService {
       ? await this.fileService.getFileUrl(platformLogoS3Key)
       : null;
 
+    const platformSimpleLogoUrl = platformSimpleLogoS3Key
+      ? await this.fileService.getFileUrl(platformSimpleLogoS3Key)
+      : null;
+
     const loginBackgroundSignedUrl = loginBackgroundImageS3Key
       ? await this.fileService.getFileUrl(loginBackgroundImageS3Key)
       : null;
@@ -68,6 +73,7 @@ export class SettingsService {
     return {
       ...restOfSettings,
       platformLogoS3Key: platformLogoUrl,
+      platformSimpleLogoS3Key: platformSimpleLogoUrl,
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
       certificateBackgroundImage: certificateBackgroundSignedUrl,
     };
@@ -301,13 +307,44 @@ export class SettingsService {
   public async getPlatformLogoUrl(): Promise<string | null> {
     const globalSettings = await this.getGlobalSettings();
 
-    const platformLogoS3Key = globalSettings.platformLogoS3Key;
+    return globalSettings.platformLogoS3Key;
+  }
 
-    if (!platformLogoS3Key) {
+  public async uploadPlatformSimpleLogo(
+    file: Express.Multer.File | null | undefined,
+  ): Promise<void> {
+    let newValue: string | null = null;
+    if (file) {
+      const resource = "platform-simple-logos";
+      const { fileKey } = await this.fileService.uploadFile(file, resource);
+      newValue = fileKey;
+    }
+
+    await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{platformSimpleLogoS3Key}',
+            ${newValue ? sql`to_jsonb(${newValue}::text)` : sql`'null'::jsonb`},
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId));
+  }
+
+  public async getPlatformSimpleLogoUrl(): Promise<string | null> {
+    const globalSettings = await this.getGlobalSettings();
+
+    const platformSimpleLogoS3Key = globalSettings.platformSimpleLogoS3Key;
+
+    if (!platformSimpleLogoS3Key) {
       return null;
     }
 
-    return await this.fileService.getFileUrl(platformLogoS3Key);
+    return await this.fileService.getFileUrl(platformSimpleLogoS3Key);
   }
 
   public async uploadLoginBackgroundImage(

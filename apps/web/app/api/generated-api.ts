@@ -404,6 +404,7 @@ export interface GetPublicGlobalSettingsResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -491,6 +492,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -515,6 +517,7 @@ export interface UpdateEnforceSSOResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -557,6 +560,7 @@ export interface UpdateColorSchemaResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -566,6 +570,12 @@ export interface UpdateColorSchemaResponse {
 }
 
 export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetPlatformSimpleLogoResponse {
   data: {
     url: string | null;
   };
@@ -3334,6 +3344,41 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<void, any>({
         path: `/api/settings/platform-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPlatformSimpleLogo
+     * @request GET:/api/settings/platform-simple-logo
+     */
+    settingsControllerGetPlatformSimpleLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformSimpleLogoResponse, any>({
+        path: `/api/settings/platform-simple-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformSimpleLogo
+     * @request PATCH:/api/settings/platform-simple-logo
+     */
+    settingsControllerUpdatePlatformSimpleLogo: (
+      data: {
+        /** @format binary */
+        logo?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-simple-logo`,
         method: "PATCH",
         body: data,
         type: ContentType.FormData,

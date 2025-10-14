@@ -20,11 +20,13 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 const PLATFORM_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const PLATFORM_SIMPLE_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const LOGIN_BACKGROUND_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
+import { platformSimpleLogoResponseSchema } from "./schemas/platform-simple-logo.schema";
 import {
   adminSettingsJSONContentSchema,
   companyInformationJSONSchema,
@@ -182,6 +184,42 @@ export class SettingsController {
   })
   async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File | null): Promise<void> {
     await this.settingsService.uploadPlatformLogo(logo);
+  }
+
+  @Get("platform-simple-logo")
+  @Public()
+  @Validate({
+    response: baseResponse(platformSimpleLogoResponseSchema),
+  })
+  async getPlatformSimpleLogo() {
+    const url = await this.settingsService.getPlatformSimpleLogoUrl();
+    return new BaseResponse({ url });
+  }
+
+  @Patch("platform-simple-logo")
+  @Roles(USER_ROLES.ADMIN)
+  @UseInterceptors(
+    FileInterceptor("logo", {
+      limits: {
+        fileSize: PLATFORM_SIMPLE_LOGO_MAX_SIZE_BYTES,
+      },
+    }),
+  )
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        logo: {
+          type: "string",
+          format: "binary",
+          nullable: true,
+        },
+      },
+    },
+  })
+  async updatePlatformSimpleLogo(@UploadedFile() logo: Express.Multer.File | null): Promise<void> {
+    await this.settingsService.uploadPlatformSimpleLogo(logo);
   }
 
   @Get("login-background")
