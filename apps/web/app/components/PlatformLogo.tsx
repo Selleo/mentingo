@@ -14,6 +14,10 @@ export const PlatformLogo = memo(
   ({ className, variant = "full", alt = "Platform Logo" }: PlatformLogoProps) => {
     const { data: customLogoUrl, isLoading } = usePlatformLogo();
 
+    if (isLoading) {
+      return <div className={className}></div>;
+    }
+
     if (customLogoUrl && !isLoading) {
       return (
         <img
