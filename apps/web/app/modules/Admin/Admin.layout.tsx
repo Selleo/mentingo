@@ -11,6 +11,7 @@ import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConf
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 import Loader from "../common/Loader/Loader";
 import { LatestAnnouncementsPopup } from "../Dashboard/components";
@@ -26,22 +27,7 @@ export const clientLoader = async ({ request }: { request: Request }) => {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);
 
     if (!user) {
-      const attemptedUrl = new URL(request.url);
-
-      sessionStorage.setItem(
-        "navigation-history",
-        JSON.stringify({
-          state: {
-            navigationHistory: [
-              {
-                pathname: attemptedUrl.pathname,
-                timestamp: Date.now(),
-              },
-            ],
-          },
-          version: 0,
-        }),
-      );
+      saveEntryToNavigationHistory(request);
 
       throw redirect("/auth/login");
     }

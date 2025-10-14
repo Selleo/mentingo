@@ -31,10 +31,3 @@ export function useNavigationTracker() {
     isRootRoute,
   ]);
 }
-
-export function useNavigationHistory() {
-  return useNavigationHistoryStore((state) => ({
-    history: state.navigationHistory,
-    clearHistory: state.clearHistory,
-  }));
-}

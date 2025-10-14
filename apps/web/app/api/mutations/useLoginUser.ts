@@ -26,9 +26,6 @@ export function useLoginUser() {
   const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
   const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
 
-  mergeNavigationHistory();
-  const lastEntry = getLastEntry();
-
   return useMutation({
     mutationFn: async (options: LoginUserOptions) => {
       const response = await ApiClient.api.authControllerLogin(options.data);
@@ -43,7 +40,9 @@ export function useLoginUser() {
       queryClient.invalidateQueries(userSettingsQueryOptions);
       queryClient.invalidateQueries(mfaSetupQueryOptions);
 
-      console.log("Redirecting to:", lastEntry?.pathname || LOGIN_REDIRECT_URL);
+      mergeNavigationHistory();
+
+      const lastEntry = getLastEntry();
 
       navigate(shouldVerifyMFA ? "/auth/mfa" : lastEntry?.pathname || LOGIN_REDIRECT_URL);
     },

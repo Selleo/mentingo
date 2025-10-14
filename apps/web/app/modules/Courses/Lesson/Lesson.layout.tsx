@@ -7,28 +7,14 @@ import { Navigation } from "~/components/Navigation";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 export const clientLoader = async ({ request }: { request: Request }) => {
   try {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);
 
     if (!user) {
-      const attemptedUrl = new URL(request.url);
-
-      sessionStorage.setItem(
-        "navigation-history",
-        JSON.stringify({
-          state: {
-            navigationHistory: [
-              {
-                pathname: attemptedUrl.pathname,
-                timestamp: Date.now(),
-              },
-            ],
-          },
-          version: 0,
-        }),
-      );
+      saveEntryToNavigationHistory(request);
 
       throw redirect("/auth/login");
     }

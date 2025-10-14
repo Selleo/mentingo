@@ -3,6 +3,7 @@ import { Navigate, redirect } from "@remix-run/react";
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
@@ -13,22 +14,7 @@ export const clientLoader = async ({ request }: { request: Request }) => {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);
 
     if (!user) {
-      const attemptedUrl = new URL(request.url);
-
-      sessionStorage.setItem(
-        "navigation-history",
-        JSON.stringify({
-          state: {
-            navigationHistory: [
-              {
-                pathname: attemptedUrl.pathname,
-                timestamp: Date.now(),
-              },
-            ],
-          },
-          version: 0,
-        }),
-      );
+      saveEntryToNavigationHistory(request);
 
       throw redirect("/auth/login");
     }

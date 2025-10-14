@@ -12,7 +12,7 @@ import faviconHref from "~/assets/favicon.ico";
 import { Toaster } from "~/components/ui/toaster";
 
 import "./index.css";
-import { useNavigationTracker } from "./hooks/useNavigationHistory";
+import { useNavigationTracker } from "./hooks/useNavigationTracker";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
 import { Providers } from "./modules/Global/Providers";
 import { ThemeWrapper } from "./modules/Global/ThemeWrapper";
