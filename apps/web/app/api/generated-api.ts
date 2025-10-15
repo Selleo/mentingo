@@ -480,6 +480,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -501,6 +502,7 @@ export interface UpdateEnforceSSOResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -928,6 +930,7 @@ export interface GetBetaCourseByIdResponse {
           lessonId: string;
           aiMentorInstructions: string;
           completionConditions: string;
+          type: "mentor" | "teacher" | "roleplay";
         } | null;
         updatedAt?: string;
       }[];
@@ -1131,6 +1134,7 @@ export type BetaCreateChapterBody = {
       lessonId: string;
       aiMentorInstructions: string;
       completionConditions: string;
+      type: "mentor" | "teacher" | "roleplay";
     } | null;
     updatedAt?: string;
   }[];
@@ -1206,6 +1210,7 @@ export type UpdateChapterBody = {
       lessonId: string;
       aiMentorInstructions: string;
       completionConditions: string;
+      type: "mentor" | "teacher" | "roleplay";
     } | null;
     updatedAt?: string;
   }[];
@@ -1399,6 +1404,7 @@ export type BetaCreateLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {
@@ -1461,6 +1467,7 @@ export type BetaCreateAiMentorLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {
@@ -1469,6 +1476,7 @@ export type BetaCreateAiMentorLessonBody = {
   displayOrder?: number;
   aiMentorInstructions: string;
   completionConditions: string;
+  type: "mentor" | "teacher" | "roleplay";
 };
 
 export interface BetaCreateAiMentorLessonResponse {
@@ -1525,11 +1533,13 @@ export type BetaUpdateAiMentorLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {
   aiMentorInstructions: string;
   completionConditions: string;
+  type: "mentor" | "teacher" | "roleplay";
 };
 
 export interface BetaUpdateAiMentorLessonResponse {
@@ -1699,6 +1709,7 @@ export type BetaUpdateLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {
@@ -3253,8 +3264,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerUpdatePrimaryColor
-     * @request PATCH:/api/settings/admin/primary-color
+     * @name SettingsControllerUpdateColorSchema
+     * @request PATCH:/api/settings/admin/color-schema
      */
     settingsControllerUpdateColorSchema: (
       data: UpdateColorSchemaBody,
@@ -3671,6 +3682,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
+        /** @format uuid */
         groupId?: string;
       },
       params: RequestParams = {},

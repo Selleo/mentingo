@@ -8505,13 +8505,30 @@
                                   },
                                   "completionConditions": {
                                     "type": "string"
+                                  },
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "mentor",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "teacher",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "roleplay",
+                                        "type": "string"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
                                   "id",
                                   "lessonId",
                                   "aiMentorInstructions",
-                                  "completionConditions"
+                                  "completionConditions",
+                                  "type"
                                 ]
                               },
                               {
@@ -9407,13 +9424,30 @@
                             },
                             "completionConditions": {
                               "type": "string"
+                            },
+                            "type": {
+                              "anyOf": [
+                                {
+                                  "const": "mentor",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "teacher",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "roleplay",
+                                  "type": "string"
+                                }
+                              ]
                             }
                           },
                           "required": [
                             "id",
                             "lessonId",
                             "aiMentorInstructions",
-                            "completionConditions"
+                            "completionConditions",
+                            "type"
                           ]
                         },
                         {
@@ -9775,13 +9809,30 @@
                             },
                             "completionConditions": {
                               "type": "string"
+                            },
+                            "type": {
+                              "anyOf": [
+                                {
+                                  "const": "mentor",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "teacher",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "roleplay",
+                                  "type": "string"
+                                }
+                              ]
                             }
                           },
                           "required": [
                             "id",
                             "lessonId",
                             "aiMentorInstructions",
-                            "completionConditions"
+                            "completionConditions",
+                            "type"
                           ]
                         },
                         {
@@ -10786,13 +10837,30 @@
                       },
                       "completionConditions": {
                         "type": "string"
+                      },
+                      "type": {
+                        "anyOf": [
+                          {
+                            "const": "mentor",
+                            "type": "string"
+                          },
+                          {
+                            "const": "teacher",
+                            "type": "string"
+                          },
+                          {
+                            "const": "roleplay",
+                            "type": "string"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "lessonId",
                       "aiMentorInstructions",
-                      "completionConditions"
+                      "completionConditions",
+                      "type"
                     ]
                   },
                   {
@@ -11068,13 +11136,30 @@
                       },
                       "completionConditions": {
                         "type": "string"
+                      },
+                      "type": {
+                        "anyOf": [
+                          {
+                            "const": "mentor",
+                            "type": "string"
+                          },
+                          {
+                            "const": "teacher",
+                            "type": "string"
+                          },
+                          {
+                            "const": "roleplay",
+                            "type": "string"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "lessonId",
                       "aiMentorInstructions",
-                      "completionConditions"
+                      "completionConditions",
+                      "type"
                     ]
                   },
                   {
@@ -11105,12 +11190,29 @@
               },
               "completionConditions": {
                 "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "mentor",
+                    "type": "string"
+                  },
+                  {
+                    "const": "teacher",
+                    "type": "string"
+                  },
+                  {
+                    "const": "roleplay",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
               "chapterId",
               "aiMentorInstructions",
-              "completionConditions"
+              "completionConditions",
+              "type"
             ]
           }
         ]
@@ -11357,13 +11459,30 @@
                       },
                       "completionConditions": {
                         "type": "string"
+                      },
+                      "type": {
+                        "anyOf": [
+                          {
+                            "const": "mentor",
+                            "type": "string"
+                          },
+                          {
+                            "const": "teacher",
+                            "type": "string"
+                          },
+                          {
+                            "const": "roleplay",
+                            "type": "string"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "lessonId",
                       "aiMentorInstructions",
-                      "completionConditions"
+                      "completionConditions",
+                      "type"
                     ]
                   },
                   {
@@ -11387,11 +11506,28 @@
               },
               "completionConditions": {
                 "type": "string"
+              },
+              "type": {
+                "anyOf": [
+                  {
+                    "const": "mentor",
+                    "type": "string"
+                  },
+                  {
+                    "const": "teacher",
+                    "type": "string"
+                  },
+                  {
+                    "const": "roleplay",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
               "aiMentorInstructions",
-              "completionConditions"
+              "completionConditions",
+              "type"
             ]
           }
         ]
@@ -12162,13 +12298,30 @@
                       },
                       "completionConditions": {
                         "type": "string"
+                      },
+                      "type": {
+                        "anyOf": [
+                          {
+                            "const": "mentor",
+                            "type": "string"
+                          },
+                          {
+                            "const": "teacher",
+                            "type": "string"
+                          },
+                          {
+                            "const": "roleplay",
+                            "type": "string"
+                          }
+                        ]
                       }
                     },
                     "required": [
                       "id",
                       "lessonId",
                       "aiMentorInstructions",
-                      "completionConditions"
+                      "completionConditions",
+                      "type"
                     ]
                   },
                   {

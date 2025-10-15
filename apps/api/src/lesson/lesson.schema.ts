@@ -1,3 +1,4 @@
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { createInsertSchema } from "drizzle-typebox";
 
@@ -71,6 +72,7 @@ export const aiMentorLessonSchema = Type.Object({
   lessonId: UUIDSchema,
   aiMentorInstructions: Type.String(),
   completionConditions: Type.String(),
+  type: Type.Enum(AI_MENTOR_TYPE),
 });
 
 export const lessonResourceType = Type.Union([Type.Literal("embed")]);
@@ -123,6 +125,7 @@ export const createAiMentorLessonSchema = Type.Intersect([
     displayOrder: Type.Optional(Type.Number()),
     aiMentorInstructions: Type.String(),
     completionConditions: Type.String(),
+    type: Type.Enum(AI_MENTOR_TYPE),
   }),
 ]);
 export const updateAiMentorLessonSchema = Type.Omit(createAiMentorLessonSchema, [
