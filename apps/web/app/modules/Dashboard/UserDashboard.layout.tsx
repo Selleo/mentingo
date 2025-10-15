@@ -48,7 +48,7 @@ export default function UserDashboardLayout() {
     return <Navigate to="/auth/mfa" />;
   }
 
-  if (lastEntry && lastEntry.pathname !== location.pathname) {
+  if (lastEntry && lastEntry.pathname !== location.pathname && location.pathname !== "/") {
     return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
   }
 
