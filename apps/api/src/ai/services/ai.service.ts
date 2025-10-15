@@ -74,7 +74,6 @@ export class AiService {
   async streamMessage(data: StreamChatBody, model: OpenAIModels, userId: UUIDType) {
     await this.isThreadActive(data.threadId, userId);
     await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
-
     const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
     const provider = await this.promptService.getOpenAI();
 
