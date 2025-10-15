@@ -17,13 +17,6 @@ const allowUnregisteredUsersToBrowseCourses = async (page: Page) => {
   await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
   await page.getByRole("link", { name: /settings/i }).click();
 
-  const header = page.getByRole("heading", {
-    name: COURSE_SETTINGS_UI.header.settings,
-    exact: true,
-  });
-
-  await header.waitFor({ state: "visible" });
-
   await page
     .getByRole("tab", { name: new RegExp(COURSE_SETTINGS_UI.button.organization, "i") })
     .click();
