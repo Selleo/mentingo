@@ -240,7 +240,7 @@
   },
   "mostPopularCoursesView": {
     "header": "Najpopularniejsze",
-    "subHeader": "Twoje 5 najlepszych kursów",
+    "subHeader": "5 najlepszych kursów",
     "other": {
       "noData": "Brak dostępnych danych",
       "students": "Studentów"
@@ -248,7 +248,7 @@
   },
   "enrollmentChartView": {
     "header": "Rejestracje",
-    "subHeader": "Liczba rejestracji w 2024 roku",
+    "subHeader": "Liczba rejestracji",
     "other": {
       "noData": "Brak danych",
       "enrollments": "Rejestracje"

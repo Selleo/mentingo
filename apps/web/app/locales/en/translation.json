@@ -239,7 +239,7 @@
   },
   "mostPopularCoursesView": {
     "header": "Most Popular",
-    "subHeader": "Your top 5 Courses",
+    "subHeader": "Top 5 Courses",
     "other": {
       "noData": "No data available",
       "students": "Students"
@@ -247,7 +247,7 @@
   },
   "enrollmentChartView": {
     "header": "Enrollment",
-    "subHeader": "Numbers of enrollment in 2024",
+    "subHeader": "Numbers of enrollment",
     "other": {
       "noData": "No data available",
       "enrollments": "Enrollments"

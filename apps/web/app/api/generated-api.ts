@@ -192,6 +192,31 @@ export interface GetContentCreatorStatsResponse {
   };
 }
 
+export interface GetAdminStatsResponse {
+  data: {
+    fiveMostPopularCourses: {
+      courseName: string;
+      studentCount: number;
+    }[];
+    totalCoursesCompletionStats: {
+      completionPercentage: number;
+      totalCoursesCompletion: number;
+      totalCourses: number;
+    };
+    conversionAfterFreemiumLesson: {
+      conversionPercentage: number;
+      purchasedCourses: number;
+      remainedOnFreemium: number;
+    };
+    courseStudentsStats: object;
+    avgQuizScore: {
+      correctAnswerCount: number;
+      wrongAnswerCount: number;
+      answerCount: number;
+    };
+  };
+}
+
 export interface FileUploadResponse {
   fileKey: string;
   fileUrl: string;
@@ -480,6 +505,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -501,6 +527,7 @@ export interface UpdateEnforceSSOResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -2762,6 +2789,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name StatisticsControllerGetAdminStats
+     * @request GET:/api/statistics/admin-stats
+     */
+    statisticsControllerGetAdminStats: (params: RequestParams = {}) =>
+      this.request<GetAdminStatsResponse, any>({
+        path: `/api/statistics/admin-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name FileControllerUploadFile
      * @request POST:/api/file
      */
@@ -3253,8 +3294,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerUpdatePrimaryColor
-     * @request PATCH:/api/settings/admin/primary-color
+     * @name SettingsControllerUpdateColorSchema
+     * @request PATCH:/api/settings/admin/color-schema
      */
     settingsControllerUpdateColorSchema: (
       data: UpdateColorSchemaBody,
@@ -3671,6 +3712,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
+        /** @format uuid */
         groupId?: string;
       },
       params: RequestParams = {},

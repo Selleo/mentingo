@@ -13,12 +13,4 @@ module.exports = {
   arrowParens: "always",
   quoteProps: "as-needed",
   endOfLine: "auto",
-  overrides: [
-    {
-      files: ["apps/web/**/*.{ts,tsx,js,jsx}"],
-      options: {
-        tailwindConfig: path.resolve(__dirname, "apps/web/tailwind.config.ts"),
-      },
-    },
-  ],
 };
