@@ -1,3 +1,5 @@
+import { AI_MENTOR_TYPE } from "@repo/shared";
+import { capitalize } from "lodash-es";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +17,13 @@ import {
 } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -122,6 +131,34 @@ const AiMentorLessonForm = ({
                 placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
                 className="mb-4"
               />
+
+              <FormField
+                render={({ field }) => (
+                  <FormItem className="mb-4 flex-1">
+                    <Label htmlFor="categoryId">
+                      <span className="text-red-500">*</span>{" "}
+                      {t("adminCourseView.curriculum.lesson.field.aiMentorTypes")}
+                    </Label>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(AI_MENTOR_TYPE).map((item, index) => (
+                          <SelectItem value={item} key={`${item}-${index}`}>
+                            {capitalize(item)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+                control={form.control}
+                name="type"
+              ></FormField>
+
               <div className="mb-4 grid grid-cols-1 lg:grid-cols-2">
                 <div>
                   <div className="flex items-center justify-between">

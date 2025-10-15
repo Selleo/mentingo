@@ -1006,6 +1006,7 @@
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
           "passThreshold": "Próg zaliczenia",
+          "aiMentorTypes": "Typ AI Mentora",
           "additionalContext": "Dodatkowy kontekst",
           "includeFiles_one": "Dołącz maksymalnie 1 plik, poniżej {{ MAX_FILE_SIZE }} MB, który będzie używany jako kontekst w lekcjach",
           "includeFiles_few": "Dołącz maksymalnie {{ count }} pliki, poniżej {{ MAX_FILE_SIZE }} MB, które będą używane jako kontekst w lekcjach",
@@ -1025,6 +1026,7 @@
           "allowFullscreen": "Zezwól na pełny ekran",
           "aiMentorInstructions": "Opisz jak AI Mentor powinien zachowywać się podczas lekcji...",
           "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
+          "aiMentorTypes": "Mentor",
           "passThreshold": "np. 70%"
         },
         "other": {

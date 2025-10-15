@@ -41,6 +41,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           lessonId: lesson.id,
           aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
           completionConditions: aiMentorLesson.completionConditions,
+          type: aiMentorLesson.type,
         })
         .returning();
 
@@ -54,6 +55,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       lessonId: faker.string.uuid(),
       aiMentorInstructions: faker.commerce.productDescription(),
       completionConditions: faker.commerce.productDescription(),
+      type: "mentor",
     };
   });
 };

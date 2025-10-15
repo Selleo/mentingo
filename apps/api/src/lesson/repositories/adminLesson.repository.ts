@@ -22,10 +22,10 @@ import type {
   CreateLessonResourceBody,
   CreateQuizLessonBody,
   LessonResourceType,
-  UpdateAiMentorLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
+import type { AiMentorType } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type * as schema from "src/storage/schema";
 
@@ -113,7 +113,7 @@ export class AdminLessonRepository {
 
   async updateAiMentorLesson(
     id: UUIDType,
-    data: UpdateAiMentorLessonBody,
+    data: UpdateLessonBody,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     return dbInstance.update(lessons).set(data).where(eq(lessons.id, id)).returning();
@@ -124,6 +124,7 @@ export class AdminLessonRepository {
     data: {
       aiMentorInstructions: string;
       completionConditions: string;
+      type: string;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
@@ -138,6 +139,7 @@ export class AdminLessonRepository {
       lessonId: UUIDType;
       aiMentorInstructions: string;
       completionConditions: string;
+      type: AiMentorType;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {

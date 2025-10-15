@@ -1001,6 +1001,7 @@
           "completionConditions": "Completion Conditions",
           "passThreshold": "Pass Threshold",
           "additionalContext": "Additional context",
+          "aiMentorTypes": "AI Mentor Type",
           "includeFiles_one": "Attach up to 1 file below {{ MAX_FILE_SIZE }} MB to be used as context in lessons",
           "includeFiles_other": "Attach up to {{ count }} files below {{ MAX_FILE_SIZE }} MB to be used as context in lessons"
         },
@@ -1017,7 +1018,8 @@
           "allowFullscreen": "Allow fullscreen",
           "aiMentorInstructions": "Describe how the AI Mentor should behave during the lesson...",
           "completionConditions": "List what the student must achieve to pass this lesson...",
-          "passThreshold": "e.g., 70%"
+          "passThreshold": "e.g., 70%",
+          "aiMentorTypes": "Mentor"
         },
         "other": {
           "lessonNumber": "Number of lessons",

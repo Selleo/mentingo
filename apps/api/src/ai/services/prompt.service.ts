@@ -70,13 +70,11 @@ export class PromptService {
       eq(aiMentorThreads.id, data.threadId),
     ]);
 
-    const { title, instructions } = await this.aiRepository.findMentorLessonByThreadId(
-      data.threadId,
-    );
+    const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
 
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
 
-    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR({ title, instructions }, groups, userLanguage);
+    const systemPrompt = SYSTEM_PROMPT_FOR_MENTOR(lesson, groups, userLanguage);
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, systemPrompt);
 
     await this.aiRepository.insertMessage({
