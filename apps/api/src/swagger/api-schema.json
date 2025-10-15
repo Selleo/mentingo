@@ -1104,16 +1104,16 @@
         }
       }
     },
-    "/api/settings/admin/primary-color": {
+    "/api/settings/admin/color-schema": {
       "patch": {
-        "operationId": "SettingsController_updatePrimaryColor",
+        "operationId": "SettingsController_updateColorSchema",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdatePrimaryColorBody"
+                "$ref": "#/components/schemas/UpdateColorSchemaBody"
               }
             }
           }
@@ -1123,7 +1123,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdatePrimaryColorResponse"
+                  "$ref": "#/components/schemas/UpdateColorSchemaResponse"
                 }
               }
             }
@@ -6022,6 +6022,16 @@
                     "type": "null"
                   }
                 ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6033,7 +6043,8 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
-              "primaryColor"
+              "primaryColor",
+              "contrastColor"
             ]
           }
         },
@@ -6406,6 +6417,16 @@
                     "type": "null"
                   }
                 ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6417,7 +6438,8 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
-              "primaryColor"
+              "primaryColor",
+              "contrastColor"
             ]
           }
         },
@@ -6538,6 +6560,16 @@
                     "type": "null"
                   }
                 ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6549,7 +6581,8 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
-              "primaryColor"
+              "primaryColor",
+              "contrastColor"
             ]
           }
         },
@@ -6601,19 +6634,24 @@
           "data"
         ]
       },
-      "UpdatePrimaryColorBody": {
+      "UpdateColorSchemaBody": {
         "type": "object",
         "properties": {
           "primaryColor": {
             "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
             "type": "string"
+          },
+          "contrastColor": {
+            "pattern": "^#(?:[0-9a-fA-F]{3}){1,2}$",
+            "type": "string"
           }
         },
         "required": [
-          "primaryColor"
+          "primaryColor",
+          "contrastColor"
         ]
       },
-      "UpdatePrimaryColorResponse": {
+      "UpdateColorSchemaResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -6726,6 +6764,16 @@
                     "type": "null"
                   }
                 ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -6737,7 +6785,8 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
-              "primaryColor"
+              "primaryColor",
+              "contrastColor"
             ]
           }
         },

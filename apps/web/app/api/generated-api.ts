@@ -395,6 +395,7 @@ export interface GetPublicGlobalSettingsResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -514,12 +515,14 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
   };
 }
 
-export interface UpdatePrimaryColorBody {
+export interface UpdateColorSchemaBody {
   /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
   primaryColor: string;
+  /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
+  contrastColor: string;
 }
 
-export interface UpdatePrimaryColorResponse {
+export interface UpdateColorSchemaResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
     enforceSSO: boolean;
@@ -537,6 +540,7 @@ export interface UpdatePrimaryColorResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -3252,12 +3256,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name SettingsControllerUpdatePrimaryColor
      * @request PATCH:/api/settings/admin/primary-color
      */
-    settingsControllerUpdatePrimaryColor: (
-      data: UpdatePrimaryColorBody,
+    settingsControllerUpdateColorSchema: (
+      data: UpdateColorSchemaBody,
       params: RequestParams = {},
     ) =>
-      this.request<UpdatePrimaryColorResponse, any>({
-        path: `/api/settings/admin/primary-color`,
+      this.request<UpdateColorSchemaResponse, any>({
+        path: `/api/settings/admin/color-schema`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,

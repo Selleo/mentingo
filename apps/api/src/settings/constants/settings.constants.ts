@@ -17,6 +17,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   defaultCourseCurrency: "pln",
   inviteOnlyRegistration: false,
   primaryColor: null,
+  contrastColor: null,
 };
 
 export const DEFAULT_STUDENT_SETTINGS = {

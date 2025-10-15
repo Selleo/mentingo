@@ -151,6 +151,7 @@ html {
     --popover: var(--background);
     --popover-foreground: var(--neutral-950);
     --primary: var(--primary-700);
+    --contrast: vaR(--color-white);
     --primary-foreground: var(--primary-50);
     --secondary: var(--primary-100);
     --secondary-foreground: var(--primary-700);

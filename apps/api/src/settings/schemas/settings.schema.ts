@@ -25,6 +25,7 @@ export const globalSettingsJSONSchema = Type.Object({
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
   inviteOnlyRegistration: Type.Boolean(),
   primaryColor: Type.Union([Type.String(), Type.Null()]),
+  contrastColor: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

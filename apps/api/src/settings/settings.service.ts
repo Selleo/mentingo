@@ -216,12 +216,14 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
-  public async updateGlobalPrimaryColor(
+  public async updateGlobalColorSchema(
     primaryColor: string,
+    contrastColor: string,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const [globalSettings] = await this.db
       .select({
         primaryColor: sql`settings.settings->>'primaryColor'`,
+        contrastColor: sql`settings.settings->>'contrastColor'`,
       })
       .from(settings)
       .where(isNull(settings.userId));
@@ -234,12 +236,7 @@ export class SettingsService {
       .update(settings)
       .set({
         settings: sql`
-          jsonb_set(
-            settings.settings,
-            '{primaryColor}',
-            to_jsonb(${primaryColor}::text),
-            true
-          )
+          settings.settings || to_jsonb(${{ primaryColor, contrastColor }}::jsonb)
         `,
       })
       .where(isNull(settings.userId))
