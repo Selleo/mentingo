@@ -83,7 +83,27 @@ jobs:
       - name: Build the app
         run: pnpm run build
       - name: Verify build output
-        run: pnpm start:prod
+        run: |
+          pnpm start:prod &
+          APP_PID=$!
+
+          attempt=1
+          max_attempts=10
+
+          until curl -sf http://localhost:3000/api/healthcheck >/dev/null 2>&1; do
+            if [ $attempt -ge $max_attempts ]; then
+              echo "Server failed to start"
+              kill $APP_PID || true
+              exit 1
+            fi
+
+            sleep 1
+
+            attempt=$((attempt + 1))
+          done
+
+          echo "Healthcheck passed"
+          kill $APP_PID || true
 
   test:
     name: Jest tests
