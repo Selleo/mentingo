@@ -1,6 +1,50 @@
+<a name="v3.14.0"></a>
+
+## [v3.14.0] - 13.10.2025
+
+### Features:
+
+- add ability to crop your avatar
+
+### Bug Fixes:
+
+- fix vite config
+
+- fix web e2e tests
+
+- fix not being able to crop uploaded avatar if you dont already have one
+
+- make avatar preview square
+
+### Chores:
+
+- remove leftover console logs
+
+### Code Refactoring:
+
+- refactor file validation in api and image crop resizing in app
+
+<a name="v3.13.0"></a>
+
+## [v3.13.0] - 14.10.2025
+
+### Chores:
+
+- update create user tokens to expire after a year ([#789](https://github.com/Selleo/mentingo/issues/789))
+
+- extend iframe load time to 30 secs ([#792](https://github.com/Selleo/mentingo/issues/792))
+
+### Documentation:
+
+- update changelog for version v3.13.0
+
 <a name="v3.12.0"></a>
 
 ## [v3.12.0] - 13.10.2025
+
+### Documentation:
+
+- update changelog for version v3.12.0
 
 ### Styles:
 
@@ -1642,7 +1686,9 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.12.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.14.0...HEAD
+[v3.14.0]: https://github.com/Selleo/mentingo/compare/v3.13.0...v3.14.0
+[v3.13.0]: https://github.com/Selleo/mentingo/compare/v3.12.0...v3.13.0
 [v3.12.0]: https://github.com/Selleo/mentingo/compare/v3.11.0...v3.12.0
 [v3.11.0]: https://github.com/Selleo/mentingo/compare/v3.10.0...v3.11.0
 [v3.10.0]: https://github.com/Selleo/mentingo/compare/v3.8.2...v3.10.0
