@@ -40,7 +40,8 @@ export default function UserDashboardLayout() {
     return <Navigate to="/auth/mfa" />;
   }
 
-  if (lastEntry) return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
+  if (lastEntry && lastEntry.pathname !== "/")
+    return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
 
   const isAuthenticated = Boolean(user && hasVerifiedMFA);
 
