@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 const TEST_SETTINGS = {
+  pageTitle: "Settings",
   jobTitle: "Programming admin",
   description:
     "A passionate programming instructor with a deep understanding of coding languages and a knack for simplifying complex concepts.",
@@ -22,12 +23,15 @@ test.describe("Admin settings", () => {
     await page.goto("/");
 
     await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+
+    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
+
+    const header = page.getByRole("heading", { name: "Settings", exact: true });
+
+    await header.waitFor({ state: "visible" });
   });
 
   test("should change admin information", async ({ page }) => {
-    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
-    await page.waitForURL("/settings");
-
     await page.locator('label[for="Bio - note"] + textarea').fill(TEST_SETTINGS.description);
     await page.locator('label[for="jobTitle"] + input').fill(TEST_SETTINGS.jobTitle);
     await page.locator('#user-details button[type="submit"]').click();
@@ -44,18 +48,12 @@ test.describe("Admin settings", () => {
   });
 
   test("should change admin new user notification setting", async ({ page }) => {
-    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
-    await page.waitForURL("/settings");
-
     const newUserNotificationSwitch = page.locator("#newUserNotifications");
     await newUserNotificationSwitch.click();
     await expect(newUserNotificationSwitch).toBeChecked();
   });
 
   test("should switch between Account and Organization tabs", async ({ page }) => {
-    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
-    await page.waitForURL("/settings");
-
     const tablist = page.getByRole("tablist");
     const accountTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.account });
     const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
@@ -74,9 +72,6 @@ test.describe("Admin settings", () => {
   });
 
   test("should toggle courses accessibility on Organization tab", async ({ page }) => {
-    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
-    await page.waitForURL("/settings");
-
     const tablist = page.getByRole("tablist");
     const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();
@@ -95,9 +90,6 @@ test.describe("Admin settings", () => {
     browser,
     page,
   }) => {
-    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
-    await page.waitForURL("/settings");
-
     const tablist = page.getByRole("tablist");
     const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();
@@ -129,9 +121,6 @@ test.describe("Admin settings", () => {
   test("should allow access to courses when courses accessibility is enabled and user is logged out", async ({
     page,
   }) => {
-    await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
-    await page.waitForURL("/settings");
-
     const tablist = page.getByRole("tablist");
     const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
     await organizationTab.click();

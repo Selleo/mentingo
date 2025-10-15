@@ -12,9 +12,9 @@ const navigateToPage = async (page: Page, name: string, headerText: string) => {
 
   await pageLinkButton.click();
 
-  await page.waitForURL(/.*/);
-
   const header = page.getByRole("heading", { name: new RegExp(headerText, "i") });
+
+  await header.waitFor({ state: "visible" });
 
   await expect(header).toHaveText(new RegExp(headerText, "i"));
 };
