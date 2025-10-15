@@ -82,6 +82,8 @@ jobs:
         run: pnpm --filter="@repo/shared" run build
       - name: Build the app
         run: pnpm run build
+      - name: Verify build output
+        run: pnpm start:prod
 
   test:
     name: Jest tests
