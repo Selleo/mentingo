@@ -25,6 +25,7 @@ export function useLoginUser() {
   const navigate = useNavigate();
   const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
   const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
+  const cleanHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   return useMutation({
     mutationFn: async (options: LoginUserOptions) => {
@@ -45,6 +46,8 @@ export function useLoginUser() {
       const lastEntry = getLastEntry();
 
       navigate(shouldVerifyMFA ? "/auth/mfa" : lastEntry?.pathname || LOGIN_REDIRECT_URL);
+
+      cleanHistory();
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

@@ -35,6 +35,7 @@ export default function UserDashboardLayout() {
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
   const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
   const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
+  const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   const lastEntry = useMemo(() => {
     mergeNavigationHistory();
@@ -48,7 +49,9 @@ export default function UserDashboardLayout() {
     return <Navigate to="/auth/mfa" />;
   }
 
-  if (lastEntry && lastEntry.pathname !== location.pathname && location.pathname !== "/") {
+  if (lastEntry && lastEntry.pathname !== location.pathname) {
+    clearHistory();
+
     return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
   }
 
