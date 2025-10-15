@@ -1,4 +1,5 @@
-import { Navigate, redirect } from "@remix-run/react";
+import { Navigate, redirect, useLocation } from "@remix-run/react";
+import { useMemo } from "react";
 
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
@@ -28,11 +29,18 @@ export const clientLoader = async ({ request }: { request: Request }) => {
 };
 
 export default function UserDashboardLayout() {
+  const location = useLocation();
+
   const { data: user } = useCurrentUser();
   const hasVerifiedMFA = useCurrentUserStore((state) => state.hasVerifiedMFA);
   const getLastEntry = useNavigationHistoryStore((state) => state.getLastEntry);
+  const mergeNavigationHistory = useNavigationHistoryStore((state) => state.mergeNavigationHistory);
 
-  const lastEntry = getLastEntry();
+  const lastEntry = useMemo(() => {
+    mergeNavigationHistory();
+
+    return getLastEntry();
+  }, [getLastEntry, mergeNavigationHistory]);
 
   useSyncUserAfterLogin(user);
 
@@ -40,8 +48,9 @@ export default function UserDashboardLayout() {
     return <Navigate to="/auth/mfa" />;
   }
 
-  if (lastEntry && lastEntry.pathname !== "/")
+  if (lastEntry && lastEntry.pathname !== location.pathname) {
     return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
+  }
 
   const isAuthenticated = Boolean(user && hasVerifiedMFA);
 
