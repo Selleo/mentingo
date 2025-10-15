@@ -10,23 +10,16 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import Loader from "~/modules/common/Loader/Loader";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CategoryDetails } from "./CategoryDetails";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { UpdateCategoryBody } from "~/api/generated-api";
-import type { ParentRouteData } from "~/modules/layout";
 
 const displayedFields: Array<keyof UpdateCategoryBody> = ["title", "archived"];
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName} - Category details` : "Category details";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.categoryDetails");
 
 const Category = () => {
   const { id = "" } = useParams();

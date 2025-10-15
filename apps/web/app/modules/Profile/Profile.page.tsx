@@ -14,6 +14,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { copyToClipboard } from "~/utils/copyToClipboard";
 import { filterChangedData } from "~/utils/filterChangedData";
+import { setPageTitle } from "~/utils/setPageTitle";
 import { isAdminLike } from "~/utils/userRoles";
 
 import Loader from "../common/Loader/Loader";
@@ -24,7 +25,6 @@ import Certificates from "./Certificates/Certificates";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
 
 import type { UpdateUserProfileBody } from "./types";
-import type { ParentRouteData } from "../layout";
 import type { MetaFunction } from "@remix-run/react";
 import type { CertificateType } from "~/types/certificate";
 
@@ -38,14 +38,7 @@ const updateUserProfileSchema = z.object({
   userAvatar: z.instanceof(File).nullable().optional(),
 });
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("Admin.layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName} - Profile` : "Profile";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.profile");
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState<boolean>(false);

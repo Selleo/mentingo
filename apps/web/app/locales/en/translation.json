@@ -1678,5 +1678,34 @@
         }
       }
     }
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "providerInformation": "Provider Information",
+    "courses": "Courses",
+    "profile": "Profile",
+    "lesson": "Lesson",
+    "register": "Register",
+    "passwordRecovery": "Password Recovery",
+    "login": "Login",
+    "createNewPassword": "Create New Password",
+    "createAnnouncement": "Create Announcement",
+    "announcements": "Announcements",
+    "users": "Users",
+    "userDetails": "User Details",
+    "createNewUser": "Create New User",
+    "promotionCodes": "Promotion Codes",
+    "promotionCodeDetails": "Promotion Code Details",
+    "createPromotionCode": "Create Promotion Code",
+    "groups": "Groups",
+    "editGroup": "Edit Group",
+    "createGroup": "Create Group",
+    "editCourse": "Edit Course",
+    "createNewCategory": "Create New Category",
+    "categoryDetails": "Category Details",
+    "categories": "Categories",
+    "createNewCourse": "Create New Course",
+    "admin": "Admin"
   }
 }

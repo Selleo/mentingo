@@ -13,15 +13,12 @@ import { ApiBody, ApiConsumes } from "@nestjs/swagger";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
+import { FILE_SIZE_BASE } from "src/common/constants";
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { USER_ROLES } from "src/user/schemas/userRoles";
-
-const PLATFORM_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
-const PLATFORM_SIMPLE_LOGO_MAX_SIZE_BYTES = 10 * 1024 * 1024;
-const LOGIN_BACKGROUND_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
@@ -165,7 +162,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
-        fileSize: PLATFORM_LOGO_MAX_SIZE_BYTES,
+        fileSize: FILE_SIZE_BASE,
       },
     }),
   )
@@ -201,7 +198,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor("logo", {
       limits: {
-        fileSize: PLATFORM_SIMPLE_LOGO_MAX_SIZE_BYTES,
+        fileSize: FILE_SIZE_BASE,
       },
     }),
   )
@@ -237,7 +234,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor("login-background", {
       limits: {
-        fileSize: LOGIN_BACKGROUND_MAX_SIZE_BYTES,
+        fileSize: FILE_SIZE_BASE,
       },
     }),
   )

@@ -11,6 +11,7 @@ import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { getCourseBadgeVariant } from "../Courses/utils";
 
@@ -21,16 +22,8 @@ import CourseStatus from "./CourseStatus/CourseStatus";
 
 import type { Chapter } from "./EditCourse.types";
 import type { MetaFunction } from "@remix-run/react";
-import type { ParentRouteData } from "~/modules/layout";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName} - Edit Course` : "Edit Course";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editCourse");
 
 const EditCourse = () => {
   const { t } = useTranslation();

@@ -13,21 +13,12 @@ import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.schema";
+import { setPageTitle } from "~/utils/setPageTitle";
 
-import type { ParentRouteData } from "../layout";
 import type { MetaFunction } from "@remix-run/react";
 import type { ResetPasswordBody } from "~/api/generated-api";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName
-    ? `${companyShortName} - Create New Password`
-    : "Create New Password";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewPassword");
 
 const createNewPasswordSchema = (t: (key: string) => string) =>
   z

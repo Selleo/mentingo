@@ -16,22 +16,14 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { convertToMinorUnits } from "~/lib/formatters/priceFormatter";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CreatePageHeader } from "../components";
 
 import type { MetaFunction } from "@remix-run/react";
-import type { ParentRouteData } from "~/modules/layout";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName
-    ? `${companyShortName} - Create promotion code`
-    : "Create promotion code";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) =>
+  setPageTitle(matches, "pages.createPromotionCode");
 
 const formSchema = z
   .object({

@@ -8,22 +8,13 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "~/component
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { CreatePageHeader } from "~/modules/Admin/components";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { useCreateCategoryForm } from "./hooks/useCreateCategoryForm";
 
 import type { MetaFunction } from "@remix-run/react";
-import type { ParentRouteData } from "~/modules/layout";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName
-    ? `${companyShortName} - Create new category`
-    : "Create new category";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewCategory");
 
 export default function CreateNewCategoryPage() {
   const { form, onSubmit } = useCreateCategoryForm(({ data }) => {
