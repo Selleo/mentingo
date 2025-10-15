@@ -1,3 +1,4 @@
+-- Custom SQL migration file, put you code below! --
 INSERT INTO settings (user_id, created_at, settings)
 SELECT 
     NULL, 

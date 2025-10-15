@@ -302,6 +302,13 @@
       "when": 1759745917269,
       "tag": "0042_add_primary_color_to_global_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1760524841663,
+      "tag": "0043_add_contrast_color_to_global_settings",
+      "breakpoints": true
     }
   ]
 }
