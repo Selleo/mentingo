@@ -11,8 +11,12 @@ import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { setPageTitle } from "~/utils/setPageTitle";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { GetCourseResponse } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.lesson");
 
 type Chapters = GetCourseResponse["data"]["chapters"];
 

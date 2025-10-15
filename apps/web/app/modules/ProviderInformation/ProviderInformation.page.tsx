@@ -6,25 +6,17 @@ import { useCompanyInformation } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
 
 import { ProviderInformationCard, ProviderInformationEditCard } from "./components";
 
-import type { ParentRouteData } from "../layout";
 import type { MetaFunction } from "@remix-run/react";
 import type { UpdateCompanyInformationBody } from "~/api/generated-api";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName
-    ? `${companyShortName} - Provider Information`
-    : "Provider Information";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) =>
+  setPageTitle(matches, "pages.providerInformation");
 
 export default function ProviderInformationPage() {
   const [isEditing, setIsEditing] = useState(false);

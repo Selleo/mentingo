@@ -34,20 +34,13 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import { useGroupTable } from "~/modules/Admin/Groups/hooks/useGroupTable";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { SortingState, RowSelectionState } from "@tanstack/react-table";
 import type { ReactElement, FormEvent } from "react";
-import type { ParentRouteData } from "~/modules/layout";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName} - Groups` : "Groups";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.groups");
 
 const Groups = (): ReactElement => {
   const { t } = useTranslation();

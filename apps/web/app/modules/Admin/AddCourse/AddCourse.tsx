@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { setPageTitle } from "~/utils/setPageTitle";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { useCreateCategoryForm } from "../Categories/hooks/useCreateCategoryForm";
@@ -31,16 +32,8 @@ import { MAX_COURSE_DESCRIPTION_HTML_LENGTH, MAX_COURSE_DESCRIPTION_LENGTH } fro
 import { useAddCourseForm } from "./hooks/useAddCourseForm";
 
 import type { MetaFunction } from "@remix-run/react";
-import type { ParentRouteData } from "~/modules/layout";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName} - Create new course` : "Create new course";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewCourse");
 
 const AddCourse = () => {
   const { form, onSubmit } = useAddCourseForm();

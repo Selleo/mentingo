@@ -8,26 +8,19 @@ import { Button } from "~/components/ui/button";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
 
 import { LatestAnnouncementsPopup } from "./components";
 
-import type { ParentRouteData } from "../layout";
 import type { MetaFunction } from "@remix-run/react";
 
 type DashboardProps = {
   isAuthenticated: boolean;
 };
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName} - Dashboard` : "Dashboard";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.dashboard");
 
 export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   const { t } = useTranslation();

@@ -11,21 +11,14 @@ import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConf
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
 import { LatestAnnouncementsPopup } from "../Dashboard/components";
 
-import type { ParentRouteData } from "../layout";
 import type { PropsWithChildren } from "react";
 
-export const meta: MetaFunction = ({ matches }) => {
-  const parentMatch = matches.find((match) => match.id.includes("layout"));
-  const companyShortName = (parentMatch?.data as ParentRouteData)?.companyInfo?.data
-    ?.companyShortName;
-  const title = companyShortName ? `${companyShortName} - Admin` : "Admin";
-
-  return [{ title }];
-};
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.admin");
 
 export const clientLoader = async () => {
   try {
