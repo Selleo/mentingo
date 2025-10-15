@@ -9,7 +9,6 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import {
   BulkUpsertEnvBody,
   bulkUpsertEnvSchema,
-  frontendPosthogConfigResponseSchema,
   frontendSSOEnabledResponseSchema,
   getEnvResponseSchema,
 } from "src/env/env.schema";
@@ -48,14 +47,5 @@ export class EnvController {
   })
   async getFrontendSSOEnabled() {
     return new BaseResponse(await this.envService.getSSOEnabled());
-  }
-
-  @Public()
-  @Get("frontend/posthog")
-  @Validate({
-    response: baseResponse(frontendPosthogConfigResponseSchema),
-  })
-  async getPostHogConfig() {
-    return new BaseResponse(await this.envService.getPostHogConfig());
   }
 }

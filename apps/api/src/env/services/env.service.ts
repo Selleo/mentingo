@@ -104,20 +104,4 @@ export class EnvService {
       slack,
     };
   }
-
-  async getPostHogConfig() {
-    const [key, host] = await Promise.all([
-      this.getEnv("VITE_POSTHOG_KEY")
-        .then((r) => r.value)
-        .catch(() => undefined),
-      this.getEnv("VITE_POSTHOG_HOST")
-        .then((r) => r.value)
-        .catch(() => undefined),
-    ]);
-
-    return {
-      key,
-      host,
-    };
-  }
 }
