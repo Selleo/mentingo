@@ -85,7 +85,7 @@ services:
     restart: always
     depends_on: *langfuse-depends-on
     ports:
-      - 3001:3000
+      - 3002:3000
 
     environment:
       <<: *langfuse-worker-env
