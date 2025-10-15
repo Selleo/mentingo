@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     ssr: {
-      noExternal: ["posthog-js", "posthog-js/react"],
+      noExternal: ["posthog-js", "posthog-js/react", "react-easy-crop"],
     },
     // https://github.com/remix-run/remix/issues/10156
     server: {

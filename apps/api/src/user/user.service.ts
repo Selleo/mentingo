@@ -41,6 +41,12 @@ import {
   UserSortFields,
 } from "./schemas/userQuery";
 import { USER_ROLES, type UserRole } from "./schemas/userRoles";
+import {
+  AVATAR_ALLOWED_TYPES,
+  AVATAR_ASPECT_RATIO,
+  AVATAR_MAX_RESOLUTION,
+  AVATAR_MAX_SIZE,
+} from "./user.constants";
 
 import type {
   UpdateUserProfileBody,
@@ -276,7 +282,12 @@ export class UserService {
     }
 
     if (userAvatar) {
-      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars");
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", {
+        allowedTypes: AVATAR_ALLOWED_TYPES,
+        maxSize: AVATAR_MAX_SIZE,
+        maxResolution: AVATAR_MAX_RESOLUTION,
+        aspectRatio: AVATAR_ASPECT_RATIO,
+      });
       data.userAvatar = fileKey;
     }
 

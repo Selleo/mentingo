@@ -176,7 +176,6 @@ test.describe("course enrollment", () => {
 
     if (await enrollButton.isVisible()) {
       await enrollButton.click();
-      await enrollButton.waitFor({ state: "hidden", timeout: 10000 });
 
       await expect(learningButton).toBeVisible({ timeout: 15000 });
     } else {

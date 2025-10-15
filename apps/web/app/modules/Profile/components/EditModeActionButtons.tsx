@@ -38,7 +38,6 @@ export const EditModeActionButtons = ({
         className="w-full md:w-fit"
         onClick={() => {
           handleSubmit(onSubmit)();
-          toggleEditing();
         }}
       >
         <Icon className="mr-2 size-4" name="Checkmark" />

@@ -254,7 +254,7 @@ const CourseSettings = ({
                 control={form.control}
                 name="thumbnailS3Key"
                 render={({ field }) => (
-                  <FormItem className="max-h-[440px]">
+                  <FormItem>
                     <Label htmlFor="thumbnailS3Key">
                       {t("adminCourseView.settings.field.thumbnail")}
                     </Label>

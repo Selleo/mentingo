@@ -66,7 +66,7 @@ const editProfilePicture = async (page: Page) => {
   await goIntoEditMode(page);
 
   await uploadInput.setInputFiles(PROFILE_PAGE_FILE_PATH);
-  await expect(uploadInput).not.toHaveValue("");
+  await expect(uploadInput).not.toBeVisible();
 
   await confirmEditMode(page);
 

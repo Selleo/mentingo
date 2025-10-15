@@ -15,6 +15,7 @@ import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/fi
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
 import { Type } from "@sinclair/typebox";
+import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -181,7 +182,7 @@ export class UserController {
   }
 
   @Patch("profile")
-  @UseInterceptors(FileInterceptor("userAvatar"))
+  @UseInterceptors(FileInterceptor("userAvatar", { storage: memoryStorage() }))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
