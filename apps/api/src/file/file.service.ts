@@ -18,6 +18,7 @@ import {
 import { FileGuard } from "./guards/file.guard";
 
 import type { FileValidationOptions } from "./guards/file.guard";
+import type { ExcelHyperlinkCell } from "./types/excel";
 import type { Static, TSchema } from "@sinclair/typebox";
 
 @Injectable()
@@ -134,9 +135,19 @@ export class FileService {
       const parsedObject: Record<string, string> = {};
 
       headers.forEach((header, colIndex) => {
+        const normalizedHeader = header.trim();
+
         const cellValue = rowValues[colIndex];
 
-        if (!isEmpty(cellValue)) parsedObject[header] = String(cellValue);
+        if (cellValue && typeof cellValue === "object" && "hyperlink" in cellValue) {
+          parsedObject[normalizedHeader] = String(
+            (cellValue as ExcelHyperlinkCell).hyperlink,
+          ).replace(/^mailto:/, "");
+
+          return;
+        }
+
+        if (!isEmpty(cellValue)) parsedObject[normalizedHeader] = String(cellValue);
       });
 
       if (!validator.Check(parsedObject))
