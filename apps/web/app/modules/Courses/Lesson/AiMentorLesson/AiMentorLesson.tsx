@@ -92,7 +92,7 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
       />
 
       {lessonLoading && <Loader />}
-      <div className="flex w-full grow flex-col gap-y-4 overflow-y-auto">
+      <div className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll">
         {!lessonLoading && messages.map((messages, idx) => <ChatMessage key={idx} {...messages} />)}
 
         {isSubmitted || (isJudgePending && <ChatLoader />)}
