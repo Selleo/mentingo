@@ -65,9 +65,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
           message: t("adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength"),
         },
       ),
-    type: z
-      .enum(Object.values(AI_MENTOR_TYPE) as [string, ...string[]])
-      .default(AI_MENTOR_TYPE.MENTOR),
+    type: z.nativeEnum(AI_MENTOR_TYPE).default(AI_MENTOR_TYPE.MENTOR),
   });
 
 export const aiMentorLessonFileSchema = (t: TFunction) =>

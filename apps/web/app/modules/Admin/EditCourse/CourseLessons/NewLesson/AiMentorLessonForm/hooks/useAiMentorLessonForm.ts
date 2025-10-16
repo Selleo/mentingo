@@ -23,7 +23,6 @@ import {
 import { aiMentorLessonFormSchema } from "../validators/useAiMentorLessonFormSchema";
 
 import type { AiMentorLessonFormValues } from "../validators/useAiMentorLessonFormSchema";
-import type { AiMentorType } from "@repo/shared";
 
 type AiMentorLessonFormProps = {
   chapterToEdit: Chapter | null;
@@ -109,12 +108,12 @@ export const useAiMentorLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateAiMentorLesson({
-          data: { ...values, type: values.type as AiMentorType },
+          data: { ...values, type: values.type },
           lessonId: lessonToEdit.id,
         });
       } else {
         await createAiMentorLesson({
-          data: { ...values, chapterId: chapterToEdit.id, type: values.type as AiMentorType },
+          data: { ...values, chapterId: chapterToEdit.id, type: values.type },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }

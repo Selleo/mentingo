@@ -64,10 +64,10 @@ export const aiMentorGroupsSchema = Type.Array(
 );
 
 export const aiMentorLessonSchema = Type.Object({
-  title: Type.Optional(Type.String()),
-  instructions: Type.Optional(Type.String()),
-  conditions: Type.Optional(Type.String()),
-  type: Type.Optional(Type.Enum(AI_MENTOR_TYPE)),
+  title: Type.String(),
+  instructions: Type.String(),
+  conditions: Type.String(),
+  type: Type.Enum(AI_MENTOR_TYPE),
 });
 
 export const aiJudgeJudgementSchema = Type.Object({

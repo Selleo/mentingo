@@ -124,7 +124,7 @@ export class AdminLessonRepository {
     data: {
       aiMentorInstructions: string;
       completionConditions: string;
-      type: string;
+      type: AiMentorType;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
