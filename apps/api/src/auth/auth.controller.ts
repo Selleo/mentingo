@@ -218,14 +218,20 @@ export class AuthController {
   ): Promise<void> {
     const googleUser = request.user;
 
-    const { accessToken, refreshToken, shouldVerifyMFA } =
-      await this.authService.handleProviderLoginCallback(googleUser);
+    try {
+      const { accessToken, refreshToken, shouldVerifyMFA } =
+        await this.authService.handleProviderLoginCallback(googleUser);
 
-    shouldVerifyMFA
-      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
-      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+      shouldVerifyMFA
+        ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+        : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-    response.redirect(this.CORS_ORIGIN);
+      response.redirect(this.CORS_ORIGIN);
+    } catch (e) {
+      response.redirect(
+        this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
+      );
+    }
   }
 
   @Public()
@@ -244,14 +250,20 @@ export class AuthController {
   ): Promise<void> {
     const microsoftUser = request.user;
 
-    const { accessToken, refreshToken, shouldVerifyMFA } =
-      await this.authService.handleProviderLoginCallback(microsoftUser);
+    try {
+      const { accessToken, refreshToken, shouldVerifyMFA } =
+        await this.authService.handleProviderLoginCallback(microsoftUser);
 
-    shouldVerifyMFA
-      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
-      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+      shouldVerifyMFA
+        ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+        : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-    response.redirect(this.CORS_ORIGIN);
+      response.redirect(this.CORS_ORIGIN);
+    } catch (e) {
+      response.redirect(
+        this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
+      );
+    }
   }
 
   @Public()
@@ -270,14 +282,20 @@ export class AuthController {
   ) {
     const slackUser = request.user;
 
-    const { accessToken, refreshToken, shouldVerifyMFA } =
-      await this.authService.handleProviderLoginCallback(slackUser);
+    try {
+      const { accessToken, refreshToken, shouldVerifyMFA } =
+        await this.authService.handleProviderLoginCallback(slackUser);
 
-    shouldVerifyMFA
-      ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
-      : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
+      shouldVerifyMFA
+        ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
+        : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-    response.redirect(this.CORS_ORIGIN);
+      response.redirect(this.CORS_ORIGIN);
+    } catch (e) {
+      response.redirect(
+        this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
+      );
+    }
   }
 
   @Post("mfa/setup")
