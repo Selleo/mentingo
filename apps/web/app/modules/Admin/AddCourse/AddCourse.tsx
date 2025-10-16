@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { setPageTitle } from "~/utils/setPageTitle";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { useCreateCategoryForm } from "../Categories/hooks/useCreateCategoryForm";
@@ -29,6 +30,10 @@ import { useCreateCategoryForm } from "../Categories/hooks/useCreateCategoryForm
 import Breadcrumb from "./components/Breadcrumb";
 import { MAX_COURSE_DESCRIPTION_HTML_LENGTH, MAX_COURSE_DESCRIPTION_LENGTH } from "./constants";
 import { useAddCourseForm } from "./hooks/useAddCourseForm";
+
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewCourse");
 
 const AddCourse = () => {
   const { form, onSubmit } = useAddCourseForm();

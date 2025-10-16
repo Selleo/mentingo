@@ -16,8 +16,14 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { convertToMinorUnits } from "~/lib/formatters/priceFormatter";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CreatePageHeader } from "../components";
+
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) =>
+  setPageTitle(matches, "pages.createPromotionCode");
 
 const formSchema = z
   .object({

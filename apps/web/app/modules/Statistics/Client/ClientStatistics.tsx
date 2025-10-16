@@ -6,6 +6,7 @@ import { useUserStatistics } from "~/api/queries/useUserStatistics";
 import { PageWrapper } from "~/components/PageWrapper";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { parseRatesChartData } from "~/modules/Statistics/utils";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import {
   AvgPercentScoreChart,
@@ -14,7 +15,10 @@ import {
   RatesChart,
 } from "./components";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { ChartConfig } from "~/components/ui/chart";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.dashboard");
 
 export default function ClientStatistics() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();

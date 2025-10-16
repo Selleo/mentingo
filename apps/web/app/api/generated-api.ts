@@ -384,6 +384,8 @@ export interface GetPublicGlobalSettingsResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -391,6 +393,7 @@ export interface GetPublicGlobalSettingsResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -469,6 +472,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -476,6 +481,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -490,6 +496,8 @@ export interface UpdateEnforceSSOResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -497,6 +505,7 @@ export interface UpdateEnforceSSOResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -529,6 +538,8 @@ export interface UpdateColorSchemaResponse {
     certificateBackgroundImage: string | null;
     companyInformation?: {
       companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
       registeredAddress?: string;
       taxNumber?: string;
       emailAddress?: string;
@@ -536,6 +547,7 @@ export interface UpdateColorSchemaResponse {
     };
     platformLogoS3Key: string | null;
     loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
@@ -550,6 +562,12 @@ export interface GetPlatformLogoResponse {
   };
 }
 
+export interface GetPlatformSimpleLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
 export interface GetLoginBackgroundResponse {
   data: {
     url: string | null;
@@ -559,6 +577,8 @@ export interface GetLoginBackgroundResponse {
 export interface GetCompanyInformationResponse {
   data: {
     companyName?: string;
+    /** @maxLength 10 */
+    companyShortName?: string;
     registeredAddress?: string;
     taxNumber?: string;
     emailAddress?: string;
@@ -568,6 +588,8 @@ export interface GetCompanyInformationResponse {
 
 export interface UpdateCompanyInformationBody {
   companyName?: string;
+  /** @maxLength 10 */
+  companyShortName?: string;
   registeredAddress?: string;
   taxNumber?: string;
   emailAddress?: string;
@@ -577,6 +599,8 @@ export interface UpdateCompanyInformationBody {
 export interface UpdateCompanyInformationResponse {
   data: {
     companyName?: string;
+    /** @maxLength 10 */
+    companyShortName?: string;
     registeredAddress?: string;
     taxNumber?: string;
     emailAddress?: string;
@@ -3307,6 +3331,41 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPlatformSimpleLogo
+     * @request GET:/api/settings/platform-simple-logo
+     */
+    settingsControllerGetPlatformSimpleLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformSimpleLogoResponse, any>({
+        path: `/api/settings/platform-simple-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformSimpleLogo
+     * @request PATCH:/api/settings/platform-simple-logo
+     */
+    settingsControllerUpdatePlatformSimpleLogo: (
+      data: {
+        /** @format binary */
+        logo?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-simple-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetLoginBackground
      * @request GET:/api/settings/login-background
      */
@@ -3671,6 +3730,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
+        /** @format uuid */
         groupId?: string;
       },
       params: RequestParams = {},

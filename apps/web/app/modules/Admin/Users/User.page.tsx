@@ -11,10 +11,14 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import Loader from "~/modules/common/Loader/Loader";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { UserInfo } from "./components/UserInfo";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { UpdateUserBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.userDetails");
 
 const displayedFields: Array<keyof UpdateUserBody> = [
   "firstName",

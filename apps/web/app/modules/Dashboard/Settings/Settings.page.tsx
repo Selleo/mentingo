@@ -6,12 +6,16 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserSettings } from "~/api/queries/useUserSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import AccountTabContent from "./components/AccountTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
 
 import type { GlobalSettings } from "./types";
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.settings");
 
 export default function SettingsPage() {
   const { t } = useTranslation();

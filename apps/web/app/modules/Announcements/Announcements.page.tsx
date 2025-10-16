@@ -5,9 +5,14 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { useUserRole } from "~/hooks/useUserRole";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { AdminAnnouncements, UserAnnouncements } from "./components";
 import { getAnnouncementsPageBreadcrumbs } from "./components/getAnnouncementsBreadcrumbs";
+
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.announcements");
 
 export default function AnnouncementsPage() {
   const { t } = useTranslation();

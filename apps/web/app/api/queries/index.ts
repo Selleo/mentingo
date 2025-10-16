@@ -21,3 +21,8 @@ export {
 export { useAllUsers, useAllUsersSuspense, usersQueryOptions } from "./useUsers";
 export { useContentCreatorStatistics } from "./useContentCreatorStatistics";
 export { useCompanyInformation } from "./useCompanyInformation";
+export {
+  usePlatformSimpleLogo,
+  usePlatformSimpleLogoSuspense,
+  platformSimpleLogoQueryOptions,
+} from "./usePlatformSimpleLogo";

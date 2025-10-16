@@ -8,6 +8,7 @@ import type { Static } from "@sinclair/typebox";
 
 export const companyInformationJSONSchema = Type.Object({
   companyName: Type.Optional(Type.String()),
+  companyShortName: Type.Optional(Type.String({ maxLength: 10 })),
   registeredAddress: Type.Optional(Type.String()),
   taxNumber: Type.Optional(Type.String()),
   emailAddress: Type.Optional(Type.String()),
@@ -21,6 +22,7 @@ export const globalSettingsJSONSchema = Type.Object({
   companyInformation: Type.Optional(companyInformationJSONSchema),
   platformLogoS3Key: Type.Union([Type.String(), Type.Null()]),
   loginBackgroundImageS3Key: Type.Union([Type.String(), Type.Null()]),
+  platformSimpleLogoS3Key: Type.Union([Type.String(), Type.Null()]),
   MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
   inviteOnlyRegistration: Type.Boolean(),

@@ -16,10 +16,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { SocialLogin } from "./components";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { LoginBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.login");
 
 const loginSchema = (t: (key: string) => string) =>
   z.object({

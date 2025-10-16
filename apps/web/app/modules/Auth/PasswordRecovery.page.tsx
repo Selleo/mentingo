@@ -12,8 +12,12 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
+import { setPageTitle } from "~/utils/setPageTitle";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { ForgotPasswordBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.passwordRecovery");
 
 const passwordRecoverySchema = (t: (key: string) => string) =>
   z.object({

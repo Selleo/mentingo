@@ -9,12 +9,17 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Toggle } from "~/components/ui/toggle";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CreatePageHeader } from "../components";
 
 import { useGetPromotionCodeStatus } from "./hooks/useGetPromotionCodes";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { CurrencyCode } from "~/lib/formatters/priceFormatter";
+
+export const meta: MetaFunction = ({ matches }) =>
+  setPageTitle(matches, "pages.promotionCodeDetails");
 
 const PromotionCodeDetails = () => {
   const { t } = useTranslation();

@@ -10,9 +10,13 @@ import { PageWrapper } from "~/components/PageWrapper";
 import CreateGroupCard from "~/modules/Admin/Groups/components/CreateGroupCard";
 import { GroupHeader } from "~/modules/Admin/Groups/components/GroupHeader";
 import { groupFormSchema } from "~/modules/Admin/Groups/group.utils";
+import { setPageTitle } from "~/utils/setPageTitle";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { ReactElement } from "react";
 import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createGroup");
 
 const CreateGroup = (): ReactElement => {
   const { t } = useTranslation();

@@ -7,12 +7,17 @@ import { useCreateAnnouncement } from "~/api/mutations/admin/useCreateAnnounceme
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CreateAnnouncementForm } from "./components";
 import { getAnnouncementsPageBreadcrumbs } from "./components/getAnnouncementsBreadcrumbs";
 import { createAnnouncementSchema } from "./schemas/createAnnouncement.schema";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { CreateAnnouncementBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) =>
+  setPageTitle(matches, "pages.createAnnouncement");
 
 export default function AnnouncementsPage() {
   const { t } = useTranslation();
