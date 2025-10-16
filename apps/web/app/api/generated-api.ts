@@ -480,6 +480,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -501,6 +502,7 @@ export interface UpdateEnforceSSOResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     primaryColor: string | null;
+    contrastColor: string | null;
   };
 }
 
@@ -2336,13 +2338,6 @@ export interface GetFrontendSSOEnabledResponse {
   };
 }
 
-export interface GetPostHogConfigResponse {
-  data: {
-    key?: string;
-    host?: string;
-  };
-}
-
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -3253,8 +3248,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name SettingsControllerUpdatePrimaryColor
-     * @request PATCH:/api/settings/admin/primary-color
+     * @name SettingsControllerUpdateColorSchema
+     * @request PATCH:/api/settings/admin/color-schema
      */
     settingsControllerUpdateColorSchema: (
       data: UpdateColorSchemaBody,
@@ -3671,6 +3666,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
+        /** @format uuid */
         groupId?: string;
       },
       params: RequestParams = {},
@@ -5071,20 +5067,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
       this.request<GetFrontendSSOEnabledResponse, any>({
         path: `/api/env/frontend/sso`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetPostHogConfig
-     * @request GET:/api/env/frontend/posthog
-     */
-    envControllerGetPostHogConfig: (params: RequestParams = {}) =>
-      this.request<GetPostHogConfigResponse, any>({
-        path: `/api/env/frontend/posthog`,
         method: "GET",
         format: "json",
         ...params,

@@ -4310,23 +4310,6 @@
           }
         }
       }
-    },
-    "/api/env/frontend/posthog": {
-      "get": {
-        "operationId": "EnvController_getPostHogConfig",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPostHogConfigResponse"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "info": {
@@ -14736,25 +14719,6 @@
                 "type": "string"
               },
               "slack": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetPostHogConfigResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "key": {
-                "type": "string"
-              },
-              "host": {
                 "type": "string"
               }
             }
