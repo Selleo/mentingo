@@ -140,14 +140,14 @@ export class FileService {
         const cellValue = rowValues[colIndex];
 
         if (cellValue && typeof cellValue === "object" && "hyperlink" in cellValue) {
-          parsedObject[normalizedHeader] = String(
-            (cellValue as ExcelHyperlinkCell).hyperlink,
-          ).replace(/^mailto:/, "");
+          parsedObject[normalizedHeader] = String((cellValue as ExcelHyperlinkCell).hyperlink)
+            .replace(/^mailto:/, "")
+            .trim();
 
           return;
         }
 
-        if (!isEmpty(cellValue)) parsedObject[normalizedHeader] = String(cellValue);
+        if (!isEmpty(cellValue)) parsedObject[normalizedHeader] = String(cellValue).trim();
       });
 
       if (!validator.Check(parsedObject))
