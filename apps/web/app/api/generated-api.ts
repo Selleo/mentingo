@@ -930,6 +930,7 @@ export interface GetBetaCourseByIdResponse {
           lessonId: string;
           aiMentorInstructions: string;
           completionConditions: string;
+          type: "mentor" | "teacher" | "roleplay";
         } | null;
         updatedAt?: string;
       }[];
@@ -1133,6 +1134,7 @@ export type BetaCreateChapterBody = {
       lessonId: string;
       aiMentorInstructions: string;
       completionConditions: string;
+      type: "mentor" | "teacher" | "roleplay";
     } | null;
     updatedAt?: string;
   }[];
@@ -1208,6 +1210,7 @@ export type UpdateChapterBody = {
       lessonId: string;
       aiMentorInstructions: string;
       completionConditions: string;
+      type: "mentor" | "teacher" | "roleplay";
     } | null;
     updatedAt?: string;
   }[];
@@ -1401,6 +1404,7 @@ export type BetaCreateLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {
@@ -1463,6 +1467,7 @@ export type BetaCreateAiMentorLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {
@@ -1471,6 +1476,7 @@ export type BetaCreateAiMentorLessonBody = {
   displayOrder?: number;
   aiMentorInstructions: string;
   completionConditions: string;
+  type: "mentor" | "teacher" | "roleplay";
 };
 
 export interface BetaCreateAiMentorLessonResponse {
@@ -1527,11 +1533,13 @@ export type BetaUpdateAiMentorLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {
   aiMentorInstructions: string;
   completionConditions: string;
+  type: "mentor" | "teacher" | "roleplay";
 };
 
 export interface BetaUpdateAiMentorLessonResponse {
@@ -1701,6 +1709,7 @@ export type BetaUpdateLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     completionConditions: string;
+    type: "mentor" | "teacher" | "roleplay";
   } | null;
   updatedAt?: string;
 } & {

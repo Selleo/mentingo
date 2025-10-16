@@ -21,6 +21,7 @@ import {
   studentLessonProgress,
 } from "src/storage/schema";
 
+import type { AiMentorType } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
@@ -183,6 +184,7 @@ export class AiRepository {
         title: lessons.title,
         instructions: aiMentorLessons.aiMentorInstructions,
         conditions: aiMentorLessons.completionConditions,
+        type: sql<AiMentorType>`${aiMentorLessons.type}`,
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
