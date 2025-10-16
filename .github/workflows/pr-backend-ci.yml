@@ -27,6 +27,7 @@ env:
   MICROSOFT_OAUTH_ENABLED: "false"
   SLACK_OAUTH_ENABLED: "false"
   MASTER_KEY: "+iFu6dFP3uc8WFAB22Ebhh9GJjnmrv/bLxOv3L/n3zw="
+  PUPPETEER_EXECUTABLE_PATH: "/usr/bin/google-chrome"
 
 on:
   pull_request:
@@ -70,6 +71,9 @@ jobs:
         working-directory: ./apps/api/
     steps:
       - uses: actions/checkout@v4
+
+      - uses: browser-actions/setup-chrome@v1
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
