@@ -11,6 +11,7 @@ import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConf
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 import Loader from "../common/Loader/Loader";
 import { LatestAnnouncementsPopup } from "../Dashboard/components";
@@ -21,11 +22,13 @@ export const meta: MetaFunction = () => {
   return [{ title: "Admin" }];
 };
 
-export const clientLoader = async () => {
+export const clientLoader = async ({ request }: { request: Request }) => {
   try {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);
 
     if (!user) {
+      saveEntryToNavigationHistory(request);
+
       throw redirect("/auth/login");
     }
   } catch (error) {

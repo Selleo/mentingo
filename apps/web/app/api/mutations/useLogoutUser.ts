@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
+import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
 
@@ -16,6 +17,7 @@ export function useLogoutUser() {
   const { setLoggedIn } = useAuthStore();
   const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
   const setIsVisible = useAnnouncementsPopupStore((state) => state.setIsVisible);
+  const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   const navigate = useNavigate();
 
@@ -33,6 +35,8 @@ export function useLogoutUser() {
       requestManager.abortAll();
 
       await queryClient.invalidateQueries();
+
+      clearHistory();
 
       navigate("/auth/login");
     },
