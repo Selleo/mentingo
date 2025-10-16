@@ -1,3 +1,4 @@
+import { observe, updateActiveObservation, updateActiveTrace } from "@langfuse/tracing";
 import {
   BadRequestException,
   ForbiddenException,
@@ -5,6 +6,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { trace } from "@opentelemetry/api";
 import { type Message, streamText } from "ai";
 import { eq } from "drizzle-orm";
 
@@ -55,67 +57,110 @@ export class AiService {
   ) {}
 
   async getThreadWithSetup(data: CreateThreadBody) {
-    const threadData = await this.threadService.createThreadIfNoneExist(data);
+    return observe(
+      async () => {
+        try {
+          const threadData = await this.threadService.createThreadIfNoneExist(data);
 
-    if (!threadData.newThread) {
-      return { data: threadData.thread };
-    }
+          if (!threadData.newThread) {
+            return { data: threadData.thread };
+          }
 
-    const systemPrompt = await this.promptService.setSystemPrompt({
-      threadId: threadData.thread.id,
-      userId: threadData.thread.userId,
-    });
+          updateActiveTrace({ userId: threadData.thread.userId, sessionId: threadData.thread.id });
 
-    await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
+          const systemPrompt = await this.promptService.setSystemPrompt({
+            threadId: threadData.thread.id,
+            userId: threadData.thread.userId,
+          });
 
-    return { data: threadData.thread };
+          await this.sendWelcomeMessage(threadData.thread.id, systemPrompt);
+
+          return { data: threadData.thread };
+        } catch (error) {
+          updateActiveObservation({
+            level: "ERROR",
+            statusMessage: error.message,
+          });
+          throw error;
+        }
+      },
+      { name: "Get Thread", asType: "span" },
+    )();
   }
 
   async streamMessage(data: StreamChatBody, model: OpenAIModels, userId: UUIDType) {
-    await this.isThreadActive(data.threadId, userId);
-    await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
+    return observe(
+      async () => {
+        updateActiveTrace({
+          sessionId: data.threadId,
+          userId,
+        });
 
-    const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
-    const provider = await this.promptService.getOpenAI();
+        await this.isThreadActive(data.threadId, userId);
+        await this.summaryService.summarizeThreadOnTokenThreshold(data.threadId);
 
-    return streamText({
-      model: provider(model),
-      messages: prompt.map((m) => ({
-        content: m.content,
-        role: this.mapRole(m.role),
-      })) as Omit<Message, "id">[],
-      maxTokens: MAX_TOKENS,
-      temperature: 0.8,
-      topK: 50,
-      topP: 0.8,
-      onFinish: async (event) => {
-        const mentorTokenCount = this.tokenService.countTokens(model, event.text);
-        const userTokenCount = this.tokenService.countTokens(model, data.content);
+        const prompt = await this.promptService.buildPrompt(data.threadId, data.content, data.id);
+        const provider = await this.promptService.getOpenAI();
 
-        await this.messageService.createMessages(
-          {
-            ...data,
-            role: MESSAGE_ROLE.USER,
-            tokenCount: userTokenCount,
+        return streamText({
+          model: provider(model),
+          messages: prompt.map((m) => ({
+            content: m.content,
+            role: this.mapRole(m.role),
+          })) as Omit<Message, "id">[],
+          maxTokens: MAX_TOKENS,
+          temperature: 0.8,
+          topK: 50,
+          topP: 0.8,
+          experimental_telemetry: { isEnabled: true },
+          onFinish: async (event) => {
+            const mentorTokenCount = this.tokenService.countTokens(model, event.text);
+            const userTokenCount = this.tokenService.countTokens(model, data.content);
+
+            await this.messageService.createMessages(
+              {
+                ...data,
+                role: MESSAGE_ROLE.USER,
+                tokenCount: userTokenCount,
+              },
+              {
+                content: event.text,
+                role: MESSAGE_ROLE.MENTOR,
+                threadId: data.threadId,
+                tokenCount: mentorTokenCount,
+              },
+            );
+
+            updateActiveObservation({
+              input: { message: data.content },
+              output: { message: event.text },
+            });
+
+            trace.getActiveSpan()?.end();
           },
-          {
-            content: event.text,
-            role: MESSAGE_ROLE.MENTOR,
-            threadId: data.threadId,
-            tokenCount: mentorTokenCount,
+          onError: ({ error }) => {
+            updateActiveObservation({
+              level: "ERROR",
+              statusMessage: (error as Error).message ?? "An error occurred during streaming",
+            });
+
+            trace.getActiveSpan()?.end();
           },
-        );
+        });
       },
-    });
+      { name: "Conversation", asType: "generation", endOnExit: false },
+    )();
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
     const welcomeMessagePrompt = WELCOME_MESSAGE_PROMPT(systemPrompt);
 
-    const content = await this.chatService.generatePrompt(
-      welcomeMessagePrompt,
-      OPENAI_MODELS.BASIC,
-    );
+    const content = await observe(
+      async () => {
+        return this.chatService.generatePrompt(welcomeMessagePrompt, OPENAI_MODELS.BASIC);
+      },
+      { name: "Start Conversation", asType: "generation" },
+    )();
 
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, content);
 
@@ -128,7 +173,14 @@ export class AiService {
   }
 
   async runJudge(data: ThreadOwnershipBody, userRole: UserRole = USER_ROLES.STUDENT) {
-    const judged = await this.judgeService.runJudge(data);
+    const judged = await observe(
+      async () => {
+        updateActiveTrace({ sessionId: data.threadId, userId: data.userId });
+        return this.judgeService.runJudge(data);
+      },
+      { name: "Thread Evaluator", asType: "evaluator" },
+    )();
+
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
 
     await this.markAsCompletedIfJudge(lessonId, data.userId, userRole, judged.data, true);

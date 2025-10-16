@@ -33,6 +33,7 @@ export class RagRepository {
           ${docChunks.chunkIndex},
           ${docChunks.content},
           ${docChunks.embedding},
+          ${documents.fileName},
           1 - (${docChunks.embedding} <=> ${JSON.stringify(embedding)}::vector) as similarity_score
         FROM ${docChunks}
         INNER JOIN ${documents} ON ${docChunks.documentId} = ${documents.id}
@@ -61,6 +62,7 @@ export class RagRepository {
             WHEN tc.id IS NOT NULL THEN tc.similarity_score
             ELSE 0
           END as similarity_score,
+          tc.file_name,
           CASE 
             WHEN tc.id IS NOT NULL THEN true
             ELSE false
@@ -78,6 +80,7 @@ export class RagRepository {
           content,
           embedding,
           similarity_score,
+          file_name,
           true as is_top_chunk
         FROM top_chunks
       )
