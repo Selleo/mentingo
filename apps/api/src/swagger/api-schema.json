@@ -944,6 +944,33 @@
         }
       }
     },
+    "/api/user/bulk/archive": {
+      "patch": {
+        "operationId": "UserController_archiveBulkUsers",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArchiveBulkUsersBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArchiveBulkUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/import": {
       "post": {
         "operationId": "UserController_importUsers",
@@ -5774,6 +5801,44 @@
         "required": [
           "userIds",
           "groupId"
+        ]
+      },
+      "ArchiveBulkUsersBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "ArchiveBulkUsersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "archivedUsersCount": {
+                "type": "number"
+              },
+              "usersAlreadyArchivedCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "archivedUsersCount",
+              "usersAlreadyArchivedCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "CreateUserBody": {
