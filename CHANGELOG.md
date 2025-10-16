@@ -1,3 +1,71 @@
+<a name="v3.14.1"></a>
+
+## [v3.14.1] - 16.10.2025
+
+### Features:
+
+- redirect user to desired path after login ([#785](https://github.com/Selleo/mentingo/issues/785))
+
+- customize font contrast color ([#777](https://github.com/Selleo/mentingo/issues/777))
+
+- display text when there are no new announcements ([#779](https://github.com/Selleo/mentingo/issues/779))
+
+### Bug Fixes:
+
+- users import failing when email is provided as a link ([#802](https://github.com/Selleo/mentingo/issues/802))
+
+- generate missing migration for contrast color using drizzle ([#795](https://github.com/Selleo/mentingo/issues/795))
+
+- install multer module so apps can be properly served ([#794](https://github.com/Selleo/mentingo/issues/794))
+
+- fix flickering logo ([#778](https://github.com/Selleo/mentingo/issues/778))
+
+### Chores:
+
+- removed posthog keys from env manager ([#798](https://github.com/Selleo/mentingo/issues/798))
+
+- update create user tokens to expire after a year ([#789](https://github.com/Selleo/mentingo/issues/789))
+
+- extend iframe load time to 30 secs ([#792](https://github.com/Selleo/mentingo/issues/792))
+
+### Code Refactoring:
+
+- refactor profile avatars ([#750](https://github.com/Selleo/mentingo/issues/750))
+
+### Documentation:
+
+- update changelog for version v3.13.0
+
+<a name="v3.14.0"></a>
+
+## [v3.14.0] - 15.10.2025
+
+### Features:
+
+- add ability to crop your avatar
+
+### Bug Fixes:
+
+- fix vite config
+
+- fix web e2e tests
+
+- fix not being able to crop uploaded avatar if you dont already have one
+
+- make avatar preview square
+
+### Chores:
+
+- remove leftover console logs
+
+### Code Refactoring:
+
+- refactor file validation in api and image crop resizing in app
+
+### Documentation:
+
+- update changelog for version v3.14.0
+
 <a name="v3.13.0"></a>
 
 ## [v3.13.0] - 14.10.2025
@@ -7,6 +75,10 @@
 - update create user tokens to expire after a year ([#789](https://github.com/Selleo/mentingo/issues/789))
 
 - extend iframe load time to 30 secs ([#792](https://github.com/Selleo/mentingo/issues/792))
+
+### Documentation:
+
+- update changelog for version v3.13.0
 
 <a name="v3.12.0"></a>
 
@@ -1656,7 +1728,9 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.13.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.14.1...HEAD
+[v3.14.1]: https://github.com/Selleo/mentingo/compare/v3.14.0...v3.14.1
+[v3.14.0]: https://github.com/Selleo/mentingo/compare/v3.13.0...v3.14.0
 [v3.13.0]: https://github.com/Selleo/mentingo/compare/v3.12.0...v3.13.0
 [v3.12.0]: https://github.com/Selleo/mentingo/compare/v3.11.0...v3.12.0
 [v3.11.0]: https://github.com/Selleo/mentingo/compare/v3.10.0...v3.11.0
