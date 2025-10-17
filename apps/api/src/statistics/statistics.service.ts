@@ -86,6 +86,28 @@ export class StatisticsService {
     };
   }
 
+  async getAdminStats() {
+    const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses();
+    const [totalCoursesCompletionStats] =
+      await this.statisticsRepository.getTotalCoursesCompletion();
+    const [conversionAfterFreemiumLesson] =
+      await this.statisticsRepository.getConversionAfterFreemiumLesson();
+    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats();
+    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore();
+
+    return {
+      fiveMostPopularCourses,
+      totalCoursesCompletionStats,
+      conversionAfterFreemiumLesson,
+      courseStudentsStats: this.formatCourseStudentStats(courseStudentsStats),
+      avgQuizScore: {
+        correctAnswerCount: avgQuizScore.correctAnswersCount,
+        wrongAnswerCount: avgQuizScore.wrongAnswersCount,
+        answerCount: avgQuizScore.correctAnswersCount + avgQuizScore.wrongAnswersCount,
+      },
+    };
+  }
+
   async createQuizAttempt(data: {
     userId: UUIDType;
     courseId: UUIDType;

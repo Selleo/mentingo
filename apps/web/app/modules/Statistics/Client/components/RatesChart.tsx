@@ -97,7 +97,7 @@ export const RatesChart = ({ isLoading = false, resourceName, chartData }: Rates
           {resourceName} {t("clientStatisticsView.other.rates")}
         </h2>
         <p className="body-sm-md text-center text-neutral-800">
-          {t("clientStatisticsView.other.numberOf")} {resourceName} in 2024
+          {t("clientStatisticsView.other.numberOf")} {resourceName}
         </p>
       </hgroup>
       <div className="mt-2 grid h-full place-items-center">
