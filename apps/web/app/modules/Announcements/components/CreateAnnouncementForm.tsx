@@ -50,6 +50,7 @@ export default function CreateAnnouncementForm({ control, errors }: CreateAnnoun
             render={({ field }) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name} className="body-sm-md md:body-base-md mb-1 block">
+                  <span className="text-error-600">*</span>{" "}
                   {t(`announcements.createPage.fields.${field.name}`)}
                 </Label>
                 <Input
@@ -70,6 +71,7 @@ export default function CreateAnnouncementForm({ control, errors }: CreateAnnoun
             render={({ field }) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name} className="body-sm-md md:body-base-md mb-1 block">
+                  <span className="text-error-600">*</span>{" "}
                   {t(`announcements.createPage.fields.group`)}
                 </Label>
                 <Select
@@ -101,6 +103,7 @@ export default function CreateAnnouncementForm({ control, errors }: CreateAnnoun
             render={({ field }) => (
               <div className="space-y-2">
                 <Label htmlFor={field.name} className="body-sm-md md:body-base-md mb-1 block">
+                  <span className="text-error-600">*</span>{" "}
                   {t(`announcements.createPage.fields.${field.name}`)}
                 </Label>
                 <Textarea

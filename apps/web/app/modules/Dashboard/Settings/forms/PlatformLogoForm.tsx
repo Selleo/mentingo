@@ -61,8 +61,8 @@ export const PlatformLogoForm = () => {
     <Card>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
-          <CardTitle>{t("platformLogo.header")}</CardTitle>
-          <CardDescription>{t("platformLogo.subHeader")}</CardDescription>
+          <CardTitle className="h5">{t("platformLogo.header")}</CardTitle>
+          <CardDescription className="body-lg-md">{t("platformLogo.subHeader")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Controller
@@ -70,7 +70,9 @@ export const PlatformLogoForm = () => {
             control={control}
             render={({ field }) => (
               <div className="flex flex-col gap-y-2">
-                <Label htmlFor="logo">{t("platformLogo.field.uploadLabel")}</Label>
+                <Label htmlFor="logo" className="body-base-md">
+                  {t("platformLogo.field.uploadLabel")}
+                </Label>
                 <PlatformLogoUploadInput
                   field={{
                     ...field,

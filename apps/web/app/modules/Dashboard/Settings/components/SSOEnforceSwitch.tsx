@@ -34,19 +34,19 @@ export default function SSOEnforceSwitch({ enforceSSO }: SSOEnforceSwitchProps) 
   return (
     <Card id="sso-enforcement">
       <CardHeader>
-        <CardTitle>{t("ssoEnforcementView.header")}</CardTitle>
-        <CardDescription>{t("ssoEnforcementView.subHeader")}</CardDescription>
+        <CardTitle className="h5">{t("ssoEnforcementView.header")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("ssoEnforcementView.subHeader")}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+      <CardContent className="body-sm-md flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
         <p className="md:w-3/4">{t("ssoEnforcementView.description")}</p>
         <div className="group inline-flex items-center gap-2">
-          <span className="flex-1 text-right text-sm font-medium">
+          <span className="flex-1 text-right details">
             {t("ssoEnforcementView.switch.disabled")}
           </span>
           <Switch checked={isChecked} onCheckedChange={toggleSwitch} />
-          <span className="flex-1 text-left text-sm font-medium">
-            {t("ssoEnforcementView.switch.enabled")}
-          </span>
+          <span className="flex-1 text-left details">{t("ssoEnforcementView.switch.enabled")}</span>
         </div>
       </CardContent>
       <CardFooter className="border-t px-6 py-4">

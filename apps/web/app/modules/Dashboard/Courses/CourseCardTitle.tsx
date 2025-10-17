@@ -30,7 +30,7 @@ export const CourseCardTitle = ({ title }: { title: string }) => {
       {isTruncated ? (
         <Tooltip>
           <TooltipTrigger asChild>
-            <h3 ref={titleRef} className="line-clamp-2 text-lg font-bold text-neutral-950">
+            <h3 ref={titleRef} className="line-clamp-2 body-lg font-bold text-neutral-950">
               {title}
             </h3>
           </TooltipTrigger>
@@ -40,7 +40,7 @@ export const CourseCardTitle = ({ title }: { title: string }) => {
           </TooltipContent>
         </Tooltip>
       ) : (
-        <h3 ref={titleRef} className="line-clamp-2 text-lg font-bold text-neutral-950">
+        <h3 ref={titleRef} className="line-clamp-2 body-lg font-bold text-neutral-950">
           {title}
         </h3>
       )}

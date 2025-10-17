@@ -65,8 +65,10 @@ export function OrganizationLoginBackgroundUpload({
   return (
     <Card id="organization-login-background-image-upload">
       <CardHeader>
-        <CardTitle>{t("organizationLoginBackgroundImageUpload.title")}</CardTitle>
-        <CardDescription>{t("organizationLoginBackgroundImageUpload.description")}</CardDescription>
+        <CardTitle className="h5">{t("organizationLoginBackgroundImageUpload.title")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("organizationLoginBackgroundImageUpload.description")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Controller

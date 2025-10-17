@@ -206,7 +206,7 @@ export default function ProfilePage() {
         {hasPermission && (
           <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
             <div className="flex flex-col gap-y-2">
-              <h2 className="h5 md:h3">{t("contentCreatorView.other.courses")}</h2>
+              <h2 className="h6 md:h4">{t("contentCreatorView.other.courses")}</h2>
             </div>
             <CoursesCarousel
               courses={contentCreatorCourses}

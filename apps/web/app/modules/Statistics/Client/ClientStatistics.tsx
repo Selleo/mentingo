@@ -85,7 +85,7 @@ export default function ClientStatistics() {
     <PageWrapper className="2xl:!pt-8">
       <div className="flex flex-col gap-y-6 2xl:gap-y-6">
         <div className="flex items-center gap-x-2 2xl:gap-x-4">
-          <p className="h5 2xl:h2 text-neutral-950">
+          <p className="h5 2xl:h2 text-neutral-950 font-gothic">
             {t("clientStatisticsView.header")} {user?.firstName}
           </p>
           <UserAvatar
