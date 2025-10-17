@@ -28,11 +28,15 @@ export default function LanguageSelect() {
   return (
     <Card id="change-language">
       <CardHeader>
-        <CardTitle>{t("changeUserLanguageView.header")}</CardTitle>
-        <CardDescription>{t("changeUserLanguageView.subHeader")}</CardDescription>
+        <CardTitle className="h5">{t("changeUserLanguageView.header")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("changeUserLanguageView.subHeader")}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        <Label htmlFor="language">{t("changeUserLanguageView.field.language")}</Label>
+        <Label htmlFor="language" className="body-base-md">
+          {t("changeUserLanguageView.field.language")}
+        </Label>
         <Select value={currentLanguage} onValueChange={handleLanguageChange} disabled={isPending}>
           <SelectTrigger>
             <SelectValue />

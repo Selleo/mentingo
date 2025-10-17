@@ -46,7 +46,7 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
               <span className="text-neutral-900">
                 {t("studentCourseView.sideSection.other.title")}:
               </span>{" "}
-              <span className="font-medium text-neutral-950">{userDetails?.jobTitle}</span>
+              <span className="body-sm-md text-neutral-950">{userDetails?.jobTitle}</span>
             </p>
           </div>
         </div>

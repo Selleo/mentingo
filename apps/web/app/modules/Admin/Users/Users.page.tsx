@@ -296,7 +296,7 @@ const Users = () => {
           />
         )}
         <div className="flex flex-wrap justify-between gap-3">
-          <h4 className="text-2xl font-bold">{t("navigationSideBar.users")}</h4>
+          <h4 className="h4">{t("navigationSideBar.users")}</h4>
           <div className="flex gap-3">
             <Button variant="primary" asChild>
               <Link to="new">{t("adminUsersView.button.createNew")}</Link>

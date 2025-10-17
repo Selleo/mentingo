@@ -49,11 +49,15 @@ export default function UserForm() {
     <Card id="change-password">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
-          <CardTitle>{t("changeUserEmailView.header")}</CardTitle>
-          <CardDescription>{t("changeUserEmailView.subHeader")}</CardDescription>
+          <CardTitle className="h5">{t("changeUserEmailView.header")}</CardTitle>
+          <CardDescription className="body-lg-md">
+            {t("changeUserEmailView.subHeader")}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Label htmlFor="email">{t("changeUserEmailView.field.email")}</Label>
+          <Label htmlFor="email" className="body-base-md">
+            {t("changeUserEmailView.field.email")}
+          </Label>
           <Input
             id="email"
             placeholder="user@email.com"

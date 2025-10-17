@@ -37,8 +37,10 @@ export const OrganizationTheme = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("organizationTheme.title")}</CardTitle>
-        <CardDescription>{t("organizationTheme.description")}</CardDescription>
+        <CardTitle className="h5">{t("organizationTheme.title")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("organizationTheme.description")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col items-center md:flex-row justify-center gap-4">

@@ -24,7 +24,7 @@ export default function NotificationPreferences({ adminSettings }: NotificationP
   return (
     <Card id="admin-notifications-preferences">
       <CardHeader>
-        <CardTitle>{t("adminPreferences.notificationSettings")}</CardTitle>
+        <CardTitle className="h5">{t("adminPreferences.notificationSettings")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="space-y-4">

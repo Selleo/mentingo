@@ -13,10 +13,10 @@ export const StudentsCurses = () => {
   return (
     <div className="flex flex-col gap-y-6">
       <div className="flex flex-col">
-        <h4 className="pb-1 text-2xl font-bold leading-10 text-neutral-950">
+        <h4 className="pb-1 h4 text-neutral-950">
           {t("studentCoursesView.enrolledCourses.header")}
         </h4>
-        <p className="text-lg leading-7 text-neutral-800">
+        <p className="body-lg-md text-neutral-800">
           {t("studentCoursesView.enrolledCourses.subHeader")}
         </p>
       </div>

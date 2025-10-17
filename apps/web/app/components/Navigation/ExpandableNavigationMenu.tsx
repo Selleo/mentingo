@@ -85,7 +85,7 @@ export const ExpandableNavigationMenu = ({
         <button
           type="button"
           className={cn(
-            "text-md flex w-full items-center justify-between gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 hover:bg-white hover:text-neutral-900 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 3xl:hover:bg-primary-50",
+            "text-md flex w-full items-center justify-between gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 hover:bg-white hover:text-neutral-900 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 3xl:hover:bg-primary-50 body-sm-md",
           )}
         >
           <Icon name={expandableIcon} className="size-6" />

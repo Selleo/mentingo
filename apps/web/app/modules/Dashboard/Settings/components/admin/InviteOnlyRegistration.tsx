@@ -35,17 +35,19 @@ export const InviteOnlyRegistration = ({
   return (
     <Card id="invite-only-registration">
       <CardHeader>
-        <CardTitle>{t("inviteOnlyRegistrationView.header")}</CardTitle>
-        <CardDescription>{t("inviteOnlyRegistrationView.subHeader")}</CardDescription>
+        <CardTitle className="h5">{t("inviteOnlyRegistrationView.header")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("inviteOnlyRegistrationView.subHeader")}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+      <CardContent className="body-sm-md flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
         <p className="md:w-3/4">{t("inviteOnlyRegistrationView.description")}</p>
         <div className="group inline-flex items-center gap-2">
-          <span className="flex-1 text-right text-sm font-medium">
+          <span className="flex-1 text-right details">
             {t("inviteOnlyRegistrationView.switch.disabled")}
           </span>
           <Switch checked={isChecked} onCheckedChange={toggleSwitch} />
-          <span className="flex-1 text-left text-sm font-medium">
+          <span className="flex-1 text-left details">
             {t("inviteOnlyRegistrationView.switch.enabled")}
           </span>
         </div>

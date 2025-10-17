@@ -22,7 +22,7 @@ export const CategoryChip = ({
       className={cn("flex max-w-fit items-center gap-2 rounded-lg bg-white px-2 py-1", className)}
     >
       <Dot size={8} strokeWidth={4} className={dotClasses} absoluteStrokeWidth />
-      <div className="truncate text-xs text-primary-950">{category}</div>
+      <div className="truncate details-md text-primary-950">{category}</div>
     </div>
   );
 };

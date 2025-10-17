@@ -58,11 +58,15 @@ export default function ChangePasswordForm() {
       <Card id="user-info">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader>
-            <CardTitle>{t("changePasswordView.header")}</CardTitle>
-            <CardDescription>{t("changePasswordView.subHeader")}</CardDescription>
+            <CardTitle className="h5">{t("changePasswordView.header")}</CardTitle>
+            <CardDescription className="body-lg-md">
+              {t("changePasswordView.subHeader")}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Label htmlFor="oldPassword">{t("changePasswordView.field.oldPassword")}</Label>
+            <Label htmlFor="oldPassword" className="body-base-md">
+              {t("changePasswordView.field.oldPassword")}
+            </Label>
             <Input
               id="oldPassword"
               type="password"
@@ -76,7 +80,9 @@ export default function ChangePasswordForm() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="newPassword">{t("changePasswordView.field.newPassword")}</Label>
+              <Label htmlFor="newPassword" className="body-base-md">
+                {t("changePasswordView.field.newPassword")}
+              </Label>
               <Input
                 id="newPassword"
                 type="password"

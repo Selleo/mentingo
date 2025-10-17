@@ -1433,7 +1433,7 @@
   },
   "adminPreferences": {
     "header": "Administrator Global Preferences",
-    "subHeader": "Configure global system settings, user preferences, and administrative options",
+    "subHeader": "Configure course settings",
     "notificationSettings": "Notification Settings",
     "courseSettings": "Course Settings",
     "field": {

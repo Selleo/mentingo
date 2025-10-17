@@ -1,12 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import url("https://use.typekit.net/qqt7bjl.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html,
 body {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Open Sans", sans-serif;
   height: 100%;
+}
+
+/* All-round-gothic font for headings */
+.font-gothic {
+  font-family: "all-round-gothic", sans-serif;
 }
 
 /* Smooth scrolling for better UX */
@@ -211,22 +218,22 @@ html {
 
 @layer components {
   .h1 {
-    @apply text-4xl font-bold leading-relaxed;
+    @apply text-4xl font-semibold font-gothic leading-relaxed;
   }
   .h2 {
-    @apply text-[32px] font-bold leading-relaxed;
+    @apply text-[32px] font-semibold font-gothic leading-relaxed;
   }
   .h3 {
-    @apply text-[29px] font-bold leading-relaxed;
+    @apply text-[29px] font-semibold font-gothic leading-relaxed;
   }
   .h4 {
-    @apply text-[26px] font-bold leading-relaxed;
+    @apply text-[26px] font-semibold font-gothic leading-relaxed;
   }
   .h5 {
-    @apply text-[23px] font-bold leading-relaxed;
+    @apply text-[23px] font-semibold font-gothic leading-relaxed;
   }
   .h6 {
-    @apply text-xl font-bold leading-relaxed;
+    @apply text-xl font-semibold font-gothic leading-relaxed;
   }
   .body-lg {
     @apply text-lg leading-relaxed;

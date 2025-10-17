@@ -27,7 +27,7 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
   if (isLoading) {
     return (
       <div className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
-        <h5 className="h5">{t("studentCertificateView.header")}</h5>
+        <h5 className="h6 md:h4">{t("studentCertificateView.header")}</h5>
         <div className="flex items-center gap-2">
           <div className="size-4 animate-spin rounded-full border-b-2 border-primary-600"></div>
           <p className="body-sm-md">{t("studentCertificateView.informations.loading")}</p>

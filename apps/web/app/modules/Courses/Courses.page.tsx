@@ -129,10 +129,10 @@ export default function CoursesPage() {
           {isStudent && <StudentsCurses />}
           <div className="flex flex-col">
             <div className="flex flex-col lg:p-0">
-              <h4 className="pb-1 text-2xl font-bold leading-10 text-neutral-950">
+              <h4 className="pb-1 h4 text-neutral-950">
                 {t("studentCoursesView.availableCourses.header")}
               </h4>
-              <p className="text-lg leading-7 text-neutral-800">
+              <p className="body-lg-md text-neutral-800">
                 {t("studentCoursesView.availableCourses.subHeader")}
               </p>
               <div className="flex items-center justify-between gap-2">

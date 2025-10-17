@@ -23,7 +23,7 @@ export default function AnnouncementsList({ announcements, isAdminView }: Announ
           />
         ))
       ) : (
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-8 body-base-md">
           {t("announcements.other.noNewAnnouncements")}
         </div>
       )}

@@ -146,10 +146,10 @@ export const NavigationGlobalSearchWrapper = ({
             <Separator className="my-2" />
             {debouncedSearch.length < 3 && (
               <div className="flex flex-col px-6 pt-4">
-                <span className="text-center text-sm font-semibold text-neutral-950">
+                <span className="text-sm-md text-center ">
                   {t("globalSearch.searchIn", { companyName })}
                 </span>
-                <span className="text-normal-800 text-center text-[12px] font-normal leading-[160%]">
+                <span className="mt-2 details text-center text-neutral-800">
                   {t("globalSearch.searchInDescription")}
                 </span>
               </div>
@@ -168,18 +168,14 @@ export const NavigationGlobalSearchWrapper = ({
           <div className="flex items-center justify-end gap-[12px] border-t border-[#F1F5F9] bg-neutral-50 px-4 py-2">
             <div className="text-md flex h-5 items-center gap-[6px]">
               <KeyboardArrows />
-              <span className="text-md text-[12px] font-semibold leading-[160%] text-neutral-800">
-                {t("globalSearch.navigate")}
-              </span>
+              <span className="details text-neutral-800">{t("globalSearch.navigate")}</span>
             </div>
             <div className="flex h-5 items-center gap-[6px]">
               <KeyboardEnter />
-              <span className="text-md text-[12px] font-semibold leading-[160%] text-neutral-800">
-                {t("globalSearch.goTo")}
-              </span>
+              <span className="details text-neutral-800">{t("globalSearch.goTo")}</span>
             </div>
-            <div className="flex h-5 items-center gap-[6px] text-[12px] font-semibold leading-[160%] text-neutral-800">
-              <div className="flex items-center gap-[1px]">
+            <div className="flex h-5 items-center gap-1.5 details text-neutral-800">
+              <div className="flex items-center gap-px">
                 <KeyboardX />
                 <span className="font-normal text-neutral-700">/</span>
                 {isMac ? (

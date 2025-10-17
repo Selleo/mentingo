@@ -25,14 +25,14 @@ export function SettingsNavigationTabs({
   ];
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-6">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="rounded px-2 py-1 text-2xl font-bold">{t("settings.title")}</h1>
-        </div>
-        <Tabs defaultValue="account" className="w-full">
-          <div className="mb-6 flex justify-start">
-            <TabsList className="inline-flex h-auto items-center justify-center rounded-md bg-primary-50 p-1 text-muted-foreground">
+    <Tabs defaultValue="account" className="w-full bg-transparent flex flex-col gap-y-4">
+      <Card className="w-full">
+        <CardContent className="p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h4 className="h4">{t("settings.title")}</h4>
+          </div>
+          <div className="flex justify-start">
+            <TabsList className="inline-flex h-auto items-center justify-center rounded-md bg-primary-50 text-muted-foreground">
               {allTabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
@@ -44,16 +44,20 @@ export function SettingsNavigationTabs({
               ))}
             </TabsList>
           </div>
+        </CardContent>
+      </Card>
 
-          <TabsContent value="account" className="mt-6 space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <TabsContent value="account" className="space-y-6">
             {accountContent}
           </TabsContent>
 
-          <TabsContent value="organization" className="mt-6 space-y-6">
+          <TabsContent value="organization" className="space-y-6">
             {organizationContent}
           </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Tabs>
   );
 }

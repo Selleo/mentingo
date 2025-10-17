@@ -58,12 +58,16 @@ export default function UserForm() {
     <Card id="user-details">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
-          <CardTitle>{t("changeUserInformationView.header")}</CardTitle>
-          <CardDescription>{t("changeUserInformationView.subHeader")}</CardDescription>
+          <CardTitle className="h5">{t("changeUserInformationView.header")}</CardTitle>
+          <CardDescription className="body-lg-md">
+            {t("changeUserInformationView.subHeader")}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           <div>
-            <Label htmlFor="Bio - note">{t("changeUserInformationView.field.description")}</Label>
+            <Label htmlFor="Bio - note" className="body-base-md">
+              {t("changeUserInformationView.field.description")}
+            </Label>
             <Textarea
               placeholder={t("changeUserInformationView.placeholder.description")}
               {...(currentUserDetails?.description && {
@@ -79,7 +83,9 @@ export default function UserForm() {
             )}
           </div>
           <div>
-            <Label htmlFor="contactEmail">{t("changeUserInformationView.field.email")}</Label>
+            <Label htmlFor="contactEmail" className="body-base-md">
+              {t("changeUserInformationView.field.email")}
+            </Label>
             <Input
               {...(currentUser?.email && {
                 defaultValue: currentUser.email,
@@ -95,7 +101,7 @@ export default function UserForm() {
             )}
           </div>
           <div>
-            <Label htmlFor="contactPhoneNumber">
+            <Label htmlFor="contactPhoneNumber" className="body-base-md">
               {t("changeUserInformationView.field.phoneNumber")}
             </Label>
             <Input
@@ -113,7 +119,9 @@ export default function UserForm() {
             )}
           </div>
           <div>
-            <Label htmlFor="jobTitle">{t("changeUserInformationView.field.jobTitle")}</Label>
+            <Label htmlFor="jobTitle" className="body-base-md">
+              {t("changeUserInformationView.field.jobTitle")}
+            </Label>
             <Input
               {...(currentUserDetails?.jobTitle && {
                 defaultValue: currentUserDetails.jobTitle,

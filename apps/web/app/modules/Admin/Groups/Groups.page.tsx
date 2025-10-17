@@ -97,7 +97,7 @@ const Groups = (): ReactElement => {
       ]}
     >
       <div className="flex flex-col">
-        <h4 className="text-2xl font-bold">{t("navigationSideBar.groups")}</h4>
+        <h4 className="h4">{t("navigationSideBar.groups")}</h4>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center justify-between gap-2 pt-6">
             <Link to="new">

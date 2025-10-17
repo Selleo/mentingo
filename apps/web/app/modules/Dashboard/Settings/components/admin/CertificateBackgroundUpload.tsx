@@ -63,8 +63,10 @@ export function CertificateBackgroundUpload({
   return (
     <Card id="certificate-background-upload">
       <CardHeader>
-        <CardTitle>{t("certificateBackgroundUpload.title")}</CardTitle>
-        <CardDescription>{t("certificateBackgroundUpload.description")}</CardDescription>
+        <CardTitle className="h5">{t("certificateBackgroundUpload.title")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("certificateBackgroundUpload.description")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Controller

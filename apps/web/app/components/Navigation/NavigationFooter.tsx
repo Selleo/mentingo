@@ -69,7 +69,7 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
               className="size-8"
             />
             <span
-              className={cn("block grow text-left", {
+              className={cn("block grow text-left body-sm-md", {
                 hidden: isBetween1440And1680,
               })}
             >{`${user?.firstName} ${user?.lastName}`}</span>
@@ -128,7 +128,7 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
                   });
                 }}
               >
-                <div className="flex cursor-pointer items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50">
+                <div className="flex cursor-pointer items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md">
                   <Icon name="Logout" className="size-6" />
                   <span className="line-clamp-1 truncate whitespace-nowrap">
                     {t("navigationSideBar.logout")}

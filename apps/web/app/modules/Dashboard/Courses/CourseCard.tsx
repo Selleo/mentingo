@@ -86,11 +86,11 @@ const CourseCard = ({
               completedLessonCount={completedChapterCount}
             />
           )}
-          <div className={cn({ "mt-3": author })}>
+          <div className={cn({ "mt-3": enrolled })}>
             <CourseCardTitle title={title} />
           </div>
           {authorEmail && (
-            <div className="mb-2 mt-1 flex items-center gap-x-1.5">
+            <div className="mb-2 mt-2 flex items-center gap-x-1.5">
               <UserAvatar
                 className="size-4"
                 userName={author}

@@ -125,10 +125,10 @@ export const GlobalSearchContent = ({
               return (
                 <div className="flex flex-col px-6 py-[50px]">
                   <NoData className="mx-auto" />
-                  <span className="pt-4 text-center text-sm font-semibold text-neutral-950">
+                  <span className="pt-4 text-center body-sm-md text-neutral-950">
                     {t("globalSearch.notFound")}
                   </span>
-                  <span className="text-normal-800 text-center text-[12px] font-normal leading-[160%]">
+                  <span className="text-center details text-neutral-800">
                     {t("globalSearch.tryAgain")}
                   </span>
                 </div>
@@ -139,7 +139,7 @@ export const GlobalSearchContent = ({
               const sectionId = `global-search-${section.resultType}`;
               return (
                 <div key={section.resultType} className="w-full">
-                  <h3 id={sectionId} className="details-md px-[8px] py-[2px] text-neutral-600">
+                  <h3 id={sectionId} className="details-md px-2 py-0.5 text-neutral-600 mb-1">
                     {t(`globalSearch.entries.${section.resultType}`)}
                   </h3>
                   <ul aria-labelledby={sectionId} className="space-y-1">
