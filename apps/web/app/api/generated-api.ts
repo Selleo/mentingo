@@ -340,6 +340,17 @@ export interface BulkAssignUsersToGroupBody {
   groupId: string;
 }
 
+export interface ArchiveBulkUsersBody {
+  userIds: string[];
+}
+
+export interface ArchiveBulkUsersResponse {
+  data: {
+    archivedUsersCount: number;
+    usersAlreadyArchivedCount: number;
+  };
+}
+
 export interface CreateUserBody {
   /** @format email */
   email: string;
@@ -3117,6 +3128,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerArchiveBulkUsers
+     * @request PATCH:/api/user/bulk/archive
+     */
+    userControllerArchiveBulkUsers: (data: ArchiveBulkUsersBody, params: RequestParams = {}) =>
+      this.request<ArchiveBulkUsersResponse, any>({
+        path: `/api/user/bulk/archive`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

@@ -13,6 +13,7 @@ import { camelCase } from "lodash-es";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
 import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
 import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUsersGroups";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
@@ -49,7 +50,7 @@ import type { UserRole } from "~/config/userRoles";
 
 type TUser = GetUsersResponse["data"][number];
 
-type ModalTypes = "group" | "role" | "delete" | null;
+type ModalTypes = "group" | "role" | "delete" | "archive" | null;
 
 export const clientLoader = async () => {
   queryClient.prefetchQuery(usersQueryOptions());
@@ -77,6 +78,7 @@ const Users = () => {
 
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
   const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
+  const { mutateAsync: archiveUsers } = useBulkArchiveUsers();
 
   const { t } = useTranslation();
 
@@ -95,6 +97,12 @@ const Users = () => {
       translationKey: "adminUsersView.dropdown.changeGroup",
       action: () => setShowEditModal("group"),
       destructive: false,
+    },
+    {
+      icon: "Archive",
+      translationKey: "adminUsersView.dropdown.archive",
+      action: () => setShowEditModal("archive"),
+      destructive: true,
     },
     {
       icon: "TrashIcon",
@@ -240,6 +248,13 @@ const Users = () => {
     });
   };
 
+  const handleArchiveUsers = () => {
+    archiveUsers({ data: { userIds: selectedUsers }, searchParams }).then(() => {
+      table.resetRowSelection();
+      setShowEditModal(null);
+    });
+  };
+
   const handleUsersGroups = () => {
     updateUsersGroups({
       data: {
@@ -260,6 +275,7 @@ const Users = () => {
     role: () => {},
     group: handleUsersGroups,
     delete: handleDeleteUsers,
+    archive: handleArchiveUsers,
   };
 
   return (

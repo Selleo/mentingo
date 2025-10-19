@@ -63,6 +63,7 @@ export { default as Bell } from "./bell.svg?react";
 export { default as KeyboardArrows } from "./keyboardArrows.svg?react";
 export { default as KeyboardEnter } from "./keyboardEnter.svg?react";
 export { default as KeyboardX } from "./keyboardX.svg?react";
+export { default as Archive } from "./archive.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 
