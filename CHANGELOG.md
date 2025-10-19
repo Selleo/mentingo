@@ -1,3 +1,23 @@
+<a name="v3.15.0"></a>
+
+## [v3.15.0] - 19.10.2025
+
+### Features:
+
+- adjust fonts to figma designs ([#806](https://github.com/Selleo/mentingo/issues/806))
+
+- add bulk archive users option ([#774](https://github.com/Selleo/mentingo/issues/774))
+
+### Bug Fixes:
+
+- adjust sidebar navigation breakpoints ([#782](https://github.com/Selleo/mentingo/issues/782))
+
+### Tests:
+
+- add e2e tests for groups ([#791](https://github.com/Selleo/mentingo/issues/791))
+
+- add e2e tests for certificates ([#786](https://github.com/Selleo/mentingo/issues/786))
+
 <a name="v3.14.1"></a>
 
 ## [v3.14.1] - 16.10.2025
@@ -33,6 +53,8 @@
 - refactor profile avatars ([#750](https://github.com/Selleo/mentingo/issues/750))
 
 ### Documentation:
+
+- update changelog for version v3.14.1
 
 - update changelog for version v3.13.0
 
@@ -1728,7 +1750,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.14.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.15.0...HEAD
+[v3.15.0]: https://github.com/Selleo/mentingo/compare/v3.14.1...v3.15.0
 [v3.14.1]: https://github.com/Selleo/mentingo/compare/v3.14.0...v3.14.1
 [v3.14.0]: https://github.com/Selleo/mentingo/compare/v3.13.0...v3.14.0
 [v3.13.0]: https://github.com/Selleo/mentingo/compare/v3.12.0...v3.13.0
