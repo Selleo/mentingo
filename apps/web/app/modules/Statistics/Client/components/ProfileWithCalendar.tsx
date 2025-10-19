@@ -61,7 +61,7 @@ export const ProfileWithCalendar = ({ user, isLoading = true, streak }: ProfileW
             profilePictureUrl={user?.profilePictureUrl}
           />
           <div className="text-center">
-            <h2 className="h5">
+            <h2 className="h5 font-gothic">
               {user?.firstName} {user?.lastName}
             </h2>
             <a className="body-lg text-neutral-800" href={`mailto:${user?.email}`}>

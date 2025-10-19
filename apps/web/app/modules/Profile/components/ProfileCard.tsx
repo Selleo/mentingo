@@ -29,8 +29,10 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
             </h2>
             {isAdminLike && (
               <div className="body-sm">
-                <span className="text-neutral-900">{t("contentCreatorView.other.title")}:</span>{" "}
-                <span className="font-medium text-neutral-950" data-testid="jobTitle">
+                <span className="text-neutral-900 body-base-md">
+                  {t("contentCreatorView.other.title")}:
+                </span>{" "}
+                <span className="font-medium body-base-md text-neutral-950" data-testid="jobTitle">
                   {userDetails?.jobTitle}
                 </span>
               </div>
@@ -59,12 +61,12 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
       {isAdminLike && (
         <div className="flex flex-col gap-y-2">
           <div className="flex items-center gap-x-3">
-            <span className="min-w-fit text-neutral-900">
+            <span className="min-w-fit body-base-md md:body-lg-md text-neutral-900">
               {t("contentCreatorView.other.about")}
             </span>
             <div className="h-px w-full bg-primary-200" />
           </div>
-          <p className="body-base mt-2 text-neutral-950" data-testid="description">
+          <p className="body-sm md:body-base mt-2 text-neutral-950" data-testid="description">
             {userDetails?.description}
           </p>
         </div>

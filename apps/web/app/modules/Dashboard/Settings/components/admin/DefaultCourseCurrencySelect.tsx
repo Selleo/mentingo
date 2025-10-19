@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { cn } from "~/lib/utils";
 
 import { ALLOWED_CURRENCIES } from "../../constants";
 
@@ -48,12 +49,14 @@ export const DefaultCourseCurrencySelect = ({
   return (
     <Card id="default-course-currency">
       <CardHeader>
-        <CardTitle>{t("defaultCourseCurrencyView.header")}</CardTitle>
-        <CardDescription>{t("defaultCourseCurrencyView.subHeader")}</CardDescription>
+        <CardTitle className="h5">{t("defaultCourseCurrencyView.header")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("defaultCourseCurrencyView.subHeader")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Select value={selectedCurrency} onValueChange={handleCurrencyChange}>
-          <SelectTrigger>
+          <SelectTrigger className="body-sm-md">
             <SelectValue
               placeholder={t(`defaultCourseCurrencyView.select.${selectedCurrency}.placeholder`)}
             />
@@ -61,7 +64,11 @@ export const DefaultCourseCurrencySelect = ({
           <SelectContent>
             {ALLOWED_CURRENCIES.map((currency) => {
               return (
-                <SelectItem key={currency} value={currency}>
+                <SelectItem
+                  key={currency}
+                  value={currency}
+                  className={cn({ "body-sm-md": selectedCurrency === currency })}
+                >
                   {t(`defaultCourseCurrencyView.select.${currency}.label`)} -{" "}
                   {t(`defaultCourseCurrencyView.select.${currency}.sign`)}
                 </SelectItem>

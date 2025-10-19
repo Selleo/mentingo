@@ -16,8 +16,8 @@ export default function AdminPreferences({ globalSettings }: AdminPreferencesPro
   return (
     <Card id="admin-preferences">
       <CardHeader>
-        <CardTitle>{t("adminPreferences.header")}</CardTitle>
-        <CardDescription>{t("adminPreferences.subHeader")}</CardDescription>
+        <CardTitle className="h5">{t("adminPreferences.courseSettings")}</CardTitle>
+        <CardDescription className="body-lg-md">{t("adminPreferences.subHeader")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <GlobalPreferences globalSettings={globalSettings} />

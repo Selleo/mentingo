@@ -52,7 +52,7 @@ export default function AnnouncementCard({ announcement, isAdminView }: Announce
       </CardHeader>
       <CardContent className="space-y-3 px-6 md:px-8">
         <h2 className="h5 md:h4">{title}</h2>
-        <p className="body-sm-md md:body-base-md text-neutral-800">{content}</p>
+        <p className="body-sm md:body-base text-neutral-800">{content}</p>
       </CardContent>
       <Separator className="mb-6 bg-primary-100" />
       <CardFooter className="px-6 md:px-8">

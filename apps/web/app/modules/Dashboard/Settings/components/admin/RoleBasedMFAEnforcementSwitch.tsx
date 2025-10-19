@@ -65,21 +65,23 @@ export default function RoleBasedMFAEnforcementSwitch({
   return (
     <Card id="sso-enforcement">
       <CardHeader>
-        <CardTitle>{t("MFAEnforcementView.header")}</CardTitle>
-        <CardDescription>{t("MFAEnforcementView.subHeader")}</CardDescription>
+        <CardTitle className="h5">{t("MFAEnforcementView.header")}</CardTitle>
+        <CardDescription className="body-lg-md">
+          {t("MFAEnforcementView.subHeader")}
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="body-sm-md">
         <div className="mb-4">{t("MFAEnforcementView.description")}</div>
         <div className="space-y-2">
           {Object.values(USER_ROLES).map((role) => (
             <div key={role} className="flex items-center justify-between">
               <p>{t(`MFAEnforcementView.roles.${role}`)}</p>
               <div className="group inline-flex items-center gap-2">
-                <span className="flex-1 text-right text-sm font-medium">
+                <span className="flex-1 text-right details">
                   {t("MFAEnforcementView.switch.disabled")}
                 </span>
                 <Switch checked={roleStates[role]} onCheckedChange={() => toggleRoleSwitch(role)} />
-                <span className="flex-1 text-left text-sm font-medium">
+                <span className="flex-1 text-left details">
                   {t("MFAEnforcementView.switch.enabled")}
                 </span>
               </div>

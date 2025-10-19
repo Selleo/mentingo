@@ -28,8 +28,10 @@ export function SettingItem({
           </div>
         )}
         <div className="space-y-0.5">
-          <Label htmlFor={id}>{label}</Label>
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <Label htmlFor={id} className="body-base-md">
+            {label}
+          </Label>
+          <p className="body-sm-md text-muted-foreground">{description}</p>
         </div>
       </div>
       <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />

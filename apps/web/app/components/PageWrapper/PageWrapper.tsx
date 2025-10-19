@@ -40,7 +40,7 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
     <BreadcrumbList className="mb-4">
       {backButton && (
         <BreadcrumbItem className="mr-3">
-          <BreadcrumbLink className="body-base-md cursor-pointer text-primary-800">
+          <BreadcrumbLink className="details-md cursor-pointer text-primary-800">
             <Button
               variant="outline"
               onClick={() => navigate(backButton.href)}
@@ -55,7 +55,7 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
       {breadcrumbs.slice(0, lastIndex).map(({ href, title }, index) => (
         <BreadcrumbItem key={index}>
           <BreadcrumbLink
-            className="body-base-md text-xs text-neutral-800 hover:text-neutral-800"
+            className="details-md text-neutral-800 hover:text-neutral-800"
             href={href}
           >
             {title}
@@ -65,7 +65,7 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
       ))}
       <BreadcrumbItem>
         <BreadcrumbLink
-          className="body-base-md text-xs text-neutral-950 hover:text-neutral-950"
+          className="details-md text-neutral-950 hover:text-neutral-950"
           href={lastBreadcrumb.href}
         >
           {lastBreadcrumb.title}

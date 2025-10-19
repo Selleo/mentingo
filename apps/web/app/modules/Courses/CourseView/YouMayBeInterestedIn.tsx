@@ -23,10 +23,8 @@ export const YouMayBeInterestedIn = ({ category, courseId }: YouMayBeInterestedI
   return (
     <section className="flex h-full w-full flex-col gap-y-6 rounded-lg bg-white p-8">
       <div className="flex flex-col">
-        <h4 className="pb-1 text-2xl font-bold leading-10 text-neutral-950">
-          {t("studentCourseView.recommendedHeader")}
-        </h4>
-        <p className="text-lg leading-7 text-neutral-800">
+        <h4 className="pb-1 h6 text-neutral-950">{t("studentCourseView.recommendedHeader")}</h4>
+        <p className="body-base-md text-neutral-800">
           {t("studentCourseView.recommendedSubheader")}
         </p>
       </div>

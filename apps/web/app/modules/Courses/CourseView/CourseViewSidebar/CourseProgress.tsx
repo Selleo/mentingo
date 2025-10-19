@@ -79,7 +79,7 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
             </span>
           </Button>
           <p className="details flex items-center justify-center gap-x-2 text-neutral-800">
-            <Icon name="Info" className="h-auto w-4 text-neutral-800" />
+            <Icon name="Info" className="h-auto w-4 text-neutral-800 details" />
             <span>{t("studentCourseView.sideSection.other.informationText")}</span>
           </p>
         </>
