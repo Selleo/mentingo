@@ -10,7 +10,7 @@ export function useIsWidthBetween(minWidth: number, maxWidth: number, initialSta
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mq = window.matchMedia(`(min-width: ${minWidth}px) and (max-width: ${maxWidth}px)`);
+    const mq = window.matchMedia(`(min-width: ${minWidth}px) and (max-width: ${maxWidth - 1}px)`);
 
     const mqWithLegacy = mq as MediaQueryList & {
       addListener?: (listener: (mql: MediaQueryList) => void) => void;
