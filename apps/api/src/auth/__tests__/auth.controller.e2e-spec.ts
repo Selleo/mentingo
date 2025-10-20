@@ -52,7 +52,7 @@ describe("AuthController (e2e)", () => {
 
       expect(response.status).toEqual(201);
       expect(response.body.data).toHaveProperty("id");
-      expect(response.body.data.email).toBe(user.email);
+      expect(response.body.data.email).toBe(user.email.toLowerCase());
     });
 
     it("should return 409 if user already exists", async () => {
@@ -126,8 +126,10 @@ describe("AuthController (e2e)", () => {
         password,
       });
 
+      const expectedUser = { ...user, email: user.email.toLowerCase() };
+
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
-        email: user.email,
+        email: expectedUser.email,
         password: password,
       });
 
@@ -159,20 +161,23 @@ describe("AuthController (e2e)", () => {
 
   describe("POST /api/auth/refresh", () => {
     it("should refresh tokens", async () => {
-      const user = await userFactory.build();
+      const user = userFactory.build();
+      const expectedUser = { ...user, email: user.email.toLowerCase() };
       const password = "Password123@";
+
       await authService.register({
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         password,
       });
+
       let refreshToken = "";
 
       const loginResponse = await request(app.getHttpServer())
         .post("/api/auth/login")
         .send({
-          email: user.email,
+          email: expectedUser.email,
           password: password,
         })
         .expect(201);

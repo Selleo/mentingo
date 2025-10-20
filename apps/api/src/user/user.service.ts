@@ -215,8 +215,13 @@ export class UserService {
       const { groupId, ...userData } = data;
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
+
+      const updatedUserData = userData.email
+        ? { ...userData, email: userData.email.toLowerCase() }
+        : { ...userData };
+
       const [updatedUser] = hasUserDataToUpdate
-        ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
+        ? await trx.update(users).set(updatedUserData).where(eq(users.id, id)).returning()
         : [existingUser.users];
 
       if (!groupId) {
@@ -257,9 +262,13 @@ export class UserService {
       throw new NotFoundException("User not found");
     }
 
+    const userDataToUpdate = data.contactEmail
+      ? { ...data, contactEmail: data.contactEmail }
+      : data;
+
     const [updatedUserDetails] = await this.db
       .update(userDetails)
-      .set(data)
+      .set(userDataToUpdate)
       .where(eq(userDetails.userId, userId))
       .returning();
 
@@ -302,7 +311,7 @@ export class UserService {
 
       const userDetailsUpdates = {
         ...(data.description && { description: data.description }),
-        ...(data.contactEmail && { contactEmail: data.contactEmail }),
+        ...(data.contactEmail && { contactEmail: data.contactEmail.toLowerCase() }),
         ...(data.contactPhone && { contactPhoneNumber: data.contactPhone }),
         ...(data.jobTitle && { jobTitle: data.jobTitle }),
       };
@@ -396,7 +405,12 @@ export class UserService {
     }
 
     return await this.db.transaction(async (trx) => {
-      const [createdUser] = await trx.insert(users).values(data).returning();
+      const { email, ...userData } = data;
+
+      const [createdUser] = await trx
+        .insert(users)
+        .values({ ...userData, email: email.toLowerCase() })
+        .returning();
 
       const token = nanoid(64);
 

@@ -175,7 +175,7 @@ export class AuthController {
   async forgotPassword(
     @Body() data: ForgotPasswordBody,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.authService.forgotPassword(data.email);
+    await this.authService.forgotPassword(data.email.toLocaleLowerCase());
     return new BaseResponse({ message: "Password reset link sent" });
   }
 

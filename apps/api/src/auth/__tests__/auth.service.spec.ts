@@ -47,6 +47,7 @@ describe("AuthService", () => {
   describe("register", () => {
     it("should register a new user successfully", async () => {
       const user = userFactory.build();
+      const expectedUser = { ...user, email: user.email.toLowerCase() };
       const password = "password123";
 
       const result = await authService.register({
@@ -56,7 +57,7 @@ describe("AuthService", () => {
         password,
       });
 
-      const [savedUser] = await db.select().from(users).where(eq(users.email, user.email));
+      const [savedUser] = await db.select().from(users).where(eq(users.email, expectedUser.email));
 
       const [savedCredentials] = await db
         .select()
@@ -65,7 +66,7 @@ describe("AuthService", () => {
 
       expect(savedUser).toBeDefined();
       expect(result).toBeDefined();
-      expect(result.email).toBe(user.email);
+      expect(result.email).toBe(expectedUser.email);
       expect(savedCredentials).toBeDefined();
       expect(await bcrypt.compare(password, savedCredentials.password)).toBe(true);
     });

@@ -78,7 +78,7 @@ export class AuthService {
       const [newUser] = await trx
         .insert(users)
         .values({
-          email,
+          email: email.toLowerCase(),
           firstName,
           lastName,
         })
