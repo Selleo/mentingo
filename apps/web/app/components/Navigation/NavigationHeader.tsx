@@ -24,7 +24,7 @@ export function NavigationHeader({
       <Link to="/" aria-label="Go to homepage">
         <PlatformLogo
           variant="full"
-          className="h-6 w-full 2xl:sr-only 3xl:not-sr-only 3xl:h-10"
+          className="h-10 w-full 2xl:sr-only 3xl:not-sr-only 3xl:h-10"
           alt="Go to homepage"
         />
 
