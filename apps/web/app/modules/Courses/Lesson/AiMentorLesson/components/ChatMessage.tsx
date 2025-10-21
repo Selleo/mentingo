@@ -45,9 +45,9 @@ const ChatMessage = (message: ChatMessageProps) => {
           </div>
         )}
       </div>
-      <div className="max-w-[90%] overflow-x-scroll flex flex-col">
+      <div className="max-w-[90%] overflow-x-hidden flex flex-col">
         <span className="mb-1 text-sm font-semibold text-primary-900">{userName}</span>
-        <p className="break-words text-sm leading-relaxed text-gray-800">
+        <p className="break-words text-sm leading-relaxed overflow-x-scroll scrollbar-hide text-gray-800">
           {isAI ? (
             <Markdown
               components={variants}
