@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
+import { courseStatisticsQueryOptions } from "~/api/queries/admin/useCourseStatistics";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
@@ -20,11 +21,13 @@ export function useBulkCourseEnroll(courseId = "") {
       return data;
     },
 
-    onSuccess: ({ data }) => {
+    onSuccess: async ({ data }) => {
       toast({
         variant: "default",
         description: data.message,
       });
+
+      await queryClient.invalidateQueries(courseStatisticsQueryOptions({ id: courseId }));
     },
 
     onError: (error) => {
