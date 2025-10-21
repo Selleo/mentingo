@@ -1,6 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
+import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { coursesStatusOptions } from "./courseQuery";
 
@@ -38,6 +39,25 @@ export const coursesForContentCreatorSchema = Type.Object({
   authorEmail: Type.String(),
 });
 
+export const courseStatusDistributionSchema = Type.Array(
+  Type.Object({
+    status: Type.Union([
+      Type.Literal(PROGRESS_STATUSES.NOT_STARTED),
+      Type.Literal(PROGRESS_STATUSES.IN_PROGRESS),
+      Type.Literal(PROGRESS_STATUSES.COMPLETED),
+      Type.Literal(PROGRESS_STATUSES.BLOCKED),
+    ]),
+    count: Type.Number(),
+  }),
+);
+
+export const getCourseStatisticsSchema = Type.Object({
+  enrolledCount: Type.Number(),
+  completionPercentage: Type.Number(),
+  averageCompletionPercentage: Type.Number(),
+  courseStatusDistribution: courseStatusDistributionSchema,
+});
+
 export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
 export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCreatorSchema);
@@ -45,3 +65,6 @@ export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCre
 export type AllCoursesResponse = Static<typeof allCoursesSchema>;
 export type AllStudentCoursesResponse = Static<typeof allStudentCoursesSchema>;
 export type AllCoursesForContentCreatorResponse = Static<typeof allCoursesForContentCreatorSchema>;
+
+export type CourseStatisticsResponse = Static<typeof getCourseStatisticsSchema>;
+export type CourseStatusDistribution = Static<typeof courseStatusDistributionSchema>;
