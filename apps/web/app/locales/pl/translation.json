@@ -1142,6 +1142,20 @@
       "dashboard": "Panel główny",
       "myCourses": "Moje kursy",
       "back": "Wstecz"
+    },
+    "statistics": {
+      "title": "Statystyki",
+      "subtitle": "Monitoruj wyniki kursu",
+      "overview": {
+        "enrolledCount": "Łącznie zapisanych",
+        "completionRate": "Wskaźnik ukończenia",
+        "averageCompletionPercentage": "Średni postęp",
+        "courseStatusDistribution": "Rozkład statusów kursów"
+      },
+      "empty": {
+        "noUsers": "Brak zapisanych",
+        "enrolled": "użytkowników"
+      }
     }
   },
   "registerView": {

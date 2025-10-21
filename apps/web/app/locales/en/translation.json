@@ -1131,6 +1131,20 @@
       "dashboard": "Dashboard",
       "myCourses": "My courses",
       "back": "Back"
+    },
+    "statistics": {
+      "title": "Statistics",
+      "subtitle": "Course performance overview",
+      "overview": {
+        "enrolledCount": "Enrolled students count",
+        "completionRate": "Completion rate",
+        "averageCompletionPercentage": "Average completion",
+        "courseStatusDistribution": "Course status distribution"
+      },
+      "empty": {
+        "noUsers": "No users",
+        "enrolled": "enrolled"
+      }
     }
   },
   "registerView": {

@@ -1075,6 +1075,18 @@ export type DeleteManyCoursesResponse = null;
 
 export type UnenrollCourseResponse = null;
 
+export interface GetCourseStatisticsResponse {
+  data: {
+    enrolledCount: number;
+    completionPercentage: number;
+    averageCompletionPercentage: number;
+    courseStatusDistribution: {
+      status: "not_started" | "in_progress" | "completed" | "blocked";
+      count: number;
+    }[];
+  };
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -4022,6 +4034,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/unenroll-course`,
         method: "DELETE",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseStatistics
+     * @request GET:/api/course/{courseId}/statistics
+     */
+    courseControllerGetCourseStatistics: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetCourseStatisticsResponse, any>({
+        path: `/api/course/${courseId}/statistics`,
+        method: "GET",
         format: "json",
         ...params,
       }),

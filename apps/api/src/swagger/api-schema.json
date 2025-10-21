@@ -2564,6 +2564,33 @@
         }
       }
     },
+    "/api/course/{courseId}/statistics": {
+      "get": {
+        "operationId": "CourseController_getCourseStatistics",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseStatisticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -9124,6 +9151,69 @@
       },
       "UnenrollCourseResponse": {
         "type": "null"
+      },
+      "GetCourseStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enrolledCount": {
+                "type": "number"
+              },
+              "completionPercentage": {
+                "type": "number"
+              },
+              "averageCompletionPercentage": {
+                "type": "number"
+              },
+              "courseStatusDistribution": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "not_started",
+                          "type": "string"
+                        },
+                        {
+                          "const": "in_progress",
+                          "type": "string"
+                        },
+                        {
+                          "const": "completed",
+                          "type": "string"
+                        },
+                        {
+                          "const": "blocked",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "count": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "count"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "enrolledCount",
+              "completionPercentage",
+              "averageCompletionPercentage",
+              "courseStatusDistribution"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
       },
       "GetChapterWithLessonResponse": {
         "type": "object",
