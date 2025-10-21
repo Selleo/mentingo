@@ -7,8 +7,8 @@ import Loader from "~/modules/common/Loader/Loader";
 import { CoursesCarousel } from "~/modules/Dashboard/Courses/CoursesCarousel";
 
 type YouMayBeInterestedInProps = {
-  category: string;
-  courseId: string;
+  category?: string;
+  courseId?: string;
 };
 
 export const YouMayBeInterestedIn = ({ category, courseId }: YouMayBeInterestedInProps) => {

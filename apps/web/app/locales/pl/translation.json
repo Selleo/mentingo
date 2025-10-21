@@ -1398,6 +1398,17 @@
       "availableCourses": "Dostępne kursy",
       "yourCourses": "Twoje kursy",
       "back": "Wstecz"
+    },
+    "certificate": {
+      "button": {
+        "viewCertificate": "Zobacz certyfikat"
+      },
+      "courseCompleted": "Gratulacje! Ukończyłeś ten kurs! Teraz masz dostęp do swojego certyfikatu."
+    },
+    "tabs": {
+      "chapters": "Rozdziały",
+      "moreFromAuthor": "Więcej od autora",
+      "statistics": "Statystyki"
     }
   },
   "studentChapterView": {
