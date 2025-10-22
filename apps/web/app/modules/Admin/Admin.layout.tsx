@@ -33,6 +33,8 @@ export const clientLoader = async ({ request }: { request: Request }) => {
   } catch (error) {
     throw redirect("/auth/login");
   }
+
+  return null;
 };
 
 const AdminGuard = ({ children }: PropsWithChildren) => {
