@@ -62,6 +62,18 @@ export interface LoginResponse {
     archived: boolean;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    onboardingStatus: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      dashboard: boolean;
+      courses: boolean;
+      announcements: boolean;
+      profile: boolean;
+      settings: boolean;
+      providerInformation: boolean;
+    };
   };
 }
 
@@ -81,6 +93,18 @@ export interface CurrentUserResponse {
     archived: boolean;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    onboardingStatus: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      userId: string;
+      dashboard: boolean;
+      courses: boolean;
+      announcements: boolean;
+      profile: boolean;
+      settings: boolean;
+      providerInformation: boolean;
+    };
   };
 }
 
@@ -387,6 +411,8 @@ export interface ImportUsersResponse {
     }[];
   };
 }
+
+export type MarkOnboardingCompleteResponse = null;
 
 export interface GetPublicGlobalSettingsResponse {
   data: {
@@ -3165,6 +3191,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerMarkOnboardingComplete
+     * @request PATCH:/api/user/onboarding-status/{page}
+     */
+    userControllerMarkOnboardingComplete: (page: string, params: RequestParams = {}) =>
+      this.request<MarkOnboardingCompleteResponse, any>({
+        path: `/api/user/onboarding-status/${page}`,
+        method: "PATCH",
         format: "json",
         ...params,
       }),

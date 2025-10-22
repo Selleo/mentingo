@@ -129,6 +129,8 @@ export class AuthService {
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
+    const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+
     if (
       MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
       userSettings.isMFAEnabled
@@ -139,6 +141,7 @@ export class AuthService {
         accessToken,
         refreshToken,
         shouldVerifyMFA: true,
+        onboardingStatus,
       };
     }
 
@@ -148,6 +151,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       shouldVerifyMFA: false,
+      onboardingStatus,
     };
   }
 
@@ -158,14 +162,16 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
+    const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
-      return { ...user, shouldVerifyMFA: true };
+      return { ...user, shouldVerifyMFA: true, onboardingStatus };
     }
 
-    return { ...user, shouldVerifyMFA: false };
+    return { ...user, shouldVerifyMFA: false, onboardingStatus };
   }
 
   public async refreshTokens(refreshToken: string) {

@@ -1,7 +1,9 @@
 import { type Static, Type } from "@sinclair/typebox";
+import { createSelectSchema } from "drizzle-typebox";
 
 import { UUIDSchema } from "src/common";
 import { commonUserSchema } from "src/common/schemas/common-user.schema";
+import { userOnboarding } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 export const baseUserResponseSchema = Type.Composite([
@@ -11,10 +13,13 @@ export const baseUserResponseSchema = Type.Composite([
   }),
 ]);
 
+export const userOnboardingStatusSchema = createSelectSchema(userOnboarding);
+
 export const currentUserResponseSchema = Type.Composite([
   baseUserResponseSchema,
   Type.Object({
     shouldVerifyMFA: Type.Boolean(),
+    onboardingStatus: userOnboardingStatusSchema,
   }),
 ]);
 

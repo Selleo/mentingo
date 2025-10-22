@@ -32,6 +32,7 @@ import {
   users,
   settings,
   courses,
+  userOnboarding,
 } from "../storage/schema";
 
 import {
@@ -55,6 +56,7 @@ import type {
   UpdateUserBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
+import type { OnboardingPages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 
@@ -643,5 +645,32 @@ export class UserService {
       );
 
     return adminEmails.map((admin) => admin.email);
+  }
+
+  async getAllOnboardingStatus(userId: UUIDType) {
+    const [onboardingStatus] = await this.db
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId))
+      .limit(1);
+
+    return onboardingStatus;
+  }
+
+  async markOnboardingPageAsCompleted(userId: UUIDType, page: OnboardingPages) {
+    const [existingOnboarding] = await this.db
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId));
+
+    if (existingOnboarding) {
+      return await this.db
+        .update(userOnboarding)
+        .set({ [page]: true })
+        .where(eq(userOnboarding.userId, userId))
+        .returning();
+    }
+
+    await this.db.insert(userOnboarding).values({ userId, [page]: true });
   }
 }

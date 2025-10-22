@@ -309,6 +309,20 @@
       "when": 1760524841663,
       "tag": "0043_add_contrast_color_to_global_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1761125848324,
+      "tag": "0044_add_user_onboarding_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1761127155970,
+      "tag": "0045_create_onboarding_records_for_existing_users",
+      "breakpoints": true
     }
   ]
 }

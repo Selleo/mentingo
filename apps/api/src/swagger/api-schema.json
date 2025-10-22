@@ -1004,6 +1004,32 @@
         }
       }
     },
+    "/api/user/onboarding-status/{page}": {
+      "patch": {
+        "operationId": "UserController_markOnboardingComplete",
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkOnboardingCompleteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/global": {
       "get": {
         "operationId": "SettingsController_getPublicGlobalSettings",
@@ -4529,6 +4555,53 @@
               },
               "shouldVerifyMFA": {
                 "type": "boolean"
+              },
+              "onboardingStatus": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "dashboard": {
+                    "type": "boolean"
+                  },
+                  "courses": {
+                    "type": "boolean"
+                  },
+                  "announcements": {
+                    "type": "boolean"
+                  },
+                  "profile": {
+                    "type": "boolean"
+                  },
+                  "settings": {
+                    "type": "boolean"
+                  },
+                  "providerInformation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "userId",
+                  "dashboard",
+                  "courses",
+                  "announcements",
+                  "profile",
+                  "settings",
+                  "providerInformation"
+                ]
               }
             },
             "required": [
@@ -4541,7 +4614,8 @@
               "role",
               "archived",
               "profilePictureUrl",
-              "shouldVerifyMFA"
+              "shouldVerifyMFA",
+              "onboardingStatus"
             ]
           }
         },
@@ -4597,6 +4671,53 @@
               },
               "shouldVerifyMFA": {
                 "type": "boolean"
+              },
+              "onboardingStatus": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "dashboard": {
+                    "type": "boolean"
+                  },
+                  "courses": {
+                    "type": "boolean"
+                  },
+                  "announcements": {
+                    "type": "boolean"
+                  },
+                  "profile": {
+                    "type": "boolean"
+                  },
+                  "settings": {
+                    "type": "boolean"
+                  },
+                  "providerInformation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "userId",
+                  "dashboard",
+                  "courses",
+                  "announcements",
+                  "profile",
+                  "settings",
+                  "providerInformation"
+                ]
               }
             },
             "required": [
@@ -4609,7 +4730,8 @@
               "role",
               "archived",
               "profilePictureUrl",
-              "shouldVerifyMFA"
+              "shouldVerifyMFA",
+              "onboardingStatus"
             ]
           }
         },
@@ -5956,6 +6078,9 @@
         "required": [
           "data"
         ]
+      },
+      "MarkOnboardingCompleteResponse": {
+        "type": "null"
       },
       "GetPublicGlobalSettingsResponse": {
         "type": "object",

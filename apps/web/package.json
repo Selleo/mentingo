@@ -84,6 +84,7 @@
     "i18next": "^24.2.0",
     "i18next-http-backend": "^3.0.1",
     "input-otp": "^1.4.2",
+    "intro.js": "8.3.2",
     "isbot": "4.1.0",
     "lodash-es": "4.17.21",
     "lucide-react": "0.408.0",

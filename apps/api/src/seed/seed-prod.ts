@@ -8,7 +8,7 @@ import hashPassword from "../common/helpers/hashPassword";
 import { credentials, users } from "../storage/schema";
 import { USER_ROLES } from "../user/schemas/userRoles";
 
-import { insertGlobalSettings, insertUserSettings } from "./seed";
+import { insertGlobalSettings, insertOnboardingData, insertUserSettings } from "./seed";
 import { seedTruncateAllTables } from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
@@ -29,6 +29,7 @@ async function createOrFindUser(email: string, password: string, userData: any) 
 
   const [newUser] = await db.insert(users).values(userData).returning();
   await insertCredential(newUser.id, password);
+  insertOnboardingData(newUser.id);
   return newUser;
 }
 

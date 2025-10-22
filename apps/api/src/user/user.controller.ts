@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -14,6 +15,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
+import { OnboardingPages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
@@ -361,5 +363,19 @@ export class UserController {
     const importStats = await this.usersService.importUsers(usersFile);
 
     return new BaseResponse(importStats);
+  }
+
+  @Patch("onboarding-status/:page")
+  @Public()
+  @Validate({
+    response: nullResponse(),
+  })
+  async markOnboardingComplete(
+    @CurrentUser("userId") userId: UUIDType,
+    @Param("page") page: OnboardingPages,
+  ): Promise<null> {
+    await this.usersService.markOnboardingPageAsCompleted(userId, page);
+
+    return null;
   }
 }
