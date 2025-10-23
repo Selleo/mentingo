@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { CreatePasswordEmail } from "@repo/email-templates";
+import { OnboardingPages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -56,7 +57,6 @@ import type {
   UpdateUserBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
-import type { OnboardingPages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 
@@ -664,13 +664,44 @@ export class UserService {
       .where(eq(userOnboarding.userId, userId));
 
     if (existingOnboarding) {
-      return await this.db
+      const [updatedOnboarding] = await this.db
         .update(userOnboarding)
         .set({ [page]: true })
         .where(eq(userOnboarding.userId, userId))
         .returning();
+
+      return updatedOnboarding;
     }
 
-    await this.db.insert(userOnboarding).values({ userId, [page]: true });
+    const [newUserOnboarding] = await this.db
+      .insert(userOnboarding)
+      .values({ userId, [page]: true })
+      .returning();
+
+    if (!newUserOnboarding) {
+      throw new Error("Failed to mark onboarding as completed");
+    }
+
+    return newUserOnboarding;
+  }
+
+  async resetOnboardingForUser(userId: UUIDType) {
+    const onboardingPagesWithValues = Object.values(OnboardingPages).reduce(
+      (acc, page) => {
+        acc[page] = false;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    );
+
+    const [updatedOnboarding] = await this.db
+      .update(userOnboarding)
+      .set({
+        ...onboardingPagesWithValues,
+      })
+      .where(eq(userOnboarding.userId, userId))
+      .returning();
+
+    return updatedOnboarding;
   }
 }

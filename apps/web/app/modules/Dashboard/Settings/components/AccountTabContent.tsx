@@ -6,6 +6,7 @@ import UserForm from "../forms/UserForm";
 
 import LanguageSelect from "./LanguageSelect";
 import NotificationPreferences from "./NotificationPreferences";
+import { ResetOnboarding } from "./ResetOnboarding";
 
 import type { AdminSettings, UserSettings } from "../types";
 
@@ -27,6 +28,7 @@ export default function AccountTabContent({
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
       {isAdmin && isAdminSettings(settings) && <NotificationPreferences adminSettings={settings} />}
+      {!isAdmin && !isContentCreator && <ResetOnboarding />}
     </>
   );
 }

@@ -201,6 +201,17 @@
       "polish": "Polish"
     }
   },
+  "resetOnboarding": {
+    "header": "Reset introduction",
+    "subHeader": "Here you can reset application introduction",
+    "button": {
+      "reset": "Reset introduction"
+    },
+    "toast": {
+      "success": "Introduction has been reset successfully",
+      "error": "Failed to reset introduction"
+    }
+  },
   "changeUserEmailView": {
     "header": "Change user information",
     "subHeader": "Update your user information here.",

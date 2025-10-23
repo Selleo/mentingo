@@ -412,7 +412,35 @@ export interface ImportUsersResponse {
   };
 }
 
-export type MarkOnboardingCompleteResponse = null;
+export interface ResetOnboardingStatusResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    dashboard: boolean;
+    courses: boolean;
+    announcements: boolean;
+    profile: boolean;
+    settings: boolean;
+    providerInformation: boolean;
+  };
+}
+
+export interface MarkOnboardingCompleteResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    dashboard: boolean;
+    courses: boolean;
+    announcements: boolean;
+    profile: boolean;
+    settings: boolean;
+    providerInformation: boolean;
+  };
+}
 
 export interface GetPublicGlobalSettingsResponse {
   data: {
@@ -3191,6 +3219,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerResetOnboardingStatus
+     * @request PATCH:/api/user/onboarding-status/reset
+     */
+    userControllerResetOnboardingStatus: (params: RequestParams = {}) =>
+      this.request<ResetOnboardingStatusResponse, any>({
+        path: `/api/user/onboarding-status/reset`,
+        method: "PATCH",
         format: "json",
         ...params,
       }),

@@ -202,6 +202,17 @@
       "polish": "Polski"
     }
   },
+  "resetOnboarding": {
+    "header": "Resetuj wprowadzenie",
+    "subHeader": "Tutaj zresetujesz wprowadzenie do aplikacji",
+    "button": {
+      "reset": "Resetuj wprowadzenie"
+    },
+    "toast": {
+      "success": "Wprowadzenie zostało pomyślnie zresetowane",
+      "error": "Nie udało się zresetować wprowadzenia"
+    }
+  },
   "changeUserEmailView": {
     "header": "Zmień dane użytkownika",
     "subHeader": "Zaktualizuj swoje dane użytkownika tutaj.",
