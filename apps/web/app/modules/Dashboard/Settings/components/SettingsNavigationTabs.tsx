@@ -28,7 +28,7 @@ export function SettingsNavigationTabs({
     <Tabs defaultValue="account" className="w-full bg-transparent flex flex-col gap-y-4">
       <Card className="w-full">
         <CardContent className="p-6">
-          <div className="mb-3 flex items-center justify-between">
+          <div id="settings-tabs" className="mb-3 flex items-center justify-between">
             <h4 className="h4">{t("settings.title")}</h4>
           </div>
           <div className="flex justify-start">

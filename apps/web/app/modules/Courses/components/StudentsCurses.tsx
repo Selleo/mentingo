@@ -11,7 +11,7 @@ export const StudentsCurses = () => {
   const { data: studentCourses, isLoading: isStudentCoursesLoading } = useStudentCourses();
 
   return (
-    <div className="flex flex-col gap-y-6">
+    <div id="your-list" className="flex flex-col gap-y-6">
       <div className="flex flex-col">
         <h4 className="pb-1 h4 text-neutral-950">
           {t("studentCoursesView.enrolledCourses.header")}

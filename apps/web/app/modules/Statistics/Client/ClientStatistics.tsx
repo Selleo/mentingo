@@ -1,3 +1,4 @@
+import { OnboardingPages } from "@repo/shared";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -5,6 +6,8 @@ import { useCurrentUser } from "~/api/queries";
 import { useUserStatistics } from "~/api/queries/useUserStatistics";
 import { PageWrapper } from "~/components/PageWrapper";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
+import { useTourSetup } from "~/modules/Onboarding/hooks/useTourSetup";
+import { studentDashboardSteps } from "~/modules/Onboarding/routes/student";
 import { parseRatesChartData } from "~/modules/Statistics/utils";
 
 import {
@@ -20,6 +23,15 @@ export default function ClientStatistics() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
   const { data: userStatistics, isLoading } = useUserStatistics();
   const { t } = useTranslation();
+
+  const steps = useMemo(() => studentDashboardSteps(t), [t]);
+
+  useTourSetup({
+    steps,
+    isLoading: isLoading || isUserLoading,
+    hasCompletedTour: user?.onboardingStatus.dashboard,
+    page: OnboardingPages.DASHBOARD,
+  });
 
   const coursesChartData = useMemo(
     () => [
@@ -82,7 +94,7 @@ export default function ClientStatistics() {
   const coursesRatesChartData = parseRatesChartData(userStatistics?.courses);
 
   return (
-    <PageWrapper className="2xl:!pt-8">
+    <PageWrapper id="client-statistics" className="2xl:!pt-8">
       <div className="flex flex-col gap-y-6 2xl:gap-y-6">
         <div className="flex items-center gap-x-2 2xl:gap-x-4">
           <p className="h5 2xl:h2 text-neutral-950 font-gothic">
@@ -98,22 +110,27 @@ export default function ClientStatistics() {
           <div className="flex h-full w-full flex-col gap-y-4 2xl:gap-x-4 2xl:gap-y-6">
             <div className="flex h-full w-full flex-wrap gap-4 2xl:flex-nowrap">
               <ContinueLearningCard isLoading={isLoading} lesson={userStatistics?.nextLesson} />
-              <AvgPercentScoreChart
-                label={`${userStatistics?.quizzes.averageScore}`}
-                title={t("clientStatisticsView.other.avgQuizScorePercentage")}
-                chartConfig={quizzesChartConfig}
-                chartData={quizzesChartData}
-                isLoading={isLoading}
-              />
-              <AvgPercentScoreChart
-                label={`${userStatistics?.averageStats.courseStats.completionRate}`}
-                title={t("clientStatisticsView.other.avgQuizCompletionPercentage")}
-                chartConfig={coursesChartConfig}
-                chartData={coursesChartData}
-                isLoading={isLoading}
-              />
+              <div id="quiz-stats" className="flex gap-4 grow">
+                <AvgPercentScoreChart
+                  label={`${userStatistics?.quizzes.averageScore}`}
+                  title={t("clientStatisticsView.other.avgQuizScorePercentage")}
+                  chartConfig={quizzesChartConfig}
+                  chartData={quizzesChartData}
+                  isLoading={isLoading}
+                />
+                <AvgPercentScoreChart
+                  label={`${userStatistics?.averageStats.courseStats.completionRate}`}
+                  title={t("clientStatisticsView.other.avgQuizCompletionPercentage")}
+                  chartConfig={coursesChartConfig}
+                  chartData={coursesChartData}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
-            <div className="flex h-full w-full flex-col gap-y-4 2xl:flex-row 2xl:gap-x-4">
+            <div
+              id="course-stats"
+              className="flex h-full w-full flex-col gap-y-4 2xl:flex-row 2xl:gap-x-4"
+            >
               <RatesChart
                 resourceName={t("clientStatisticsView.other.courses")}
                 chartData={coursesRatesChartData}

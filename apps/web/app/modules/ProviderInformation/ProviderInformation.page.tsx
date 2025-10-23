@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { OnboardingPages } from "@repo/shared";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateCompanyInformation } from "~/api/mutations/admin/useUpdateCompanyInformation";
-import { useCompanyInformation } from "~/api/queries";
+import { useCurrentUser, useCompanyInformation } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
 
 import Loader from "../common/Loader/Loader";
+import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
+import { studentProviderInformationSteps } from "../Onboarding/routes/student";
 
 import { ProviderInformationCard, ProviderInformationEditCard } from "./components";
 
@@ -17,9 +20,22 @@ export default function ProviderInformationPage() {
   const [isEditing, setIsEditing] = useState(false);
   const { t } = useTranslation();
 
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isStudent } = useUserRole();
   const { data: companyInfo, isLoading } = useCompanyInformation();
   const { mutate: updateCompanyInformation, isPending } = useUpdateCompanyInformation();
+  const { data: currentUser } = useCurrentUser();
+
+  const steps = useMemo(
+    () => (isStudent ? studentProviderInformationSteps(t) : []),
+    [t, isStudent],
+  );
+
+  useTourSetup({
+    steps,
+    isLoading,
+    hasCompletedTour: currentUser?.onboardingStatus?.providerInformation,
+    page: OnboardingPages.PROVIDER_INFORMATION,
+  });
 
   const handleSubmit = (data: UpdateCompanyInformationBody) => {
     updateCompanyInformation(data, {
@@ -52,7 +68,9 @@ export default function ProviderInformationPage() {
     >
       <div className="flex flex-col items-center gap-6">
         <section className="flex w-full max-w-[720px] justify-between">
-          <h2 className="h5 md:h3 text-neutral-950">{t("providerInformation.title")}</h2>
+          <h2 id="provider-information" className="h5 md:h3 text-neutral-950">
+            {t("providerInformation.title")}
+          </h2>
           {isAdmin && (
             <Button variant="outline" onClick={() => setIsEditing(!isEditing)} disabled={isPending}>
               {isEditing ? t("common.button.cancel") : t("common.button.edit")}

@@ -46,7 +46,7 @@ export default function UserForm() {
   };
 
   return (
-    <Card id="change-password">
+    <Card id="change-email">
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader>
           <CardTitle className="h5">{t("changeUserEmailView.header")}</CardTitle>

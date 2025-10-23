@@ -55,7 +55,7 @@ export default function ChangePasswordForm() {
 
   return (
     <FormProvider {...methods}>
-      <Card id="user-info">
+      <Card id="change-password">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader>
             <CardTitle className="h5">{t("changePasswordView.header")}</CardTitle>

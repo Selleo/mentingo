@@ -1,5 +1,5 @@
 export enum OnboardingPages {
-  Dashboard = "dashboard",
+  DASHBOARD = "dashboard",
   COURSES = "courses",
   ANNOUNCEMENTS = "announcements",
   PROFILE = "profile",
