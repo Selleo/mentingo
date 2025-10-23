@@ -19,7 +19,7 @@ export {
   useStudentLessonsSuspense,
 } from "./useStudentLessons";
 export { useAllUsers, useAllUsersSuspense, usersQueryOptions } from "./useUsers";
-export { useContentCreatorStatistics } from "./useContentCreatorStatistics";
+export { useStatistics } from "./useStatistics";
 export { useCompanyInformation } from "./useCompanyInformation";
 export {
   usePlatformSimpleLogo,

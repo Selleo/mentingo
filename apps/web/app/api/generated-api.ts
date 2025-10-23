@@ -192,6 +192,31 @@ export interface GetContentCreatorStatsResponse {
   };
 }
 
+export interface GetAdminStatsResponse {
+  data: {
+    fiveMostPopularCourses: {
+      courseName: string;
+      studentCount: number;
+    }[];
+    totalCoursesCompletionStats: {
+      completionPercentage: number;
+      totalCoursesCompletion: number;
+      totalCourses: number;
+    };
+    conversionAfterFreemiumLesson: {
+      conversionPercentage: number;
+      purchasedCourses: number;
+      remainedOnFreemium: number;
+    };
+    courseStudentsStats: object;
+    avgQuizScore: {
+      correctAnswerCount: number;
+      wrongAnswerCount: number;
+      answerCount: number;
+    };
+  };
+}
+
 export interface FileUploadResponse {
   fileKey: string;
   fileUrl: string;
@@ -2784,6 +2809,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     statisticsControllerGetContentCreatorStats: (params: RequestParams = {}) =>
       this.request<GetContentCreatorStatsResponse, any>({
         path: `/api/statistics/content-creator-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetAdminStats
+     * @request GET:/api/statistics/admin-stats
+     */
+    statisticsControllerGetAdminStats: (params: RequestParams = {}) =>
+      this.request<GetAdminStatsResponse, any>({
+        path: `/api/statistics/admin-stats`,
         method: "GET",
         format: "json",
         ...params,
