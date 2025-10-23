@@ -1,8 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import {
+  chapters,
   courses,
   coursesSummaryStats,
   courseStudentsStats,
@@ -10,8 +11,11 @@ import {
   quizAttempts,
   studentChapterProgress,
   studentCourses,
+  studentLessonProgress,
+  users,
   userStatistics,
 } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -381,5 +385,40 @@ export class StatisticsRepository {
     if (!lesson) return null;
 
     return lesson;
+  }
+
+  async getMostRecentCourseForStudents(studentIds: UUIDType[]) {
+    if (!studentIds.length) return [];
+    return this.db
+      .selectDistinctOn([studentLessonProgress.studentId], {
+        studentId: studentLessonProgress.studentId,
+        courseId: courses.id,
+        courseName: courses.title,
+      })
+      .from(studentLessonProgress)
+      .innerJoin(chapters, eq(chapters.id, studentLessonProgress.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .where(
+        and(
+          isNull(studentLessonProgress.completedAt),
+          inArray(studentLessonProgress.studentId, studentIds),
+        ),
+      )
+      .orderBy(studentLessonProgress.studentId, desc(studentLessonProgress.createdAt));
+  }
+  async getInactiveStudents(inactivityDays: number) {
+    return this.db
+      .select({ userId: users.id, name: users.firstName, email: users.email })
+      .from(userStatistics)
+      .innerJoin(users, eq(userStatistics.userId, users.id))
+      .where(
+        and(
+          eq(users.role, USER_ROLES.STUDENT),
+          eq(
+            sql`DATE(${userStatistics.lastActivityDate})`,
+            sql`CURRENT_DATE - (${inactivityDays}::INTEGER * INTERVAL '1 day')`,
+          ),
+        ),
+      );
   }
 }

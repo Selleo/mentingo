@@ -234,6 +234,34 @@
       "ssoEnforcementUpdateFailed": "Failed to update SSO enforcement"
     }
   },
+  "userEmailTriggers": {
+    "header": "User Email Triggers",
+    "subHeader": "Manage automated email notifications",
+    "settings": {
+      "userInvite": "User Invite",
+      "userInviteDescription": "Send a message when a user is invited",
+      "userFirstLogin": "First Login",
+      "userFirstLoginDescription": "Send a message on user's first login",
+      "userCourseAssignment": "Course Assignment",
+      "userCourseAssignmentDescription": "Send a message when a user is assigned to a course",
+      "userShortInactivity": "Short Inactivity (14 days)",
+      "userShortInactivityDescription": "Send a message after 14 days of inactivity",
+      "userLongInactivity": "Long Inactivity (30 days)",
+      "userLongInactivityDescription": "Send a message after 30 days of inactivity",
+      "userChapterFinished": "Chapter Finished",
+      "userChapterFinishedDescription": "Send a message when a user completes a chapter",
+      "userCourseFinished": "Course Finished",
+      "userCourseFinishedDescription": "Send a message when a user completes a course"
+    },
+    "switch": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "toast": {
+      "userEmailTriggersUpdatedSuccessfully": "Email triggers have been successfully updated",
+      "userEmailTriggersUpdateFailed": "Failed to update email triggers"
+    }
+  },
   "inviteOnlyRegistrationView": {
     "header": "Invite-Only Registration Enforcement",
     "subHeader": "Require an invitation to register",

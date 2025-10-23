@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import {
   differenceInDays,
   eachDayOfInterval,
@@ -9,6 +10,7 @@ import {
   subDays,
 } from "date-fns";
 
+import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { FileService } from "src/file/file.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -26,6 +28,7 @@ export class StatisticsService {
   constructor(
     private readonly statisticsRepository: StatisticsRepository,
     private readonly fileService: FileService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async getUserStats(userId: UUIDType): Promise<UserStats> {
@@ -135,6 +138,8 @@ export class StatisticsService {
     const formattedTodayDate = format(today, "yyyy-MM-dd");
 
     const currentStats = await this.statisticsRepository.getActivityStats(userId);
+
+    if (!currentStats) this.eventBus.publish(new UserFirstLoginEvent({ userId }));
 
     const lastActivityDate = currentStats?.lastActivityDate
       ? startOfDay(new Date(currentStats.lastActivityDate))
@@ -269,5 +274,13 @@ export class StatisticsService {
     const courseThumbnail = await this.fileService.getFileUrl(nextLesson.courseThumbnail);
 
     return { ...nextLesson, courseThumbnail };
+  }
+
+  async getInactiveStudents(inactivityDays: number) {
+    return this.statisticsRepository.getInactiveStudents(inactivityDays);
+  }
+
+  async getRecentCoursesForStudents(studentIds: UUIDType[]) {
+    return this.statisticsRepository.getMostRecentCourseForStudents(studentIds);
   }
 }

@@ -464,6 +464,15 @@ export interface GetPublicGlobalSettingsResponse {
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userInvite: boolean;
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
     primaryColor: string | null;
     contrastColor: string | null;
   };
@@ -552,6 +561,15 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userInvite: boolean;
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
     primaryColor: string | null;
     contrastColor: string | null;
   };
@@ -577,6 +595,15 @@ export interface UpdateEnforceSSOResponse {
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userInvite: boolean;
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
     primaryColor: string | null;
     contrastColor: string | null;
   };
@@ -620,6 +647,15 @@ export interface UpdateColorSchemaResponse {
     MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userInvite: boolean;
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
     primaryColor: string | null;
     contrastColor: string | null;
   };
@@ -3705,6 +3741,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateInviteOnlyRegistration: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/settings/admin/invite-only-registration`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUserEmailTriggers
+     * @request PATCH:/api/settings/admin/user-email-triggers/{triggerKey}
+     */
+    settingsControllerUpdateUserEmailTriggers: (triggerKey: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/user-email-triggers/${triggerKey}`,
         method: "PATCH",
         ...params,
       }),
