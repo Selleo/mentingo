@@ -2,8 +2,8 @@ import { Link, Outlet } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
-import { Icon } from "~/components/Icon";
 import { Navigation } from "~/components/Navigation";
+import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { RouteGuard } from "~/Guards/RouteGuard";
@@ -43,8 +43,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
         <header className="sticky top-0 z-10 w-full">
           <div className="flex w-full justify-between px-4 py-3">
             <Link to="/courses" aria-label={t("navigationSideBar.ariaLabels.goToAvailableCourses")}>
-              <Icon name="AppLogo" className="h-10 w-full" />
-              <Icon name="AppSignet" className="sr-only" />
+              <PlatformLogo variant="full" className="h-10 w-full" alt="Go to homepage" />
             </Link>
             <div className="flex gap-4">
               <Link to="/auth/login">
