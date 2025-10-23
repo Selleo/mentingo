@@ -6,17 +6,17 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { CreatePasswordEmail } from "@repo/email-templates";
+import { EventBus } from "@nestjs/cqrs";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
-import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -46,6 +46,8 @@ import {
   AVATAR_ASPECT_RATIO,
   AVATAR_MAX_RESOLUTION,
   AVATAR_MAX_SIZE,
+  USER_LONG_INACTIVITY_DAYS,
+  USER_SHORT_INACTIVITY_DAYS,
 } from "./user.constants";
 
 import type {
@@ -56,13 +58,14 @@ import type {
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UUIDType } from "src/common";
+import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    private emailService: EmailService,
+    private readonly eventBus: EventBus,
     private fileService: FileService,
     private s3Service: S3Service,
     private statisticsService: StatisticsService,
@@ -410,21 +413,13 @@ export class UserService {
         reminderCount: 0,
       });
 
-      const url = `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`;
-
-      const { text, html } = new CreatePasswordEmail({
+      const userInviteDetails: UserInvite = {
         name: createdUser.firstName,
-        role: createdUser.role,
-        createPasswordLink: url,
-      });
+        email: createdUser.email,
+        token,
+      };
 
-      await this.emailService.sendEmail({
-        to: createdUser.email,
-        subject: "Welcome to the Platform!",
-        text,
-        html,
-        from: process.env.SES_EMAIL || "",
-      });
+      this.eventBus.publish(new UserInviteEvent(userInviteDetails));
 
       if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
         await trx
@@ -455,6 +450,17 @@ export class UserService {
       );
 
     return adminEmails.map((admin) => admin.email);
+  }
+
+  public async getStudentEmailsByIds(studentIds: UUIDType[]) {
+    const userEmails = await this.db
+      .select({
+        email: users.email,
+      })
+      .from(users)
+      .where(and(eq(users.role, USER_ROLES.STUDENT), inArray(users.id, studentIds)));
+
+    return userEmails.map((user) => user.email);
   }
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
@@ -621,5 +627,15 @@ export class UserService {
       );
 
     return adminEmails.map((admin) => admin.email);
+  }
+
+  async checkUsersInactivity() {
+    const shortInactivity = await this.statisticsService.getInactiveStudents(
+      USER_SHORT_INACTIVITY_DAYS,
+    );
+    const longInactivity =
+      await this.statisticsService.getInactiveStudents(USER_LONG_INACTIVITY_DAYS);
+
+    return { shortInactivity, longInactivity };
   }
 }

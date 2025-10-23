@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import {
   and,
   between,
@@ -26,6 +27,7 @@ import { isEmpty } from "lodash";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
@@ -98,6 +100,7 @@ export class CourseService {
     private readonly userService: UserService,
     private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -1061,6 +1064,8 @@ export class CourseService {
 
       await trx.insert(studentCourses).values(studentCoursesValues);
 
+      this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
+
       await Promise.all(
         studentIds.map(async (studentId) => {
           await this.createCourseDependencies(courseId, studentId, null, trx);
@@ -1457,5 +1462,23 @@ export class CourseService {
     `);
 
     return availableCourses.map(({ courseId }) => courseId);
+  }
+
+  async getCourseName(courseId: UUIDType) {
+    const [{ courseName }] = await this.db
+      .select({ courseName: courses.title })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    return courseName;
+  }
+
+  async getChapterName(chapterId: UUIDType) {
+    const [{ chapterName }] = await this.db
+      .select({ chapterName: chapters.title })
+      .from(chapters)
+      .where(eq(chapters.id, chapterId));
+
+    return chapterName;
   }
 }

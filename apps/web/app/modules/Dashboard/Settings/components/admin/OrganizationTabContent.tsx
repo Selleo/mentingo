@@ -1,4 +1,5 @@
 import { InviteOnlyRegistration } from "~/modules/Dashboard/Settings/components/admin/InviteOnlyRegistration";
+import UserEmailTriggers from "~/modules/Dashboard/Settings/components/admin/UserEmailTriggers";
 
 import { PlatformLogoForm } from "../../forms/PlatformLogoForm";
 import SSOEnforceSwitch from "../SSOEnforceSwitch";
@@ -31,6 +32,7 @@ export default function OrganizationTabContent({
     <>
       <AdminPreferences globalSettings={globalSettings} />
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
+      <UserEmailTriggers userEmailTriggers={globalSettings.userEmailTriggers} />
       <InviteOnlyRegistration inviteOnlyRegistration={globalSettings.inviteOnlyRegistration} />
       <RoleBasedMFAEnforcementSwitch MFAEnforcedRoles={globalSettings.MFAEnforcedRoles} />
       <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />
