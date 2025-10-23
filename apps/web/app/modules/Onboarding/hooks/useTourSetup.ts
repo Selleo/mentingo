@@ -21,10 +21,12 @@ export function useTourSetup({ steps, isLoading, hasCompletedTour, page }: UseTo
   const currentUser = useCurrentUserStore((state) => state.currentUser);
 
   const isLastStep = useMemo(() => currentStep === steps.length - 1, [currentStep, steps]);
+  const isTestEnvironment =
+    import.meta.env.VITE_E2E === "true" || import.meta.env.VITE_TEST === "true";
 
   const shouldSkipTour = useMemo(
-    () => hasCompletedTour || !currentUser,
-    [hasCompletedTour, currentUser],
+    () => hasCompletedTour || !currentUser || isTestEnvironment,
+    [hasCompletedTour, currentUser, isTestEnvironment],
   );
 
   useEffect(() => {
