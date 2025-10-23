@@ -15,6 +15,16 @@ export const companyInformationJSONSchema = Type.Object({
   courtRegisterNumber: Type.Optional(Type.String()),
 });
 
+export const userEmailTriggersJSONSchema = Type.Object({
+  userInvite: Type.Boolean(),
+  userFirstLogin: Type.Boolean(),
+  userCourseAssignment: Type.Boolean(),
+  userShortInactivity: Type.Boolean(),
+  userLongInactivity: Type.Boolean(),
+  userChapterFinished: Type.Boolean(),
+  userCourseFinished: Type.Boolean(),
+});
+
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
   enforceSSO: Type.Boolean(),
@@ -26,6 +36,7 @@ export const globalSettingsJSONSchema = Type.Object({
   MFAEnforcedRoles: Type.Array(Type.Enum(USER_ROLES)),
   defaultCourseCurrency: Type.Union(ALLOWED_CURRENCIES.map((currency) => Type.Literal(currency))),
   inviteOnlyRegistration: Type.Boolean(),
+  userEmailTriggers: userEmailTriggersJSONSchema,
   primaryColor: Type.Union([Type.String(), Type.Null()]),
   contrastColor: Type.Union([Type.String(), Type.Null()]),
 });

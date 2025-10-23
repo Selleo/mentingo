@@ -18,6 +18,15 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
   inviteOnlyRegistration: false,
+  userEmailTriggers: {
+    userInvite: false,
+    userFirstLogin: false,
+    userCourseAssignment: false,
+    userShortInactivity: false,
+    userLongInactivity: false,
+    userChapterFinished: false,
+    userCourseFinished: false,
+  },
   primaryColor: null,
   contrastColor: null,
 };
