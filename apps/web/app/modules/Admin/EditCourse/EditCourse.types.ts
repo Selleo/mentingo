@@ -1,4 +1,5 @@
 import type { Question } from "./CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
+import type { AiMentorType } from "@repo/shared";
 
 export type NavigationTab = "Settings" | "Curriculum" | "Pricing" | "Status";
 
@@ -6,11 +7,12 @@ export const LessonResourceType = {
   EMBED: "embed",
 } as const;
 
-type AiMentorType = {
+type AiMentor = {
   id: string;
   lessonId: string;
   aiMentorInstructions: string;
   completionConditions: string;
+  type: AiMentorType;
 };
 
 export interface LessonResource {
@@ -40,7 +42,7 @@ export interface Lesson {
   questions?: Question[];
   lessonResources?: LessonResource[];
   isExternal?: boolean;
-  aiMentor?: AiMentorType;
+  aiMentor?: AiMentor;
 }
 
 export interface Chapter {

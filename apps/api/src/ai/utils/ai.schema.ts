@@ -1,3 +1,4 @@
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { THREAD_STATUS, SUPPORTED_LANGUAGES, MESSAGE_ROLE } from "src/ai/utils/ai.type";
@@ -63,9 +64,10 @@ export const aiMentorGroupsSchema = Type.Array(
 );
 
 export const aiMentorLessonSchema = Type.Object({
-  title: Type.Optional(Type.String()),
-  instructions: Type.Optional(Type.String()),
-  conditions: Type.Optional(Type.String()),
+  title: Type.String(),
+  instructions: Type.String(),
+  conditions: Type.String(),
+  type: Type.Enum(AI_MENTOR_TYPE),
 });
 
 export const aiJudgeJudgementSchema = Type.Object({

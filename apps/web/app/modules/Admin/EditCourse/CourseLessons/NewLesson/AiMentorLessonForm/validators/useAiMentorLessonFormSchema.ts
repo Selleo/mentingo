@@ -1,3 +1,4 @@
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { z } from "zod";
 
 import { MAX_MB_PER_FILE, MAX_NUM_OF_FILES } from "../AiMentorLesson.constants";
@@ -64,6 +65,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
           message: t("adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength"),
         },
       ),
+    type: z.nativeEnum(AI_MENTOR_TYPE).default(AI_MENTOR_TYPE.MENTOR),
   });
 
 export const aiMentorLessonFileSchema = (t: TFunction) =>

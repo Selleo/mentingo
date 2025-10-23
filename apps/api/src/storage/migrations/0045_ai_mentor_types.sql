@@ -1,0 +1,1 @@
+ALTER TABLE "ai_mentor_lessons" ADD COLUMN "type" text DEFAULT 'mentor' NOT NULL;
