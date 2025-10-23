@@ -389,6 +389,7 @@ export class StatisticsRepository {
 
   async getMostRecentCourseForStudents(studentIds: UUIDType[]) {
     if (!studentIds.length) return [];
+    
     return this.db
       .selectDistinctOn([studentLessonProgress.studentId], {
         studentId: studentLessonProgress.studentId,
@@ -406,6 +407,7 @@ export class StatisticsRepository {
       )
       .orderBy(studentLessonProgress.studentId, desc(studentLessonProgress.createdAt));
   }
+  
   async getInactiveStudents(inactivityDays: number) {
     return this.db
       .select({ userId: users.id, name: users.firstName, email: users.email })
