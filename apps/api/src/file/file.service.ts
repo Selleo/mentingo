@@ -150,6 +150,8 @@ export class FileService {
         if (!isEmpty(cellValue)) parsedObject[normalizedHeader] = String(cellValue).trim();
       });
 
+      if (isEmpty(parsedObject)) return null;
+
       if (!validator.Check(parsedObject))
         throw new BadRequestException({
           message: "files.import.requiredDataMissing",
@@ -158,6 +160,6 @@ export class FileService {
       return parsedObject as Static<T>;
     });
 
-    return parsedCsvData;
+    return parsedCsvData.filter((item) => item !== null);
   }
 }
