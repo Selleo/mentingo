@@ -8,8 +8,13 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "~/component
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { CreatePageHeader } from "~/modules/Admin/components";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { useCreateCategoryForm } from "./hooks/useCreateCategoryForm";
+
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewCategory");
 
 export default function CreateNewCategoryPage() {
   const { form, onSubmit } = useCreateCategoryForm(({ data }) => {

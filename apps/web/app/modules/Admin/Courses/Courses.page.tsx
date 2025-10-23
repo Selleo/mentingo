@@ -54,14 +54,17 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { getCourseBadgeVariant, getCourseStatus } from "./utils";
 
-import type { ClientLoaderFunctionArgs } from "@remix-run/react";
+import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 import type { GetAllCoursesResponse } from "~/api/generated-api";
 import type { CourseParams, CourseStatus } from "~/api/queries/useCourses";
 
 type TCourse = GetAllCoursesResponse["data"][number];
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.courses");
 
 export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
   try {

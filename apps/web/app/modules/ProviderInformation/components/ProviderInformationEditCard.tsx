@@ -14,21 +14,38 @@ import type {
   UpdateCompanyInformationBody,
 } from "~/api/generated-api";
 
-const companyInformationFormSchema = z.object({
-  companyName: z.string().optional(),
-  registeredAddress: z.string().optional(),
-  taxNumber: z
-    .string()
-    .regex(/^\d{10}$/)
-    .optional()
-    .or(z.literal("")),
-  emailAddress: z.string().email().optional().or(z.literal("")),
-  courtRegisterNumber: z
-    .string()
-    .regex(/^\d{10}$/)
-    .optional()
-    .or(z.literal("")),
-});
+const companyInformationFormSchema = z
+  .object({
+    companyName: z.string().optional(),
+    companyShortName: z
+      .string()
+      .max(10, "Company short name must be 10 characters or less")
+      .optional(),
+    registeredAddress: z.string().optional(),
+    taxNumber: z
+      .string()
+      .regex(/^\d{10}$/)
+      .optional()
+      .or(z.literal("")),
+    emailAddress: z.string().email().optional().or(z.literal("")),
+    courtRegisterNumber: z
+      .string()
+      .regex(/^\d{10}$/)
+      .optional()
+      .or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      if (data.companyName && data.companyShortName && data.companyShortName.trim() !== "") {
+        return data.companyShortName.length <= data.companyName.length;
+      }
+      return true;
+    },
+    {
+      message: "Company short name must be shorter than or equal to company name",
+      path: ["companyShortName"],
+    },
+  );
 
 export interface ProviderInformationEditCardProps {
   companyInformation: GetCompanyInformationResponse["data"] | null;
@@ -53,6 +70,7 @@ export const ProviderInformationEditCard = ({
     resolver: zodResolver(companyInformationFormSchema),
     defaultValues: companyInformation || {
       companyName: "",
+      companyShortName: "",
       registeredAddress: "",
       taxNumber: "",
       emailAddress: "",
@@ -74,6 +92,21 @@ export const ProviderInformationEditCard = ({
           />
           {errors.companyName && (
             <p className="mt-1 text-xs text-red-500">{errors.companyName.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="companyShortName">{t("providerInformation.companyShortName")}</Label>
+          <Input
+            id="companyShortName"
+            maxLength={10}
+            className={cn({
+              "border-red-500 focus:!ring-red-500": errors.companyShortName,
+            })}
+            {...register("companyShortName")}
+          />
+          {errors.companyShortName && (
+            <p className="mt-1 text-xs text-red-500">{errors.companyShortName.message}</p>
           )}
         </div>
 

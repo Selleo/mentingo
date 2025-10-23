@@ -22,6 +22,11 @@ import {
 } from "~/components/ui/select";
 import { USER_ROLE } from "~/config/userRoles";
 import { CreatePageHeader } from "~/modules/Admin/components";
+import { setPageTitle } from "~/utils/setPageTitle";
+
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewUser");
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters."),

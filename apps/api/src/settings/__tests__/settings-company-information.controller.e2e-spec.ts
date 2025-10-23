@@ -24,6 +24,7 @@ describe("SettingsController - Company Information (e2e)", () => {
 
   const validCompanyData: CompanyInformaitonJSONSchema = {
     companyName: "Test Company Ltd",
+    companyShortName: "",
     registeredAddress: "123 Test Street, Test City",
     taxNumber: "1234567890",
     emailAddress: "contact@testcompany.com",
@@ -94,6 +95,7 @@ describe("SettingsController - Company Information (e2e)", () => {
 
       expect(response.body.data).toEqual({
         companyName: "",
+        companyShortName: "",
         registeredAddress: "",
         taxNumber: "",
         emailAddress: "",

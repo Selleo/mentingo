@@ -21,8 +21,13 @@ import { CourseList } from "~/modules/Courses/components/CourseList";
 import { StudentsCurses } from "~/modules/Courses/components/StudentsCurses";
 import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { createSortOptions, type SortOption } from "~/types/sorting";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CoursesAccessGuard } from "./Courses.layout";
+
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.courses");
 
 const DEFAULT_STATE = { searchTitle: undefined, sort: "title", category: undefined };
 

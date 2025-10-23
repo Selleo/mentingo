@@ -1,6 +1,7 @@
 import { InviteOnlyRegistration } from "~/modules/Dashboard/Settings/components/admin/InviteOnlyRegistration";
 
 import { PlatformLogoForm } from "../../forms/PlatformLogoForm";
+import { PlatformSimpleLogoForm } from "../../forms/PlatformSimpleLogoForm";
 import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
@@ -41,6 +42,7 @@ export default function OrganizationTabContent({
         backgroundImage={globalSettings.loginBackgroundImageS3Key}
       />
       <PlatformLogoForm />
+      <PlatformSimpleLogoForm />
       <OrganizationTheme />
     </>
   );

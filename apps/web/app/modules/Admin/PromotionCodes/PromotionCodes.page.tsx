@@ -15,12 +15,15 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { useGetPromotionCodeStatus } from "./hooks/useGetPromotionCodes";
 
 import type { TPromotionCode } from "./types";
-import type { ClientLoaderFunctionArgs } from "@remix-run/react";
+import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 import type { CurrencyCode } from "~/lib/formatters/priceFormatter";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.promotionCodes");
 
 export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
   try {
