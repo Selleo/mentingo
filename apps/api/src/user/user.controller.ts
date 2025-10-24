@@ -277,11 +277,7 @@ export class UserController {
     @Query("id") id: UUIDType,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<null> {
-    if (currentUserId !== id) {
-      throw new ForbiddenException("You can only delete your own account");
-    }
-
-    await this.usersService.deleteUser(id);
+    await this.usersService.deleteUser(currentUserId, id);
 
     return null;
   }
@@ -292,8 +288,11 @@ export class UserController {
     response: nullResponse(),
     request: [{ type: "body", schema: deleteUsersSchema }],
   })
-  async deleteBulkUsers(@Body() data: DeleteUsersSchema): Promise<null> {
-    await this.usersService.deleteBulkUsers(data.userIds);
+  async deleteBulkUsers(
+    @Body() data: DeleteUsersSchema,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<null> {
+    await this.usersService.deleteBulkUsers(currentUserId, data.userIds);
 
     return null;
   }

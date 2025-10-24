@@ -2,17 +2,11 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { eq, and, gte } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { users, resetTokens } from "src/storage/schema";
+import { resetTokens } from "src/storage/schema";
 
 @Injectable()
 export class ResetPasswordService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
-
-  public async getUsers() {
-    const allUsers = await this.db.select().from(users);
-
-    return allUsers;
-  }
 
   public async getOneByToken(token: string) {
     const [resetToken] = await this.db

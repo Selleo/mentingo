@@ -10,6 +10,7 @@ import {
   desc,
   ilike,
   or,
+  isNull,
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -101,7 +102,13 @@ export class AnnouncementsRepository {
         .select({ userId: groupUsers.userId })
         .from(groupUsers)
         .leftJoin(users, eq(groupUsers.userId, users.id))
-        .where(and(eq(groupUsers.groupId, groupId), not(eq(users.role, USER_ROLES.ADMIN))));
+        .where(
+          and(
+            eq(groupUsers.groupId, groupId),
+            not(eq(users.role, USER_ROLES.ADMIN)),
+            isNull(users.deletedAt),
+          ),
+        );
 
       await this.createUserAnnouncementRecords(
         usersRelatedToGroup.map((user) => user.userId),
