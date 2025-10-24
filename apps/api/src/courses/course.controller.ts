@@ -33,6 +33,7 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { CourseService } from "src/courses/course.service";
 import {
   allCoursesForContentCreatorSchema,
+  courseAverageQuizScoresSchema,
   getCourseStatisticsSchema,
 } from "src/courses/schemas/course.schema";
 import {
@@ -447,5 +448,17 @@ export class CourseController {
     const data = await this.courseService.getCourseStatistics(courseId);
 
     return new BaseResponse(data);
+  }
+
+  @Get(":courseId/statistics/average-quiz-score")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(courseAverageQuizScoresSchema),
+  })
+  async getAverageQuizScores(@Param("courseId") courseId: UUIDType) {
+    const averageQuizScores = await this.courseService.getAverageQuizScoreForCourse(courseId);
+
+    return new BaseResponse(averageQuizScores);
   }
 }

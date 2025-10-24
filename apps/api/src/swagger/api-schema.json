@@ -2591,6 +2591,33 @@
         }
       }
     },
+    "/api/course/{courseId}/statistics/average-quiz-score": {
+      "get": {
+        "operationId": "CourseController_getAverageQuizScores",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAverageQuizScoresResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -9208,6 +9235,45 @@
               "completionPercentage",
               "averageCompletionPercentage",
               "courseStatusDistribution"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAverageQuizScoresResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "averageScoresPerQuiz": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "quizId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "averageScore": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "quizId",
+                    "name",
+                    "averageScore"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "averageScoresPerQuiz"
             ]
           }
         },

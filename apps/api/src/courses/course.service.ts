@@ -70,6 +70,8 @@ import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
+  CourseAverageQuizScorePerQuiz,
+  CourseAverageQuizScoresResponse,
   CourseStatisticsResponse,
   CourseStatusDistribution,
 } from "./schemas/course.schema";
@@ -1516,5 +1518,34 @@ export class CourseService {
       .where(eq(coursesSummaryStats.courseId, id));
 
     return courseStats;
+  }
+
+  async getAverageQuizScoreForCourse(courseId: UUIDType): Promise<CourseAverageQuizScoresResponse> {
+    const [averageScorePerQuiz] = await this.db
+      .select({
+        averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
+          (
+            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score))
+            FROM (
+              SELECT
+                l.id AS quiz_id,
+                l.title AS quiz_name,
+                ROUND(AVG(slp.quiz_score), 0) AS average_score
+              FROM ${lessons} l
+              JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
+              JOIN ${chapters} c ON l.chapter_id = c.id
+              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.attempts IS NOT NULL AND slp.quiz_score IS NOT NULL
+              GROUP BY l.id, l.title
+            ) AS subquery
+          ),
+          '[]'::jsonb
+        )`,
+      })
+      .from(studentLessonProgress)
+      .leftJoin(chapters, eq(studentLessonProgress.chapterId, chapters.id))
+      .leftJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(courses.id, courseId));
+
+    return averageScorePerQuiz;
   }
 }

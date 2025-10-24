@@ -1142,6 +1142,9 @@
         "completionRateTooltip": "Percentage of users who have completed the entire course.",
         "averageCompletionPercentage": "Average progress",
         "averageCompletionPercentageTooltip": "Average course completion level across all enrolled users.",
+        "averageScorePerQuiz": "Average score per quiz",
+        "averageScorePerQuizSubtitle": "See average results for individual quizzes in the course",
+        "averageQuizScore": "Average quiz score",
         "courseStatusDistribution": "Course status distribution",
         "courseStatusDistributionTooltip": "Shows how many users have completed, started, or not started the course."
       },

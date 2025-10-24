@@ -9,13 +9,12 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "~/components/
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
-import { getCourseStatusDistributionOptions } from "./utils/getCourseStatusDistributionOptions";
+import { getCourseStatusDistributionChartOptions } from "../utils/getCourseStatusDistributionChartOptions";
 
-import type { ProgressStatus } from "../lessonTypes";
 import type { GetCourseStatisticsResponse } from "~/api/generated-api";
 
 interface CourseStatusDistributionProps {
-  courseStatistics: GetCourseStatisticsResponse["data"];
+  courseStatistics?: GetCourseStatisticsResponse["data"];
   className?: string;
 }
 
@@ -25,17 +24,9 @@ export function CourseStatusDistributionChart({
 }: CourseStatusDistributionProps) {
   const { t } = useTranslation();
 
-  const statusCounts = courseStatistics.courseStatusDistribution.reduce(
-    (acc, item) => {
-      acc[item.status] = item.count;
-      return acc;
-    },
-    {} as Record<ProgressStatus, number>,
-  );
-
   const { chartConfig, chartData, isEmpty } = useMemo(() => {
-    return getCourseStatusDistributionOptions(t, statusCounts);
-  }, [t, statusCounts]);
+    return getCourseStatusDistributionChartOptions(t, courseStatistics);
+  }, [t, courseStatistics]);
 
   return (
     <div

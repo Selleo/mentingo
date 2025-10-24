@@ -1153,6 +1153,9 @@
         "completionRateTooltip": "Procent użytkowników, którzy ukończyli cały kurs.",
         "averageCompletionPercentage": "Średni postęp",
         "averageCompletionPercentageTooltip": "Średni poziom ukończenia kursu przez wszystkich zapisanych użytkowników.",
+        "averageScorePerQuiz": "Średnie wyniki z quizów",
+        "averageScorePerQuizSubtitle": "Zobacz średnie wyniki z poszczególnych quizów zawartych w kursie",
+        "averageQuizScore": "Średni wynik quizu",
         "courseStatusDistribution": "Rozkład statusów kursów",
         "courseStatusDistributionTooltip": "Pokazuje, ilu użytkowników ukończyło, rozpoczęło lub nie rozpoczęło kursu."
       },

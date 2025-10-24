@@ -1,11 +1,32 @@
 import type { ProgressStatus } from "../../lessonTypes";
 import type i18next from "i18next";
+import type { GetCourseStatisticsResponse } from "~/api/generated-api";
 import type { ChartConfig } from "~/components/ui/chart";
 
-export const getCourseStatusDistributionOptions = (
+export const getCourseStatusDistributionChartOptions = (
   t: typeof i18next.t,
-  statusCounts: Record<ProgressStatus, number>,
+  courseStatistics?: GetCourseStatisticsResponse["data"],
 ) => {
+  if (!courseStatistics) {
+    return {
+      chartConfig: {
+        count: {
+          label: t("adminCourseView.statistics.overview.courseStatusDistribution"),
+        },
+      } satisfies ChartConfig,
+      chartData: [{ status: "No data", count: 1, fill: "var(--neutral-200)" }],
+      isEmpty: true,
+    };
+  }
+
+  const statusCounts = courseStatistics.courseStatusDistribution.reduce(
+    (acc, item) => {
+      acc[item.status] = item.count;
+      return acc;
+    },
+    {} as Record<ProgressStatus, number>,
+  );
+
   const totalCount =
     (statusCounts.completed || 0) +
     (statusCounts.in_progress || 0) +
