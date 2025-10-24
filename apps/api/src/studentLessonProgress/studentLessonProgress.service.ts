@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { format } from "date-fns";
-import { and, eq, isNotNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
@@ -487,6 +487,7 @@ export class StudentLessonProgressService {
         courseId: sql<string>`${chapters.courseId}`,
       })
       .from(lessons)
+      .leftJoin(users, eq(users.id, userId))
       .leftJoin(
         studentLessonProgress,
         and(
@@ -499,7 +500,7 @@ export class StudentLessonProgressService {
         studentCourses,
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
-      .where(eq(lessons.id, id));
+      .where(and(eq(lessons.id, id), isNull(users.deletedAt)));
   }
 
   async getUserCourseCompletionDetails(
@@ -519,7 +520,13 @@ export class StudentLessonProgressService {
       .leftJoin(courses, eq(studentCourses.courseId, courses.id))
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
+      .where(
+        and(
+          eq(studentCourses.studentId, studentId),
+          eq(studentCourses.courseId, courseId),
+          isNull(users.deletedAt),
+        ),
+      );
 
     return {
       ...courseCompletionDetails,
