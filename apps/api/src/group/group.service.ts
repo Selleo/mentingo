@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, countDistinct, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, countDistinct, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -180,7 +180,13 @@ export class GroupService {
       .from(groupUsers)
       .leftJoin(users, and(eq(users.id, userId)))
       .leftJoin(groups, and(eq(groups.id, groupId)))
-      .where(and(eq(groupUsers.groupId, groupId), eq(groupUsers.userId, userId)));
+      .where(
+        and(
+          eq(groupUsers.groupId, groupId),
+          eq(groupUsers.userId, userId),
+          isNull(users.deletedAt),
+        ),
+      );
 
     if (!dbOutput.groupId) throw new NotFoundException("Group not found");
     if (!dbOutput.userId) throw new NotFoundException("User not found");
@@ -201,7 +207,14 @@ export class GroupService {
     const [assigned] = await this.db
       .select()
       .from(groupUsers)
-      .where(and(eq(groupUsers.groupId, groupId), eq(groupUsers.userId, userId)));
+      .innerJoin(users, eq(users.id, groupUsers.userId))
+      .where(
+        and(
+          eq(groupUsers.groupId, groupId),
+          eq(groupUsers.userId, userId),
+          isNull(users.deletedAt),
+        ),
+      );
 
     if (!assigned) throw new ConflictException("User is not assigned to this group");
 
