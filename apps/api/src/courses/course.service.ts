@@ -1484,20 +1484,16 @@ export class CourseService {
         averageCompletionPercentage: sql<number>`COALESCE(
           (
             SELECT
-              ROUND(AVG(completion_percentage), 0)
+              ROUND((CAST(total_completed AS DECIMAL) / NULLIF(total_rows, 0)) * 100, 0)
             FROM (
               SELECT
-                sc.student_id,
-                (CAST(COUNT(DISTINCT CASE WHEN slp.completed_at IS NOT NULL THEN slp.lesson_id END) AS DECIMAL) /
-                 (SELECT SUM(ch.lesson_count) FROM ${chapters} ch WHERE ch.course_id = sc.course_id)) * 100 AS completion_percentage
-              FROM ${studentCourses} AS sc
-              LEFT JOIN ${studentLessonProgress} AS slp
-                ON sc.student_id = slp.student_id
-              LEFT JOIN ${chapters} AS ch
-                ON slp.chapter_id = ch.id AND ch.course_id = sc.course_id
-              WHERE sc.course_id = ${id}
-              GROUP BY sc.student_id, sc.course_id
-            ) AS student_completion
+                COUNT(*) FILTER (WHERE slp.completed_at IS NOT NULL) AS total_completed,
+                COUNT(*) AS total_rows
+              FROM ${studentLessonProgress} AS slp
+              JOIN ${lessons} AS l ON slp.lesson_id = l.id
+              JOIN ${chapters} AS ch ON l.chapter_id = ch.id
+              WHERE ch.course_id = ${id}
+            ) AS stats
           ),
           0
         )::float`,
