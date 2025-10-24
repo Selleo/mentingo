@@ -16,6 +16,7 @@ import {
   ilike,
   inArray,
   isNotNull,
+  isNull,
   like,
   ne,
   or,
@@ -218,6 +219,7 @@ export class CourseService {
       const conditions = [
         eq(studentCourses.studentId, userId),
         or(eq(courses.status, "published"), eq(courses.status, "private")),
+        isNull(users.deletedAt),
       ];
       conditions.push(...this.getFiltersConditions(filters, false));
 
@@ -311,6 +313,8 @@ export class CourseService {
     if (filters.groupId) {
       conditions.push(eq(groupUsers.groupId, filters.groupId));
     }
+
+    conditions.push(isNull(users.deletedAt));
 
     const data = await this.db
       .select({
@@ -1004,8 +1008,10 @@ export class CourseService {
         id: courses.id,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
         price: courses.priceInCents,
+        userDeletedAt: users.deletedAt,
       })
       .from(courses)
+      .leftJoin(users, eq(users.id, studentId))
       .leftJoin(
         studentCourses,
         and(eq(courses.id, studentCourses.courseId), eq(studentCourses.studentId, studentId)),
@@ -1013,6 +1019,10 @@ export class CourseService {
       .where(and(eq(courses.id, id)));
 
     if (!course) throw new NotFoundException("Course not found");
+
+    if (course.userDeletedAt) {
+      throw new NotFoundException("User not found");
+    }
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
 
@@ -1038,6 +1048,14 @@ export class CourseService {
       .where(
         and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
       );
+
+    const studentsToEnroll = await this.db
+      .select()
+      .from(users)
+      .where(and(inArray(users.id, studentIds), isNull(users.deletedAt)));
+
+    if (studentsToEnroll.length !== studentIds.length)
+      throw new BadRequestException("You can only enroll existing users");
 
     if (existingStudentsEnrollments.length > 0) {
       const existingStudentsEnrollmentsIds = existingStudentsEnrollments.map(
