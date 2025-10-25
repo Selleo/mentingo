@@ -1,6 +1,6 @@
 import { StripeWebhookHandler as StripeWebhookHandlerDecorator } from "@golevelup/nestjs-stripe";
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import Stripe from "stripe";
 
 import { DatabasePg } from "src/common";
@@ -22,7 +22,10 @@ export class StripeWebhookHandler {
 
     if (!userId && !courseId) return null;
 
-    const [user] = await this.db.select().from(users).where(eq(users.id, userId));
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
     if (!user) return null;
 
