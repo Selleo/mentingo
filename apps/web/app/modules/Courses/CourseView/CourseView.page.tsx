@@ -1,19 +1,27 @@
 import { useParams } from "@remix-run/react";
+import { format } from "date-fns";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourse, useCurrentUser } from "~/api/queries";
 import { useCertificate } from "~/api/queries/useCertificates";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useUserRole } from "~/hooks/useUserRole";
-import { CourseChapter } from "~/modules/Courses/CourseView/CourseChapter";
+import { cn } from "~/lib/utils";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
 import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
 import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
-import CertificateContent from "~/modules/Profile/Certificates/CertificateContent";
+import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
 import { CoursesAccessGuard } from "../Courses.layout";
+
+import { ChapterListOverview } from "./components/ChapterListOverview";
 
 export default function CourseViewPage() {
   const { t } = useTranslation();
@@ -23,10 +31,57 @@ export default function CourseViewPage() {
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
 
+  const [isCertificatePreviewOpen, setCertificatePreview] = useState(false);
+
+  const handleOpenCertificatePreview = () => setCertificatePreview(true);
+  const handleCloseCertificatePreview = () => setCertificatePreview(false);
+
   const { data: certificate } = useCertificate({
     userId: currentUser?.id ?? "",
     courseId: id,
   });
+
+  const hasFinishedCourse = useMemo(() => {
+    return course?.completedChapterCount === course?.courseChapterCount;
+  }, [course?.completedChapterCount, course?.courseChapterCount]);
+
+  const courseViewTabs = useMemo(
+    () => [
+      {
+        title: t("studentCourseView.tabs.chapters"),
+        itemCount: course?.chapters?.length,
+        content: <ChapterListOverview course={course} />,
+        isForAdminLike: false,
+      },
+      {
+        title: t("studentCourseView.tabs.moreFromAuthor"),
+        content: (
+          <div className="flex flex-col gap-6">
+            <MoreCoursesByAuthor courseId={course?.id ?? ""} contentCreatorId={course?.authorId} />
+            <YouMayBeInterestedIn courseId={course?.id} category={course?.category} />
+          </div>
+        ),
+        isForAdminLike: false,
+      },
+      { title: t("studentCourseView.tabs.statistics"), isForAdminLike: true },
+    ],
+    [t, course],
+  );
+
+  const certificateInfo = useMemo(() => {
+    if (!course || !currentUser || !isStudent) {
+      return { studentName: "", courseName: "", formattedDate: "" };
+    }
+
+    const cert = certificate?.[0];
+
+    const studentName = cert?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
+    const courseName = cert?.courseTitle || course.title;
+    const completionDate = cert ? cert.completionDate : null;
+    const formattedDate = completionDate ? format(new Date(completionDate), "dd.MM.yyyy") : "";
+
+    return { studentName, courseName, formattedDate };
+  }, [certificate, currentUser, course, isStudent]);
 
   if (!course) return null;
 
@@ -42,21 +97,7 @@ export default function CourseViewPage() {
 
   const backButton = { title: t("studentCourseView.breadcrumbs.back"), href: "/courses" };
 
-  const canShowCertificate =
-    course?.hasCertificate && certificate !== undefined && certificate.length > 0;
-
-  if (!course) return null;
-
-  const studentName: string =
-    certificate?.[0]?.fullName || `${currentUser?.firstName} ${currentUser?.lastName}`;
-  const courseName: string = certificate?.[0]?.courseTitle || course.title;
-  const completionDate =
-    certificate && certificate.length > 0
-      ? certificate[0].completionDate || certificate[0].createdAt
-      : null;
-  const formattedDate = completionDate
-    ? new Date(completionDate).toISOString().split("T")[0].replaceAll("-", ".")
-    : "";
+  const { studentName, courseName, formattedDate } = certificateInfo;
 
   return (
     <CoursesAccessGuard>
@@ -64,36 +105,82 @@ export default function CourseViewPage() {
         <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
           <div className="flex flex-col gap-y-6 overflow-hidden">
             <CourseOverview course={course} />
-            {canShowCertificate && (
-              <div className="hidden aspect-video w-full rounded-xl border border-white bg-white shadow-sm sm:block">
-                <CertificateContent
-                  studentName={studentName}
-                  courseName={courseName}
-                  completionDate={formattedDate}
-                  backgroundImageUrl={globalSettings?.certificateBackgroundImage}
-                  platformLogo={globalSettings?.platformLogoS3Key}
-                />
-              </div>
+
+            {hasFinishedCourse && (
+              <Card className="px-4 py-4 md:px-8 flex items-center gap-4 bg-success-50">
+                <div className="bg-success-50 aspect-square size-10 rounded-full grid place-items-center">
+                  <Icon name="InputRoundedMarkerSuccess" className="size-4" />
+                </div>
+                <p className="body-sm-md grow">
+                  {t("studentCourseView.certificate.courseCompleted")}
+                </p>
+                <div>
+                  <Button variant="ghost" size="sm" onClick={handleOpenCertificatePreview}>
+                    <Icon name="Eye" className="size-4 mr-2" />
+                    {t("studentCourseView.certificate.button.viewCertificate")}
+                  </Button>
+                </div>
+              </Card>
             )}
-            <div className="flex flex-col gap-y-4 rounded-lg bg-white px-4 py-6 md:p-8">
-              <div className="flex flex-col gap-y-1">
-                <h4 className="h6 text-neutral-950">{t("studentCourseView.header")}</h4>
-                <p className="body-base-md text-neutral-800">{t("studentCourseView.subHeader")}</p>
-              </div>
-              {course.chapters?.map((chapter) => {
-                if (!chapter) return null;
+
+            <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
+              <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
+                {courseViewTabs.map((tab) => {
+                  const { title, isForAdminLike } = tab;
+
+                  if (isForAdminLike && isStudent) return null;
+
+                  return (
+                    <TabsTrigger
+                      key={title}
+                      value={title}
+                      className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
+                    >
+                      <span className="body-sm">{title}</span>{" "}
+                      {tab.itemCount && (
+                        <span className="body-sm bg-neutral-200 px-2 rounded-lg">
+                          {tab.itemCount}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+              {courseViewTabs.map((tab) => {
+                const { title, isForAdminLike, content } = tab;
+
+                if (isForAdminLike && isStudent) return null;
+
                 return (
-                  <CourseChapter
-                    key={chapter.id}
-                    chapter={chapter}
-                    courseId={course.id}
-                    isEnrolled={Boolean(course.enrolled)}
-                  />
+                  <TabsContent
+                    key={title}
+                    value={title}
+                    className={cn({
+                      "data-[state=active]:mt-6": true,
+                    })}
+                  >
+                    {content}
+                  </TabsContent>
                 );
               })}
-            </div>
-            <MoreCoursesByAuthor courseId={course.id} contentCreatorId={course.authorId} />
-            <YouMayBeInterestedIn courseId={course.id} category={course.category} />
+            </Tabs>
+            {isCertificatePreviewOpen && isStudent && (
+              <button
+                className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
+                onClick={handleCloseCertificatePreview}
+              >
+                <div>
+                  <CertificatePreview
+                    studentName={studentName}
+                    courseName={courseName}
+                    completionDate={formattedDate}
+                    onClose={handleCloseCertificatePreview}
+                    platformLogo={globalSettings?.platformLogoS3Key}
+                    certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}
+                  />
+                </div>
+              </button>
+            )}
           </div>
           <CourseViewSidebar course={course} />
         </div>

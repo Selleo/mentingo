@@ -1387,6 +1387,17 @@
       "availableCourses": "Available courses",
       "yourCourses": "Your courses",
       "back": "Back"
+    },
+    "certificate": {
+      "button": {
+        "viewCertificate": "View Certificate"
+      },
+      "courseCompleted": "Congratulations! You have completed the course! Now you have access to your certificate."
+    },
+    "tabs": {
+      "chapters": "Chapters",
+      "moreFromAuthor": "More from author",
+      "statistics": "Statistics"
     }
   },
   "studentChapterView": {

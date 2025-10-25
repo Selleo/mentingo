@@ -25,6 +25,7 @@ const CertificatePreview = ({
   const handleDownload = () => {
     downloadCertificatePdf(courseName);
   };
+
   return (
     <>
       <HiddenCertificate
