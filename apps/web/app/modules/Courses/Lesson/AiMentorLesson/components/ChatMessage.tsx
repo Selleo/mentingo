@@ -1,7 +1,13 @@
 import { useTranslation } from "react-i18next";
+import Markdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 
 import { useCurrentUserSuspense } from "~/api/queries";
 import { Icon } from "~/components/Icon";
+import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
+import "katex/dist/katex.min.css";
 
 interface ChatMessageProps {
   id: string;
@@ -27,7 +33,7 @@ const ChatMessage = (message: ChatMessageProps) => {
   }
 
   return (
-    <div key={message.id} className="flex items-start gap-x-3">
+    <div key={message.id} className="flex items-start gap-x-3 max-w-full">
       <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full">
         {isAI ? (
           <div className="flex size-full items-center justify-center rounded-full bg-primary-100">
@@ -39,9 +45,21 @@ const ChatMessage = (message: ChatMessageProps) => {
           </div>
         )}
       </div>
-      <div className="max-w-4/5 flex flex-col">
+      <div className="max-w-[90%] overflow-x-hidden flex flex-col">
         <span className="mb-1 text-sm font-semibold text-primary-900">{userName}</span>
-        <p className="break-words text-sm leading-relaxed text-gray-800">{message.content}</p>
+        <p className="break-words text-sm leading-relaxed overflow-x-scroll scrollbar-hide text-gray-800">
+          {isAI ? (
+            <Markdown
+              components={variants}
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+            >
+              {message.content}
+            </Markdown>
+          ) : (
+            message.content
+          )}
+        </p>
       </div>
     </div>
   );
