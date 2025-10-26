@@ -7,12 +7,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: guidebook
       POSTGRES_DB: guidebook
-      LANGFUSE_DB: ${LANGFUSE_POSTGRES_DB}
-      LANGFUSE_USER: ${LANGFUSE_POSTGRES_USER}
-      LANGFUSE_PASS: ${LANGFUSE_POSTGRES_PASSWORD}
     volumes:
       - lms-db-data:/var/lib/postgresql/data
-      - ./initdb:/docker-entrypoint-initdb.d
     ports:
       - 5432:5432
     healthcheck:
@@ -38,6 +34,24 @@ services:
     ports:
       - 1025:1025
       - 8025:8025
+
+  langfuse-db:
+    image: pgvector/pgvector:pg16
+    restart: always
+    env_file: ".env"
+    environment:
+      POSTGRES_DB: ${LANGFUSE_POSTGRES_DB}
+      POSTGRES_USER: ${LANGFUSE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${LANGFUSE_POSTGRES_PASSWORD}
+    volumes:
+      - langfuse-db-data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
 
   langfuse-worker:
     image: docker.io/langfuse/langfuse-worker:3
@@ -127,4 +141,7 @@ volumes:
     driver: local
   langfuse_clickhouse_logs:
     driver: local
+  langfuse-db-data:
+    driver: local
+
 
