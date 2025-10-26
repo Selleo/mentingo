@@ -1,3 +1,29 @@
+<a name="v3.16.0"></a>
+
+## [v3.16.0] - 26.10.2025
+
+### Features:
+
+- Added markdown to ai mentor ([#803](https://github.com/Selleo/mentingo/issues/803))
+
+- add tabs in course view and certificate modal instead of displayed certificate ([#812](https://github.com/Selleo/mentingo/issues/812))
+
+- Implemented system for ai mentor evaluation ([#788](https://github.com/Selleo/mentingo/issues/788))
+
+- update logo in unregistered view ([#810](https://github.com/Selleo/mentingo/issues/810))
+
+### Bug Fixes:
+
+- users import failing when empty record provided ([#808](https://github.com/Selleo/mentingo/issues/808))
+
+### Chores:
+
+- separated langfuse docker instance ([#829](https://github.com/Selleo/mentingo/issues/829))
+
+### Documentation:
+
+- update deployment docs ([#823](https://github.com/Selleo/mentingo/issues/823))
+
 <a name="v3.15.0"></a>
 
 ## [v3.15.0] - 19.10.2025
@@ -11,6 +37,10 @@
 ### Bug Fixes:
 
 - adjust sidebar navigation breakpoints ([#782](https://github.com/Selleo/mentingo/issues/782))
+
+### Documentation:
+
+- update changelog for version v3.15.0
 
 ### Tests:
 
@@ -1750,7 +1780,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.15.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.16.0...HEAD
+[v3.16.0]: https://github.com/Selleo/mentingo/compare/v3.15.0...v3.16.0
 [v3.15.0]: https://github.com/Selleo/mentingo/compare/v3.14.1...v3.15.0
 [v3.14.1]: https://github.com/Selleo/mentingo/compare/v3.14.0...v3.14.1
 [v3.14.0]: https://github.com/Selleo/mentingo/compare/v3.13.0...v3.14.0
