@@ -33,6 +33,7 @@ import {
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { GetCourseStudentsProgressResponse } from "~/api/generated-api";
 import type { CourseStudentsProgressQueryParams } from "~/api/queries/admin/useCourseStudentsProgress";
+import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 
 type CourseStundentsProgressColumn = GetCourseStudentsProgressResponse["data"][number];
 
@@ -204,7 +205,7 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
         <Pagination
           className="border-t"
           totalItems={totalItems}
-          itemsPerPage={perPage}
+          itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
           currentPage={page}
           onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
           onItemsPerPageChange={(newPerPage) => {

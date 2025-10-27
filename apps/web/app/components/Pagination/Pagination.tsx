@@ -10,13 +10,13 @@ import { PaginationButton } from "./PaginationButton";
 interface PaginationProps {
   className?: string;
   totalItems?: number;
-  itemsPerPage?: number;
+  itemsPerPage?: (typeof ITEMS_PER_PAGE_OPTIONS)[number];
   currentPage?: number;
   onPageChange: (page: number) => void;
   onItemsPerPageChange: (itemsPerPage: string) => void;
 }
 
-const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
+export const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100] as const;
 
 export const Pagination = ({
   className,
