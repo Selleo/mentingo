@@ -14,7 +14,9 @@ import { CourseCardTitle } from "./CourseCardTitle";
 
 import type { GetAvailableCoursesResponse } from "~/api/generated-api";
 
-export type CourseCardProps = GetAvailableCoursesResponse["data"][number];
+export type CourseCardProps = GetAvailableCoursesResponse["data"][number] & {
+  isFirst?: boolean;
+};
 
 const CourseCard = ({
   author,
@@ -31,6 +33,7 @@ const CourseCard = ({
   thumbnailUrl,
   priceInCents,
   title,
+  isFirst = false,
 }: CourseCardProps) => {
   const { isAdmin } = useUserRole();
   const { pathname } = useLocation();
@@ -39,6 +42,7 @@ const CourseCard = ({
   return (
     <Link
       to={isScormCreatePage ? "#" : `/course/${id}`}
+      id={isFirst ? "available-courses" : undefined}
       data-testid={title}
       className={cn(
         "flex h-auto w-full max-w-[320px] flex-col overflow-hidden rounded-lg border bg-white transition hover:shadow-primary lg:bg-none",

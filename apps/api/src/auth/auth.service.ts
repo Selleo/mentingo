@@ -29,7 +29,7 @@ import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import { createTokens, credentials, resetTokens, users } from "../storage/schema";
+import { createTokens, credentials, resetTokens, userOnboarding, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
@@ -89,6 +89,8 @@ export class AuthService {
         password: hashedPassword,
       });
 
+      await trx.insert(userOnboarding).values({ userId: newUser.id });
+
       await this.settingsService.createSettingsIfNotExists(
         newUser.id,
         newUser.role as UserRole,
@@ -129,6 +131,8 @@ export class AuthService {
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
+    const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+
     if (
       MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
       userSettings.isMFAEnabled
@@ -139,6 +143,7 @@ export class AuthService {
         accessToken,
         refreshToken,
         shouldVerifyMFA: true,
+        onboardingStatus,
       };
     }
 
@@ -148,6 +153,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       shouldVerifyMFA: false,
+      onboardingStatus,
     };
   }
 
@@ -158,14 +164,16 @@ export class AuthService {
       throw new UnauthorizedException("User not found");
     }
 
+    const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
+
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
     const userSettings = await this.settingsService.getUserSettings(user.id);
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
-      return { ...user, shouldVerifyMFA: true };
+      return { ...user, shouldVerifyMFA: true, onboardingStatus };
     }
 
-    return { ...user, shouldVerifyMFA: false };
+    return { ...user, shouldVerifyMFA: false, onboardingStatus };
   }
 
   public async refreshTokens(refreshToken: string) {

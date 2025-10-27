@@ -1,9 +1,10 @@
+import { OnboardingPages } from "@repo/shared";
 import { isEmpty } from "lodash-es";
-import { useReducer } from "react";
+import { useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
-import { useCategories } from "~/api/queries";
+import { useCategories, useCurrentUser } from "~/api/queries";
 import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Icon } from "~/components/Icon";
@@ -23,6 +24,9 @@ import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { createSortOptions, type SortOption } from "~/types/sorting";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
+import { studentCoursesSteps } from "../Onboarding/routes/student";
+
 import { CoursesAccessGuard } from "./Courses.layout";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -34,6 +38,8 @@ const DEFAULT_STATE = { searchTitle: undefined, sort: "title", category: undefin
 export default function CoursesPage() {
   const { isStudent } = useUserRole();
   const { t } = useTranslation();
+
+  const { data: currentUser } = useCurrentUser();
 
   type State = {
     searchTitle: string | undefined;
@@ -74,6 +80,15 @@ export default function CoursesPage() {
   const { data: categories, isLoading: isCategoriesLoading } = useCategories();
 
   const { courseListLayout, setCourseListLayout } = useLayoutsStore();
+
+  const steps = useMemo(() => (isStudent ? studentCoursesSteps(t) : []), [t, isStudent]);
+
+  useTourSetup({
+    steps,
+    isLoading: isAvailableCoursesLoading || isCategoriesLoading,
+    hasCompletedTour: currentUser?.onboardingStatus.courses,
+    page: OnboardingPages.COURSES,
+  });
 
   const filterConfig: FilterConfig[] = [
     {
@@ -142,6 +157,7 @@ export default function CoursesPage() {
               </p>
               <div className="flex items-center justify-between gap-2">
                 <SearchFilter
+                  id="course-filters"
                   filters={filterConfig}
                   values={{
                     title: state.searchTitle,
@@ -183,7 +199,7 @@ export default function CoursesPage() {
               )}
               {!userAvailableCourses ||
                 (isEmpty(userAvailableCourses) && (
-                  <div className="col-span-3 flex gap-8">
+                  <div id="available-courses" className="col-span-3 flex gap-8">
                     <Icon name="EmptyCourse" className="mr-2 text-neutral-900" />
                     <div className="flex flex-col justify-center gap-2">
                       <p className="text-lg font-bold leading-5 text-neutral-950">

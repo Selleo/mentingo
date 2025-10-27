@@ -3,7 +3,6 @@ import { screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 
 import ProfilePage from "~/modules/Profile/Profile.page";
-import { server } from "~/utils/mocks/node";
 import { renderWith } from "~/utils/testUtils";
 
 vi.mock("~/api/queries/useContentCreatorCourses", () => ({
@@ -14,14 +13,16 @@ vi.mock("~/utils/userRoles", () => ({
   isAdminLike: vi.fn().mockReturnValue(false),
 }));
 
-const RemixStub = createRemixStub([{ path: "/profile/:id", Component: ProfilePage }]);
+vi.mock("~/api/queries/useCurrentUser", async () => {
+  const actual = await vi.importActual("~/api/queries/useCurrentUser");
 
-beforeAll(() => server.listen());
-afterEach(() => {
-  server.resetHandlers();
-  vi.resetAllMocks();
+  return {
+    ...actual,
+    useCurrentUserSuspense: vi.fn().mockReturnValue({ id: "1234" }),
+  };
 });
-afterAll(() => server.close());
+
+const RemixStub = createRemixStub([{ path: "/profile/:id", Component: ProfilePage }]);
 
 describe("ProfilePage", () => {
   it("renders and shows user details when present", async () => {

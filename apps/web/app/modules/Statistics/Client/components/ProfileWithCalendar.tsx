@@ -51,7 +51,10 @@ export const ProfileWithCalendar = ({ user, isLoading = true, streak }: ProfileW
   }
 
   return (
-    <div className="flex size-full flex-col gap-6 rounded-lg drop-shadow-card md:flex-row 2xl:max-w-[384px] 2xl:flex-col 2xl:gap-6 2xl:divide-y 2xl:divide-primary-200 2xl:bg-white 2xl:p-8">
+    <div
+      id="profile"
+      className="flex size-full flex-col gap-6 rounded-lg drop-shadow-card md:flex-row 2xl:max-w-[384px] 2xl:flex-col 2xl:gap-6 2xl:divide-y 2xl:divide-primary-200 2xl:bg-white 2xl:p-8"
+    >
       <div className="w-full gap-y-6 rounded-lg bg-white p-6 md:p-8 2xl:p-0">
         <span className="body-lg-md text-neutral-900">{t("profileWithCalendarView.header")}</span>
         <div className="flex flex-col items-center gap-6">
@@ -73,7 +76,10 @@ export const ProfileWithCalendar = ({ user, isLoading = true, streak }: ProfileW
           </Link>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-y-2 bg-white p-6 md:p-8 2xl:p-0 2xl:pt-6">
+      <div
+        id="daily-streak"
+        className="flex w-full flex-col gap-y-2 bg-white p-6 md:p-8 2xl:p-0 2xl:pt-6"
+      >
         <div className="flex flex-row-reverse items-center justify-between 2xl:flex-row">
           <div className="flex items-center gap-x-2 py-2">
             <Icon name="Flame" />

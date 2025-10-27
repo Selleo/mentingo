@@ -55,6 +55,7 @@ export type FilterValues = Partial<{
 }>;
 
 interface SearchFilterProps {
+  id?: string;
   filters: FilterConfig[];
   values: FilterValues;
   onChange: (name: string, value: FilterValue) => void;
@@ -62,6 +63,7 @@ interface SearchFilterProps {
 }
 
 export const SearchFilter: React.FC<SearchFilterProps> = ({
+  id,
   filters,
   values,
   onChange,
@@ -104,7 +106,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   }, [filters, values]);
 
   return (
-    <div className="flex grow flex-wrap items-center gap-2 py-6">
+    <div id={id} className="flex grow flex-wrap items-center gap-2 py-6">
       {filters.map((filter) => {
         if (filter?.type === "text") {
           return (
