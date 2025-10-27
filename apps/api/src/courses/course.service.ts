@@ -70,6 +70,8 @@ import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
+  CourseStatisticsResponse,
+  CourseStatusDistribution,
 } from "./schemas/course.schema";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
@@ -1457,5 +1459,62 @@ export class CourseService {
     `);
 
     return availableCourses.map(({ courseId }) => courseId);
+  }
+
+  async getCourseStatistics(id: UUIDType): Promise<CourseStatisticsResponse> {
+    const [courseStats] = await this.db
+      .select({
+        enrolledCount: sql<number>`COUNT(DISTINCT ${studentCourses.studentId})::int`,
+        completionPercentage: sql<number>`COALESCE(
+          (
+            SELECT
+              ROUND(
+                (CAST(completed_count AS DECIMAL) /
+                 NULLIF(total_count, 0)) * 100, 2)
+            FROM (
+              SELECT
+                COUNT(DISTINCT CASE WHEN sc.progress = 'completed' THEN sc.student_id END) AS completed_count,
+                COUNT(DISTINCT sc.student_id) AS total_count
+              FROM ${studentCourses} AS sc
+              WHERE sc.course_id = ${id}
+            ) AS stats
+          ),
+          0
+        )::float`,
+        averageCompletionPercentage: sql<number>`COALESCE(
+          (
+            SELECT
+              ROUND((CAST(total_completed AS DECIMAL) / NULLIF(total_rows, 0)) * 100, 0)
+            FROM (
+              SELECT
+                COUNT(*) FILTER (WHERE slp.completed_at IS NOT NULL) AS total_completed,
+                COUNT(*) AS total_rows
+              FROM ${studentLessonProgress} AS slp
+              JOIN ${lessons} AS l ON slp.lesson_id = l.id
+              JOIN ${chapters} AS ch ON l.chapter_id = ch.id
+              WHERE ch.course_id = ${id}
+            ) AS stats
+          ),
+          0
+        )::float`,
+        courseStatusDistribution: sql<CourseStatusDistribution>`COALESCE(
+          (
+            SELECT jsonb_agg(jsonb_build_object('status', progress, 'count', count)) FROM (
+              SELECT
+                sc.progress AS progress,
+                COUNT(*) AS count
+              FROM ${studentCourses} AS sc
+              WHERE sc.course_id = ${id}
+              GROUP BY sc.progress
+            ) AS progress_counts
+          ),
+          '[]'::jsonb
+        )`,
+      })
+      .from(coursesSummaryStats)
+      .leftJoin(studentCourses, eq(coursesSummaryStats.courseId, studentCourses.courseId))
+      .where(eq(coursesSummaryStats.courseId, id));
+
+    return courseStats;
   }
 }

@@ -22,6 +22,7 @@ import CertificatePreview from "~/modules/Profile/Certificates/CertificatePrevie
 import { CoursesAccessGuard } from "../Courses.layout";
 
 import { ChapterListOverview } from "./components/ChapterListOverview";
+import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
 
 export default function CourseViewPage() {
   const { t } = useTranslation();
@@ -63,7 +64,11 @@ export default function CourseViewPage() {
         ),
         isForAdminLike: false,
       },
-      { title: t("studentCourseView.tabs.statistics"), isForAdminLike: true },
+      {
+        title: t("studentCourseView.tabs.statistics"),
+        content: <CourseAdminStatistics />,
+        isForAdminLike: true,
+      },
     ],
     [t, course],
   );

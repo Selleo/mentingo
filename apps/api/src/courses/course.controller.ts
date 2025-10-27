@@ -31,7 +31,10 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CourseService } from "src/courses/course.service";
-import { allCoursesForContentCreatorSchema } from "src/courses/schemas/course.schema";
+import {
+  allCoursesForContentCreatorSchema,
+  getCourseStatisticsSchema,
+} from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseEnrollmentScope,
@@ -63,6 +66,7 @@ import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
+  CourseStatisticsResponse,
 } from "src/courses/schemas/course.schema";
 import type {
   CoursesFilterSchema,
@@ -429,5 +433,19 @@ export class CourseController {
     await this.courseService.unenrollCourse(id, currentUserId);
 
     return null;
+  }
+
+  @Get(":courseId/statistics")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    response: baseResponse(getCourseStatisticsSchema),
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+  })
+  async getCourseStatistics(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<BaseResponse<CourseStatisticsResponse>> {
+    const data = await this.courseService.getCourseStatistics(courseId);
+
+    return new BaseResponse(data);
   }
 }
