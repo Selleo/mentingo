@@ -60,15 +60,20 @@ export function CourseAdminStatistics({ lessonCount }: CourseAdminStatisticsProp
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grid-rows-auto md:grid-rows-3">
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.enrolledCount")}
+              tooltipText={t("adminCourseView.statistics.overview.enrolledCountTooltip")}
               statistic={courseStatistics?.enrolledCount ?? 0}
             />
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.completionRate")}
+              tooltipText={t("adminCourseView.statistics.overview.completionRateTooltip")}
               statistic={courseStatistics?.completionPercentage ?? 0}
               type="percentage"
             />
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.averageCompletionPercentage")}
+              tooltipText={t(
+                "adminCourseView.statistics.overview.averageCompletionPercentageTooltip",
+              )}
               statistic={courseStatistics?.averageCompletionPercentage ?? 0}
               type="percentage"
             />
