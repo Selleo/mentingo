@@ -1,3 +1,17 @@
+<a name="v3.17.0"></a>
+
+## [v3.17.0] - 27.10.2025
+
+### Features:
+
+- implement student onboarding guides ([#820](https://github.com/Selleo/mentingo/issues/820))
+
+- add course statistics overview for admin ([#813](https://github.com/Selleo/mentingo/issues/813))
+
+### Bug Fixes:
+
+- allow author to preview private/draft courses ([#818](https://github.com/Selleo/mentingo/issues/818))
+
 <a name="v3.16.0"></a>
 
 ## [v3.16.0] - 26.10.2025
@@ -21,6 +35,8 @@
 - separated langfuse docker instance ([#829](https://github.com/Selleo/mentingo/issues/829))
 
 ### Documentation:
+
+- update changelog for version v3.16.0
 
 - update deployment docs ([#823](https://github.com/Selleo/mentingo/issues/823))
 
@@ -1780,7 +1796,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.16.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.17.0...HEAD
+[v3.17.0]: https://github.com/Selleo/mentingo/compare/v3.16.0...v3.17.0
 [v3.16.0]: https://github.com/Selleo/mentingo/compare/v3.15.0...v3.16.0
 [v3.15.0]: https://github.com/Selleo/mentingo/compare/v3.14.1...v3.15.0
 [v3.14.1]: https://github.com/Selleo/mentingo/compare/v3.14.0...v3.14.1
