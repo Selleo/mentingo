@@ -1135,6 +1135,13 @@
     "statistics": {
       "title": "Statistics",
       "subtitle": "Course performance overview",
+      "details": "Details",
+      "field": {
+        "studentName": "Student",
+        "groupName": "Group name",
+        "completedLessonsCount": "Completed lessons",
+        "lastActivity": "Last activity"
+      },
       "overview": {
         "enrolledCount": "Enrolled students count",
         "enrolledCountTooltip": "Number of users enrolled in this course.",

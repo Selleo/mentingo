@@ -736,7 +736,6 @@
       "envs": "Zmienne środowiskowe"
     }
   },
-
   "adminGroupsView": {
     "name": "Nazwa grupy",
     "characteristic": "Charakterystyka",
@@ -1146,6 +1145,13 @@
     "statistics": {
       "title": "Statystyki",
       "subtitle": "Monitoruj wyniki kursu",
+      "details": "Szczegóły",
+      "field": {
+        "studentName": "Uczeń",
+        "groupName": "Nazwa grupy",
+        "completedLessonsCount": "Postęp",
+        "lastActivity": "Ostatnia aktywność"
+      },
       "overview": {
         "enrolledCount": "Łącznie zapisanych",
         "enrolledCountTooltip": "Liczba użytkowników zapisanych na ten kurs.",
@@ -1636,14 +1642,12 @@
     "title": "Motyw organizacji",
     "description": "Dostosuj wygląd swojej platformy, wybierając kolor, który odzwierciedla tożsamość Twojej marki."
   },
-
   "organizationLoginBackgroundImageUpload": {
     "title": "Przesyłanie obrazu tła logowania",
     "description": "Wgraj własny obraz tła dla strony logowania organizacji.",
     "button": {
       "removeBackgroundImage": "Usuń obraz tła"
     },
-
     "toast": {
       "success": "Obraz tła logowania został pomyślnie zmieniony",
       "error": "Nie udało się zmienić obrazu tła logowania"

@@ -13,9 +13,14 @@ import {
   CourseAdminStatisticsCard,
   CourseStatusDistributionChart,
   AverageScorePerQuizChart,
+  CourseStudentsProgressTable,
 } from "./components";
 
-export function CourseAdminStatistics() {
+interface CourseAdminStatisticsProps {
+  lessonCount: number;
+}
+
+export function CourseAdminStatistics({ lessonCount }: CourseAdminStatisticsProps) {
   const { t } = useTranslation();
 
   const { id = "" } = useParams();
@@ -55,20 +60,15 @@ export function CourseAdminStatistics() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grid-rows-auto md:grid-rows-3">
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.enrolledCount")}
-              tooltipText={t("adminCourseView.statistics.overview.enrolledCountTooltip")}
               statistic={courseStatistics?.enrolledCount ?? 0}
             />
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.completionRate")}
-              tooltipText={t("adminCourseView.statistics.overview.completionRateTooltip")}
               statistic={courseStatistics?.completionPercentage ?? 0}
               type="percentage"
             />
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.averageCompletionPercentage")}
-              tooltipText={t(
-                "adminCourseView.statistics.overview.averageCompletionPercentageTooltip",
-              )}
               statistic={courseStatistics?.averageCompletionPercentage ?? 0}
               type="percentage"
             />
@@ -78,6 +78,7 @@ export function CourseAdminStatistics() {
             />
           </div>
           <AverageScorePerQuizChart averageQuizScores={averageQuizScores} />
+          <CourseStudentsProgressTable lessonCount={lessonCount} />
         </CardContent>
       </Card>
     </TooltipProvider>
