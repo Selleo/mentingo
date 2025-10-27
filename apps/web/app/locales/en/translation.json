@@ -1746,5 +1746,10 @@
     "categories": "Categories",
     "createNewCourse": "Create New Course",
     "admin": "Admin"
+  },
+  "pagination": {
+    "showing": "Showing {{startItem}}-{{endItem}} of {{totalItems}} results",
+    "previous": "Previous",
+    "next": "Next"
   }
 }

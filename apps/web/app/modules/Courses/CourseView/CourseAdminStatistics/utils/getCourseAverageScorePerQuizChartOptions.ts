@@ -1,3 +1,5 @@
+import { isEmpty } from "lodash-es";
+
 import type i18next from "i18next";
 import type { GetAverageQuizScoresResponse } from "~/api/generated-api";
 import type { ChartConfig } from "~/components/ui/chart";
@@ -6,7 +8,7 @@ export const getCourseAverageScorePerQuizChartOptions = (
   t: typeof i18next.t,
   averageQuizScores?: GetAverageQuizScoresResponse["data"],
 ) => {
-  if (!averageQuizScores) {
+  if (isEmpty(averageQuizScores?.averageScoresPerQuiz) || !averageQuizScores) {
     return { chartConfig: {}, chartData: [], isEmpty: true };
   }
 

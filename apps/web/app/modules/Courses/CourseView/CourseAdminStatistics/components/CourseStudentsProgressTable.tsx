@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourseStudentsProgress } from "~/api/queries/admin/useCourseStudentsProgress";
+import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Progress } from "~/components/ui/progress";
 import {
@@ -22,6 +23,7 @@ import {
 } from "~/components/ui/table";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
+import Loader from "~/modules/common/Loader/Loader";
 import {
   SearchFilter,
   type FilterConfig,
@@ -50,7 +52,7 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
 
   const [isPending, startTransition] = React.useTransition();
 
-  const { data: courseStudentsProgress } = useCourseStudentsProgress({
+  const { data: courseStudentsProgress, isLoading } = useCourseStudentsProgress({
     id,
     enabled: isAdminLike,
     query: searchParams,
@@ -126,7 +128,7 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
 
   const table = useReactTable({
     getRowId: (row) => row.studentId,
-    data: courseStudentsProgress || [],
+    data: courseStudentsProgress?.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -144,6 +146,16 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
       }));
     });
   };
+
+  const { totalItems, perPage, page } = courseStudentsProgress?.pagination || {};
+
+  if (isLoading) {
+    return (
+      <div className="min-h-80 grid place-items-center">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-sm flex flex-col justify-center">
@@ -189,6 +201,13 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
             ))}
           </TableBody>
         </Table>
+        <Pagination
+          className="border-t"
+          totalItems={totalItems}
+          itemsPerPage={perPage}
+          currentPage={page}
+          onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
+        />
       </div>
     </div>
   );

@@ -2,8 +2,6 @@ import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 
 import { ApiClient } from "../../api-client";
 
-import type { GetCourseStudentsProgressResponse } from "~/api/generated-api";
-
 export const COURSE_STUDENTS_PROGRESS_QUERY_KEY = ["course-students-progress", "admin"];
 
 export type CourseStudentsProgressQueryParams = {
@@ -40,7 +38,6 @@ export const courseStudentsProgressQueryOptions = ({
 
       return response.data;
     },
-    select: (data: GetCourseStudentsProgressResponse) => data.data,
   });
 
 export function useCourseStudentsProgress({ id, enabled, query }: CourseStudentsProgressOptions) {

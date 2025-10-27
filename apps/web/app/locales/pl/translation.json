@@ -1735,5 +1735,10 @@
     "categories": "Kategorie",
     "createNewCourse": "Utwórz nowy kurs",
     "admin": "Administrator"
+  },
+  "pagination": {
+    "showing": "Wyświetlanie {{startItem}}-{{endItem}} z {{totalItems}} wyników",
+    "previous": "Poprzedni",
+    "next": "Następny"
   }
 }
