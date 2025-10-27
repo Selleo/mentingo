@@ -41,12 +41,7 @@ export const coursesForContentCreatorSchema = Type.Object({
 
 export const courseStatusDistributionSchema = Type.Array(
   Type.Object({
-    status: Type.Union([
-      Type.Literal(PROGRESS_STATUSES.NOT_STARTED),
-      Type.Literal(PROGRESS_STATUSES.IN_PROGRESS),
-      Type.Literal(PROGRESS_STATUSES.COMPLETED),
-      Type.Literal(PROGRESS_STATUSES.BLOCKED),
-    ]),
+    status: Type.Enum(PROGRESS_STATUSES),
     count: Type.Number(),
   }),
 );

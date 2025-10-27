@@ -1137,9 +1137,13 @@
       "subtitle": "Course performance overview",
       "overview": {
         "enrolledCount": "Enrolled students count",
+        "enrolledCountTooltip": "Number of users enrolled in this course.",
         "completionRate": "Completion rate",
-        "averageCompletionPercentage": "Average completion",
-        "courseStatusDistribution": "Course status distribution"
+        "completionRateTooltip": "Percentage of users who have completed the entire course.",
+        "averageCompletionPercentage": "Average progress",
+        "averageCompletionPercentageTooltip": "Average course completion level across all enrolled users.",
+        "courseStatusDistribution": "Course status distribution",
+        "courseStatusDistributionTooltip": "Shows how many users have completed, started, or not started the course."
       },
       "empty": {
         "noUsers": "No users",

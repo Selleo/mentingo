@@ -1,10 +1,12 @@
 "use client";
 
+import { Info } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Label, Pie, PieChart } from "recharts";
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
 import { getCourseStatusDistributionOptions } from "./utils/getCourseStatusDistributionOptions";
@@ -42,9 +44,21 @@ export function CourseStatusDistributionChart({
         className,
       )}
     >
-      <p className="body-base-md">
-        {t("adminCourseView.statistics.overview.courseStatusDistribution")}
-      </p>
+      <div className="flex items-center gap-2">
+        <p className="body-base-md">
+          {t("adminCourseView.statistics.overview.courseStatusDistribution")}
+        </p>
+        <Tooltip>
+          <TooltipTrigger>
+            <Info className="size-4 cursor-pointer" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="body-sm-md">
+              {t("adminCourseView.statistics.overview.courseStatusDistributionTooltip")}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
       <div className="pb-0">
         <ChartContainer
           config={chartConfig}
