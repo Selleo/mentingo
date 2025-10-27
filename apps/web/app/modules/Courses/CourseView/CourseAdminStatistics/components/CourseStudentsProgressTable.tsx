@@ -207,7 +207,10 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
           itemsPerPage={perPage}
           currentPage={page}
           onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
-          onItemsPerPageChange={(newPerPage) => handleFilterChange("perPage", newPerPage)}
+          onItemsPerPageChange={(newPerPage) => {
+            handleFilterChange("page", "1");
+            handleFilterChange("perPage", newPerPage);
+          }}
         />
       </div>
     </div>
