@@ -29,7 +29,7 @@ import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
-import { createTokens, credentials, resetTokens, users } from "../storage/schema";
+import { createTokens, credentials, resetTokens, userOnboarding, users } from "../storage/schema";
 import { UserService } from "../user/user.service";
 
 import { CreatePasswordService } from "./create-password.service";
@@ -88,6 +88,8 @@ export class AuthService {
         userId: newUser.id,
         password: hashedPassword,
       });
+
+      await trx.insert(userOnboarding).values({ userId: newUser.id });
 
       await this.settingsService.createSettingsIfNotExists(
         newUser.id,

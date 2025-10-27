@@ -56,13 +56,18 @@ describe("CertificatesController (e2e)", () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)
-          .create({ role: USER_ROLES.ADMIN });
+          .withAdminRole()
+          .create();
+
         const student = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
-          .create({ role: USER_ROLES.STUDENT });
+          .create();
+
         const cookies = await cookieFor(student, app);
+
         const category = await categoryFactory.create();
+
         const course = await courseFactory.create({
           title: "Python Basics",
           authorId: admin.id,
@@ -70,6 +75,7 @@ describe("CertificatesController (e2e)", () => {
           thumbnailS3Key: null,
           hasCertificate: true,
         });
+
         await db.insert(certificates).values({
           userId: student.id,
           courseId: course.id,

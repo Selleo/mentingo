@@ -4,7 +4,7 @@ import { Factory } from "fishery";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import hashPassword from "../../src/common/helpers/hashPassword";
-import { credentials, users } from "../../src/storage/schema";
+import { credentials, userOnboarding, users } from "../../src/storage/schema";
 
 import { createSettingsFactory } from "./settings.factory";
 
@@ -69,6 +69,8 @@ export const createUserFactory = (db: DatabasePg) => {
   return UserFactory.define(({ onCreate, associations }) => {
     onCreate(async (user) => {
       const [inserted] = await db.insert(users).values(user).returning();
+
+      await db.insert(userOnboarding).values({ userId: inserted.id });
 
       if (associations.credentials) {
         const [insertedCredential] = await db

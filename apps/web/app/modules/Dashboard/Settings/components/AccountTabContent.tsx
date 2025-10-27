@@ -2,7 +2,6 @@ import { isAdminSettings } from "~/utils/isAdminSettings";
 
 import ChangePasswordForm from "../forms/ChangePasswordForm";
 import UserDetailsForm from "../forms/UserDetailsForm";
-import UserForm from "../forms/UserForm";
 
 import LanguageSelect from "./LanguageSelect";
 import NotificationPreferences from "./NotificationPreferences";
@@ -24,7 +23,6 @@ export default function AccountTabContent({
   return (
     <>
       <LanguageSelect />
-      <UserForm />
       {(isContentCreator || isAdmin) && <UserDetailsForm />}
       <ChangePasswordForm />
       {isAdmin && isAdminSettings(settings) && <NotificationPreferences adminSettings={settings} />}

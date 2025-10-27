@@ -399,6 +399,7 @@ export class UserService {
 
     return await this.db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
+      await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
       const token = nanoid(64);
 
