@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+
 import { PaginationButton } from "./PaginationButton";
 
 interface PaginationProps {
@@ -11,7 +13,10 @@ interface PaginationProps {
   itemsPerPage?: number;
   currentPage?: number;
   onPageChange: (page: number) => void;
+  onItemsPerPageChange: (itemsPerPage: string) => void;
 }
+
+const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 
 export const Pagination = ({
   className,
@@ -19,6 +24,7 @@ export const Pagination = ({
   itemsPerPage = 10,
   currentPage = 1,
   onPageChange,
+  onItemsPerPageChange,
 }: PaginationProps) => {
   const { t } = useTranslation();
 
@@ -33,6 +39,9 @@ export const Pagination = ({
   const handleNext = () => {
     if (currentPage < totalPages) onPageChange(currentPage + 1);
   };
+
+  const handleItemsPerPageChange = (newItemsPerPage: string) =>
+    onItemsPerPageChange(newItemsPerPage);
 
   const renderPageButtons = () => {
     const buttons: JSX.Element[] = [];
@@ -102,8 +111,22 @@ export const Pagination = ({
 
   return (
     <div className={cn("px-4 py-2.5 flex items-center justify-between", className)}>
-      <div className="body-sm text-neutral-800">
-        {t("pagination.showing", { startItem, endItem, totalItems })}
+      <div className="flex items-center gap-2">
+        <div className="body-sm text-neutral-800">
+          {t("pagination.showing", { startItem, endItem, totalItems })}
+        </div>
+        <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
+          <SelectTrigger className="w-fit">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+              <SelectItem key={option} value={String(option)}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex items-center space-x-2">
         <Button variant="ghost" size="sm" onClick={handlePrevious} disabled={currentPage <= 1}>
