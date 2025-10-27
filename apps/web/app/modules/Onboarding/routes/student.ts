@@ -6,20 +6,8 @@ export const studentDashboardSteps = (t: typeof i18next.t) => [
     content: t("studentOnboarding.dashboard.clientStatistics"),
   },
   {
-    selector: "#profile",
-    content: t("studentOnboarding.dashboard.profile"),
-  },
-  {
-    selector: "#course-stats",
-    content: t("studentOnboarding.dashboard.courseStats"),
-  },
-  {
-    selector: "#quiz-stats",
-    content: t("studentOnboarding.dashboard.quizStats"),
-  },
-  {
-    selector: "#continue-learning",
-    content: t("studentOnboarding.dashboard.continueLearning"),
+    selector: "#daily-streak",
+    content: t("studentOnboarding.dashboard.dailyStreak"),
   },
 ];
 
@@ -31,10 +19,6 @@ export const studentCoursesSteps = (t: typeof i18next.t) => [
   {
     selector: "#course-filters",
     content: t("studentOnboarding.courses.availableListFilters"),
-  },
-  {
-    selector: "#available-courses",
-    content: t("studentOnboarding.courses.availableCourses"),
   },
 ];
 
@@ -53,10 +37,6 @@ export const studentSettingsSteps = (t: typeof i18next.t) => [
   {
     selector: "#change-language",
     content: t("studentOnboarding.settings.language"),
-  },
-  {
-    selector: "#change-email",
-    content: t("studentOnboarding.settings.email"),
   },
   {
     selector: "#change-password",

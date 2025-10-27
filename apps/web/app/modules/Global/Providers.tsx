@@ -26,6 +26,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 ...base,
                 rx: 16,
               }),
+              maskWrapper: (base) => ({
+                ...base,
+                backgroundColor: "var(--color-black)",
+                opacity: 0.4,
+              }),
               badge: (base) => ({
                 ...base,
                 backgroundColor: "var(--primary-700)",

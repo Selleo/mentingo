@@ -1724,29 +1724,24 @@
   },
   "studentOnboarding": {
     "dashboard": {
-      "clientStatistics": "Witamy na Twoim pulpicie! Śledź tutaj swoje postępy i statystyki nauki.",
-      "profile": "Sprawdź swoją serię logowań i miej dostęp do szybkiego podglądu swojego profilu.",
-      "courseStats": "Monitoruj postępy w kursach, w tym ukończone i trwające kursy.",
-      "quizStats": "Analizuj swoje wyniki quizów dzięki szczegółowym statystykom.",
-      "continueLearning": "Wznów swoją podróż edukacyjną z kursami, które rozpocząłeś."
+      "clientStatistics": "To Twój panel główny - znajdziesz tu postępy, statystyki i ostatnie aktywności.",
+      "dailyStreak": "Dbaj o regularność - tutaj śledzisz swoją serię codziennych logowań."
     },
     "courses": {
-      "yourList": "Zobacz swoje zapisane kursy i śledź swoje postępy.",
-      "availableListFilters": "Użyj filtrów, aby znaleźć idealne kursy dla Ciebie.",
-      "availableCourses": "Przeglądaj dostępne kursy i rozpocznij swoją podróż edukacyjną w kursach."
+      "yourList": "Tutaj znajdziesz Twoje kursy...",
+      "availableListFilters": "...a tu możesz przeglądać dostępne kursy, na które możesz się zapisać."
     },
     "announcements": {
-      "stayInformed": "Bądź na bieżąco z najnowszymi aktualizacjami i ogłoszeniami od swojego zespołu edukacyjnego."
+      "stayInformed": "Tu znajdziesz komunikaty od osób prowadzących lub koordynujących kurs."
     },
     "settings": {
-      "welcome": "Zarządzaj ustawieniami swojego konta i preferencjami tutaj.",
-      "language": "Zmień preferencje języka, aby dostosować swoje doświadczenie.",
-      "email": "Zaktualizuj swój adres e-mail dla bezpieczeństwa konta i powiadomień.",
+      "welcome": "Tutaj możesz zarządzać swoim profilem - edytuj dane, ustaw preferencje i zmień hasło.",
+      "language": "Tutaj ustawisz preferowany język interfejsu - dopasuj platformę do swoich potrzeb.",
       "password": "Regularnie zmieniaj hasło, aby utrzymać bezpieczeństwo swojego konta."
     },
     "profile": {
-      "info": "Zobacz i zarządzaj swoimi osobistymi informacjami profilowymi.",
-      "certificates": "Sprawdź swoje zdobyte certyfikaty i osiągnięcia."
+      "info": "Tutaj zobaczysz i edytujesz swoje dane profilowe.",
+      "certificates": "Tutaj sprawdzisz certyfikaty ukończenia Twoich kursów."
     },
     "providerInformation": {
       "welcome": "Dowiedz się o dostawcy i jego danych kontaktowych."

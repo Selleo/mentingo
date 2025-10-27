@@ -1732,32 +1732,27 @@
   },
   "studentOnboarding": {
     "dashboard": {
-      "clientStatistics": "Welcome to your dashboard! Track your learning progress and statistics here.",
-      "profile": "Have a look at and update your profile information and your daily streak.",
-      "courseStats": "Monitor your course progress, including completed and ongoing courses.",
-      "quizStats": "Analyze your quiz performance with detailed statistics.",
-      "continueLearning": "Resume your learning journey with courses you've started."
+      "clientStatistics": "This is your dashboard - here you can find your progress, statistics and recent activity.",
+      "dailyStreak": "Keep up the streak - track your series of daily logins here."
     },
     "courses": {
-      "yourList": "View your enrolled courses and track your progress.",
-      "availableListFilters": "Use filters to find the perfect courses for you.",
-      "availableCourses": "Browse available courses and start your learning journey in courses."
+      "yourList": "Here you'll find your courses...",
+      "availableListFilters": "And here you can browse available courses you can sign up for."
     },
     "announcements": {
-      "stayInformed": "Stay informed about the latest updates and announcements from your educational team."
+      "stayInformed": "Here you will find announcements from instructors or course coordinators."
     },
     "settings": {
-      "welcome": "Manage your account settings and preferences here.",
-      "language": "Change your language preference to customize your experience.",
-      "email": "Update your email address for account security and notifications.",
-      "password": "Change your password regularly to keep your account secure."
+      "welcome": "Here you can manage your profile - edit details, set preferences and change your password.",
+      "language": "Set your preferred interface language here - tailor the platform to your needs.",
+      "password": "Change your password regularly to maintain the security of your account."
     },
     "profile": {
-      "info": "View and manage your personal profile information.",
-      "certificates": "Check out your earned certificates and achievements."
+      "info": "Here you can view and edit your profile details.",
+      "certificates": "Here you can check completion certificates for your courses."
     },
     "providerInformation": {
-      "welcome": "Learn about the provider and their contact information."
+      "welcome": "Learn about the provider and their contact details."
     }
   }
 }
