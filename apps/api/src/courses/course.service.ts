@@ -1540,7 +1540,7 @@ export class CourseService {
               FROM ${lessons} l
               JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
               JOIN ${chapters} c ON l.chapter_id = c.id
-              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.attempts IS NOT NULL AND slp.quiz_score IS NOT NULL
+              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL
               GROUP BY l.id, l.title
             ) AS subquery
           ),
