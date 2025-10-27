@@ -2,18 +2,31 @@ services:
   project-db:
     image: pgvector/pgvector:pg16
     restart: always
+    env_file: "apps/api/.env"
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: guidebook
       POSTGRES_DB: guidebook
     volumes:
       - lms-db-data:/var/lib/postgresql/data
     ports:
       - 5432:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
   redis:
     image: redis:8.0-M02-alpine3.20
     restart: always
     ports:
       - 6379:6379
+    healthcheck:
+          test: [ "CMD", "redis-cli", "ping" ]
+          interval: 3s
+          timeout: 3s
+          retries: 10
     volumes:
       - lms-redis-data:/data
   mailhog:
@@ -22,8 +35,113 @@ services:
       - 1025:1025
       - 8025:8025
 
+  langfuse-db:
+    image: pgvector/pgvector:pg16
+    restart: always
+    env_file: ".env"
+    environment:
+      POSTGRES_DB: ${LANGFUSE_POSTGRES_DB}
+      POSTGRES_USER: ${LANGFUSE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${LANGFUSE_POSTGRES_PASSWORD}
+    volumes:
+      - langfuse-db-data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  langfuse-worker:
+    image: docker.io/langfuse/langfuse-worker:3
+    env_file: "apps/api/.env"
+
+    restart: always
+    depends_on: &langfuse-depends-on
+      project-db:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+      clickhouse:
+        condition: service_healthy
+
+    ports:
+      - 127.0.0.1:3030:3030
+
+    environment: &langfuse-worker-env
+      NEXTAUTH_URL: ${LANGFUSE_NEXTAUTH_URL}
+      DATABASE_URL: ${LANGFUSE_DATABASE_URL}
+      SALT: ${LANGFUSE_SALT}
+      ENCRYPTION_KEY: ${LANGFUSE_ENCRYPTION_KEY}
+      CLICKHOUSE_MIGRATION_URL: ${LANGFUSE_CLICKHOUSE_MIGRATION_URL}
+      CLICKHOUSE_URL: ${CLICKHOUSE_URL}
+      CLICKHOUSE_USER: ${LANGFUSE_CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${LANGFUSE_CLICKHOUSE_PASSWORD}
+      REDIS_CONNECTION_STRING: ${REDIS_URL}
+      LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${AWS_BUCKET_NAME}
+      LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      LANGFUSE_S3_EVENT_UPLOAD_REGION: ${AWS_REGION}
+      LANGFUSE_S3_EVENT_UPLOAD_PREFIX: ${LANGFUSE_S3_EVENT_PREFIX}
+      LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: ${AWS_BUCKET_NAME}
+      LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${AWS_REGION}
+      LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: ${LANGFUSE_S3_MEDIA_PREFIX}
+      CLICKHOUSE_CLUSTER_ENABLED: ${CLICKHOUSE_CLUSTER_ENABLED}
+
+  langfuse-web:
+    image: docker.io/langfuse/langfuse:3
+    env_file: "apps/api/.env"
+    restart: always
+    depends_on: *langfuse-depends-on
+    ports:
+      - 3002:3000
+
+    environment:
+      <<: *langfuse-worker-env
+      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET}
+
+  clickhouse:
+      image: docker.io/clickhouse/clickhouse-server
+      restart: always
+      user: "101:101"
+      env_file: "apps/api/.env"
+      environment:
+        CLICKHOUSE_DB: default
+        CLICKHOUSE_USER: ${LANGFUSE_CLICKHOUSE_USER}
+        CLICKHOUSE_PASSWORD: ${LANGFUSE_CLICKHOUSE_PASSWORD}
+      volumes:
+        - langfuse_clickhouse_data:/var/lib/clickhouse
+        - langfuse_clickhouse_logs:/var/log/clickhouse-server
+      ports:
+        - 127.0.0.1:8123:8123
+        - 127.0.0.1:9000:9000
+      healthcheck:
+        test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+        interval: 5s
+        timeout: 5s
+        retries: 10
+        start_period: 1s
+
+
+
+
+
+
 volumes:
   lms-db-data:
     driver: local
   lms-redis-data:
     driver: local
+  langfuse_clickhouse_data:
+    driver: local
+  langfuse_clickhouse_logs:
+    driver: local
+  langfuse-db-data:
+    driver: local
+
+

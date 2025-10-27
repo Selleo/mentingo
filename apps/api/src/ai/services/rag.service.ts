@@ -17,7 +17,20 @@ export class RagService {
     private readonly envService: EnvService,
   ) {}
 
-  async getContext(content: string, lessonId: UUIDType, neighbours: number = CHUNK_NEIGHBOURS) {
+  async getContext(
+    content: string,
+    lessonId: UUIDType,
+    neighbours: number = CHUNK_NEIGHBOURS,
+  ): Promise<{
+    chunks: {
+      role: MessageRole;
+      content: string;
+      documentId: unknown;
+      chunkIndex: unknown;
+      similarityScore: unknown;
+      fileName: unknown;
+    }[];
+  }> {
     const embedding = await this.getEmbedding(content);
 
     const chunks = await this.ragRepository.findTopKDocumentChunksWithNeighboursForAiMentorLesson(
@@ -27,11 +40,16 @@ export class RagService {
       neighbours,
     );
 
-    return chunks.map((chunk) => ({
-      id: "",
-      role: MESSAGE_ROLE.SYSTEM as MessageRole,
-      content: `[RAG] ${chunk.content}` as string,
-    }));
+    return {
+      chunks: chunks.map((chunk) => ({
+        role: MESSAGE_ROLE.SYSTEM as MessageRole,
+        content: `[RAG] ${chunk.content}` as string,
+        documentId: chunk.document_id,
+        chunkIndex: chunk.chunk_index,
+        similarityScore: chunk.similarity_score,
+        fileName: chunk.file_name,
+      })),
+    };
   }
 
   private async getEmbedding(content: string) {
@@ -39,6 +57,7 @@ export class RagService {
     const { embedding } = await embed({
       model: provider.textEmbeddingModel(OPENAI_MODELS.EMBEDDING),
       value: content,
+      experimental_telemetry: { isEnabled: true },
     });
 
     return embedding;

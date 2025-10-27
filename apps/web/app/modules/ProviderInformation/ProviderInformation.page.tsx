@@ -7,6 +7,7 @@ import { useCurrentUser, useCompanyInformation } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
@@ -14,7 +15,11 @@ import { studentProviderInformationSteps } from "../Onboarding/routes/student";
 
 import { ProviderInformationCard, ProviderInformationEditCard } from "./components";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { UpdateCompanyInformationBody } from "~/api/generated-api";
+
+export const meta: MetaFunction = ({ matches }) =>
+  setPageTitle(matches, "pages.providerInformation");
 
 export default function ProviderInformationPage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -38,7 +43,16 @@ export default function ProviderInformationPage() {
   });
 
   const handleSubmit = (data: UpdateCompanyInformationBody) => {
-    updateCompanyInformation(data, {
+    const processedData = { ...data };
+    if (data.companyName && (!data.companyShortName || data.companyShortName.trim() === "")) {
+      if (data.companyName.length <= 11) {
+        processedData.companyShortName = data.companyName;
+      } else {
+        processedData.companyShortName = "";
+      }
+    }
+
+    updateCompanyInformation(processedData, {
       onSuccess: () => {
         setIsEditing(false);
       },

@@ -169,6 +169,7 @@
     "description": "Information about your company that will be visible to users",
     "editTitle": "Edit Provider Information",
     "companyName": "Company Name",
+    "companyShortName": "Company Short Name",
     "registeredAddress": "Registered Address",
     "taxNumber": "Tax Number (NIP)",
     "emailAddress": "Email Address",
@@ -1397,6 +1398,17 @@
       "availableCourses": "Available courses",
       "yourCourses": "Your courses",
       "back": "Back"
+    },
+    "certificate": {
+      "button": {
+        "viewCertificate": "View Certificate"
+      },
+      "courseCompleted": "Congratulations! You have completed the course! Now you have access to your certificate."
+    },
+    "tabs": {
+      "chapters": "Chapters",
+      "moreFromAuthor": "More from author",
+      "statistics": "Statistics"
     }
   },
   "studentChapterView": {
@@ -1441,7 +1453,8 @@
       "removeBackgroundImage": "Remove Background Image"
     },
     "other": {
-      "uploading": "Uploading..."
+      "uploading": "Uploading...",
+      "removing": "Removing..."
     },
     "toast": {
       "success": "Certificate background image changed successfully",
@@ -1599,7 +1612,23 @@
     },
     "toast": {
       "logoUploadedSuccessfully": "Platform logo uploaded successfully",
+      "logoRemovedSuccessfully": "Platform logo removed successfully",
       "logoFetchError": "Error fetching platform logo"
+    }
+  },
+  "platformSimpleLogo": {
+    "header": "Platform Simple Logo",
+    "subHeader": "Upload a custom logo that will be used as a signet nad favicon. Supported formats: PNG, SVG",
+    "field": {
+      "uploadLabel": "Logo Image"
+    },
+    "button": {
+      "removeLogo": "Remove Logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Platform simple logo uploaded successfully",
+      "logoRemovedSuccessfully": "Platform simple logo removed successfully",
+      "logoFetchError": "Error fetching platform simple logo"
     }
   },
   "organizationTheme": {
@@ -1671,6 +1700,35 @@
         }
       }
     }
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "providerInformation": "Provider Information",
+    "courses": "Courses",
+    "profile": "Profile",
+    "lesson": "Lesson",
+    "register": "Register",
+    "passwordRecovery": "Password Recovery",
+    "login": "Login",
+    "createNewPassword": "Create New Password",
+    "createAnnouncement": "Create Announcement",
+    "announcements": "Announcements",
+    "users": "Users",
+    "userDetails": "User Details",
+    "createNewUser": "Create New User",
+    "promotionCodes": "Promotion Codes",
+    "promotionCodeDetails": "Promotion Code Details",
+    "createPromotionCode": "Create Promotion Code",
+    "groups": "Groups",
+    "editGroup": "Edit Group",
+    "createGroup": "Create Group",
+    "editCourse": "Edit Course",
+    "createNewCategory": "Create New Category",
+    "categoryDetails": "Category Details",
+    "categories": "Categories",
+    "createNewCourse": "Create New Course",
+    "admin": "Admin"
   },
   "studentOnboarding": {
     "dashboard": {

@@ -8,6 +8,7 @@ import { useUserSettings } from "~/api/queries/useUserSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { useTourSetup } from "../../Onboarding/hooks/useTourSetup";
 import { studentSettingsSteps } from "../../Onboarding/routes/student";
@@ -17,6 +18,9 @@ import OrganizationTabContent from "./components/admin/OrganizationTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
 
 import type { GlobalSettings } from "./types";
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.settings");
 
 export default function SettingsPage() {
   const { t } = useTranslation();

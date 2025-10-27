@@ -16,12 +16,6 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { USER_ROLE } from "~/config/userRoles";
 import Loader from "~/modules/common/Loader/Loader";
 
-import type { MetaFunction } from "@remix-run/node";
-
-export const meta: MetaFunction = () => {
-  return [{ title: "Courses" }, { name: "description", content: "Courses" }];
-};
-
 const prefetchQueriesForUser = async (userRole: string | undefined) => {
   await queryClient.prefetchQuery(categoriesQueryOptions());
 

@@ -16,6 +16,7 @@ import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
 import { copyToClipboard } from "~/utils/copyToClipboard";
 import { filterChangedData } from "~/utils/filterChangedData";
+import { setPageTitle } from "~/utils/setPageTitle";
 import { isAdminLike } from "~/utils/userRoles";
 
 import Loader from "../common/Loader/Loader";
@@ -28,6 +29,7 @@ import Certificates from "./Certificates/Certificates";
 import { ProfileActionButtons, ProfileCard, ProfileEditCard } from "./components";
 
 import type { UpdateUserProfileBody } from "./types";
+import type { MetaFunction } from "@remix-run/react";
 import type { CertificateType } from "~/types/certificate";
 
 const updateUserProfileSchema = z.object({
@@ -39,6 +41,8 @@ const updateUserProfileSchema = z.object({
   jobTitle: z.string().optional(),
   userAvatar: z.instanceof(File).nullable().optional(),
 });
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.profile");
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState<boolean>(false);

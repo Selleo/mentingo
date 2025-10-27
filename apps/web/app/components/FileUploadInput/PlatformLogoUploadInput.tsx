@@ -55,6 +55,7 @@ const PlatformLogoUploadInput = ({
           </div>
         </div>
         <input
+          id="platform-logo"
           ref={fileInputRef}
           type="file"
           accept=".png, .svg"

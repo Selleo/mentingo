@@ -7,10 +7,14 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { AvgScoreAcrossAllQuizzesChart } from "~/modules/Statistics/Admin/components/AvgScoreAcrossAllQuizzessChart";
 import { ConversionsAfterFreemiumLessonChart } from "~/modules/Statistics/Admin/components/ConversionsAfterFreemiumLessonChart";
 import { EnrollmentChart } from "~/modules/Statistics/Admin/components/EnrollmentChart";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CourseCompletionPercentageChart, FiveMostPopularCoursesChart } from "./components";
 
+import type { MetaFunction } from "@remix-run/react";
 import type { ChartConfig } from "~/components/ui/chart";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.dashboard");
 
 export const AdminStatistics = () => {
   const { data: user } = useCurrentUser();

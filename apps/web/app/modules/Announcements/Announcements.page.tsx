@@ -9,12 +9,17 @@ import { Button } from "~/components/ui/button";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
 import { studentAnnouncementsSteps } from "../Onboarding/routes/student";
 
 import { AdminAnnouncements, UserAnnouncements } from "./components";
 import { getAnnouncementsPageBreadcrumbs } from "./components/getAnnouncementsBreadcrumbs";
+
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.announcements");
 
 export default function AnnouncementsPage() {
   const { t } = useTranslation();

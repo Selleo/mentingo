@@ -170,6 +170,7 @@
     "description": "Informacje o Twojej firmie, które będą widoczne dla użytkowników",
     "editTitle": "Edytuj Informacje o Dostawcy",
     "companyName": "Nazwa firmy",
+    "companyShortName": "Skrócona nazwa firmy",
     "registeredAddress": "Adres siedziby",
     "taxNumber": "Numer NIP",
     "emailAddress": "Adres email",
@@ -1409,6 +1410,17 @@
       "availableCourses": "Dostępne kursy",
       "yourCourses": "Twoje kursy",
       "back": "Wstecz"
+    },
+    "certificate": {
+      "button": {
+        "viewCertificate": "Zobacz certyfikat"
+      },
+      "courseCompleted": "Gratulacje! Ukończyłeś ten kurs! Teraz masz dostęp do swojego certyfikatu."
+    },
+    "tabs": {
+      "chapters": "Rozdziały",
+      "moreFromAuthor": "Więcej od autora",
+      "statistics": "Statystyki"
     }
   },
   "studentChapterView": {
@@ -1680,6 +1692,35 @@
         }
       }
     }
+  },
+  "pages": {
+    "dashboard": "Panel główny",
+    "settings": "Ustawienia",
+    "providerInformation": "Informacje o dostawcy",
+    "courses": "Kursy",
+    "profile": "Profil",
+    "lesson": "Lekcja",
+    "register": "Rejestracja",
+    "passwordRecovery": "Odzyskiwanie hasła",
+    "login": "Logowanie",
+    "createNewPassword": "Utwórz nowe hasło",
+    "createAnnouncement": "Utwórz ogłoszenie",
+    "announcements": "Ogłoszenia",
+    "users": "Użytkownicy",
+    "userDetails": "Informacje o użytkowniku",
+    "createNewUser": "Utwórz nowego użytkownika",
+    "promotionCodes": "Kody promocyjne",
+    "promotionCodeDetails": "Informacje o kodzie promocyjnym",
+    "createPromotionCode": "Utwórz kod promocyjny",
+    "groups": "Grupy",
+    "editGroup": "Edytuj grupę",
+    "createGroup": "Utwórz grupę",
+    "editCourse": "Edytuj kurs",
+    "createNewCategory": "Utwórz nową kategorię",
+    "categoryDetails": "Informacje o kategorii",
+    "categories": "Kategorie",
+    "createNewCourse": "Utwórz nowy kurs",
+    "admin": "Administrator"
   },
   "studentOnboarding": {
     "dashboard": {

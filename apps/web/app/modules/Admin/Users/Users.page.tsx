@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate, type MetaFunction } from "@remix-run/react";
 import {
   type ColumnDef,
   flexRender,
@@ -41,6 +41,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { setPageTitle } from "~/utils/setPageTitle";
 import { USER_ROLES } from "~/utils/userRoles";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
@@ -51,6 +52,8 @@ import type { UserRole } from "~/config/userRoles";
 type TUser = GetUsersResponse["data"][number];
 
 type ModalTypes = "group" | "role" | "delete" | "archive" | null;
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.users");
 
 export const clientLoader = async () => {
   queryClient.prefetchQuery(usersQueryOptions());

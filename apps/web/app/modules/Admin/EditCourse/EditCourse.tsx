@@ -11,6 +11,7 @@ import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
+import { setPageTitle } from "~/utils/setPageTitle";
 
 import { getCourseBadgeVariant } from "../Courses/utils";
 
@@ -20,6 +21,9 @@ import CourseSettings from "./CourseSettings/CourseSettings";
 import CourseStatus from "./CourseStatus/CourseStatus";
 
 import type { Chapter } from "./EditCourse.types";
+import type { MetaFunction } from "@remix-run/react";
+
+export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editCourse");
 
 const EditCourse = () => {
   const { t } = useTranslation();

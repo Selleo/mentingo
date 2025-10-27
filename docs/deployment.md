@@ -235,6 +235,30 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
     ![Image23](images/image23.png)
 
+#### **3.2 Repository Secrets**
+
+1.  In your GitHub repository, go to **Settings -\> Secrets and variables -\> Actions**.
+
+2.  Add the following secrets using the credentials from your `tenant-<client>-ci` IAM user and the ECR repository URIs.
+
+    - `AWS_ACCESS_KEY_ID`: Access key ID for the CI user.
+    - `AWS_SECRET_ACCESS_KEY`: Secret access key for the CI user.
+    - `AWS_REGION`: e.g., `eu-central-1`.
+    - `AWS_ECR_REGISTRY`: The full URI for the `tenant/<client>/api` ECR repository.
+    - `AWS_ECR_REGISTRY_WEB`: The full URI for the `tenant/<client>/ui` ECR repository.
+    - (Add other secrets like `VITE_STRIPE_PUBLISHABLE_KEY`, `POSTHOG_KEY`, `POSTHOG_HOST` and Sentry keys as needed).
+
+3.  If you want your E2E tests to work, create environment called `e2e` and then add these secrets:
+
+    - `MASTER_KEY`: 32 byte base64 (can be generated using `openssl rand -base64 32`)
+    - `STRIPE_PUBLISHABLE_KEY`
+    - `STRIPE_SECRET_KEY`
+    - `STRIPE_WEBHOOK_SECRET`
+
+    > **Note:** You can use Stripe API keys from your Stripe test mode (sandbox) - these are safe to use for development and CI environments.
+
+    ![Image24](images/image24.png)
+
 #### **3.3 GitHub Actions Workflows**
 
 1.  In your repository, create a `.github/workflows/` directory.
@@ -309,6 +333,8 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
               VITE_SENTRY_ORG: ${{secrets.SENTRY_ORG}}
               VITE_SENTRY_PROJECT: ${{secrets.SENTRY_PROJECT}}
               VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
+              VITE_POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
+              VITE_POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
             run: |
               docker build -f ./web.Dockerfile \
                 --build-arg VERSION=$IMAGE_TAG \
@@ -317,26 +343,13 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
                 --build-arg VITE_SENTRY_ORG=$VITE_SENTRY_ORG \
                 --build-arg VITE_SENTRY_PROJECT=$VITE_SENTRY_PROJECT \
                 --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
+                --build-arg VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY \
+                --build-arg VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST \
                 -t $ECR_REGISTRY:$IMAGE_TAG .
               docker tag $ECR_REGISTRY:$IMAGE_TAG $ECR_REGISTRY:latest
               docker push $ECR_REGISTRY:$IMAGE_TAG
               docker push $ECR_REGISTRY:latest
     ```
-
-#### **3.4 Repository Secrets**
-
-1.  In your GitHub repository, go to **Settings -\> Secrets and variables -\> Actions**.
-
-2.  Add the following secrets using the credentials from your `tenant-<client>-ci` IAM user and the ECR repository URIs.
-
-    - `AWS_ACCESS_KEY_ID`: Access key ID for the CI user.
-    - `AWS_SECRET_ACCESS_KEY`: Secret access key for the CI user.
-    - `AWS_REGION`: e.g., `eu-central-1`.
-    - `AWS_ECR_REGISTRY`: The full URI for the `tenant/<client>/api` ECR repository.
-    - `AWS_ECR_REGISTRY_WEB`: The full URI for the `tenant/<client>/ui` ECR repository.
-    - (Add other secrets like `VITE_STRIPE_PUBLISHABLE_KEY` and Sentry keys as needed).
-
-      ![Image24](images/image24.png)
 
 3.  Push your code changes. The GitHub Actions should run automatically and push your first images to ECR.
 
@@ -490,7 +503,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
           - db
 
       db:
-        image: postgres:16.2
+        image: pgvector/pgvector:pg16
         container_name: db
         restart: unless-stopped
         environment:
@@ -567,6 +580,9 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     STRIPE_WEBHOOK_SECRET=
     SENTRY_ENVIRONMENT=production
     SENTRY_DSN=
+
+    # 32 byte base64 key (can be generate using openssl rand -base64 32)
+    MASTER_KEY=
     ```
 
     **File 2: `.env.prd.ui`**
@@ -630,6 +646,8 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
         }
     }
     ```
+
+    If you're having issues with saving the file try to do it as root user.
 
 #### **4.8 Final Firewall Rules**
 

@@ -30,11 +30,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 ...base,
                 backgroundColor: "var(--primary-700)",
               }),
-              dot: (base) => ({
-                ...base,
-
-                backgroundColor: "var(--primary-700)",
-              }),
               close: (base) => ({
                 ...base,
                 color: "var(--primary-700)",
@@ -44,6 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             }}
             position="top"
             disableDotsNavigation
+            badgeContent={({ totalSteps, currentStep }) => `${currentStep + 1} / ${totalSteps}`}
             showDots={false}
           >
             <ThemeProvider>
