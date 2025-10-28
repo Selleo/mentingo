@@ -7,6 +7,15 @@ const DEFAULT_COMPANY_INFORMATION = {
   courtRegisterNumber: "",
 };
 
+export const DEFAULT_EMAIL_TRIGGERS = {
+  userFirstLogin: false,
+  userCourseAssignment: false,
+  userShortInactivity: false,
+  userLongInactivity: false,
+  userChapterFinished: false,
+  userCourseFinished: false,
+};
+
 export const DEFAULT_GLOBAL_SETTINGS = {
   unregisteredUserCoursesAccessibility: false,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
@@ -18,15 +27,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   MFAEnforcedRoles: [],
   defaultCourseCurrency: "pln",
   inviteOnlyRegistration: false,
-  userEmailTriggers: {
-    userInvite: false,
-    userFirstLogin: false,
-    userCourseAssignment: false,
-    userShortInactivity: false,
-    userLongInactivity: false,
-    userChapterFinished: false,
-    userCourseFinished: false,
-  },
+  userEmailTriggers: DEFAULT_EMAIL_TRIGGERS,
   primaryColor: null,
   contrastColor: null,
 };

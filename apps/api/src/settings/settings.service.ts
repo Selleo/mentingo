@@ -25,6 +25,7 @@ import type {
   GlobalSettingsJSONContentSchema,
   AdminSettingsJSONContentSchema,
   UserSettingsJSONContentSchema,
+  UserEmailTriggersSchema,
 } from "./schemas/settings.schema";
 import type {
   AllowedCurrency,
@@ -61,8 +62,11 @@ export class SettingsService {
       platformLogoS3Key,
       platformSimpleLogoS3Key,
       loginBackgroundImageS3Key,
+      userEmailTriggers,
       ...restOfSettings
     } = parsedSettings;
+
+    const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
       ? await this.fileService.getFileUrl(certificateBackgroundImage)
@@ -82,6 +86,7 @@ export class SettingsService {
 
     return {
       ...restOfSettings,
+      userEmailTriggers: reorderedEmailTriggers,
       platformLogoS3Key: platformLogoUrl,
       platformSimpleLogoS3Key: platformSimpleLogoUrl,
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
@@ -651,5 +656,14 @@ export class SettingsService {
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),
     };
+  }
+
+  private reorderEmailTriggers(emailTriggers: UserEmailTriggersSchema) {
+    const triggerOrder = Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers);
+    return Object.fromEntries(
+      triggerOrder
+        .filter((key) => key in emailTriggers)
+        .map((key) => [key, emailTriggers[key as keyof UserEmailTriggersSchema]]),
+    ) as UserEmailTriggersSchema;
   }
 }

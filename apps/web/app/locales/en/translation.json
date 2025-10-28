@@ -238,8 +238,6 @@
     "header": "User Email Triggers",
     "subHeader": "Manage automated email notifications",
     "settings": {
-      "userInvite": "User Invite",
-      "userInviteDescription": "Send a message when a user is invited",
       "userFirstLogin": "First Login",
       "userFirstLoginDescription": "Send a message on user's first login",
       "userCourseAssignment": "Course Assignment",

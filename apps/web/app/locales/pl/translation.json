@@ -1533,23 +1533,21 @@
     }
   },
   "userEmailTriggers": {
-    "header": "Wyzwalacze e-mail użytkownika",
-    "subtitle": "Zarządzaj automatycznymi powiadomieniami e-mail",
+    "header": "Reguły wysyłki powiadomień e-mail dla użytkowników",
+    "subtitle": "Zarządzaj automatycznymi wiadomościami e-mail wysyłanymi do użytkowników",
     "settings": {
-      "userInvite": "Zaproszenie użytkownika",
-      "userInviteDescription": "Wyślij wiadomość po zaproszeniu użytkownika",
       "userFirstLogin": "Pierwsze logowanie",
-      "userFirstLoginDescription": "Wyślij wiadomość po pierwszym logowaniu użytkownika",
+      "userFirstLoginDescription": "Wyślij użytkownikowi wiadomość po jego pierwszym logowaniu do systemu.",
       "userCourseAssignment": "Przypisanie kursu",
-      "userCourseAssignmentDescription": "Wyślij wiadomość gdy użytkownik zostanie przypisany do kursu",
+      "userCourseAssignmentDescription": "Wyślij użytkownikowi wiadomość po tym, jak zostanie zapisany na kurs przez administratora.",
       "userShortInactivity": "Krótka nieaktywność (14 dni)",
-      "userShortInactivityDescription": "Wyślij wiadomość po 14 dniach nieaktywności",
+      "userShortInactivityDescription": "Wyślij użytkownikowi wiadomość po 14 dniach jego nieaktywności.",
       "userLongInactivity": "Długa nieaktywność (30 dni)",
-      "userLongInactivityDescription": "Wyślij wiadomość po 30 dniach nieaktywności",
+      "userLongInactivityDescription": "Wyślij użytkownikowi wiadomość po 30 dniach jego nieaktywności.",
       "userChapterFinished": "Rozdział ukończony",
-      "userChapterFinishedDescription": "Wyślij wiadomość gdy użytkownik ukończy rozdział",
+      "userChapterFinishedDescription": "Wyślij użytkownikowi wiadomość po ukończeniu przez niego rozdziału.",
       "userCourseFinished": "Kurs ukończony",
-      "userCourseFinishedDescription": "Wyślij wiadomość gdy użytkownik ukończy kurs"
+      "userCourseFinishedDescription": "Wyślij użytkownikowi wiadomość po ukończeniu przez niego kursu."
     },
     "switch": {
       "enabled": "Włączone",

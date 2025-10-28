@@ -24,6 +24,7 @@ import { UserService } from "src/user/user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
 import type { InactiveUsers } from "src/events/user/user-short-inactivity.event";
+import type { UserEmailTriggersSchema } from "src/settings/schemas/settings.schema";
 
 type EventType =
   | UserInviteEvent
@@ -44,6 +45,15 @@ const UserNotificationEvents = [
   UserCourseFinishedEvent,
 ] as const;
 
+const eventTriggerMap: Record<string, keyof UserEmailTriggersSchema> = {
+  UserFirstLoginEvent: "userFirstLogin",
+  UsersAssignedToCourseEvent: "userCourseAssignment",
+  UsersShortInactivityEvent: "userShortInactivity",
+  UsersLongInactivityEvent: "userLongInactivity",
+  UserChapterFinishedEvent: "userChapterFinished",
+  UserCourseFinishedEvent: "userCourseFinished",
+};
+
 @EventsHandler(...UserNotificationEvents)
 export class NotifyUsersHandler implements IEventHandler {
   constructor(
@@ -57,31 +67,34 @@ export class NotifyUsersHandler implements IEventHandler {
   async handle(event: EventType) {
     const { userEmailTriggers } = await this.settingsService.getGlobalSettings();
 
-    if (event instanceof UserInviteEvent && userEmailTriggers.userInvite) {
+    if (event instanceof UserInviteEvent) {
       await this.notifyUserAboutInvite(event);
+      return;
     }
 
-    if (event instanceof UserFirstLoginEvent && userEmailTriggers.userFirstLogin) {
+    if (!userEmailTriggers[eventTriggerMap[event.constructor.name]]) return;
+
+    if (event instanceof UserFirstLoginEvent) {
       await this.notifyUserAboutFirstLogin(event);
     }
 
-    if (event instanceof UsersAssignedToCourseEvent && userEmailTriggers.userCourseAssignment) {
+    if (event instanceof UsersAssignedToCourseEvent) {
       await this.notifyUserAboutCourseAssignment(event);
     }
 
-    if (event instanceof UsersShortInactivityEvent && userEmailTriggers.userShortInactivity) {
+    if (event instanceof UsersShortInactivityEvent) {
       await this.notifyUserAboutShortInactivity(event);
     }
 
-    if (event instanceof UsersLongInactivityEvent && userEmailTriggers.userLongInactivity) {
+    if (event instanceof UsersLongInactivityEvent) {
       await this.notifyUserAboutLongInactivity(event);
     }
 
-    if (event instanceof UserChapterFinishedEvent && userEmailTriggers.userChapterFinished) {
+    if (event instanceof UserChapterFinishedEvent) {
       await this.notifyUserAboutChapterFinished(event);
     }
 
-    if (event instanceof UserCourseFinishedEvent && userEmailTriggers.userCourseFinished) {
+    if (event instanceof UserCourseFinishedEvent) {
       await this.notifyUserAboutCourseCompleted(event);
     }
   }

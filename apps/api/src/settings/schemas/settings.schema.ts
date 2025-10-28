@@ -16,7 +16,6 @@ export const companyInformationJSONSchema = Type.Object({
 });
 
 export const userEmailTriggersJSONSchema = Type.Object({
-  userInvite: Type.Boolean(),
   userFirstLogin: Type.Boolean(),
   userCourseAssignment: Type.Boolean(),
   userShortInactivity: Type.Boolean(),
@@ -68,5 +67,6 @@ export type StudentSettingsJSONContentSchema = Static<typeof studentSettingsJSON
 export type AdminSettingsJSONContentSchema = Static<typeof adminSettingsJSONContentSchema>;
 export type UserSettingsJSONContentSchema = Static<typeof userSettingsJSONContentSchema>;
 
+export type UserEmailTriggersSchema = Static<typeof userEmailTriggersJSONSchema>;
 export type CompanyInformationSchema = Static<typeof companyInformationJSONSchema>;
 export type GlobalSettingsJSONContentSchema = Static<typeof globalSettingsJSONSchema>;

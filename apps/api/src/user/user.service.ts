@@ -7,7 +7,6 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { CreatePasswordEmail } from "@repo/email-templates";
 import { OnboardingPages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, not, or, sql } from "drizzle-orm";
@@ -15,6 +14,7 @@ import { nanoid } from "nanoid";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
+import { EmailService } from "src/common/emails/emails.service";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -63,7 +63,6 @@ import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/us
 import type { UUIDType } from "src/common";
 import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
-import { EmailService } from "src/common/emails/emails.service";
 
 @Injectable()
 export class UserService {
