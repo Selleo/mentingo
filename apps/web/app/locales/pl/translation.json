@@ -1168,6 +1168,10 @@
       "details": "Szczegóły",
       "filterByQuiz": "Filtruj według quizu",
       "allQuizzes": "Wszystkie quizy",
+      "tabs": {
+        "progress": "Postępy",
+        "quizResults": "Wyniki quizów"
+      },
       "field": {
         "studentName": "Uczeń",
         "groupName": "Grupa",

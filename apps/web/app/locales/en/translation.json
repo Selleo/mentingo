@@ -1159,6 +1159,10 @@
       "details": "Details",
       "filterByQuiz": "Filter by quiz",
       "allQuizzes": "All quizzes",
+      "tabs": {
+        "progress": "Progress",
+        "quizResults": "Quiz Results"
+      },
       "field": {
         "studentName": "Student",
         "groupName": "Group",

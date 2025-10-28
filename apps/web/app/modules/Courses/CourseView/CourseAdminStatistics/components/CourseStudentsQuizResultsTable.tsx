@@ -6,19 +6,12 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { startTransition, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourseStudentsQuizResults } from "~/api/queries/admin/useCourseStudentsQuizResults";
 import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import {
   Table,
   TableBody,
@@ -40,11 +33,13 @@ import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 type CourseStudentsQuizResultsColumn = GetCourseStudentsQuizResultsResponse["data"][number];
 
 interface CourseStudentsQuizResultsTableProps {
-  quizOptions: { id: string; title: string }[];
+  searchParams: CourseStudentsQuizResultsQueryParams;
+  onFilterChange: (name: string, value: FilterValue) => void;
 }
 
 export function CourseStudentsQuizResultsTable({
-  quizOptions,
+  searchParams,
+  onFilterChange,
 }: CourseStudentsQuizResultsTableProps) {
   const { t } = useTranslation();
 
@@ -53,7 +48,6 @@ export function CourseStudentsQuizResultsTable({
   const { isAdminLike } = useUserRole();
 
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [searchParams, setSearchParams] = useState<CourseStudentsQuizResultsQueryParams>({});
 
   const { data: courseStudentsQuizResults, isLoading } = useCourseStudentsQuizResults({
     id,
@@ -98,7 +92,7 @@ export function CourseStudentsQuizResultsTable({
           {t("adminCourseView.statistics.field.quizScore")}
         </SortButton>
       ),
-      cell: ({ row }) => <div className="flex items-center gap-2">{row.original.quizScore}</div>,
+      cell: ({ row }) => <div className="flex items-center gap-2">{row.original.quizScore}%</div>,
     },
     {
       accessorKey: "attempts",
@@ -135,19 +129,7 @@ export function CourseStudentsQuizResultsTable({
   });
 
   const handleFilterChange = (name: string, value: FilterValue) => {
-    startTransition(() => {
-      setSearchParams((prev) => {
-        if (name === "quizId" && value === "all") {
-          const { quizId: _quizId, ...rest } = prev;
-          return rest;
-        }
-
-        return {
-          ...prev,
-          [name]: value,
-        };
-      });
-    });
+    onFilterChange(name, value);
   };
 
   const { totalItems, perPage, page } = courseStudentsQuizResults?.pagination || {};
@@ -161,70 +143,46 @@ export function CourseStudentsQuizResultsTable({
   }
 
   return (
-    <div className="rounded-sm flex flex-col justify-center">
-      <div className="flex items-center justify-between">
-        <h6 className="h6 grow">{t("adminCourseView.statistics.details")}</h6>
-        <Select
-          value={(searchParams.quizId as string | undefined) || "all"}
-          onValueChange={(value) => handleFilterChange("quizId", value)}
-        >
-          <SelectTrigger className="max-w-xs my-6">
-            <SelectValue placeholder={t("adminCourseView.statistics.filterByQuiz")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("adminCourseView.statistics.allQuizzes")}</SelectItem>
-            {quizOptions.map((quiz) => (
-              <SelectItem key={quiz.id} value={quiz.id}>
-                {quiz.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="rounded-lg overflow-hidden border border-neutral-200">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-neutral-900 body-base-md bg-neutral-50"
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id + row.index}
-                data-state={row.getIsSelected() && "selected"}
-                className="cursor-pointer hover:bg-neutral-100"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <Pagination
-          className="border-t"
-          totalItems={totalItems}
-          itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
-          currentPage={page}
-          onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
-          onItemsPerPageChange={(newPerPage) => {
-            handleFilterChange("page", "1");
-            handleFilterChange("perPage", newPerPage);
-          }}
-        />
-      </div>
+    <div className="rounded-lg overflow-hidden border border-neutral-200">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id} className="text-neutral-900 body-base-md bg-neutral-50">
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow
+              key={row.id + row.index}
+              data-state={row.getIsSelected() && "selected"}
+              className="cursor-pointer hover:bg-neutral-100"
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Pagination
+        className="border-t"
+        totalItems={totalItems}
+        itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
+        currentPage={page}
+        onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
+        onItemsPerPageChange={(newPerPage) => {
+          handleFilterChange("page", "1");
+          handleFilterChange("perPage", newPerPage);
+        }}
+      />
     </div>
   );
 }
