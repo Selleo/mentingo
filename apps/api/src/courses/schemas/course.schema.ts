@@ -57,6 +57,7 @@ export const courseAverageQuizScorePerQuizSchema = Type.Object({
   quizId: UUIDSchema,
   name: Type.String(),
   averageScore: Type.Number(),
+  finishedCount: Type.Number(),
 });
 
 export const courseAverageQuizScoresSchema = Type.Object({

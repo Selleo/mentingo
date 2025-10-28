@@ -9354,12 +9354,16 @@
                     },
                     "averageScore": {
                       "type": "number"
+                    },
+                    "finishedCount": {
+                      "type": "number"
                     }
                   },
                   "required": [
                     "quizId",
                     "name",
-                    "averageScore"
+                    "averageScore",
+                    "finishedCount"
                   ]
                 }
               }

@@ -23,7 +23,7 @@ import {
 } from "~/components/ui/table";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
-import Loader from "~/modules/common/Loader/Loader";
+import { cn } from "~/lib/utils";
 import {
   SearchFilter,
   type FilterConfig,
@@ -53,7 +53,7 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
 
   const [isPending, startTransition] = React.useTransition();
 
-  const { data: courseStudentsProgress, isLoading } = useCourseStudentsProgress({
+  const { data: courseStudentsProgress } = useCourseStudentsProgress({
     id,
     enabled: isAdminLike,
     query: searchParams,
@@ -103,15 +103,22 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
           {t("adminCourseView.statistics.field.completedLessonsCount")}
         </SortButton>
       ),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Progress
-            className="h-2 w-4/5"
-            value={(row.original.completedLessonsCount / lessonCount) * 100}
-          />
-          {row.original.completedLessonsCount}/{lessonCount}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const progressValue = (row.original.completedLessonsCount / lessonCount) * 100;
+
+        return (
+          <div className="flex items-center gap-2">
+            <Progress
+              className="h-2 w-4/5"
+              indicatorClassName={cn({
+                "bg-success-500": progressValue === 100,
+              })}
+              value={progressValue}
+            />
+            {row.original.completedLessonsCount}/{lessonCount}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "lastActivity",
@@ -149,14 +156,6 @@ export function CourseStudentsProgressTable({ lessonCount }: CourseStudentsProgr
   };
 
   const { totalItems, perPage, page } = courseStudentsProgress?.pagination || {};
-
-  if (isLoading) {
-    return (
-      <div className="min-h-80 grid place-items-center">
-        <Loader />
-      </div>
-    );
-  }
 
   return (
     <div className="rounded-sm flex flex-col justify-center">

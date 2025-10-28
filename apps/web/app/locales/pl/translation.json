@@ -1148,8 +1148,8 @@
       "details": "Szczegóły",
       "field": {
         "studentName": "Uczeń",
-        "groupName": "Nazwa grupy",
-        "completedLessonsCount": "Postęp",
+        "groupName": "Grupa",
+        "completedLessonsCount": "Ukończone lekcje",
         "lastActivity": "Ostatnia aktywność"
       },
       "overview": {
@@ -1162,6 +1162,9 @@
         "averageScorePerQuiz": "Średnie wyniki z quizów",
         "averageScorePerQuizSubtitle": "Zobacz średnie wyniki z poszczególnych quizów zawartych w kursie",
         "averageQuizScore": "Średni wynik quizu",
+        "completedBy_one": "Ukończył {{count}} student",
+        "completedBy_few": "Ukończyło {{count}} studentów",
+        "completedBy_many": "Ukończyło {{count}} studentów",
         "courseStatusDistribution": "Rozkład statusów kursów",
         "courseStatusDistributionTooltip": "Pokazuje, ilu użytkowników ukończyło, rozpoczęło lub nie rozpoczęło kursu."
       },

@@ -1094,6 +1094,7 @@ export interface GetAverageQuizScoresResponse {
       quizId: string;
       name: string;
       averageScore: number;
+      finishedCount: number;
     }[];
   };
 }

@@ -15,6 +15,7 @@ export const getCourseAverageScorePerQuizChartOptions = (
   const chartData = averageQuizScores.averageScoresPerQuiz.map((item) => ({
     quizName: item.name,
     averageQuizScore: item.averageScore,
+    finishedCount: item.finishedCount,
   }));
 
   const chartConfig = {

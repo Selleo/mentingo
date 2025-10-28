@@ -1138,7 +1138,7 @@
       "details": "Details",
       "field": {
         "studentName": "Student",
-        "groupName": "Group name",
+        "groupName": "Group",
         "completedLessonsCount": "Completed lessons",
         "lastActivity": "Last activity"
       },
@@ -1152,6 +1152,8 @@
         "averageScorePerQuiz": "Average score per quiz",
         "averageScorePerQuizSubtitle": "See average results for individual quizzes in the course",
         "averageQuizScore": "Average quiz score",
+        "completedBy_one": "Completed by {{count}} student",
+        "completedBy_other": "Completed by {{count}} students",
         "courseStatusDistribution": "Course status distribution",
         "courseStatusDistributionTooltip": "Shows how many users have completed, started, or not started the course."
       },

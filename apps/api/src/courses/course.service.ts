@@ -1531,12 +1531,13 @@ export class CourseService {
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
           (
-            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score))
+            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count))
             FROM (
               SELECT
                 l.id AS quiz_id,
                 l.title AS quiz_name,
-                ROUND(AVG(slp.quiz_score), 0) AS average_score
+                ROUND(AVG(slp.quiz_score), 0) AS average_score,
+                COUNT(DISTINCT slp.student_id) AS finished_count
               FROM ${lessons} l
               JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
               JOIN ${chapters} c ON l.chapter_id = c.id
@@ -1696,9 +1697,20 @@ export class CourseService {
           WHERE gu.user_id = ${users.id}
         )`;
 
+    const finishedCountExpression = sql<number>`COALESCE((
+          SELECT COUNT(*)
+          FROM ${studentLessonProgress} slp
+          JOIN ${lessons} l ON slp.lesson_id = l.id
+          JOIN ${chapters} ch ON l.chapter_id = ch.id
+          WHERE slp.lesson_id = l.id
+            AND ch.course_id = ${courseId}
+            AND slp.completed_at IS NOT NULL
+        ), 0)::float`;
+
     return {
       studentNameExpression,
       lastActivityExpression,
+      finishedCountExpression,
       completedLessonsCountExpression,
       groupNameExpression,
     };
