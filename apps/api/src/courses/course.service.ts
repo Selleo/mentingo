@@ -550,9 +550,8 @@ export class CourseService {
                   ${lessons.isExternal} AS "isExternal",
                   CASE
                     WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${PROGRESS_STATUSES.BLOCKED}
-                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN  ${PROGRESS_STATUSES.COMPLETED}
-                    WHEN ${studentLessonProgress.completedAt} IS NULL
-                      AND ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
+                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${studentLessonProgress.isQuizPassed} IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${PROGRESS_STATUSES.COMPLETED}
+                    WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
                   CASE
@@ -572,7 +571,8 @@ export class CourseService {
                   ${studentLessonProgress.completedAt},
                   ${studentLessonProgress.completedQuestionCount},
                   ${studentLessonProgress.isStarted},
-                  ${chapters.isFreemium}
+                  ${chapters.isFreemium},
+                  ${studentLessonProgress.isQuizPassed}
                 ORDER BY ${lessons.displayOrder}
               ) AS lesson_data
             ),

@@ -63,12 +63,12 @@ export class LessonService {
 
     if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) return lesson;
 
-    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
-      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
-    }
-
-    if (lesson.type === LESSON_TYPES.QUIZ || lesson.type === LESSON_TYPES.VIDEO) {
-      this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
+    if (
+      lesson.type === LESSON_TYPES.QUIZ ||
+      lesson.type === LESSON_TYPES.VIDEO ||
+      lesson.type === LESSON_TYPES.AI_MENTOR
+    ) {
+      await this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
     }
 
     if (
@@ -231,7 +231,7 @@ export class LessonService {
         await this.studentLessonProgressService.markLessonAsCompleted({
           id: studentQuizAnswers.lessonId,
           studentId: userId,
-          quizCompleted: true,
+          quizCompleted: isQuizPassed,
           completedQuestionCount:
             evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
           dbInstance: trx,
