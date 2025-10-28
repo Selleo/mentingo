@@ -17,7 +17,6 @@ import {
 import { Tabs, TabsContent, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { useUserRole } from "~/hooks/useUserRole";
-import Loader from "~/modules/common/Loader/Loader";
 import {
   SearchFilter,
   type FilterValue,
@@ -79,17 +78,11 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     );
   }, [course]);
 
-  const { data: courseStatistics, isLoading: isLoadingCourseStatistics } = useCourseStatistics({
+  const { data: courseStatistics } = useCourseStatistics({
     id,
     enabled: isAdminLike,
   });
-  const { data: averageQuizScores, isLoading: isLoadingAverageScores } =
-    useCourseAverageScorePerQuiz({ id, enabled: isAdminLike });
-
-  const isLoading = useMemo(
-    () => isLoadingCourseStatistics || isLoadingAverageScores,
-    [isLoadingCourseStatistics, isLoadingAverageScores],
-  );
+  const { data: averageQuizScores } = useCourseAverageScorePerQuiz({ id, enabled: isAdminLike });
 
   const filterConfig: FilterConfig[] = [
     {
@@ -122,14 +115,6 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
       });
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="grid h-full w-full place-items-center">
-        <Loader />
-      </div>
-    );
-  }
 
   return (
     <TooltipProvider>
@@ -177,7 +162,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                     filters={filterConfig}
                     values={{ search: progressSearchParams.search }}
                     onChange={handleProgressFilterChange}
-                    isLoading={isLoading || isPending}
+                    isLoading={isPending}
                   />
                 ))
                 .with("quizResults", () => (
