@@ -465,7 +465,6 @@ export interface GetPublicGlobalSettingsResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
-      userInvite: boolean;
       userFirstLogin: boolean;
       userCourseAssignment: boolean;
       userShortInactivity: boolean;
@@ -562,7 +561,6 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
-      userInvite: boolean;
       userFirstLogin: boolean;
       userCourseAssignment: boolean;
       userShortInactivity: boolean;
@@ -596,7 +594,6 @@ export interface UpdateEnforceSSOResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
-      userInvite: boolean;
       userFirstLogin: boolean;
       userCourseAssignment: boolean;
       userShortInactivity: boolean;
@@ -648,7 +645,6 @@ export interface UpdateColorSchemaResponse {
     defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
     inviteOnlyRegistration: boolean;
     userEmailTriggers: {
-      userInvite: boolean;
       userFirstLogin: boolean;
       userCourseAssignment: boolean;
       userShortInactivity: boolean;
