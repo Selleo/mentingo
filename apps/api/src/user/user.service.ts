@@ -26,7 +26,6 @@ import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
-import { StatisticsService } from "src/statistics/statistics.service";
 import { importUserSchema } from "src/user/schemas/createUser.schema";
 
 import {
@@ -78,7 +77,6 @@ export class UserService {
     private readonly emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
-    private statisticsService: StatisticsService,
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
   ) {}
@@ -274,10 +272,7 @@ export class UserService {
   }
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
-    const [existingUser] = await this.db
-      .select()
-      .from(users)
-      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+    const existingUser = await this.getExistingUser(userId);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -297,10 +292,7 @@ export class UserService {
     data: UpdateUserProfileBody,
     userAvatar?: Express.Multer.File,
   ) {
-    const [existingUser] = await this.db
-      .select()
-      .from(users)
-      .where(and(eq(users.id, id), isNull(users.deletedAt)));
+    const existingUser = await this.getExistingUser(id);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -347,10 +339,7 @@ export class UserService {
   }
 
   async changePassword(id: UUIDType, oldPassword: string, newPassword: string) {
-    const [existingUser] = await this.db
-      .select()
-      .from(users)
-      .where(and(eq(users.id, id), isNull(users.deletedAt)));
+    const existingUser = await this.getExistingUser(id);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -378,10 +367,7 @@ export class UserService {
   }
 
   async resetPassword(id: UUIDType, newPassword: string) {
-    const [existingUser] = await this.db
-      .select()
-      .from(users)
-      .where(and(eq(users.id, id), isNull(users.deletedAt)));
+    const existingUser = await this.getExistingUser(id);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -479,7 +465,7 @@ export class UserService {
     const [existingUser] = await db
       .select()
       .from(users)
-      .where(and(eq(users.email, data.email), isNull(users.deletedAt)));
+      .where(and(eq(users.email, data.email)));
 
     if (existingUser) {
       throw new ConflictException("User already exists");
@@ -890,5 +876,14 @@ export class UserService {
           .where(eq(coursesSummaryStats.courseId, courseStatistic.courseId)),
       ),
     );
+  }
+
+  private async getExistingUser(userId: UUIDType) {
+    const [existingUser] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+
+    return existingUser;
   }
 }
