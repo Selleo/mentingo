@@ -1170,7 +1170,11 @@
         "studentName": "Uczeń",
         "groupName": "Grupa",
         "completedLessonsCount": "Ukończone lekcje",
-        "lastActivity": "Ostatnia aktywność"
+        "lastActivity": "Ostatnia aktywność",
+        "quizName": "Quiz",
+        "quizScore": "Wynik",
+        "attempts": "Próby",
+        "lastAttempt": "Ostatnia próba"
       },
       "overview": {
         "enrolledCount": "Łącznie zapisanych",
@@ -1787,6 +1791,7 @@
   "pagination": {
     "showing": "Wyświetlanie {{startItem}}-{{endItem}} z {{totalItems}} wyników",
     "previous": "Poprzedni",
-    "next": "Następny"
+    "next": "Następny",
+    "noData": "Nie znaleziono danych"
   }
 }

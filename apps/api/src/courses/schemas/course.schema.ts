@@ -73,7 +73,18 @@ export const studentCourseProgressionSchema = Type.Object({
   lastActivity: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const studentQuizResultSchema = Type.Object({
+  studentId: UUIDSchema,
+  studentName: Type.String(),
+  studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
+  quizName: Type.String(),
+  quizScore: Type.Number(),
+  attempts: Type.Number(),
+  lastAttempt: Type.String(),
+});
+
 export const allStudentCourseProgressionSchema = Type.Array(studentCourseProgressionSchema);
+export const allStudentQuizResultsSchema = Type.Array(studentQuizResultSchema);
 
 export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
@@ -88,3 +99,4 @@ export type CourseStatusDistribution = Static<typeof courseStatusDistributionSch
 export type CourseAverageQuizScorePerQuiz = Static<typeof courseAverageQuizScorePerQuizSchema>;
 export type CourseAverageQuizScoresResponse = Static<typeof courseAverageQuizScoresSchema>;
 export type AllStudentCourseProgressionResponse = Static<typeof allStudentCourseProgressionSchema>;
+export type AllStudentQuizResultsResponse = Static<typeof allStudentQuizResultsSchema>;

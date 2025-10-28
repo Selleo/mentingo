@@ -128,20 +128,15 @@ export const courseStudentProgressionSortFields = [
   "lastActivity",
 ] as const;
 
-export type CourseStundentProgressionSortField =
-  (typeof courseStudentProgressionSortFields)[number];
-
-export const CourseStudentProgressionSortFields: Record<
-  CourseStundentProgressionSortField,
-  string
-> = {
-  studentName: "studentName",
-  groupName: "groupName",
-  completedLessonsCount: "completedLessonsCount",
-  lastActivity: "lastActivity",
-};
-
 export type CourseStudentProgressionSortField = (typeof courseStudentProgressionSortFields)[number];
+
+export const CourseStudentProgressionSortFields: Record<CourseStudentProgressionSortField, string> =
+  {
+    studentName: "studentName",
+    groupName: "groupName",
+    completedLessonsCount: "completedLessonsCount",
+    lastActivity: "lastActivity",
+  };
 
 export const sortCourseStudentProgressionOptions = Type.Union([
   Type.Literal("studentName"),
@@ -164,4 +159,42 @@ export type CourseStudentProgressionQuery = {
   perPage?: number;
   searchQuery?: string;
   sort?: SortCourseStudentProgressionOptions;
+};
+
+// Course student quiz results query options
+
+export const courseStudentQuizResultsSortFields = [
+  "studentName",
+  "quizName",
+  "quizScore",
+  "attempts",
+  "lastAttempt",
+] as const;
+
+export type CourseStudentQuizResultsSortField = (typeof courseStudentQuizResultsSortFields)[number];
+
+export const CourseStudentQuizResultsSortFields: Record<CourseStudentQuizResultsSortField, string> =
+  {
+    studentName: "studentName",
+    quizName: "quizName",
+    quizScore: "quizScore",
+    attempts: "attempts",
+    lastAttempt: "lastAttempt",
+  };
+
+export const sortCourseStudentQuizResultsOptions = Type.Union([
+  ...courseStudentQuizResultsSortFields.map((field) => Type.Literal(field)),
+  ...courseStudentQuizResultsSortFields.map((field) => Type.Literal(`-${field}`)),
+]);
+
+export type SortCourseStudentQuizResultsOptions = Static<
+  typeof sortCourseStudentQuizResultsOptions
+>;
+
+export type CourseStudentQuizResultsQuery = {
+  courseId: UUIDType;
+  page?: number;
+  perPage?: number;
+  quizId?: string;
+  sort?: SortCourseStudentQuizResultsOptions;
 };

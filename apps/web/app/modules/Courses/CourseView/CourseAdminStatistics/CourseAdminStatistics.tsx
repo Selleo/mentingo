@@ -14,6 +14,7 @@ import {
   CourseStatusDistributionChart,
   AverageScorePerQuizChart,
   CourseStudentsProgressTable,
+  CourseStudentsQuizResultsTable,
 } from "./components";
 
 interface CourseAdminStatisticsProps {
@@ -84,6 +85,7 @@ export function CourseAdminStatistics({ lessonCount }: CourseAdminStatisticsProp
           </div>
           <AverageScorePerQuizChart averageQuizScores={averageQuizScores} />
           <CourseStudentsProgressTable lessonCount={lessonCount} />
+          <CourseStudentsQuizResultsTable />
         </CardContent>
       </Card>
     </TooltipProvider>

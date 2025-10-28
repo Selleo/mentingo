@@ -60,6 +60,7 @@ import {
   CourseSortFields,
   EnrolledStudentSortFields,
   CourseStudentProgressionSortFields,
+  CourseStudentQuizResultsSortFields,
 } from "./schemas/courseQuery";
 
 import type {
@@ -79,13 +80,14 @@ import type {
   CourseSortField,
   CoursesQuery,
   EnrolledStudentFilterSchema,
+  CourseStudentQuizResultsQuery,
+  CourseStudentQuizResultsSortField,
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
 import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
-import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { BaseResponse, Pagination, UUIDType } from "src/common";
 import type {
@@ -1572,7 +1574,7 @@ export class CourseService {
       lastActivityExpression,
       completedLessonsCountExpression,
       groupNameExpression,
-    } = this.getStudentCourseProgressionExpressions(courseId);
+    } = this.getStudentCourseStatisticsExpressions(courseId);
 
     const studentsProgress = await this.db
       .select({
@@ -1601,12 +1603,9 @@ export class CourseService {
       .offset((page - 1) * perPage)
       .orderBy(
         sortOrder(
-          this.getProgressionColumnToSortBy(
+          this.getCourseStatisticsColumnToSortBy(
             sortedField as CourseStudentProgressionSortField,
-            lastActivityExpression,
-            completedLessonsCountExpression,
-            studentNameExpression,
-            groupNameExpression,
+            courseId,
           ),
         ),
       );
@@ -1647,13 +1646,94 @@ export class CourseService {
     };
   }
 
-  private getProgressionColumnToSortBy(
-    sort: CourseStudentProgressionSortField,
-    lastActivityExpression: SQL<string | null>,
-    completedLessonsCountExpression: SQL<number>,
-    studentNameExpression: SQL<string>,
-    groupNameExpression: SQL<string | null>,
+  async getStudentsQuizResults(query: CourseStudentQuizResultsQuery) {
+    const {
+      courseId,
+      page = 1,
+      perPage = DEFAULT_PAGE_SIZE,
+      quizId = "",
+      sort = CourseStudentQuizResultsSortFields.studentName,
+    } = query;
+
+    const conditions = [
+      eq(studentCourses.courseId, courseId),
+      isNotNull(studentLessonProgress.completedAt),
+      isNotNull(studentLessonProgress.attempts),
+    ];
+
+    if (quizId) conditions.push(eq(lessons.id, quizId));
+
+    const { sortOrder, sortedField } = getSortOptions(sort);
+
+    const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
+      this.getStudentCourseStatisticsExpressions(courseId);
+
+    const quizResults = await this.db
+      .select({
+        studentId: sql<UUIDType>`${users.id}`,
+        studentName: studentNameExpression,
+        studentAvatarKey: users.avatarReference,
+        quizName: quizNameExpression,
+        attempts: sql<number>`${studentLessonProgress.attempts}`,
+        quizScore: sql<number>`${studentLessonProgress.quizScore}`,
+        lastAttempt: lastAttemptExpression,
+      })
+      .from(studentCourses)
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
+      .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .orderBy(
+        sortOrder(
+          this.getCourseStatisticsColumnToSortBy(
+            sortedField as CourseStudentQuizResultsSortField,
+            courseId,
+          ),
+        ),
+      )
+      .limit(perPage)
+      .offset((page - 1) * perPage)
+      .where(and(...conditions));
+
+    const [{ totalCount }] = await this.db
+      .select({ totalCount: count() })
+      .from(studentLessonProgress)
+      .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
+      .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .where(and(...conditions));
+
+    const allStudentsResults = await Promise.all(
+      quizResults.map(async (studentProgress) => {
+        const studentAvatarUrl = studentProgress.studentAvatarKey
+          ? await this.userService.getUsersProfilePictureUrl(studentProgress.studentAvatarKey)
+          : null;
+
+        return {
+          ...studentProgress,
+          studentAvatarUrl,
+        };
+      }),
+    );
+
+    return {
+      data: allStudentsResults,
+      pagination: { page, perPage, totalItems: totalCount },
+    };
+  }
+
+  private getCourseStatisticsColumnToSortBy(
+    sort: CourseStudentProgressionSortField | CourseStudentQuizResultsSortField,
+    courseId: UUIDType,
   ) {
+    const {
+      lastAttemptExpression,
+      studentNameExpression,
+      quizNameExpression,
+      groupNameExpression,
+      lastActivityExpression,
+      completedLessonsCountExpression,
+    } = this.getStudentCourseStatisticsExpressions(courseId);
+
     switch (sort) {
       case CourseStudentProgressionSortFields.studentName:
         return studentNameExpression;
@@ -1663,12 +1743,20 @@ export class CourseService {
         return lastActivityExpression;
       case CourseStudentProgressionSortFields.completedLessonsCount:
         return completedLessonsCountExpression;
+      case CourseStudentQuizResultsSortFields.quizName:
+        return quizNameExpression;
+      case CourseStudentQuizResultsSortFields.lastAttempt:
+        return lastAttemptExpression;
+      case CourseStudentQuizResultsSortFields.attempts:
+        return studentLessonProgress.attempts;
+      case CourseStudentQuizResultsSortFields.quizScore:
+        return studentLessonProgress.quizScore;
       default:
         return studentNameExpression;
     }
   }
 
-  private getStudentCourseProgressionExpressions(courseId: UUIDType) {
+  private getStudentCourseStatisticsExpressions(courseId: UUIDType) {
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -1697,22 +1785,30 @@ export class CourseService {
           WHERE gu.user_id = ${users.id}
         )`;
 
-    const finishedCountExpression = sql<number>`COALESCE((
-          SELECT COUNT(*)
+    const lastAttemptExpression = sql<string>`(
+          SELECT TO_CHAR(MAX(slp.updated_at), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
           FROM ${studentLessonProgress} slp
           JOIN ${lessons} l ON slp.lesson_id = l.id
           JOIN ${chapters} ch ON l.chapter_id = ch.id
-          WHERE slp.lesson_id = l.id
+          WHERE slp.student_id = ${users.id}
+            AND slp.chapter_id = ch.id
             AND ch.course_id = ${courseId}
-            AND slp.completed_at IS NOT NULL
-        ), 0)::float`;
+        )`;
+
+    const quizNameExpression = sql<string>`(
+          SELECT l.title
+          FROM ${lessons} l
+          WHERE l.id = ${studentLessonProgress.lessonId}
+            AND l.type = 'quiz'
+        )`;
 
     return {
       studentNameExpression,
       lastActivityExpression,
-      finishedCountExpression,
       completedLessonsCountExpression,
       groupNameExpression,
+      lastAttemptExpression,
+      quizNameExpression,
     };
   }
 }
