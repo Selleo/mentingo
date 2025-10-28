@@ -106,45 +106,36 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     },
   ];
 
-  const handleProgressFilterChange = (name: string, value: FilterValue) => {
+  const handleFilterChange = <T,>(
+    setter: React.Dispatch<React.SetStateAction<T>>,
+    name: string,
+    value: FilterValue,
+  ) => {
     startTransition(() => {
-      setProgressSearchParams((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setter((prev) => {
+        if ((name === "quizId" || name === "lessonId") && value === "all") {
+          const { [name]: _, ...rest } = prev as Record<string, unknown>;
+          return rest as T;
+        }
+
+        return {
+          ...prev,
+          [name]: value,
+        } as T;
+      });
     });
+  };
+
+  const handleProgressFilterChange = (name: string, value: FilterValue) => {
+    handleFilterChange(setProgressSearchParams, name, value);
   };
 
   const handleQuizFilterChange = (name: string, value: FilterValue) => {
-    startTransition(() => {
-      setQuizSearchParams((prev) => {
-        if (name === "quizId" && value === "all") {
-          const { quizId: _quizId, ...rest } = prev;
-          return rest;
-        }
-
-        return {
-          ...prev,
-          [name]: value,
-        };
-      });
-    });
+    handleFilterChange(setQuizSearchParams, name, value);
   };
 
   const handleAiMentorFilterChange = (name: string, value: FilterValue) => {
-    startTransition(() => {
-      setAiMentorSearchParams((prev) => {
-        if (name === "lessonId" && value === "all") {
-          const { lessonId: _lessonId, ...rest } = prev;
-          return rest;
-        }
-
-        return {
-          ...prev,
-          [name]: value,
-        };
-      });
-    });
+    handleFilterChange(setAiMentorSearchParams, name, value);
   };
 
   return (
