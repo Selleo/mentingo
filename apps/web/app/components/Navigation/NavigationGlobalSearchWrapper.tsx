@@ -52,10 +52,10 @@ export const NavigationGlobalSearchWrapper = ({
   });
 
   const companyName =
-    globalSettings?.companyInformation?.companyName &&
-    globalSettings.companyInformation.companyName.length > 0
-      ? globalSettings?.companyInformation?.companyName
-      : "Your Company";
+    globalSettings?.companyInformation?.companyShortName &&
+    globalSettings?.companyInformation?.companyShortName.length > 0
+      ? globalSettings?.companyInformation?.companyShortName
+      : null;
 
   const isMac =
     typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("mac");
@@ -147,7 +147,9 @@ export const NavigationGlobalSearchWrapper = ({
             {debouncedSearch.length < 3 && (
               <div className="flex flex-col px-6 pt-4">
                 <span className="text-sm-md text-center ">
-                  {t("globalSearch.searchIn", { companyName })}
+                  {companyName
+                    ? t("globalSearch.searchIn", { companyName })
+                    : t("common.other.search")}
                 </span>
                 <span className="mt-2 details text-center text-neutral-800">
                   {t("globalSearch.searchInDescription")}
