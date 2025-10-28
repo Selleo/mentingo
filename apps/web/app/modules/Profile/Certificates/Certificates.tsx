@@ -50,7 +50,10 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
 
   if (!certificates || certificates.length === 0) {
     return (
-      <div className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
+      <div
+        id="certificates"
+        className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow"
+      >
         <h5 className="h5">{t("studentCertificateView.header")}</h5>
         <p className="body-sm-md text-gray-600">
           {t("studentCertificateView.informations.noCertificates")}
@@ -60,7 +63,10 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
   }
 
   return (
-    <div className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
+    <div
+      id="certificates"
+      className="justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow"
+    >
       <h5 className="h5">{t("studentCertificateView.header")}</h5>
       <div className="flex flex-col gap-4 sm:grid sm:grid-cols-3">
         {certificates.map((certificate: CertificateType) => {

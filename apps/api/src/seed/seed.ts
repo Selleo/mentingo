@@ -28,6 +28,7 @@ import {
   studentCourses,
   studentLessonProgress,
   userDetails,
+  userOnboarding,
   users,
 } from "../storage/schema";
 import { USER_ROLES } from "../user/schemas/userRoles";
@@ -79,6 +80,7 @@ async function createOrFindUser(email: string, password: string, userData: any) 
   const [newUser] = await db.insert(users).values(userData).returning();
 
   await insertCredential(newUser.id, password);
+  await insertOnboardingData(newUser.id);
 
   if (newUser.role === USER_ROLES.ADMIN || newUser.role === USER_ROLES.CONTENT_CREATOR)
     await insertUserDetails(newUser.id);
@@ -95,6 +97,12 @@ async function insertCredential(userId: UUIDType, password: string) {
     updatedAt: new Date().toISOString(),
   };
   return (await db.insert(credentials).values(credentialData).returning())[0];
+}
+
+export async function insertOnboardingData(userId: UUIDType) {
+  return await db.insert(userOnboarding).values({
+    userId,
+  });
 }
 
 async function insertUserDetails(userId: UUIDType) {

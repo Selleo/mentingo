@@ -202,6 +202,17 @@
       "polish": "Polish"
     }
   },
+  "resetOnboarding": {
+    "header": "Reset introduction",
+    "subHeader": "Here you can reset application introduction",
+    "button": {
+      "reset": "Reset introduction"
+    },
+    "toast": {
+      "success": "Introduction has been reset successfully",
+      "error": "Failed to reset introduction"
+    }
+  },
   "changeUserEmailView": {
     "header": "Change user information",
     "subHeader": "Update your user information here.",
@@ -1748,6 +1759,31 @@
     "categories": "Categories",
     "createNewCourse": "Create New Course",
     "admin": "Admin"
+  },
+  "studentOnboarding": {
+    "dashboard": {
+      "clientStatistics": "This is your dashboard - here you can find your progress, statistics and recent activity.",
+      "dailyStreak": "Keep up the streak - track your series of daily logins here."
+    },
+    "courses": {
+      "yourList": "Here you'll find your courses...",
+      "availableListFilters": "And here you can browse available courses you can sign up for."
+    },
+    "announcements": {
+      "stayInformed": "Here you will find announcements from instructors or course coordinators."
+    },
+    "settings": {
+      "welcome": "Here you can manage your profile - edit details, set preferences and change your password.",
+      "language": "Set your preferred interface language here - tailor the platform to your needs.",
+      "password": "Change your password regularly to maintain the security of your account."
+    },
+    "profile": {
+      "info": "Here you can view and edit your profile details.",
+      "certificates": "Here you can check completion certificates for your courses."
+    },
+    "providerInformation": {
+      "welcome": "Learn about the provider and their contact details."
+    }
   },
   "pagination": {
     "showing": "Showing {{startItem}}-{{endItem}} of {{totalItems}} results",

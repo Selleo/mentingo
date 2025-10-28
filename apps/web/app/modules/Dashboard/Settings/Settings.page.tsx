@@ -1,12 +1,17 @@
-import { Loader } from "lucide-react";
-import { Suspense } from "react";
+import { OnboardingPages } from "@repo/shared";
+import { Suspense, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useCurrentUser } from "~/api/queries";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserSettings } from "~/api/queries/useUserSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
+import Loader from "~/modules/common/Loader/Loader";
 import { setPageTitle } from "~/utils/setPageTitle";
+
+import { useTourSetup } from "../../Onboarding/hooks/useTourSetup";
+import { studentSettingsSteps } from "../../Onboarding/routes/student";
 
 import AccountTabContent from "./components/AccountTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
@@ -20,9 +25,21 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 export default function SettingsPage() {
   const { t } = useTranslation();
 
-  const { isContentCreator, isAdmin } = useUserRole();
-  const { data: userSettings } = useUserSettings();
-  const { data: globalSettings } = useGlobalSettings();
+  const { isContentCreator, isAdmin, isStudent } = useUserRole();
+  const { data: userSettings, isLoading: isLoadingUserSettings } = useUserSettings();
+  const { data: globalSettings, isLoading: isLoadingGlobalSettings } = useGlobalSettings();
+  const { data: user, isLoading: isLoadingUser } = useCurrentUser();
+
+  const isLoading = isLoadingUserSettings || isLoadingGlobalSettings || isLoadingUser;
+
+  const steps = useMemo(() => (isStudent ? studentSettingsSteps(t) : []), [isStudent, t]);
+
+  useTourSetup({
+    steps,
+    hasCompletedTour: user?.onboardingStatus.settings,
+    isLoading,
+    page: OnboardingPages.SETTINGS,
+  });
 
   const isUserSettings = (
     settings: typeof userSettings,

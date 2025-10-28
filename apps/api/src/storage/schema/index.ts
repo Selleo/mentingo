@@ -595,3 +595,23 @@ export const lessonResources = pgTable("lesson_resources", {
     .references(() => lessons.id, { onDelete: "cascade" })
     .notNull(),
 });
+
+export const userOnboarding = pgTable(
+  "user_onboarding",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    dashboard: boolean("dashboard").notNull().default(false),
+    courses: boolean("courses").notNull().default(false),
+    announcements: boolean("announcements").notNull().default(false),
+    profile: boolean("profile").notNull().default(false),
+    settings: boolean("settings").notNull().default(false),
+    providerInformation: boolean("provider_information").notNull().default(false),
+  },
+  (table) => ({
+    unq: unique().on(table.userId),
+  }),
+);

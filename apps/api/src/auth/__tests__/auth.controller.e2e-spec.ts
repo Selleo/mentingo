@@ -161,12 +161,14 @@ describe("AuthController (e2e)", () => {
     it("should refresh tokens", async () => {
       const user = await userFactory.build();
       const password = "Password123@";
+
       await authService.register({
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         password,
       });
+
       let refreshToken = "";
 
       const loginResponse = await request(app.getHttpServer())
@@ -234,7 +236,9 @@ describe("AuthController (e2e)", () => {
         .set("Cookie", `access_token=${accessToken};`)
         .expect(200);
 
-      expect(response.body.data).toStrictEqual({
+      const { onboardingStatus: _, ...currentUser } = response.body.data;
+
+      expect(currentUser).toStrictEqual({
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
         groupName: null,

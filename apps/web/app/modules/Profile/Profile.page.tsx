@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useParams } from "@remix-run/react";
+import { OnboardingPages } from "@repo/shared";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -12,6 +13,7 @@ import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
+import { useUserRole } from "~/hooks/useUserRole";
 import { copyToClipboard } from "~/utils/copyToClipboard";
 import { filterChangedData } from "~/utils/filterChangedData";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -19,6 +21,8 @@ import { isAdminLike } from "~/utils/userRoles";
 
 import Loader from "../common/Loader/Loader";
 import { CoursesCarousel } from "../Dashboard/Courses/CoursesCarousel";
+import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
+import { studentProfileSteps } from "../Onboarding/routes/student";
 
 import CertificatePreview from "./Certificates/CertificatePreview";
 import Certificates from "./Certificates/Certificates";
@@ -46,6 +50,7 @@ export default function ProfilePage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
 
+  const { isStudent } = useUserRole();
   const { data: userDetails, error } = useUserDetails(id);
   const { data: currentUser } = useCurrentUser();
 
@@ -57,6 +62,18 @@ export default function ProfilePage() {
       isProfileOwner: currentUser?.id === userDetails?.id,
     };
   }, [userDetails, currentUser]);
+
+  const steps = useMemo(
+    () => (isStudent && isProfileOwner ? studentProfileSteps(t) : []),
+    [t, isStudent, isProfileOwner],
+  );
+
+  useTourSetup({
+    steps,
+    isLoading: !userDetails,
+    hasCompletedTour: currentUser?.onboardingStatus?.profile,
+    page: OnboardingPages.PROFILE,
+  });
 
   const { data: contentCreatorCourses } = useContentCreatorCourses(id, undefined, hasPermission);
 

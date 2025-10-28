@@ -203,6 +203,17 @@
       "polish": "Polski"
     }
   },
+  "resetOnboarding": {
+    "header": "Resetuj wprowadzenie",
+    "subHeader": "Tutaj zresetujesz wprowadzenie do aplikacji",
+    "button": {
+      "reset": "Resetuj wprowadzenie"
+    },
+    "toast": {
+      "success": "Wprowadzenie zostało pomyślnie zresetowane",
+      "error": "Nie udało się zresetować wprowadzenia"
+    }
+  },
   "changeUserEmailView": {
     "header": "Zmień dane użytkownika",
     "subHeader": "Zaktualizuj swoje dane użytkownika tutaj.",
@@ -1738,6 +1749,31 @@
     "categories": "Kategorie",
     "createNewCourse": "Utwórz nowy kurs",
     "admin": "Administrator"
+  },
+  "studentOnboarding": {
+    "dashboard": {
+      "clientStatistics": "To Twój panel główny - znajdziesz tu postępy, statystyki i ostatnie aktywności.",
+      "dailyStreak": "Dbaj o regularność - tutaj śledzisz swoją serię codziennych logowań."
+    },
+    "courses": {
+      "yourList": "Tutaj znajdziesz Twoje kursy...",
+      "availableListFilters": "...a tu możesz przeglądać dostępne kursy, na które możesz się zapisać."
+    },
+    "announcements": {
+      "stayInformed": "Tu znajdziesz komunikaty od osób prowadzących lub koordynujących kurs."
+    },
+    "settings": {
+      "welcome": "Tutaj możesz zarządzać swoim profilem - edytuj dane, ustaw preferencje i zmień hasło.",
+      "language": "Tutaj ustawisz preferowany język interfejsu - dopasuj platformę do swoich potrzeb.",
+      "password": "Regularnie zmieniaj hasło, aby utrzymać bezpieczeństwo swojego konta."
+    },
+    "profile": {
+      "info": "Tutaj zobaczysz i edytujesz swoje dane profilowe.",
+      "certificates": "Tutaj sprawdzisz certyfikaty ukończenia Twoich kursów."
+    },
+    "providerInformation": {
+      "welcome": "Tutaj znajdziesz informacje o dostawcach i autorach kursów."
+    }
   },
   "pagination": {
     "showing": "Wyświetlanie {{startItem}}-{{endItem}} z {{totalItems}} wyników",

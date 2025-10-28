@@ -30,7 +30,10 @@ export const ContinueLearningCard = ({ isLoading = false, lesson }: ContinueLear
 
   if (!lesson) {
     return (
-      <div className="flex h-auto w-full flex-col items-center justify-between gap-y-4 rounded-lg bg-white p-8 drop-shadow-card md:gap-8 2xl:max-w-[296px] 2xl:flex-col 2xl:gap-y-4">
+      <div
+        id="continue-learning"
+        className="flex h-auto w-full flex-col items-center justify-between gap-y-4 rounded-lg bg-white p-8 drop-shadow-card md:gap-8 2xl:max-w-[296px] 2xl:flex-col 2xl:gap-y-4"
+      >
         <div className="text-center md:w-fit 2xl:w-full">
           <h2 className="body-lg-md text-neutral-950">
             {t("clientStatisticsView.other.noLessonsToContinue")}
@@ -45,7 +48,10 @@ export const ContinueLearningCard = ({ isLoading = false, lesson }: ContinueLear
   }
 
   return (
-    <div className="flex h-auto w-full flex-col gap-y-4 rounded-lg bg-white p-4 drop-shadow-card md:flex-row md:gap-8 2xl:max-w-[296px] 2xl:flex-col 2xl:gap-y-4">
+    <div
+      id="continue-learning"
+      className="flex h-auto w-full flex-col gap-y-4 rounded-lg bg-white p-4 drop-shadow-card md:flex-row md:gap-8 2xl:max-w-[296px] 2xl:flex-col 2xl:gap-y-4"
+    >
       <div className="text-center md:w-fit 2xl:w-full">
         <h2 className="body-lg-md text-neutral-950">
           {t("clientStatisticsView.other.continueLearning")}

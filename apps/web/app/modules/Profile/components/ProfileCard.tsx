@@ -15,7 +15,10 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
   const { t } = useTranslation();
 
   return (
-    <section className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow">
+    <section
+      id="profile-card"
+      className="flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow"
+    >
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
         <UserAvatar
           className="size-32"

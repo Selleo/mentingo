@@ -45,17 +45,24 @@ export const TableCourseList = ({ availableCourses }: CardCourseListProps) => {
       </TableHeader>
       <TableBody className="before:block before:h-4 before:content-['']">
         {availableCourses?.map(
-          ({
-            currency,
-            id,
-            title,
-            thumbnailUrl,
-            description,
-            category,
-            enrolled = false,
-            priceInCents,
-          }) => (
-            <TableRow key={id} className="group border-none hover:bg-primary-50">
+          (
+            {
+              currency,
+              id,
+              title,
+              thumbnailUrl,
+              description,
+              category,
+              enrolled = false,
+              priceInCents,
+            },
+            index,
+          ) => (
+            <TableRow
+              id={index === 0 ? "available-courses" : undefined}
+              key={id}
+              className="group border-none hover:bg-primary-50"
+            >
               <TableCell className="rounded-s-lg p-4">
                 <img
                   src={thumbnailUrl || "https://placehold.co/600x400/png"}

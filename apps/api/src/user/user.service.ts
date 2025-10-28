@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { CreatePasswordEmail } from "@repo/email-templates";
+import { OnboardingPages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -32,6 +33,7 @@ import {
   users,
   settings,
   courses,
+  userOnboarding,
 } from "../storage/schema";
 
 import {
@@ -397,6 +399,7 @@ export class UserService {
 
     return await this.db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
+      await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
       const token = nanoid(64);
 
@@ -643,5 +646,63 @@ export class UserService {
       );
 
     return adminEmails.map((admin) => admin.email);
+  }
+
+  async getAllOnboardingStatus(userId: UUIDType) {
+    const [onboardingStatus] = await this.db
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId))
+      .limit(1);
+
+    return onboardingStatus;
+  }
+
+  async markOnboardingPageAsCompleted(userId: UUIDType, page: OnboardingPages) {
+    const [existingOnboarding] = await this.db
+      .select()
+      .from(userOnboarding)
+      .where(eq(userOnboarding.userId, userId));
+
+    if (existingOnboarding) {
+      const [updatedOnboarding] = await this.db
+        .update(userOnboarding)
+        .set({ [page]: true })
+        .where(eq(userOnboarding.userId, userId))
+        .returning();
+
+      return updatedOnboarding;
+    }
+
+    const [newUserOnboarding] = await this.db
+      .insert(userOnboarding)
+      .values({ userId, [page]: true })
+      .returning();
+
+    if (!newUserOnboarding) {
+      throw new Error("Failed to mark onboarding as completed");
+    }
+
+    return newUserOnboarding;
+  }
+
+  async resetOnboardingForUser(userId: UUIDType) {
+    const onboardingPagesWithValues = Object.values(OnboardingPages).reduce(
+      (acc, page) => {
+        acc[page] = false;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    );
+
+    const [updatedOnboarding] = await this.db
+      .update(userOnboarding)
+      .set({
+        ...onboardingPagesWithValues,
+      })
+      .where(eq(userOnboarding.userId, userId))
+      .returning();
+
+    return updatedOnboarding;
   }
 }

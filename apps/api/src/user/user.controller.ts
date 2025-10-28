@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  Param,
   Patch,
   Post,
   Query,
@@ -14,6 +15,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
+import { OnboardingPages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
@@ -63,6 +65,7 @@ import {
   baseUserResponseSchema,
   userDetailsResponseSchema,
   userSchema,
+  userOnboardingStatusSchema,
 } from "./schemas/user.schema";
 import { SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
@@ -361,5 +364,30 @@ export class UserController {
     const importStats = await this.usersService.importUsers(usersFile);
 
     return new BaseResponse(importStats);
+  }
+
+  @Patch("onboarding-status/reset")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    response: baseResponse(userOnboardingStatusSchema),
+  })
+  async resetOnboardingStatus(@CurrentUser("userId") userId: UUIDType) {
+    const onboardingStatus = await this.usersService.resetOnboardingForUser(userId);
+
+    return new BaseResponse(onboardingStatus);
+  }
+
+  @Patch("onboarding-status/:page")
+  @Roles(...Object.values(USER_ROLES))
+  @Validate({
+    response: baseResponse(userOnboardingStatusSchema),
+  })
+  async markOnboardingComplete(
+    @CurrentUser("userId") userId: UUIDType,
+    @Param("page") page: OnboardingPages,
+  ) {
+    const onboardingStatus = await this.usersService.markOnboardingPageAsCompleted(userId, page);
+
+    return new BaseResponse(onboardingStatus);
   }
 }
