@@ -1166,6 +1166,8 @@
       "title": "Statystyki",
       "subtitle": "Monitoruj wyniki kursu",
       "details": "Szczegóły",
+      "filterByQuiz": "Filtruj według quizu",
+      "allQuizzes": "Wszystkie quizy",
       "field": {
         "studentName": "Uczeń",
         "groupName": "Grupa",

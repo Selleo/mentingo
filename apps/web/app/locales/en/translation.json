@@ -1157,6 +1157,8 @@
       "title": "Statistics",
       "subtitle": "Course performance overview",
       "details": "Details",
+      "filterByQuiz": "Filter by quiz",
+      "allQuizzes": "All quizzes",
       "field": {
         "studentName": "Student",
         "groupName": "Group",

@@ -13,6 +13,13 @@ import { useCourseStudentsQuizResults } from "~/api/queries/admin/useCourseStude
 import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -32,7 +39,13 @@ import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
 type CourseStudentsQuizResultsColumn = GetCourseStudentsQuizResultsResponse["data"][number];
 
-export function CourseStudentsQuizResultsTable() {
+interface CourseStudentsQuizResultsTableProps {
+  quizOptions: { id: string; title: string }[];
+}
+
+export function CourseStudentsQuizResultsTable({
+  quizOptions,
+}: CourseStudentsQuizResultsTableProps) {
   const { t } = useTranslation();
 
   const { id = "" } = useParams();
@@ -123,10 +136,17 @@ export function CourseStudentsQuizResultsTable() {
 
   const handleFilterChange = (name: string, value: FilterValue) => {
     startTransition(() => {
-      setSearchParams((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setSearchParams((prev) => {
+        if (name === "quizId" && value === "all") {
+          const { quizId: _quizId, ...rest } = prev;
+          return rest;
+        }
+
+        return {
+          ...prev,
+          [name]: value,
+        };
+      });
     });
   };
 
@@ -144,6 +164,22 @@ export function CourseStudentsQuizResultsTable() {
     <div className="rounded-sm flex flex-col justify-center">
       <div className="flex items-center justify-between">
         <h6 className="h6 grow">{t("adminCourseView.statistics.details")}</h6>
+        <Select
+          value={(searchParams.quizId as string | undefined) || "all"}
+          onValueChange={(value) => handleFilterChange("quizId", value)}
+        >
+          <SelectTrigger className="max-w-xs my-6">
+            <SelectValue placeholder={t("adminCourseView.statistics.filterByQuiz")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("adminCourseView.statistics.allQuizzes")}</SelectItem>
+            {quizOptions.map((quiz) => (
+              <SelectItem key={quiz.id} value={quiz.id}>
+                {quiz.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="rounded-lg overflow-hidden border border-neutral-200">
         <Table>

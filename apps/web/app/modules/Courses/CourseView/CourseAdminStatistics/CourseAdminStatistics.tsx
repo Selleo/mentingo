@@ -17,15 +17,32 @@ import {
   CourseStudentsQuizResultsTable,
 } from "./components";
 
+import type { GetCourseResponse } from "~/api/generated-api";
+
 interface CourseAdminStatisticsProps {
-  lessonCount: number;
+  course?: GetCourseResponse["data"];
 }
 
-export function CourseAdminStatistics({ lessonCount }: CourseAdminStatisticsProps) {
+export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
   const { t } = useTranslation();
 
   const { id = "" } = useParams();
   const { isAdminLike } = useUserRole();
+
+  const lessonCount = useMemo(
+    () => course?.chapters?.reduce((acc, chapter) => acc + chapter.lessons.length, 0) || 0,
+    [course],
+  );
+
+  const quizOptions = useMemo(() => {
+    return (
+      course?.chapters.flatMap((chapter) =>
+        chapter.lessons
+          .filter((lesson) => lesson.type === "quiz")
+          .map((lesson) => ({ id: lesson.id, title: lesson.title })),
+      ) || []
+    );
+  }, [course]);
 
   const { data: courseStatistics, isLoading: isLoadingCourseStatistics } = useCourseStatistics({
     id,
@@ -85,7 +102,7 @@ export function CourseAdminStatistics({ lessonCount }: CourseAdminStatisticsProp
           </div>
           <AverageScorePerQuizChart averageQuizScores={averageQuizScores} />
           <CourseStudentsProgressTable lessonCount={lessonCount} />
-          <CourseStudentsQuizResultsTable />
+          <CourseStudentsQuizResultsTable quizOptions={quizOptions} />
         </CardContent>
       </Card>
     </TooltipProvider>
