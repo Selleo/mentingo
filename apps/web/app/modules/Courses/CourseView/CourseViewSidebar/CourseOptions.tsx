@@ -8,15 +8,19 @@ import { Enroll } from "~/assets/svgs";
 import { CopyUrlButton } from "~/components/CopyUrlButton/CopyUrlButton";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
+import { useUserRole } from "~/hooks/useUserRole";
 import { PaymentModal } from "~/modules/stripe/PaymentModal";
 
+import type { Dispatch, SetStateAction } from "react";
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseOptionsProps = {
   course: GetCourseResponse["data"];
+  setIsEnrollGroupsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-export const CourseOptions = ({ course }: CourseOptionsProps) => {
+export const CourseOptions = ({ course, setIsEnrollGroupsModalOpen }: CourseOptionsProps) => {
+  const { isAdmin } = useUserRole();
   const { mutateAsync: enrollCourse } = useEnrollCourse();
   const { t } = useTranslation();
   const { data: currentUser } = useCurrentUser();
@@ -57,6 +61,16 @@ export const CourseOptions = ({ course }: CourseOptionsProps) => {
           <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
+        {isAdmin && (
+          <Button
+            className="gap-x-2"
+            variant="primary"
+            onClick={() => setIsEnrollGroupsModalOpen(true)}
+          >
+            <Icon name="Hat" className="text-contrast h-auto w-6" />
+            <span>{t("studentCourseView.sideSection.button.enrollGroups")}</span>
+          </Button>
+        )}
         {course.priceInCents && course.currency && course.stripePriceId ? (
           <PaymentModal
             courseCurrency={course.currency}

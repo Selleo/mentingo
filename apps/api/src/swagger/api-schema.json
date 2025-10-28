@@ -2614,6 +2614,43 @@
         }
       }
     },
+    "/api/course/{courseId}/enroll-groups-to-course": {
+      "post": {
+        "operationId": "CourseController_enrollGroupsToCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollGroupsToCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollGroupsToCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/deleteCourse/{id}": {
       "delete": {
         "operationId": "CourseController_deleteCourse",
@@ -4597,6 +4634,33 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UnassignUserFromGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/by-course/{courseId}": {
+      "get": {
+        "operationId": "GroupController_getGroupsByCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupsByCourseResponse"
                 }
               }
             }
@@ -10217,6 +10281,40 @@
         ]
       },
       "EnrollCoursesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "EnrollGroupsToCourseBody": {
+        "type": "object",
+        "properties": {
+          "groupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "groupIds"
+        ]
+      },
+      "EnrollGroupsToCourseResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -16079,15 +16177,28 @@
           "data": {
             "type": "object",
             "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
               "name": {
                 "type": "string"
               },
               "characteristic": {
                 "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
               }
             },
             "required": [
-              "name"
+              "id",
+              "name",
+              "createdAt",
+              "updatedAt"
             ]
           }
         },
@@ -16172,6 +16283,44 @@
             "required": [
               "message"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetGroupsByCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "characteristic": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
           }
         },
         "required": [

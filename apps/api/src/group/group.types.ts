@@ -1,10 +1,10 @@
 import type { Static } from "@sinclair/typebox";
 import type {
   allGroupsSchema,
-  baseGroupSchema,
   groupSchema,
   groupsFilterSchema,
   groupSortFieldsOptions,
+  upsertGroupSchema,
 } from "src/group/group.schema";
 
 export type GroupResponse = Static<typeof groupSchema>;
@@ -20,4 +20,4 @@ export type GroupsQuery = {
   sort?: GroupSortFieldsOptions;
 };
 
-export type UpsertGroupBody = Static<typeof baseGroupSchema>;
+export type UpsertGroupBody = Static<typeof upsertGroupSchema>;

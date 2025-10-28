@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUserDetails } from "~/api/queries/useUserDetails";
@@ -8,6 +9,8 @@ import { useUserRole } from "~/hooks/useUserRole";
 import { CourseOptions } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseOptions";
 import { CourseProgress } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseProgress";
 
+import { CourseEnrollGroupsModal } from "./CourseEnrollGroupsModal";
+
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseViewSidebar = {
@@ -15,6 +18,7 @@ type CourseViewSidebar = {
 };
 
 export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
+  const [isEnrollGroupsModalOpen, setIsEnrollGroupsModalOpen] = useState(false);
   const { data: userDetails } = useUserDetails(course?.authorId ?? "");
   const { isAdminLike } = useUserRole();
   const { t } = useTranslation();
@@ -23,10 +27,15 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
 
   return (
     <section className="sticky left-0 top-6 flex h-min flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-8 drop-shadow xl:w-full xl:max-w-[480px] 3xl:top-12">
+      <CourseEnrollGroupsModal
+        courseId={course.id}
+        isOpen={isEnrollGroupsModalOpen}
+        onOpenChange={setIsEnrollGroupsModalOpen}
+      />
       {shouldShowCourseOptions ? (
-        <CourseOptions course={course} />
+        <CourseOptions course={course} setIsEnrollGroupsModalOpen={setIsEnrollGroupsModalOpen} />
       ) : (
-        <CourseProgress course={course} />
+        <CourseProgress course={course} setIsEnrollGroupsModalOpen={setIsEnrollGroupsModalOpen} />
       )}
       <h4 className="h6 pb-1 pt-2 text-neutral-950">
         {t("studentCourseView.sideSection.other.author")}

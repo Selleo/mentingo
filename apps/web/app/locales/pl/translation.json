@@ -1556,7 +1556,8 @@
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
         "goToContentCreatorPage": "Przejdź do strony twórcy treści",
-        "repeatLessons": "Powtórz lekcje"
+        "repeatLessons": "Powtórz lekcje",
+        "enrollGroups": "Zapisz grupy"
       }
     },
     "breadcrumbs": {

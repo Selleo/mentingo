@@ -406,6 +406,32 @@ export class CourseController {
     return new BaseResponse({ message: "Pomyślnie zapisano na kursy" });
   }
 
+  @Post("/:courseId/enroll-groups-to-course")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "courseId",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: Type.Object({ groupIds: Type.Array(UUIDSchema) }),
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async enrollGroupsToCourse(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: { groupIds: UUIDType[] } = { groupIds: [] },
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.enrollGroupsToCourse(courseId, body.groupIds, currentUserId);
+
+    return new BaseResponse({ message: "Pomyślnie zapisano grupy na kurs" });
+  }
+
   @Delete("deleteCourse/:id")
   @Roles(USER_ROLES.ADMIN)
   @Validate({

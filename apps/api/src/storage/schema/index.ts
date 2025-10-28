@@ -286,6 +286,7 @@ export const studentCourses = pgTable(
       precision: 3,
     }),
     paymentId: varchar("payment_id", { length: 50 }),
+    enrolledByGroupId: uuid("enrolled_by_group_id").references(() => groups.id),
   },
   (table) => ({
     unq: unique().on(table.studentId, table.courseId),
@@ -446,6 +447,24 @@ export const groupUsers = pgTable(
   },
   (table) => ({
     unq: unique().on(table.userId, table.groupId),
+  }),
+);
+
+export const groupCourses = pgTable(
+  "group_courses",
+  {
+    ...id,
+    ...timestamps,
+    groupId: uuid("group_id")
+      .references(() => groups.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    enrolledBy: uuid("enrolled_by").references(() => users.id),
+  },
+  (table) => ({
+    unq: unique().on(table.groupId, table.courseId),
   }),
 );
 

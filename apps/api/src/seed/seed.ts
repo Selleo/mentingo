@@ -163,6 +163,7 @@ async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
         numberOfFinishedAssignments: faker.number.int({ min: 0, max: 10 }),
         state: "not_started",
         archived: false,
+        enrolledByGroupId: null,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
       };

@@ -286,7 +286,9 @@ describe("UsersController (e2e)", () => {
         avatarReference: null,
       };
 
-      const updateData = await groupService.createGroup({ name: "Test group" });
+      const updateData = await groupService.createGroup({
+        name: "Test group",
+      });
 
       await request(app.getHttpServer())
         .patch(`/api/user/bulk/groups`)

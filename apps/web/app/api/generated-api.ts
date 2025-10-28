@@ -1176,6 +1176,16 @@ export interface EnrollCoursesResponse {
   };
 }
 
+export interface EnrollGroupsToCourseBody {
+  groupIds: string[];
+}
+
+export interface EnrollGroupsToCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
 export type DeleteCourseResponse = null;
 
 export interface DeleteManyCoursesBody {
@@ -2413,8 +2423,12 @@ export interface UpdateGroupBody {
 
 export interface UpdateGroupResponse {
   data: {
+    /** @format uuid */
+    id: string;
     name: string;
     characteristic?: string;
+    createdAt: string;
+    updatedAt: string;
   };
 }
 
@@ -2442,6 +2456,17 @@ export interface UnassignUserFromGroupResponse {
   data: {
     message: string;
   };
+}
+
+export interface GetGroupsByCourseResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic?: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
 }
 
 export interface UploadScormPackageResponse {
@@ -4287,6 +4312,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerEnrollGroupsToCourse
+     * @request POST:/api/course/{courseId}/enroll-groups-to-course
+     */
+    courseControllerEnrollGroupsToCourse: (
+      courseId: string,
+      data: EnrollGroupsToCourseBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<EnrollGroupsToCourseResponse, any>({
+        path: `/api/course/${courseId}/enroll-groups-to-course`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerDeleteCourse
      * @request DELETE:/api/course/deleteCourse/{id}
      */
@@ -5429,6 +5474,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/group/unassign`,
         method: "DELETE",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetGroupsByCourse
+     * @request GET:/api/group/by-course/{courseId}
+     */
+    groupControllerGetGroupsByCourse: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetGroupsByCourseResponse, any>({
+        path: `/api/group/by-course/${courseId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
