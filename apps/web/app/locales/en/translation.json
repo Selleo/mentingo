@@ -1159,9 +1159,12 @@
       "details": "Details",
       "filterByQuiz": "Filter by quiz",
       "allQuizzes": "All quizzes",
+      "filterByLesson": "Filter by lesson",
+      "allLessons": "All lessons",
       "tabs": {
         "progress": "Progress",
-        "quizResults": "Quiz Results"
+        "quizResults": "Quiz Results",
+        "aiMentorResults": "AI Mentor Results"
       },
       "field": {
         "studentName": "Student",
@@ -1171,7 +1174,10 @@
         "quizName": "Quiz",
         "quizScore": "Score",
         "attempts": "Attempts",
-        "lastAttempt": "Last Attempt"
+        "lastAttempt": "Last Attempt",
+        "lessonName": "Lesson",
+        "lastSession": "Last Session",
+        "score": "Score"
       },
       "overview": {
         "enrolledCount": "Enrolled students count",

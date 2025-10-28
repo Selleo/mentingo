@@ -34,6 +34,7 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { CourseService } from "src/courses/course.service";
 import {
   allCoursesForContentCreatorSchema,
+  allStudentAiMentorResultsSchema,
   allStudentCourseProgressionSchema,
   allStudentQuizResultsSchema,
   courseAverageQuizScoresSchema,
@@ -49,6 +50,8 @@ import {
   SortCourseStudentProgressionOptions,
   sortCourseStudentQuizResultsOptions,
   SortCourseStudentQuizResultsOptions,
+  sortCourseStudentAiMentorResultsOptions,
+  SortCourseStudentAiMentorResultsOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -73,6 +76,7 @@ import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
+  AllStudentAiMentorResultsResponse,
   AllStudentCourseProgressionResponse,
   AllStudentCoursesResponse,
   AllStudentQuizResultsResponse,
@@ -539,6 +543,42 @@ export class CourseController {
     };
 
     const studentQuizResults = await this.courseService.getStudentsQuizResults(query);
+
+    return new PaginatedResponse(studentQuizResults);
+  }
+
+  @Get(":courseId/statistics/students-ai-mentor-results")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "page", schema: Type.Number() },
+      { type: "query", name: "perPage", schema: Type.Number() },
+      { type: "query", name: "lessonId", schema: Type.String() },
+      {
+        type: "query",
+        name: "sort",
+        schema: sortCourseStudentAiMentorResultsOptions,
+      },
+    ],
+    response: paginatedResponse(allStudentAiMentorResultsSchema),
+  })
+  async getCourseStudentsAiMentorResults(
+    @Param("courseId") courseId: UUIDType,
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+    @Query("lessonId") lessonId: string,
+    @Query("sort") sort: SortCourseStudentAiMentorResultsOptions,
+  ): Promise<PaginatedResponse<AllStudentAiMentorResultsResponse>> {
+    const query = {
+      courseId,
+      page,
+      perPage,
+      lessonId,
+      sort,
+    };
+
+    const studentQuizResults = await this.courseService.getStudentsAiMentorResults(query);
 
     return new PaginatedResponse(studentQuizResults);
   }

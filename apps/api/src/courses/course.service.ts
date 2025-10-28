@@ -39,6 +39,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
 import {
+  aiMentorStudentLessonProgress,
   categories,
   chapters,
   courses,
@@ -61,6 +62,7 @@ import {
   EnrolledStudentSortFields,
   CourseStudentProgressionSortFields,
   CourseStudentQuizResultsSortFields,
+  CourseStudentAiMentorResultsSortFields,
 } from "./schemas/courseQuery";
 
 import type {
@@ -82,6 +84,8 @@ import type {
   EnrolledStudentFilterSchema,
   CourseStudentQuizResultsQuery,
   CourseStudentQuizResultsSortField,
+  CourseStudentAiMentorResultsQuery,
+  CourseStudentAiMentorResultsSortField,
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
@@ -1721,8 +1725,91 @@ export class CourseService {
     };
   }
 
+  async getStudentsAiMentorResults(query: CourseStudentAiMentorResultsQuery) {
+    const {
+      courseId,
+      page = 1,
+      perPage = DEFAULT_PAGE_SIZE,
+      lessonId = "",
+      sort = CourseStudentQuizResultsSortFields.studentName,
+    } = query;
+
+    const conditions = [
+      eq(studentCourses.courseId, courseId),
+      eq(lessons.type, LESSON_TYPES.AI_MENTOR),
+      isNotNull(studentLessonProgress.completedAt),
+    ];
+
+    if (lessonId) conditions.push(eq(lessons.id, lessonId));
+
+    const { sortOrder, sortedField } = getSortOptions(sort);
+
+    const { studentNameExpression } = this.getStudentCourseStatisticsExpressions(courseId);
+
+    const quizResults = await this.db
+      .select({
+        studentId: sql<UUIDType>`${users.id}`,
+        studentName: studentNameExpression,
+        studentAvatarKey: users.avatarReference,
+        lessonName: sql<string>`${lessons.title}`,
+        score: sql<number>`${aiMentorStudentLessonProgress.percentage}`,
+        lastSession: sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
+      })
+      .from(studentCourses)
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
+      .leftJoin(
+        aiMentorStudentLessonProgress,
+        eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
+      )
+      .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .orderBy(
+        sortOrder(
+          this.getCourseStatisticsColumnToSortBy(
+            sortedField as CourseStudentAiMentorResultsSortField,
+            courseId,
+          ),
+        ),
+      )
+      .limit(perPage)
+      .offset((page - 1) * perPage)
+      .where(and(...conditions));
+
+    const [{ totalCount }] = await this.db
+      .select({ totalCount: count() })
+      .from(aiMentorStudentLessonProgress)
+      .leftJoin(
+        studentLessonProgress,
+        eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
+      )
+      .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
+      .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .where(and(...conditions));
+
+    const allStudentsResults = await Promise.all(
+      quizResults.map(async (studentProgress) => {
+        const studentAvatarUrl = studentProgress.studentAvatarKey
+          ? await this.userService.getUsersProfilePictureUrl(studentProgress.studentAvatarKey)
+          : null;
+
+        return {
+          ...studentProgress,
+          studentAvatarUrl,
+        };
+      }),
+    );
+
+    return {
+      data: allStudentsResults,
+      pagination: { page, perPage, totalItems: totalCount },
+    };
+  }
+
   private getCourseStatisticsColumnToSortBy(
-    sort: CourseStudentProgressionSortField | CourseStudentQuizResultsSortField,
+    sort:
+      | CourseStudentProgressionSortField
+      | CourseStudentQuizResultsSortField
+      | CourseStudentAiMentorResultsSortField,
     courseId: UUIDType,
   ) {
     const {
@@ -1751,6 +1838,12 @@ export class CourseService {
         return studentLessonProgress.attempts;
       case CourseStudentQuizResultsSortFields.quizScore:
         return studentLessonProgress.quizScore;
+      case CourseStudentAiMentorResultsSortFields.lessonName:
+        return lessons.title;
+      case CourseStudentAiMentorResultsSortFields.score:
+        return aiMentorStudentLessonProgress.percentage;
+      case CourseStudentAiMentorResultsSortFields.lastSession:
+        return aiMentorStudentLessonProgress.updatedAt;
       default:
         return studentNameExpression;
     }

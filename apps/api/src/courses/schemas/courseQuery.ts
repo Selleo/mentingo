@@ -198,3 +198,42 @@ export type CourseStudentQuizResultsQuery = {
   quizId?: string;
   sort?: SortCourseStudentQuizResultsOptions;
 };
+
+// Course student ai mentor results query options
+
+export const courseStudentAiMentorResultsSortFields = [
+  "studentName",
+  "lessonName",
+  "score",
+  "lastSession",
+] as const;
+
+export type CourseStudentAiMentorResultsSortField =
+  (typeof courseStudentAiMentorResultsSortFields)[number];
+
+export const CourseStudentAiMentorResultsSortFields: Record<
+  CourseStudentAiMentorResultsSortField,
+  string
+> = {
+  studentName: "studentName",
+  lessonName: "lessonName",
+  score: "score",
+  lastSession: "lastSession",
+};
+
+export const sortCourseStudentAiMentorResultsOptions = Type.Union([
+  ...courseStudentAiMentorResultsSortFields.map((field) => Type.Literal(field)),
+  ...courseStudentAiMentorResultsSortFields.map((field) => Type.Literal(`-${field}`)),
+]);
+
+export type SortCourseStudentAiMentorResultsOptions = Static<
+  typeof sortCourseStudentAiMentorResultsOptions
+>;
+
+export type CourseStudentAiMentorResultsQuery = {
+  courseId: UUIDType;
+  page?: number;
+  perPage?: number;
+  lessonId?: UUIDType;
+  sort?: SortCourseStudentAiMentorResultsOptions;
+};
