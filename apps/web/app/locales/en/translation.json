@@ -1409,7 +1409,8 @@
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
         "goToContentCreatorPage": "Go to content creator page",
-        "repeatLessons": "Repeat lessons"
+        "repeatLessons": "Repeat lessons",
+        "enrollGroups": "Enroll groups"
       }
     },
     "breadcrumbs": {

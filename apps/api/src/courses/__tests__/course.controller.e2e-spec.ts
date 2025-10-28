@@ -17,6 +17,7 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
+import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
@@ -32,6 +33,7 @@ describe("CourseController (e2e)", () => {
   let userFactory: ReturnType<typeof createUserFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let chapterFactory: ReturnType<typeof createChapterFactory>;
+  let groupFactory: ReturnType<typeof createGroupFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   const password = "password123";
 
@@ -63,6 +65,7 @@ describe("CourseController (e2e)", () => {
     categoryFactory = createCategoryFactory(db);
     courseFactory = createCourseFactory(db);
     chapterFactory = createChapterFactory(db);
+    groupFactory = createGroupFactory(db);
   });
 
   afterAll(async () => {
@@ -80,6 +83,8 @@ describe("CourseController (e2e)", () => {
       "users",
       "categories",
       "settings",
+      "group_users",
+      "groups",
     ]);
   });
 
@@ -1778,6 +1783,257 @@ describe("CourseController (e2e)", () => {
             .where(inArray(studentLessonProgress.studentId, studentsIds));
 
           expect(studentLessonProgressData.length).toBe(2);
+        });
+      });
+    });
+  });
+
+  describe("POST /api/course/:courseId/enroll-groups-to-course", () => {
+    describe("when user is not logged in", () => {
+      it("returns 401 for unauthorized request", async () => {
+        const category = await categoryFactory.create();
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .withAdminRole()
+          .create();
+
+        const course = await courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+        });
+
+        await request(app.getHttpServer())
+          .post(`/api/course/${course.id}/enroll-groups-to-course`)
+          .send({ groupIds: [] })
+          .expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      describe("when user is student", () => {
+        it("returns 403 for unauthorized request", async () => {
+          const category = await categoryFactory.create();
+          const student = await userFactory.withCredentials({ password }).create();
+
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+          });
+
+          const cookies = await cookieFor(student, app);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({ groupIds: [] })
+            .set("Cookie", cookies)
+            .expect(403);
+        });
+      });
+
+      describe("when user is admin", () => {
+        describe("when course does not exist", () => {
+          it("returns 404", async () => {
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
+
+            const cookies = await cookieFor(admin, app);
+
+            await request(app.getHttpServer())
+              .post(`/api/course/${faker.string.uuid()}/enroll-groups-to-course`)
+              .send({ groupIds: [] })
+              .set("Cookie", cookies)
+              .expect(404);
+          });
+        });
+
+        describe("when group is empty", () => {
+          it("returns 404 with message about no users found", async () => {
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
+
+            const category = await categoryFactory.create();
+            const course = await courseFactory.create({
+              authorId: admin.id,
+              categoryId: category.id,
+            });
+
+            const group = await groupFactory.withMembers([]).create();
+
+            const cookies = await cookieFor(admin, app);
+
+            const response = await request(app.getHttpServer())
+              .post(`/api/course/${course.id}/enroll-groups-to-course`)
+              .send({ groupIds: [group.id] })
+              .set("Cookie", cookies)
+              .expect(404);
+
+            expect(response.body.message).toContain("No users found");
+          });
+        });
+
+        describe("when group has users", () => {
+          it("should enroll new users and ignore already enrolled users", async () => {
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
+
+            const category = await categoryFactory.create();
+            const course = await courseFactory.create({
+              authorId: admin.id,
+              categoryId: category.id,
+              status: "published",
+            });
+
+            const chapter = await chapterFactory.create({
+              courseId: course.id,
+              title: "Free Chapter",
+              isFreemium: true,
+            });
+
+            await db.insert(lessons).values({
+              chapterId: chapter.id,
+              type: LESSON_TYPES.QUIZ,
+              title: "Quiz",
+              thresholdScore: 0,
+            });
+
+            // Create users
+            const student1 = await userFactory.withCredentials({ password }).create();
+            const student2 = await userFactory.withCredentials({ password }).create();
+            const student3 = await userFactory.withCredentials({ password }).create();
+
+            // Create group with all three users
+            const group = await groupFactory
+              .withMembers([student1.id, student2.id, student3.id])
+              .create();
+
+            // Enroll student1 and student2 individually (enrolledByGroup: false)
+            await db.insert(studentCourses).values([
+              {
+                studentId: student1.id,
+                courseId: course.id,
+                enrolledByGroupId: null,
+              },
+              {
+                studentId: student2.id,
+                courseId: course.id,
+                enrolledByGroupId: null,
+              },
+            ]);
+
+            const cookies = await cookieFor(admin, app);
+
+            // Enroll group to course
+            await request(app.getHttpServer())
+              .post(`/api/course/${course.id}/enroll-groups-to-course`)
+              .send({ groupIds: [group.id] })
+              .set("Cookie", cookies)
+              .expect(201);
+
+            // Check enrollments
+            const enrollments = await db
+              .select()
+              .from(studentCourses)
+              .where(eq(studentCourses.courseId, course.id));
+
+            expect(enrollments.length).toBe(3);
+
+            // student1 should still have enrolledByGroup: false
+            const student1Enrollment = enrollments.find((e) => e.studentId === student1.id);
+            expect(student1Enrollment?.enrolledByGroupId).toBe(null);
+
+            // student2 should still have enrolledByGroupId: null
+            const student2Enrollment = enrollments.find((e) => e.studentId === student2.id);
+            expect(student2Enrollment?.enrolledByGroupId).toBe(null);
+
+            // student3 should have enrolledByGroupId: group.id (newly enrolled from group)
+            const student3Enrollment = enrollments.find((e) => e.studentId === student3.id);
+            expect(student3Enrollment?.enrolledByGroupId).toBe(group.id);
+          });
+
+          it("should return success when all users are already enrolled", async () => {
+            const admin = await userFactory
+              .withCredentials({ password })
+              .withAdminSettings(db)
+              .withAdminRole()
+              .create();
+
+            const category = await categoryFactory.create();
+            const course = await courseFactory.create({
+              authorId: admin.id,
+              categoryId: category.id,
+              status: "published",
+            });
+
+            const chapter = await chapterFactory.create({
+              courseId: course.id,
+              title: "Free Chapter",
+              isFreemium: true,
+            });
+
+            await db.insert(lessons).values({
+              chapterId: chapter.id,
+              type: LESSON_TYPES.QUIZ,
+              title: "Quiz",
+              thresholdScore: 0,
+            });
+
+            // Create users
+            const student1 = await userFactory.withCredentials({ password }).create();
+            const student2 = await userFactory.withCredentials({ password }).create();
+
+            // Create group with both users
+            const group = await groupFactory.withMembers([student1.id, student2.id]).create();
+
+            // Enroll both users individually
+            await db.insert(studentCourses).values([
+              {
+                studentId: student1.id,
+                courseId: course.id,
+                enrolledByGroupId: null,
+              },
+              {
+                studentId: student2.id,
+                courseId: course.id,
+                enrolledByGroupId: null,
+              },
+            ]);
+
+            const cookies = await cookieFor(admin, app);
+
+            // Try to enroll the group (all users are already enrolled)
+            await request(app.getHttpServer())
+              .post(`/api/course/${course.id}/enroll-groups-to-course`)
+              .send({ groupIds: [group.id] })
+              .set("Cookie", cookies)
+              .expect(201);
+
+            // Check that nothing changed
+            const enrollments = await db
+              .select()
+              .from(studentCourses)
+              .where(eq(studentCourses.courseId, course.id));
+
+            expect(enrollments.length).toBe(2);
+            enrollments.forEach((e) => {
+              expect(e.enrolledByGroupId).toBe(null);
+            });
+          });
         });
       });
     });

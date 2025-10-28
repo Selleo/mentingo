@@ -13,6 +13,13 @@ export const groupSchema = Type.Object({
 });
 export const allGroupsSchema = Type.Array(groupSchema);
 export const baseGroupSchema = Type.Object({
+  id: UUIDSchema,
+  name: Type.String(),
+  characteristic: Type.Optional(Type.String()),
+  createdAt: Type.String(),
+  updatedAt: Type.String(),
+});
+export const upsertGroupSchema = Type.Object({
   name: Type.String(),
   characteristic: Type.Optional(Type.String()),
 });
