@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useCourseStudentsQuizResults } from "~/api/queries/admin/useCourseStudentsQuizResults";
 import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
+import { CircularProgress } from "~/components/ui/circular-progress";
 import {
   Table,
   TableBody,
@@ -92,7 +93,12 @@ export function CourseStudentsQuizResultsTable({
           {t("adminCourseView.statistics.field.quizScore")}
         </SortButton>
       ),
-      cell: ({ row }) => <div className="flex items-center gap-2">{row.original.quizScore}%</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <CircularProgress value={row.original.quizScore} size={32} strokeWidth={2} />
+          {row.original.quizScore}%
+        </div>
+      ),
     },
     {
       accessorKey: "attempts",
