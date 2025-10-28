@@ -17,6 +17,7 @@ import {
 import { Tabs, TabsContent, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { useUserRole } from "~/hooks/useUserRole";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import {
   SearchFilter,
   type FilterValue,
@@ -72,7 +73,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     return (
       course?.chapters.flatMap((chapter) =>
         chapter.lessons
-          .filter((lesson) => lesson.type === "quiz")
+          .filter((lesson) => lesson.type === LessonType.QUIZ)
           .map((lesson) => ({ id: lesson.id, title: lesson.title })),
       ) || []
     );
