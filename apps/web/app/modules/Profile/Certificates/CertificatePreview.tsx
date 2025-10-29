@@ -1,4 +1,7 @@
 import { X, Download } from "lucide-react";
+import { useState } from "react";
+
+import RectangularSwitch from "~/components/RectangularSwitch";
 
 import CertificateContent from "./CertificateContent";
 import useCertificatePDF from "./useCertificatePDF";
@@ -21,10 +24,13 @@ const CertificatePreview = ({
   certificateBackgroundImageUrl,
 }: CertificatePreviewProps) => {
   const { downloadCertificatePdf, HiddenCertificate } = useCertificatePDF();
+  const [toggled, setToggled] = useState<boolean>(false);
 
   const handleDownload = () => {
     downloadCertificatePdf(courseName);
   };
+
+  const lang = toggled ? "pl" : "en";
 
   return (
     <>
@@ -33,6 +39,7 @@ const CertificatePreview = ({
         courseName={courseName}
         completionDate={completionDate}
         platformLogo={platformLogo}
+        lang={lang}
       />
 
       <div className="mx-auto w-full max-w-[95vw] overflow-hidden rounded-t-lg">
@@ -43,6 +50,13 @@ const CertificatePreview = ({
           </div>
 
           <div className="flex gap-3">
+            <RectangularSwitch
+              switchLabel="Language Toggle"
+              onLabel="PL"
+              offLabel="EN"
+              toggled={toggled}
+              setToggled={setToggled}
+            />
             <button
               className="flex size-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
               onClick={handleDownload}
@@ -67,6 +81,7 @@ const CertificatePreview = ({
           isModal
           platformLogo={platformLogo}
           backgroundImageUrl={certificateBackgroundImageUrl}
+          lang={lang}
         />
       </div>
     </>
