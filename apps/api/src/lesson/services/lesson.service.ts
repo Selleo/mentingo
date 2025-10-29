@@ -132,7 +132,7 @@ export class LessonService {
       }),
     );
 
-    if (isStudent && lesson.lessonCompleted && isNumber(lesson.quizScore)) {
+    if (lesson.lessonCompleted && isNumber(lesson.quizScore)) {
       const [quizResult] = await this.lessonRepository.getQuizResult(
         lesson.id,
         lesson.quizScore,

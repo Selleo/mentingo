@@ -77,6 +77,7 @@ export const studentQuizResultSchema = Type.Object({
   studentId: UUIDSchema,
   studentName: Type.String(),
   studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
+  lessonId: UUIDSchema,
   quizName: Type.String(),
   quizScore: Type.Number(),
   attempts: Type.Number(),

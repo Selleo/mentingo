@@ -33,6 +33,7 @@ type LessonContentProps = {
   isFirstLesson: boolean;
   isLastLesson: boolean;
   lessonLoading: boolean;
+  isPreviewMode?: boolean;
 };
 
 export const LessonContent = ({
@@ -44,6 +45,7 @@ export const LessonContent = ({
   isFirstLesson,
   lessonLoading,
   isLastLesson,
+  isPreviewMode = false,
 }: LessonContentProps) => {
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const { data: user } = useCurrentUser();
@@ -67,6 +69,8 @@ export const LessonContent = ({
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    if (isPreviewMode) return;
+
     if (isAdminLike) {
       setIsNextDisabled(false);
       setIsPreviousDisabled(false);
@@ -97,12 +101,17 @@ export const LessonContent = ({
     nextChapter,
     prevChapter,
     course.enrolled,
+    isPreviewMode,
+    queryClient,
+    course.id,
   ]);
 
   const Content = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
-      .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
+      .with("quiz", () => (
+        <Quiz lesson={lesson} userId={user?.id || ""} isPreviewMode={isPreviewMode} />
+      ))
       .with("video", () => (
         <Video
           url={lesson.fileUrl}
@@ -123,6 +132,8 @@ export const LessonContent = ({
       .otherwise(() => null);
 
   useEffect(() => {
+    if (isPreviewMode) return;
+
     if (
       lesson.type === LessonType.TEXT ||
       lesson.type === LessonType.PRESENTATION ||
@@ -149,6 +160,10 @@ export const LessonContent = ({
     currentChapterIndex,
     course,
     isLastLesson,
+    isPreviewMode,
+    lesson.id,
+    lesson.type,
+    markLessonAsCompleted,
   ]);
 
   return (
@@ -179,27 +194,29 @@ export const LessonContent = ({
               </div>
               <p className="h4 text-neutral-950">{lesson.title}</p>
             </div>
-            <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
-              {!isFirstLesson && (
+            {!isPreviewMode && (
+              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
+                {!isFirstLesson && (
+                  <Button
+                    variant="outline"
+                    className="w-full gap-x-1 sm:w-auto"
+                    disabled={isPreviousDisabled}
+                    onClick={handlePrevious}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                  </Button>
+                )}
                 <Button
+                  data-testid="next-lesson-button"
                   variant="outline"
+                  disabled={isNextDisabled}
                   className="w-full gap-x-1 sm:w-auto"
-                  disabled={isPreviousDisabled}
-                  onClick={handlePrevious}
+                  onClick={handleNext}
                 >
-                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                  <Icon name="ArrowRight" className="h-auto w-4" />
                 </Button>
-              )}
-              <Button
-                data-testid="next-lesson-button"
-                variant="outline"
-                disabled={isNextDisabled}
-                className="w-full gap-x-1 sm:w-auto"
-                onClick={handleNext}
-              >
-                <Icon name="ArrowRight" className="h-auto w-4" />
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
 
           <div>

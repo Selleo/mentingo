@@ -1409,6 +1409,7 @@
     "lesson": {
       "missingAnswer": "Missing answer",
       "yourAnswer": "Your answer",
+      "studentsAnswer": "Student's answer",
       "singleChoice": "Single choice question",
       "multipleChoice": "Multiple choice question",
       "trueOfFalseChoice": "True or false question",
@@ -1764,6 +1765,7 @@
     "courses": "Courses",
     "profile": "Profile",
     "lesson": "Lesson",
+    "lessonPreview": "Lesson Preview",
     "register": "Register",
     "passwordRecovery": "Password Recovery",
     "login": "Login",

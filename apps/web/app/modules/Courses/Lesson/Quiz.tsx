@@ -38,9 +38,10 @@ import type { GetLessonByIdResponse } from "~/api/generated-api";
 type QuizProps = {
   lesson: GetLessonByIdResponse["data"];
   userId: string;
+  isPreviewMode: boolean;
 };
 
-export const Quiz = ({ lesson, userId }: QuizProps) => {
+export const Quiz = ({ lesson, userId, isPreviewMode = false }: QuizProps) => {
   const { lessonId = "" } = useParams();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
@@ -121,55 +122,57 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
         </div>
 
         <Questions questions={questions} isQuizCompleted={isUserSubmittedAnswer} />
-        <div className="flex gap-x-2 self-end">
-          <div className="group relative">
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="inline-block">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={handleRetake}
-                      className="gap-x-1"
-                      disabled={isAdminLike || !isUserSubmittedAnswer || !canRetake}
-                    >
-                      <span>
-                        {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
-                          lesson.attempts,
-                          lesson.attemptsLimit,
-                          canRetake,
-                          hoursLeft,
-                        )}`}
-                      </span>
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="center"
-                  className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                >
-                  {getQuizTooltipText(
-                    isUserSubmittedAnswer,
-                    canRetake,
-                    hoursLeft,
-                    lesson.quizCooldownInHours,
-                  )}
-                  <TooltipArrow className="fill-black" />
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+        {!isPreviewMode && (
+          <div className="flex gap-x-2 self-end">
+            <div className="group relative">
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="inline-block">
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={handleRetake}
+                        className="gap-x-1"
+                        disabled={isAdminLike || !isUserSubmittedAnswer || !canRetake}
+                      >
+                        <span>
+                          {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
+                            lesson.attempts,
+                            lesson.attemptsLimit,
+                            canRetake,
+                            hoursLeft,
+                          )}`}
+                        </span>
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="center"
+                    className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                  >
+                    {getQuizTooltipText(
+                      isUserSubmittedAnswer,
+                      canRetake,
+                      hoursLeft,
+                      lesson.quizCooldownInHours,
+                    )}
+                    <TooltipArrow className="fill-black" />
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <Button
+              type="submit"
+              className="flex items-center gap-x-2"
+              disabled={isAdminLike || isUserSubmittedAnswer}
+            >
+              <span>{t("studentLessonView.button.submit")}</span>
+              <Icon name="ArrowRight" className="h-auto w-4" />
+            </Button>
           </div>
-          <Button
-            type="submit"
-            className="flex items-center gap-x-2"
-            disabled={isAdminLike || isUserSubmittedAnswer}
-          >
-            <span>{t("studentLessonView.button.submit")}</span>
-            <Icon name="ArrowRight" className="h-auto w-4" />
-          </Button>
-        </div>
+        )}
       </form>
     </FormProvider>
   );

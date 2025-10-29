@@ -1,4 +1,4 @@
-import { useParams } from "@remix-run/react";
+import { Link, useParams } from "@remix-run/react";
 import {
   flexRender,
   getCoreRowModel,
@@ -10,8 +10,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourseStudentsQuizResults } from "~/api/queries/admin/useCourseStudentsQuizResults";
+import { ArrowRight } from "~/assets/svgs";
 import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
+import { Button } from "~/components/ui/button";
 import { CircularProgress } from "~/components/ui/circular-progress";
 import {
   Table,
@@ -119,6 +121,20 @@ export function CourseStudentsQuizResultsTable({
         row.original.lastAttempt
           ? format(new Date(row.original.lastAttempt), "MMM dd, yyyy")
           : null,
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex justify-center">
+          <Button variant="outline" size="icon">
+            <Link
+              to={`/admin/course/${id}/lesson/${row.original.lessonId}/preview?userId=${row.original.studentId}`}
+            >
+              <ArrowRight className="size-4 text-black" />
+            </Link>
+          </Button>
+        </div>
+      ),
     },
   ];
 

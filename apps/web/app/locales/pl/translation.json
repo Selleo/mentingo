@@ -1420,6 +1420,7 @@
     "lesson": {
       "missingAnswer": "Brakująca odpowiedź",
       "yourAnswer": "Twoja odpowiedź",
+      "studentsAnswer": "Odpowiedź ucznia",
       "singleChoice": "Pytanie jednokrotnego wyboru",
       "multipleChoice": "Pytanie wielokrotnego wyboru",
       "trueOrFalseChoice": "Pytanie prawda fałsz",
@@ -1753,6 +1754,7 @@
     "courses": "Kursy",
     "profile": "Profil",
     "lesson": "Lekcja",
+    "lessonPreview": "Podgląd lekcji",
     "register": "Rejestracja",
     "passwordRecovery": "Odzyskiwanie hasła",
     "login": "Logowanie",

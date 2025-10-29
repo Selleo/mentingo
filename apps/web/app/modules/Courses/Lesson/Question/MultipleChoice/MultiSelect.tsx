@@ -20,6 +20,7 @@ type MultiSelectProps = {
   isWrongAnswer: boolean;
   questionId: string;
   optionFieldId?: "multiAnswerQuestions" | "photoQuestionMultipleChoice";
+  isPreviewMode: boolean;
 };
 
 export const MultiSelect = ({
@@ -33,6 +34,7 @@ export const MultiSelect = ({
   isCompleted,
   answer,
   optionFieldId = "multiAnswerQuestions",
+  isPreviewMode,
 }: MultiSelectProps) => {
   const { register, setValue, getValues } = useFormContext<QuizForm>();
   const { t } = useTranslation();
@@ -123,7 +125,11 @@ export const MultiSelect = ({
       >
         <span>{answer}</span>
         <span className={classes}>
-          {isStudentAnswer && isCompleted && t("studentCourseView.lesson.yourAnswer")}
+          {isStudentAnswer &&
+            isCompleted &&
+            (isPreviewMode
+              ? t("studentCourseView.lesson.studentsAnswer")
+              : t("studentCourseView.lesson.yourAnswer"))}
           {isCorrectAnswerNotSelected && t("studentCourseView.lesson.missingAnswer")}
         </span>
       </Label>

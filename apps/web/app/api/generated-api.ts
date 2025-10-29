@@ -1180,6 +1180,8 @@ export interface GetCourseStudentsQuizResultsResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
+    /** @format uuid */
+    lessonId: string;
     quizName: string;
     quizScore: number;
     attempts: number;
@@ -4482,6 +4484,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       query: {
         userLanguage: string;
+        studentId: string;
       },
       params: RequestParams = {},
     ) =>
