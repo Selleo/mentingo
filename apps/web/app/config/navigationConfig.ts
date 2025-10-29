@@ -30,7 +30,7 @@ export type NavigationGroups = {
   items: NavigationItem[];
 };
 
-export const getNavigationConfig = (isUser = true, t: typeof i18next.t): NavigationGroups[] => [
+export const getNavigationConfig = (t: typeof i18next.t): NavigationGroups[] => [
   {
     title: t("navigationSideBar.courses"),
     isExpandable: false,
@@ -41,14 +41,9 @@ export const getNavigationConfig = (isUser = true, t: typeof i18next.t): Navigat
         iconName: "Dashboard",
       },
       {
-        label: t("navigationSideBar.myCourses"),
-        path: "admin/courses",
-        iconName: "Course",
-      },
-      {
-        label: isUser ? t("navigationSideBar.courses") : t("navigationSideBar.browseCourses"),
+        label: t("navigationSideBar.courses"),
         path: "courses",
-        iconName: isUser ? "Course" : "Multi",
+        iconName: "Course",
       },
     ],
   },
