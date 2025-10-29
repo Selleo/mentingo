@@ -2,12 +2,9 @@ import { Link, Outlet } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
-import { Navigation } from "~/components/Navigation";
 import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
-import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { RouteGuard } from "~/Guards/RouteGuard";
-import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
@@ -24,7 +21,6 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 
 export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   const { t } = useTranslation();
-  const { currentUser } = useCurrentUserStore();
 
   const { data: latestUnreadAnnouncements, isLoading } =
     useLatestUnreadAnnouncements(isAuthenticated);
@@ -65,18 +61,11 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   }
 
   return (
-    <div className="flex h-screen flex-col">
-      <div className="flex flex-1 flex-col overflow-hidden 2xl:flex-row">
-        <Navigation
-          menuItems={mapNavigationItems(getNavigationConfig(currentUser?.role === "user", t))}
-        />
-        <main className="relative flex-1 overflow-y-auto bg-primary-50">
-          <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />
-          <RouteGuard>
-            <Outlet />
-          </RouteGuard>
-        </main>
-      </div>
-    </div>
+    <main className="relative flex-1 overflow-y-auto bg-primary-50">
+      <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />
+      <RouteGuard>
+        <Outlet />
+      </RouteGuard>
+    </main>
   );
 };
