@@ -771,7 +771,8 @@ describe("groupController (e2e)", () => {
       });
 
       const user = await userFactory.withCredentials({ password }).create();
-      const group = await groupFactory.withMembers([]).create();
+      const existingGroupMember = await userFactory.withCredentials({ password }).create();
+      const group = await groupFactory.withMembers([existingGroupMember.id]).create();
 
       // Enroll group to course
       const cookies = await cookieFor(admin, app);

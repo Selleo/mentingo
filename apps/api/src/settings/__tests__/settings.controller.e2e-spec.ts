@@ -22,11 +22,11 @@ describe("SettingsController (e2e)", () => {
     db = app.get("DB");
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
-  }, 10000);
+  });
 
   afterAll(async () => {
     await app.close();
-  }, 10000);
+  });
 
   describe("User Settings", () => {
     let testUser: UserWithCredentials;

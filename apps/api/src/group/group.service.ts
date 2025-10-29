@@ -181,16 +181,18 @@ export class GroupService {
   }
 
   async assignUserToGroup(groupId: UUIDType, userId: UUIDType) {
-    const [dbOutput] = await this.db
-      .select({
-        groupId: groups.id,
-        userId: users.id,
-        userRole: users.role,
-        associatedRow: groupUsers,
-      })
+    // Check if group exists
+    const [group] = await this.db.select().from(groups).where(eq(groups.id, groupId));
+    if (!group) throw new NotFoundException("Group not found");
+
+    // Check if user exists and is a student
+    const [user] = await this.db.select().from(users).where(eq(users.id, userId));
+    if (!user) throw new NotFoundException("User not found");
+    if (user.role !== USER_ROLES.STUDENT) throw new ConflictException("User is not a student");
+
+    const [existingAssociation] = await this.db
+      .select()
       .from(groupUsers)
-      .leftJoin(users, and(eq(users.id, userId)))
-      .leftJoin(groups, and(eq(groups.id, groupId)))
       .where(
         and(
           eq(groupUsers.groupId, groupId),
@@ -199,13 +201,7 @@ export class GroupService {
         ),
       );
 
-    if (!dbOutput.groupId) throw new NotFoundException("Group not found");
-    if (!dbOutput.userId) throw new NotFoundException("User not found");
-
-    if (dbOutput.userRole !== USER_ROLES.STUDENT)
-      throw new ConflictException("User is not a student");
-
-    if (dbOutput.associatedRow) throw new ConflictException("User already assigned to the group");
+    if (existingAssociation) throw new ConflictException("User already assigned to the group");
 
     await this.db.transaction(async (trx) => {
       // Assign user to group

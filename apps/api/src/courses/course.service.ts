@@ -1131,9 +1131,6 @@ export class CourseService {
       .from(groupUsers)
       .where(inArray(groupUsers.groupId, groupIds));
 
-    if (!groupUsersList.length)
-      throw new NotFoundException("No users found in the specified groups");
-
     // Check if groups are already enrolled to this course
     const existingGroupEnrollments = await this.db
       .select({ groupId: groupCourses.groupId })
@@ -1143,29 +1140,34 @@ export class CourseService {
     const existingGroupIds = existingGroupEnrollments.map((e: any) => e.groupId);
     const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
 
-    // Get existing student enrollments to avoid duplicates
-    const existingEnrollments = await this.db
-      .select({
-        studentId: studentCourses.studentId,
-      })
-      .from(studentCourses)
-      .where(
-        and(
-          eq(studentCourses.courseId, courseId),
-          inArray(
-            studentCourses.studentId,
-            groupUsersList.map((gu: any) => gu.userId),
-          ),
-        ),
-      );
+    // Get existing student enrollments to avoid duplicates (only if there are users)
+    let existingStudentIds: string[] = [];
+    let newStudentIds: string[] = [];
 
-    const existingStudentIds = existingEnrollments.map((e: any) => e.studentId);
-    const newStudentIds = groupUsersList
-      .map((gu: any) => gu.userId)
-      .filter((userId: any) => !existingStudentIds.includes(userId));
+    if (groupUsersList.length > 0) {
+      const existingEnrollments = await this.db
+        .select({
+          studentId: studentCourses.studentId,
+        })
+        .from(studentCourses)
+        .where(
+          and(
+            eq(studentCourses.courseId, courseId),
+            inArray(
+              studentCourses.studentId,
+              groupUsersList.map((gu: any) => gu.userId),
+            ),
+          ),
+        );
+
+      existingStudentIds = existingEnrollments.map((e: any) => e.studentId);
+      newStudentIds = groupUsersList
+        .map((gu: any) => gu.userId)
+        .filter((userId: any) => !existingStudentIds.includes(userId));
+    }
 
     await this.db.transaction(async (trx) => {
-      // Save group-course relationships (even if all users were already enrolled)
+      // Save group-course relationships (even if group is empty or all users were already enrolled)
       if (newGroupIds.length > 0) {
         const groupCoursesValues = newGroupIds.map((groupId: any) => ({
           groupId,
