@@ -1,11 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
   coursesSummaryStats,
+  groupCourses,
   lessons,
   studentChapterProgress,
   studentCourses,
@@ -1814,7 +1815,10 @@ describe("CourseController (e2e)", () => {
       describe("when user is student", () => {
         it("returns 403 for unauthorized request", async () => {
           const category = await categoryFactory.create();
-          const student = await userFactory.withCredentials({ password }).create();
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ role: USER_ROLES.STUDENT });
 
           const admin = await userFactory
             .withCredentials({ password })
@@ -1857,7 +1861,7 @@ describe("CourseController (e2e)", () => {
         });
 
         describe("when group is empty", () => {
-          it("returns 404 with message about no users found", async () => {
+          it("should enroll empty group to course successfully", async () => {
             const admin = await userFactory
               .withCredentials({ password })
               .withAdminSettings(db)
@@ -1868,19 +1872,64 @@ describe("CourseController (e2e)", () => {
             const course = await courseFactory.create({
               authorId: admin.id,
               categoryId: category.id,
+              status: "published",
+            });
+
+            // Create chapters and lessons for the course
+            const chapter = await chapterFactory.create({
+              courseId: course.id,
+              title: "Chapter 1",
+              isFreemium: true,
+            });
+            await db.insert(lessons).values({
+              chapterId: chapter.id,
+              type: LESSON_TYPES.QUIZ,
+              title: "Quiz",
+              thresholdScore: 0,
             });
 
             const group = await groupFactory.withMembers([]).create();
 
             const cookies = await cookieFor(admin, app);
 
-            const response = await request(app.getHttpServer())
+            // Enroll empty group to course
+            await request(app.getHttpServer())
               .post(`/api/course/${course.id}/enroll-groups-to-course`)
               .send({ groupIds: [group.id] })
               .set("Cookie", cookies)
-              .expect(404);
+              .expect(201);
 
-            expect(response.body.message).toContain("No users found");
+            // Verify that group is enrolled in the course
+            const [groupCourse] = await db
+              .select()
+              .from(groupCourses)
+              .where(and(eq(groupCourses.groupId, group.id), eq(groupCourses.courseId, course.id)));
+
+            expect(groupCourse).toBeDefined();
+            expect(groupCourse.groupId).toBe(group.id);
+            expect(groupCourse.courseId).toBe(course.id);
+
+            // Create a new user and assign to the group
+            const newUser = await userFactory.withCredentials({ password }).create();
+
+            await request(app.getHttpServer())
+              .post(`/api/group/assign?userId=${newUser.id}&groupId=${group.id}`)
+              .set("Cookie", cookies)
+              .expect(201);
+
+            // Verify that user is automatically enrolled in the course
+            const [userEnrollment] = await db
+              .select()
+              .from(studentCourses)
+              .where(
+                and(
+                  eq(studentCourses.studentId, newUser.id),
+                  eq(studentCourses.courseId, course.id),
+                ),
+              );
+
+            expect(userEnrollment).toBeDefined();
+            expect(userEnrollment.enrolledByGroupId).toBe(group.id);
           });
         });
 
