@@ -575,7 +575,11 @@
     "editCategoryHeader": "Category Information",
     "field": {
       "title": "Title",
-      "status": "Status"
+      "status": "Status",
+      "newCategoryName": "New Category Name"
+    },
+    "placeholder": {
+      "categoryName": "Enter category name..."
     },
     "button": {
       "createCategory": "Create category"
