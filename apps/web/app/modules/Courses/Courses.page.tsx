@@ -173,7 +173,7 @@ export default function CoursesPage() {
                       {
                         children: <DashboardIcon />,
                         isActive: true,
-                        onClick: () => null,
+                        onClick: () => navigate("/courses"),
                       },
                       {
                         children: <HamburgerIcon />,

@@ -28,6 +28,7 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 const EditCourse = () => {
   const { t } = useTranslation();
   const { id } = useParams();
+
   const params = new URLSearchParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const courseTabs = useEditCourseTabs();
@@ -57,7 +58,7 @@ const EditCourse = () => {
     { title: course?.title || "", href: `/admin/beta-courses/${id}` },
   ];
 
-  const backButton = { title: t("adminCourseView.breadcrumbs.back"), href: "/admin/courses" };
+  const backButton = { title: t("adminCourseView.breadcrumbs.back"), href: -1 };
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>

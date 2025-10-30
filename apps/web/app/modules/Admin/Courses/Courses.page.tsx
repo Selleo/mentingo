@@ -20,6 +20,7 @@ import { useDeleteManyCourses } from "~/api/mutations/admin/useDeleteManyCourses
 import { categoriesQueryOptions } from "~/api/queries";
 import { useCoursesSuspense, ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
+import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
@@ -53,6 +54,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -326,6 +328,22 @@ const Courses = () => {
           <Link to="/admin/beta-courses/new">
             <Button variant="outline">{t("adminCoursesView.button.createNew")}</Button>
           </Link>
+
+          <ButtonGroup
+            className="sr-only lg:not-sr-only"
+            buttons={[
+              {
+                children: <DashboardIcon />,
+                isActive: false,
+                onClick: () => navigate("/courses"),
+              },
+              {
+                children: <HamburgerIcon />,
+                isActive: true,
+                onClick: () => navigate("/admin/courses"),
+              },
+            ]}
+          />
         </div>
         <div className="flex items-center justify-between gap-2">
           <SearchFilter
