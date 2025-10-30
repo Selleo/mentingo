@@ -89,8 +89,9 @@ test.describe("Admin navigation", () => {
       .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })
       .click();
     await page.waitForURL("/settings");
-    const settingsHeader = page.locator("h3", {
-      hasText: TEST_NAVIGATION.header.settings,
+    const settingsHeader = page.getByRole("heading", {
+      name: TEST_NAVIGATION.header.settings,
+      exact: true,
     });
     await settingsHeader.waitFor({ state: "visible" });
     await expect(settingsHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.settings, "i"));
