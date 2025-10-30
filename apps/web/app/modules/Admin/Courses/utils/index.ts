@@ -1,15 +1,16 @@
+import type i18next from "i18next";
 import type { CourseStatus } from "~/api/queries/useCourses";
 
-export const getCourseStatus = (status: CourseStatus) => {
+export const getCourseStatus = (status: CourseStatus, t: typeof i18next.t) => {
   switch (status) {
     case "draft":
-      return "Draft";
+      return t("common.other.draft");
     case "published":
-      return "Published";
+      return t("common.other.published");
     case "private":
-      return "Private";
+      return t("common.other.private");
     default:
-      return "Draft";
+      return t("common.other.draft");
   }
 };
 

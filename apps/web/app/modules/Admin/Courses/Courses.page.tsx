@@ -189,7 +189,7 @@ const Courses = () => {
           variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
           className="w-max"
         >
-          {getCourseStatus(row.original.status as CourseStatus)}
+          {getCourseStatus(row.original.status as CourseStatus, t)}
         </Badge>
       ),
     },
