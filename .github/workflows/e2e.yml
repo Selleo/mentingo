@@ -169,7 +169,7 @@ jobs:
           echo "S3 setup completed successfully!"
 
       - name: Run tests
-        run: pnpm playwright test
+        run: VITE_TEST=true pnpm playwright test
         working-directory: ./apps/web
         env:
           PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright

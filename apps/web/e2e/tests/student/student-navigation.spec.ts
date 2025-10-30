@@ -11,7 +11,7 @@ const TEST_NAVIGATION = {
   header: {
     welcomeBack: "Welcome back",
     yourCourses: "Your courses",
-    changeUserInformation: "Change user information",
+    settings: "Settings",
   },
 } as const;
 
@@ -50,11 +50,9 @@ test.describe("Student navigation", () => {
     await page.waitForURL("/settings");
 
     const settingsHeader = page.locator("h3", {
-      hasText: TEST_NAVIGATION.header.changeUserInformation,
+      hasText: TEST_NAVIGATION.header.settings,
     });
     await settingsHeader.waitFor({ state: "visible" });
-    await expect(settingsHeader).toHaveText(
-      new RegExp(TEST_NAVIGATION.header.changeUserInformation, "i"),
-    );
+    await expect(settingsHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.settings, "i"));
   });
 });
