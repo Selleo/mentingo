@@ -3,7 +3,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import { cn } from "~/lib/utils";
 
 import { plugins } from "./plugins";
-import { defaultClasses } from "./styles";
+import { defaultClasses, lessonVariantClasses } from "./styles";
 
 type ViewerProps = {
   content: string;
@@ -12,23 +12,7 @@ type ViewerProps = {
   variant?: "default" | "lesson";
 };
 
-const lessonVariantClasses = {
-  layout: "[&>div]:flex [&>div]:flex-col [&>div]:gap-y-6",
-  h2: "[&>div>h2]:h6 [&>div>h2]:text-neutral-950",
-  p: "[&>div>p]:body-base [&>div>p>strong]:body-base-md [&>div>p]:text-neutral-900",
-  ul: "[&>div>ul>li>p]:body-base [&>div>ul>li>p]:text-neutral-900 [&>div>ul>li>p>strong]:body-base-md [&>div>ul>li>p>strong]:text-neutral-950",
-  ol: "[&>div>ol>li>p]:body-base [&>div>ol>li>p]:text-neutral-900 [&>div>ol>li>p>strong]:body-base-md [&>div>ol>li>p>strong]:text-neutral-950",
-};
-
 const Viewer = ({ content, style, className, variant = "default" }: ViewerProps) => {
-  const editor = useEditor({
-    extensions: [...plugins],
-    content: content,
-    editable: false,
-  });
-
-  if (!editor) return <></>;
-
   const classNames = cn(
     { "prose-mt-0 prose max-w-none dark:prose-invert": style === "prose" },
     className,
@@ -46,11 +30,25 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
       : [];
 
   const editorClasses = cn(
+    "h-full",
     defaultClasses.ul,
     defaultClasses.ol,
     defaultClasses.taskList,
     ...variantClasses,
   );
+
+  const editor = useEditor({
+    extensions: [...plugins],
+    content: content,
+    editable: false,
+    editorProps: {
+      attributes: {
+        class: cn({ "prose max-w-none": variant === "lesson" }),
+      },
+    },
+  });
+
+  if (!editor) return <></>;
 
   return (
     <article className={classNames}>
