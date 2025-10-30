@@ -1,7 +1,7 @@
 import { routeAccessConfig } from "./routeAccessConfig";
 import { USER_ROLE, type UserRole } from "./userRoles";
 
-import type i18next from "i18next";
+import type { TFunction } from "i18next";
 import type { IconName } from "~/types/shared";
 
 export interface BaseMenuItem {
@@ -30,7 +30,7 @@ export type NavigationGroups = {
   items: NavigationItem[];
 };
 
-export const getNavigationConfig = (t: typeof i18next.t): NavigationGroups[] => [
+export const getNavigationConfig = (t: TFunction): NavigationGroups[] => [
   {
     title: t("navigationSideBar.courses"),
     isExpandable: false,
