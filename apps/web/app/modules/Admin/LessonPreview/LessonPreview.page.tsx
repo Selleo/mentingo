@@ -43,13 +43,13 @@ export default function LessonPreviewPage() {
   }
 
   const breadcrumbs = [
-    { title: "Przeglądaj kursy", href: "/courses" },
+    { title: t("lessonPreview.breadcrumbs.browseCourses"), href: "/courses" },
     { title: course.title, href: `/courses/${courseId}` },
     { title: `${user.firstName} ${user.lastName}`, href: `/admin/users/${userId}` },
-    { title: `${lesson.title} Preview`, href: "#" },
+    { title: `${lesson.title} ${t("lessonPreview.breadcrumbs.lessonPreview")}`, href: "#" },
   ];
 
-  const backButton = { href: `/course/${courseId}`, title: "Wstecz" };
+  const backButton = { href: `/course/${courseId}`, title: t("lessonPreview.button.back") };
 
   const currentChapter = course.chapters.find((chapter) =>
     chapter?.lessons.some((l) => l.id === lessonId),

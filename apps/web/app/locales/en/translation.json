@@ -1788,6 +1788,15 @@
     "createNewCourse": "Create New Course",
     "admin": "Admin"
   },
+  "lessonPreview": {
+    "breadcrumbs": {
+      "browseCourses": "Browse Courses",
+      "lessonPreview": "Preview"
+    },
+    "button": {
+      "back": "Back"
+    }
+  },
   "studentOnboarding": {
     "dashboard": {
       "clientStatistics": "This is your dashboard - here you can find your progress, statistics and recent activity.",

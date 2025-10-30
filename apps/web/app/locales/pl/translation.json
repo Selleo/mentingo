@@ -1777,6 +1777,15 @@
     "createNewCourse": "Utwórz nowy kurs",
     "admin": "Administrator"
   },
+  "lessonPreview": {
+    "breadcrumbs": {
+      "browseCourses": "Przeglądaj kursy",
+      "lessonPreview": "Podgląd"
+    },
+    "button": {
+      "back": "Wstecz"
+    }
+  },
   "studentOnboarding": {
     "dashboard": {
       "clientStatistics": "To Twój panel główny - znajdziesz tu postępy, statystyki i ostatnie aktywności.",
