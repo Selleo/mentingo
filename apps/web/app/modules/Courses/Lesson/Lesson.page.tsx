@@ -143,7 +143,6 @@ export default function LessonPage() {
 
   const backButton = {
     title: t("studentLessonView.breadcrumbs.back"),
-    href: `/course/${courseId}`,
   };
 
   return (
