@@ -14,6 +14,8 @@ import * as Sentry from "@sentry/react";
 import { StrictMode, useEffect } from "react";
 import { hydrateRoot } from "react-dom/client";
 
+import { version } from "../version.json";
+
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   integrations: [
@@ -37,6 +39,11 @@ Sentry.init({
     }
     return event;
   },
+});
+
+// eslint-disable-next-line import/namespace
+Sentry.setTags({
+  version,
 });
 
 hydrateRoot(

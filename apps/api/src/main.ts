@@ -6,6 +6,8 @@ import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import cookieParser from "cookie-parser";
 import { patchNestJsSwagger, applyFormats } from "nestjs-typebox";
 
+import { version } from "../version.json";
+
 import { AppModule } from "./app.module";
 import { startInstrumentation } from "./langfuse/instrumentation";
 import { environmentValidation } from "./utils/environment-validation";
@@ -23,6 +25,10 @@ async function bootstrap() {
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
     environment: environmentValidation(String(process.env.NODE_ENV)),
+  });
+
+  Sentry.setTags({
+    version,
   });
 
   const app = await NestFactory.create(AppModule, {
