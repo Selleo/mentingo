@@ -131,6 +131,7 @@ describe("UsersController (e2e)", () => {
         password: "password123",
         firstName: "Another",
         lastName: "User",
+        language: "en",
       });
       await request(app.getHttpServer())
         .patch(`/api/user?id=${anotherUser.id}`)
@@ -178,6 +179,7 @@ describe("UsersController (e2e)", () => {
         password: "Password123@",
         firstName: "Another",
         lastName: "User",
+        language: "en",
       });
 
       await request(app.getHttpServer())
@@ -207,6 +209,7 @@ describe("UsersController (e2e)", () => {
         password: "password123",
         firstName: "Another",
         lastName: "User",
+        language: "en",
       });
       await request(app.getHttpServer())
         .delete(`/api/user/user?id=${anotherUser.id}`)
@@ -246,6 +249,7 @@ describe("UsersController (e2e)", () => {
         password: testPassword,
         firstName: "Another",
         lastName: "User",
+        language: "en",
       });
       const loginResponse = await request(app.getHttpServer())
         .post("/api/auth/login")
@@ -270,6 +274,7 @@ describe("UsersController (e2e)", () => {
         password: testPassword,
         firstName: "Another",
         lastName: "User",
+        language: "en",
       });
       await request(app.getHttpServer())
         .get(`/api/user/details?userId=${anotherUser2.id}`)
@@ -289,6 +294,7 @@ describe("UsersController (e2e)", () => {
           password: testPassword,
           firstName: "Another",
           lastName: "User",
+          language: "en",
         })),
         avatarReference: null,
       };
@@ -299,6 +305,7 @@ describe("UsersController (e2e)", () => {
           password: testPassword,
           firstName: "Another",
           lastName: "User",
+          language: "en",
         })),
         avatarReference: null,
       };
@@ -319,6 +326,7 @@ describe("UsersController (e2e)", () => {
           password: testPassword,
           firstName: "Another",
           lastName: "User",
+          language: "en",
         })),
         avatarReference: null,
       };
@@ -329,6 +337,7 @@ describe("UsersController (e2e)", () => {
           password: testPassword,
           firstName: "Another",
           lastName: "User",
+          language: "en",
         })),
         avatarReference: null,
       };

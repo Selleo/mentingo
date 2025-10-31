@@ -1,11 +1,13 @@
 import * as cookie from "cookie";
 import { isArray, omit } from "lodash";
+import { nanoid } from "nanoid";
 import request from "supertest";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
+import { createTokens } from "../../storage/schema";
 import { AuthService } from "../auth.service";
 
 import type { DatabasePg } from "../../common/index";
@@ -61,6 +63,7 @@ describe("AuthController (e2e)", () => {
         password: "Password123@",
         firstName: "Tyler",
         lastName: "Durden",
+        language: "en",
       };
 
       await authService.register(existingUser);
@@ -76,6 +79,86 @@ describe("AuthController (e2e)", () => {
         .send(user)
         .expect(400);
       expect(response.body.message).toEqual("Validation failed (body)");
+    });
+
+    it("should fallback to 'en' when registering with unsupported language (e.g., 'ar')", async () => {
+      const user = userFactory.build();
+      const password = "Password123@";
+
+      await authService.register({
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password,
+        language: "ar",
+      });
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: password,
+      });
+
+      expect(loginResponse.status).toBe(201);
+
+      const cookies = loginResponse.headers["set-cookie"];
+      let accessToken = "";
+
+      if (Array.isArray(cookies)) {
+        cookies.forEach((cookieString) => {
+          const parsedCookie = cookie.parse(cookieString);
+          if ("access_token" in parsedCookie) {
+            accessToken = parsedCookie.access_token;
+          }
+        });
+      }
+
+      const settingsResponse = await request(app.getHttpServer())
+        .get("/api/settings")
+        .set("Cookie", `access_token=${accessToken};`)
+        .expect(200);
+
+      expect(settingsResponse.body.data).toBeDefined();
+      expect(settingsResponse.body.data.language).toBe("en");
+    });
+
+    it("should save correct language when registering with supported language other than 'en'", async () => {
+      const user = userFactory.build();
+      const password = "Password123@";
+
+      await authService.register({
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        password,
+        language: "pl",
+      });
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: password,
+      });
+
+      expect(loginResponse.status).toBe(201);
+
+      const cookies = loginResponse.headers["set-cookie"];
+      let accessToken = "";
+
+      if (Array.isArray(cookies)) {
+        cookies.forEach((cookieString) => {
+          const parsedCookie = cookie.parse(cookieString);
+          if ("access_token" in parsedCookie) {
+            accessToken = parsedCookie.access_token;
+          }
+        });
+      }
+
+      const settingsResponse = await request(app.getHttpServer())
+        .get("/api/settings")
+        .set("Cookie", `access_token=${accessToken};`)
+        .expect(200);
+
+      expect(settingsResponse.body.data).toBeDefined();
+      expect(settingsResponse.body.data.language).toBe("pl");
     });
   });
 
@@ -124,6 +207,7 @@ describe("AuthController (e2e)", () => {
         firstName: user.firstName,
         lastName: user.lastName,
         password,
+        language: "en",
       });
 
       const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
@@ -167,6 +251,7 @@ describe("AuthController (e2e)", () => {
         firstName: user.firstName,
         lastName: user.lastName,
         password,
+        language: "en",
       });
 
       let refreshToken = "";
@@ -328,6 +413,112 @@ describe("AuthController (e2e)", () => {
         .expect(400);
 
       expect(response.body.message).toEqual("Validation failed (body)");
+    });
+  });
+
+  describe("POST /api/auth/create-password", () => {
+    it("should save correct language when creating password with supported language other than 'en'", async () => {
+      const user = await userFactory.create({
+        email: "createpassword@example.com",
+      });
+
+      const token = nanoid(64);
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+      await db.insert(createTokens).values({
+        userId: user.id,
+        createToken: token,
+        expiryDate,
+        reminderCount: 0,
+      });
+
+      const password = "Password123@";
+
+      await authService.createPassword({
+        createToken: token,
+        password,
+        language: "pl",
+      });
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: password,
+      });
+
+      expect(loginResponse.status).toBe(201);
+
+      const cookies = loginResponse.headers["set-cookie"];
+      let accessToken = "";
+
+      if (Array.isArray(cookies)) {
+        cookies.forEach((cookieString) => {
+          const parsedCookie = cookie.parse(cookieString);
+          if ("access_token" in parsedCookie) {
+            accessToken = parsedCookie.access_token;
+          }
+        });
+      }
+
+      const settingsResponse = await request(app.getHttpServer())
+        .get("/api/settings")
+        .set("Cookie", `access_token=${accessToken};`)
+        .expect(200);
+
+      expect(settingsResponse.body.data).toBeDefined();
+      expect(settingsResponse.body.data.language).toBe("pl");
+    });
+
+    it("should fallback to 'en' when creating password with unsupported language (e.g., 'ar')", async () => {
+      const user = await userFactory.create({
+        email: "createpassword@example.com",
+      });
+
+      const token = nanoid(64);
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+      await db.insert(createTokens).values({
+        userId: user.id,
+        createToken: token,
+        expiryDate,
+        reminderCount: 0,
+      });
+
+      const password = "Password123@";
+
+      await authService.createPassword({
+        createToken: token,
+        password,
+        language: "ar",
+      });
+
+      const loginResponse = await request(app.getHttpServer()).post("/api/auth/login").send({
+        email: user.email,
+        password: password,
+      });
+
+      expect(loginResponse.status).toBe(201);
+
+      const cookies = loginResponse.headers["set-cookie"];
+      let accessToken = "";
+
+      if (Array.isArray(cookies)) {
+        cookies.forEach((cookieString) => {
+          const parsedCookie = cookie.parse(cookieString);
+          if ("access_token" in parsedCookie) {
+            accessToken = parsedCookie.access_token;
+          }
+        });
+      }
+
+      const settingsResponse = await request(app.getHttpServer())
+        .get("/api/settings")
+        .set("Cookie", `access_token=${accessToken};`)
+        .expect(200);
+
+      expect(settingsResponse.body.data).toBeDefined();
+      expect(settingsResponse.body.data.language).toBe("en");
     });
   });
 });

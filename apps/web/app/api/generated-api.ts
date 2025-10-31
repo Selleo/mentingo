@@ -23,6 +23,7 @@ export interface RegisterBody {
    */
   lastName: string;
   password: string;
+  language: "pl" | "en";
 }
 
 export interface RegisterResponse {
@@ -120,6 +121,7 @@ export interface CreatePasswordBody {
   password: string;
   /** @minLength 1 */
   createToken: string;
+  language: "pl" | "en";
 }
 
 export interface ResetPasswordBody {

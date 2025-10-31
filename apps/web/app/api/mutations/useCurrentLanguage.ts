@@ -12,6 +12,8 @@ export function useCurrentLanguage() {
       language: userSettings?.language || fallbackLanguage,
       isFromDatabase: !!userSettings?.language,
       isFromLocalStorage: !userSettings?.language && !!fallbackLanguage,
+      currentUser,
+      userSettings,
     };
   }
 
@@ -19,5 +21,7 @@ export function useCurrentLanguage() {
     language: fallbackLanguage,
     isFromDatabase: false,
     isFromLocalStorage: !!fallbackLanguage,
+    currentUser: undefined,
+    userSettings: undefined,
   };
 }
