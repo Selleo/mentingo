@@ -1,9 +1,10 @@
-import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { promotionCodesQuery } from "~/api/queries/admin/usePromotionCodes";
-import { queryClient } from "~/api/queryClient";
+import { usePromotionCodesQuery } from "~/api/queries/admin/usePromotionCodes";
+import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
 import { Button } from "~/components/ui/button";
 import {
@@ -20,28 +21,25 @@ import { setPageTitle } from "~/utils/setPageTitle";
 import { useGetPromotionCodeStatus } from "./hooks/useGetPromotionCodes";
 
 import type { TPromotionCode } from "./types";
-import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/react";
 import type { CurrencyCode } from "~/lib/formatters/priceFormatter";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.promotionCodes");
 
-export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
-  try {
-    const { data: promotionsCodes } = await queryClient.fetchQuery(promotionCodesQuery());
-
-    return { promotionsCodes };
-  } catch (error) {
-    console.error("Error fetching promotion codes:", error);
-
-    throw new Error("Failed to load promotion codes.");
-  }
-};
 const PromotionCodes = () => {
-  const { promotionsCodes } = useLoaderData<typeof clientLoader>();
+  const { data: isStripeConfigured, isLoading } = useStripeConfigured();
+  const { data: promotionsCodes } = usePromotionCodesQuery(isStripeConfigured?.enabled);
   const { getPromotionCodeStatus } = useGetPromotionCodeStatus();
+
   const navigate = useNavigate();
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!(isLoading || isStripeConfigured?.enabled)) {
+      navigate("/");
+    }
+  }, [isStripeConfigured, navigate, isLoading]);
 
   const columns: ColumnDef<TPromotionCode>[] = [
     {
@@ -86,7 +84,7 @@ const PromotionCodes = () => {
 
   const table = useReactTable({
     getRowId: (row) => row.id,
-    data: promotionsCodes,
+    data: promotionsCodes?.data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -105,6 +103,8 @@ const PromotionCodes = () => {
       href: "/admin/promotion-codes",
     },
   ];
+
+  if (!isStripeConfigured?.enabled) return null;
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs}>

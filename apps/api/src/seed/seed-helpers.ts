@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { ConfigService } from "@nestjs/config";
 import { eq, sql } from "drizzle-orm/sql";
 
 import { EnvRepository } from "src/env/repositories/env.repository";
@@ -53,7 +54,9 @@ export async function createNiceCourses(
     let stripeProductId = null;
     let stripePriceId = null;
 
-    const stripeService = new StripeService(new EnvService(new EnvRepository(db)));
+    const stripeService = new StripeService(
+      new EnvService(new EnvRepository(db), new ConfigService()),
+    );
     const existingStripeProduct = await stripeService.searchProducts({
       query: `name:\'${courseData.title}\'`,
     });

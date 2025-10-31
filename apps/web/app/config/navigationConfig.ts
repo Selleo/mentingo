@@ -30,7 +30,10 @@ export type NavigationGroups = {
   items: NavigationItem[];
 };
 
-export const getNavigationConfig = (t: TFunction): NavigationGroups[] => [
+export const getNavigationConfig = (
+  t: TFunction,
+  isStripeConfigured = false,
+): NavigationGroups[] => [
   {
     title: t("navigationSideBar.courses"),
     isExpandable: false,
@@ -73,11 +76,15 @@ export const getNavigationConfig = (t: TFunction): NavigationGroups[] => [
         path: "admin/categories",
         iconName: "Category",
       },
-      {
-        label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
-        path: "admin/promotion-codes",
-        iconName: "HandCoins",
-      },
+      ...(isStripeConfigured
+        ? [
+            {
+              label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
+              path: "admin/promotion-codes",
+              iconName: "HandCoins",
+            } as NavigationItem,
+          ]
+        : []),
     ],
   },
 ];

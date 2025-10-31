@@ -26,6 +26,7 @@ import { isEmpty } from "lodash";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { EnvService } from "src/env/services/env.service";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
@@ -114,6 +115,7 @@ export class CourseService {
     private readonly userService: UserService,
     private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
+    private readonly envService: EnvService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -842,6 +844,8 @@ export class CourseService {
         .from(categories)
         .where(eq(categories.id, createCourseBody.categoryId));
 
+      const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
+
       if (!category) {
         throw new NotFoundException("Category not found");
       }
@@ -852,7 +856,7 @@ export class CourseService {
       let productId: string | null = null;
       let priceId: string | null = null;
 
-      if (!isPlaywrightTest) {
+      if (!isPlaywrightTest && isStripeConfigured) {
         const stripeResult = await this.stripeService.createProduct({
           name: createCourseBody.title,
           description: createCourseBody?.description ?? "",
@@ -906,6 +910,8 @@ export class CourseService {
     return this.db.transaction(async (trx) => {
       const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
 
+      const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
+
       if (!existingCourse) {
         throw new NotFoundException("Course not found");
       }
@@ -937,8 +943,11 @@ export class CourseService {
         }
       }
 
+      const { priceInCents, currency, ...rest } = updateCourseBody;
+
       const updateData = {
-        ...updateCourseBody,
+        ...rest,
+        ...(isStripeConfigured ? { priceInCents, currency } : {}),
         ...(imageKey && { imageUrl: imageKey.fileUrl }),
       };
 
@@ -952,7 +961,7 @@ export class CourseService {
         throw new ConflictException("Failed to update course");
       }
 
-      if (!isPlaywrightTest) {
+      if (!isPlaywrightTest && isStripeConfigured) {
         // --- create stripe product if it doesn't exist yet ---
         if (!updatedCourse.stripeProductId) {
           const { productId, priceId } = await this.stripeService.createProduct({

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
+import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Badge } from "~/components/ui/badge";
@@ -31,6 +32,8 @@ const EditCourse = () => {
   const { id } = useParams();
 
   const params = new URLSearchParams();
+  const { data: isStripeConfigured } = useStripeConfigured();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const courseTabs = useEditCourseTabs();
   const navigate = useNavigate();
@@ -149,13 +152,15 @@ const EditCourse = () => {
             />
           </LeaveModalProvider>
         </TabsContent>
-        <TabsContent value="Pricing">
-          <CoursePricing
-            courseId={course?.id || ""}
-            currency={course?.currency}
-            priceInCents={course?.priceInCents}
-          />
-        </TabsContent>
+        {isStripeConfigured?.enabled && (
+          <TabsContent value="Pricing">
+            <CoursePricing
+              courseId={course?.id || ""}
+              currency={course?.currency}
+              priceInCents={course?.priceInCents}
+            />
+          </TabsContent>
+        )}
         <TabsContent value="Status">
           <CourseStatus courseId={course?.id || ""} status={course?.status || "draft"} />
         </TabsContent>

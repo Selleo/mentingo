@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 import { ALLOWED_SECRETS, ENCRYPTION_ALG } from "src/env/env.config";
 import { EnvRepository } from "src/env/repositories/env.repository";
@@ -10,7 +11,10 @@ import type { BulkUpsertEnvBody, EncryptedEnvBody } from "src/env/env.schema";
 @Injectable()
 export class EnvService {
   private readonly KEY_ENCRYPTION_KEY;
-  constructor(private readonly envRepository: EnvRepository) {
+  constructor(
+    private readonly envRepository: EnvRepository,
+    private readonly configService: ConfigService,
+  ) {
     this.KEY_ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
   }
 
@@ -111,5 +115,21 @@ export class EnvService {
       .catch(() => null);
 
     return stripePublishableKey;
+  }
+
+  async getStripeConfigured() {
+    const [stripeWebhookSecret, stripeSecretKey] = await Promise.all([
+      this.getEnv("STRIPE_SECRET_KEY")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("stripe.secretKey")),
+
+      this.getEnv("STRIPE_WEBHOOK_SECRET")
+        .then((r) => r.value)
+        .catch(() => this.configService.get("stripe.webhookSecret")),
+    ]);
+
+    const enabled = !!(stripeWebhookSecret && stripeSecretKey);
+
+    return { enabled };
   }
 }

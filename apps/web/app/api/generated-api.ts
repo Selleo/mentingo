@@ -2525,6 +2525,12 @@ export interface GetStripePublishableKeyResponse {
   };
 }
 
+export interface GetStripeConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -5474,6 +5480,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetStripePublishableKey: (params: RequestParams = {}) =>
       this.request<GetStripePublishableKeyResponse, any>({
         path: `/api/env/stripe/publishable-key`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetStripeConfigured
+     * @request GET:/api/env/frontend/stripe
+     */
+    envControllerGetStripeConfigured: (params: RequestParams = {}) =>
+      this.request<GetStripeConfiguredResponse, any>({
+        path: `/api/env/frontend/stripe`,
         method: "GET",
         format: "json",
         ...params,
