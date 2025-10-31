@@ -47,9 +47,9 @@ export default defineConfig(({ mode }) => {
       }),
       tsconfigPaths(),
       sentryVitePlugin({
-        org: env.VITE_SENTRY_ORG,
-        project: env.VITE_SENTRY_PROJECT,
-        authToken: env.VITE_SENTRY_AUTH_TOKEN,
+        org: env.SENTRY_ORG,
+        project: env.SENTRY_PROJECT,
+        authToken: env.SENTRY_AUTH_TOKEN,
         sourcemaps: {
           assets: "./build/client/**",
         },
