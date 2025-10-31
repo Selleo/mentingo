@@ -330,6 +330,13 @@
       "when": 1761553007781,
       "tag": "0046_create_onboarding_records_for_existing_users",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1761919146339,
+      "tag": "0047_added_ai_mentor_types",
+      "breakpoints": true
     }
   ]
 }
