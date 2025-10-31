@@ -9,14 +9,16 @@ import { CourseProgressChart } from "~/modules/Courses/CourseView/components/Cou
 
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 
+import type { Dispatch, SetStateAction } from "react";
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseProgressProps = {
   course: GetCourseResponse["data"];
+  setIsEnrollGroupsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-export const CourseProgress = ({ course }: CourseProgressProps) => {
-  const { isAdminLike } = useUserRole();
+export const CourseProgress = ({ course, setIsEnrollGroupsModalOpen }: CourseProgressProps) => {
+  const { isAdminLike, isAdmin } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const notStartedLessonId = findFirstNotStartedLessonId(course);
@@ -63,6 +65,16 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
           <Icon name="Share" className="h-auto w-6 text-primary-800" />
           <span>{t("studentCourseView.sideSection.button.shareCourse")}</span>
         </CopyUrlButton>
+        {isAdmin && (
+          <Button
+            className="gap-x-2"
+            variant="primary"
+            onClick={() => setIsEnrollGroupsModalOpen(true)}
+          >
+            <Icon name="Hat" className="text-contrast h-auto w-6" />
+            <span>{t("studentCourseView.sideSection.button.enrollGroups")}</span>
+          </Button>
+        )}
         <>
           <Button className="gap-x-2" onClick={handleNavigateToLesson}>
             <Icon name="Play" className="text-contrast h-auto w-6" />

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -33,4 +33,8 @@ export const groupsQueryOptions = (
 
 export function useGroupsQuerySuspense(searchParams?: GroupsSearchParams) {
   return useSuspenseQuery(groupsQueryOptions(searchParams));
+}
+
+export function useGroupsQuery(searchParams?: GroupsSearchParams) {
+  return useQuery(groupsQueryOptions(searchParams));
 }
