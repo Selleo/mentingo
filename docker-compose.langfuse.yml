@@ -23,10 +23,10 @@ services:
     ports:
       - 6379:6379
     healthcheck:
-          test: [ "CMD", "redis-cli", "ping" ]
-          interval: 3s
-          timeout: 3s
-          retries: 10
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
     volumes:
       - lms-redis-data:/data
   mailhog:
@@ -92,6 +92,12 @@ services:
       LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${AWS_REGION}
       LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: ${LANGFUSE_S3_MEDIA_PREFIX}
       CLICKHOUSE_CLUSTER_ENABLED: ${CLICKHOUSE_CLUSTER_ENABLED}
+      LANGFUSE_S3_BATCH_EXPORT_ENABLED: ${LANGFUSE_S3_BATCH_EXPORT_ENABLED}
+      LANGFUSE_S3_BATCH_EXPORT_BUCKET: ${LANGFUSE_S3_BATCH_EXPORT_BUCKET}
+      LANGFUSE_S3_BATCH_EXPORT_PREFIX: ${LANGFUSE_S3_BATCH_EXPORT_PREFIX}
+      LANGFUSE_S3_BATCH_EXPORT_REGION: ${LANGFUSE_S3_BATCH_EXPORT_REGION}
+      LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID}
+      LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY}
 
   langfuse-web:
     image: docker.io/langfuse/langfuse:3
@@ -106,28 +112,57 @@ services:
       NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET}
 
   clickhouse:
-      image: docker.io/clickhouse/clickhouse-server
-      restart: always
-      user: "101:101"
-      env_file: "apps/api/.env"
-      environment:
-        CLICKHOUSE_DB: default
-        CLICKHOUSE_USER: ${LANGFUSE_CLICKHOUSE_USER}
-        CLICKHOUSE_PASSWORD: ${LANGFUSE_CLICKHOUSE_PASSWORD}
-      volumes:
-        - langfuse_clickhouse_data:/var/lib/clickhouse
-        - langfuse_clickhouse_logs:/var/log/clickhouse-server
-      ports:
-        - 127.0.0.1:8123:8123
-        - 127.0.0.1:9000:9000
-      healthcheck:
-        test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
-        interval: 5s
-        timeout: 5s
-        retries: 10
-        start_period: 1s
+    image: docker.io/clickhouse/clickhouse-server
+    restart: always
+    user: "101:101"
+    env_file: "apps/api/.env"
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: ${LANGFUSE_CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${LANGFUSE_CLICKHOUSE_PASSWORD}
+    volumes:
+      - langfuse_clickhouse_data:/var/lib/clickhouse
+      - langfuse_clickhouse_logs:/var/log/clickhouse-server
+    ports:
+      - 127.0.0.1:8123:8123
+      - 127.0.0.1:9000:9000
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 1s
 
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    restart: always
+    ports:
+      - "9100:9000" # MinIO API
+      - "9101:9001" # Web console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  create-minio-bucket:
+    image: quay.io/minio/mc:latest
+    container_name: minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+    env_file: ./apps/api/.env
+    volumes:
+      - ./create-minio-bucket.sh:/create-minio-bucket.sh
+    entrypoint: ["/bin/sh", "/create-minio-bucket.sh"]
 
 
 
@@ -143,5 +178,5 @@ volumes:
     driver: local
   langfuse-db-data:
     driver: local
-
-
+  minio-data:
+    driver: local
