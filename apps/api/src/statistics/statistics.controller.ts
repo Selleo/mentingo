@@ -5,7 +5,7 @@ import { baseResponse, UUIDType, BaseResponse } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import { UserStatsSchema, StatsSchema } from "./schemas/userStats.schema";
 import { StatisticsService } from "./statistics.service";
@@ -27,23 +27,15 @@ export class StatisticsController {
     return new BaseResponse(await this.statisticsService.getUserStats(currentUserId));
   }
 
-  @Get("content-creator-stats")
+  @Get("stats")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     response: baseResponse(StatsSchema),
   })
-  async getContentCreatorStats(
+  async getStats(
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
   ): Promise<BaseResponse<Stats>> {
-    return new BaseResponse(await this.statisticsService.getContentCreatorStats(currentUserId));
-  }
-
-  @Get("admin-stats")
-  @Roles(USER_ROLES.ADMIN)
-  @Validate({
-    response: baseResponse(StatsSchema),
-  })
-  async getAdminStats(): Promise<BaseResponse<Stats>> {
-    return new BaseResponse(await this.statisticsService.getAdminStats());
+    return new BaseResponse(await this.statisticsService.getStats(currentUserId, userRole));
   }
 }

@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { useCurrentUser, useStatistics } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
-import { useUserRole } from "~/hooks/useUserRole";
 import { AvgScoreAcrossAllQuizzesChart } from "~/modules/Statistics/Admin/components/AvgScoreAcrossAllQuizzessChart";
 import { ConversionsAfterFreemiumLessonChart } from "~/modules/Statistics/Admin/components/ConversionsAfterFreemiumLessonChart";
 import { EnrollmentChart } from "~/modules/Statistics/Admin/components/EnrollmentChart";
@@ -15,8 +14,7 @@ import type { ChartConfig } from "~/components/ui/chart";
 
 export const AdminStatistics = () => {
   const { data: user } = useCurrentUser();
-  const { role } = useUserRole();
-  const { data: statistics, isLoading } = useStatistics(role);
+  const { data: statistics, isLoading } = useStatistics();
   const { t } = useTranslation();
   const totalCoursesCompletion =
     statistics?.totalCoursesCompletionStats.totalCoursesCompletion ?? 0;
