@@ -30,7 +30,7 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
             <h2 className="h6 md:h4 text-neutral-950" data-testid="username">
               {userDetails?.firstName} {userDetails?.lastName}
             </h2>
-            {isAdminLike && (
+            {isAdminLike && userDetails?.jobTitle && (
               <div className="body-sm">
                 <span className="text-neutral-900 body-base-md">
                   {t("contentCreatorView.other.title")}:
@@ -43,25 +43,29 @@ export const ProfileCard = ({ isAdminLike, userDetails }: ProfileCardProps) => {
           </div>
           {isAdminLike && (
             <div className="flex w-full flex-col gap-3 *:w-full md:flex-row md:*:w-fit">
-              <a
-                href={`tel:${userDetails?.contactPhone}`}
-                className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-3 py-2 text-accent-foreground md:justify-start"
-              >
-                <Icon name="Phone" className="size-5 text-neutral-900" />
-                <span data-testid="contactPhone">{userDetails?.contactPhone}</span>
-              </a>
-              <a
-                href={`mailto:${userDetails?.contactEmail}`}
-                className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-2 py-1 text-accent-foreground md:justify-start"
-              >
-                <Icon name="Email" className="size-5 text-neutral-900" />
-                <span data-testid="contactEmail">{userDetails?.contactEmail}</span>
-              </a>
+              {userDetails?.contactPhone && (
+                <a
+                  href={`tel:${userDetails?.contactPhone}`}
+                  className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-3 py-2 text-accent-foreground md:justify-start"
+                >
+                  <Icon name="Phone" className="size-5 text-neutral-900" />
+                  <span data-testid="contactPhone">{userDetails?.contactPhone}</span>
+                </a>
+              )}
+              {userDetails?.contactEmail && (
+                <a
+                  href={`mailto:${userDetails?.contactEmail}`}
+                  className="body-sm-md md:body-base-md flex items-center justify-center gap-x-2 rounded-lg bg-primary-50 px-2 py-1 text-accent-foreground md:justify-start"
+                >
+                  <Icon name="Email" className="size-5 text-neutral-900" />
+                  <span data-testid="contactEmail">{userDetails?.contactEmail}</span>
+                </a>
+              )}
             </div>
           )}
         </div>
       </div>
-      {isAdminLike && (
+      {isAdminLike && userDetails?.description && (
         <div className="flex flex-col gap-y-2">
           <div className="flex items-center gap-x-3">
             <span className="min-w-fit body-base-md md:body-lg-md text-neutral-900">

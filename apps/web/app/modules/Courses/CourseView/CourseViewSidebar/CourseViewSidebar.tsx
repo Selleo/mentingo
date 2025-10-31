@@ -42,26 +42,32 @@ export const CourseViewSidebar = ({ course }: CourseViewSidebar) => {
             {userDetails?.firstName} {userDetails?.lastName}
           </h2>
           <div className="flex flex-col gap-y-1">
-            <p className="body-sm">
-              <span className="text-neutral-900">
-                {t("studentCourseView.sideSection.other.title")}:
-              </span>{" "}
-              <span className="body-sm-md text-neutral-950">{userDetails?.jobTitle}</span>
-            </p>
+            {userDetails?.jobTitle && (
+              <p className="body-sm">
+                <span className="text-neutral-900">
+                  {t("studentCourseView.sideSection.other.title")}:
+                </span>{" "}
+                <span className="body-sm-md text-neutral-950">{userDetails?.jobTitle}</span>
+              </p>
+            )}
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-y-2">
-        <div className="flex items-center gap-x-3">
-          <span className="text-neutral-900">{t("studentCourseView.sideSection.other.about")}</span>
-          <div className="h-px w-full bg-primary-200" />
+      {userDetails?.description && (
+        <div className="flex flex-col gap-y-2">
+          <div className="flex items-center gap-x-3">
+            <span className="text-neutral-900">
+              {t("studentCourseView.sideSection.other.about")}
+            </span>
+            <div className="h-px w-full bg-primary-200" />
+          </div>
+          <p className="body-sm mt-2 text-neutral-950">{userDetails?.description}</p>
         </div>
-        <p className="body-sm mt-2 text-neutral-950">{userDetails?.description}</p>
-      </div>
+      )}
       <Button variant="outline" className="sr-only">
         <span>{t("studentCourseView.sideSection.other.collapse")}</span>
       </Button>
-      <Button variant="outline">
+      <Button variant="outline" asChild>
         <Link to={`/profile/${course?.authorId}`}>
           <span>{t("studentCourseView.sideSection.button.goToContentCreatorPage")}</span>
         </Link>
