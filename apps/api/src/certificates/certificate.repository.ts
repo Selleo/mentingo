@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, and, countDistinct, sql } from "drizzle-orm";
+import { eq, and, countDistinct, sql, isNull } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { addPagination } from "src/common/pagination";
@@ -42,7 +42,7 @@ export class CertificateRepository {
           eq(studentCourses.courseId, certificates.courseId),
         ),
       )
-      .where(eq(certificates.userId, userId))
+      .where(and(eq(certificates.userId, userId), isNull(users.deletedAt)))
       .orderBy(sortOrder(certificates.createdAt));
 
     const paginatedQuery = addPagination(queryDB.$dynamic(), page, perPage);
@@ -55,7 +55,8 @@ export class CertificateRepository {
     const [{ totalItems }] = await dbInstance
       .select({ totalItems: countDistinct(certificates.id) })
       .from(certificates)
-      .where(eq(certificates.userId, userId));
+      .innerJoin(users, eq(users.id, certificates.userId))
+      .where(and(eq(certificates.userId, userId), isNull(users.deletedAt)));
 
     return totalItems;
   }
@@ -69,7 +70,7 @@ export class CertificateRepository {
         lastName: users.lastName,
       })
       .from(users)
-      .where(eq(users.id, userId));
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
     return user;
   }
@@ -100,7 +101,14 @@ export class CertificateRepository {
         completedAt: studentCourses.completedAt,
       })
       .from(studentCourses)
-      .where(and(eq(studentCourses.studentId, userId), eq(studentCourses.courseId, courseId)));
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          eq(studentCourses.studentId, userId),
+          eq(studentCourses.courseId, courseId),
+          isNull(users.deletedAt),
+        ),
+      );
 
     return courseCompletion;
   }
@@ -133,7 +141,13 @@ export class CertificateRepository {
           eq(studentCourses.courseId, certificates.courseId),
         ),
       )
-      .where(and(eq(certificates.userId, userId), eq(certificates.courseId, courseId)));
+      .where(
+        and(
+          eq(certificates.userId, userId),
+          eq(certificates.courseId, courseId),
+          isNull(users.deletedAt),
+        ),
+      );
 
     return certificate;
   }
@@ -148,7 +162,14 @@ export class CertificateRepository {
     const [existingCertificate] = await dbInstance
       .select()
       .from(certificates)
-      .where(and(eq(certificates.userId, userId), eq(certificates.courseId, courseId)));
+      .innerJoin(users, eq(users.id, certificates.userId))
+      .where(
+        and(
+          eq(certificates.userId, userId),
+          eq(certificates.courseId, courseId),
+          isNull(users.deletedAt),
+        ),
+      );
 
     return existingCertificate;
   }
