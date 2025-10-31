@@ -50,6 +50,7 @@ describe("AuthController (e2e)", () => {
           firstName: user.firstName,
           lastName: user.lastName,
           password: user.credentials?.password,
+          language: "en",
         });
 
       expect(response.status).toEqual(201);
@@ -471,7 +472,7 @@ describe("AuthController (e2e)", () => {
 
     it("should fallback to 'en' when creating password with unsupported language (e.g., 'ar')", async () => {
       const user = await userFactory.create({
-        email: "createpassword@example.com",
+        email: `createpassword-${nanoid(8)}@example.com`,
       });
 
       const token = nanoid(64);
