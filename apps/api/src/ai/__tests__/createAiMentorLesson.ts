@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Factory } from "fishery";
 
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -41,6 +42,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           lessonId: lesson.id,
           aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
           completionConditions: aiMentorLesson.completionConditions,
+          type: aiMentorLesson.type,
         })
         .returning();
 
@@ -54,6 +56,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       lessonId: faker.string.uuid(),
       aiMentorInstructions: faker.commerce.productDescription(),
       completionConditions: faker.commerce.productDescription(),
+      type: AI_MENTOR_TYPE.MENTOR,
     };
   });
 };

@@ -1,3 +1,5 @@
+import { AI_MENTOR_TYPE } from "@repo/shared";
+import { capitalize } from "lodash-es";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +17,13 @@ import {
 } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -122,6 +131,67 @@ const AiMentorLessonForm = ({
                 placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
                 className="mb-4"
               />
+
+              <FormField
+                render={({ field }) => (
+                  <FormItem className="mb-4 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="categoryId">
+                        <span className="text-red-500">*</span>{" "}
+                        {t("adminCourseView.curriculum.lesson.field.aiMentorTypes")}
+                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Icon
+                              name="Info"
+                              className="h-auto w-6 cursor-default text-neutral-800"
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          align="center"
+                          className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                        >
+                          <ul className="flex flex-col gap-2 list-disc list-inside">
+                            {Object.entries({
+                              Mentor: "adminCourseView.curriculum.lesson.other.aiMentorTypeTooltip",
+                              Teacher:
+                                "adminCourseView.curriculum.lesson.other.aiTeacherTypeTooltip",
+                              Roleplay:
+                                "adminCourseView.curriculum.lesson.other.aiRoleplayTypeTooltip",
+                            }).map(([label, translationKey]) => (
+                              <li key={label} className="text-sm">
+                                <span className="font-semibold">{label}:</span> {t(translationKey)}
+                              </li>
+                            ))}
+                          </ul>
+
+                          <TooltipArrow className="fill-black" />
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(AI_MENTOR_TYPE).map((item, index) => (
+                          <SelectItem value={item} key={`${item}-${index}`}>
+                            {capitalize(item)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+                control={form.control}
+                name="type"
+              ></FormField>
+
               <div className="mb-4 grid grid-cols-1 lg:grid-cols-2">
                 <div>
                   <div className="flex items-center justify-between">

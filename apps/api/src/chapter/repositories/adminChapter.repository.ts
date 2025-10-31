@@ -135,7 +135,8 @@ export class AdminChapterRepository {
             'id', aml.id,
             'lessonId', aml.lesson_id,
             'aiMentorInstructions', aml.ai_mentor_instructions,
-            'completionConditions', aml.completion_conditions
+            'completionConditions', aml.completion_conditions,
+            'type', aml.type
           )
           FROM ${aiMentorLessons} aml
           WHERE lessons.id = aml.lesson_id 

@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -49,6 +50,7 @@ export const useAiMentorLessonForm = ({
       title: lessonToEdit?.title || "",
       aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
       completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
+      type: lessonToEdit?.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
     },
   });
 
@@ -60,6 +62,7 @@ export const useAiMentorLessonForm = ({
         title: lessonToEdit.title,
         aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
         completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
+        type: lessonToEdit?.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
       });
     }
   }, [lessonToEdit, reset]);
@@ -105,12 +108,12 @@ export const useAiMentorLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateAiMentorLesson({
-          data: { ...values },
+          data: { ...values, type: values.type },
           lessonId: lessonToEdit.id,
         });
       } else {
         await createAiMentorLesson({
-          data: { ...values, chapterId: chapterToEdit.id },
+          data: { ...values, chapterId: chapterToEdit.id, type: values.type },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }

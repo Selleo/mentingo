@@ -185,6 +185,7 @@ export const aiMentorLessons = pgTable("ai_mentor_lessons", {
     .notNull(),
   aiMentorInstructions: text("ai_mentor_instructions").notNull(),
   completionConditions: text("completion_conditions").notNull(),
+  type: text("type").notNull().default("mentor"),
 });
 
 export const aiMentorThreads = pgTable("ai_mentor_threads", {

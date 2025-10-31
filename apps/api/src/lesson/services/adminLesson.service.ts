@@ -167,6 +167,7 @@ export class AdminLessonService {
           lessonId: lesson.id,
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
+          type: data.type,
         },
         trx,
       );
@@ -181,7 +182,8 @@ export class AdminLessonService {
     userId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
-      const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, data, trx);
+      const { type: _type, ...rest } = data;
+      const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
 
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
         throw new BadRequestException("Instructions and conditions required");
@@ -191,6 +193,7 @@ export class AdminLessonService {
         {
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
+          type: data.type,
         },
         trx,
       );
