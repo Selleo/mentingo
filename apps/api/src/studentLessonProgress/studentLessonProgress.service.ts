@@ -209,9 +209,20 @@ export class StudentLessonProgressService {
 
     if (lessonProgress?.isStarted) return;
 
+    if (!lessonProgress) {
+      const [lesson] = await dbInstance.select().from(lessons).where(eq(lessons.id, id));
+
+      await dbInstance.insert(studentLessonProgress).values({
+        studentId,
+        lessonId: id,
+        chapterId: lesson.chapterId,
+      });
+    }
+
     if (
       accessCourseLessonWithDetails.lessonType === LESSON_TYPES.QUIZ ||
-      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.VIDEO
+      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.VIDEO ||
+      accessCourseLessonWithDetails.lessonType === LESSON_TYPES.AI_MENTOR
     ) {
       await dbInstance
         .update(studentLessonProgress)
