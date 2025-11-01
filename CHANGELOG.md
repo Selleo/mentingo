@@ -1,3 +1,19 @@
+<a name="v3.18.0"></a>
+
+## [v3.18.0] - 31.10.2025
+
+### Features:
+
+- implemented various types of AI mentor conversation ([#801](https://github.com/Selleo/mentingo/issues/801))
+
+### Bug Fixes:
+
+- Empty sections in content creator profile are hidden
+
+### Tests:
+
+- sentry config ([#862](https://github.com/Selleo/mentingo/issues/862))
+
 <a name="v3.17.0"></a>
 
 ## [v3.17.0] - 27.10.2025
@@ -11,6 +27,10 @@
 ### Bug Fixes:
 
 - allow author to preview private/draft courses ([#818](https://github.com/Selleo/mentingo/issues/818))
+
+### Documentation:
+
+- update changelog for version v3.17.0
 
 <a name="v3.16.0"></a>
 
@@ -1796,7 +1816,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.17.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.18.0...HEAD
+[v3.18.0]: https://github.com/Selleo/mentingo/compare/v3.17.0...v3.18.0
 [v3.17.0]: https://github.com/Selleo/mentingo/compare/v3.16.0...v3.17.0
 [v3.16.0]: https://github.com/Selleo/mentingo/compare/v3.15.0...v3.16.0
 [v3.15.0]: https://github.com/Selleo/mentingo/compare/v3.14.1...v3.15.0
