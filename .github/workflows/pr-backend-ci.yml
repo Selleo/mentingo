@@ -170,7 +170,7 @@ jobs:
           echo "S3 setup completed successfully!"
 
       - name: Start containers
-        run: docker compose -f "docker-compose.ci.yml" up -d --build
+        run: docker compose -f "docker-compose.yml" up -d --build
 
       - uses: actions/setup-node@v4
         with:
