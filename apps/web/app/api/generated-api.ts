@@ -1144,6 +1144,36 @@ export interface GetCourseStatisticsResponse {
   };
 }
 
+export interface GetAverageQuizScoresResponse {
+  data: {
+    averageScoresPerQuiz: {
+      /** @format uuid */
+      quizId: string;
+      name: string;
+      averageScore: number;
+      finishedCount: number;
+    }[];
+  };
+}
+
+export interface GetCourseStudentsProgressResponse {
+  data: {
+    /** @format uuid */
+    studentId: string;
+    studentName: string;
+    studentAvatarUrl: string | null;
+    groupName: string | null;
+    completedLessonsCount: number;
+    lastActivity: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -4141,6 +4171,52 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetCourseStatisticsResponse, any>({
         path: `/api/course/${courseId}/statistics`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetAverageQuizScores
+     * @request GET:/api/course/{courseId}/statistics/average-quiz-score
+     */
+    courseControllerGetAverageQuizScores: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetAverageQuizScoresResponse, any>({
+        path: `/api/course/${courseId}/statistics/average-quiz-score`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseStudentsProgress
+     * @request GET:/api/course/{courseId}/statistics/students-progress
+     */
+    courseControllerGetCourseStudentsProgress: (
+      courseId: string,
+      query?: {
+        page?: number;
+        perPage?: number;
+        search?: string;
+        sort?:
+          | "studentName"
+          | "groupName"
+          | "completedLessonsCount"
+          | "lastActivity"
+          | "-studentName"
+          | "-groupName"
+          | "-completedLessonsCount"
+          | "-lastActivity";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseStudentsProgressResponse, any>({
+        path: `/api/course/${courseId}/statistics/students-progress`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

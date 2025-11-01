@@ -53,6 +53,28 @@ export const getCourseStatisticsSchema = Type.Object({
   courseStatusDistribution: courseStatusDistributionSchema,
 });
 
+export const courseAverageQuizScorePerQuizSchema = Type.Object({
+  quizId: UUIDSchema,
+  name: Type.String(),
+  averageScore: Type.Number(),
+  finishedCount: Type.Number(),
+});
+
+export const courseAverageQuizScoresSchema = Type.Object({
+  averageScoresPerQuiz: Type.Array(courseAverageQuizScorePerQuizSchema),
+});
+
+export const studentCourseProgressionSchema = Type.Object({
+  studentId: UUIDSchema,
+  studentName: Type.String(),
+  studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
+  groupName: Type.Union([Type.String(), Type.Null()]),
+  completedLessonsCount: Type.Number(),
+  lastActivity: Type.Union([Type.String(), Type.Null()]),
+});
+
+export const allStudentCourseProgressionSchema = Type.Array(studentCourseProgressionSchema);
+
 export const allCoursesSchema = Type.Array(courseSchema);
 export const allStudentCoursesSchema = Type.Array(studentCourseSchema);
 export const allCoursesForContentCreatorSchema = Type.Array(coursesForContentCreatorSchema);
@@ -63,3 +85,6 @@ export type AllCoursesForContentCreatorResponse = Static<typeof allCoursesForCon
 
 export type CourseStatisticsResponse = Static<typeof getCourseStatisticsSchema>;
 export type CourseStatusDistribution = Static<typeof courseStatusDistributionSchema>;
+export type CourseAverageQuizScorePerQuiz = Static<typeof courseAverageQuizScorePerQuizSchema>;
+export type CourseAverageQuizScoresResponse = Static<typeof courseAverageQuizScoresSchema>;
+export type AllStudentCourseProgressionResponse = Static<typeof allStudentCourseProgressionSchema>;

@@ -22,6 +22,7 @@ import {
   baseResponse,
   BaseResponse,
   nullResponse,
+  paginatedResponse,
   PaginatedResponse,
   UUIDSchema,
   type UUIDType,
@@ -33,6 +34,8 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { CourseService } from "src/courses/course.service";
 import {
   allCoursesForContentCreatorSchema,
+  allStudentCourseProgressionSchema,
+  courseAverageQuizScoresSchema,
   getCourseStatisticsSchema,
 } from "src/courses/schemas/course.schema";
 import {
@@ -41,6 +44,8 @@ import {
   SortCourseFieldsOptions,
   SortEnrolledStudentsOptions,
   CoursesStatusOptions,
+  sortCourseStudentProgressionOptions,
+  SortCourseStudentProgressionOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -65,6 +70,7 @@ import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
+  AllStudentCourseProgressionResponse,
   AllStudentCoursesResponse,
   CourseStatisticsResponse,
 } from "src/courses/schemas/course.schema";
@@ -447,5 +453,53 @@ export class CourseController {
     const data = await this.courseService.getCourseStatistics(courseId);
 
     return new BaseResponse(data);
+  }
+
+  @Get(":courseId/statistics/average-quiz-score")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(courseAverageQuizScoresSchema),
+  })
+  async getAverageQuizScores(@Param("courseId") courseId: UUIDType) {
+    const averageQuizScores = await this.courseService.getAverageQuizScoreForCourse(courseId);
+
+    return new BaseResponse(averageQuizScores);
+  }
+
+  @Get(":courseId/statistics/students-progress")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "page", schema: Type.Number() },
+      { type: "query", name: "perPage", schema: Type.Number() },
+      { type: "query", name: "search", schema: Type.String() },
+      {
+        type: "query",
+        name: "sort",
+        schema: sortCourseStudentProgressionOptions,
+      },
+    ],
+    response: paginatedResponse(allStudentCourseProgressionSchema),
+  })
+  async getCourseStudentsProgress(
+    @Param("courseId") courseId: UUIDType,
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+    @Query("search") searchQuery: string,
+    @Query("sort") sort: SortCourseStudentProgressionOptions,
+  ): Promise<PaginatedResponse<AllStudentCourseProgressionResponse>> {
+    const query = {
+      courseId,
+      page,
+      perPage,
+      searchQuery,
+      sort,
+    };
+
+    const studentsProgression = await this.courseService.getStudentsProgress(query);
+
+    return new PaginatedResponse(studentsProgression);
   }
 }

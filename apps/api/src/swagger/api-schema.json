@@ -2634,6 +2634,125 @@
         }
       }
     },
+    "/api/course/{courseId}/statistics/average-quiz-score": {
+      "get": {
+        "operationId": "CourseController_getAverageQuizScores",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAverageQuizScoresResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/{courseId}/statistics/students-progress": {
+      "get": {
+        "operationId": "CourseController_getCourseStudentsProgress",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "groupName",
+                  "type": "string"
+                },
+                {
+                  "const": "completedLessonsCount",
+                  "type": "string"
+                },
+                {
+                  "const": "lastActivity",
+                  "type": "string"
+                },
+                {
+                  "const": "-studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "-groupName",
+                  "type": "string"
+                },
+                {
+                  "const": "-completedLessonsCount",
+                  "type": "string"
+                },
+                {
+                  "const": "-lastActivity",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseStudentsProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -9505,6 +9624,139 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetAverageQuizScoresResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "averageScoresPerQuiz": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "quizId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "averageScore": {
+                      "type": "number"
+                    },
+                    "finishedCount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "quizId",
+                    "name",
+                    "averageScore",
+                    "finishedCount"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "averageScoresPerQuiz"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseStudentsProgressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "studentId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "studentName": {
+                  "type": "string"
+                },
+                "studentAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "groupName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "completedLessonsCount": {
+                  "type": "number"
+                },
+                "lastActivity": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "studentId",
+                "studentName",
+                "studentAvatarUrl",
+                "groupName",
+                "completedLessonsCount",
+                "lastActivity"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
         ]
       },
       "GetChapterWithLessonResponse": {

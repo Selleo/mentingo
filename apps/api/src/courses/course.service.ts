@@ -57,27 +57,35 @@ import {
 
 import {
   COURSE_ENROLLMENT_SCOPES,
-  type CourseEnrollmentScope,
-  type CoursesFilterSchema,
-  type CourseSortField,
   CourseSortFields,
-  type CoursesQuery,
   EnrolledStudentSortFields,
-  type EnrolledStudentFilterSchema,
+  CourseStudentProgressionSortFields,
 } from "./schemas/courseQuery";
 
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
   AllStudentCoursesResponse,
+  CourseAverageQuizScorePerQuiz,
+  CourseAverageQuizScoresResponse,
   CourseStatisticsResponse,
   CourseStatusDistribution,
 } from "./schemas/course.schema";
+import type {
+  CourseStudentProgressionSortField,
+  CourseStudentProgressionQuery,
+  CourseEnrollmentScope,
+  CoursesFilterSchema,
+  CourseSortField,
+  CoursesQuery,
+  EnrolledStudentFilterSchema,
+} from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
 import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { BaseResponse, Pagination, UUIDType } from "src/common";
 import type {
@@ -1516,5 +1524,195 @@ export class CourseService {
       .where(eq(coursesSummaryStats.courseId, id));
 
     return courseStats;
+  }
+
+  async getAverageQuizScoreForCourse(courseId: UUIDType): Promise<CourseAverageQuizScoresResponse> {
+    const [averageScorePerQuiz] = await this.db
+      .select({
+        averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
+          (
+            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count))
+            FROM (
+              SELECT
+                l.id AS quiz_id,
+                l.title AS quiz_name,
+                ROUND(AVG(slp.quiz_score), 0) AS average_score,
+                COUNT(DISTINCT slp.student_id) AS finished_count
+              FROM ${lessons} l
+              JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
+              JOIN ${chapters} c ON l.chapter_id = c.id
+              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL
+              GROUP BY l.id, l.title
+            ) AS subquery
+          ),
+          '[]'::jsonb
+        )`,
+      })
+      .from(studentLessonProgress)
+      .leftJoin(chapters, eq(studentLessonProgress.chapterId, chapters.id))
+      .leftJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(courses.id, courseId));
+
+    return averageScorePerQuiz;
+  }
+
+  async getStudentsProgress(query: CourseStudentProgressionQuery) {
+    const {
+      courseId,
+      sort = CourseStudentProgressionSortFields.studentName,
+      perPage = DEFAULT_PAGE_SIZE,
+      page = 1,
+      searchQuery = "",
+    } = query;
+
+    const { sortOrder, sortedField } = getSortOptions(sort);
+
+    const {
+      studentNameExpression,
+      lastActivityExpression,
+      completedLessonsCountExpression,
+      groupNameExpression,
+    } = this.getStudentCourseProgressionExpressions(courseId);
+
+    const studentsProgress = await this.db
+      .select({
+        studentId: sql<UUIDType>`${users.id}`,
+        studentName: studentNameExpression,
+        studentAvatarKey: users.avatarReference,
+        groupName: groupNameExpression,
+        completedLessonsCount: completedLessonsCountExpression,
+        lastActivity: lastActivityExpression,
+      })
+      .from(studentCourses)
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .leftJoin(groups, eq(groups.id, groupUsers.groupId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          or(
+            ilike(users.firstName, `%${searchQuery}%`),
+            ilike(users.lastName, `%${searchQuery}%`),
+            ilike(groups.name, `%${searchQuery}%`),
+          ),
+        ),
+      )
+      .limit(perPage)
+      .offset((page - 1) * perPage)
+      .orderBy(
+        sortOrder(
+          this.getProgressionColumnToSortBy(
+            sortedField as CourseStudentProgressionSortField,
+            lastActivityExpression,
+            completedLessonsCountExpression,
+            studentNameExpression,
+            groupNameExpression,
+          ),
+        ),
+      );
+
+    const [{ totalCount }] = await this.db
+      .select({ totalCount: count() })
+      .from(studentCourses)
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .leftJoin(groups, eq(groups.id, groupUsers.groupId))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          or(
+            ilike(users.firstName, `%${searchQuery}%`),
+            ilike(users.lastName, `%${searchQuery}%`),
+            ilike(groups.name, `%${searchQuery}%`),
+          ),
+        ),
+      );
+
+    const allStudentsProgress = await Promise.all(
+      studentsProgress.map(async (studentProgress) => {
+        const studentAvatarUrl = studentProgress.studentAvatarKey
+          ? await this.userService.getUsersProfilePictureUrl(studentProgress.studentAvatarKey)
+          : null;
+
+        return {
+          ...studentProgress,
+          studentAvatarUrl,
+        };
+      }),
+    );
+
+    return {
+      data: allStudentsProgress,
+      pagination: { page, perPage, totalItems: totalCount },
+    };
+  }
+
+  private getProgressionColumnToSortBy(
+    sort: CourseStudentProgressionSortField,
+    lastActivityExpression: SQL<string | null>,
+    completedLessonsCountExpression: SQL<number>,
+    studentNameExpression: SQL<string>,
+    groupNameExpression: SQL<string | null>,
+  ) {
+    switch (sort) {
+      case CourseStudentProgressionSortFields.studentName:
+        return studentNameExpression;
+      case CourseStudentProgressionSortFields.groupName:
+        return groupNameExpression;
+      case CourseStudentProgressionSortFields.lastActivity:
+        return lastActivityExpression;
+      case CourseStudentProgressionSortFields.completedLessonsCount:
+        return completedLessonsCountExpression;
+      default:
+        return studentNameExpression;
+    }
+  }
+
+  private getStudentCourseProgressionExpressions(courseId: UUIDType) {
+    const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
+
+    const lastActivityExpression = sql<string | null>`(
+          SELECT TO_CHAR(MAX(slp.completed_at), 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+          FROM ${studentLessonProgress} slp
+          JOIN ${lessons} l ON slp.lesson_id = l.id
+          JOIN ${chapters} ch ON l.chapter_id = ch.id
+          WHERE slp.student_id = ${users.id}
+            AND ch.course_id = ${courseId}
+        )`;
+
+    const completedLessonsCountExpression = sql<number>`COALESCE((
+          SELECT COUNT(*)
+          FROM ${studentLessonProgress} slp
+          JOIN ${lessons} l ON slp.lesson_id = l.id
+          JOIN ${chapters} ch ON l.chapter_id = ch.id
+          WHERE slp.student_id = ${users.id}
+            AND ch.course_id = ${courseId}
+            AND slp.completed_at IS NOT NULL
+        ), 0)::float`;
+
+    const groupNameExpression = sql<string | null>`(
+          SELECT g.name
+          FROM ${groups} g
+          JOIN ${groupUsers} gu ON gu.group_id = g.id
+          WHERE gu.user_id = ${users.id}
+        )`;
+
+    const finishedCountExpression = sql<number>`COALESCE((
+          SELECT COUNT(*)
+          FROM ${studentLessonProgress} slp
+          JOIN ${lessons} l ON slp.lesson_id = l.id
+          JOIN ${chapters} ch ON l.chapter_id = ch.id
+          WHERE slp.lesson_id = l.id
+            AND ch.course_id = ${courseId}
+            AND slp.completed_at IS NOT NULL
+        ), 0)::float`;
+
+    return {
+      studentNameExpression,
+      lastActivityExpression,
+      finishedCountExpression,
+      completedLessonsCountExpression,
+      groupNameExpression,
+    };
   }
 }

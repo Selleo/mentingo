@@ -118,3 +118,50 @@ export const enrolledStudentFilterSchema = Type.Object({
 });
 
 export type EnrolledStudentFilterSchema = Static<typeof enrolledStudentFilterSchema>;
+
+// Course student progression query options
+
+export const courseStudentProgressionSortFields = [
+  "studentName",
+  "groupName",
+  "completedLessonsCount",
+  "lastActivity",
+] as const;
+
+export type CourseStundentProgressionSortField =
+  (typeof courseStudentProgressionSortFields)[number];
+
+export const CourseStudentProgressionSortFields: Record<
+  CourseStundentProgressionSortField,
+  string
+> = {
+  studentName: "studentName",
+  groupName: "groupName",
+  completedLessonsCount: "completedLessonsCount",
+  lastActivity: "lastActivity",
+};
+
+export type CourseStudentProgressionSortField = (typeof courseStudentProgressionSortFields)[number];
+
+export const sortCourseStudentProgressionOptions = Type.Union([
+  Type.Literal("studentName"),
+  Type.Literal("groupName"),
+  Type.Literal("completedLessonsCount"),
+  Type.Literal("lastActivity"),
+  Type.Literal("-studentName"),
+  Type.Literal("-groupName"),
+  Type.Literal("-completedLessonsCount"),
+  Type.Literal("-lastActivity"),
+]);
+
+export type SortCourseStudentProgressionOptions = Static<
+  typeof sortCourseStudentProgressionOptions
+>;
+
+export type CourseStudentProgressionQuery = {
+  courseId: UUIDType;
+  page?: number;
+  perPage?: number;
+  searchQuery?: string;
+  sort?: SortCourseStudentProgressionOptions;
+};

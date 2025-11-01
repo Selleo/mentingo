@@ -1152,6 +1152,13 @@
     "statistics": {
       "title": "Statistics",
       "subtitle": "Course performance overview",
+      "details": "Details",
+      "field": {
+        "studentName": "Student",
+        "groupName": "Group",
+        "completedLessonsCount": "Completed lessons",
+        "lastActivity": "Last activity"
+      },
       "overview": {
         "enrolledCount": "Enrolled students count",
         "enrolledCountTooltip": "Number of users enrolled in this course.",
@@ -1159,6 +1166,11 @@
         "completionRateTooltip": "Percentage of users who have completed the entire course.",
         "averageCompletionPercentage": "Average progress",
         "averageCompletionPercentageTooltip": "Average course completion level across all enrolled users.",
+        "averageScorePerQuiz": "Average score per quiz",
+        "averageScorePerQuizSubtitle": "See average results for individual quizzes in the course",
+        "averageQuizScore": "Average quiz score",
+        "completedBy_one": "Completed by {{count}} student",
+        "completedBy_other": "Completed by {{count}} students",
         "courseStatusDistribution": "Course status distribution",
         "courseStatusDistributionTooltip": "Shows how many users have completed, started, or not started the course."
       },
@@ -1778,5 +1790,10 @@
     "providerInformation": {
       "welcome": "Learn about the provider and their contact details."
     }
+  },
+  "pagination": {
+    "showing": "Showing {{startItem}}-{{endItem}} of {{totalItems}} results",
+    "previous": "Previous",
+    "next": "Next"
   }
 }

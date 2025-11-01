@@ -747,7 +747,6 @@
       "envs": "Zmienne środowiskowe"
     }
   },
-
   "adminGroupsView": {
     "name": "Nazwa grupy",
     "characteristic": "Charakterystyka",
@@ -1162,6 +1161,13 @@
     "statistics": {
       "title": "Statystyki",
       "subtitle": "Monitoruj wyniki kursu",
+      "details": "Szczegóły",
+      "field": {
+        "studentName": "Uczeń",
+        "groupName": "Grupa",
+        "completedLessonsCount": "Ukończone lekcje",
+        "lastActivity": "Ostatnia aktywność"
+      },
       "overview": {
         "enrolledCount": "Łącznie zapisanych",
         "enrolledCountTooltip": "Liczba użytkowników zapisanych na ten kurs.",
@@ -1169,6 +1175,12 @@
         "completionRateTooltip": "Procent użytkowników, którzy ukończyli cały kurs.",
         "averageCompletionPercentage": "Średni postęp",
         "averageCompletionPercentageTooltip": "Średni poziom ukończenia kursu przez wszystkich zapisanych użytkowników.",
+        "averageScorePerQuiz": "Średnie wyniki z quizów",
+        "averageScorePerQuizSubtitle": "Zobacz średnie wyniki z poszczególnych quizów zawartych w kursie",
+        "averageQuizScore": "Średni wynik quizu",
+        "completedBy_one": "Ukończył {{count}} student",
+        "completedBy_few": "Ukończyło {{count}} studentów",
+        "completedBy_many": "Ukończyło {{count}} studentów",
         "courseStatusDistribution": "Rozkład statusów kursów",
         "courseStatusDistributionTooltip": "Pokazuje, ilu użytkowników ukończyło, rozpoczęło lub nie rozpoczęło kursu."
       },
@@ -1649,14 +1661,12 @@
     "title": "Motyw organizacji",
     "description": "Dostosuj wygląd swojej platformy, wybierając kolor, który odzwierciedla tożsamość Twojej marki."
   },
-
   "organizationLoginBackgroundImageUpload": {
     "title": "Przesyłanie obrazu tła logowania",
     "description": "Wgraj własny obraz tła dla strony logowania organizacji.",
     "button": {
       "removeBackgroundImage": "Usuń obraz tła"
     },
-
     "toast": {
       "success": "Obraz tła logowania został pomyślnie zmieniony",
       "error": "Nie udało się zmienić obrazu tła logowania"
@@ -1769,5 +1779,10 @@
     "providerInformation": {
       "welcome": "Tutaj znajdziesz informacje o dostawcach i autorach kursów."
     }
+  },
+  "pagination": {
+    "showing": "Wyświetlanie {{startItem}}-{{endItem}} z {{totalItems}} wyników",
+    "previous": "Poprzedni",
+    "next": "Następny"
   }
 }
