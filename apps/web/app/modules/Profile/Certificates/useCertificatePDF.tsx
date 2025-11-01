@@ -11,6 +11,7 @@ interface CertificateToPDFProps {
   completionDate?: string;
   platformLogo?: string | null;
   backgroundImageUrl?: string | null;
+  lang: "pl" | "en";
 }
 
 const useCertificatePDF = () => {
@@ -54,6 +55,7 @@ const useCertificatePDF = () => {
     completionDate,
     platformLogo,
     backgroundImageUrl,
+    lang,
   }: CertificateToPDFProps) => (
     <div
       style={{
@@ -80,6 +82,7 @@ const useCertificatePDF = () => {
           courseName={courseName}
           completionDate={completionDate}
           isDownload={true}
+          lang={lang}
           platformLogo={platformLogo}
           backgroundImageUrl={backgroundImageUrl}
         />

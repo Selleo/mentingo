@@ -97,6 +97,7 @@ const Certificate = ({
         courseName={certData?.courseTitle || courseName}
         completionDate={courseCompletionDate}
         platformLogo={platformLogo}
+        lang="en"
         backgroundImageUrl={backgroundImageUrl}
       />
       <div className="grid grid-cols-1 gap-4">
