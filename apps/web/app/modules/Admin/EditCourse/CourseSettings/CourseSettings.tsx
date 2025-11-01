@@ -4,16 +4,14 @@ import { useTranslation } from "react-i18next";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
 import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
-import { categoriesQueryOptions, useCategoriesSuspense } from "~/api/queries/useCategories";
+import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import { queryClient } from "~/api/queryClient";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
 import Editor from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
-import { DialogFooter } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -22,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Separator } from "~/components/ui/separator";
 import { Toggle } from "~/components/ui/toggle";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
@@ -30,7 +27,7 @@ import {
   MAX_COURSE_DESCRIPTION_HTML_LENGTH,
   MAX_COURSE_DESCRIPTION_LENGTH,
 } from "../../AddCourse/constants";
-import { useCreateCategoryForm } from "../../Categories/hooks/useCreateCategoryForm";
+import { InlineCategoryCreationForm } from "../../Categories/components/InlineCategoryCreationForm";
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
@@ -60,19 +57,10 @@ const CourseSettings = ({
     thumbnailS3Key,
     courseId: courseId || "",
   });
-  const { form: createCategoryForm, onSubmit: createCategoryOnSubmit } = useCreateCategoryForm(
-    ({ data }) => {
-      if (data.id) {
-        queryClient.fetchQuery(categoriesQueryOptions());
-        createCategoryForm.reset();
-      }
-    },
-  );
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
   const isFormValid = form.formState.isValid;
-  const { isValid: createCategoryIsFormValid } = createCategoryForm.formState;
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(
     thumbnailS3SingedUrl || undefined,
   );
@@ -181,7 +169,7 @@ const CourseSettings = ({
                         <span className="mr-1 text-error-600">*</span>
                         {t("adminCourseView.settings.field.category")}
                       </Label>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger id="categoryId">
                             <SelectValue placeholder={t("selectCategory")} />
@@ -193,39 +181,11 @@ const CourseSettings = ({
                               {category.title}
                             </SelectItem>
                           ))}
-                          <Separator className="my-1" />
-                          <Form {...createCategoryForm}>
-                            <form
-                              onSubmit={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                createCategoryForm.handleSubmit(createCategoryOnSubmit)();
-                              }}
-                              className="flex gap-1"
-                            >
-                              <FormField
-                                control={createCategoryForm.control}
-                                name="title"
-                                render={({ field }) => (
-                                  <FormItem className="w-full">
-                                    <FormControl>
-                                      <Input
-                                        id="title"
-                                        {...field}
-                                        onKeyDown={(e) => e.stopPropagation()}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <DialogFooter>
-                                <Button type="submit" disabled={!createCategoryIsFormValid}>
-                                  {t("adminCategoryView.button.createCategory")}
-                                </Button>
-                              </DialogFooter>
-                            </form>
-                          </Form>
+                          <InlineCategoryCreationForm
+                            onCategoryCreated={(categoryId) => {
+                              form.setValue("categoryId", categoryId, { shouldValidate: true });
+                            }}
+                          />
                         </SelectContent>
                       </Select>
                       <FormMessage />
