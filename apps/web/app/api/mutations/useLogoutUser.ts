@@ -7,7 +7,7 @@ import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
 
-import { requestManager, ApiClient } from "../api-client";
+import { ApiClient } from "../api-client";
 import { queryClient } from "../queryClient";
 
 import { useAuthStore } from "./../../modules/Auth/authStore";
@@ -32,9 +32,7 @@ export function useLogoutUser() {
       return response.data;
     },
     onSuccess: async () => {
-      requestManager.abortAll();
-
-      await queryClient.invalidateQueries();
+      queryClient.clear();
 
       clearHistory();
 
