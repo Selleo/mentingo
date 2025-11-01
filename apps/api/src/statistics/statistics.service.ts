@@ -11,6 +11,7 @@ import {
 
 import { FileService } from "src/file/file.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type {
   CourseStudentsStatsByMonth,
@@ -18,6 +19,8 @@ import type {
   UserStats,
 } from "./schemas/userStats.schema";
 import type { UUIDType } from "src/common";
+import type { UserRole } from "src/user/schemas/userRoles";
+
 @Injectable()
 export class StatisticsService {
   constructor(
@@ -63,15 +66,45 @@ export class StatisticsService {
     };
   }
 
-  async getContentCreatorStats(userId: UUIDType) {
-    const fiveMostPopularCourses =
-      await this.statisticsRepository.getFiveMostPopularCourses(userId);
-    const [totalCoursesCompletionStats] =
-      await this.statisticsRepository.getTotalCoursesCompletion(userId);
+  async getStats(userId: UUIDType, userRole: UserRole) {
+    const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses(
+      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+    );
+    const [totalCoursesCompletionStats] = await this.statisticsRepository.getTotalCoursesCompletion(
+      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+    );
     const [conversionAfterFreemiumLesson] =
-      await this.statisticsRepository.getConversionAfterFreemiumLesson(userId);
-    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats(userId);
-    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore(userId);
+      await this.statisticsRepository.getConversionAfterFreemiumLesson(
+        userRole !== USER_ROLES.ADMIN ? userId : undefined,
+      );
+    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats(
+      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+    );
+    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore(
+      userRole !== USER_ROLES.ADMIN ? userId : undefined,
+    );
+
+    return {
+      fiveMostPopularCourses,
+      totalCoursesCompletionStats,
+      conversionAfterFreemiumLesson,
+      courseStudentsStats: this.formatCourseStudentStats(courseStudentsStats),
+      avgQuizScore: {
+        correctAnswerCount: avgQuizScore.correctAnswersCount,
+        wrongAnswerCount: avgQuizScore.wrongAnswersCount,
+        answerCount: avgQuizScore.correctAnswersCount + avgQuizScore.wrongAnswersCount,
+      },
+    };
+  }
+
+  async getAdminStats() {
+    const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses();
+    const [totalCoursesCompletionStats] =
+      await this.statisticsRepository.getTotalCoursesCompletion();
+    const [conversionAfterFreemiumLesson] =
+      await this.statisticsRepository.getConversionAfterFreemiumLesson();
+    const courseStudentsStats = await this.statisticsRepository.getCourseStudentsStats();
+    const [avgQuizScore] = await this.statisticsRepository.getAvgQuizScore();
 
     return {
       fiveMostPopularCourses,

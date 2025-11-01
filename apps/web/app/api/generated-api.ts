@@ -191,7 +191,7 @@ export interface GetUserStatisticsResponse {
   };
 }
 
-export interface GetContentCreatorStatsResponse {
+export interface GetStatsResponse {
   data: {
     fiveMostPopularCourses: {
       courseName: string;
@@ -2853,12 +2853,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name StatisticsControllerGetContentCreatorStats
-     * @request GET:/api/statistics/content-creator-stats
+     * @name StatisticsControllerGetStats
+     * @request GET:/api/statistics/stats
      */
-    statisticsControllerGetContentCreatorStats: (params: RequestParams = {}) =>
-      this.request<GetContentCreatorStatsResponse, any>({
-        path: `/api/statistics/content-creator-stats`,
+    statisticsControllerGetStats: (params: RequestParams = {}) =>
+      this.request<GetStatsResponse, any>({
+        path: `/api/statistics/stats`,
         method: "GET",
         format: "json",
         ...params,

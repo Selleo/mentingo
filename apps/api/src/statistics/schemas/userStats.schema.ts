@@ -70,7 +70,7 @@ const QuizScoreSchema = Type.Object({
   answerCount: Type.Number(),
 });
 
-export const ContentCreatorStatsSchema = Type.Object({
+export const StatsSchema = Type.Object({
   fiveMostPopularCourses: Type.Array(PopularCourseStatsSchema),
   totalCoursesCompletionStats: Type.Object({
     completionPercentage: Type.Number(),
@@ -96,5 +96,5 @@ const UserStatisticSchema = Type.Object({
 export type UserStats = Static<typeof UserStatsSchema>;
 export type StatsByMonth = Static<typeof StatsByMonthSchema>;
 export type UserStatistic = Static<typeof UserStatisticSchema>;
-export type ContentCreatorStats = Static<typeof ContentCreatorStatsSchema>;
+export type Stats = Static<typeof StatsSchema>;
 export type CourseStudentsStatsByMonth = Static<typeof CourseStudentsStatsByMonthSchema>;

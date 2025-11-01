@@ -296,16 +296,16 @@
         }
       }
     },
-    "/api/statistics/content-creator-stats": {
+    "/api/statistics/stats": {
       "get": {
-        "operationId": "StatisticsController_getContentCreatorStats",
+        "operationId": "StatisticsController_getStats",
         "parameters": [],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetContentCreatorStatsResponse"
+                  "$ref": "#/components/schemas/GetStatsResponse"
                 }
               }
             }
@@ -5230,7 +5230,7 @@
           "data"
         ]
       },
-      "GetContentCreatorStatsResponse": {
+      "GetStatsResponse": {
         "type": "object",
         "properties": {
           "data": {

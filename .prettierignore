@@ -17,6 +17,7 @@
 **/coverage
 **/*.generated.*
 **/generated
+**/generated-api.ts
 **/api/src/swagger/*
 **/.docusaurus
 **/*.d.ts

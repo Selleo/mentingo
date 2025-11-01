@@ -138,7 +138,7 @@ export class StatisticsRepository {
     return result;
   }
 
-  async getFiveMostPopularCourses(userId: UUIDType) {
+  async getFiveMostPopularCourses(userId?: UUIDType) {
     return this.db
       .select({
         courseName: courses.title,
@@ -146,14 +146,14 @@ export class StatisticsRepository {
       })
       .from(coursesSummaryStats)
       .innerJoin(courses, eq(coursesSummaryStats.courseId, courses.id))
-      .where(eq(courses.authorId, userId))
+      .where(userId ? eq(courses.authorId, userId) : undefined)
       .orderBy(
         sql`${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount} DESC`,
       )
       .limit(5);
   }
 
-  async getTotalCoursesCompletion(userId: UUIDType) {
+  async getTotalCoursesCompletion(userId?: UUIDType) {
     return this.db
       .select({
         totalCoursesCompletion: sql<number>`COALESCE(SUM(${coursesSummaryStats.completedCourseStudentCount}), 0)::INTEGER`,
@@ -161,10 +161,10 @@ export class StatisticsRepository {
         completionPercentage: sql<number>`COALESCE((SUM(${coursesSummaryStats.completedCourseStudentCount})::DECIMAL / NULLIF(SUM(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}), 0) * 100), 0)::INTEGER`,
       })
       .from(coursesSummaryStats)
-      .where(eq(coursesSummaryStats.authorId, userId));
+      .where(userId ? eq(coursesSummaryStats.authorId, userId) : undefined);
   }
 
-  async getConversionAfterFreemiumLesson(userId: UUIDType) {
+  async getConversionAfterFreemiumLesson(userId?: UUIDType) {
     return this.db
       .select({
         purchasedCourses: sql<number>`COALESCE(SUM(${coursesSummaryStats.paidPurchasedAfterFreemiumCount}), 0)::INTEGER`,
@@ -172,23 +172,23 @@ export class StatisticsRepository {
         conversionPercentage: sql<number>`COALESCE(SUM(${coursesSummaryStats.paidPurchasedAfterFreemiumCount})::DECIMAL / NULLIF(SUM(${coursesSummaryStats.completedFreemiumStudentCount}), 0) * 100, 0)::INTEGER`,
       })
       .from(coursesSummaryStats)
-      .where(eq(coursesSummaryStats.authorId, userId));
+      .where(userId ? eq(coursesSummaryStats.authorId, userId) : undefined);
   }
 
-  async getCourseStudentsStats(userId: UUIDType) {
+  async getCourseStudentsStats(userId?: UUIDType) {
     return this.db
       .select({
         month: sql<string>`${courseStudentsStats.year} || '-' || ${courseStudentsStats.month}+1`,
         newStudentsCount: sql<number>`SUM(${courseStudentsStats.newStudentsCount})::INTEGER`,
       })
       .from(courseStudentsStats)
-      .where(eq(courseStudentsStats.authorId, userId))
+      .where(userId ? eq(courseStudentsStats.authorId, userId) : undefined)
       .groupBy(courseStudentsStats.month, courseStudentsStats.year)
       .orderBy(desc(courseStudentsStats.month), desc(courseStudentsStats.year))
       .limit(12);
   }
 
-  async getAvgQuizScore(userId: UUIDType) {
+  async getAvgQuizScore(userId?: UUIDType) {
     return this.db
       .select({
         correctAnswersCount: sql<number>`COALESCE(SUM(${quizAttempts.correctAnswers}), 0)::INTEGER`,
@@ -196,7 +196,7 @@ export class StatisticsRepository {
       })
       .from(quizAttempts)
       .innerJoin(courses, eq(quizAttempts.courseId, courses.id))
-      .where(eq(courses.authorId, userId));
+      .where(userId ? eq(courses.authorId, userId) : undefined);
   }
 
   async createQuizAttempt(data: {
