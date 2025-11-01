@@ -20,6 +20,7 @@ import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "src/ai/utils/ai.type";
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
@@ -36,6 +37,7 @@ import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 import { TokenService } from "./token.service";
 
+import type { CreatePasswordBody } from "./schemas/create-password.schema";
 import type { Response } from "express";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { UserResponse } from "src/user/schemas/user.schema";
@@ -61,11 +63,13 @@ export class AuthService {
     firstName,
     lastName,
     password,
+    language,
   }: {
     email: string;
     firstName: string;
     lastName: string;
     password: string;
+    language: string;
   }) {
     const [existingUser] = await this.db.select().from(users).where(eq(users.email, email));
     if (existingUser) {
@@ -90,11 +94,16 @@ export class AuthService {
       });
 
       await trx.insert(userOnboarding).values({ userId: newUser.id });
+      const languageGuard = Object.values(SUPPORTED_LANGUAGES).includes(
+        language as SupportedLanguages,
+      )
+        ? language
+        : "en";
 
       await this.settingsService.createSettingsIfNotExists(
         newUser.id,
         newUser.role as UserRole,
-        undefined,
+        { language: languageGuard },
         trx,
       );
 
@@ -280,7 +289,8 @@ export class AuthService {
     });
   }
 
-  public async createPassword(token: string, password: string) {
+  public async createPassword(data: CreatePasswordBody) {
+    const { createToken: token, password, language } = data;
     const createToken = await this.createPasswordService.getOneByToken(token);
 
     const [existingUser] = await this.db
@@ -307,9 +317,16 @@ export class AuthService {
       .values({ userId: createToken.userId, password: hashedPassword });
     await this.createPasswordService.deleteToken(token);
 
+    const languageGuard = Object.values(SUPPORTED_LANGUAGES).includes(
+      language as SupportedLanguages,
+    )
+      ? language
+      : "en";
+
     await this.settingsService.createSettingsIfNotExists(
       createToken.userId,
       existingUser.role as UserRole,
+      { language: languageGuard },
     );
 
     this.eventBus.publish(new UserPasswordCreatedEvent(existingUser));

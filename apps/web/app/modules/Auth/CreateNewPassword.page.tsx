@@ -13,6 +13,7 @@ import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.schema";
+import { detectBrowserLanguage, SUPPORTED_LANGUAGES } from "~/utils/browser-language";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -72,7 +73,13 @@ export default function CreateNewPasswordPage() {
 
     if (createToken) {
       createNewPassword({
-        data: { password: data.newPassword, createToken: createToken },
+        data: {
+          password: data.newPassword,
+          createToken: createToken,
+          language: SUPPORTED_LANGUAGES.includes(detectBrowserLanguage())
+            ? detectBrowserLanguage()
+            : "en",
+        },
       }).then(() => {
         toast({
           description: t("changePasswordView.toast.passwordCreatedSuccessfully"),

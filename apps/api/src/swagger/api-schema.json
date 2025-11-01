@@ -4512,13 +4512,26 @@
                 "type": "string"
               }
             ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "en",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
           "email",
           "firstName",
           "lastName",
-          "password"
+          "password",
+          "language"
         ]
       },
       "RegisterResponse": {
@@ -4879,11 +4892,24 @@
           "createToken": {
             "minLength": 1,
             "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "en",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
           "password",
-          "createToken"
+          "createToken",
+          "language"
         ]
       },
       "ResetPasswordBody": {

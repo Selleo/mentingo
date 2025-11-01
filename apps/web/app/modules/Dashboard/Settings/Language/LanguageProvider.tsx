@@ -5,20 +5,28 @@ import { useCurrentLanguage } from "~/api/mutations/useCurrentLanguage";
 
 import { useLanguageStore } from "./LanguageStore";
 
-import type { Language } from "./LanguageStore";
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const { language: currentLanguage, isFromDatabase } = useCurrentLanguage();
-  const { setLanguage } = useLanguageStore();
+  const {
+    language: currentLanguage,
+    isFromDatabase,
+    isFromLocalStorage,
+    currentUser,
+    userSettings,
+  } = useCurrentLanguage();
+  const { initializeLanguage } = useLanguageStore();
 
   useEffect(() => {
-    if (isFromDatabase) {
-      setLanguage(currentLanguage as Language);
+    if (currentUser) {
+      initializeLanguage(userSettings?.language);
+    } else {
+      initializeLanguage();
     }
+  }, [currentUser, userSettings?.language, initializeLanguage]);
 
+  useEffect(() => {
     document.documentElement.lang = currentLanguage;
     i18n.changeLanguage(currentLanguage);
-  }, [currentLanguage, isFromDatabase, setLanguage]);
+  }, [currentLanguage, isFromDatabase, isFromLocalStorage]);
 
   return <>{children}</>;
 }

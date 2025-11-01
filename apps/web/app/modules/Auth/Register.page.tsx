@@ -15,6 +15,7 @@ import { FormValidationError } from "~/components/ui/form-validation-error";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
+import { detectBrowserLanguage, SUPPORTED_LANGUAGES } from "~/utils/browser-language";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { passwordSchema } from "../Dashboard/Settings/schema/password.schema";
@@ -31,6 +32,7 @@ const registerSchema = z.object({
   lastName: z.string().min(2, { message: "registerView.validation.lastName" }),
   email: z.string().email({ message: "registerView.validation.email" }),
   password: passwordSchema,
+  language: z.enum([...SUPPORTED_LANGUAGES] as [string, ...string[]]),
 });
 
 export default function RegisterPage() {
@@ -58,6 +60,9 @@ export default function RegisterPage() {
       lastName: "",
       email: "",
       password: "",
+      language: SUPPORTED_LANGUAGES.includes(detectBrowserLanguage())
+        ? detectBrowserLanguage()
+        : "en",
     },
   });
 

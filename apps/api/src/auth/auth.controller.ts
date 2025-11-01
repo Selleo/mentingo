@@ -187,7 +187,7 @@ export class AuthController {
   async createPassword(
     @Body() data: CreatePasswordBody,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.authService.createPassword(data.createToken, data.password);
+    await this.authService.createPassword(data);
     return new BaseResponse({ message: "Password created successfully" });
   }
 

@@ -54,6 +54,7 @@ describe("AuthService", () => {
         firstName: user.firstName,
         lastName: user.lastName,
         password,
+        language: "en",
       });
 
       const [savedUser] = await db.select().from(users).where(eq(users.email, user.email));
@@ -82,6 +83,7 @@ describe("AuthService", () => {
         firstName: user.firstName,
         lastName: user.lastName,
         password,
+        language: "en",
       });
       expect(allEmails).toHaveLength(1);
     });
@@ -96,6 +98,7 @@ describe("AuthService", () => {
           firstName: user.firstName,
           lastName: user.lastName,
           password: "password123",
+          language: "en",
         }),
       ).rejects.toThrow(ConflictException);
     });
