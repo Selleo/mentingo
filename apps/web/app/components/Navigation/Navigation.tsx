@@ -1,9 +1,13 @@
+import { useLocation } from "@remix-run/react";
 import { useEffect, useState, Fragment } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { shouldHideTopbarAndSidebar } from "~/modules/Admin/Admin.layout";
 
 import { NavigationFooter } from "./NavigationFooter";
 import { NavigationGlobalSearchWrapper } from "./NavigationGlobalSearchWrapper";
@@ -14,11 +18,13 @@ import { useMobileNavigation } from "./useMobileNavigation";
 import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
 import type { UserRole } from "~/utils/userRoles";
 
-type DashboardNavigationProps = { menuItems: NavigationGroups[] };
+type DashboardNavigationProps = { menuItems?: NavigationGroups[] };
 
 export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
   const { role } = useUserRole();
+  const { t } = useTranslation();
+  const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
 
   useEffect(() => {
@@ -32,7 +38,13 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     };
   }, []);
 
+  if (!menuItems) {
+    menuItems = mapNavigationItems(getNavigationConfig(role === "user", t));
+  }
+
   if (!role) return null;
+
+  if (shouldHideTopbarAndSidebar(pathname)) return null;
 
   return (
     <TooltipProvider>
