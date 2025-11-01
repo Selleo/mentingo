@@ -1,3 +1,67 @@
+<a name="v3.19.0"></a>
+
+## [v3.19.0] - 01.11.2025
+
+### Features:
+
+- add inline category creation form and update category selection in course settings and add course view ([#855](https://github.com/Selleo/mentingo/issues/855))
+
+- added language toggle to certificates ([#849](https://github.com/Selleo/mentingo/issues/849))
+
+- course statistics about students progress for admin ([#834](https://github.com/Selleo/mentingo/issues/834))
+
+- set default interface language according to browser settings ([#814](https://github.com/Selleo/mentingo/issues/814))
+
+### Bug Fixes:
+
+- Empty sections in content creator profile are hidden ([#873](https://github.com/Selleo/mentingo/issues/873))
+
+- separated langfuse compose to separate file ([#864](https://github.com/Selleo/mentingo/issues/864))
+
+- invalidation on logout ([#857](https://github.com/Selleo/mentingo/issues/857))
+
+- failing tests after user onboarding feature ([#856](https://github.com/Selleo/mentingo/issues/856))
+
+- fixed flickering logo ([#847](https://github.com/Selleo/mentingo/issues/847))
+
+- fixed lesson status on completion ([#845](https://github.com/Selleo/mentingo/issues/845))
+
+- allow admin to see all statistics regardless of the course creator ([#796](https://github.com/Selleo/mentingo/issues/796))
+
+- getting back from course preview to course edit via back button ([#781](https://github.com/Selleo/mentingo/issues/781))
+
+- archiving users should block their access to the platform ([#741](https://github.com/Selleo/mentingo/issues/741))
+
+- use companyShortName instead of companyName in global search ([#842](https://github.com/Selleo/mentingo/issues/842))
+
+### Chores:
+
+- translate statuses to polish on courses page ([#861](https://github.com/Selleo/mentingo/issues/861))
+
+### Documentation:
+
+- update api .env.example ([#848](https://github.com/Selleo/mentingo/issues/848))
+
+<a name="v3.18.0"></a>
+
+## [v3.18.0] - 01.11.2025
+
+### Features:
+
+- implemented various types of AI mentor conversation ([#801](https://github.com/Selleo/mentingo/issues/801))
+
+### Bug Fixes:
+
+- Empty sections in content creator profile are hidden
+
+### Documentation:
+
+- update changelog for version v3.18.0
+
+### Tests:
+
+- sentry config ([#862](https://github.com/Selleo/mentingo/issues/862))
+
 <a name="v3.17.0"></a>
 
 ## [v3.17.0] - 27.10.2025
@@ -11,6 +75,10 @@
 ### Bug Fixes:
 
 - allow author to preview private/draft courses ([#818](https://github.com/Selleo/mentingo/issues/818))
+
+### Documentation:
+
+- update changelog for version v3.17.0
 
 <a name="v3.16.0"></a>
 
@@ -1796,7 +1864,9 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.17.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.19.0...HEAD
+[v3.19.0]: https://github.com/Selleo/mentingo/compare/v3.18.0...v3.19.0
+[v3.18.0]: https://github.com/Selleo/mentingo/compare/v3.17.0...v3.18.0
 [v3.17.0]: https://github.com/Selleo/mentingo/compare/v3.16.0...v3.17.0
 [v3.16.0]: https://github.com/Selleo/mentingo/compare/v3.15.0...v3.16.0
 [v3.15.0]: https://github.com/Selleo/mentingo/compare/v3.14.1...v3.15.0
