@@ -123,6 +123,10 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password");
     }
 
+    if (user.archived) {
+      throw new UnauthorizedException("Your account has been archived");
+    }
+
     const { accessToken, refreshToken } = await this.getTokens(user);
 
     const { avatarReference, ...userWithoutAvatar } = user;
@@ -413,6 +417,10 @@ export class AuthService {
 
     const { inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
     let [user] = await this.db.select().from(users).where(eq(users.email, userCallback.email));
+
+    if (user?.archived) {
+      throw new UnauthorizedException("Your account has been archived");
+    }
 
     if (!user && inviteOnlyRegistration) {
       throw new UnauthorizedException("Registration is invite-only.");
