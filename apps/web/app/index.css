@@ -306,3 +306,34 @@ html {
     background-color: darkgrey;
   }
 }
+
+@keyframes shimmer-sweep-45deg {
+  0% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(60%);
+  }
+}
+
+.shimmer-45 {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-45::after {
+  content: "";
+  position: absolute;
+  inset: -50% -60%;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0) 35%,
+    rgba(0, 0, 0, 0.02) 45%,
+    rgba(0, 0, 0, 0.04) 50%,
+    rgba(0, 0, 0, 0.02) 55%,
+    rgba(0, 0, 0, 0) 65%
+  );
+  animation: shimmer-sweep-45deg 1.8s linear infinite;
+}
