@@ -46,11 +46,6 @@ export default function CourseViewPage() {
     return course?.completedChapterCount === course?.courseChapterCount;
   }, [course?.completedChapterCount, course?.courseChapterCount]);
 
-  const lessonCount = useMemo(
-    () => course?.chapters?.reduce((acc, chapter) => acc + chapter.lessons.length, 0) || 0,
-    [course],
-  );
-
   const courseViewTabs = useMemo(
     () => [
       {
@@ -71,11 +66,11 @@ export default function CourseViewPage() {
       },
       {
         title: t("studentCourseView.tabs.statistics"),
-        content: <CourseAdminStatistics lessonCount={lessonCount} />,
+        content: <CourseAdminStatistics course={course} />,
         isForAdminLike: true,
       },
     ],
-    [t, course, lessonCount],
+    [t, course],
   );
 
   const certificateInfo = useMemo(() => {

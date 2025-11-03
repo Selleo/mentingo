@@ -1157,11 +1157,21 @@
       "title": "Statistics",
       "subtitle": "Course performance overview",
       "details": "Details",
+      "filterByQuiz": "Filter by quiz",
+      "allQuizzes": "All quizzes",
+      "tabs": {
+        "progress": "Progress",
+        "quizResults": "Quiz Results"
+      },
       "field": {
         "studentName": "Student",
         "groupName": "Group",
         "completedLessonsCount": "Completed lessons",
-        "lastActivity": "Last activity"
+        "lastActivity": "Last activity",
+        "quizName": "Quiz",
+        "quizScore": "Score",
+        "attempts": "Attempts",
+        "lastAttempt": "Last Attempt"
       },
       "overview": {
         "enrolledCount": "Enrolled students count",
@@ -1798,6 +1808,7 @@
   "pagination": {
     "showing": "Showing {{startItem}}-{{endItem}} of {{totalItems}} results",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "noData": "No data found"
   }
 }

@@ -35,6 +35,7 @@ import { CourseService } from "src/courses/course.service";
 import {
   allCoursesForContentCreatorSchema,
   allStudentCourseProgressionSchema,
+  allStudentQuizResultsSchema,
   courseAverageQuizScoresSchema,
   getCourseStatisticsSchema,
 } from "src/courses/schemas/course.schema";
@@ -46,6 +47,8 @@ import {
   CoursesStatusOptions,
   sortCourseStudentProgressionOptions,
   SortCourseStudentProgressionOptions,
+  sortCourseStudentQuizResultsOptions,
+  SortCourseStudentQuizResultsOptions,
 } from "src/courses/schemas/courseQuery";
 import { CreateCourseBody, createCourseSchema } from "src/courses/schemas/createCourse.schema";
 import {
@@ -72,6 +75,7 @@ import type {
   AllCoursesResponse,
   AllStudentCourseProgressionResponse,
   AllStudentCoursesResponse,
+  AllStudentQuizResultsResponse,
   CourseStatisticsResponse,
 } from "src/courses/schemas/course.schema";
 import type {
@@ -501,5 +505,41 @@ export class CourseController {
     const studentsProgression = await this.courseService.getStudentsProgress(query);
 
     return new PaginatedResponse(studentsProgression);
+  }
+
+  @Get(":courseId/statistics/students-quiz-results")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "page", schema: Type.Number() },
+      { type: "query", name: "perPage", schema: Type.Number() },
+      { type: "query", name: "quizId", schema: Type.String() },
+      {
+        type: "query",
+        name: "sort",
+        schema: sortCourseStudentQuizResultsOptions,
+      },
+    ],
+    response: paginatedResponse(allStudentQuizResultsSchema),
+  })
+  async getCourseStudentsQuizResults(
+    @Param("courseId") courseId: UUIDType,
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+    @Query("quizId") quizId: string,
+    @Query("sort") sort: SortCourseStudentQuizResultsOptions,
+  ): Promise<PaginatedResponse<AllStudentQuizResultsResponse>> {
+    const query = {
+      courseId,
+      page,
+      perPage,
+      quizId,
+      sort,
+    };
+
+    const studentQuizResults = await this.courseService.getStudentsQuizResults(query);
+
+    return new PaginatedResponse(studentQuizResults);
   }
 }

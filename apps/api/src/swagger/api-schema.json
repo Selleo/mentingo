@@ -2753,6 +2753,106 @@
         }
       }
     },
+    "/api/course/{courseId}/statistics/students-quiz-results": {
+      "get": {
+        "operationId": "CourseController_getCourseStudentsQuizResults",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "quizId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "quizName",
+                  "type": "string"
+                },
+                {
+                  "const": "quizScore",
+                  "type": "string"
+                },
+                {
+                  "const": "attempts",
+                  "type": "string"
+                },
+                {
+                  "const": "lastAttempt",
+                  "type": "string"
+                },
+                {
+                  "const": "-studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "-quizName",
+                  "type": "string"
+                },
+                {
+                  "const": "-quizScore",
+                  "type": "string"
+                },
+                {
+                  "const": "-attempts",
+                  "type": "string"
+                },
+                {
+                  "const": "-lastAttempt",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseStudentsQuizResultsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -9725,6 +9825,86 @@
                 "groupName",
                 "completedLessonsCount",
                 "lastActivity"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCourseStudentsQuizResultsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "studentId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "studentName": {
+                  "type": "string"
+                },
+                "studentAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "quizName": {
+                  "type": "string"
+                },
+                "quizScore": {
+                  "type": "number"
+                },
+                "attempts": {
+                  "type": "number"
+                },
+                "lastAttempt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "studentId",
+                "studentName",
+                "studentAvatarUrl",
+                "quizName",
+                "quizScore",
+                "attempts",
+                "lastAttempt"
               ]
             }
           },

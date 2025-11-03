@@ -1174,6 +1174,25 @@ export interface GetCourseStudentsProgressResponse {
   appliedFilters?: object;
 }
 
+export interface GetCourseStudentsQuizResultsResponse {
+  data: {
+    /** @format uuid */
+    studentId: string;
+    studentName: string;
+    studentAvatarUrl: string | null;
+    quizName: string;
+    quizScore: number;
+    attempts: number;
+    lastAttempt: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -4215,6 +4234,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetCourseStudentsProgressResponse, any>({
         path: `/api/course/${courseId}/statistics/students-progress`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseStudentsQuizResults
+     * @request GET:/api/course/{courseId}/statistics/students-quiz-results
+     */
+    courseControllerGetCourseStudentsQuizResults: (
+      courseId: string,
+      query?: {
+        page?: number;
+        perPage?: number;
+        quizId?: string;
+        sort?:
+          | "studentName"
+          | "quizName"
+          | "quizScore"
+          | "attempts"
+          | "lastAttempt"
+          | "-studentName"
+          | "-quizName"
+          | "-quizScore"
+          | "-attempts"
+          | "-lastAttempt";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseStudentsQuizResultsResponse, any>({
+        path: `/api/course/${courseId}/statistics/students-quiz-results`,
         method: "GET",
         query: query,
         format: "json",

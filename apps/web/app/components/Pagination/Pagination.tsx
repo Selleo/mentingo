@@ -106,7 +106,7 @@ export const Pagination = ({
   };
 
   if (totalItems === 0) {
-    return null;
+    return <div className="w-full text-center py-8 body-base-md">{t("pagination.noData")}</div>;
   }
 
   return (
