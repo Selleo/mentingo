@@ -2,6 +2,7 @@ import { Link } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
+import Viewer from "~/components/RichText/Viever";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ChapterCard } from "~/modules/Statistics/Client/components/ChapterCard";
@@ -60,7 +61,7 @@ export const ContinueLearningCard = ({ isLoading = false, lesson }: ContinueLear
           {lesson?.courseTitle}
         </a>
         <p className="md:body-base sr-only md:not-sr-only md:mt-6 md:text-neutral-800 2xl:sr-only">
-          {lesson?.courseDescription}
+          <Viewer content={lesson?.courseDescription} />
         </p>
       </div>
       <ChapterCard {...lesson} />

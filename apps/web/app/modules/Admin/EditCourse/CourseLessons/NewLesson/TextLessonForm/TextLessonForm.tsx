@@ -46,14 +46,6 @@ const TextLessonForm = ({
     setIsModalOpen(true);
   };
 
-  const maxDescriptionFieldLength = 5000;
-
-  const watchedContentLength = form.watch("description").length;
-  const descriptionFieldCharactersLeft = Math.max(
-    0,
-    maxDescriptionFieldLength - watchedContentLength,
-  );
-
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
       <div className="flex flex-col gap-y-1">
@@ -110,10 +102,6 @@ const TextLessonForm = ({
               </FormItem>
             )}
           />
-
-          <p className="mt-1 text-neutral-800">
-            {descriptionFieldCharactersLeft} {t("adminCourseView.settings.other.charactersLeft")}
-          </p>
 
           {form.formState.errors.description && (
             <p className="details-md flex items-center gap-x-1.5 text-error-600">

@@ -50,6 +50,8 @@ const CourseSettings = ({
   thumbnailS3Key,
   hasCertificate = false,
 }: CourseSettingsProps) => {
+  const { t } = useTranslation();
+
   const { form, onSubmit } = useCourseSettingsForm({
     title,
     description,
@@ -66,7 +68,6 @@ const CourseSettings = ({
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { t } = useTranslation();
   const watchedTitle = form.watch("title");
   const watchedDescription = form.watch("description");
   const watchedCategoryId = form.getValues("categoryId");
@@ -203,12 +204,8 @@ const CourseSettings = ({
                   {t("adminCourseView.settings.other.reachedCharactersLimitHtml")}
                 </p>
               )}
-              {descriptionFieldCharactersLeft <= 0 ? (
+              {descriptionFieldCharactersLeft <= 0 && (
                 <p className="text-sm text-red-500">You have reached the character limit.</p>
-              ) : (
-                <p className="mt-1 text-neutral-800">
-                  {descriptionFieldCharactersLeft} characters left
-                </p>
               )}
               <FormField
                 control={form.control}

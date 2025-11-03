@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
@@ -24,10 +25,11 @@ export const useCourseSettingsForm = ({
   thumbnailS3Key,
   courseId,
 }: CourseSettingsProps) => {
+  const { t } = useTranslation();
   const { mutateAsync: updateCourse } = useUpdateCourse();
 
   const form = useForm<CourseSettingsFormValues>({
-    resolver: zodResolver(courseSettingsFormSchema),
+    resolver: zodResolver(courseSettingsFormSchema(t)),
     defaultValues: {
       title: title || "",
       description: description || "",

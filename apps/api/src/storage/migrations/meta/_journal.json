@@ -337,6 +337,13 @@
       "when": 1761919146339,
       "tag": "0047_added_ai_mentor_types",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1762164850617,
+      "tag": "0048_bump_text_fields_limit",
+      "breakpoints": true
     }
   ]
 }
