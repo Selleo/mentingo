@@ -43,7 +43,7 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
     editable: false,
     editorProps: {
       attributes: {
-        class: cn({ "prose max-w-none": variant === "lesson" }),
+        class: cn({ "prose max-w-none dark:prose-invert": variant === "lesson" }),
       },
     },
   });
