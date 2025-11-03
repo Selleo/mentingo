@@ -85,10 +85,12 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     );
   }, [course]);
 
-  const lessonOptions = useMemo(() => {
+  const aiMentorLessons = useMemo(() => {
     return (
       course?.chapters.flatMap((chapter) =>
-        chapter.lessons.map((lesson) => ({ id: lesson.id, title: lesson.title })),
+        chapter.lessons
+          .filter((lesson) => lesson.type === LessonType.AI_MENTOR)
+          .map((lesson) => ({ id: lesson.id, title: lesson.title })),
       ) || []
     );
   }, [course]);
@@ -222,7 +224,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                         <SelectItem value="all">
                           {t("adminCourseView.statistics.allLessons")}
                         </SelectItem>
-                        {lessonOptions.map((aiMentorLesson) => (
+                        {aiMentorLessons.map((aiMentorLesson) => (
                           <SelectItem key={aiMentorLesson.id} value={aiMentorLesson.id}>
                             {aiMentorLesson.title}
                           </SelectItem>
