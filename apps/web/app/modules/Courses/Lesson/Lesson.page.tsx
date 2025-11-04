@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useCourse, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
-import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
@@ -43,7 +42,6 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language);
   const { data: course } = useCourse(courseId);
-  const { isStudent } = useUserRole();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -133,9 +131,7 @@ export default function LessonPage() {
 
   const breadcrumbs = [
     {
-      title: isStudent
-        ? t("studentLessonView.breadcrumbs.yourCourses")
-        : t("studentLessonView.breadcrumbs.availableCourses"),
+      title: t("studentCourseView.breadcrumbs.courses"),
       href: "/courses",
     },
     { title: course.title, href: `/course/${courseId}` },

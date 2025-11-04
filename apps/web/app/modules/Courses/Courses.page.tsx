@@ -138,8 +138,8 @@ export default function CoursesPage() {
             href: "/",
           },
           {
-            title: t("studentCoursesView.breadcrumbs.availableCourses"),
-            href: "/admin/courses",
+            title: t("studentCoursesView.breadcrumbs.courses"),
+            href: "/courses",
           },
         ]}
       >
@@ -168,7 +168,6 @@ export default function CoursesPage() {
 
                 {isAdminLike && (
                   <ButtonGroup
-                    className="sr-only lg:not-sr-only"
                     buttons={[
                       {
                         children: <DashboardIcon />,

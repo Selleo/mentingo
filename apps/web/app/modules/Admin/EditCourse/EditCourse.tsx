@@ -1,4 +1,5 @@
-import { Link, useParams, useSearchParams } from "@remix-run/react";
+import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
@@ -32,11 +33,13 @@ const EditCourse = () => {
   const params = new URLSearchParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const courseTabs = useEditCourseTabs();
+  const navigate = useNavigate();
 
   if (!id) throw new Error("Course ID not found");
-  const { data: course, isLoading, dataUpdatedAt } = useBetaCourseById(id);
+  const { data: course, isLoading, dataUpdatedAt, error } = useBetaCourseById(id);
 
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
+
   const handleTabChange = (tabValue: string) => {
     params.set("tab", tabValue);
     setSearchParams(params);
@@ -44,6 +47,14 @@ const EditCourse = () => {
 
   const canRefetchChapterList =
     previousDataUpdatedAt && currentDataUpdatedAt && previousDataUpdatedAt < currentDataUpdatedAt;
+
+  useEffect(() => {
+    if (error) {
+      navigate("/");
+    }
+  }, [error, navigate]);
+
+  if (error) return null;
 
   if (isLoading) {
     return (
@@ -54,16 +65,16 @@ const EditCourse = () => {
   }
 
   const breadcrumbs = [
-    { title: t("adminCourseView.breadcrumbs.myCourses"), href: "/admin/courses" },
+    { title: t("adminCourseView.breadcrumbs.courses"), href: "/admin/courses" },
     { title: course?.title || "", href: `/admin/beta-courses/${id}` },
   ];
 
-  const backButton = { title: t("adminCourseView.breadcrumbs.back"), href: -1 };
+  const backButton = { title: t("adminCourseView.breadcrumbs.back") };
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
       <Tabs
-        defaultValue={searchParams.get("tab") ?? "Curriculum"}
+        value={searchParams.get("tab") ?? "Curriculum"}
         className="flex h-full flex-col gap-y-4"
       >
         <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">

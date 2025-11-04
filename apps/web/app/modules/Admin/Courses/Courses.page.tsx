@@ -301,12 +301,16 @@ const Courses = () => {
           href: "/",
         },
         {
-          title: t("adminCourseView.breadcrumbs.myCourses"),
+          title: t("adminCourseView.breadcrumbs.courses"),
           href: "/admin/courses",
         },
       ]}
     >
       <div className="flex flex-col">
+        <div className="flex flex-col lg:p-0 mb-6">
+          <h4 className="pb-1 h4 text-neutral-950">{t("adminCoursesView.courses.header")}</h4>
+          <p className="body-lg-md text-neutral-800">{t("adminCoursesView.courses.subHeader")}</p>
+        </div>
         <div className="ml-auto flex gap-3">
           <TooltipProvider delayDuration={0}>
             <Tooltip>
@@ -326,11 +330,11 @@ const Courses = () => {
           </TooltipProvider>
 
           <Link to="/admin/beta-courses/new">
-            <Button variant="outline">{t("adminCoursesView.button.createNew")}</Button>
+            <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>
           </Link>
 
           <ButtonGroup
-            className="sr-only lg:not-sr-only"
+            className="not-sr-only"
             buttons={[
               {
                 children: <DashboardIcon />,
@@ -367,6 +371,7 @@ const Courses = () => {
                 <Button
                   size="sm"
                   className="flex items-center gap-x-2"
+                  variant="outline"
                   disabled={isEmpty(selectedCourses)}
                 >
                   <Trash className="size-3" />
