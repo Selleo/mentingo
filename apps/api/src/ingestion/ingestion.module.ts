@@ -1,5 +1,8 @@
 import { Module } from "@nestjs/common";
 
+import { AiModule } from "src/ai/ai.module";
+import { RagRepository } from "src/ai/repositories/rag.repository";
+import { RagService } from "src/ai/services/rag.service";
 import { DocumentRepository } from "src/ingestion/repositories/document.repository";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
 import { ChunkService } from "src/ingestion/services/chunk.service";
@@ -12,8 +15,10 @@ import { IngestionWorker } from "src/ingestion/workers/ingestion.worker";
 import { IngestionController } from "./ingestion.controller";
 
 @Module({
+  imports: [AiModule],
   controllers: [IngestionController],
   providers: [
+    RagRepository,
     IngestionService,
     IngestionRepository,
     DocumentService,
@@ -22,6 +27,7 @@ import { IngestionController } from "./ingestion.controller";
     IngestionWorker,
     ChunkService,
     EmbeddingService,
+    RagService,
   ],
   exports: [DocumentService],
 })
