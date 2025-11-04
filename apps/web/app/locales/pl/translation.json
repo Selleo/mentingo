@@ -1168,9 +1168,12 @@
       "details": "Szczegóły",
       "filterByQuiz": "Filtruj według quizu",
       "allQuizzes": "Wszystkie quizy",
+      "filterByLesson": "Filtruj według lekcji",
+      "allLessons": "Wszystkie lekcje",
       "tabs": {
         "progress": "Postępy",
-        "quizResults": "Wyniki quizów"
+        "quizResults": "Wyniki quizów",
+        "aiMentorResults": "Wyniki AI Mentora"
       },
       "field": {
         "studentName": "Uczeń",
@@ -1180,7 +1183,10 @@
         "quizName": "Quiz",
         "quizScore": "Wynik",
         "attempts": "Próby",
-        "lastAttempt": "Ostatnia próba"
+        "lastAttempt": "Ostatnia próba",
+        "lessonName": "Lekcja",
+        "lastSession": "Ostatnia sesja",
+        "score": "Wynik"
       },
       "overview": {
         "enrolledCount": "Łącznie zapisanych",

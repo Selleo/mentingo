@@ -5,6 +5,8 @@ import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
+import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "../queries/admin/useCourseStudentsAiMentorResults";
+
 export const useJudgeLesson = (lessonId: string, courseId: string) => {
   return useMutation({
     mutationFn: async ({ threadId }: { threadId: string }) => {
@@ -29,6 +31,9 @@ export const useJudgeLesson = (lessonId: string, courseId: string) => {
         queryKey: ["threadMessages", { lessonId }],
       });
       await queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
+      await queryClient.invalidateQueries({
+        queryKey: COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY,
+      });
     },
   });
 };

@@ -1,0 +1,177 @@
+import { useParams } from "@remix-run/react";
+import {
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { format } from "date-fns";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { useCourseStudentsAiMentorResults } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
+import { Pagination } from "~/components/Pagination/Pagination";
+import SortButton from "~/components/TableSortButton/TableSortButton";
+import { CircularProgress } from "~/components/ui/circular-progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
+import { useUserRole } from "~/hooks/useUserRole";
+
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import type { GetCourseStudentsAiMentorResultsResponse } from "~/api/generated-api";
+import type { CourseStudentsAiMentorResultsQueryParams } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
+import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
+import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
+
+type CourseStudentsAiMentorResultsColumn = GetCourseStudentsAiMentorResultsResponse["data"][number];
+
+interface CourseStudentsAiMentorResultsTableProps {
+  searchParams: CourseStudentsAiMentorResultsQueryParams;
+  onFilterChange: (name: string, value: FilterValue) => void;
+}
+
+export function CourseStudentsAiMentorResultsTable({
+  searchParams,
+  onFilterChange,
+}: CourseStudentsAiMentorResultsTableProps) {
+  const { t } = useTranslation();
+
+  const { id = "" } = useParams();
+
+  const { isAdminLike } = useUserRole();
+
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const { data: courseStudentsAiMentorResults } = useCourseStudentsAiMentorResults({
+    id,
+    enabled: isAdminLike,
+    query: searchParams,
+  });
+
+  const columns: ColumnDef<CourseStudentsAiMentorResultsColumn>[] = [
+    {
+      accessorKey: "studentName",
+      header: ({ column }) => (
+        <SortButton<CourseStudentsAiMentorResultsColumn> column={column}>
+          {t("adminCourseView.statistics.field.studentName")}
+        </SortButton>
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-md truncate flex items-center gap-2">
+          <UserAvatar
+            className="size-7"
+            userName={row.original.studentName}
+            profilePictureUrl={row.original.studentAvatarUrl}
+          />
+          {row.original.studentName}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "lessonName",
+      header: ({ column }) => (
+        <SortButton<CourseStudentsAiMentorResultsColumn> column={column}>
+          {t("adminCourseView.statistics.field.lessonName")}
+        </SortButton>
+      ),
+      cell: ({ row }) => (
+        <div className="text-neutral-800 font-semibold">{row.original.lessonName}</div>
+      ),
+    },
+    {
+      accessorKey: "score",
+      header: ({ column }) => (
+        <SortButton<CourseStudentsAiMentorResultsColumn> column={column}>
+          {t("adminCourseView.statistics.field.score")}
+        </SortButton>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <CircularProgress value={row.original.score} size={32} strokeWidth={2} />
+          {row.original.score}%
+        </div>
+      ),
+    },
+    {
+      accessorKey: "lastSession",
+      header: ({ column }) => (
+        <SortButton<CourseStudentsAiMentorResultsColumn> column={column}>
+          {t("adminCourseView.statistics.field.lastSession")}
+        </SortButton>
+      ),
+      cell: ({ row }) =>
+        row.original.lastSession
+          ? format(new Date(row.original.lastSession), "MMM dd, yyyy")
+          : null,
+    },
+  ];
+
+  const table = useReactTable({
+    getRowId: (row) => row.studentId,
+    data: courseStudentsAiMentorResults?.data || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
+  });
+
+  const handleFilterChange = (name: string, value: FilterValue) => {
+    onFilterChange(name, value);
+  };
+
+  const { totalItems, perPage, page } = courseStudentsAiMentorResults?.pagination || {};
+
+  return (
+    <div className="rounded-lg overflow-hidden border border-neutral-200">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id} className="text-neutral-900 body-base-md bg-neutral-50">
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow
+              key={row.id + row.index}
+              data-state={row.getIsSelected() && "selected"}
+              className="cursor-pointer hover:bg-neutral-100"
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Pagination
+        className="border-t"
+        totalItems={totalItems}
+        itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
+        currentPage={page}
+        onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
+        onItemsPerPageChange={(newPerPage) => {
+          handleFilterChange("page", "1");
+          handleFilterChange("perPage", newPerPage);
+        }}
+      />
+    </div>
+  );
+}

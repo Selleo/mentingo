@@ -1193,6 +1193,24 @@ export interface GetCourseStudentsQuizResultsResponse {
   appliedFilters?: object;
 }
 
+export interface GetCourseStudentsAiMentorResultsResponse {
+  data: {
+    /** @format uuid */
+    studentId: string;
+    studentName: string;
+    studentAvatarUrl: string | null;
+    lessonName: string;
+    score: number;
+    lastSession: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -4268,6 +4286,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetCourseStudentsQuizResultsResponse, any>({
         path: `/api/course/${courseId}/statistics/students-quiz-results`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseStudentsAiMentorResults
+     * @request GET:/api/course/{courseId}/statistics/students-ai-mentor-results
+     */
+    courseControllerGetCourseStudentsAiMentorResults: (
+      courseId: string,
+      query?: {
+        page?: number;
+        perPage?: number;
+        lessonId?: string;
+        sort?:
+          | "studentName"
+          | "lessonName"
+          | "score"
+          | "lastSession"
+          | "-studentName"
+          | "-lessonName"
+          | "-score"
+          | "-lastSession";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseStudentsAiMentorResultsResponse, any>({
+        path: `/api/course/${courseId}/statistics/students-ai-mentor-results`,
         method: "GET",
         query: query,
         format: "json",

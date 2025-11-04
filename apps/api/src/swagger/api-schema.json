@@ -2853,6 +2853,98 @@
         }
       }
     },
+    "/api/course/{courseId}/statistics/students-ai-mentor-results": {
+      "get": {
+        "operationId": "CourseController_getCourseStudentsAiMentorResults",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lessonId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "lessonName",
+                  "type": "string"
+                },
+                {
+                  "const": "score",
+                  "type": "string"
+                },
+                {
+                  "const": "lastSession",
+                  "type": "string"
+                },
+                {
+                  "const": "-studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "-lessonName",
+                  "type": "string"
+                },
+                {
+                  "const": "-score",
+                  "type": "string"
+                },
+                {
+                  "const": "-lastSession",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseStudentsAiMentorResultsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -9905,6 +9997,82 @@
                 "quizScore",
                 "attempts",
                 "lastAttempt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCourseStudentsAiMentorResultsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "studentId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "studentName": {
+                  "type": "string"
+                },
+                "studentAvatarUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "lessonName": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "number"
+                },
+                "lastSession": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "studentId",
+                "studentName",
+                "studentAvatarUrl",
+                "lessonName",
+                "score",
+                "lastSession"
               ]
             }
           },

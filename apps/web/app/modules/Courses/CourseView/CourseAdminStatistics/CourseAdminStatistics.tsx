@@ -31,14 +31,17 @@ import {
   CourseStudentsProgressTable,
   CourseStudentsQuizResultsTable,
 } from "./components";
+import { CourseStudentsAiMentorResultsTable } from "./components/CourseStudentsAiMentorResults";
 
 import type { GetCourseResponse } from "~/api/generated-api";
+import type { CourseStudentsAiMentorResultsQueryParams } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import type { CourseStudentsProgressQueryParams } from "~/api/queries/admin/useCourseStudentsProgress";
 import type { CourseStudentsQuizResultsQueryParams } from "~/api/queries/admin/useCourseStudentsQuizResults";
 
 const StatisticsTabs = {
   progress: "progress",
   quizResults: "quizResults",
+  aiMentorResults: "aiMentorResults",
 } as const;
 
 type AdminCourseStatisticsTab = (typeof StatisticsTabs)[keyof typeof StatisticsTabs];
@@ -62,6 +65,9 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     {},
   );
 
+  const [aiMentorSearchParams, setAiMentorSearchParams] =
+    useState<CourseStudentsAiMentorResultsQueryParams>({});
+
   const [isPending, startTransition] = useTransition();
 
   const lessonCount = useMemo(
@@ -74,6 +80,16 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
       course?.chapters.flatMap((chapter) =>
         chapter.lessons
           .filter((lesson) => lesson.type === LessonType.QUIZ)
+          .map((lesson) => ({ id: lesson.id, title: lesson.title })),
+      ) || []
+    );
+  }, [course]);
+
+  const aiMentorLessons = useMemo(() => {
+    return (
+      course?.chapters.flatMap((chapter) =>
+        chapter.lessons
+          .filter((lesson) => lesson.type === LessonType.AI_MENTOR)
           .map((lesson) => ({ id: lesson.id, title: lesson.title })),
       ) || []
     );
@@ -92,29 +108,36 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     },
   ];
 
-  const handleProgressFilterChange = (name: string, value: FilterValue) => {
+  const handleFilterChange = <T,>(
+    setter: React.Dispatch<React.SetStateAction<T>>,
+    name: string,
+    value: FilterValue,
+  ) => {
     startTransition(() => {
-      setProgressSearchParams((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    });
-  };
-
-  const handleQuizFilterChange = (name: string, value: FilterValue) => {
-    startTransition(() => {
-      setQuizSearchParams((prev) => {
-        if (name === "quizId" && value === "all") {
-          const { quizId: _quizId, ...rest } = prev;
-          return rest;
+      setter((prev) => {
+        if ((name === "quizId" || name === "lessonId") && value === "all") {
+          const { [name]: _, ...rest } = prev as Record<string, unknown>;
+          return rest as T;
         }
 
         return {
           ...prev,
           [name]: value,
-        };
+        } as T;
       });
     });
+  };
+
+  const handleProgressFilterChange = (name: string, value: FilterValue) => {
+    handleFilterChange(setProgressSearchParams, name, value);
+  };
+
+  const handleQuizFilterChange = (name: string, value: FilterValue) => {
+    handleFilterChange(setQuizSearchParams, name, value);
+  };
+
+  const handleAiMentorFilterChange = (name: string, value: FilterValue) => {
+    handleFilterChange(setAiMentorSearchParams, name, value);
   };
 
   return (
@@ -155,50 +178,74 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
           </div>
           <AverageScorePerQuizChart averageQuizScores={averageQuizScores} />
           <Tabs value={activeTab} className="h-full">
-            <div className="flex items-center gap-2">
-              <h6 className="h6 grow">{t("adminCourseView.statistics.details")}</h6>
-              {match(activeTab)
-                .with("progress", () => (
-                  <SearchFilter
-                    filters={filterConfig}
-                    values={{ search: progressSearchParams.search }}
-                    onChange={handleProgressFilterChange}
-                    isLoading={isPending}
-                  />
-                ))
-                .with("quizResults", () => (
-                  <Select
-                    value={(quizSearchParams.quizId as string) || "all"}
-                    onValueChange={(value) => handleQuizFilterChange("quizId", value)}
-                  >
-                    <SelectTrigger className="max-w-xs my-6">
-                      <SelectValue placeholder={t("adminCourseView.statistics.filterByQuiz")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        {t("adminCourseView.statistics.allQuizzes")}
-                      </SelectItem>
-                      {quizOptions.map((quiz) => (
-                        <SelectItem key={quiz.id} value={quiz.id}>
-                          {quiz.title}
+            <div className="flex items-start md:items-center gap-2 flex-col md:flex-row">
+              <h6 className="h6">{t("adminCourseView.statistics.details")}</h6>
+              <div className="flex items-center justify-end gap-2 grow">
+                {match(activeTab)
+                  .with("progress", () => (
+                    <div className="max-w-40">
+                      <SearchFilter
+                        filters={filterConfig}
+                        values={{ search: progressSearchParams.search }}
+                        onChange={handleProgressFilterChange}
+                        isLoading={isPending}
+                      />
+                    </div>
+                  ))
+                  .with("quizResults", () => (
+                    <Select
+                      value={(quizSearchParams.quizId as string) || "all"}
+                      onValueChange={(value) => handleQuizFilterChange("quizId", value)}
+                    >
+                      <SelectTrigger className="max-w-40 my-6">
+                        <SelectValue placeholder={t("adminCourseView.statistics.filterByQuiz")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          {t("adminCourseView.statistics.allQuizzes")}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ))
-                .exhaustive()}
-              <TabsList className="h-[42px] rounded-sm p-1 bg-primary-50">
-                {Object.values(StatisticsTabs).map((tab) => (
-                  <TabsTrigger
-                    key={tab}
-                    className="h-full"
-                    value={tab}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {t(`adminCourseView.statistics.tabs.${tab}`)}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+                        {quizOptions.map((quiz) => (
+                          <SelectItem key={quiz.id} value={quiz.id}>
+                            {quiz.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ))
+                  .with("aiMentorResults", () => (
+                    <Select
+                      value={(aiMentorSearchParams.lessonId as string) || "all"}
+                      onValueChange={(value) => handleAiMentorFilterChange("lessonId", value)}
+                    >
+                      <SelectTrigger className="max-w-40 my-6">
+                        <SelectValue placeholder={t("adminCourseView.statistics.filterByLesson")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">
+                          {t("adminCourseView.statistics.allLessons")}
+                        </SelectItem>
+                        {aiMentorLessons.map((aiMentorLesson) => (
+                          <SelectItem key={aiMentorLesson.id} value={aiMentorLesson.id}>
+                            {aiMentorLesson.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ))
+                  .exhaustive()}
+                <TabsList className="h-[42px] rounded-sm p-1 bg-primary-50">
+                  {Object.values(StatisticsTabs).map((tab) => (
+                    <TabsTrigger
+                      key={tab}
+                      className="h-full"
+                      value={tab}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {t(`adminCourseView.statistics.tabs.${tab}`)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
             </div>
             <TabsContent value="progress">
               <CourseStudentsProgressTable
@@ -211,6 +258,12 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
               <CourseStudentsQuizResultsTable
                 searchParams={quizSearchParams}
                 onFilterChange={handleQuizFilterChange}
+              />
+            </TabsContent>
+            <TabsContent value="aiMentorResults">
+              <CourseStudentsAiMentorResultsTable
+                searchParams={aiMentorSearchParams}
+                onFilterChange={handleAiMentorFilterChange}
               />
             </TabsContent>
           </Tabs>
