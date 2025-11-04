@@ -1452,6 +1452,26 @@
         }
       }
     },
+    "/api/settings/admin/user-email-triggers/{triggerKey}": {
+      "patch": {
+        "operationId": "SettingsController_updateUserEmailTriggers",
+        "parameters": [
+          {
+            "name": "triggerKey",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/test-config/setup": {
       "post": {
         "operationId": "TestConfigController_setup",
@@ -6731,6 +6751,37 @@
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
+              "userEmailTriggers": {
+                "type": "object",
+                "properties": {
+                  "userFirstLogin": {
+                    "type": "boolean"
+                  },
+                  "userCourseAssignment": {
+                    "type": "boolean"
+                  },
+                  "userShortInactivity": {
+                    "type": "boolean"
+                  },
+                  "userLongInactivity": {
+                    "type": "boolean"
+                  },
+                  "userChapterFinished": {
+                    "type": "boolean"
+                  },
+                  "userCourseFinished": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userFirstLogin",
+                  "userCourseAssignment",
+                  "userShortInactivity",
+                  "userLongInactivity",
+                  "userChapterFinished",
+                  "userCourseFinished"
+                ]
+              },
               "primaryColor": {
                 "anyOf": [
                   {
@@ -6762,6 +6813,7 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
+              "userEmailTriggers",
               "primaryColor",
               "contrastColor"
             ]
@@ -7141,6 +7193,37 @@
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
+              "userEmailTriggers": {
+                "type": "object",
+                "properties": {
+                  "userFirstLogin": {
+                    "type": "boolean"
+                  },
+                  "userCourseAssignment": {
+                    "type": "boolean"
+                  },
+                  "userShortInactivity": {
+                    "type": "boolean"
+                  },
+                  "userLongInactivity": {
+                    "type": "boolean"
+                  },
+                  "userChapterFinished": {
+                    "type": "boolean"
+                  },
+                  "userCourseFinished": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userFirstLogin",
+                  "userCourseAssignment",
+                  "userShortInactivity",
+                  "userLongInactivity",
+                  "userChapterFinished",
+                  "userCourseFinished"
+                ]
+              },
               "primaryColor": {
                 "anyOf": [
                   {
@@ -7172,6 +7255,7 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
+              "userEmailTriggers",
               "primaryColor",
               "contrastColor"
             ]
@@ -7299,6 +7383,37 @@
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
+              "userEmailTriggers": {
+                "type": "object",
+                "properties": {
+                  "userFirstLogin": {
+                    "type": "boolean"
+                  },
+                  "userCourseAssignment": {
+                    "type": "boolean"
+                  },
+                  "userShortInactivity": {
+                    "type": "boolean"
+                  },
+                  "userLongInactivity": {
+                    "type": "boolean"
+                  },
+                  "userChapterFinished": {
+                    "type": "boolean"
+                  },
+                  "userCourseFinished": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userFirstLogin",
+                  "userCourseAssignment",
+                  "userShortInactivity",
+                  "userLongInactivity",
+                  "userChapterFinished",
+                  "userCourseFinished"
+                ]
+              },
               "primaryColor": {
                 "anyOf": [
                   {
@@ -7330,6 +7445,7 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
+              "userEmailTriggers",
               "primaryColor",
               "contrastColor"
             ]
@@ -7518,6 +7634,37 @@
               "inviteOnlyRegistration": {
                 "type": "boolean"
               },
+              "userEmailTriggers": {
+                "type": "object",
+                "properties": {
+                  "userFirstLogin": {
+                    "type": "boolean"
+                  },
+                  "userCourseAssignment": {
+                    "type": "boolean"
+                  },
+                  "userShortInactivity": {
+                    "type": "boolean"
+                  },
+                  "userLongInactivity": {
+                    "type": "boolean"
+                  },
+                  "userChapterFinished": {
+                    "type": "boolean"
+                  },
+                  "userCourseFinished": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userFirstLogin",
+                  "userCourseAssignment",
+                  "userShortInactivity",
+                  "userLongInactivity",
+                  "userChapterFinished",
+                  "userCourseFinished"
+                ]
+              },
               "primaryColor": {
                 "anyOf": [
                   {
@@ -7549,6 +7696,7 @@
               "MFAEnforcedRoles",
               "defaultCourseCurrency",
               "inviteOnlyRegistration",
+              "userEmailTriggers",
               "primaryColor",
               "contrastColor"
             ]

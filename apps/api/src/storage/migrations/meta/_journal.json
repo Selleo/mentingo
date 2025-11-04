@@ -337,6 +337,13 @@
       "when": 1761919146339,
       "tag": "0047_added_ai_mentor_types",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1762267386198,
+      "tag": "0048_added_email_invite_triggers_settings",
+      "breakpoints": true
     }
   ]
 }
