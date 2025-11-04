@@ -13,6 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useUserRole } from "~/hooks/useUserRole";
+import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 
@@ -110,7 +111,12 @@ export const LessonContent = ({
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
       .with("quiz", () => (
-        <Quiz lesson={lesson} userId={user?.id || ""} isPreviewMode={isPreviewMode} />
+        <Quiz
+          lesson={lesson}
+          userId={user?.id || ""}
+          isPreviewMode={isPreviewMode}
+          previewLessonId={lesson.id}
+        />
       ))
       .with("video", () => (
         <Video
@@ -168,33 +174,37 @@ export const LessonContent = ({
 
   return (
     <TooltipProvider>
-      <div className="flex size-full flex-col items-center py-10">
+      <div
+        className={cn("flex size-full flex-col items-center", {
+          "py-10": !isPreviewMode,
+        })}
+      >
         <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
-          <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
-            <div className="flex w-full flex-col gap-y-4">
-              <div className="flex items-center gap-x-2">
-                <p className="body-sm-md text-neutral-800">
-                  {t("studentLessonView.other.lesson")}{" "}
-                  <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
-                  <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
-                  <span data-testid="lesson-type">{startCase(lesson.type)}</span>
-                </p>
-                {lesson.type === "ai_mentor" && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge variant="secondary" className="uppercase">
-                        Beta
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      {t("studentLessonView.tooltip.beta")}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+          {!isPreviewMode && (
+            <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
+              <div className="flex w-full flex-col gap-y-4">
+                <div className="flex items-center gap-x-2">
+                  <p className="body-sm-md text-neutral-800">
+                    {t("studentLessonView.other.lesson")}{" "}
+                    <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
+                    <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
+                    <span data-testid="lesson-type">{startCase(lesson.type)}</span>
+                  </p>
+                  {lesson.type === "ai_mentor" && (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge variant="secondary" className="uppercase">
+                          Beta
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        {t("studentLessonView.tooltip.beta")}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                <p className="h4 text-neutral-950">{lesson.title}</p>
               </div>
-              <p className="h4 text-neutral-950">{lesson.title}</p>
-            </div>
-            {!isPreviewMode && (
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
                 {!isFirstLesson && (
                   <Button
@@ -216,8 +226,8 @@ export const LessonContent = ({
                   <Icon name="ArrowRight" className="h-auto w-4" />
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <div>
             <Content />

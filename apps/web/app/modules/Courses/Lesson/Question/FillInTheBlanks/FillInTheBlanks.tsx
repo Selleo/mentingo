@@ -19,7 +19,7 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
   if (!question.description) return null;
 
   return (
-    <Card className="flex flex-col gap-4 border-none p-8 drop-shadow-primary">
+    <Card className="flex flex-col gap-4 border-neutral-200 p-8">
       <div className="details uppercase text-primary-700">
         {t("studentLessonView.other.question")} {question.displayOrder}
       </div>

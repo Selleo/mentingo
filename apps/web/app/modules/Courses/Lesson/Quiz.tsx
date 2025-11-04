@@ -39,9 +39,10 @@ type QuizProps = {
   lesson: GetLessonByIdResponse["data"];
   userId: string;
   isPreviewMode: boolean;
+  previewLessonId: string;
 };
 
-export const Quiz = ({ lesson, userId, isPreviewMode = false }: QuizProps) => {
+export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }: QuizProps) => {
   const { lessonId = "" } = useParams();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
@@ -61,15 +62,15 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false }: QuizProps) => {
     handleOnSuccess: () => {
       if (isAdminLike) return;
       if (lesson.type == LessonType.QUIZ) {
-        markLessonAsCompleted({ lessonId });
+        markLessonAsCompleted({ lessonId: previewLessonId || lessonId });
       }
     },
   });
 
   const retakeQuiz = useRetakeQuiz({
-    lessonId,
+    lessonId: previewLessonId || lessonId,
     handleOnSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
+      queryClient.invalidateQueries({ queryKey: ["lesson", previewLessonId || lessonId] });
       methods.reset();
     },
   });
@@ -104,24 +105,30 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false }: QuizProps) => {
           });
         })}
       >
-        <div className="flex w-full justify-between">
-          <span className="group relative">
-            {t("studentLessonView.other.score", {
-              score: lesson.quizDetails?.score ?? 0,
-              correct: lesson.quizDetails?.correctAnswerCount ?? 0,
-              questionsNumber: questions.length,
-            })}
-          </span>
-          <span>
-            {t("studentLessonView.other.passingThreshold", {
-              threshold: lesson.thresholdScore,
-              correct: requiredCorrect,
-              questionsNumber: questions.length,
-            })}
-          </span>
-        </div>
+        {!isPreviewMode && (
+          <div className="flex w-full justify-between">
+            <span className="group relative">
+              {t("studentLessonView.other.score", {
+                score: lesson.quizDetails?.score ?? 0,
+                correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                questionsNumber: questions.length,
+              })}
+            </span>
+            <span>
+              {t("studentLessonView.other.passingThreshold", {
+                threshold: lesson.thresholdScore,
+                correct: requiredCorrect,
+                questionsNumber: questions.length,
+              })}
+            </span>
+          </div>
+        )}
 
-        <Questions questions={questions} isQuizCompleted={isUserSubmittedAnswer} />
+        <Questions
+          questions={questions}
+          isQuizCompleted={isUserSubmittedAnswer}
+          lessonId={previewLessonId || lessonId}
+        />
         {!isPreviewMode && (
           <div className="flex gap-x-2 self-end">
             <div className="group relative">
