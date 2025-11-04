@@ -236,20 +236,20 @@
   },
   "userEmailTriggers": {
     "header": "User Email Triggers",
-    "subHeader": "Manage automated email notifications",
+    "subHeader": "Manage automated email notifications sent to users",
     "settings": {
       "userFirstLogin": "First Login",
-      "userFirstLoginDescription": "Send a message on user's first login",
-      "userCourseAssignment": "Course Assignment",
-      "userCourseAssignmentDescription": "Send a message when a user is assigned to a course",
+      "userFirstLoginDescription": "Send an email to the user after their first login to the system.",
+      "userCourseAssignment": "Course Enrollment",
+      "userCourseAssignmentDescription": "Send an email to the user after they are enrolled in a course by an administrator.",
       "userShortInactivity": "Short Inactivity (14 days)",
-      "userShortInactivityDescription": "Send a message after 14 days of inactivity",
+      "userShortInactivityDescription": "Send an email to the user after 14 days of inactivity.",
       "userLongInactivity": "Long Inactivity (30 days)",
-      "userLongInactivityDescription": "Send a message after 30 days of inactivity",
-      "userChapterFinished": "Chapter Finished",
-      "userChapterFinishedDescription": "Send a message when a user completes a chapter",
-      "userCourseFinished": "Course Finished",
-      "userCourseFinishedDescription": "Send a message when a user completes a course"
+      "userLongInactivityDescription": "Send an email to the user after 30 days of inactivity.",
+      "userChapterFinished": "Chapter Completed",
+      "userChapterFinishedDescription": "Send an email to the user after they complete a chapter.",
+      "userCourseFinished": "Course Completed",
+      "userCourseFinishedDescription": "Send an email to the user after they complete a course."
     },
     "switch": {
       "enabled": "Enabled",

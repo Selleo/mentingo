@@ -1534,11 +1534,11 @@
   },
   "userEmailTriggers": {
     "header": "Reguły wysyłki powiadomień e-mail dla użytkowników",
-    "subtitle": "Zarządzaj automatycznymi wiadomościami e-mail wysyłanymi do użytkowników",
+    "subHeader": "Zarządzaj automatycznymi wiadomościami e-mail wysyłanymi do użytkowników",
     "settings": {
       "userFirstLogin": "Pierwsze logowanie",
       "userFirstLoginDescription": "Wyślij użytkownikowi wiadomość po jego pierwszym logowaniu do systemu.",
-      "userCourseAssignment": "Przypisanie kursu",
+      "userCourseAssignment": "Zapisanie na kurs",
       "userCourseAssignmentDescription": "Wyślij użytkownikowi wiadomość po tym, jak zostanie zapisany na kurs przez administratora.",
       "userShortInactivity": "Krótka nieaktywność (14 dni)",
       "userShortInactivityDescription": "Wyślij użytkownikowi wiadomość po 14 dniach jego nieaktywności.",
