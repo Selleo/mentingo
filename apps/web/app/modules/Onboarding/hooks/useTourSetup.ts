@@ -15,7 +15,7 @@ interface UseTourSetupProps {
 }
 
 export function useTourSetup({ steps, isLoading, hasCompletedTour, page }: UseTourSetupProps) {
-  const { setSteps, setIsOpen, currentStep, isOpen, setCurrentStep } = useTour();
+  const { setSteps, setIsOpen, currentStep, isOpen, setCurrentStep, setMeta } = useTour();
   const { mutate: markOnboardingPageAsCompleted } = useMarkPageOnboardingAsCompleted(page);
 
   const currentUser = useCurrentUserStore((state) => state.currentUser);
@@ -39,8 +39,9 @@ export function useTourSetup({ steps, isLoading, hasCompletedTour, page }: UseTo
     if (!shouldSkipTour && setSteps) {
       setSteps(steps);
       setCurrentStep(0);
+      setMeta?.(page);
     }
-  }, [setSteps, steps, shouldSkipTour, setCurrentStep]);
+  }, [setSteps, steps, shouldSkipTour, setCurrentStep, setMeta, page]);
 
   useEffect(() => {
     if (!isLoading && !shouldSkipTour) {

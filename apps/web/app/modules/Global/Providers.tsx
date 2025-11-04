@@ -4,11 +4,15 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { I18nextProvider } from "react-i18next";
 
 import i18n from "../../../i18n";
+import { ApiClient } from "../../api/api-client";
+import { currentUserQueryOptions } from "../../api/queries";
 import { queryClient } from "../../api/queryClient";
 import { LanguageProvider } from "../Dashboard/Settings/Language/LanguageProvider";
 import { ThemeProvider } from "../Theme";
 
 import { PostHogWrapper } from "./PostHogWrapper";
+
+import type { OnboardingPages } from "@repo/shared";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +21,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <PostHogWrapper>
           <TourProvider
             steps={[]}
+            onClickClose={({ meta, setIsOpen }) => {
+              setIsOpen(false);
+              if (!meta) return;
+              void ApiClient.api
+                .userControllerMarkOnboardingComplete(meta as OnboardingPages)
+                .then(() => {
+                  queryClient.invalidateQueries({
+                    queryKey: currentUserQueryOptions.queryKey,
+                  });
+                })
+                .catch(() => {});
+            }}
             styles={{
               popover: (base) => ({
                 ...base,
