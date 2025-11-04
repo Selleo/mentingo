@@ -1737,7 +1737,7 @@ export class CourseService {
     const conditions = [
       eq(studentCourses.courseId, courseId),
       eq(lessons.type, LESSON_TYPES.AI_MENTOR),
-      isNotNull(studentLessonProgress.completedAt),
+      eq(studentLessonProgress.id, aiMentorStudentLessonProgress.studentLessonProgressId),
     ];
 
     if (lessonId) conditions.push(eq(lessons.id, lessonId));
