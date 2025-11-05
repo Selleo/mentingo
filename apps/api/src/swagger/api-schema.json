@@ -4761,6 +4761,23 @@
           }
         }
       }
+    },
+    "/api/env/stripe/publishable-key": {
+      "get": {
+        "operationId": "EnvController_getStripePublishableKey",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStripePublishableKeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -16046,6 +16063,32 @@
                 "type": "string"
               }
             }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetStripePublishableKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "publishableKey": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "publishableKey"
+            ]
           }
         },
         "required": [

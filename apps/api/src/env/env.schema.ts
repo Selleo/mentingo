@@ -37,6 +37,10 @@ export const frontendPosthogConfigResponseSchema = Type.Object({
   host: Type.Optional(Type.String()),
 });
 
+export const stripePublishableKeyResponseSchema = Type.Object({
+  publishableKey: Type.Union([Type.String(), Type.Null()]),
+});
+
 export type EncryptedEnvBody = Static<typeof encryptedEnvSchema>;
 export type BulkUpsertEnvBody = Static<typeof bulkUpsertEnvSchema>;
 export type FrontendSSOEnabledResponseBody = Static<typeof frontendSSOEnabledResponseSchema>;
