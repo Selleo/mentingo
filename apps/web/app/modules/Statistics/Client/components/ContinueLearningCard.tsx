@@ -61,7 +61,7 @@ export const ContinueLearningCard = ({ isLoading = false, lesson }: ContinueLear
           {lesson?.courseTitle}
         </a>
         <p className="md:body-base sr-only md:not-sr-only md:mt-6 md:text-neutral-800 2xl:sr-only">
-          <Viewer content={lesson?.courseDescription} />
+          <Viewer content={lesson?.courseDescription} variant="lesson" />
         </p>
       </div>
       <ChapterCard {...lesson} />
