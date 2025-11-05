@@ -60,7 +60,7 @@ export const ContinueLearningCard = ({ isLoading = false, lesson }: ContinueLear
         <a href={`/course/${lesson?.courseId}`} className="body-sm-md text-primary-700 underline">
           {lesson?.courseTitle}
         </a>
-        <p className="md:body-base sr-only md:not-sr-only md:mt-6 md:text-neutral-800 2xl:sr-only">
+        <p className="sr-only md:not-sr-only md:mt-6 2xl:sr-only">
           <Viewer content={lesson?.courseDescription} variant="lesson" />
         </p>
       </div>
