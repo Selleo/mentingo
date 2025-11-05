@@ -281,7 +281,7 @@ const AiMentorLessonForm = ({
                               "adminCourseView.curriculum.lesson.placeholder.completionConditions",
                             )}
                             className="h-48 grow resize-none overflow-y-auto"
-                            parentClassName={"lg:rounded-l-none lg:border-l-0"}
+                            parentClassName="lg:rounded-l-none lg:border-l-0"
                             {...field}
                           />
                         </FormControl>
