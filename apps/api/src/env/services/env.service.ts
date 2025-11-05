@@ -107,7 +107,7 @@ export class EnvService {
 
   async getStripePublishableKey() {
     const stripePublishableKey = await this.getEnv("VITE_STRIPE_PUBLISHABLE_KEY")
-      .then((r) => r.value)
+      .then(({ value }) => value)
       .catch(() => null);
 
     return stripePublishableKey;
