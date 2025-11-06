@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { cn } from "~/lib/utils";
 
 import type React from "react";
 
@@ -60,6 +61,7 @@ interface SearchFilterProps {
   values: FilterValues;
   onChange: (name: string, value: FilterValue) => void;
   isLoading?: boolean;
+  className?: string;
 }
 
 export const SearchFilter: React.FC<SearchFilterProps> = ({
@@ -68,6 +70,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   values,
   onChange,
   isLoading,
+  className,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
@@ -106,7 +109,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   }, [filters, values]);
 
   return (
-    <div id={id} className="flex grow flex-wrap items-center gap-2 py-6">
+    <div id={id} className={cn("flex grow flex-wrap items-center gap-2 py-6", className)}>
       {filters.map((filter) => {
         if (filter?.type === "text") {
           return (
