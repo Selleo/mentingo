@@ -1,10 +1,16 @@
 import { z } from "zod";
 
-export const courseSettingsFormSchema = z.object({
-  title: z.string().min(2, "Title must be at least 2 characters."),
-  description: z.string().min(2, "Description must be at least 2 characters."),
-  categoryId: z.string().min(1, "Category is required"),
-  thumbnailS3Key: z.string().optional(),
-});
+import type i18next from "i18next";
 
-export type CourseSettingsFormValues = z.infer<typeof courseSettingsFormSchema>;
+export const courseSettingsFormSchema = (t: typeof i18next.t) =>
+  z.object({
+    title: z
+      .string()
+      .min(2, t("adminCourseView.settings.validation.titleMinLength"))
+      .max(250, t("adminCourseView.settings.validation.titleMaxLength")),
+    description: z.string().min(2, t("adminCourseView.settings.validation.descriptionMinLength")),
+    categoryId: z.string().min(1, t("adminCourseView.settings.validation.categoryRequired")),
+    thumbnailS3Key: z.string().optional(),
+  });
+
+export type CourseSettingsFormValues = z.infer<ReturnType<typeof courseSettingsFormSchema>>;

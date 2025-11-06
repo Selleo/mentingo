@@ -125,8 +125,8 @@ export const coursesStatusEnum = pgEnum("status", ["draft", "published", "privat
 export const courses = pgTable("courses", {
   ...id,
   ...timestamps,
-  title: varchar("title", { length: 100 }).notNull(),
-  description: varchar("description", { length: 1000 }),
+  title: varchar("title", { length: 250 }).notNull(),
+  description: varchar("description", { length: 20_000 }),
   thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
   status: coursesStatusEnum("status").notNull().default("draft"),
   hasCertificate: boolean("has_certificate").notNull().default(false),
@@ -147,7 +147,7 @@ export const courses = pgTable("courses", {
 export const chapters = pgTable("chapters", {
   ...id,
   ...timestamps,
-  title: varchar("title", { length: 100 }).notNull(),
+  title: varchar("title", { length: 250 }).notNull(),
   courseId: uuid("course_id")
     .references(() => courses.id, { onDelete: "cascade" })
     .notNull(),
@@ -166,7 +166,7 @@ export const lessons = pgTable("lessons", {
     .references(() => chapters.id, { onDelete: "cascade" })
     .notNull(),
   type: varchar("type", { length: 20 }).notNull(),
-  title: varchar("title", { length: 100 }).notNull(),
+  title: varchar("title", { length: 250 }).notNull(),
   description: text("description"),
   thresholdScore: integer("threshold_score"),
   attemptsLimit: integer("attempts_limit"),
@@ -223,7 +223,7 @@ export const questions = pgTable("questions", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   type: text("type").notNull(),
-  title: varchar("title", { length: 200 }).notNull(),
+  title: varchar("title", { length: 250 }).notNull(),
   displayOrder: integer("display_order"),
   photoS3Key: varchar("photo_s3_key", { length: 200 }),
   description: text("description"),

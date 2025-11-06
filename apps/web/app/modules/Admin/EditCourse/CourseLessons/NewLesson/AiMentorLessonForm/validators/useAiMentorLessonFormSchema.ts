@@ -36,7 +36,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
       .refine(
         (val) => {
           const textContent = stripHtmlTags(val);
-          return textContent.length <= 2000;
+          return textContent.length <= 20_000;
         },
         {
           message: t("adminCourseView.curriculum.lesson.validation.aiMentorInstructionsMaxLength"),
@@ -59,7 +59,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
       .refine(
         (val) => {
           const textContent = stripHtmlTags(val);
-          return textContent.length <= 1000;
+          return textContent.length <= 20_000;
         },
         {
           message: t("adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength"),
