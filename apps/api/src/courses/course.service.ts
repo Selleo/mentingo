@@ -1551,18 +1551,20 @@ export class CourseService {
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
           (
-            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count))
+            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
             FROM (
               SELECT
                 l.id AS quiz_id,
                 l.title AS quiz_name,
+                l.display_order AS lesson_order,
                 ROUND(AVG(slp.quiz_score), 0) AS average_score,
                 COUNT(DISTINCT slp.student_id) AS finished_count
               FROM ${lessons} l
               JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
               JOIN ${chapters} c ON l.chapter_id = c.id
               WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL
-              GROUP BY l.id, l.title
+              GROUP BY l.id, l.title, l.display_order
+              ORDER BY l.display_order
             ) AS subquery
           ),
           '[]'::jsonb
