@@ -1,3 +1,21 @@
+<a name="v3.19.1"></a>
+
+## [v3.19.1] - 06.11.2025
+
+### Features:
+
+- course statistics about AI mentor lessons for admin ([#844](https://github.com/Selleo/mentingo/issues/844))
+
+- add students quiz results table in admin course view ([#843](https://github.com/Selleo/mentingo/issues/843))
+
+### Bug Fixes:
+
+- bold styling mismatch in lesson editor and lesson view ([#860](https://github.com/Selleo/mentingo/issues/860))
+
+### Chores:
+
+- increase character limits for course titles and descriptions ([#853](https://github.com/Selleo/mentingo/issues/853))
+
 <a name="v3.19.0"></a>
 
 ## [v3.19.0] - 01.11.2025
@@ -39,6 +57,8 @@
 - translate statuses to polish on courses page ([#861](https://github.com/Selleo/mentingo/issues/861))
 
 ### Documentation:
+
+- update changelog for version v3.19.0
 
 - update api .env.example ([#848](https://github.com/Selleo/mentingo/issues/848))
 
@@ -1864,7 +1884,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.19.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.19.1...HEAD
+[v3.19.1]: https://github.com/Selleo/mentingo/compare/v3.19.0...v3.19.1
 [v3.19.0]: https://github.com/Selleo/mentingo/compare/v3.18.0...v3.19.0
 [v3.18.0]: https://github.com/Selleo/mentingo/compare/v3.17.0...v3.18.0
 [v3.17.0]: https://github.com/Selleo/mentingo/compare/v3.16.0...v3.17.0
