@@ -183,7 +183,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
               <div className="flex flex-col md:flex-row md:items-center justify-end gap-2 grow w-full md:w-auto">
                 {match(activeTab)
                   .with("progress", () => (
-                    <div className="max-w-56">
+                    <div className="max-w-[248px]">
                       <SearchFilter
                         filters={filterConfig}
                         values={{ search: progressSearchParams.search }}
