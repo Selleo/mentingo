@@ -153,6 +153,12 @@ cp .env.example .env
 pnpm run --filter=@repo/shared build
 ```
 
+### Build prompt templates
+
+```bash
+pnpm run --filter=@repo/prompts build
+```
+
 ## Database Setup
 
 </div>
