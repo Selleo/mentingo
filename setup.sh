@@ -242,6 +242,12 @@ if ! pnpm --filter="@repo/shared" run build > /dev/null 2>&1; then
     exit 1
 fi
 
+echo -e "${GREEN}[4b/9]${NC} Building prompt templates..."
+if ! pnpm run --filter=@repo/prompts build > /dev/null 2>&1; then
+    echo -e "${RED}✗ Failed to build prompt templates${NC}"
+    exit 1
+fi
+
 #  Set up environment files
 echo -e "${GREEN}[5/9]${NC} Setting up environment files..."
 

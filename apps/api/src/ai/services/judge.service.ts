@@ -3,8 +3,8 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { ChatService } from "src/ai/services/chat.service";
 import { MessageService } from "src/ai/services/message.service";
+import { PromptService } from "src/ai/services/prompt.service";
 import { ThreadService } from "src/ai/services/thread.service";
-import { SYSTEM_PROMPT_FOR_JUDGE } from "src/ai/utils/ai.config";
 import { MESSAGE_ROLE, THREAD_STATUS } from "src/ai/utils/ai.type";
 
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
@@ -16,6 +16,7 @@ export class JudgeService {
     private readonly chatService: ChatService,
     private readonly threadService: ThreadService,
     private readonly messageService: MessageService,
+    private readonly promptService: PromptService,
   ) {}
 
   async runJudge(data: ThreadOwnershipBody) {
@@ -32,7 +33,12 @@ export class JudgeService {
     );
 
     const content = messages.history.map(({ content }) => content).join("\n");
-    const system = SYSTEM_PROMPT_FOR_JUDGE(mentorLesson, messages.userLanguage);
+    const system = await this.promptService.loadPrompt("judgePrompt", {
+      lessonTitle: mentorLesson.title,
+      language: messages.userLanguage,
+      lessonInstructions: mentorLesson.instructions,
+      lessonConditions: mentorLesson.conditions,
+    });
     const judged = await this.chatService.judge(system, content);
 
     const { status } = await this.aiRepository.updateThread(data.threadId, {
