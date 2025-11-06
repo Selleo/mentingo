@@ -1152,6 +1152,7 @@ export interface GetAverageQuizScoresResponse {
       name: string;
       averageScore: number;
       finishedCount: number;
+      lessonOrder: number;
     }[];
   };
 }
