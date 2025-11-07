@@ -6,6 +6,7 @@ import remarkMath from "remark-math";
 
 import { useCurrentUserSuspense } from "~/api/queries";
 import { Icon } from "~/components/Icon";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
 import "katex/dist/katex.min.css";
 
@@ -41,7 +42,7 @@ const ChatMessage = (message: ChatMessageProps) => {
           </div>
         ) : (
           <div className="flex size-full items-center justify-center rounded-full bg-gray-200">
-            <Icon name="User" className="size-5 text-gray-500" />
+            <UserAvatar userName={userName} profilePictureUrl={currentUser.profilePictureUrl} />
           </div>
         )}
       </div>
