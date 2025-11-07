@@ -17,7 +17,6 @@ export const judgePromptSchema = Type.Object({
 });
 
 export const aiPromptSchema = Type.Object({
-  language: Type.String(),
   lessonTitle: Type.String(),
   lessonInstructions: Type.String(),
   securityAndRagBlock: Type.String(),
