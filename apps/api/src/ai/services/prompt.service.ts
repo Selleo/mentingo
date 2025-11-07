@@ -139,7 +139,6 @@ export class PromptService implements OnModuleInit {
       lessonTitle: lesson.title,
       lessonInstructions: lesson.instructions,
       groups: groups,
-      language: userLanguage,
       securityAndRagBlock: securityAndRagBlock,
     });
 
