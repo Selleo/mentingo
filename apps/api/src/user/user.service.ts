@@ -9,7 +9,7 @@ import {
 import { CreatePasswordEmail } from "@repo/email-templates";
 import { OnboardingPages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
-import { and, count, eq, getTableColumns, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, count, eq, getTableColumns, ilike, inArray, not, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
@@ -443,7 +443,7 @@ export class UserService {
     return await this.s3Service.getSignedUrl(avatarReference);
   };
 
-  public async getAdminsToNotifyAboutNewUser(): Promise<string[]> {
+  public async getAdminsToNotifyAboutNewUser(emailToExclude: string): Promise<string[]> {
     const adminEmails = await this.db
       .select({
         email: users.email,
@@ -454,6 +454,7 @@ export class UserService {
         and(
           eq(users.role, USER_ROLES.ADMIN),
           sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
+          not(eq(users.email, emailToExclude)),
         ),
       );
 
