@@ -13,6 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useUserRole } from "~/hooks/useUserRole";
+import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 
@@ -33,6 +34,7 @@ type LessonContentProps = {
   isFirstLesson: boolean;
   isLastLesson: boolean;
   lessonLoading: boolean;
+  isPreviewMode?: boolean;
 };
 
 export const LessonContent = ({
@@ -44,6 +46,7 @@ export const LessonContent = ({
   isFirstLesson,
   lessonLoading,
   isLastLesson,
+  isPreviewMode = false,
 }: LessonContentProps) => {
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const { data: user } = useCurrentUser();
@@ -67,6 +70,8 @@ export const LessonContent = ({
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    if (isPreviewMode) return;
+
     if (isAdminLike) {
       setIsNextDisabled(false);
       setIsPreviousDisabled(false);
@@ -97,12 +102,22 @@ export const LessonContent = ({
     nextChapter,
     prevChapter,
     course.enrolled,
+    isPreviewMode,
+    queryClient,
+    course.id,
   ]);
 
   const Content = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
-      .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
+      .with("quiz", () => (
+        <Quiz
+          lesson={lesson}
+          userId={user?.id || ""}
+          isPreviewMode={isPreviewMode}
+          previewLessonId={lesson.id}
+        />
+      ))
       .with("video", () => (
         <Video
           url={lesson.fileUrl}
@@ -123,6 +138,8 @@ export const LessonContent = ({
       .otherwise(() => null);
 
   useEffect(() => {
+    if (isPreviewMode) return;
+
     if (
       lesson.type === LessonType.TEXT ||
       lesson.type === LessonType.PRESENTATION ||
@@ -149,58 +166,68 @@ export const LessonContent = ({
     currentChapterIndex,
     course,
     isLastLesson,
+    isPreviewMode,
+    lesson.id,
+    lesson.type,
+    markLessonAsCompleted,
   ]);
 
   return (
     <TooltipProvider>
-      <div className="flex size-full flex-col items-center py-10">
+      <div
+        className={cn("flex size-full flex-col items-center", {
+          "py-10": !isPreviewMode,
+        })}
+      >
         <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
-          <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
-            <div className="flex w-full flex-col gap-y-4">
-              <div className="flex items-center gap-x-2">
-                <p className="body-sm-md text-neutral-800">
-                  {t("studentLessonView.other.lesson")}{" "}
-                  <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
-                  <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
-                  <span data-testid="lesson-type">{startCase(lesson.type)}</span>
-                </p>
-                {lesson.type === "ai_mentor" && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge variant="secondary" className="uppercase">
-                        Beta
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      {t("studentLessonView.tooltip.beta")}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+          {!isPreviewMode && (
+            <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
+              <div className="flex w-full flex-col gap-y-4">
+                <div className="flex items-center gap-x-2">
+                  <p className="body-sm-md text-neutral-800">
+                    {t("studentLessonView.other.lesson")}{" "}
+                    <span data-testid="current-lesson-number">{lesson.displayOrder}</span>/
+                    <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
+                    <span data-testid="lesson-type">{startCase(lesson.type)}</span>
+                  </p>
+                  {lesson.type === "ai_mentor" && (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Badge variant="secondary" className="uppercase">
+                          Beta
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        {t("studentLessonView.tooltip.beta")}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                <p className="h4 text-neutral-950">{lesson.title}</p>
               </div>
-              <p className="h4 text-neutral-950">{lesson.title}</p>
-            </div>
-            <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
-              {!isFirstLesson && (
+              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
+                {!isFirstLesson && (
+                  <Button
+                    variant="outline"
+                    className="w-full gap-x-1 sm:w-auto"
+                    disabled={isPreviousDisabled}
+                    onClick={handlePrevious}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                  </Button>
+                )}
                 <Button
+                  data-testid="next-lesson-button"
                   variant="outline"
+                  disabled={isNextDisabled}
                   className="w-full gap-x-1 sm:w-auto"
-                  disabled={isPreviousDisabled}
-                  onClick={handlePrevious}
+                  onClick={handleNext}
                 >
-                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                  <Icon name="ArrowRight" className="h-auto w-4" />
                 </Button>
-              )}
-              <Button
-                data-testid="next-lesson-button"
-                variant="outline"
-                disabled={isNextDisabled}
-                className="w-full gap-x-1 sm:w-auto"
-                onClick={handleNext}
-              >
-                <Icon name="ArrowRight" className="h-auto w-4" />
-              </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <Content />

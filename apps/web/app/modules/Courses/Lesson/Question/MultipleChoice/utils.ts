@@ -13,5 +13,6 @@ export const getOptionConfig = (option: QuizQuestionOption, isAdmin: boolean) =>
     isCorrectAnswerNotSelected,
     isCorrectAnswer: option.isCorrect,
     isCorrectAnswerSelected: isCorrectAnswer,
+    isPreviewMode: isAdmin,
   };
 };

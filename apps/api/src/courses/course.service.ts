@@ -1677,6 +1677,7 @@ export class CourseService {
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
+        lessonId: sql<UUIDType>`${lessons.id}`,
         quizName: quizNameExpression,
         attempts: sql<number>`${studentLessonProgress.attempts}`,
         quizScore: sql<number>`${studentLessonProgress.quizScore}`,

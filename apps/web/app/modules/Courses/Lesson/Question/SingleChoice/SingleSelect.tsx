@@ -20,6 +20,7 @@ type SelectAnswerOptionQuizProps = {
   isWrongAnswer: boolean;
   questionId: string;
   optionFieldId?: "singleAnswerQuestions" | "photoQuestionSingleChoice";
+  isPreviewMode: boolean;
 };
 
 export const SingleSelect = ({
@@ -33,6 +34,7 @@ export const SingleSelect = ({
   isWrongAnswer,
   questionId,
   optionFieldId = "singleAnswerQuestions",
+  isPreviewMode,
 }: SelectAnswerOptionQuizProps) => {
   const { register, setValue, getValues } = useFormContext<QuizForm>();
   const { t } = useTranslation();
@@ -120,7 +122,11 @@ export const SingleSelect = ({
       >
         <span>{answer}</span>
         <span className={classes}>
-          {isStudentAnswer && isCompleted && t("studentCourseView.lesson.yourAnswer")}
+          {isStudentAnswer &&
+            isCompleted &&
+            (isPreviewMode
+              ? t("studentCourseView.lesson.studentsAnswer")
+              : t("studentCourseView.lesson.yourAnswer"))}
         </span>
       </Label>
     </label>

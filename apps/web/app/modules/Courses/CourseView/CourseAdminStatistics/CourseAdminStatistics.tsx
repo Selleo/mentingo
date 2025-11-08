@@ -256,6 +256,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
             </TabsContent>
             <TabsContent value="quizResults">
               <CourseStudentsQuizResultsTable
+                course={course}
                 searchParams={quizSearchParams}
                 onFilterChange={handleQuizFilterChange}
               />

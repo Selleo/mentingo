@@ -3192,6 +3192,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -9976,6 +9984,10 @@
                     }
                   ]
                 },
+                "lessonId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
                 "quizName": {
                   "type": "string"
                 },
@@ -9993,6 +10005,7 @@
                 "studentId",
                 "studentName",
                 "studentAvatarUrl",
+                "lessonId",
                 "quizName",
                 "quizScore",
                 "attempts",

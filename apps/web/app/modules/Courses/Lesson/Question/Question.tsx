@@ -1,5 +1,3 @@
-import { useParams } from "@remix-run/react";
-
 import { BriefResponse } from "./BriefResponse";
 import { DetailedResponse } from "./DetailedResponse";
 import { FillInTheBlanksDnd } from "./FillInTheBlanks/dnd/FillInTheBlanksDnd";
@@ -16,11 +14,10 @@ type QuestionProps = {
   question: QuizQuestion;
   isSubmitted?: boolean;
   isCompleted: boolean;
+  lessonId: string;
 };
 
-export const Question = ({ question, isCompleted }: QuestionProps) => {
-  const { lessonId = "" } = useParams();
-
+export const Question = ({ question, isCompleted, lessonId }: QuestionProps) => {
   if (!lessonId) throw new Error("Lesson ID not found");
 
   const isTrueOrFalse = question.type === "true_or_false";

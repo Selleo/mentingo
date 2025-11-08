@@ -91,9 +91,10 @@ export class LessonController {
     @Query("userLanguage") userLanguage: SupportedLanguages,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") userRole: UserRole,
+    @Query("studentId") studentId: UUIDType,
   ): Promise<BaseResponse<LessonShow>> {
     return new BaseResponse(
-      await this.lessonService.getLessonById(id, userId, userRole, userLanguage),
+      await this.lessonService.getLessonById(id, studentId || userId, userRole, userLanguage),
     );
   }
 

@@ -7,12 +7,20 @@ type Questions = NonNullable<GetLessonByIdResponse["data"]["quizDetails"]>["ques
 type QuestionsProps = {
   questions: Questions;
   isQuizCompleted?: boolean;
+  lessonId: string;
 };
 
-export const Questions = ({ questions, isQuizCompleted = false }: QuestionsProps) => {
+export const Questions = ({ questions, isQuizCompleted = false, lessonId }: QuestionsProps) => {
   return questions.map((question: Questions[number]) => {
     if (!question) return null;
 
-    return <Question key={question.id} question={question} isCompleted={isQuizCompleted} />;
+    return (
+      <Question
+        key={question.id}
+        question={question}
+        isCompleted={isQuizCompleted}
+        lessonId={lessonId}
+      />
+    );
   });
 };
