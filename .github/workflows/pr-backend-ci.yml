@@ -9,7 +9,7 @@ env:
   CORS_ORIGIN: ""
   EMAIL_ADAPTER: "mailhog"
   DATABASE_URL: ""
-  REDIS_URL: ""
+  REDIS_URL: "redis://localhost:6380"
   SMTP_HOST: ""
   SMTP_PORT: "1025"
   SMTP_USER: ""
@@ -170,7 +170,7 @@ jobs:
           echo "S3 setup completed successfully!"
 
       - name: Start containers
-        run: docker compose -f "docker-compose.yml" up -d --build
+        run: docker compose -f "docker-compose.test.yml" up -d --build
 
       - uses: actions/setup-node@v4
         with:
