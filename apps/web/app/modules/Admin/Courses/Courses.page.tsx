@@ -20,6 +20,7 @@ import { useDeleteManyCourses } from "~/api/mutations/admin/useDeleteManyCourses
 import { categoriesQueryOptions } from "~/api/queries";
 import { useCoursesSuspense, ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
+import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
@@ -53,6 +54,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -299,12 +301,16 @@ const Courses = () => {
           href: "/",
         },
         {
-          title: t("adminCourseView.breadcrumbs.myCourses"),
+          title: t("adminCourseView.breadcrumbs.courses"),
           href: "/admin/courses",
         },
       ]}
     >
       <div className="flex flex-col">
+        <div className="flex flex-col lg:p-0 mb-6">
+          <h4 className="pb-1 h4 text-neutral-950">{t("adminCoursesView.courses.header")}</h4>
+          <p className="body-lg-md text-neutral-800">{t("adminCoursesView.courses.subHeader")}</p>
+        </div>
         <div className="ml-auto flex gap-3">
           <TooltipProvider delayDuration={0}>
             <Tooltip>
@@ -324,8 +330,24 @@ const Courses = () => {
           </TooltipProvider>
 
           <Link to="/admin/beta-courses/new">
-            <Button variant="outline">{t("adminCoursesView.button.createNew")}</Button>
+            <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>
           </Link>
+
+          <ButtonGroup
+            className="not-sr-only"
+            buttons={[
+              {
+                children: <DashboardIcon />,
+                isActive: false,
+                onClick: () => navigate("/courses"),
+              },
+              {
+                children: <HamburgerIcon />,
+                isActive: true,
+                onClick: () => navigate("/admin/courses"),
+              },
+            ]}
+          />
         </div>
         <div className="flex items-center justify-between gap-2">
           <SearchFilter
@@ -349,6 +371,7 @@ const Courses = () => {
                 <Button
                   size="sm"
                   className="flex items-center gap-x-2"
+                  variant="outline"
                   disabled={isEmpty(selectedCourses)}
                 >
                   <Trash className="size-3" />

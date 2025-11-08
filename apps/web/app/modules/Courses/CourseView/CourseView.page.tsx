@@ -92,17 +92,13 @@ export default function CourseViewPage() {
 
   const breadcrumbs = [
     {
-      title: isStudent
-        ? t("studentCourseView.breadcrumbs.yourCourses")
-        : t("studentCourseView.breadcrumbs.availableCourses"),
+      title: t("studentCoursesView.breadcrumbs.courses"),
       href: "/courses",
     },
     { title: course.title, href: `/course/${id}` },
   ];
 
-  const backButton = {
-    title: t("studentCourseView.breadcrumbs.back"),
-  };
+  const backButton = { title: t("studentCourseView.breadcrumbs.back") };
 
   const { studentName, courseName, formattedDate } = certificateInfo;
 

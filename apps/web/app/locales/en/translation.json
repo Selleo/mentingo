@@ -130,12 +130,10 @@
     "dashboard": "Dashboard",
     "findInApplication": "Find in application",
     "courses": "Courses",
-    "myCourses": "My courses",
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
     "providerInformation": "Information",
-    "browseCourses": "Browse Courses",
     "announcements": "Announcements",
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
@@ -495,6 +493,10 @@
         "published": "Published",
         "private": "Private"
       }
+    },
+    "courses": {
+      "header": "Manage Courses",
+      "subHeader": "All courses you can view and edit"
     },
     "field": {
       "title": "Title",
@@ -1157,7 +1159,7 @@
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
-      "myCourses": "My courses",
+      "courses": "Courses",
       "back": "Back"
     },
     "statistics": {
@@ -1289,7 +1291,7 @@
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
-      "availableCourses": "Available Courses"
+      "courses": "Courses"
     },
     "button": {
       "continue": "Continue",

@@ -1,7 +1,14 @@
+import { useNavigate } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
+
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
+import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
+import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
+import { useUserRole } from "~/hooks/useUserRole";
+import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -13,6 +20,13 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
   const title = course?.title;
   const description = course?.description || "";
+
+  const { isAdminLike, isAdmin } = useUserRole();
+  const { currentUser } = useCurrentUserStore();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const navigateToEditCourse = () => navigate(`/admin/beta-courses/${course.id}`);
 
   return (
     <Card className="w-full border-none pt-6 drop-shadow-primary lg:pt-0">
@@ -30,7 +44,15 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
           />
         </div>
         <div className="flex w-full flex-col gap-y-2">
-          <CategoryChip category={course?.category} className="bg-primary-50" />
+          <div className="flex justify-between items-center">
+            <CategoryChip category={course?.category} className="bg-primary-50" />
+            {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
+              <Button className="flex gap-2" variant="primary" onClick={navigateToEditCourse}>
+                <Icon name="Edit" className="size-4" />
+                {t("pages.editCourse")}
+              </Button>
+            )}
+          </div>
           <h5 className="h5">{title}</h5>
           <Viewer
             content={description}

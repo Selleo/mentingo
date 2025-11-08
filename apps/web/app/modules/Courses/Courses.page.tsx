@@ -1,3 +1,4 @@
+import { useNavigate } from "@remix-run/react";
 import { OnboardingPages } from "@repo/shared";
 import { isEmpty } from "lodash-es";
 import { useMemo, useReducer } from "react";
@@ -10,8 +11,6 @@ import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { useUserRole } from "~/hooks/useUserRole";
-import { cn } from "~/lib/utils";
-import { useLayoutsStore } from "~/modules/common/Layout/LayoutsStore";
 import Loader from "~/modules/common/Loader/Loader";
 import {
   type FilterConfig,
@@ -36,8 +35,9 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 const DEFAULT_STATE = { searchTitle: undefined, sort: "title", category: undefined };
 
 export default function CoursesPage() {
-  const { isStudent } = useUserRole();
+  const { isStudent, isAdminLike } = useUserRole();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { data: currentUser } = useCurrentUser();
 
@@ -78,8 +78,6 @@ export default function CoursesPage() {
   });
 
   const { data: categories, isLoading: isCategoriesLoading } = useCategories();
-
-  const { courseListLayout, setCourseListLayout } = useLayoutsStore();
 
   const steps = useMemo(() => (isStudent ? studentCoursesSteps(t) : []), [t, isStudent]);
 
@@ -140,8 +138,8 @@ export default function CoursesPage() {
             href: "/",
           },
           {
-            title: t("studentCoursesView.breadcrumbs.availableCourses"),
-            href: "/admin/courses",
+            title: t("studentCoursesView.breadcrumbs.courses"),
+            href: "/courses",
           },
         ]}
       >
@@ -167,35 +165,31 @@ export default function CoursesPage() {
                   onChange={handleFilterChange}
                   isLoading={isCategoriesLoading}
                 />
-                <ButtonGroup
-                  className="sr-only lg:not-sr-only"
-                  buttons={[
-                    {
-                      children: <DashboardIcon />,
-                      isActive: courseListLayout === "card",
-                      onClick: () => setCourseListLayout("card"),
-                    },
-                    {
-                      children: <HamburgerIcon />,
-                      isActive: courseListLayout === "table",
-                      onClick: () => setCourseListLayout("table"),
-                    },
-                  ]}
-                />
+
+                {isAdminLike && (
+                  <ButtonGroup
+                    buttons={[
+                      {
+                        children: <DashboardIcon />,
+                        isActive: true,
+                        onClick: () => navigate("/courses"),
+                      },
+                      {
+                        children: <HamburgerIcon />,
+                        isActive: false,
+                        onClick: () => navigate("/admin/courses"),
+                      },
+                    ]}
+                  />
+                )}
               </div>
             </div>
             <div
               data-testid="unenrolled-courses"
-              className={cn("gap-6 rounded-lg drop-shadow-primary lg:bg-white lg:p-8", {
-                "flex flex-wrap": courseListLayout === "card",
-                block: courseListLayout === "table",
-              })}
+              className="gap-6 rounded-lg drop-shadow-primary lg:bg-white lg:p-8 flex flex-wrap"
             >
               {userAvailableCourses && !isEmpty(userAvailableCourses) && (
-                <CourseList
-                  availableCourses={userAvailableCourses}
-                  courseListLayout={courseListLayout}
-                />
+                <CourseList availableCourses={userAvailableCourses} />
               )}
               {!userAvailableCourses ||
                 (isEmpty(userAvailableCourses) && (

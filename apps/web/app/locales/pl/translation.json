@@ -131,12 +131,10 @@
     "dashboard": "Panel główny",
     "courses": "Kursy",
     "findInApplication": "Znajdź w aplikacji",
-    "myCourses": "Moje kursy",
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
     "providerInformation": "Informacje",
-    "browseCourses": "Przeglądaj kursy",
     "announcements": "Ogłoszenia",
     "promotionCodes": "Kody promocyjne",
     "manage": "Zarządzaj",
@@ -496,6 +494,10 @@
         "published": "Opublikowane",
         "private": "Niepubliczne"
       }
+    },
+    "courses": {
+      "header": "Zarządzaj kursami",
+      "subHeader": "Wszystkie kursy, które możesz wyświetlić i edytować"
     },
     "field": {
       "title": "Tytuł",
@@ -1166,7 +1168,7 @@
     },
     "breadcrumbs": {
       "dashboard": "Panel główny",
-      "myCourses": "Moje kursy",
+      "courses": "Kursy",
       "back": "Wstecz"
     },
     "statistics": {
@@ -1299,7 +1301,7 @@
     },
     "breadcrumbs": {
       "dashboard": "Panel główny",
-      "availableCourses": "Dostępne kursy"
+      "courses": "Kursy"
     },
     "button": {
       "continue": "Kontynuuj",

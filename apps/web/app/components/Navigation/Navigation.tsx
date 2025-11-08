@@ -39,7 +39,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   }, []);
 
   if (!menuItems) {
-    menuItems = mapNavigationItems(getNavigationConfig(role === "user", t));
+    menuItems = mapNavigationItems(getNavigationConfig(t));
   }
 
   if (!role) return null;
