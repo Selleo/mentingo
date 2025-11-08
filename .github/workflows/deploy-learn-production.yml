@@ -15,6 +15,28 @@ jobs:
         working-directory: ./
     steps:
       - uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+            fetch-tags: true
+
+      - name: Save version in apps/api
+        run: |
+          # Try to get latest local tag
+          TAG_VERSION=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || true)
+
+          # If no tag found, fetch from external repo
+          if [ -z "$TAG_VERSION" ]; then
+            echo "⚠️ No local tags found. Fetching from Selleo/mentingo..."
+            TAG_VERSION=$(git ls-remote --tags https://github.com/Selleo/mentingo \
+              | awk -F/ '{print $3}' \
+              | sed 's/\^{}//' \
+              | grep '^v' \
+              | sort -V \
+              | tail -n1)
+          fi
+
+          echo "{ \"version\": \"$TAG_VERSION\" }" > apps/api/version.json
+          echo "✅ Wrote version $TAG_VERSION to apps/api/version.json"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -221,9 +243,6 @@ jobs:
         env:
           ECR_URL: ${{ steps.login-ecr.outputs.registry }}/learn/production/ui
           VITE_STRIPE_PUBLISHABLE_KEY: ${{secrets.STRIPE_PUBLISHABLE_KEY}}
-          VITE_SENTRY_AUTH_TOKEN: ${{secrets.SENTRY_AUTH_TOKEN}}
-          VITE_SENTRY_ORG: ${{secrets.SENTRY_ORG}}
-          VITE_SENTRY_PROJECT: learn-hub
           VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
           VITE_GOOGLE_OAUTH_ENABLED: ${{secrets.VITE_GOOGLE_OAUTH_ENABLED}}
           VITE_MICROSOFT_OAUTH_ENABLED: ${{secrets.VITE_MICROSOFT_OAUTH_ENABLED}}
@@ -234,9 +253,6 @@ jobs:
           docker build -f ./web.Dockerfile \
             --build-arg VERSION=$IMAGE_TAG \
             --build-arg VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY \
-            --build-arg VITE_SENTRY_AUTH_TOKEN=$VITE_SENTRY_AUTH_TOKEN \
-            --build-arg VITE_SENTRY_ORG=$VITE_SENTRY_ORG \
-            --build-arg VITE_SENTRY_PROJECT=$VITE_SENTRY_PROJECT \
             --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
             --build-arg VITE_GOOGLE_OAUTH_ENABLED=$VITE_GOOGLE_OAUTH_ENABLED \
             --build-arg VITE_MICROSOFT_OAUTH_ENABLED=$VITE_MICROSOFT_OAUTH_ENABLED \

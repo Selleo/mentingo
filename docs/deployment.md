@@ -280,6 +280,28 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
+              fetch-tags: true
+
+          - name: Save version in apps/api
+            run: |
+              # Try to get latest local tag
+              TAG_VERSION=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || true)
+
+              # If no tag found, fetch from external repo
+              if [ -z "$TAG_VERSION" ]; then
+                echo "⚠️ No local tags found. Fetching from Selleo/mentingo..."
+                TAG_VERSION=$(git ls-remote --tags https://github.com/Selleo/mentingo \
+                  | awk -F/ '{print $3}' \
+                  | sed 's/\^{}//' \
+                  | grep '^v' \
+                  | sort -V \
+                  | tail -n1)
+              fi
+
+              echo "{ \"version\": \"$TAG_VERSION\" }" > apps/api/version.json
+              echo "✅ Wrote version $TAG_VERSION to apps/api/version.json"
           - name: Configure AWS credentials
             uses: aws-actions/configure-aws-credentials@v1-node16
             with:
@@ -315,6 +337,28 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
         runs-on: ubuntu-latest
         steps:
           - uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
+              fetch-tags: true
+
+          - name: Save version in apps/web
+            run: |
+              # Try to get latest local tag
+              TAG_VERSION=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || true)
+
+              # If no tag found, fetch from external repo
+              if [ -z "$TAG_VERSION" ]; then
+                echo "⚠️ No local tags found. Fetching from Selleo/mentingo..."
+                TAG_VERSION=$(git ls-remote --tags https://github.com/Selleo/mentingo \
+                  | awk -F/ '{print $3}' \
+                  | sed 's/\^{}//' \
+                  | grep '^v' \
+                  | sort -V \
+                  | tail -n1)
+              fi
+
+              echo "{ \"version\": \"$TAG_VERSION\" }" > apps/web/version.json
+              echo "✅ Wrote version $TAG_VERSION to apps/web/version.json"
           - name: Configure AWS credentials
             uses: aws-actions/configure-aws-credentials@v1-node16
             with:
@@ -329,9 +373,6 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
               ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY_WEB }}
               IMAGE_TAG: ${{ github.sha }}
               VITE_STRIPE_PUBLISHABLE_KEY: ${{secrets.VITE_STRIPE_PUBLISHABLE_KEY}}
-              VITE_SENTRY_AUTH_TOKEN: ${{secrets.SENTRY_AUTH_TOKEN}}
-              VITE_SENTRY_ORG: ${{secrets.SENTRY_ORG}}
-              VITE_SENTRY_PROJECT: ${{secrets.SENTRY_PROJECT}}
               VITE_SENTRY_DSN: ${{secrets.SENTRY_DSN}}
               VITE_POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
               VITE_POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
@@ -339,9 +380,6 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
               docker build -f ./web.Dockerfile \
                 --build-arg VERSION=$IMAGE_TAG \
                 --build-arg VITE_STRIPE_PUBLISHABLE_KEY=$VITE_STRIPE_PUBLISHABLE_KEY \
-                --build-arg VITE_SENTRY_AUTH_TOKEN=$VITE_SENTRY_AUTH_TOKEN \
-                --build-arg VITE_SENTRY_ORG=$VITE_SENTRY_ORG \
-                --build-arg VITE_SENTRY_PROJECT=$VITE_SENTRY_PROJECT \
                 --build-arg VITE_SENTRY_DSN=$VITE_SENTRY_DSN \
                 --build-arg VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY \
                 --build-arg VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST \
@@ -593,9 +631,9 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
     # STRIPE & SENTRY
     VITE_STRIPE_PUBLISHABLE_KEY=
-    VITE_SENTRY_AUTH_TOKEN=
-    VITE_SENTRY_ORG=
-    VITE_SENTRY_PROJECT=
+    SENTRY_AUTH_TOKEN=
+    SENTRY_ORG=
+    SENTRY_PROJECT=
     VITE_SENTRY_DSN=
     ```
 
