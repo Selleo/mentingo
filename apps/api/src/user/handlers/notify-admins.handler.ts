@@ -2,10 +2,8 @@ import { EventsHandler } from "@nestjs/cqrs";
 import { FinishedCourseEmail, NewUserEmail } from "@repo/email-templates";
 
 import { EmailService } from "src/common/emails/emails.service";
-import { CourseCompletedEvent } from "src/events";
+import { CourseCompletedEvent, UserPasswordCreatedEvent, UserRegisteredEvent } from "src/events";
 
-import { UserPasswordCreatedEvent } from "../../events/user/user-password-created.event";
-import { UserRegisteredEvent } from "../../events/user/user-registered.event";
 import { UserService } from "../user.service";
 
 import type { IEventHandler } from "@nestjs/cqrs";
@@ -45,7 +43,7 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
       email: email,
     });
 
-    const adminsEmailsToNotify = await this.userService.getAdminsToNotifyAboutNewUser();
+    const adminsEmailsToNotify = await this.userService.getAdminsToNotifyAboutNewUser(email);
 
     await Promise.all(
       adminsEmailsToNotify.map((adminsEmail) => {
