@@ -281,6 +281,15 @@ html {
   display: none;
 }
 
+/* Only supported by Chrome */
+/* noinspection CssUnknownProperty */
+@supports (field-sizing: content) {
+  .field-sizing-content {
+    field-sizing: content;
+  }
+}
+
+
 @supports (scrollbar-width: thin) {
   .scrollbar-thin {
     scrollbar-width: thin;
