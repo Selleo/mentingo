@@ -2519,6 +2519,12 @@ export interface GetFrontendSSOEnabledResponse {
   };
 }
 
+export interface GetStripePublishableKeyResponse {
+  data: {
+    publishableKey: string | null;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -5454,6 +5460,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
       this.request<GetFrontendSSOEnabledResponse, any>({
         path: `/api/env/frontend/sso`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetStripePublishableKey
+     * @request GET:/api/env/stripe/publishable-key
+     */
+    envControllerGetStripePublishableKey: (params: RequestParams = {}) =>
+      this.request<GetStripePublishableKeyResponse, any>({
+        path: `/api/env/stripe/publishable-key`,
         method: "GET",
         format: "json",
         ...params,

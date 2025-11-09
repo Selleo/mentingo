@@ -739,6 +739,7 @@
       "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
       "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
       "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
+      "VITE_STRIPE_PUBLISHABLE_KEY": { "label": "Vite Stripe Publishable Key" },
       "SLACK_CLIENT_ID": { "label": "Slack Client ID" },
       "SLACK_CLIENT_SECRET": { "label": "Slack Client Secret" },
       "SLACK_OAUTH_ENABLED": { "label": "Slack OAuth Enabled (true/false)" },

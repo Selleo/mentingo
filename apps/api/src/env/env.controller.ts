@@ -11,6 +11,7 @@ import {
   bulkUpsertEnvSchema,
   frontendSSOEnabledResponseSchema,
   getEnvResponseSchema,
+  stripePublishableKeyResponseSchema,
 } from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -47,5 +48,16 @@ export class EnvController {
   })
   async getFrontendSSOEnabled() {
     return new BaseResponse(await this.envService.getSSOEnabled());
+  }
+
+  @Public()
+  @Get("stripe/publishable-key")
+  @Validate({
+    response: baseResponse(stripePublishableKeyResponseSchema),
+  })
+  async getStripePublishableKey() {
+    const stripePublishableKey = await this.envService.getStripePublishableKey();
+
+    return new BaseResponse({ publishableKey: stripePublishableKey });
   }
 }

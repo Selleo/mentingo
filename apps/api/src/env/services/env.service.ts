@@ -104,4 +104,12 @@ export class EnvService {
       slack,
     };
   }
+
+  async getStripePublishableKey() {
+    const stripePublishableKey = await this.getEnv("VITE_STRIPE_PUBLISHABLE_KEY")
+      .then(({ value }) => value)
+      .catch(() => null);
+
+    return stripePublishableKey;
+  }
 }
