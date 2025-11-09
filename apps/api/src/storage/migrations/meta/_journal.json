@@ -344,6 +344,13 @@
       "when": 1762164850617,
       "tag": "0048_bump_text_fields_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1762507996209,
+      "tag": "0049_add_missing_properties_to_user_settings",
+      "breakpoints": true
     }
   ]
 }
