@@ -19,7 +19,6 @@ import { PromptService } from "src/ai/services/prompt.service";
 import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
-import { WELCOME_MESSAGE_PROMPT } from "src/ai/utils/ai.config";
 import {
   MESSAGE_ROLE,
   type MessageRole,
@@ -153,7 +152,9 @@ export class AiService {
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
-    const welcomeMessagePrompt = WELCOME_MESSAGE_PROMPT(systemPrompt);
+    const welcomeMessagePrompt = await this.promptService.loadPrompt("welcomePrompt", {
+      systemPrompt,
+    });
 
     const content = await observe(
       async () => {
