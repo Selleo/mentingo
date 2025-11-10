@@ -9866,13 +9866,17 @@
                     },
                     "finishedCount": {
                       "type": "number"
+                    },
+                    "lessonOrder": {
+                      "type": "number"
                     }
                   },
                   "required": [
                     "quizId",
                     "name",
                     "averageScore",
-                    "finishedCount"
+                    "finishedCount",
+                    "lessonOrder"
                   ]
                 }
               }
