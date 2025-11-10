@@ -39,22 +39,23 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
 
   const [showRetakeModal, setShowRetakeModal] = useState(false);
 
-  const { messages, input, setMessages, handleInputChange, handleSubmit, status } = useChat({
-    api: "/api/ai/chat",
-    body: {
-      threadId: lesson.threadId ?? "",
-    },
-    fetch: async (url, options) => {
-      const body = JSON.parse(options?.body as string);
-      return fetch(url, {
-        ...options,
-        body: JSON.stringify({
-          content: body.messages[body.messages.length - 1]?.content || "",
-          threadId: lesson.threadId ?? "",
-        }),
-      });
-    },
-  });
+  const { messages, input, setMessages, handleInputChange, handleSubmit, status, setInput } =
+    useChat({
+      api: "/api/ai/chat",
+      body: {
+        threadId: lesson.threadId ?? "",
+      },
+      fetch: async (url, options) => {
+        const body = JSON.parse(options?.body as string);
+        return fetch(url, {
+          ...options,
+          body: JSON.stringify({
+            content: body.messages[body.messages.length - 1]?.content || "",
+            threadId: lesson.threadId ?? "",
+          }),
+        });
+      },
+    });
 
   useEffect(() => {
     setMessages((currentThreadMessages?.data as Message[]) || []);
@@ -104,6 +105,7 @@ const AiMentorLesson = ({ lesson, lessonLoading }: AiMentorLessonProps) => {
           handleSubmit={handleSubmit}
           handleInputChange={handleInputChange}
           input={input}
+          setInput={setInput}
         />
       )}
 
