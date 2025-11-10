@@ -263,6 +263,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
             </TabsContent>
             <TabsContent value="aiMentorResults">
               <CourseStudentsAiMentorResultsTable
+                course={course}
                 searchParams={aiMentorSearchParams}
                 onFilterChange={handleAiMentorFilterChange}
               />

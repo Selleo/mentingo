@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { CircularProgress } from "~/components/ui/circular-progress";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -49,9 +50,37 @@ export default function LessonPreviewDialog({
     chapter?.lessons.some((l) => l.id === lessonId),
   );
 
-  const requiredCorrect = Math.ceil(
-    ((lesson.thresholdScore ?? 0) * (lesson.quizDetails?.questionCount ?? 0)) / 100,
-  );
+  const scorePercentage =
+    lesson.type === LessonType.AI_MENTOR
+      ? lesson.aiMentorScorePercentage
+      : (lesson.quizDetails?.score ?? 0);
+
+  const score =
+    lesson.type === LessonType.AI_MENTOR
+      ? lesson.aiMentorScore
+      : (lesson.quizDetails?.correctAnswerCount ?? 0);
+
+  const minScore =
+    lesson.type === LessonType.AI_MENTOR
+      ? (() => {
+          const max = lesson.aiMentorMaxScore ?? 0;
+          const min = lesson.aiMentorMinScore ?? 0;
+          return max > 0 ? (min / max) * 100 : 0;
+        })()
+      : lesson.thresholdScore;
+
+  const maxScore =
+    lesson.type === LessonType.AI_MENTOR
+      ? lesson.aiMentorMaxScore
+      : (lesson.quizDetails?.questionCount ?? 0);
+
+  const requiredScore =
+    lesson.type === LessonType.AI_MENTOR
+      ? (() => {
+          const max = lesson.aiMentorMaxScore ?? 0;
+          return max > 0 ? Math.ceil(((minScore ?? 0) * max) / 100) : 0;
+        })()
+      : Math.ceil(((lesson.thresholdScore ?? 0) * (lesson.quizDetails?.questionCount ?? 0)) / 100);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -86,20 +115,20 @@ export default function LessonPreviewDialog({
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <CircularProgress size={40} strokeWidth={4} value={lesson.quizDetails?.score ?? 0} />
+              <CircularProgress size={40} strokeWidth={4} value={scorePercentage ?? 0} />
               <div className="flex flex-col">
                 <span className="group relative">
                   {t("studentLessonView.other.score", {
-                    score: lesson.quizDetails?.score ?? 0,
-                    correct: lesson.quizDetails?.correctAnswerCount ?? 0,
-                    questionsNumber: lesson.quizDetails?.questionCount,
+                    score: scorePercentage,
+                    correct: score,
+                    questionsNumber: maxScore,
                   })}
                 </span>
                 <span>
                   {t("studentLessonView.other.passingThreshold", {
-                    threshold: lesson.thresholdScore,
-                    correct: requiredCorrect,
-                    questionsNumber: lesson.quizDetails?.questionCount,
+                    threshold: minScore,
+                    correct: requiredScore,
+                    questionsNumber: maxScore,
                   })}
                 </span>
               </div>
@@ -115,6 +144,7 @@ export default function LessonPreviewDialog({
             isFirstLesson={true}
             lessonLoading={isLoadingLesson}
             isPreviewMode={true}
+            previewUserId={user.id}
           />
         </div>
       </DialogContent>

@@ -17,6 +17,7 @@ interface ChatMessageProps {
   user?: { name?: string; email?: string };
   name?: string;
   email?: string;
+  userName?: string;
 }
 const ChatMessage = (message: ChatMessageProps) => {
   const { t } = useTranslation();
@@ -27,6 +28,7 @@ const ChatMessage = (message: ChatMessageProps) => {
 
   if (!isAI) {
     userName =
+      message.userName ||
       message.user?.name ||
       message.name ||
       `${currentUser?.firstName ?? ""} ${currentUser?.lastName ?? ""}`.trim() ||

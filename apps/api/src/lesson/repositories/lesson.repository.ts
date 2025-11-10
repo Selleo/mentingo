@@ -3,6 +3,7 @@ import { and, desc, eq, getTableColumns, ilike, isNull, or, sql } from "drizzle-
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
+  aiMentorStudentLessonProgress,
   chapters,
   courses,
   lessonResources,
@@ -50,6 +51,10 @@ export class LessonRepository {
         updatedAt: studentLessonProgress.updatedAt,
         isQuizPassed: sql<boolean | null>`${studentLessonProgress.isQuizPassed}`,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
+        aiMentorMinScore: sql<number | null>`${aiMentorStudentLessonProgress.minScore}`,
+        aiMentorMaxScore: sql<number | null>`${aiMentorStudentLessonProgress.maxScore}`,
+        aiMentorScore: sql<number | null>`${aiMentorStudentLessonProgress.score}`,
+        aiMentorScorePercentage: sql<number | null>`${aiMentorStudentLessonProgress.percentage}`,
         isExternal: sql<boolean>`${lessons.isExternal}`,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,
         isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NULL THEN FALSE ELSE TRUE END`,
@@ -82,6 +87,13 @@ export class LessonRepository {
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
           eq(studentLessonProgress.studentId, userId),
+        ),
+      )
+      .leftJoin(
+        aiMentorStudentLessonProgress,
+        and(
+          eq(studentLessonProgress.lessonId, lessons.id),
+          eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
         ),
       )
       .where(eq(lessons.id, id));
