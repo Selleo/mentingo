@@ -1,6 +1,7 @@
-import { TourProvider } from "@reactour/tour";
+import { TourProvider, useTour } from "@reactour/tour";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useCallback, useEffect } from "react";
 import { I18nextProvider } from "react-i18next";
 
 import i18n from "../../../i18n";
@@ -14,25 +15,63 @@ import { PostHogWrapper } from "./PostHogWrapper";
 
 import type { OnboardingPages } from "@repo/shared";
 
+function TourKeyboardHandler({
+  handleCloseTour,
+}: {
+  handleCloseTour: ({
+    meta,
+    setIsOpen,
+  }: {
+    meta?: string | undefined;
+    setIsOpen: (isOpen: boolean) => void;
+  }) => void;
+}) {
+  const { isOpen, setIsOpen, meta } = useTour();
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        handleCloseTour({ meta, setIsOpen });
+      }
+    },
+    [handleCloseTour, meta, setIsOpen],
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleKeyDown]);
+
+  return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
+  const handleCloseTour = useCallback(
+    ({ meta, setIsOpen }: { meta?: string | undefined; setIsOpen: (isOpen: boolean) => void }) => {
+      setIsOpen(false);
+      if (!meta) return;
+      void ApiClient.api
+        .userControllerMarkOnboardingComplete(meta as OnboardingPages)
+        .then(() => {
+          queryClient.invalidateQueries({
+            queryKey: currentUserQueryOptions.queryKey,
+          });
+        })
+        .catch(() => {});
+    },
+    [],
+  );
+
   return (
     <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
         <PostHogWrapper>
           <TourProvider
             steps={[]}
-            onClickClose={({ meta, setIsOpen }) => {
-              setIsOpen(false);
-              if (!meta) return;
-              void ApiClient.api
-                .userControllerMarkOnboardingComplete(meta as OnboardingPages)
-                .then(() => {
-                  queryClient.invalidateQueries({
-                    queryKey: currentUserQueryOptions.queryKey,
-                  });
-                })
-                .catch(() => {});
-            }}
+            onClickMask={handleCloseTour}
+            onClickClose={handleCloseTour}
             styles={{
               popover: (base) => ({
                 ...base,
@@ -63,6 +102,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             badgeContent={({ totalSteps, currentStep }) => `${currentStep + 1} / ${totalSteps}`}
             showDots={false}
           >
+            <TourKeyboardHandler handleCloseTour={handleCloseTour} />
             <ThemeProvider>
               <LanguageProvider>{children}</LanguageProvider>
               {process.env.NODE_ENV === "development" && (
