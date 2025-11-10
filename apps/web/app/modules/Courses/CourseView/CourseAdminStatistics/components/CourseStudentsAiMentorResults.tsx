@@ -5,8 +5,10 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourseStudentsAiMentorResults } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
+import { ArrowRight } from "~/assets/svgs";
 import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
+import { Button } from "~/components/ui/button";
 import { CircularProgress } from "~/components/ui/circular-progress";
 import {
   Table,
@@ -21,8 +23,13 @@ import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
+import LessonPreviewDialog from "./LessonPreviewDialog";
+
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import type { GetCourseStudentsAiMentorResultsResponse } from "~/api/generated-api";
+import type {
+  GetCourseResponse,
+  GetCourseStudentsAiMentorResultsResponse,
+} from "~/api/generated-api";
 import type { CourseStudentsAiMentorResultsQueryParams } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
@@ -32,17 +39,24 @@ type CourseStudentsAiMentorResultsColumn = GetCourseStudentsAiMentorResultsRespo
 interface CourseStudentsAiMentorResultsTableProps {
   searchParams: CourseStudentsAiMentorResultsQueryParams;
   onFilterChange: (name: string, value: FilterValue) => void;
+  course?: GetCourseResponse["data"];
 }
 
 export function CourseStudentsAiMentorResultsTable({
   searchParams,
   onFilterChange,
+  course,
 }: CourseStudentsAiMentorResultsTableProps) {
   const { t } = useTranslation();
 
   const { id = "" } = useParams();
-
   const { isAdminLike } = useUserRole();
+
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
+  const [previewDialogData, setPreviewDialogData] = useState<{
+    lessonId: string;
+    userId: string;
+  } | null>(null);
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -120,6 +134,26 @@ export function CourseStudentsAiMentorResultsTable({
             ? format(new Date(row.original.lastSession), "MMM dd, yyyy")
             : null,
       },
+      {
+        id: "actions",
+        cell: ({ row }) => (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setPreviewDialogData({
+                  lessonId: row.original.lessonId,
+                  userId: row.original.studentId,
+                });
+                setIsPreviewDialogOpen(true);
+              }}
+            >
+              <ArrowRight className="size-4 text-black" />
+            </Button>
+          </div>
+        ),
+      },
     ],
     [t],
   );
@@ -195,6 +229,18 @@ export function CourseStudentsAiMentorResultsTable({
           handleFilterChange("perPage", newPerPage);
         }}
       />
+      {previewDialogData && course && (
+        <LessonPreviewDialog
+          course={course}
+          lessonId={previewDialogData.lessonId}
+          userId={previewDialogData.userId}
+          isOpen={isPreviewDialogOpen}
+          onClose={() => {
+            setIsPreviewDialogOpen(false);
+            setPreviewDialogData(null);
+          }}
+        />
+      )}
     </div>
   );
 }
