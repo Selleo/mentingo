@@ -50,37 +50,27 @@ export default function LessonPreviewDialog({
     chapter?.lessons.some((l) => l.id === lessonId),
   );
 
-  const scorePercentage =
-    lesson.type === LessonType.AI_MENTOR
-      ? lesson.aiMentorScorePercentage
-      : (lesson.quizDetails?.score ?? 0);
+  const isAiMentorLesson = lesson.type === LessonType.AI_MENTOR;
 
-  const score =
-    lesson.type === LessonType.AI_MENTOR
-      ? lesson.aiMentorScore
-      : (lesson.quizDetails?.correctAnswerCount ?? 0);
+  const scorePercentage = isAiMentorLesson
+    ? (lesson.aiMentorDetails?.percentage ?? 0)
+    : (lesson.quizDetails?.score ?? 0);
 
-  const minScore =
-    lesson.type === LessonType.AI_MENTOR
-      ? (() => {
-          const max = lesson.aiMentorMaxScore ?? 0;
-          const min = lesson.aiMentorMinScore ?? 0;
-          return max > 0 ? (min / max) * 100 : 0;
-        })()
-      : lesson.thresholdScore;
+  const score = isAiMentorLesson
+    ? (lesson.aiMentorDetails?.score ?? 0)
+    : (lesson.quizDetails?.correctAnswerCount ?? 0);
 
-  const maxScore =
-    lesson.type === LessonType.AI_MENTOR
-      ? lesson.aiMentorMaxScore
-      : (lesson.quizDetails?.questionCount ?? 0);
+  const thresholdPercentage = isAiMentorLesson
+    ? (lesson.aiMentorDetails?.requiredScore ?? 0)
+    : (lesson.thresholdScore ?? 0);
 
-  const requiredScore =
-    lesson.type === LessonType.AI_MENTOR
-      ? (() => {
-          const max = lesson.aiMentorMaxScore ?? 0;
-          return max > 0 ? Math.ceil(((minScore ?? 0) * max) / 100) : 0;
-        })()
-      : Math.ceil(((lesson.thresholdScore ?? 0) * (lesson.quizDetails?.questionCount ?? 0)) / 100);
+  const maxScore = isAiMentorLesson
+    ? (lesson.aiMentorDetails?.maxScore ?? 0)
+    : (lesson.quizDetails?.questionCount ?? 0);
+
+  const requiredCorrectAnswers = isAiMentorLesson
+    ? Math.ceil((thresholdPercentage * maxScore) / 100)
+    : Math.ceil((thresholdPercentage * maxScore) / 100);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -126,8 +116,8 @@ export default function LessonPreviewDialog({
                 </span>
                 <span>
                   {t("studentLessonView.other.passingThreshold", {
-                    threshold: minScore,
-                    correct: requiredScore,
+                    threshold: thresholdPercentage,
+                    correct: requiredCorrectAnswers,
                     questionsNumber: maxScore,
                   })}
                 </span>

@@ -179,10 +179,18 @@ export const lessonShowSchema = Type.Object({
   status: Type.Optional(Type.Enum(THREAD_STATUS)),
   threadId: Type.Optional(UUIDSchema),
   lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
-  aiMentorMinScore: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
-  aiMentorMaxScore: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
-  aiMentorScore: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
-  aiMentorScorePercentage: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  aiMentorDetails: Type.Optional(
+    Type.Union([
+      Type.Object({
+        minScore: Type.Union([Type.Number(), Type.Null()]),
+        maxScore: Type.Union([Type.Number(), Type.Null()]),
+        score: Type.Union([Type.Number(), Type.Null()]),
+        percentage: Type.Union([Type.Number(), Type.Null()]),
+        requiredScore: Type.Union([Type.Number(), Type.Null()]),
+      }),
+      Type.Null(),
+    ]),
+  ),
 });
 
 export const updateLessonSchema = Type.Partial(createLessonSchema);
