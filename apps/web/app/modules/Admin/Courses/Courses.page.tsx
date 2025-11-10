@@ -12,7 +12,7 @@ import { isAxiosError } from "axios";
 import { format } from "date-fns";
 import { isEmpty } from "lodash-es";
 import { Trash } from "lucide-react";
-import { startTransition, useState } from "react";
+import React, { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteCourse } from "~/api/mutations/admin/useDeleteCourse";
@@ -57,6 +57,7 @@ import {
 import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { getCurrencyLocale } from "~/utils/getCurrencyLocale";
 import { setPageTitle } from "~/utils/setPageTitle";
+import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import { getCourseBadgeVariant, getCourseStatus } from "./utils";
 
@@ -88,6 +89,7 @@ const Courses = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const { t } = useTranslation();
+  const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
 
   const filterConfig: FilterConfig[] = [
     {
@@ -139,12 +141,23 @@ const Courses = () => {
           aria-label="Select all"
         />
       ),
-      cell: ({ row }) => (
+      cell: ({ row, table }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
-          onClick={(e) => e.stopPropagation()}
+          data-testid={row.original.authorEmail}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowSelectionRange({
+              table,
+              e,
+              id: row.id,
+              idx: row.index,
+              value: row.getIsSelected(),
+              lastSelectedRowIndex,
+              setLastSelectedRowIndex,
+            });
+          }}
         />
       ),
       enableSorting: false,

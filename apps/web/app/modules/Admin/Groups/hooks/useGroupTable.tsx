@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Checkbox } from "~/components/ui/checkbox";
+import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import type { ColumnDef } from "@tanstack/react-table";
 import type { GetAllGroupsResponse } from "~/api/generated-api";
@@ -10,6 +12,7 @@ type GroupColumns = GetAllGroupsResponse["data"][number];
 
 export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () => {
   const { t } = useTranslation();
+  const [lastSelectedRowIndex, setLastSelectedRowIndex] = useState<number>(0);
 
   return {
     columns: [
@@ -22,12 +25,22 @@ export const useGroupTable: () => { columns: ColumnDef<GroupColumns>[] } = () =>
             aria-label="Select all"
           />
         ),
-        cell: ({ row }) => (
+        cell: ({ row, table }) => (
           <Checkbox
             checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
             aria-label="Select row"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRowSelectionRange({
+                table,
+                e,
+                id: row.id,
+                idx: row.index,
+                value: row.getIsSelected(),
+                lastSelectedRowIndex,
+                setLastSelectedRowIndex,
+              });
+            }}
           />
         ),
         enableSorting: false,

@@ -42,6 +42,7 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { setPageTitle } from "~/utils/setPageTitle";
+import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 import { USER_ROLES } from "~/utils/userRoles";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
@@ -77,6 +78,7 @@ const Users = () => {
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+
   const [selectedValue, setSelectedValue] = React.useState<string>("");
 
   const { mutateAsync: deleteUsers } = useBulkDeleteUsers();
@@ -87,6 +89,8 @@ const Users = () => {
 
   const [showEditModal, setShowEditModal] = React.useState<ModalTypes>(null);
   const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
+
+  const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
 
   const dropdownItems: DropdownItems[] = [
     {
@@ -169,10 +173,20 @@ const Users = () => {
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
           data-testid={row.original.email}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowSelectionRange({
+              table,
+              e,
+              id: row.id,
+              idx: row.index,
+              value: row.getIsSelected(),
+              lastSelectedRowIndex,
+              setLastSelectedRowIndex,
+            });
+          }}
         />
       ),
       enableSorting: false,

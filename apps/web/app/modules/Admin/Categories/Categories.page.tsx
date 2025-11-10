@@ -11,7 +11,7 @@ import {
 import { format } from "date-fns";
 import { isEmpty } from "lodash-es";
 import { Trash } from "lucide-react";
-import { useState, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteCategory } from "~/api/mutations/admin/useDeleteCategory";
@@ -51,6 +51,7 @@ import {
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { setPageTitle } from "~/utils/setPageTitle";
+import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { GetAllCategoriesResponse } from "~/api/generated-api";
@@ -79,6 +80,7 @@ const Categories = () => {
   const { data } = useCategoriesSuspense(searchParams);
   const { t } = useTranslation();
   const { toast } = useToast();
+  const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
 
   const filterConfig: FilterConfig[] = [
     {
@@ -111,12 +113,22 @@ const Categories = () => {
           aria-label="Select all"
         />
       ),
-      cell: ({ row }) => (
+      cell: ({ row, table }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
           aria-label="Select row"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowSelectionRange({
+              table,
+              e,
+              lastSelectedRowIndex,
+              setLastSelectedRowIndex,
+              id: row.id,
+              idx: row.index,
+              value: row.getIsSelected(),
+            });
+          }}
         />
       ),
       enableSorting: false,
