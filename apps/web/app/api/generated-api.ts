@@ -1560,10 +1560,13 @@ export interface GetLessonByIdResponse {
       createdAt: string;
       updatedAt: string;
     }[];
-    aiMentorMinScore?: number | null;
-    aiMentorMaxScore?: number | null;
-    aiMentorScore?: number | null;
-    aiMentorScorePercentage?: number | null;
+    aiMentorDetails?: {
+      minScore: number | null;
+      maxScore: number | null;
+      score: number | null;
+      percentage: number | null;
+      requiredScore: number | null;
+    } | null;
   };
 }
 
