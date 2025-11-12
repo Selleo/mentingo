@@ -105,100 +105,66 @@ Before you begin, make sure you have:
 
 ### Installation
 
-Install project dependencies:
+Run the automated setup script:
+
+**On macOS/Linux:**
 
 ```bash
-pnpm install
+pnpm setup:unix
 ```
 
-Configure Caddy (first-time setup only):
+**On Windows:**
 
 ```bash
-cd ./apps/reverse-proxy
-caddy run
-# After running caddy just terminate the process with Ctrl+C
+pnpm setup:win
 ```
 
-> [!IMPORTANT]
-> First run has to be run by hand to configure caddy. Later on it will automatically
-> start with the app start script.
+The setup script will automatically:
+
+- ✓ Verify all prerequisites and tool versions
+- ✓ Configure Caddy for HTTPS development
+- ✓ Install project dependencies
+- ✓ Build shared packages
+- ✓ Set up environment files (.env)
+- ✓ Start Docker containers
+- ✓ Run database migrations
+- ✓ Seed the database with test data
 
 > [!NOTE]
-> Caddy tries to bind to port 443. On Unix/Linux systems, ports below 1024 are privileged, meaning only processes with special permissions (or root) can use them. If you encounter an error, you might have to grant it permission to bind to privileged ports by running:
->
-> ```bash
-> sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
-> ```
-
-### Environment Setup
-
-Configure environment variables for both applications:
-
-```bash
-cd apps/api
-cp .env.example .env
-```
-
-```bash
-cd apps/web
-cp .env.example .env
-```
-
-</br>
-<div align="center">
-
-### Build shared packages
-
-```bash
-pnpm run --filter=@repo/shared build
-```
-
-## Database Setup
-
-</div>
-
-### Migrations
-
-> [!NOTE]
-> In project root.
-
-1. Start the database:
-
-```bash
-docker compose up -d
-```
-
-2. Run migrations:
-
-```bash
-pnpm db:migrate
-```
-
-### Database Seeding
-
-Populate the database with initial data:
-
-```bash
-pnpm db:seed
-```
-
-> [!NOTE]
-> Make sure your `.env` variables are set correctly. Otherwise, you might run into errors when running E2E tests.
+> On Linux, Caddy needs permission to bind to port 443. The script will automatically handle this, but you may be prompted for your sudo password.
 
 ### Default User Accounts
 
-After running the database seeding **AFTER** renaming the `teacher` role to `content creator`, the following default accounts are available:
+After setup completes, the following default accounts are available:
 
-| Role            | Email                       | Password |
-| --------------- | --------------------------- | -------- |
-| Student         | student@example.com         | password |
-| Student         | student2@example.com        | password |
-| Content Creator | contentcreator@example.com  | password |
-| Content Creator | contentcreator2@example.com | password |
-| Admin           | admin@example.com           | password |
+| Role            | Email                      | Password |
+| --------------- | -------------------------- | -------- |
+| Admin           | admin@example.com          | password |
+| Student         | user@example.com           | password |
+| Content Creator | contentcreator@example.com | password |
 
 > [!NOTE]
-> These accounts are created during the seeding process and are intended for development and testing purposes only.
+> The setup script creates a minimal production-like environment with only these three essential accounts.
+
+> [!TIP]
+> If you need a populated environment with sample courses, lessons, and additional test users for development, you can run the development seed instead:
+>
+> ```bash
+> pnpm db:seed
+> ```
+>
+> This will create accounts:
+>
+> | Role            | Email                       | Password |
+> | --------------- | --------------------------- | -------- |
+> | Student         | student@example.com         | password |
+> | Student         | student2@example.com        | password |
+> | Content Creator | contentcreator@example.com  | password |
+> | Content Creator | contentcreator2@example.com | password |
+> | Admin           | admin@example.com           | password |
+
+> [!NOTE]
+> All accounts are intended for development and testing purposes only.
 
 </br>
 <div align="center">
