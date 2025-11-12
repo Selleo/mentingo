@@ -118,31 +118,25 @@ fi
 echo -e "${GREEN}[4/8]${NC} Setting up environment files..."
 
 # API .env
-if [[ -f "apps/api/.env" ]]; then
-    echo -e "  ${YELLOW}⚠${NC}  apps/api/.env already exists, skipping..."
-else
-    echo "  → Copying apps/api/.env.example to apps/api/.env"
-    cp apps/api/.env.example apps/api/.env
+
+echo "  → Copying apps/api/.env.example to apps/api/.env"
+cp apps/api/.env.example apps/api/.env
     
-    # Generate master key
-    echo "  → Generating master key..."
-    MASTER_KEY=$(openssl rand -base64 32)
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        sed -i '' "s|MASTER_KEY=.*|MASTER_KEY=\"$MASTER_KEY\"|g" apps/api/.env
-    else
-        # Linux and Windows (Git Bash/WSL)
-        sed -i "s|MASTER_KEY=.*|MASTER_KEY=\"$MASTER_KEY\"|g" apps/api/.env
-    fi
+# Generate master key
+echo "  → Generating master key..."
+MASTER_KEY=$(openssl rand -base64 32)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' "s|MASTER_KEY=.*|MASTER_KEY=\"$MASTER_KEY\"|g" apps/api/.env
+else
+    # Linux and Windows (Git Bash/WSL)
+    sed -i "s|MASTER_KEY=.*|MASTER_KEY=\"$MASTER_KEY\"|g" apps/api/.env
 fi
 
 # Web .env
-if [[ -f "apps/web/.env" ]]; then
-    echo -e "  ${YELLOW}⚠${NC}  apps/web/.env already exists, skipping..."
-else
-    echo "  → Copying apps/web/.env.example to apps/web/.env"
-    cp apps/web/.env.example apps/web/.env
-fi
+
+echo "  → Copying apps/web/.env.example to apps/web/.env"
+cp apps/web/.env.example apps/web/.env
 
 
 # Step 5: Start Docker containers
@@ -153,23 +147,32 @@ echo "  → Stopping pre-existing project containers..."
 docker compose down > /dev/null 2>&1 || true
 
 echo "  → Starting containers using docker compose..."
-if ! docker compose up -d; then
+if ! docker compose up -d > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to start Docker containers${NC}"
     exit 1
 fi
 
 # Wait for database to be ready with health check
 echo "  → Waiting for database to be ready..."
-MAX_RETRIES=15
+
+MAX_RETRIES=30
 RETRY_COUNT=0
-until docker compose exec -T postgres pg_isready -U postgres > /dev/null 2>&1 || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
-    RETRY_COUNT=$((RETRY_COUNT + 1))
-    echo "    Attempt $RETRY_COUNT/$MAX_RETRIES..."
-    sleep 1
+DB_READY=false
+
+while [ "$DB_READY" = false ] && [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    DB_HEALTH=$(docker compose ps project-db --format json | grep -o '"Health":"[^"]*"' | cut -d'"' -f4 || echo "starting")
+
+    if [ "$DB_HEALTH" = "healthy" ]; then
+        DB_READY=true
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        echo "    Attempt $RETRY_COUNT/$MAX_RETRIES (status: $DB_HEALTH)..."
+        sleep 1
+    fi
 done
 
-if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-    echo -e "${RED}✗ Database failed to start${NC}"
+if [ "$DB_READY" = false ]; then
+    echo -e "${RED}✗ Database failed to start after $MAX_RETRIES attempts${NC}"
     exit 1
 fi
 
@@ -189,10 +192,22 @@ fi
 
 # Step 8: Verify setup
 echo -e "${GREEN}[8/8]${NC} Verifying setup..."
-if docker compose ps | grep -q "Up"; then
-    echo -e "  ${GREEN}✓${NC} Docker containers are running"
-else
-    echo -e "${RED}✗ Some Docker containers are not running${NC}"
+
+# Check if critical services are running
+CRITICAL_SERVICES=("project-db" "redis" "minio")
+ALL_RUNNING=true
+
+for service in "${CRITICAL_SERVICES[@]}"; do
+    if docker compose ps "$service" --format json | grep -q '"State":"running"'; then
+        echo -e "  ${GREEN}✓${NC} $service is running"
+    else
+        echo -e "  ${RED}✗${NC} $service is not running"
+        ALL_RUNNING=false
+    fi
+done
+
+if [ "$ALL_RUNNING" = false ]; then
+    echo -e "${RED}✗ Some critical services are not running${NC}"
     exit 1
 fi
 
