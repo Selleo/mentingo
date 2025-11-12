@@ -12,12 +12,14 @@ type NavigationHeaderProps = {
   isMobileNavOpen: boolean;
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
   is2xlBreakpoint: boolean;
+  hasConfigurationIssues?: boolean;
 };
 
 export function NavigationHeader({
   isMobileNavOpen,
   setIsMobileNavOpen,
   is2xlBreakpoint,
+  hasConfigurationIssues,
 }: NavigationHeaderProps) {
   return (
     <div className="flex w-full items-center justify-between px-4 py-3 md:px-6 2xl:h-20 2xl:justify-center 2xl:p-0 3xl:px-8">
@@ -40,6 +42,7 @@ export function NavigationHeader({
         <MobileMenuToggle
           isMobileNavOpen={isMobileNavOpen}
           setIsMobileNavOpen={setIsMobileNavOpen}
+          hasConfigurationIssues={hasConfigurationIssues}
         />
       </div>
     </div>
