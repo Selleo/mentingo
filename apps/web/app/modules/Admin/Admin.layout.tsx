@@ -4,7 +4,6 @@ import { match } from "ts-pattern";
 
 import { currentUserQueryOptions } from "~/api/queries";
 import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
-import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { queryClient } from "~/api/queryClient";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { useUserRole } from "~/hooks/useUserRole";
