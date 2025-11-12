@@ -3,6 +3,7 @@ import { Outlet, redirect } from "@remix-run/react";
 import { currentUserQueryOptions } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
 import { RouteGuard } from "~/Guards/RouteGuard";
+import { useAuthStore } from "~/modules/Auth/authStore";
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -18,6 +19,14 @@ export const meta: MetaFunction = ({ matches }) => {
 };
 
 export const clientLoader = async ({ request }: { request: Request }) => {
+  const isLoggedIn = useAuthStore.getState().isLoggedIn;
+
+  if (!isLoggedIn) {
+    saveEntryToNavigationHistory(request);
+
+    return null;
+  }
+
   try {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);
 
