@@ -35,6 +35,23 @@ echo -e "${BLUE}          Mentingo Development Environment Setup           ${NC}
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
+# Detect OS
+IS_WINDOWS=false
+IS_MACOS=false
+IS_LINUX=false
+
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    IS_WINDOWS=true
+    echo -e "${YELLOW}Detected OS: Windows (Git Bash/MSYS)${NC}"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    IS_MACOS=true
+    echo -e "${YELLOW}Detected OS: macOS${NC}"
+else
+    IS_LINUX=true
+    echo -e "${YELLOW}Detected OS: Linux${NC}"
+fi
+echo ""
+
 # Prerequisites check
 echo -e "${GREEN}[0/9]${NC} Checking prerequisites..."
 
@@ -104,29 +121,55 @@ echo ""
 echo -e "${GREEN}[2/9]${NC} Configuring Caddy (first-time setup)..."
 
 # Detect platform and set data directory
-CADDY_DATA_DIR="$HOME/Library/Application Support/Caddy"
-if [[ "$OSTYPE" != "darwin"* ]]; then
+if [ "$IS_MACOS" = true ]; then
+    CADDY_DATA_DIR="$HOME/Library/Application Support/Caddy"
+elif [ "$IS_WINDOWS" = true ]; then
+    CADDY_DATA_DIR="$HOME/AppData/Roaming/Caddy"
+else
     CADDY_DATA_DIR="$HOME/.local/share/caddy"
 fi
 
 # Function to check if Caddy is running successfully
 check_caddy_running() {
-    if pgrep -x caddy >/dev/null 2>&1; then
-        return 0
+    # On Windows, pgrep might not be available, use alternative
+    if [ "$IS_WINDOWS" = true ]; then
+        if tasklist 2>/dev/null | grep -i "caddy.exe" >/dev/null 2>&1; then
+            return 0
+        fi
+    else
+        if pgrep -x caddy >/dev/null 2>&1; then
+            return 0
+        fi
     fi
 
-    # fallback: check if port 443 or 80 is open
-    if lsof -i :443 -sTCP:LISTEN >/dev/null 2>&1 || lsof -i :80 -sTCP:LISTEN >/dev/null 2>&1; then
-        return 0
+    # Fallback: check if port 443 or 80 is open
+    # Use netstat on Windows, lsof on Unix
+    if [ "$IS_WINDOWS" = true ]; then
+        if netstat -ano 2>/dev/null | grep ":443.*LISTENING" >/dev/null 2>&1 || \
+           netstat -ano 2>/dev/null | grep ":80.*LISTENING" >/dev/null 2>&1; then
+            return 0
+        fi
+    else
+        if command -v lsof >/dev/null 2>&1; then
+            if lsof -i :443 -sTCP:LISTEN >/dev/null 2>&1 || lsof -i :80 -sTCP:LISTEN >/dev/null 2>&1; then
+                return 0
+            fi
+        fi
     fi
     return 1
 }
 
 # Function to stop Caddy safely
 stop_caddy() {
-    if pgrep -x caddy >/dev/null 2>&1; then
-        killall caddy >/dev/null 2>&1 || pkill caddy >/dev/null 2>&1
+    if [ "$IS_WINDOWS" = true ]; then
+        # On Windows, use taskkill
+        taskkill //F //IM caddy.exe >/dev/null 2>&1 || true
         sleep 1
+    else
+        if pgrep -x caddy >/dev/null 2>&1; then
+            killall caddy >/dev/null 2>&1 || pkill caddy >/dev/null 2>&1
+            sleep 1
+        fi
     fi
 }
 
@@ -135,8 +178,8 @@ if [[ ! -d "$CADDY_DATA_DIR" ]] || [[ ! -d "$CADDY_DATA_DIR/certificates" ]]; th
     echo -e "  ${YELLOW}→${NC} Starting Caddy to generate certificates..."
     echo ""
     
-    # On Linux, allow Caddy to bind to privileged ports
-    if [[ "$OSTYPE" != "darwin"* ]] && [[ $(id -u) -ne 0 ]]; then
+    # On Linux (not Windows or macOS), allow Caddy to bind to privileged ports
+    if [ "$IS_LINUX" = true ] && [[ $(id -u) -ne 0 ]]; then
         echo -e "  ${YELLOW}→${NC} On Linux, giving Caddy permission to bind to port 443..."
         if ! sudo setcap 'cap_net_bind_service=+ep' "$(which caddy)" 2>/dev/null; then
             echo -e "  ${YELLOW}⚠${NC} Could not set capabilities. You may need to run Caddy with sudo."
@@ -210,8 +253,8 @@ cp apps/api/.env.example apps/api/.env
 # Generate master key
 echo "  → Generating master key..."
 MASTER_KEY=$(openssl rand -base64 32)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
+if [ "$IS_MACOS" = true ]; then
+    # macOS requires empty string after -i
     sed -i '' "s|MASTER_KEY=.*|MASTER_KEY=\"$MASTER_KEY\"|g" apps/api/.env
 else
     # Linux and Windows (Git Bash/WSL)
