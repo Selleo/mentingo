@@ -313,7 +313,7 @@ fi
 
 #  Seed the database
 echo -e "${GREEN}[8/9]${NC} Seeding the database..."
-if ! (cd apps/api && ts-node -r tsconfig-paths/register ./src/seed/seed-prod.ts > /dev/null 2>&1); then
+if ! pnpm --filter=api run db:seed-prod > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to seed database${NC}"
     exit 1
 fi
