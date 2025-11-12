@@ -1,3 +1,45 @@
+<a name="v3.20.0"></a>
+
+## [v3.20.0] - 09.11.2025
+
+### Features:
+
+- Made ai mentor user message have profile picture ([#904](https://github.com/Selleo/mentingo/issues/904))
+
+- simplify navigating in course list for admin ([#850](https://github.com/Selleo/mentingo/issues/850))
+
+- quiz results preview mode for admin ([#846](https://github.com/Selleo/mentingo/issues/846))
+
+### Bug Fixes:
+
+- newly created admin doesnt get notification about his own registration ([#906](https://github.com/Selleo/mentingo/issues/906))
+
+- fixed translations ([#903](https://github.com/Selleo/mentingo/issues/903))
+
+- users not being able to change settings, because of validation errors ([#902](https://github.com/Selleo/mentingo/issues/902))
+
+- payment modal not opening on enroll click ([#894](https://github.com/Selleo/mentingo/issues/894))
+
+- added translations to freemium lessons ([#889](https://github.com/Selleo/mentingo/issues/889))
+
+- fixed openai provider retrieval in file attach ([#887](https://github.com/Selleo/mentingo/issues/887))
+
+- move profile page route ([#863](https://github.com/Selleo/mentingo/issues/863))
+
+### Chores:
+
+- update pull request template for clarity ([#893](https://github.com/Selleo/mentingo/issues/893))
+
+- simplify local setup by introducing MinIO service ([#879](https://github.com/Selleo/mentingo/issues/879))
+
+- update workflow files for deployment consistency after sentry changes ([#868](https://github.com/Selleo/mentingo/issues/868))
+
+### Code Refactoring:
+
+- made ai mentor input resize based on content ([#895](https://github.com/Selleo/mentingo/issues/895))
+
+- removed certificate options and made preview on click ([#890](https://github.com/Selleo/mentingo/issues/890))
+
 <a name="v3.19.1"></a>
 
 ## [v3.19.1] - 06.11.2025
@@ -15,6 +57,10 @@
 ### Chores:
 
 - increase character limits for course titles and descriptions ([#853](https://github.com/Selleo/mentingo/issues/853))
+
+### Documentation:
+
+- update changelog for version v3.19.1
 
 <a name="v3.19.0"></a>
 
@@ -1884,7 +1930,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.19.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.20.0...HEAD
+[v3.20.0]: https://github.com/Selleo/mentingo/compare/v3.19.1...v3.20.0
 [v3.19.1]: https://github.com/Selleo/mentingo/compare/v3.19.0...v3.19.1
 [v3.19.0]: https://github.com/Selleo/mentingo/compare/v3.18.0...v3.19.0
 [v3.18.0]: https://github.com/Selleo/mentingo/compare/v3.17.0...v3.18.0
