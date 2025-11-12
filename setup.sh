@@ -36,7 +36,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Prerequisites check
-echo -e "${GREEN}[0/8]${NC} Checking prerequisites..."
+echo -e "${GREEN}[0/9]${NC} Checking prerequisites..."
 
 # Check if .tool-versions exists
 if [[ ! -f ".tool-versions" ]]; then
@@ -52,7 +52,7 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 # Check if required commands exist
-for cmd in node pnpm docker openssl; do
+for cmd in node pnpm docker openssl caddy; do
     if ! command -v $cmd > /dev/null 2>&1; then
         echo -e "${RED}✗ $cmd is not installed!${NC}"
         exit 1
@@ -63,7 +63,7 @@ echo -e "  ${GREEN}✓${NC} All required tools are available"
 echo ""
 
 # Version verification
-echo -e "${GREEN}[1/8]${NC} Verifying tool versions..."
+echo -e "${GREEN}[1/9]${NC} Verifying tool versions..."
 
 # Read required versions from .tool-versions
 REQUIRED_NODE_VERSION=$(grep "nodejs" .tool-versions | awk '{print $2}')
@@ -100,22 +100,107 @@ echo -e "  ${GREEN}✓${NC} Node.js version: $CURRENT_NODE_VERSION"
 echo -e "  ${GREEN}✓${NC} pnpm version: $CURRENT_PNPM_VERSION"
 echo ""
 
-# Step 2: Install dependencies
-echo -e "${GREEN}[2/8]${NC} Installing dependencies with pnpm..."
+# Configure Caddy
+echo -e "${GREEN}[2/9]${NC} Configuring Caddy (first-time setup)..."
+
+# Detect platform and set data directory
+CADDY_DATA_DIR="$HOME/Library/Application Support/Caddy"
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    CADDY_DATA_DIR="$HOME/.local/share/caddy"
+fi
+
+# Function to check if Caddy is running successfully
+check_caddy_running() {
+    if pgrep -x caddy >/dev/null 2>&1; then
+        return 0
+    fi
+
+    # fallback: check if port 443 or 80 is open
+    if lsof -i :443 -sTCP:LISTEN >/dev/null 2>&1 || lsof -i :80 -sTCP:LISTEN >/dev/null 2>&1; then
+        return 0
+    fi
+    return 1
+}
+
+# Function to stop Caddy safely
+stop_caddy() {
+    if pgrep -x caddy >/dev/null 2>&1; then
+        killall caddy >/dev/null 2>&1 || pkill caddy >/dev/null 2>&1
+        sleep 1
+    fi
+}
+
+if [[ ! -d "$CADDY_DATA_DIR" ]] || [[ ! -d "$CADDY_DATA_DIR/certificates" ]]; then
+    echo -e "  ${YELLOW}→${NC} Caddy needs to be configured for HTTPS development"
+    echo -e "  ${YELLOW}→${NC} Starting Caddy to generate certificates..."
+    echo ""
+    
+    # On Linux, allow Caddy to bind to privileged ports
+    if [[ "$OSTYPE" != "darwin"* ]] && [[ $(id -u) -ne 0 ]]; then
+        echo -e "  ${YELLOW}→${NC} On Linux, giving Caddy permission to bind to port 443..."
+        if ! sudo setcap 'cap_net_bind_service=+ep' "$(which caddy)" 2>/dev/null; then
+            echo -e "  ${YELLOW}⚠${NC} Could not set capabilities. You may need to run Caddy with sudo."
+        fi
+    fi
+
+    # Start Caddy in background
+    (cd apps/reverse-proxy && caddy run > /dev/null 2>&1 &)
+    CADDY_PID=$!
+
+    echo -e "  ${YELLOW}→${NC} Waiting for Caddy to initialize..."
+
+    CADDY_MAX_RETRIES=15
+
+    for i in $(seq 1 $CADDY_MAX_RETRIES); do
+        if check_caddy_running; then
+            echo -e "  ${GREEN}✓${NC} Caddy is running (PID: $CADDY_PID)"
+            break
+        fi
+        
+        # Show progress
+        if [ $((i % 5)) -eq 0 ]; then
+            echo -e "    Still waiting... ($i/$CADDY_MAX_RETRIES seconds)"
+        fi
+        sleep 1
+    done
+
+    # Verify startup success
+    if ! check_caddy_running; then
+        echo -e "${RED}✗ Failed to start Caddy properly after $CADDY_MAX_RETRIES seconds${NC}"
+        echo -e "  Please check your configuration or permissions."
+        kill $CADDY_PID 2>/dev/null || true
+        exit 1
+    fi
+
+    echo -e "  ${YELLOW}→${NC} Waiting for certificate generation..."
+    sleep 3  # let it finish generating certs
+
+    # Stop Caddy cleanly
+    stop_caddy
+
+    echo ""
+    echo -e "  ${GREEN}✓${NC} Caddy configured successfully"
+else
+    echo -e "  ${GREEN}✓${NC} Caddy already configured (skipping)"
+fi
+echo ""
+
+#  Install dependencies
+echo -e "${GREEN}[3/9]${NC} Installing dependencies with pnpm..."
 if ! pnpm install --prefer-offline > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to install dependencies${NC}"
     exit 1
 fi
 
-# Step 3: Build shared package
-echo -e "${GREEN}[3/8]${NC} Building shared package..."
+#  Build shared package
+echo -e "${GREEN}[4/9]${NC} Building shared package..."
 if ! pnpm --filter="@repo/shared" run build > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to build shared package${NC}"
     exit 1
 fi
 
-# Step 4: Set up environment files
-echo -e "${GREEN}[4/8]${NC} Setting up environment files..."
+#  Set up environment files
+echo -e "${GREEN}[5/9]${NC} Setting up environment files..."
 
 # API .env
 
@@ -139,8 +224,8 @@ echo "  → Copying apps/web/.env.example to apps/web/.env"
 cp apps/web/.env.example apps/web/.env
 
 
-# Step 5: Start Docker containers
-echo -e "${GREEN}[5/8]${NC} Starting Docker containers..."
+#  Start Docker containers
+echo -e "${GREEN}[6/9]${NC} Starting Docker containers..."
 
 # Stop only this project's containers
 echo "  → Stopping pre-existing project containers..."
@@ -176,22 +261,22 @@ if [ "$DB_READY" = false ]; then
     exit 1
 fi
 
-# Step 6: Run database migrations
-echo -e "${GREEN}[6/8]${NC} Running database migrations..."
+#  Run database migrations
+echo -e "${GREEN}[7/9]${NC} Running database migrations..."
 if ! pnpm db:migrate > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to run database migrations${NC}"
     exit 1
 fi
 
-# Step 7: Seed the database
-echo -e "${GREEN}[7/8]${NC} Seeding the database..."
+#  Seed the database
+echo -e "${GREEN}[8/9]${NC} Seeding the database..."
 if ! (cd apps/api && ts-node -r tsconfig-paths/register ./src/seed/seed-prod.ts > /dev/null 2>&1); then
     echo -e "${RED}✗ Failed to seed database${NC}"
     exit 1
 fi
 
-# Step 8: Verify setup
-echo -e "${GREEN}[8/8]${NC} Verifying setup..."
+#  Verify setup
+echo -e "${GREEN}[9/9]${NC} Verifying setup..."
 
 # Check if critical services are running
 CRITICAL_SERVICES=("project-db" "redis" "minio")
