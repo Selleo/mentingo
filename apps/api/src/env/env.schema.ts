@@ -32,9 +32,8 @@ export const frontendSSOEnabledResponseSchema = Type.Object({
   slack: Type.Optional(Type.String()),
 });
 
-export const frontendPosthogConfigResponseSchema = Type.Object({
-  key: Type.Optional(Type.String()),
-  host: Type.Optional(Type.String()),
+export const frontendStripeConfiguredResponseSchema = Type.Object({
+  enabled: Type.Boolean(),
 });
 
 export const stripePublishableKeyResponseSchema = Type.Object({
@@ -44,3 +43,6 @@ export const stripePublishableKeyResponseSchema = Type.Object({
 export type EncryptedEnvBody = Static<typeof encryptedEnvSchema>;
 export type BulkUpsertEnvBody = Static<typeof bulkUpsertEnvSchema>;
 export type FrontendSSOEnabledResponseBody = Static<typeof frontendSSOEnabledResponseSchema>;
+export type FrontendStripeConfiguredResponseSchema = Static<
+  typeof frontendStripeConfiguredResponseSchema
+>;

@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { useUserRole } from "~/hooks/useUserRole";
 
 export const useEditCourseTabs = () => {
   const { t } = useTranslation();
+  const { data: isStripeConfigured } = useStripeConfigured();
 
   const { isAdmin } = useUserRole();
 
@@ -12,10 +14,17 @@ export const useEditCourseTabs = () => {
     () => [
       { label: t("adminCourseView.common.settings"), value: "Settings" },
       { label: t("adminCourseView.common.curriculum"), value: "Curriculum" },
-      { label: t("adminCourseView.common.pricing"), value: "Pricing" },
+      ...(isStripeConfigured?.enabled
+        ? [
+            {
+              label: t("adminCourseView.common.pricing"),
+              value: "Pricing",
+            },
+          ]
+        : []),
       { label: t("adminCourseView.common.status"), value: "Status" },
     ],
-    [t],
+    [isStripeConfigured, t],
   );
 
   const adminTabs = useMemo(

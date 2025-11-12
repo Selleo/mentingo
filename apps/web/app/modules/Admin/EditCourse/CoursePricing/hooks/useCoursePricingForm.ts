@@ -28,7 +28,7 @@ export const useCoursePricingForm = ({
     defaultValues: {
       priceInCents: priceInCents || undefined,
       currency: currency || "",
-      isFree: priceInCents === 0 ? true : false,
+      isFree: priceInCents === 0,
     },
   });
   const onSubmit = async (data: CoursePricingFormValues) => {

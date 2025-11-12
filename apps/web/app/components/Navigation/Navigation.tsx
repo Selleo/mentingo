@@ -2,6 +2,7 @@ import { useLocation } from "@remix-run/react";
 import { useEffect, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
@@ -26,6 +27,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
+  const { data: isStripeConfigured } = useStripeConfigured();
 
   useEffect(() => {
     const updateBreakpoint = () => {
@@ -39,7 +41,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   }, []);
 
   if (!menuItems) {
-    menuItems = mapNavigationItems(getNavigationConfig(t));
+    menuItems = mapNavigationItems(getNavigationConfig(t, isStripeConfigured?.enabled));
   }
 
   if (!role) return null;

@@ -4786,6 +4786,23 @@
           }
         }
       }
+    },
+    "/api/env/frontend/stripe": {
+      "get": {
+        "operationId": "EnvController_getStripeConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStripeConfiguredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -16101,6 +16118,25 @@
             },
             "required": [
               "publishableKey"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetStripeConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
             ]
           }
         },

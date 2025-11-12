@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { ConfigService } from "@nestjs/config";
 import { eq, sql } from "drizzle-orm/sql";
 
 import { EnvRepository } from "src/env/repositories/env.repository";
@@ -53,30 +54,37 @@ export async function createNiceCourses(
     let stripeProductId = null;
     let stripePriceId = null;
 
-    const stripeService = new StripeService(new EnvService(new EnvRepository(db)));
-    const existingStripeProduct = await stripeService.searchProducts({
-      query: `name:\'${courseData.title}\'`,
-    });
+    const envService = new EnvService(new EnvRepository(db), new ConfigService());
 
-    // if product exists, search for price
-    if (existingStripeProduct.data.length > 0) {
-      const price = await stripeService.searchPrices({
-        query: `product:\'${existingStripeProduct.data?.[0].id}\' AND active:\'true\'`,
+    const { enabled: isStripeConfigured } = await envService.getStripeConfigured();
+
+    if (isStripeConfigured) {
+      const stripeService = new StripeService(envService);
+
+      const existingStripeProduct = await stripeService.searchProducts({
+        query: `name:\'${courseData.title}\'`,
       });
 
-      stripeProductId = existingStripeProduct.data?.[0]?.id;
-      stripePriceId = price.data?.[0]?.id;
-    } else {
-      // create product and price
-      const { productId, priceId } = await stripeService.createProduct({
-        name: courseData.title,
-        description: courseData.description,
-        amountInCents: courseData.priceInCents ? courseData.priceInCents : 0,
-        currency: courseData.currency ? courseData.currency : "usd",
-      });
+      // if product exists, search for price
+      if (existingStripeProduct.data.length > 0) {
+        const price = await stripeService.searchPrices({
+          query: `product:\'${existingStripeProduct.data?.[0].id}\' AND active:\'true\'`,
+        });
 
-      stripeProductId = productId;
-      stripePriceId = priceId;
+        stripeProductId = existingStripeProduct.data?.[0]?.id;
+        stripePriceId = price.data?.[0]?.id;
+      } else {
+        // create product and price
+        const { productId, priceId } = await stripeService.createProduct({
+          name: courseData.title,
+          description: courseData.description,
+          amountInCents: courseData.priceInCents ? courseData.priceInCents : 0,
+          currency: courseData.currency ? courseData.currency : "usd",
+        });
+
+        stripeProductId = productId;
+        stripePriceId = priceId;
+      }
     }
 
     const [course] = await db
