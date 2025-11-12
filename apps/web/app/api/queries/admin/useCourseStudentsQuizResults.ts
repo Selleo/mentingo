@@ -40,6 +40,7 @@ export const courseStudentsQuizResultsQueryOptions = ({
 
       return response.data;
     },
+    placeholderData: (previousData) => previousData,
   });
 
 export function useCourseStudentsQuizResults({

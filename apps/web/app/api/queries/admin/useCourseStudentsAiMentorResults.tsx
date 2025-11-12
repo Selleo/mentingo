@@ -35,6 +35,7 @@ export const courseStudentsAiMentorResultsQueryOptions = ({
 }: CourseStudentsAiMentorResultsOptions) =>
   queryOptions({
     enabled,
+    placeholderData: (previousData) => previousData,
     queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY, { id, query }],
     queryFn: async () => {
       const response = await ApiClient.api.courseControllerGetCourseStudentsAiMentorResults(
