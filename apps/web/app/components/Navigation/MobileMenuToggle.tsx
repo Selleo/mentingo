@@ -5,15 +5,23 @@ import type { Dispatch, SetStateAction } from "react";
 type MobileMenuToggleProps = {
   isMobileNavOpen: boolean;
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
+  hasConfigurationIssues?: boolean;
 };
 
-export function MobileMenuToggle({ isMobileNavOpen, setIsMobileNavOpen }: MobileMenuToggleProps) {
+export function MobileMenuToggle({
+  isMobileNavOpen,
+  setIsMobileNavOpen,
+  hasConfigurationIssues,
+}: MobileMenuToggleProps) {
   const { t } = useTranslation();
   return (
     <button
       onClick={() => setIsMobileNavOpen((prevState) => !prevState)}
-      className="flex w-min gap-x-2 rounded-lg bg-neutral-50 px-3 py-2 2xl:sr-only"
+      className="relative flex w-min gap-x-2 rounded-lg bg-neutral-50 px-3 py-2 2xl:sr-only"
     >
+      {hasConfigurationIssues && (
+        <span className="absolute right-1 top-1 size-2 rounded-full bg-red-500" />
+      )}
       {isMobileNavOpen ? (
         <>
           <svg

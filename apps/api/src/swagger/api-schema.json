@@ -1452,6 +1452,33 @@
         }
       }
     },
+    "/api/settings/admin/config-warning-dismissed": {
+      "patch": {
+        "operationId": "SettingsController_updateConfigWarningDismissed",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConfigWarningDismissedBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateConfigWarningDismissedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/test-config/setup": {
       "post": {
         "operationId": "TestConfigController_setup",
@@ -4803,6 +4830,23 @@
           }
         }
       }
+    },
+    "/api/env/config/setup": {
+      "get": {
+        "operationId": "EnvController_getIsConfigSetup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIsConfigSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -6872,6 +6916,9 @@
                   },
                   "adminFinishedCourseNotification": {
                     "type": "boolean"
+                  },
+                  "configWarningDismissed": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -6879,7 +6926,8 @@
                   "isMFAEnabled",
                   "MFASecret",
                   "adminNewUserNotification",
-                  "adminFinishedCourseNotification"
+                  "adminFinishedCourseNotification",
+                  "configWarningDismissed"
                 ]
               }
             ]
@@ -6939,6 +6987,9 @@
                 "type": "boolean"
               },
               "adminFinishedCourseNotification": {
+                "type": "boolean"
+              },
+              "configWarningDismissed": {
                 "type": "boolean"
               }
             }
@@ -7004,6 +7055,9 @@
                   },
                   "adminFinishedCourseNotification": {
                     "type": "boolean"
+                  },
+                  "configWarningDismissed": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -7011,7 +7065,8 @@
                   "isMFAEnabled",
                   "MFASecret",
                   "adminNewUserNotification",
-                  "adminFinishedCourseNotification"
+                  "adminFinishedCourseNotification",
+                  "configWarningDismissed"
                 ]
               }
             ]
@@ -7050,6 +7105,9 @@
               },
               "adminFinishedCourseNotification": {
                 "type": "boolean"
+              },
+              "configWarningDismissed": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -7057,7 +7115,8 @@
               "isMFAEnabled",
               "MFASecret",
               "adminNewUserNotification",
-              "adminFinishedCourseNotification"
+              "adminFinishedCourseNotification",
+              "configWarningDismissed"
             ]
           }
         },
@@ -7410,6 +7469,9 @@
               },
               "adminFinishedCourseNotification": {
                 "type": "boolean"
+              },
+              "configWarningDismissed": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -7417,7 +7479,8 @@
               "isMFAEnabled",
               "MFASecret",
               "adminNewUserNotification",
-              "adminFinishedCourseNotification"
+              "adminFinishedCourseNotification",
+              "configWarningDismissed"
             ]
           }
         },
@@ -7806,6 +7869,65 @@
         },
         "required": [
           "defaultCourseCurrency"
+        ]
+      },
+      "UpdateConfigWarningDismissedBody": {
+        "type": "object",
+        "properties": {
+          "dismissed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "dismissed"
+        ]
+      },
+      "UpdateConfigWarningDismissedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              },
+              "configWarningDismissed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification",
+              "configWarningDismissed"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "GetAllCategoriesResponse": {
@@ -16137,6 +16259,80 @@
             },
             "required": [
               "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetIsConfigSetupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fullyConfigured": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "partiallyConfigured": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "missingKeys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "missingKeys"
+                  ]
+                }
+              },
+              "notConfigured": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "missingKeys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "missingKeys"
+                  ]
+                }
+              },
+              "hasIssues": {
+                "type": "boolean"
+              },
+              "isWarningDismissed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "fullyConfigured",
+              "partiallyConfigured",
+              "notConfigured",
+              "hasIssues",
+              "isWarningDismissed"
             ]
           }
         },

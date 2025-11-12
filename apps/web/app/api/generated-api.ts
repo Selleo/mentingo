@@ -484,6 +484,7 @@ export interface GetUserSettingsResponse {
         MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
+        configWarningDismissed: boolean;
       };
 }
 
@@ -501,6 +502,7 @@ export type UpdateUserSettingsBody =
       MFASecret?: string | null;
       adminNewUserNotification?: boolean;
       adminFinishedCourseNotification?: boolean;
+      configWarningDismissed?: boolean;
     };
 
 export interface UpdateUserSettingsResponse {
@@ -518,6 +520,7 @@ export interface UpdateUserSettingsResponse {
         MFASecret: string | null;
         adminNewUserNotification: boolean;
         adminFinishedCourseNotification: boolean;
+        configWarningDismissed: boolean;
       };
 }
 
@@ -529,6 +532,7 @@ export interface UpdateAdminNewUserNotificationResponse {
     MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
   };
 }
 
@@ -590,6 +594,7 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
     MFASecret: string | null;
     adminNewUserNotification: boolean;
     adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
   };
 }
 
@@ -685,6 +690,22 @@ export interface UpdateMFAEnforcedRolesBody {
 
 export interface UpdateDefaultCourseCurrencyBody {
   defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+}
+
+export interface UpdateConfigWarningDismissedBody {
+  dismissed: boolean;
+}
+
+export interface UpdateConfigWarningDismissedResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
+  };
 }
 
 export interface GetAllCategoriesResponse {
@@ -2531,6 +2552,22 @@ export interface GetStripeConfiguredResponse {
   };
 }
 
+export interface GetIsConfigSetupResponse {
+  data: {
+    fullyConfigured: string[];
+    partiallyConfigured: {
+      service: string;
+      missingKeys: string[];
+    }[];
+    notConfigured: {
+      service: string;
+      missingKeys: string[];
+    }[];
+    hasIssues: boolean;
+    isWarningDismissed: boolean;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -3706,6 +3743,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/settings/admin/invite-only-registration`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateConfigWarningDismissed
+     * @request PATCH:/api/settings/admin/config-warning-dismissed
+     */
+    settingsControllerUpdateConfigWarningDismissed: (
+      data: UpdateConfigWarningDismissedBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateConfigWarningDismissedResponse, any>({
+        path: `/api/settings/admin/config-warning-dismissed`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -5494,6 +5550,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetStripeConfigured: (params: RequestParams = {}) =>
       this.request<GetStripeConfiguredResponse, any>({
         path: `/api/env/frontend/stripe`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetIsConfigSetup
+     * @request GET:/api/env/config/setup
+     */
+    envControllerGetIsConfigSetup: (params: RequestParams = {}) =>
+      this.request<GetIsConfigSetupResponse, any>({
+        path: `/api/env/config/setup`,
         method: "GET",
         format: "json",
         ...params,

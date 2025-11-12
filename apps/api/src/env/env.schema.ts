@@ -40,6 +40,24 @@ export const stripePublishableKeyResponseSchema = Type.Object({
   publishableKey: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const isEnvSetupResponseSchema = Type.Object({
+  fullyConfigured: Type.Array(Type.String()),
+  partiallyConfigured: Type.Array(
+    Type.Object({
+      service: Type.String(),
+      missingKeys: Type.Array(Type.String()),
+    }),
+  ),
+  notConfigured: Type.Array(
+    Type.Object({
+      service: Type.String(),
+      missingKeys: Type.Array(Type.String()),
+    }),
+  ),
+  hasIssues: Type.Boolean(),
+  isWarningDismissed: Type.Boolean(),
+});
+
 export type EncryptedEnvBody = Static<typeof encryptedEnvSchema>;
 export type BulkUpsertEnvBody = Static<typeof bulkUpsertEnvSchema>;
 export type FrontendSSOEnabledResponseBody = Static<typeof frontendSSOEnabledResponseSchema>;
