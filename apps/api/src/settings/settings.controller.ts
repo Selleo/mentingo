@@ -40,6 +40,8 @@ import {
   updateMFAEnforcedRolesSchema,
   UpdateSettingsBody,
   updateSettingsBodySchema,
+  updateConfigWarningDismissedSchema,
+  UpdateConfigWarningDismissedBody,
 } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
@@ -330,5 +332,22 @@ export class SettingsController {
   @Roles(USER_ROLES.ADMIN)
   async updateInviteOnlyRegistration() {
     return new BaseResponse(await this.settingsService.updateGlobalInviteOnlyRegistration());
+  }
+
+  @Patch("admin/config-warning-dismissed")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: updateConfigWarningDismissedSchema }],
+    response: baseResponse(adminSettingsJSONContentSchema),
+  })
+  async updateConfigWarningDismissed(
+    @Body() body: UpdateConfigWarningDismissedBody,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
+    const updatedSettings = await this.settingsService.updateConfigWarningDismissed(
+      userId,
+      body.dismissed,
+    );
+    return new BaseResponse(updatedSettings);
   }
 }

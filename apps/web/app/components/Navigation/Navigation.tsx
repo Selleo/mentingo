@@ -2,10 +2,13 @@ import { useLocation } from "@remix-run/react";
 import { useEffect, useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useCurrentUser } from "~/api/queries";
+import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConfig";
+import { USER_ROLE } from "~/config/userRoles";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { shouldHideTopbarAndSidebar } from "~/modules/Admin/Admin.layout";
@@ -28,6 +31,17 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
   const { data: isStripeConfigured } = useStripeConfigured();
+
+  const { data: user } = useCurrentUser();
+
+  const { data: configurationState } = useConfigurationState({
+    enabled: user?.role === USER_ROLE.admin,
+  });
+
+  const hasConfigurationIssues =
+    user?.role === USER_ROLE.admin &&
+    configurationState?.hasIssues &&
+    !configurationState?.isWarningDismissed;
 
   useEffect(() => {
     const updateBreakpoint = () => {
@@ -61,6 +75,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
           isMobileNavOpen={isMobileNavOpen}
           setIsMobileNavOpen={setIsMobileNavOpen}
           is2xlBreakpoint={is2xlBreakpoint}
+          hasConfigurationIssues={hasConfigurationIssues}
         />
 
         {is2xlBreakpoint && <NavigationGlobalSearchWrapper />}
@@ -95,7 +110,10 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
             })}
           </div>
 
-          <NavigationFooter setIsMobileNavOpen={setIsMobileNavOpen} />
+          <NavigationFooter
+            setIsMobileNavOpen={setIsMobileNavOpen}
+            hasConfigurationIssues={hasConfigurationIssues}
+          />
         </nav>
       </header>
     </TooltipProvider>

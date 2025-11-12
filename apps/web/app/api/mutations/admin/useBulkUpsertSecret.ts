@@ -3,6 +3,8 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { CONFIGURATION_STATE_QUERY_KEY } from "~/api/queries/admin/useConfigurationState";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { BulkUpsertEnvBody } from "~/api/generated-api";
@@ -21,6 +23,8 @@ export function useBulkUpsertSecret() {
         variant: "default",
         description: t("adminEnvsView.updateSuccessful"),
       });
+
+      queryClient.invalidateQueries({ queryKey: CONFIGURATION_STATE_QUERY_KEY });
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

@@ -40,6 +40,7 @@ export const adminSettingsJSONContentSchema = Type.Object({
   ...studentSettingsJSONContentSchema.properties,
   adminNewUserNotification: Type.Boolean(),
   adminFinishedCourseNotification: Type.Boolean(),
+  configWarningDismissed: Type.Boolean(),
 });
 
 export const settingsJSONContentSchema = Type.Union([

@@ -14,12 +14,14 @@ interface MobileNavigationFooterItemsProps {
   userId?: string;
   setIsMobileNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
   showLabelsOn2xl?: boolean;
+  hasConfigurationIssues?: boolean;
 }
 
 export const MobileNavigationFooterItems = ({
   setIsMobileNavOpen,
   showLabelsOn2xl,
   userId,
+  hasConfigurationIssues,
 }: MobileNavigationFooterItemsProps) => {
   const { t } = useTranslation();
 
@@ -55,6 +57,7 @@ export const MobileNavigationFooterItems = ({
           link: "/settings",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
+        showBadge={hasConfigurationIssues}
       />
 
       <li className="hidden 2xl:block">
