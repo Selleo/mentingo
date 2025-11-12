@@ -34,6 +34,8 @@ const checkOverallLessonPosition = (chapters: Chapters, currentLessonId: string)
 
 export default function LessonPage() {
   const { courseId = "", lessonId = "" } = useParams();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
   const { language } = useLanguageStore();
 
   const {
@@ -42,8 +44,6 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language);
   const { data: course } = useCourse(courseId);
-  const navigate = useNavigate();
-  const { t } = useTranslation();
 
   useEffect(() => {
     if (lessonError) navigate(`/course/${courseId}`);
@@ -131,7 +131,7 @@ export default function LessonPage() {
 
   const breadcrumbs = [
     {
-      title: t("studentCourseView.breadcrumbs.courses"),
+      title: t("studentCoursesView.breadcrumbs.courses"),
       href: "/courses",
     },
     { title: course.title, href: `/course/${courseId}` },

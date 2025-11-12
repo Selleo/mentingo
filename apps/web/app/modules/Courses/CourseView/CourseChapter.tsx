@@ -51,6 +51,8 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
 
     const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? chapter.lessons[0].id;
 
+    console.log({ lessonToPlay });
+
     return navigate(`lesson/${lessonToPlay}`);
   };
 

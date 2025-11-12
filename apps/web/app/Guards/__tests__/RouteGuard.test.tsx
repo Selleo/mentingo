@@ -3,15 +3,21 @@ import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useUserRole } from "~/hooks/useUserRole";
+import { useAuthStore } from "~/modules/Auth/authStore";
 import { renderWith } from "~/utils/testUtils";
 
 import { RouteGuard } from "../RouteGuard";
 
 vi.mock("~/hooks/useUserRole");
+vi.mock("~/modules/Auth/authStore");
 
 describe("RouteGuard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useAuthStore.getState = vi.fn(() => ({
+      isLoggedIn: true,
+      setLoggedIn: vi.fn(),
+    }));
   });
 
   it("should render children when user has access", async () => {
