@@ -10,8 +10,8 @@ import {
 
 import { PlatformFavicon } from "./components/PlatformFavicon";
 import { Toaster } from "./components/ui/toaster";
-import "./index.css";
 import { useNavigationTracker } from "./hooks/useNavigationTracker";
+import css from "./index.css?url";
 import CustomErrorBoundary from "./modules/common/ErrorBoundary/ErrorBoundary";
 import { Providers } from "./modules/Global/Providers";
 import { ThemeWrapper } from "./modules/Global/ThemeWrapper";
@@ -23,6 +23,7 @@ export const links: LinksFunction = () => {
     { rel: "icon", href: "/app-signet.svg", type: "image/svg+xml" },
     { rel: "shortcut icon", href: "/app-signet.svg", type: "image/svg+xml" },
     { rel: "apple-touch-icon", href: "/app-signet.svg" },
+    { rel: "stylesheet", href: css },
   ];
 };
 
