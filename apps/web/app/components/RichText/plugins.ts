@@ -1,3 +1,4 @@
+import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
@@ -23,6 +24,11 @@ export const plugins = [
       class: "text-primary-700 underline",
       rel: "noopener noreferrer",
       target: "_blank",
+    },
+  }),
+  Image.configure({
+    HTMLAttributes: {
+      class: "max-w-full h-auto m-0",
     },
   }),
 ];

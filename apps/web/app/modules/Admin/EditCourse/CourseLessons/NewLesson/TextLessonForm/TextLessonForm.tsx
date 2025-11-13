@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import { LessonTypes } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
@@ -96,6 +97,8 @@ const TextLessonForm = ({
                     id="description"
                     content={field.value}
                     className="h-32 w-full"
+                    lessonType={LessonTypes.text}
+                    lessonId={lessonToEdit?.id}
                     {...field}
                   />
                 </FormControl>
