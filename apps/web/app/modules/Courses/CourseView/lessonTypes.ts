@@ -3,7 +3,7 @@ export const LessonTypes = {
   text: "Text",
   video: "Video",
   quiz: "Quiz",
-  ai_mentor: "AiMentor",
+  ai_mentor: "AI Mentor",
   embed: "Embed",
 } as const;
 
