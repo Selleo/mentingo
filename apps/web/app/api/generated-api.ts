@@ -4719,6 +4719,30 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonControllerUploadImageToLesson
+     * @request POST:/api/lesson/upload-files-to-lesson
+     */
+    lessonControllerUploadImageToLesson: (
+      data: {
+        /** @format uuid */
+        lessonId: string;
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<string, any>({
+        path: `/api/lesson/upload-files-to-lesson`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LessonControllerDeleteStudentQuizAnswers
      * @request DELETE:/api/lesson/delete-student-quiz-answers
      */
@@ -4770,6 +4794,24 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerGetLessonImage
+     * @request GET:/api/lesson/lesson-image/{lessonId}/{fileKey}
+     */
+    lessonControllerGetLessonImage: (
+      resourceId: string,
+      lessonId: string,
+      fileKey: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/lesson/lesson-image/${lessonId}/${fileKey}`,
+        method: "GET",
         ...params,
       }),
 

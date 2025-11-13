@@ -1,7 +1,9 @@
-import { EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useEffect } from "react";
 
+import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { cn } from "~/lib/utils";
+import { LessonTypes } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { plugins } from "./plugins";
 import { defaultClasses } from "./styles";
@@ -14,6 +16,8 @@ type EditorProps = {
   id?: string;
   className?: string;
   parentClassName?: string;
+  lessonType?: string;
+  lessonId?: string;
 };
 
 const Editor = ({
@@ -23,12 +27,50 @@ const Editor = ({
   id,
   className,
   parentClassName,
+  lessonType,
+  lessonId,
 }: EditorProps) => {
+  const { mutateAsync: uploadFile } = useLessonFileUpload();
+
+  const handleFileInsert = async (
+    file: File,
+    editor: TiptapEditor | null,
+    e: DragEvent | ClipboardEvent,
+  ) => {
+    if (!file || !lessonId || lessonType != LessonTypes.text) {
+      return;
+    }
+
+    if (file.type.startsWith("image/")) {
+      const uploaded = await uploadFile({ file, lessonId });
+
+      const url = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
+
+      editor?.chain().insertContent(`<a href="${url}">${url}</a>`).run();
+
+      e.preventDefault?.();
+    }
+  };
+
   const editor = useEditor({
     extensions: [...plugins],
     content: content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    onPaste: async (e) => {
+      const file = e.clipboardData?.files[0];
+
+      if (!file) return;
+
+      await handleFileInsert(file, editor, e);
+    },
+    onDrop: async (e) => {
+      const file = e.dataTransfer?.files[0];
+
+      if (!file) return;
+
+      await handleFileInsert(file, editor, e);
     },
     editorProps: {
       attributes: {
@@ -54,7 +96,11 @@ const Editor = ({
         parentClassName,
       )}
     >
-      <EditorToolbar editor={editor} />
+      <EditorToolbar
+        editor={editor}
+        allowFiles={lessonType === LessonTypes.text}
+        lessonId={lessonId}
+      />
       <div
         className={cn(
           "relative h-[200px] max-h-[600px] min-h-[200px] resize-y overflow-auto [&_.ProseMirror]:h-full [&_.ProseMirror]:max-h-full [&_.ProseMirror]:min-h-full",

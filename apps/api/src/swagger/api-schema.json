@@ -3481,6 +3481,48 @@
         }
       }
     },
+    "/api/lesson/upload-files-to-lesson": {
+      "post": {
+        "operationId": "LessonController_uploadImageToLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lessonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "lessonId",
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/delete-student-quiz-answers": {
       "delete": {
         "operationId": "LessonController_deleteStudentQuizAnswers",
@@ -3568,6 +3610,27 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/lesson/lesson-image/{resourceId}": {
+      "get": {
+        "operationId": "LessonController_getLessonImage",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
