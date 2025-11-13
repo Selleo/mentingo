@@ -7,9 +7,11 @@ import {
   Put,
   UseInterceptors,
   UploadedFile,
+  Param,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
+import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse } from "src/common";
@@ -330,5 +332,14 @@ export class SettingsController {
   @Roles(USER_ROLES.ADMIN)
   async updateInviteOnlyRegistration() {
     return new BaseResponse(await this.settingsService.updateGlobalInviteOnlyRegistration());
+  }
+
+  @Patch("admin/user-email-triggers/:triggerKey")
+  @Validate({
+    request: [{ type: "param", name: "triggerKey", schema: Type.String() }],
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async updateUserEmailTriggers(@Param("triggerKey") triggerKey: string) {
+    return new BaseResponse(await this.settingsService.updateUserEmailTriggers(triggerKey));
   }
 }

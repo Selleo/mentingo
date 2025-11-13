@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { eq, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -7,7 +13,11 @@ import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
-import { DEFAULT_ADMIN_SETTINGS, DEFAULT_STUDENT_SETTINGS } from "./constants/settings.constants";
+import {
+  DEFAULT_ADMIN_SETTINGS,
+  DEFAULT_GLOBAL_SETTINGS,
+  DEFAULT_STUDENT_SETTINGS,
+} from "./constants/settings.constants";
 
 import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import type {
@@ -15,6 +25,7 @@ import type {
   GlobalSettingsJSONContentSchema,
   AdminSettingsJSONContentSchema,
   UserSettingsJSONContentSchema,
+  UserEmailTriggersSchema,
 } from "./schemas/settings.schema";
 import type {
   AllowedCurrency,
@@ -51,8 +62,11 @@ export class SettingsService {
       platformLogoS3Key,
       platformSimpleLogoS3Key,
       loginBackgroundImageS3Key,
+      userEmailTriggers,
       ...restOfSettings
     } = parsedSettings;
+
+    const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
       ? await this.fileService.getFileUrl(certificateBackgroundImage)
@@ -72,6 +86,7 @@ export class SettingsService {
 
     return {
       ...restOfSettings,
+      userEmailTriggers: reorderedEmailTriggers,
       platformLogoS3Key: platformLogoUrl,
       platformSimpleLogoS3Key: platformSimpleLogoUrl,
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
@@ -585,6 +600,42 @@ export class SettingsService {
     return updatedGlobalSettings;
   }
 
+  async updateUserEmailTriggers(triggerKey: string) {
+    if (!Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers).includes(triggerKey)) {
+      throw new BadRequestException("Invalid trigger key");
+    }
+
+    const [globalSettings] = await this.db
+      .select({
+        triggerToUpdate: sql<boolean>`(settings.settings->'userEmailTriggers'->>${sql.raw(
+          `'${triggerKey}'`,
+        )})::boolean`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{userEmailTriggers,${sql.raw(triggerKey)}}',
+            to_jsonb(${!globalSettings.triggerToUpdate}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedGlobalSettings;
+  }
+
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
     switch (role) {
       case USER_ROLES.ADMIN:
@@ -605,5 +656,14 @@ export class SettingsService {
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),
     };
+  }
+
+  private reorderEmailTriggers(emailTriggers: UserEmailTriggersSchema) {
+    const triggerOrder = Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers);
+    return Object.fromEntries(
+      triggerOrder
+        .filter((key) => key in emailTriggers)
+        .map((key) => [key, emailTriggers[key as keyof UserEmailTriggersSchema]]),
+    ) as UserEmailTriggersSchema;
   }
 }
