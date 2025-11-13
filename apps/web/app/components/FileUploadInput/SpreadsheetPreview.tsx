@@ -6,22 +6,16 @@ import { Button } from "../ui/button";
 
 interface SpreadsheetPreviewProps {
   file: File | null;
-  acceptedTypes: string;
-  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDelete: () => void;
   setVideoPreview: (url: string | null) => void;
   setFile: (file: File | null) => void;
-  isUploading: boolean;
 }
 
 export const SpreadsheetPreview = ({
   file,
-  acceptedTypes,
-  handleFileChange,
   setFile,
   handleFileDelete,
   setVideoPreview,
-  isUploading,
 }: SpreadsheetPreviewProps) => {
   const { t } = useTranslation();
 
@@ -39,14 +33,6 @@ export const SpreadsheetPreview = ({
               <span className="text-neutral-950">{t("uploadFile.subHeader")}</span>
             </div>
           </div>
-          <input
-            type="file"
-            id="file-upload"
-            accept={acceptedTypes}
-            onChange={handleFileChange}
-            disabled={isUploading}
-            className="sr-only"
-          />
         </label>
       </div>
       <div className="flex items-center justify-between p-3">
@@ -57,7 +43,9 @@ export const SpreadsheetPreview = ({
         <Button
           variant="ghost"
           className="aspect-square"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
             handleFileDelete();
             setFile(null);
             setVideoPreview(null);

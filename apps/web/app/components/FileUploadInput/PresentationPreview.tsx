@@ -5,18 +5,12 @@ import { Icon } from "../Icon";
 import { Button } from "../ui/button";
 
 interface PresentationPreviewProps {
-  acceptedTypes: string;
-  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  isUploading: boolean;
   setFile: (file: File | null) => void;
   setVideoPreview: (url: string | null) => void;
   url?: string;
 }
 
 export const PresentationPreview = ({
-  acceptedTypes,
-  handleFileChange,
-  isUploading,
   setFile,
   setVideoPreview,
   url,
@@ -62,18 +56,12 @@ export const PresentationPreview = ({
           </div>
           <div className="details text-neutral-200">{t("uploadFile.details.presentation")}</div>
         </div>
-        <input
-          type="file"
-          id="file-upload"
-          accept={acceptedTypes}
-          onChange={handleFileChange}
-          disabled={isUploading}
-          className="sr-only"
-        />
         <Button
           variant="destructive"
           className="mt-2 gap-x-1"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
             setFile(null);
             setVideoPreview(null);
           }}
