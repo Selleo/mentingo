@@ -21,6 +21,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ToggleGroup, Toolbar } from "~/components/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 
 import { InsertLinkDialog } from "../components/InsertLinkDialog";
@@ -38,6 +39,8 @@ type EditorToolbarProps = {
 
 const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarProps) => {
   const { t } = useTranslation();
+  const { toast } = useToast();
+
   const { mutateAsync: uploadImage } = useLessonFileUpload();
 
   const fileUploadRef = useRef<HTMLInputElement | null>(null);
@@ -65,14 +68,14 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
     const file = e.target.files?.[0];
 
     if (!file || !lessonId) {
-      return;
+      return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
     }
 
     const uploaded = await uploadImage({ file, lessonId });
 
-    const url = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
+    const imageUrl = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
 
-    editor.chain().insertContent(`<a href="${url}">${url}</a>`).run();
+    editor.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
 
     if (fileUploadRef.current) {
       fileUploadRef.current.value = "";
@@ -122,7 +125,7 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
                   <UploadCloudIcon className="size-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Upload: Allows you to upload an image</TooltipContent>
+              <TooltipContent>{t("richTextEditor.toolbar.upload.tooltip")}</TooltipContent>
             </Tooltip>
           )}
 

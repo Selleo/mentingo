@@ -96,7 +96,7 @@ export class FileService {
     try {
       return await this.s3Service.getFileStream(fileKey);
     } catch (error) {
-      throw new ConflictException("Failed to retrieve file");
+      throw new BadRequestException("Failed to retrieve file");
     }
   }
 
