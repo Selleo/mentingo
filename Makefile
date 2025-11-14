@@ -20,6 +20,11 @@ release:
 	git tag -a ${TAG} -m "${TAG}" && \
 	git push origin HEAD --tags --no-verify;
 
+	git checkout origin/staging && \
+	git rebase origin/main && \
+	git push origin staging --no-verify --force-with-lease && \
+	git checkout -;
+
 .PHONY: dry-release
 dry-release:
 	@if [ -z "${TAG}" ]; then \

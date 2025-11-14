@@ -34,7 +34,7 @@ on:
   push:
     branches:
       - main
-      - "deploy-staging/**"
+      - staging
   workflow_dispatch:
 
 jobs:
