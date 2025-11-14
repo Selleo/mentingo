@@ -105,6 +105,13 @@ export default function CourseViewPage() {
 
   const { studentName, courseName, formattedDate } = certificateInfo;
 
+  const canView = (isForAdminLike: boolean, isForUnregistered: boolean) => {
+    const hideForAdmin = isForAdminLike && (isStudent || !currentUser);
+    const hideWhenUnregistered = !isForUnregistered && !currentUser;
+
+    return !(hideForAdmin || hideWhenUnregistered);
+  };
+
   return (
     <CoursesAccessGuard>
       <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
@@ -134,11 +141,7 @@ export default function CourseViewPage() {
                 {courseViewTabs.map((tab) => {
                   const { title, isForAdminLike, isForUnregistered } = tab;
 
-                  const noCurrentUser = !currentUser;
-                  const hideForAdmin = isForAdminLike && (isStudent || noCurrentUser);
-                  const hideWhenUnregistered = !isForUnregistered && noCurrentUser;
-
-                  if (hideForAdmin || hideWhenUnregistered) return null;
+                  if (!canView(isForAdminLike, isForUnregistered)) return null;
 
                   return (
                     <TabsTrigger
@@ -159,11 +162,7 @@ export default function CourseViewPage() {
               {courseViewTabs.map((tab) => {
                 const { title, isForAdminLike, content, isForUnregistered } = tab;
 
-                const noCurrentUser = !currentUser;
-                const hideForAdmin = isForAdminLike && (isStudent || noCurrentUser);
-                const hideWhenUnregistered = !isForUnregistered && noCurrentUser;
-
-                if (hideForAdmin || hideWhenUnregistered) return null;
+                if (!canView(isForAdminLike, isForUnregistered)) return null;
 
                 return (
                   <TabsContent
