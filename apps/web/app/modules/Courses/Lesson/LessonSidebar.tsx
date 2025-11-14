@@ -136,7 +136,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                                 icon={progressBadge[status]}
                                 iconClasses="w-6 h-auto shrink-0"
                               />{" "}
-                              <div className="flex w-full flex-col">
+                              <div className="flex flex-1 flex-col break-words overflow-x-hidden">
                                 <p className="body-sm-md text-neutral-950">{title}</p>
                                 <p className="details text-neutral-800">{startCase(type)}</p>
                               </div>

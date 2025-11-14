@@ -82,7 +82,7 @@ export const EmbedLessonForm = ({
                 {t("adminCourseView.curriculum.other.edit")}
                 {": "}
               </span>
-              <span className="font-bold">{lessonToEdit.title}</span>
+              <span className="font-bold break-words">{lessonToEdit.title}</span>
             </>
           ) : (
             t("adminCourseView.curriculum.other.create")

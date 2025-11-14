@@ -52,10 +52,10 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
       )}
     >
       {dragTrigger}
-      <div className="flex items-start gap-x-2">
-        <Icon name={getIcon as IconName} className="size-6 text-primary-700" />
-        <hgroup>
-          <p className="text-l">
+      <div className="flex min-w-0 items-start gap-x-2">
+        <Icon name={getIcon as IconName} className="size-6 shrink-0 text-primary-700" />
+        <hgroup className="min-w-0">
+          <p className="text-l break-words" title={item.title}>
             {item.type === LessonType.QUIZ ? (
               <>
                 {item.title}{" "}
@@ -65,7 +65,10 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
               item.title
             )}
           </p>
-          <p className="details text-neutral-600">
+          <p
+            className="details text-neutral-600 truncate"
+            title={t(`adminCoursesView.lessonCard.mappedTypes.${contentType}`)}
+          >
             {t(`adminCoursesView.lessonCard.mappedTypes.${contentType}`)}
           </p>
         </hgroup>

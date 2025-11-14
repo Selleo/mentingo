@@ -153,7 +153,7 @@ const FileLessonForm = ({
               <span className="text-neutral-600">
                 {t("adminCourseView.curriculum.other.edit")}:
               </span>{" "}
-              {lessonToEdit?.title}
+              <span className="break-words">{lessonToEdit?.title}</span>
             </>
           ) : (
             t("common.button.create")
