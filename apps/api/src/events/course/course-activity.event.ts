@@ -1,10 +1,9 @@
 import { UUIDType } from "src/common";
 
 type CourseCompletedDetails = {
+  courseId: UUIDType;
   userName: string;
   courseTitle: string;
-  groupName: string;
-  completedAt: string;
 };
 
 export class CourseStartedEvent {

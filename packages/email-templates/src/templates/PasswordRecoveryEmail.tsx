@@ -1,24 +1,27 @@
-import { Button, Html } from "@react-email/components";
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type PasswordRecoveryEmailProps = {
-  email: string;
   name: string;
   resetLink: string;
-};
+} & DefaultEmailSettings;
 
-export const PasswordRecoveryEmail = ({ email, name, resetLink }: PasswordRecoveryEmailProps) => {
-  return (
-    <Html>
-      <Button
-        href="https://selleo.com"
-        style={{ background: "#000", color: "#fff", padding: "12px 20px" }}
-      >
-        Hello there! {name}({email})
-      </Button>
-
-      <p>Your recovery token: {resetLink}</p>
-    </Html>
-  );
+export const PasswordRecoveryEmail = ({
+  name,
+  resetLink,
+  primaryColor = "#4796FD",
+}: PasswordRecoveryEmailProps) => {
+  return BaseEmailTemplate({
+    heading: "Password Recovery",
+    paragraphs: [
+      `Hey ${name}, you've requested a password reset 🔑`,
+      "You can reset your password using the button below.",
+    ],
+    buttonText: "RESET PASSWORD",
+    buttonLink: resetLink,
+    primaryColor,
+  });
 };
 
 export default PasswordRecoveryEmail;

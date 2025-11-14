@@ -1,24 +1,27 @@
-import { Button, Html, Text } from "@react-email/components";
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type UserShortInactivityProps = {
-  name: string;
   courseName: string;
   courseLink: string;
-};
+} & DefaultEmailSettings;
 
 export const UserShortInactivityEmail = ({
-  name,
   courseName,
   courseLink,
+  primaryColor = "#4796FD",
 }: UserShortInactivityProps) => {
-  return (
-    <Html>
-      <Text>Cześć {name}, dawno Cię nie było!</Text>
-      <Text>
-        <Button href={courseLink}>Wróć</Button> do kursu {courseName} i kontynuuj naukę.
-      </Text>
-    </Html>
-  );
+  return BaseEmailTemplate({
+    heading: "Reminder",
+    paragraphs: [
+      "Resume learning 🔔",
+      `14 days since last activity in ${courseName}. Continue to keep your progress on track.`,
+    ],
+    buttonText: "CONTINUE COURSE",
+    buttonLink: courseLink,
+    primaryColor,
+  });
 };
 
 export default UserShortInactivityEmail;

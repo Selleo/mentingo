@@ -75,9 +75,12 @@ describe("AuthService", () => {
       const user = userFactory.build();
       const password = "password123";
 
+      await settingsFactory.create({ userId: null });
+
       const allEmails = emailAdapter.getAllEmails();
 
       expect(allEmails).toHaveLength(0);
+
       await authService.register({
         email: user.email,
         firstName: user.firstName,
@@ -85,6 +88,7 @@ describe("AuthService", () => {
         password,
         language: "en",
       });
+
       expect(allEmails).toHaveLength(1);
     });
 
@@ -208,9 +212,13 @@ describe("AuthService", () => {
     it("should generate a reset token and send an email", async () => {
       const email = "user@example.com";
       const password = "password123";
+
       await userFactory.withCredentials({ password }).create({ email });
+      await settingsFactory.create({ userId: null });
+
       const expiryDate = new Date();
       expiryDate.setHours(expiryDate.getHours() + 1);
+
       const allEmails = emailAdapter.getAllEmails();
       expect(allEmails).toHaveLength(0);
 

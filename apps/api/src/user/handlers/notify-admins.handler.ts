@@ -35,12 +35,14 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
   async handleNotifyAdminAboutNewUser(event: UserRegisteredEvent | UserPasswordCreatedEvent) {
     const { user } = event;
-    const { firstName, lastName, email } = user;
+    const { firstName, lastName } = user;
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
 
     const { text, html } = new NewUserEmail({
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
+      userName: `${firstName} ${lastName}`,
+      profileLink: `${process.env.CORS_ORIGIN}/profile/${user.id}`,
+      ...defaultEmailSettings,
     });
 
     const adminsEmailsToNotify = await this.userService.getAdminsToNotifyAboutNewUser();
@@ -60,14 +62,16 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
   async handleNotifyAdminAboutFinishedCourse(event: CourseCompletedEvent) {
     const {
-      courseCompletionData: { userName, courseTitle, groupName, completedAt },
+      courseCompletionData: { userName, courseTitle, courseId },
     } = event;
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
 
     const { text, html } = new FinishedCourseEmail({
       userName,
       courseName: courseTitle,
-      completedAt,
-      groupName,
+      progressLink: `${process.env.CORS_ORIGIN}/course/${courseId}`,
+      ...defaultEmailSettings,
     });
 
     const adminsEmailsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();

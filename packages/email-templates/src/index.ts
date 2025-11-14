@@ -1,4 +1,6 @@
 import { emailTemplateFactory } from "./email-factory";
+import BaseEmailTemplateTemplate from "./templates/BaseEmailTemplate";
+export const BaseEmailTemplate = emailTemplateFactory(BaseEmailTemplateTemplate);
 import CreatePasswordReminderEmailTemplate from "./templates/CreatePasswordReminderEmail";
 export const CreatePasswordReminderEmail = emailTemplateFactory(CreatePasswordReminderEmailTemplate);
 import FinishedCourseEmailTemplate from "./templates/FinishedCourseEmail";
@@ -23,5 +25,3 @@ import UserShortInactivityEmailTemplate from "./templates/UserShortInactivityEma
 export const UserShortInactivityEmail = emailTemplateFactory(UserShortInactivityEmailTemplate);
 import WelcomeEmailTemplate from "./templates/WelcomeEmail";
 export const WelcomeEmail = emailTemplateFactory(WelcomeEmailTemplate);
-import WelcomeEmailTwoTemplate from "./templates/WelcomeEmailTwo";
-export const WelcomeEmailTwo = emailTemplateFactory(WelcomeEmailTwoTemplate);

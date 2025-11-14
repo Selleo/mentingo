@@ -1,0 +1,1 @@
+export { getBaseEmailStyles } from './getBaseEmailStyles';

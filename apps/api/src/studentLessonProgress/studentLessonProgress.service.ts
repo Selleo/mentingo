@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { format } from "date-fns";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
@@ -456,7 +455,6 @@ export class StudentLessonProgressService {
       const courseCompletionDetails = await this.getUserCourseCompletionDetails(
         studentId,
         courseId,
-        studentCourse.completedAt!,
       );
 
       this.eventBus.publish(new CourseCompletedEvent(courseCompletionDetails));
@@ -502,17 +500,11 @@ export class StudentLessonProgressService {
       .where(eq(lessons.id, id));
   }
 
-  async getUserCourseCompletionDetails(
-    studentId: UUIDType,
-    courseId: UUIDType,
-    completedAtFromTrx?: string,
-  ) {
+  async getUserCourseCompletionDetails(studentId: UUIDType, courseId: UUIDType) {
     const [courseCompletionDetails] = await this.db
       .select({
         userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         courseTitle: sql<string>`${courses.title}`,
-        groupName: sql<string>`${groups.name}`,
-        completedAt: sql<string>`${studentCourses.completedAt}`,
       })
       .from(studentCourses)
       .leftJoin(users, eq(studentCourses.studentId, users.id))
@@ -523,10 +515,7 @@ export class StudentLessonProgressService {
 
     return {
       ...courseCompletionDetails,
-      completedAt: format(
-        new Date(completedAtFromTrx ?? courseCompletionDetails.completedAt),
-        "dd MMM yyyy HH:mm:ss",
-      ),
+      courseId,
     };
   }
 }

@@ -1,27 +1,26 @@
-import { Html, Text } from "@react-email/components";
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type FinishedCourseEmailProps = {
   userName: string;
   courseName: string;
-  completedAt: string;
-  groupName?: string;
-};
+  progressLink: string;
+} & DefaultEmailSettings;
 
 export const FinishedCourseEmail = ({
   userName,
   courseName,
-  completedAt,
-  groupName,
+  progressLink,
+  primaryColor = "#4796FD",
 }: FinishedCourseEmailProps) => {
-  return (
-    <Html>
-      <Text>
-        <b>{userName}</b> finished the course <b>{courseName}</b>.
-      </Text>
-      <Text>Completed at: {completedAt}</Text>
-      {groupName && <Text>Belongs to group: {groupName}</Text>}
-    </Html>
-  );
+  return BaseEmailTemplate({
+    heading: "User finished the course",
+    paragraphs: ["Hello! 🧑‍💻", `${userName} completed ${courseName}. Review their progress.`],
+    buttonText: "VIEW PROGRESS",
+    buttonLink: progressLink,
+    primaryColor,
+  });
 };
 
 export default FinishedCourseEmail;
