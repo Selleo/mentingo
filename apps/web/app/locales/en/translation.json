@@ -1795,6 +1795,10 @@
           "urlInvalid": "Invalid URL format",
           "linkTextRequired": "Link text is required"
         }
+      },
+      "upload": {
+        "uploadFailed": "File upload failed",
+        "tooltip": "Upload: Allows you to upload an image"
       }
     }
   },

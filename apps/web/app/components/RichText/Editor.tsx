@@ -1,7 +1,9 @@
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
+import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { LessonTypes } from "~/modules/Courses/CourseView/lessonTypes";
 
@@ -32,21 +34,24 @@ const Editor = ({
 }: EditorProps) => {
   const { mutateAsync: uploadFile } = useLessonFileUpload();
 
+  const { toast } = useToast();
+  const { t } = useTranslation();
+
   const handleFileInsert = async (
-    file: File,
-    editor: TiptapEditor | null,
     e: DragEvent | ClipboardEvent,
+    file?: File,
+    editor?: TiptapEditor | null,
   ) => {
     if (!file || !lessonId || lessonType != LessonTypes.text) {
-      return;
+      return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
     }
 
     if (file.type.startsWith("image/")) {
       const uploaded = await uploadFile({ file, lessonId });
 
-      const url = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
+      const imageUrl = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
 
-      editor?.chain().insertContent(`<a href="${url}">${url}</a>`).run();
+      editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
 
       e.preventDefault?.();
     }
@@ -61,16 +66,12 @@ const Editor = ({
     onPaste: async (e) => {
       const file = e.clipboardData?.files[0];
 
-      if (!file) return;
-
-      await handleFileInsert(file, editor, e);
+      await handleFileInsert(e, file, editor);
     },
     onDrop: async (e) => {
       const file = e.dataTransfer?.files[0];
 
-      if (!file) return;
-
-      await handleFileInsert(file, editor, e);
+      await handleFileInsert(e, file, editor);
     },
     editorProps: {
       attributes: {
