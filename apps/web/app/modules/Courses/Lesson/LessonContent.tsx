@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -10,6 +10,7 @@ import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useUserRole } from "~/hooks/useUserRole";
@@ -21,7 +22,8 @@ import Presentation from "../../../components/Presentation/Presentation";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
-import { isNextBlocked, isPreviousBlocked } from "./utils";
+import { useAutoplayFullscreenStore, useAutoplayStore } from "./stores/autoplayStore";
+import { findNextLessonInfo, isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
 
@@ -55,6 +57,10 @@ export const LessonContent = ({
   const { t } = useTranslation();
   const { isAdminLike, isStudent } = useUserRole();
 
+  const { isAutoplayEnabled, setAutoplayEnabled } = useAutoplayStore();
+  const { shouldRestoreFullscreen, setShouldRestoreFullscreen } = useAutoplayFullscreenStore();
+  const videoContainerRef = useRef<HTMLDivElement | null>(null);
+
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
     chapter.lessons.some(({ id }) => id === lesson.id),
   );
@@ -68,6 +74,74 @@ export const LessonContent = ({
   const totalLessons = currentChapter.lessons.length;
 
   const queryClient = useQueryClient();
+
+  const nextLessonInfo = useMemo(
+    () => findNextLessonInfo(course.chapters, lesson.id),
+    [course.chapters, lesson.id],
+  );
+
+  const isNextLessonVideo = nextLessonInfo?.lesson.type === LessonType.VIDEO;
+
+  useEffect(() => {
+    if (lesson.type !== LessonType.VIDEO) return;
+    if (typeof window === "undefined") return;
+    if (!shouldRestoreFullscreen) return;
+
+    const container = videoContainerRef.current;
+
+    if (!container) {
+      setShouldRestoreFullscreen(false);
+      return;
+    }
+
+    const elementWithVendorApi = container as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void>;
+      msRequestFullscreen?: () => Promise<void>;
+    };
+
+    const requestFullscreen = async () => {
+      try {
+        if (container.requestFullscreen) {
+          await container.requestFullscreen();
+        } else if (elementWithVendorApi.webkitRequestFullscreen) {
+          await elementWithVendorApi.webkitRequestFullscreen();
+        } else if (elementWithVendorApi.msRequestFullscreen) {
+          await elementWithVendorApi.msRequestFullscreen();
+        }
+      } catch (error) {
+        console.warn("Unable to restore fullscreen mode after autoplay", error);
+      } finally {
+        setShouldRestoreFullscreen(false);
+      }
+    };
+
+    requestFullscreen();
+  }, [lesson.id, lesson.type, setShouldRestoreFullscreen, shouldRestoreFullscreen]);
+
+  const handleVideoEnded = () => {
+    setIsNextDisabled(false);
+    if (isStudent) {
+      markLessonAsCompleted({ lessonId: lesson.id });
+    }
+
+    if (!isAutoplayEnabled || !isNextLessonVideo || !nextLessonInfo?.lesson) return;
+
+    const fullscreenElement =
+      typeof document === "undefined"
+        ? null
+        : document.fullscreenElement ||
+          (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+          (document as Document & { mozFullScreenElement?: Element }).mozFullScreenElement ||
+          (document as Document & { msFullscreenElement?: Element }).msFullscreenElement;
+
+    if (fullscreenElement) {
+      setShouldRestoreFullscreen(true);
+    } else {
+      setShouldRestoreFullscreen(false);
+    }
+
+    handleNext();
+  };
 
   useEffect(() => {
     if (isPreviewMode) return;
@@ -107,7 +181,7 @@ export const LessonContent = ({
     course.id,
   ]);
 
-  const Content = () =>
+  const renderLessonContent = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
       .with("quiz", () => (
@@ -119,14 +193,25 @@ export const LessonContent = ({
         />
       ))
       .with("video", () => (
-        <Video
-          url={lesson.fileUrl}
-          onVideoEnded={() => {
-            setIsNextDisabled(false);
-            isStudent && markLessonAsCompleted({ lessonId: lesson.id });
-          }}
-          isExternalUrl={lesson.isExternal}
-        />
+        <div ref={videoContainerRef} className="flex flex-col">
+          <div className="mb-4 flex items-center justify-end gap-2">
+            <p className="text-sm text-muted-foreground">
+              {t("studentLessonView.controls.autoplay", { defaultValue: "Autoplay" })}
+            </p>
+            <Switch
+              checked={isAutoplayEnabled}
+              onCheckedChange={setAutoplayEnabled}
+              aria-label={t("studentLessonView.controls.autoplayToggle", {
+                defaultValue: "Toggle autoplay",
+              })}
+            />
+          </div>
+          <Video
+            url={lesson.fileUrl}
+            onVideoEnded={handleVideoEnded}
+            isExternalUrl={lesson.isExternal}
+          />
+        </div>
       ))
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
@@ -229,9 +314,7 @@ export const LessonContent = ({
             </div>
           )}
 
-          <div>
-            <Content />
-          </div>
+          <div>{renderLessonContent()}</div>
         </div>
       </div>
     </TooltipProvider>

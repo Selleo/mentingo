@@ -3,6 +3,7 @@ import { expect, describe, it } from "vitest";
 import {
   findFirstInProgressLessonId,
   findFirstNotStartedLessonId,
+  findNextLessonInfo,
   isNextBlocked,
   isPreviousBlocked,
 } from "../utils";
@@ -310,5 +311,45 @@ describe("isPreviousBlocked", () => {
       );
       expect(previousBlocked).toBe(false);
     });
+  });
+});
+
+describe("findNextLessonInfo", () => {
+  const buildChapters = () =>
+    [
+      {
+        id: "chapter-1",
+        lessons: [
+          { id: "lesson-1", type: "video" },
+          { id: "lesson-2", type: "video" },
+        ],
+      },
+      {
+        id: "chapter-2",
+        lessons: [{ id: "lesson-3", type: "text" }],
+      },
+    ] as unknown as GetCourseResponse["data"]["chapters"];
+
+  it("returns the next lesson within the same chapter", () => {
+    const chapters = buildChapters();
+    const result = findNextLessonInfo(chapters, "lesson-1");
+
+    expect(result?.lesson.id).toBe("lesson-2");
+    expect(result?.chapterId).toBe("chapter-1");
+  });
+
+  it("returns the first lesson of the next chapter when current is last", () => {
+    const chapters = buildChapters();
+    const result = findNextLessonInfo(chapters, "lesson-2");
+
+    expect(result?.lesson.id).toBe("lesson-3");
+    expect(result?.chapterId).toBe("chapter-2");
+  });
+
+  it("returns null when there is no subsequent lesson", () => {
+    const chapters = buildChapters();
+    const result = findNextLessonInfo(chapters, "lesson-3");
+
+    expect(result).toBeNull();
   });
 });

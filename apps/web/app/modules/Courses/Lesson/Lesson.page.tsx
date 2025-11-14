@@ -9,6 +9,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
+import { findNextLessonInfo } from "~/modules/Courses/Lesson/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
@@ -75,29 +76,17 @@ export default function LessonPage() {
       return;
     }
 
-    for (const chapter of chapters) {
-      const lessonIndex = findCurrentLessonIndex(chapter.lessons, currentLessonId);
-      if (lessonIndex !== -1) {
-        if (lessonIndex + 1 < chapter.lessons.length) {
-          const nextLessonId = chapter.lessons[lessonIndex + 1].id;
-          queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
-          navigate(`/course/${courseId}/lesson/${nextLessonId}`, {
-            state: { chapterId: chapter.id },
-          });
-        } else {
-          const currentChapterIndex = chapters.indexOf(chapter);
-          if (currentChapterIndex + 1 < chapters.length) {
-            const nextLessonId = chapters[currentChapterIndex + 1].lessons[0].id;
-            queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
-            navigate(`/course/${courseId}/lesson/${nextLessonId}`, {
-              state: { chapterId: chapters[currentChapterIndex + 1].id },
-            });
-          }
-        }
-      }
+    const nextLessonInfo = findNextLessonInfo(chapters, currentLessonId);
+
+    if (!nextLessonInfo) {
+      navigate(`/course/${courseId}`);
+      return;
     }
 
-    return null;
+    queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
+    navigate(`/course/${courseId}/lesson/${nextLessonInfo.lesson.id}`, {
+      state: { chapterId: nextLessonInfo.chapterId },
+    });
   }
 
   function handlePrevLesson(

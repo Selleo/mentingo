@@ -244,6 +244,43 @@ export const findFirstInProgressLessonId = (course: GetCourseResponse["data"]) =
   return find(allLessons, (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS)?.id;
 };
 
+export type NextLessonInfo = {
+  lesson: GetCourseResponse["data"]["chapters"][number]["lessons"][number];
+  chapterId: string;
+};
+
+export const findNextLessonInfo = (
+  chapters: GetCourseResponse["data"]["chapters"],
+  currentLessonId: string,
+): NextLessonInfo | null => {
+  for (let chapterIndex = 0; chapterIndex < chapters.length; chapterIndex += 1) {
+    const chapter = chapters[chapterIndex];
+    const lessonIndex = chapter.lessons.findIndex((lesson) => lesson.id === currentLessonId);
+
+    if (lessonIndex === -1) continue;
+
+    const hasNextLessonInChapter = lessonIndex + 1 < chapter.lessons.length;
+    if (hasNextLessonInChapter) {
+      return {
+        lesson: chapter.lessons[lessonIndex + 1],
+        chapterId: chapter.id,
+      };
+    }
+
+    const nextChapter = chapters[chapterIndex + 1];
+    if (nextChapter && nextChapter.lessons.length > 0) {
+      return {
+        lesson: nextChapter.lessons[0],
+        chapterId: nextChapter.id,
+      };
+    }
+
+    return null;
+  }
+
+  return null;
+};
+
 export const isNextBlocked = (
   currentLessonIndex: number,
   totalLessons: number,
