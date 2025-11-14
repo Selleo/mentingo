@@ -21885,7 +21885,7 @@ snapshots:
     dependencies:
       '@types/node': 20.17.6
       tapable: 2.2.1
-      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)
+      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -30938,7 +30938,7 @@ snapshots:
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.36.0
-      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)
+      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0)
     optionalDependencies:
       '@swc/core': 1.3.101(@swc/helpers@0.5.2)
       esbuild: 0.19.11
@@ -31950,7 +31950,7 @@ snapshots:
       - esbuild
       - uglify-js
 
-  webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11):
+  webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.6

@@ -30,7 +30,7 @@ export const LessonForm = ({
     if (!showEmojiPicker) return;
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
         setShowEmojiPicker(false);
       }
     };
