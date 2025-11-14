@@ -117,11 +117,11 @@ const Categories = () => {
         <Checkbox
           checked={row.getIsSelected()}
           aria-label="Select row"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             handleRowSelectionRange({
               table,
-              e,
+              event,
               lastSelectedRowIndex,
               setLastSelectedRowIndex,
               id: row.id,

@@ -3,15 +3,15 @@ import type React from "react";
 
 export function handleRowSelectionRange<TData>(params: {
   table: Table<TData>;
-  e: React.MouseEvent<HTMLButtonElement>;
+  event: React.MouseEvent<HTMLButtonElement>;
   id: string;
   idx: number;
   value: boolean;
   lastSelectedRowIndex: number;
   setLastSelectedRowIndex: (n: number) => void;
 }): void {
-  const { table, e, id, idx, value, lastSelectedRowIndex, setLastSelectedRowIndex } = params;
-  const shiftKeyPressed = e.shiftKey;
+  const { table, event, id, idx, value, lastSelectedRowIndex, setLastSelectedRowIndex } = params;
+  const shiftKeyPressed = event.shiftKey;
 
   if (!shiftKeyPressed) {
     table.getRow(id).toggleSelected(!value);

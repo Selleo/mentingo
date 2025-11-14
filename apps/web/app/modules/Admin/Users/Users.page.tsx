@@ -175,11 +175,11 @@ const Users = () => {
           checked={row.getIsSelected()}
           aria-label="Select row"
           data-testid={row.original.email}
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             handleRowSelectionRange({
               table,
-              e,
+              event,
               id: row.id,
               idx: row.index,
               value: row.getIsSelected(),
