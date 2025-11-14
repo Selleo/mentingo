@@ -46,6 +46,7 @@ export const threadMessageSchema = Type.Intersect([
     role: Type.Enum(MESSAGE_ROLE),
     tokenCount: Type.Integer(),
     isJudge: Type.Optional(Type.Boolean()),
+    userName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   }),
 ]);
 

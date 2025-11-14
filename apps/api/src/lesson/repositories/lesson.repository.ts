@@ -3,6 +3,7 @@ import { and, desc, eq, getTableColumns, ilike, isNull, or, sql } from "drizzle-
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
+  aiMentorStudentLessonProgress,
   chapters,
   courses,
   lessonResources,
@@ -50,6 +51,26 @@ export class LessonRepository {
         updatedAt: studentLessonProgress.updatedAt,
         isQuizPassed: sql<boolean | null>`${studentLessonProgress.isQuizPassed}`,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
+        aiMentorDetails: sql<{
+          minScore: number | null;
+          maxScore: number | null;
+          score: number | null;
+          percentage: number | null;
+          requiredScore: number | null;
+        } | null>`
+          json_build_object(
+            'minScore', ${aiMentorStudentLessonProgress.minScore},
+            'maxScore', ${aiMentorStudentLessonProgress.maxScore},
+            'score', ${aiMentorStudentLessonProgress.score},
+            'percentage', ${aiMentorStudentLessonProgress.percentage},
+            'requiredScore', 
+              CASE 
+                WHEN ${aiMentorStudentLessonProgress.maxScore} > 0 
+                THEN CAST(${aiMentorStudentLessonProgress.minScore} AS FLOAT) / CAST(${aiMentorStudentLessonProgress.maxScore} AS FLOAT) * 100
+                ELSE 0 
+              END
+          )
+        `,
         isExternal: sql<boolean>`${lessons.isExternal}`,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,
         isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NULL THEN FALSE ELSE TRUE END`,
@@ -82,6 +103,13 @@ export class LessonRepository {
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
           eq(studentLessonProgress.studentId, userId),
+        ),
+      )
+      .leftJoin(
+        aiMentorStudentLessonProgress,
+        and(
+          eq(studentLessonProgress.lessonId, lessons.id),
+          eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
         ),
       )
       .where(eq(lessons.id, id));

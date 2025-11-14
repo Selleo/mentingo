@@ -3754,6 +3754,14 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -10103,6 +10111,10 @@
                     }
                   ]
                 },
+                "lessonId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
                 "lessonName": {
                   "type": "string"
                 },
@@ -10117,6 +10129,7 @@
                 "studentId",
                 "studentName",
                 "studentAvatarUrl",
+                "lessonId",
                 "lessonName",
                 "score",
                 "lastSession"
@@ -11768,6 +11781,75 @@
                     "updatedAt"
                   ]
                 }
+              },
+              "aiMentorDetails": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "minScore": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "maxScore": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "score": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "percentage": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "requiredScore": {
+                        "anyOf": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "minScore",
+                      "maxScore",
+                      "score",
+                      "percentage",
+                      "requiredScore"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -14218,6 +14300,16 @@
                         },
                         "isJudge": {
                           "type": "boolean"
+                        },
+                        "userName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         }
                       },
                       "required": [

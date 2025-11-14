@@ -1761,6 +1761,7 @@ export class CourseService {
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
+        lessonId: sql<UUIDType>`${lessons.id}`,
         lessonName: sql<string>`${lessons.title}`,
         score: sql<number>`${aiMentorStudentLessonProgress.percentage}`,
         lastSession: sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,

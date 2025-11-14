@@ -44,7 +44,12 @@ export class ThreadService {
 
   async findAllMessagesByThread(threadId: UUIDType, userId: UUIDType) {
     await this.findThread(threadId, userId);
-    const messages = await this.aiRepository.findMessageHistory(threadId);
+    const messages = await this.aiRepository.findMessageHistory(
+      threadId,
+      undefined,
+      undefined,
+      userId,
+    );
 
     return { data: messages };
   }

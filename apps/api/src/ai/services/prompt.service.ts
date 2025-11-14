@@ -39,6 +39,7 @@ export class PromptService {
       history.unshift({
         id: summary.id,
         role: summary.role,
+        userName: null,
         content: summary.content,
       });
 
@@ -46,6 +47,7 @@ export class PromptService {
       history.unshift({
         id: systemPrompt.id,
         role: systemPrompt.role,
+        userName: null,
         content: systemPrompt.content,
       });
 
@@ -59,8 +61,10 @@ export class PromptService {
       { name: "RAG", asType: "retriever" },
     )();
 
-    history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, content });
-    history.push(...context.map(({ role, content }) => ({ id: "", role, content })));
+    history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, userName: null, content });
+    history.push(
+      ...context.map(({ role, content }) => ({ id: "", role, userName: null, content })),
+    );
 
     return history;
   }
