@@ -9,19 +9,23 @@ const TEST_COURSE = {
 const URL_PATTERNS = {
   course:
     /admin\/beta-courses\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
+  course2:
+    /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/,
 } as const;
 
 class CourseActions {
   constructor(private readonly page: Page) {}
 
   async searchCourse(): Promise<void> {
-    await this.page.waitForSelector('a[href="/admin/courses"]', { state: "visible" });
-    await this.page.getByText("My Courses").click();
+    await this.page.getByRole("link", { name: "Courses" }).click();
+    await expect(this.page.locator(".h-min > button:nth-child(2)")).toBeVisible();
+    await this.page.getByText("Available Courses").click();
     await this.page.getByPlaceholder(/Search by title/).fill(TEST_COURSE.name);
     await expect(this.page.getByRole("button", { name: "Clear All" })).toBeVisible();
   }
 
   async openCourse(): Promise<void> {
+    await this.page.getByRole("main").getByRole("button").nth(2).click();
     await this.page.getByText(TEST_COURSE.name).click();
     await this.page.waitForURL(URL_PATTERNS.course);
     await expect(this.page).toHaveURL(URL_PATTERNS.course);
@@ -44,9 +48,9 @@ test.describe.serial("Course E2E", () => {
   });
 
   test("should change course price to free", async ({ page }) => {
-    await page.getByRole("tab", { name: "Pricing" }).click();
-    await page.getByText("Free").click();
-    await page.getByRole("button", { name: "Save" }).click();
+    await page
+      .getByTestId(/^Freemium\s*-\s*[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$/i)
+      .click();
 
     await expect(
       page

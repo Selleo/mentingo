@@ -11,8 +11,7 @@ export const LANGUAGE_PAGE_UI = {
       english: "angielski",
       sidebarItems: {
         dashboard: "panel główny",
-        myCourses: "moje kursy",
-        browseCourses: "przeglądaj kursy",
+        browseCourses: "kursy",
         categories: "kategorie",
         users: "użytkownicy",
         groups: "grupy",
@@ -22,8 +21,7 @@ export const LANGUAGE_PAGE_UI = {
       language: "english",
       sidebarItems: {
         dashboard: "dashboard",
-        myCourses: "my courses",
-        browseCourses: "browse courses",
+        browseCourses: "courses",
         categories: "categories",
         users: "users",
         groups: "groups",

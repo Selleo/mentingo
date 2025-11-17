@@ -8,7 +8,7 @@ import {
   navigateToPage,
   selectCourseAndOpenEnrollmentTab,
   verifyStudentSeesCourse,
-} from "e2e/utils";
+} from "../../utils/index";
 
 import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-data";
 
@@ -49,7 +49,10 @@ test.describe("Assigning students to course flow", () => {
       );
 
       expect(
-        await verifyStudentSeesCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign),
+        await verifyStudentSeesCourse(
+          page,
+          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.secondCourseToAssign,
+        ),
       ).toBeTruthy();
     });
   });
@@ -59,7 +62,7 @@ test.describe("Assigning students to course flow", () => {
   }) => {
     await selectCourseAndOpenEnrollmentTab(
       page,
-      ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.secondCourseToAssign,
+      ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
     );
 
     await enrollAllStudents(page);

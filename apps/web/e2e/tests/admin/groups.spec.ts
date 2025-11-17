@@ -6,7 +6,7 @@ import {
   findAndClickButton,
   findAndClickCell,
   navigateToPage,
-} from "e2e/utils";
+} from "../../utils/index";
 
 import { GROUPS_PAGE_UI } from "./data/groups-data";
 
@@ -106,6 +106,16 @@ test.describe("Admin groups page flow", () => {
   test.describe("Group CRUD", () => {
     test.beforeEach(async ({ page }) => {
       await navigateToPage(page, GROUPS_PAGE_UI.button.groups, GROUPS_PAGE_UI.header.groupHeader);
+
+      await page.getByLabel("Select all").click();
+      const zeroSelected = page.getByText("Selected (0)");
+      if (await zeroSelected.isVisible()) {
+        return;
+      }
+      await page.getByText("Delete selected").click();
+      const deleteButton = page.getByText("Delete", { exact: true });
+      await deleteButton.waitFor({ state: "visible" });
+      await deleteButton.click();
     });
 
     test("should create a new group with characteristics", async ({ page }) => {
@@ -126,7 +136,7 @@ test.describe("Admin groups page flow", () => {
         GROUPS_PAGE_UI.dataId.groupCharacteristic,
       );
 
-      await deleteAndAssert(page, GROUPS_PAGE_UI.expectedValues.updatedGroupName);
+      await deleteAndAssert(page, GROUPS_PAGE_UI.expectedValues.groupName);
     });
 
     test("should fail to edit group when inputting no data", async ({ page }) => {

@@ -4,8 +4,8 @@ const TEST_NAVIGATION = {
   button: {
     createNew: "create new",
     dashboard: "dashboard",
-    myCourses: "my courses",
-    browseCourses: "browse courses",
+    myCourses: "Courses",
+    browseCourses: "Courses",
     profile: "profile",
     settings: "settings",
   },
@@ -33,7 +33,8 @@ test.describe("Content creator navigation", () => {
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.myCourses, "i") })
       .click();
-    await page.waitForURL("/admin/courses");
+    await page.waitForURL("/courses");
+    await page.locator(".h-min > button:nth-child(2)").click();
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });
@@ -45,13 +46,13 @@ test.describe("Content creator navigation", () => {
     const yourCoursesHeader = page.locator("h4", { hasText: TEST_NAVIGATION.header.yourCourses });
     await expect(yourCoursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.yourCourses, "i"));
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("button", { name: "Dakota Content Creator" }).click();
     await page.getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
     const currentURL = page.url();
     expect(currentURL).toMatch(/\/profile\/[a-f0-9-]{36}/);
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("button", { name: "Dakota Content Creator" }).click();
 
     await page
       .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })
