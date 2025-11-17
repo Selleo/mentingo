@@ -3192,6 +3192,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -4755,6 +4763,40 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetFrontendSSOEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/stripe/publishable-key": {
+      "get": {
+        "operationId": "EnvController_getStripePublishableKey",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStripePublishableKeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/frontend/stripe": {
+      "get": {
+        "operationId": "EnvController_getStripeConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStripeConfiguredResponse"
                 }
               }
             }
@@ -9976,6 +10018,10 @@
                     }
                   ]
                 },
+                "lessonId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
                 "quizName": {
                   "type": "string"
                 },
@@ -9993,6 +10039,7 @@
                 "studentId",
                 "studentName",
                 "studentAvatarUrl",
+                "lessonId",
                 "quizName",
                 "quizScore",
                 "attempts",
@@ -16046,6 +16093,51 @@
                 "type": "string"
               }
             }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetStripePublishableKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "publishableKey": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "publishableKey"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetStripeConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
           }
         },
         "required": [
