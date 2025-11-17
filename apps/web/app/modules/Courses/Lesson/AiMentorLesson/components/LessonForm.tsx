@@ -1,8 +1,9 @@
-import { useRef, useLayoutEffect } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
+import { LessonEmojiPicker } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonEmojiPicker";
 
 import type { ChangeEvent } from "react";
 
@@ -10,10 +11,34 @@ interface LessonFormProps {
   handleSubmit: () => void;
   input: string;
   handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
+  setInput: (value: string) => void;
 }
 
-export const LessonForm = ({ handleSubmit, input, handleInputChange }: LessonFormProps) => {
+export const LessonForm = ({
+  handleSubmit,
+  input,
+  handleInputChange,
+  setInput,
+}: LessonFormProps) => {
   const { t } = useTranslation();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const emojiRef = useRef<HTMLDivElement | null>(null);
+  const toggleEmojiPicker = () => setShowEmojiPicker((prev) => !prev);
+
+  useEffect(() => {
+    if (!showEmojiPicker) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showEmojiPicker]);
 
   const ref = useRef<HTMLTextAreaElement | null>(null);
 
@@ -36,7 +61,7 @@ export const LessonForm = ({ handleSubmit, input, handleInputChange }: LessonFor
   }, [ref.current?.value, handleSubmit]);
 
   return (
-    <div className="mt-8 w-full">
+    <div className="mt-8 w-full relative">
       <form onSubmit={handleSubmit}>
         <div className="flex w-full flex-col gap-y-4 rounded-2xl border border-[#E4E6EB] bg-[#F5F6F7] px-6 py-4">
           <div className="flex w-full items-end">
@@ -53,9 +78,18 @@ export const LessonForm = ({ handleSubmit, input, handleInputChange }: LessonFor
                   <Button className="flex size-8 items-center justify-center rounded-full border-none bg-white p-0 shadow-sm disabled:opacity-50">
                     <Icon name="Plus" className="size-5 text-gray-700" />
                   </Button>
-                  <Button className="flex size-8 items-center justify-center rounded-full border-none bg-white p-0 shadow-sm disabled:opacity-50">
+                  <Button
+                    className="flex size-8 items-center justify-center rounded-full border-none bg-white p-0 shadow-sm disabled:opacity-50"
+                    onClick={toggleEmojiPicker}
+                    type="button"
+                  >
                     <Icon name="Smile" className="size-5 text-gray-700" />
                   </Button>
+                  {showEmojiPicker && (
+                    <div className="absolute bottom-16" ref={emojiRef}>
+                      <LessonEmojiPicker setInput={setInput} input={input} />
+                    </div>
+                  )}
                 </div>
                 <Button
                   type="submit"

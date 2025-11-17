@@ -1093,6 +1093,10 @@
           "problemSolving": "Rozwiązywanie problemów",
           "creativeTask": "Zadanie kreatywne",
           "knowledgeSharing": "Dialog dzielenia się wiedzą",
+          "emoji": {
+            "search": "Szukaj",
+            "loading": "Ładowanie..."
+          },
           "aiMentorSuggestionExamples": {
             "instructions": {
               "scenarioSimulation": "Wcielasz się w rolę klienta biznesowego, który szuka dostawcy usług tworzenia oprogramowania. Masz konkretne wymagania: aplikacja musi być gotowa w ciągu 3 miesięcy, masz ograniczony budżet i oczekujesz jasnej komunikacji. Student wciela się w rolę przedstawiciela handlowego, który chce pozyskać twój biznes. AI Mentor powinien odpowiadać jako klient, zadając pytania i wyrażając obawy.",
