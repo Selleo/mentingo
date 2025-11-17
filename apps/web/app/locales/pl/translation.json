@@ -1532,6 +1532,32 @@
       "error": "Wystąpił błąd podczas zmiany tła certyfikatu"
     }
   },
+  "userEmailTriggers": {
+    "header": "Reguły wysyłki powiadomień e-mail dla użytkowników",
+    "subHeader": "Zarządzaj automatycznymi wiadomościami e-mail wysyłanymi do użytkowników",
+    "settings": {
+      "userFirstLogin": "Pierwsze logowanie",
+      "userFirstLoginDescription": "Wyślij użytkownikowi wiadomość po jego pierwszym logowaniu do systemu.",
+      "userCourseAssignment": "Zapisanie na kurs",
+      "userCourseAssignmentDescription": "Wyślij użytkownikowi wiadomość po tym, jak zostanie zapisany na kurs przez administratora.",
+      "userShortInactivity": "Krótka nieaktywność (14 dni)",
+      "userShortInactivityDescription": "Wyślij użytkownikowi wiadomość po 14 dniach jego nieaktywności.",
+      "userLongInactivity": "Długa nieaktywność (30 dni)",
+      "userLongInactivityDescription": "Wyślij użytkownikowi wiadomość po 30 dniach jego nieaktywności.",
+      "userChapterFinished": "Rozdział ukończony",
+      "userChapterFinishedDescription": "Wyślij użytkownikowi wiadomość po ukończeniu przez niego rozdziału.",
+      "userCourseFinished": "Kurs ukończony",
+      "userCourseFinishedDescription": "Wyślij użytkownikowi wiadomość po ukończeniu przez niego kursu."
+    },
+    "switch": {
+      "enabled": "Włączone",
+      "disabled": "Wyłączone"
+    },
+    "toast": {
+      "userEmailTriggersUpdatedSuccessfully": "Wyzwalacze e-mail zostały pomyślnie zaktualizowane",
+      "userEmailTriggersUpdateFailed": "Nie udało się zaktualizować wyzwalaczy e-mail"
+    }
+  },
   "adminPreferences": {
     "header": "Globalne preferencje administratora",
     "subHeader": "Zarządzaj ustawieniami kursów",

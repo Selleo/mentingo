@@ -351,6 +351,13 @@
       "when": 1762507996209,
       "tag": "0049_add_missing_properties_to_user_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1762761933381,
+      "tag": "0050_added_email_invite_triggers",
+      "breakpoints": true
     }
   ]
 }
