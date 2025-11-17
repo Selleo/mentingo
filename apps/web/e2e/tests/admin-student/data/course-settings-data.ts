@@ -18,7 +18,8 @@ export const COURSE_SETTINGS_UI = {
     courseUpdatedSuccessfully: "Course updated successfully",
   },
   header: {
-    chapterTitle: "Introduction to E2E Testing",
+    chapterTitle: "Artificial Intelligence in Business: Fundamentals",
+    chapterTitle2: "E2E Test: Automated Course",
     settings: "settings",
     signup: "sign up",
   },

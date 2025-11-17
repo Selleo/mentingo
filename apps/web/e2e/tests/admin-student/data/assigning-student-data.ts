@@ -1,10 +1,10 @@
 export const ASSIGNING_STUDENT_TO_GROUP_PAGE_UI = {
   button: {
-    myCourses: "my courses",
+    myCourses: "Courses",
     enrolledStudents: "enrolled students",
     enrollSelected: "enroll selected",
     save: "save",
-    browseCourses: "browse courses",
+    browseCourses: "Courses",
   },
   cell: {
     courseToAssign: "Advanced English: Mastering Complex Language Skills",
