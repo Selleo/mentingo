@@ -12,6 +12,8 @@ import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { CourseCompletedEvent } from "src/events";
+import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
+import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
@@ -296,7 +298,11 @@ export class StudentLessonProgressService {
       );
 
     if (completedLessonCount.count === lessonCount) {
-      return await dbInstance
+      this.eventBus.publish(
+        new UserChapterFinishedEvent({ chapterId, courseId, userId: studentId }),
+      );
+
+      return dbInstance
         .insert(studentChapterProgress)
         .values({
           completedLessonCount: completedLessonCount.count,
@@ -321,7 +327,7 @@ export class StudentLessonProgressService {
         .returning();
     }
 
-    return await dbInstance
+    return dbInstance
       .insert(studentChapterProgress)
       .values({
         completedLessonCount: completedLessonCount.count,
@@ -454,11 +460,12 @@ export class StudentLessonProgressService {
       );
 
       this.eventBus.publish(new CourseCompletedEvent(courseCompletionDetails));
+      this.eventBus.publish(new UserCourseFinishedEvent({ userId: studentId, courseId }));
 
       return studentCourse;
     }
 
-    return await dbInstance
+    return dbInstance
       .update(studentCourses)
       .set({ progress, finishedChapterCount })
       .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));

@@ -10,6 +10,7 @@ export type GlobalSettings = {
   defaultCourseCurrency: GetPublicGlobalSettingsResponse["data"]["defaultCourseCurrency"];
   inviteOnlyRegistration: boolean;
   loginBackgroundImageS3Key: string | null;
+  userEmailTriggers: GetPublicGlobalSettingsResponse["data"]["userEmailTriggers"];
 };
 
 export type UserSettings = {
