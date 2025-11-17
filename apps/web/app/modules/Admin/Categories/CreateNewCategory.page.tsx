@@ -31,13 +31,8 @@ export default function CreateNewCategoryPage() {
     { title: t("adminCategoriesView.breadcrumbs.createNew"), href: "/admin/categories/new" },
   ];
 
-  const backButton = {
-    title: t("adminCategoriesView.breadcrumbs.back"),
-    href: "/admin/categories",
-  };
-
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs}>
       <div className="flex flex-col gap-y-6">
         <CreatePageHeader
           title={t("adminCategoryView.header")}

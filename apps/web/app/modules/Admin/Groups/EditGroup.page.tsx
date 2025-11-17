@@ -59,7 +59,6 @@ const EditGroup = (): ReactElement => {
   return (
     <PageWrapper
       className="flex h-full flex-col"
-      backButton={{ href: "/admin/groups", title: t("adminGroupsView.breadcrumbs.back") }}
       breadcrumbs={[
         {
           title: t("adminGroupsView.breadcrumbs.dashboard"),
