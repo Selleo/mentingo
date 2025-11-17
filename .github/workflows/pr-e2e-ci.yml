@@ -6,7 +6,7 @@ on:
 
 jobs:
   e2e:
-    if: ${{ (github.event_name == 'pull_request' && github.event.label != null && github.event.label.name == 'merge me :green_heart:') || github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ (github.event_name == 'pull_request' && github.event.label != null && github.event.label.name == 'run E2E tests ⚙️') || github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' }}
     uses: ./.github/workflows/e2e.yml
     with: {}
     secrets:
