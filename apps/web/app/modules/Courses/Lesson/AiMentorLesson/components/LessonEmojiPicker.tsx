@@ -28,7 +28,7 @@ export function LessonEmojiPicker({ setInput, input }: Props) {
         <EmojiPicker.List
           className="select-none pb-1.5"
           components={{
-            CategoryHeader: ({ category, ...props }) => (
+            CategoryHeader: ({ category }, props) => (
               <div
                 className="bg-white px-3 pt-3 pb-1.5 font-medium text-neutral-600 text-xs dark:bg-neutral-900 dark:text-neutral-400"
                 {...props}
@@ -36,12 +36,15 @@ export function LessonEmojiPicker({ setInput, input }: Props) {
                 {category.label}
               </div>
             ),
-            Row: ({ children, ...props }) => (
-              <div className="scroll-my-1.5 px-1.5" {...props}>
-                {children}
-              </div>
-            ),
-            Emoji: ({ emoji, ...props }) => (
+            Row: (props) => {
+              const { children, ...rest } = props;
+              return (
+                <div className="scroll-my-1.5 px-1.5" {...rest}>
+                  {children}
+                </div>
+              );
+            },
+            Emoji: ({ emoji }, props) => (
               <Button
                 className="flex size-8 items-center justify-center rounded-md text-lg"
                 variant="ghost"
