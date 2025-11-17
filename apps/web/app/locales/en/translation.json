@@ -1114,6 +1114,10 @@
           "problemSolving": "Problem Solving",
           "creativeTask": "Creative Task",
           "knowledgeSharing": "Knowledge Sharing Dialogue",
+          "emoji": {
+            "search": "Search",
+            "loading": "Loading..."
+          },
           "aiMentorSuggestionExamples": {
             "instructions": {
               "scenarioSimulation": "You play the role of a business client who is looking for a supplier of software development services. You have specific requirements: the app must be ready within 3 months, you have a limited budget, and you expect clear communication. The student plays the role of the sales representative who wants to win your business. The AI Mentor should respond as the client, asking questions and expressing concerns.",
