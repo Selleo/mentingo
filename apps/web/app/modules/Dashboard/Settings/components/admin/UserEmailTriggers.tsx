@@ -17,7 +17,7 @@ export default function UserEmailTriggers({ userEmailTriggers }: UserEmailTrigge
   return (
     <Card id="user-email-triggers">
       <CardHeader>
-        <CardTitle>{t("userEmailTriggers.header")}</CardTitle>
+        <CardTitle className="h5">{t("userEmailTriggers.header")}</CardTitle>
         <CardDescription>{t("userEmailTriggers.subHeader")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
