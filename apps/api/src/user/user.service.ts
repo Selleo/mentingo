@@ -23,6 +23,7 @@ import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
+import { StatisticsService } from "src/statistics/statistics.service";
 import { importUserSchema } from "src/user/schemas/createUser.schema";
 
 import {
@@ -75,6 +76,7 @@ export class UserService {
     private s3Service: S3Service,
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
+    private statisticsService: StatisticsService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
