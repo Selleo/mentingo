@@ -183,12 +183,13 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
               <div className="flex items-center justify-end gap-2 grow">
                 {match(activeTab)
                   .with("progress", () => (
-                    <div className="max-w-40">
+                    <div className="max-w-56">
                       <SearchFilter
                         filters={filterConfig}
                         values={{ search: progressSearchParams.search }}
                         onChange={handleProgressFilterChange}
                         isLoading={isPending}
+                        className="flex-nowrap"
                       />
                     </div>
                   ))
@@ -197,7 +198,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                       value={(quizSearchParams.quizId as string) || "all"}
                       onValueChange={(value) => handleQuizFilterChange("quizId", value)}
                     >
-                      <SelectTrigger className="max-w-40 my-6">
+                      <SelectTrigger className="max-w-52 my-6">
                         <SelectValue placeholder={t("adminCourseView.statistics.filterByQuiz")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -217,7 +218,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                       value={(aiMentorSearchParams.lessonId as string) || "all"}
                       onValueChange={(value) => handleAiMentorFilterChange("lessonId", value)}
                     >
-                      <SelectTrigger className="max-w-40 my-6">
+                      <SelectTrigger className="max-w-52 my-6">
                         <SelectValue placeholder={t("adminCourseView.statistics.filterByLesson")} />
                       </SelectTrigger>
                       <SelectContent>

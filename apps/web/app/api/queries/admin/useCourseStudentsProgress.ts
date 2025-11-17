@@ -38,6 +38,7 @@ export const courseStudentsProgressQueryOptions = ({
 
       return response.data;
     },
+    placeholderData: (previousData) => previousData,
   });
 
 export function useCourseStudentsProgress({ id, enabled, query }: CourseStudentsProgressOptions) {

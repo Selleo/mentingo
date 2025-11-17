@@ -1,12 +1,7 @@
 import { useParams } from "@remix-run/react";
-import {
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourseStudentsProgress } from "~/api/queries/admin/useCourseStudentsProgress";
@@ -24,6 +19,7 @@ import {
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { GetCourseStudentsProgressResponse } from "~/api/generated-api";
@@ -31,7 +27,7 @@ import type { CourseStudentsProgressQueryParams } from "~/api/queries/admin/useC
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
-type CourseStundentsProgressColumn = GetCourseStudentsProgressResponse["data"][number];
+type CourseStudentsProgressColumn = GetCourseStudentsProgressResponse["data"][number];
 
 interface CourseStudentsProgressTableProps {
   lessonCount: number;
@@ -52,87 +48,106 @@ export function CourseStudentsProgressTable({
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const { data: courseStudentsProgress } = useCourseStudentsProgress({
+  const query = useMemo(() => {
+    const sort = tanstackSortingToParam(sorting) as CourseStudentsProgressQueryParams["sort"];
+    return { ...searchParams, sort };
+  }, [searchParams, sorting]);
+
+  const { data: courseStudentsProgress, isFetching } = useCourseStudentsProgress({
     id,
     enabled: isAdminLike,
-    query: searchParams,
+    query,
   });
 
-  const columns: ColumnDef<CourseStundentsProgressColumn>[] = [
-    {
-      accessorKey: "studentName",
-      header: ({ column }) => (
-        <SortButton<CourseStundentsProgressColumn> column={column}>
-          {t("adminCourseView.statistics.field.studentName")}
-        </SortButton>
-      ),
-      cell: ({ row }) => (
-        <div className="max-w-md truncate flex items-center gap-2">
-          <UserAvatar
-            className="size-7"
-            userName={row.original.studentName}
-            profilePictureUrl={row.original.studentAvatarUrl}
-          />
-          {row.original.studentName}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "groupName",
-      header: ({ column }) => (
-        <SortButton<CourseStundentsProgressColumn> column={column}>
-          {t("adminCourseView.statistics.field.groupName")}
-        </SortButton>
-      ),
-      cell: ({ row }) => (
-        <div className="text-neutral-800 font-semibold">{row.original.groupName}</div>
-      ),
-    },
-    {
-      accessorKey: "completedLessonsCount",
-      header: ({ column }) => (
-        <SortButton<CourseStundentsProgressColumn> column={column}>
-          {t("adminCourseView.statistics.field.completedLessonsCount")}
-        </SortButton>
-      ),
-      cell: ({ row }) => {
-        const progressValue = (row.original.completedLessonsCount / lessonCount) * 100;
+  const tableData = useMemo(() => {
+    return courseStudentsProgress?.data || [];
+  }, [courseStudentsProgress]);
 
-        return (
-          <div className="flex items-center gap-2">
-            <Progress
-              className="h-2 w-4/5"
-              indicatorClassName={cn({
-                "bg-success-500": progressValue === 100,
-              })}
-              value={progressValue}
+  const columns: ColumnDef<CourseStudentsProgressColumn>[] = useMemo(
+    () => [
+      {
+        accessorKey: "studentName",
+        header: ({ column }) => (
+          <SortButton<CourseStudentsProgressColumn> column={column}>
+            {t("adminCourseView.statistics.field.studentName")}
+          </SortButton>
+        ),
+        cell: ({ row }) => (
+          <div className="max-w-md truncate flex items-center gap-2">
+            <UserAvatar
+              className="size-7"
+              userName={row.original.studentName}
+              profilePictureUrl={row.original.studentAvatarUrl}
             />
-            {row.original.completedLessonsCount}/{lessonCount}
+            {row.original.studentName}
           </div>
-        );
+        ),
       },
+      {
+        accessorKey: "groupName",
+        header: ({ column }) => (
+          <SortButton<CourseStudentsProgressColumn> column={column}>
+            {t("adminCourseView.statistics.field.groupName")}
+          </SortButton>
+        ),
+        cell: ({ row }) => (
+          <div className="text-neutral-800 font-semibold">{row.original.groupName}</div>
+        ),
+      },
+      {
+        accessorKey: "completedLessonsCount",
+        header: ({ column }) => (
+          <SortButton<CourseStudentsProgressColumn> column={column}>
+            {t("adminCourseView.statistics.field.completedLessonsCount")}
+          </SortButton>
+        ),
+        cell: ({ row }) => {
+          const progressValue = (row.original.completedLessonsCount / lessonCount) * 100;
+
+          return (
+            <div className="flex items-center gap-2">
+              <Progress
+                className="h-2 w-4/5"
+                indicatorClassName={cn({
+                  "bg-success-500": progressValue === 100,
+                })}
+                value={progressValue}
+              />
+              {row.original.completedLessonsCount}/{lessonCount}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "lastActivity",
+        header: ({ column }) => (
+          <SortButton<CourseStudentsProgressColumn> column={column}>
+            {t("adminCourseView.statistics.field.lastActivity")}
+          </SortButton>
+        ),
+        cell: ({ row }) =>
+          row.original.lastActivity
+            ? format(new Date(row.original.lastActivity), "MMM dd, yyyy")
+            : null,
+      },
+    ],
+    [t, lessonCount],
+  );
+
+  const handleSortingChange = useCallback(
+    (updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
+      setSorting(updaterOrValue);
     },
-    {
-      accessorKey: "lastActivity",
-      header: ({ column }) => (
-        <SortButton<CourseStundentsProgressColumn> column={column}>
-          {t("adminCourseView.statistics.field.lastActivity")}
-        </SortButton>
-      ),
-      cell: ({ row }) =>
-        row.original.lastActivity
-          ? format(new Date(row.original.lastActivity), "MMM dd, yyyy")
-          : null,
-    },
-  ];
+    [],
+  );
 
   const table = useReactTable({
     getRowId: (row) => row.studentId,
-    data: courseStudentsProgress?.data || [],
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: handleSortingChange,
+    manualSorting: true,
     state: {
       sorting,
     },
@@ -145,7 +160,12 @@ export function CourseStudentsProgressTable({
   const { totalItems, perPage, page } = courseStudentsProgress?.pagination || {};
 
   return (
-    <div className="rounded-lg overflow-hidden border border-neutral-200">
+    <div
+      className={cn(
+        "rounded-lg overflow-hidden border border-neutral-200 relative",
+        isFetching && "shimmer-45",
+      )}
+    >
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
