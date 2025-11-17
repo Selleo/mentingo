@@ -162,7 +162,7 @@ services:
     env_file: ./apps/api/.env
     volumes:
       - ./create-minio-bucket.sh:/create-minio-bucket.sh
-    entrypoint: ["/bin/sh", "/create-minio-bucket.sh"]
+    entrypoint: [ "/bin/sh", "/create-minio-bucket.sh" ]
 
 
 
