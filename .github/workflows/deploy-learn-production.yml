@@ -2,8 +2,8 @@ name: Deploy Learn (Production)
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'staging'
 
 jobs:
   deploy_api:
