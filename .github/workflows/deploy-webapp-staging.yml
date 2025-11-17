@@ -6,8 +6,7 @@ env:
 on:
   push:
     branches:
-      - main
-      - "deploy-staging/**"
+      - "staging"
     paths:
       - apps/web/**
       - .github/workflows/deploy-webapp-staging.yml
