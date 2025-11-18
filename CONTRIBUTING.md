@@ -2,11 +2,11 @@
 
 </div>
 
-We welcome contributions to LMS Core! Please check our Contributing Guide for guidelines about how to proceed.
+We welcome contributions to Mentingo! Please check our Contributing Guide for guidelines about how to proceed.
 
 ### 📚 Naming Conventions: Branches, Commits, and Pull Requests
 
-To ensure consistency and clarity across our development workflow, we follow the naming conventions outlined below.
+To ensure consistency and clarity across our development workflow, we follow the naming conventions outlined below:
 
 ---
 

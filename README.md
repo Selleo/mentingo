@@ -321,7 +321,7 @@ lms-core
 
 </div>
 
-We welcome contributions to LMS Core! Please check our [Contributing Guide](CONTRIBUTING.md) for guidelines about how to proceed.
+We welcome contributions to Mentingo! Please check our [Contributing Guide](CONTRIBUTING.md) for guidelines about how to proceed.
 
 ---
 
