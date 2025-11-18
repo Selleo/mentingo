@@ -52,15 +52,10 @@ const PromotionCodeDetails = () => {
     });
   };
 
-  const backButton = {
-    title: t("adminPromotionCodesView.breadcrumbs.back"),
-    href: "/admin/promotion-codes",
-  };
-
   const isCouponActive = promotionCode?.active;
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs}>
       <CreatePageHeader title={t("adminPromotionCodesView.headers.update")} description="" />
       <div className="flex justify-end gap-3 pb-4">
         <Toggle

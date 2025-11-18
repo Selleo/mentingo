@@ -113,11 +113,6 @@ const CreatePromotionCode = () => {
     { title: t("adminPromotionCodesView.breadcrumbs.createNew"), href: "/admin/coupons/new" },
   ];
 
-  const backButton = {
-    title: t("adminPromotionCodesView.breadcrumbs.back"),
-    href: "/admin/promotion-codes",
-  };
-
   const onSubmit = (data: FormData) => {
     const payload = {
       code: trim(data.code),
@@ -134,7 +129,7 @@ const CreatePromotionCode = () => {
   };
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton} className="relative">
+    <PageWrapper breadcrumbs={breadcrumbs} className="relative">
       <div className="flex flex-col gap-y-6">
         <CreatePageHeader title={t("adminPromotionCodesView.headers.create")} description="" />
       </div>

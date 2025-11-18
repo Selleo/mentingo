@@ -98,13 +98,11 @@ export default function CourseViewPage() {
     { title: course.title, href: `/course/${id}` },
   ];
 
-  const backButton = { title: t("studentCourseView.breadcrumbs.back") };
-
   const { studentName, courseName, formattedDate } = certificateInfo;
 
   return (
     <CoursesAccessGuard>
-      <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+      <PageWrapper breadcrumbs={breadcrumbs}>
         <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
           <div className="flex flex-col gap-y-6 overflow-hidden">
             <CourseOverview course={course} />

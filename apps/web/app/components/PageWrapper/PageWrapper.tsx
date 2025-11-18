@@ -1,36 +1,27 @@
-import { useNavigate } from "@remix-run/react";
-
-import { Icon } from "~/components/Icon";
 import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
-import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 import type { HTMLAttributes, ReactNode } from "react";
 
 type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   breadcrumbs?: { title: string; href: string }[];
-  backButton?: BackButton;
   isBarebones?: boolean;
   children: ReactNode;
   className?: string;
 };
 
-type BackButton = { href?: string; title: string };
-
 type Breadcrumb = { title: string; href: string };
 
 type BreadcrumbsProps = {
   breadcrumbs: Breadcrumb[];
-  backButton?: BackButton;
 };
 
-export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) => {
-  const navigate = useNavigate();
+export const Breadcrumbs = ({ breadcrumbs = [] }: BreadcrumbsProps) => {
   if (!breadcrumbs.length) return null;
 
   const lastIndex = breadcrumbs.length - 1;
@@ -38,20 +29,6 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
 
   return (
     <BreadcrumbList className="mb-4">
-      {backButton && (
-        <BreadcrumbItem className="mr-3">
-          <BreadcrumbLink className="details-md cursor-pointer text-primary-800">
-            <Button
-              variant="outline"
-              onClick={() => (backButton.href ? navigate(backButton.href) : navigate(-1))}
-              className="h-min w-auto text-sm"
-            >
-              <Icon name="ChevronLeft" className="mr-2 size-3" />
-              {backButton.title}
-            </Button>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-      )}
       {breadcrumbs.slice(0, lastIndex).map(({ href, title }, index) => (
         <BreadcrumbItem key={index}>
           <BreadcrumbLink
@@ -78,7 +55,6 @@ export const Breadcrumbs = ({ breadcrumbs = [], backButton }: BreadcrumbsProps) 
 export const PageWrapper = ({
   className,
   breadcrumbs,
-  backButton,
   isBarebones,
   children,
   ...props
@@ -97,7 +73,7 @@ export const PageWrapper = ({
     <div className={classes} {...props}>
       {breadcrumbs && (
         <div className="breadcrumbs">
-          <Breadcrumbs breadcrumbs={breadcrumbs} backButton={backButton} />
+          <Breadcrumbs breadcrumbs={breadcrumbs} />
         </div>
       )}
       {children}

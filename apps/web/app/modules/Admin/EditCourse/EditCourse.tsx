@@ -72,10 +72,8 @@ const EditCourse = () => {
     { title: course?.title || "", href: `/admin/beta-courses/${id}` },
   ];
 
-  const backButton = { title: t("adminCourseView.breadcrumbs.back") };
-
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} backButton={backButton}>
+    <PageWrapper breadcrumbs={breadcrumbs}>
       <Tabs
         value={searchParams.get("tab") ?? "Curriculum"}
         className="flex h-full flex-col gap-y-4"
