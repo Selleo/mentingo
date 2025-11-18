@@ -180,9 +180,11 @@ test.describe("Course settings flow", () => {
 
       await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
 
-      await expect(page.getByRole("heading", { name: "E2E Test: Automated Course" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: COURSE_SETTINGS_UI.header.chapterTitle2 }),
+      ).toBeVisible();
 
-      await page.getByText("Introduction to E2E Testing", { exact: true }).click();
+      await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle3, { exact: true }).click();
 
       await page
         .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
@@ -214,7 +216,7 @@ test.describe("Course settings flow", () => {
           /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i,
         );
 
-        await page.getByText("Introduction to E2E Testing", { exact: true }).click();
+        await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle3, { exact: true }).click();
 
         await newPage
           .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
