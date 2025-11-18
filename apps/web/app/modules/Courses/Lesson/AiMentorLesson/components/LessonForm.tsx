@@ -70,6 +70,12 @@ export const LessonForm = ({
                 ref={ref}
                 value={input}
                 onChange={handleInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
                 placeholder={t("studentCourseView.lesson.aiMentorLesson.sendMessage")}
                 className="w-full border-none bg-transparent py-2 text-base font-normal max-w-full overflow-x-hidden resize-none max-h-48 h-auto text-gray-500 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
               />
