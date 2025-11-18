@@ -53,6 +53,7 @@ export default function CourseViewPage() {
         itemCount: course?.chapters?.length,
         content: <ChapterListOverview course={course} />,
         isForAdminLike: false,
+        isForUnregistered: true,
       },
       {
         title: t("studentCourseView.tabs.moreFromAuthor"),
@@ -63,11 +64,13 @@ export default function CourseViewPage() {
           </div>
         ),
         isForAdminLike: false,
+        isForUnregistered: false,
       },
       {
         title: t("studentCourseView.tabs.statistics"),
         content: <CourseAdminStatistics course={course} />,
         isForAdminLike: true,
+        isForUnregistered: false,
       },
     ],
     [t, course],
@@ -100,6 +103,13 @@ export default function CourseViewPage() {
 
   const { studentName, courseName, formattedDate } = certificateInfo;
 
+  const canView = (isForAdminLike: boolean, isForUnregistered: boolean) => {
+    const hideForAdmin = isForAdminLike && (isStudent || !currentUser);
+    const hideWhenUnregistered = !isForUnregistered && !currentUser;
+
+    return !(hideForAdmin || hideWhenUnregistered);
+  };
+
   return (
     <CoursesAccessGuard>
       <PageWrapper breadcrumbs={breadcrumbs}>
@@ -127,9 +137,9 @@ export default function CourseViewPage() {
             <Tabs defaultValue={courseViewTabs[0].title} className="w-full">
               <TabsList className="bg-card w-full justify-start gap-4 p-0 overflow-hidden">
                 {courseViewTabs.map((tab) => {
-                  const { title, isForAdminLike } = tab;
+                  const { title, isForAdminLike, isForUnregistered } = tab;
 
-                  if (isForAdminLike && isStudent) return null;
+                  if (!canView(isForAdminLike, isForUnregistered)) return null;
 
                   return (
                     <TabsTrigger
@@ -148,9 +158,9 @@ export default function CourseViewPage() {
                 })}
               </TabsList>
               {courseViewTabs.map((tab) => {
-                const { title, isForAdminLike, content } = tab;
+                const { title, isForAdminLike, content, isForUnregistered } = tab;
 
-                if (isForAdminLike && isStudent) return null;
+                if (!canView(isForAdminLike, isForUnregistered)) return null;
 
                 return (
                   <TabsContent
