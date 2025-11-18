@@ -6,7 +6,9 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { eq, isNull, sql } from "drizzle-orm";
+import sharp from "sharp";
 
+import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
 import { settings } from "src/storage/schema";
@@ -325,6 +327,22 @@ export class SettingsService {
     return globalSettings.platformLogoS3Key;
   }
 
+  public async getPlatformLogoBuffer(): Promise<Buffer | null> {
+    const [globalSettings] = await this.db
+      .select({
+        platformLogoS3Key: sql<string | null>`${settings.settings}->>'platformLogoS3Key'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings?.platformLogoS3Key) {
+      const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
+      return await this.fileService.getFileBuffer(defaultLogoUrl);
+    }
+
+    return await this.fileService.getFileBuffer(globalSettings.platformLogoS3Key);
+  }
+
   public async uploadPlatformSimpleLogo(
     file: Express.Multer.File | null | undefined,
   ): Promise<void> {
@@ -360,6 +378,55 @@ export class SettingsService {
     }
 
     return await this.fileService.getFileUrl(platformSimpleLogoS3Key);
+  }
+
+  public async getPlatformSimpleLogoBuffer(): Promise<Buffer | null> {
+    const [globalSettings] = await this.db
+      .select({
+        platformSimpleLogoS3Key: sql<
+          string | null
+        >`${settings.settings}->>'platformSimpleLogoS3Key'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-logo.svg`;
+
+    const buffer: Buffer | null = await this.fileService.getFileBuffer(
+      globalSettings.platformSimpleLogoS3Key || defaultLogoUrl,
+    );
+
+    if (!buffer) {
+      return null;
+    }
+
+    const imageMeta = await sharp(buffer, { density: 300 }).metadata();
+
+    const imageHeight = imageMeta.height;
+    const imageWidth = imageMeta.width;
+    const halfImageHeight = Math.round(imageHeight / 2);
+
+    const resizedBuffer = await sharp(buffer, { density: 300 })
+      .extract({
+        left: 0,
+        top: halfImageHeight - 15,
+        width: imageWidth,
+        height: halfImageHeight + 14,
+      })
+      .composite([
+        {
+          input: Buffer.from(
+            `<svg width="${imageWidth}" height="${halfImageHeight + 14}">
+          <rect width="100%" height="100%" fill="white" fill-opacity="0.4"/>
+        </svg>`,
+          ),
+          blend: "dest-in",
+        },
+      ])
+      .png()
+      .toBuffer();
+
+    return resizedBuffer;
   }
 
   public async uploadLoginBackgroundImage(
@@ -634,6 +701,39 @@ export class SettingsService {
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
     return updatedGlobalSettings;
+  }
+
+  async getEmailBorderCircleBuffer(): Promise<Buffer | null> {
+    const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-border-circle.svg`;
+
+    const borderCircleResponse = await fetch(defaultLogoUrl);
+
+    if (!borderCircleResponse.ok) {
+      return null;
+    }
+
+    const svgText = await borderCircleResponse.text();
+
+    const [globalSettings] = await this.db
+      .select({
+        primaryColor: sql<string | null>`${settings.settings}->>'primaryColor'`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    const primaryColor = globalSettings?.primaryColor || "#4596FD";
+
+    const modifiedSvg = svgText.replace(/currentColor/g, primaryColor);
+
+    const pngBuffer = await sharp(Buffer.from(modifiedSvg, "utf-8"), { density: 300 })
+      .resize(230, 119, {
+        fit: "contain",
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+
+    return pngBuffer;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {

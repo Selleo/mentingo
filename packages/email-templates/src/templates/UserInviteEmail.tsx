@@ -1,22 +1,27 @@
-import { Button, Html, Text } from "@react-email/components";
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type UserInviteProps = {
-  name: string;
+  invitedByUserName: string;
   createPasswordLink: string;
-};
+} & DefaultEmailSettings;
 
-export const UserInviteEmail = ({ name, createPasswordLink }: UserInviteProps) => {
-  return (
-    <Html>
-      <Text>Witaj {name},</Text>
-      <Text>
-        Zostałeś zaproszony do naszej platformy.
-        <br />
-        Kliknij, aby aktywować konto. 🔗
-      </Text>
-      <Button href={createPasswordLink}>Aktywuj konto</Button>
-    </Html>
-  );
+export const UserInviteEmail = ({
+  invitedByUserName,
+  createPasswordLink,
+  primaryColor = "#4796FD",
+}: UserInviteProps) => {
+  return BaseEmailTemplate({
+    heading: "You're invited",
+    paragraphs: [
+      "Hello there 👋",
+      `You've been invited to the e-learning platform by ${invitedByUserName}. Click the button below to start improving your skills.`,
+    ],
+    buttonText: "JOIN NOW",
+    buttonLink: createPasswordLink,
+    primaryColor,
+  });
 };
 
 export default UserInviteEmail;

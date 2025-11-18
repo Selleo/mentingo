@@ -1,19 +1,27 @@
-import { Button, Html, Text } from "@react-email/components";
+import { BaseEmailTemplate } from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type UserLongInactivityProps = {
-  name: string;
+  courseName: string;
   courseLink: string;
-};
+} & DefaultEmailSettings;
 
-export const UserLongInactivityEmail = ({ name, courseLink }: UserLongInactivityProps) => {
-  return (
-    <Html>
-      <Text>
-        {name}, Twój <Button href={courseLink}>kurs</Button> nadal czeka! Nie pozwól, by postęp się
-        zatrzymał.
-      </Text>
-    </Html>
-  );
+export const UserLongInactivityEmail = ({
+  courseName,
+  courseLink,
+  primaryColor = "#4796FD",
+}: UserLongInactivityProps) => {
+  return BaseEmailTemplate({
+    heading: "Time to resume your course",
+    paragraphs: [
+      "Continue learning 📚",
+      `It’s been 30 days since your last activity in ${courseName}. Resuming now will help you finish on time.`,
+    ],
+    buttonText: "RESUME COURSE",
+    buttonLink: courseLink,
+    primaryColor,
+  });
 };
 
 export default UserLongInactivityEmail;

@@ -1,25 +1,27 @@
-import { Button, Html, Text } from "@react-email/components";
+import { BaseEmailTemplate } from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type UserFinishedCourseProps = {
-  name: string;
   courseName: string;
   certificateDownloadLink: string;
-};
+} & DefaultEmailSettings;
 
 export const UserFinishedCourseEmail = ({
-  name,
   courseName,
   certificateDownloadLink,
+  primaryColor = "#4796FD",
 }: UserFinishedCourseProps) => {
-  return (
-    <Html>
-      <Text>Brawo {name}!</Text>
-      <Text>
-        Ukończyłeś kurs {courseName}. <Button href={certificateDownloadLink}>Pobierz</Button>{" "}
-        certyfikat!
-      </Text>
-    </Html>
-  );
+  return BaseEmailTemplate({
+    heading: "Course completed",
+    paragraphs: [
+      "Congratulations! 🏁",
+      `You’ve completed ${courseName}. Your certificate is ready to download; check the recommended next steps.`,
+    ],
+    buttonText: "DOWNLOAD CERTIFICATE",
+    buttonLink: certificateDownloadLink,
+    primaryColor,
+  });
 };
 
 export default UserFinishedCourseEmail;

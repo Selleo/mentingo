@@ -393,7 +393,7 @@ export class UserService {
     }
   }
 
-  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg) {
+  public async createUser(data: CreateUserBody, currentUserId?: UUIDType, dbInstance?: DatabasePg) {
     const db = dbInstance ?? this.db;
 
     const [existingUser] = await db.select().from(users).where(eq(users.email, data.email));
@@ -418,13 +418,20 @@ export class UserService {
         reminderCount: 0,
       });
 
-      const userInviteDetails: UserInvite = {
-        name: createdUser.firstName,
-        email: createdUser.email,
-        token,
-      };
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
 
-      this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+      if (currentUserId) {
+        const [createdByUser] = await db.select().from(users).where(eq(users.id, currentUserId));
+
+        const userInviteDetails: UserInvite = {
+          createdByUserName: createdByUser.firstName + " " + createdByUser.lastName,
+          email: createdUser.email,
+          token,
+          ...defaultEmailSettings,
+        };
+
+        this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+      }
 
       if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
         await trx
@@ -494,7 +501,7 @@ export class UserService {
     return adminsWithSettings;
   }
 
-  async importUsers(usersDataFile: Express.Multer.File) {
+  async importUsers(usersDataFile: Express.Multer.File, currentUserId: UUIDType) {
     const importStats: ImportUserResponse = {
       importedUsersAmount: 0,
       skippedUsersAmount: 0,
@@ -525,7 +532,7 @@ export class UserService {
       await this.db.transaction(async (trx) => {
         const { groupName, ...userInfo } = userData;
 
-        const createdUser = await this.createUser({ ...userInfo }, trx);
+        const createdUser = await this.createUser({ ...userInfo }, currentUserId, trx);
         await this.settingsService.createSettingsIfNotExists(
           createdUser.id,
           createdUser.role as UserRole,

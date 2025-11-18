@@ -147,303 +147,6 @@ export interface MFAVerifyResponse {
   };
 }
 
-export interface GetUserStatisticsResponse {
-  data: {
-    averageStats: {
-      lessonStats: {
-        started: number;
-        completed: number;
-        completionRate: number;
-      };
-      courseStats: {
-        started: number;
-        completed: number;
-        completionRate: number;
-      };
-    };
-    quizzes: {
-      totalAttempts: number;
-      totalCorrectAnswers: number;
-      totalWrongAnswers: number;
-      totalQuestions: number;
-      averageScore: number;
-      uniqueQuizzesTaken: number;
-    };
-    courses: object;
-    lessons: object;
-    streak: {
-      current: number;
-      longest: number;
-      activityHistory: object;
-    };
-    nextLesson: {
-      /** @format uuid */
-      courseId: string;
-      courseTitle: string;
-      courseDescription: string;
-      courseThumbnail: string;
-      /** @format uuid */
-      lessonId: string;
-      chapterTitle: string;
-      chapterProgress: "not_started" | "in_progress" | "completed" | "blocked";
-      completedLessonCount: number;
-      lessonCount: number;
-      chapterDisplayOrder: number;
-    } | null;
-  };
-}
-
-export interface GetStatsResponse {
-  data: {
-    fiveMostPopularCourses: {
-      courseName: string;
-      studentCount: number;
-    }[];
-    totalCoursesCompletionStats: {
-      completionPercentage: number;
-      totalCoursesCompletion: number;
-      totalCourses: number;
-    };
-    conversionAfterFreemiumLesson: {
-      conversionPercentage: number;
-      purchasedCourses: number;
-      remainedOnFreemium: number;
-    };
-    courseStudentsStats: object;
-    avgQuizScore: {
-      correctAnswerCount: number;
-      wrongAnswerCount: number;
-      answerCount: number;
-    };
-  };
-}
-
-export interface FileUploadResponse {
-  fileKey: string;
-  fileUrl: string;
-}
-
-export interface GetUsersResponse {
-  data: ({
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    archived: boolean;
-    profilePictureUrl: string | null;
-  } & {
-    groupId: string | null;
-    groupName: string | null;
-  })[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface GetUserByIdResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    archived: boolean;
-    profilePictureUrl: string | null;
-    groupId: string | null;
-    groupName: string | null;
-  };
-}
-
-export interface GetUserDetailsResponse {
-  data: {
-    firstName: string | null;
-    lastName: string | null;
-    /** @format uuid */
-    id: string;
-    description: string | null;
-    contactEmail: string | null;
-    contactPhone: string | null;
-    jobTitle: string | null;
-    role: "admin" | "student" | "content_creator";
-    profilePictureUrl: string | null;
-  };
-}
-
-export interface UpdateUserBody {
-  firstName?: string;
-  lastName?: string;
-  groupId?: string | null;
-  /** @format email */
-  email?: string;
-  role?: "admin" | "student" | "content_creator";
-  archived?: boolean;
-}
-
-export interface UpdateUserResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    archived: boolean;
-    profilePictureUrl: string | null;
-  };
-}
-
-export interface UpsertUserDetailsBody {
-  description?: string;
-  /** @format email */
-  contactEmail?: string;
-  contactPhoneNumber?: string;
-  jobTitle?: string;
-}
-
-export interface UpsertUserDetailsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    message: string;
-  };
-}
-
-export interface AdminUpdateUserBody {
-  firstName?: string;
-  lastName?: string;
-  groupId?: string | null;
-  /** @format email */
-  email?: string;
-  role?: "admin" | "student" | "content_creator";
-  archived?: boolean;
-}
-
-export interface AdminUpdateUserResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    archived: boolean;
-    profilePictureUrl: string | null;
-  };
-}
-
-export interface ChangePasswordBody {
-  newPassword: string;
-  /**
-   * @minLength 8
-   * @maxLength 64
-   */
-  oldPassword: string;
-}
-
-export type ChangePasswordResponse = null;
-
-export type DeleteUserResponse = null;
-
-export interface DeleteBulkUsersBody {
-  userIds: string[];
-}
-
-export type DeleteBulkUsersResponse = null;
-
-export interface BulkAssignUsersToGroupBody {
-  userIds: string[];
-  /** @format uuid */
-  groupId: string;
-}
-
-export interface ArchiveBulkUsersBody {
-  userIds: string[];
-}
-
-export interface ArchiveBulkUsersResponse {
-  data: {
-    archivedUsersCount: number;
-    usersAlreadyArchivedCount: number;
-  };
-}
-
-export interface CreateUserBody {
-  /** @format email */
-  email: string;
-  /**
-   * @minLength 1
-   * @maxLength 64
-   */
-  firstName: string;
-  /**
-   * @minLength 1
-   * @maxLength 64
-   */
-  lastName: string;
-  role: "admin" | "student" | "content_creator";
-}
-
-export interface CreateUserResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    message: string;
-  };
-}
-
-export interface ImportUsersResponse {
-  data: {
-    importedUsersAmount: number;
-    skippedUsersAmount: number;
-    importedUsersList: string[];
-    skippedUsersList: {
-      /** @format email */
-      email: string;
-      reason: string;
-    }[];
-  };
-}
-
-export interface ResetOnboardingStatusResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
-    dashboard: boolean;
-    courses: boolean;
-    announcements: boolean;
-    profile: boolean;
-    settings: boolean;
-    providerInformation: boolean;
-  };
-}
-
-export interface MarkOnboardingCompleteResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    userId: string;
-    dashboard: boolean;
-    courses: boolean;
-    announcements: boolean;
-    profile: boolean;
-    settings: boolean;
-    providerInformation: boolean;
-  };
-}
-
 export interface GetPublicGlobalSettingsResponse {
   data: {
     unregisteredUserCoursesAccessibility: boolean;
@@ -717,6 +420,303 @@ export interface UpdateMFAEnforcedRolesBody {
 
 export interface UpdateDefaultCourseCurrencyBody {
   defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+}
+
+export interface FileUploadResponse {
+  fileKey: string;
+  fileUrl: string;
+}
+
+export interface GetUserStatisticsResponse {
+  data: {
+    averageStats: {
+      lessonStats: {
+        started: number;
+        completed: number;
+        completionRate: number;
+      };
+      courseStats: {
+        started: number;
+        completed: number;
+        completionRate: number;
+      };
+    };
+    quizzes: {
+      totalAttempts: number;
+      totalCorrectAnswers: number;
+      totalWrongAnswers: number;
+      totalQuestions: number;
+      averageScore: number;
+      uniqueQuizzesTaken: number;
+    };
+    courses: object;
+    lessons: object;
+    streak: {
+      current: number;
+      longest: number;
+      activityHistory: object;
+    };
+    nextLesson: {
+      /** @format uuid */
+      courseId: string;
+      courseTitle: string;
+      courseDescription: string;
+      courseThumbnail: string;
+      /** @format uuid */
+      lessonId: string;
+      chapterTitle: string;
+      chapterProgress: "not_started" | "in_progress" | "completed" | "blocked";
+      completedLessonCount: number;
+      lessonCount: number;
+      chapterDisplayOrder: number;
+    } | null;
+  };
+}
+
+export interface GetStatsResponse {
+  data: {
+    fiveMostPopularCourses: {
+      courseName: string;
+      studentCount: number;
+    }[];
+    totalCoursesCompletionStats: {
+      completionPercentage: number;
+      totalCoursesCompletion: number;
+      totalCourses: number;
+    };
+    conversionAfterFreemiumLesson: {
+      conversionPercentage: number;
+      purchasedCourses: number;
+      remainedOnFreemium: number;
+    };
+    courseStudentsStats: object;
+    avgQuizScore: {
+      correctAnswerCount: number;
+      wrongAnswerCount: number;
+      answerCount: number;
+    };
+  };
+}
+
+export interface GetUsersResponse {
+  data: ({
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    archived: boolean;
+    profilePictureUrl: string | null;
+  } & {
+    groupId: string | null;
+    groupName: string | null;
+  })[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetUserByIdResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    archived: boolean;
+    profilePictureUrl: string | null;
+    groupId: string | null;
+    groupName: string | null;
+  };
+}
+
+export interface GetUserDetailsResponse {
+  data: {
+    firstName: string | null;
+    lastName: string | null;
+    /** @format uuid */
+    id: string;
+    description: string | null;
+    contactEmail: string | null;
+    contactPhone: string | null;
+    jobTitle: string | null;
+    role: "admin" | "student" | "content_creator";
+    profilePictureUrl: string | null;
+  };
+}
+
+export interface UpdateUserBody {
+  firstName?: string;
+  lastName?: string;
+  groupId?: string | null;
+  /** @format email */
+  email?: string;
+  role?: "admin" | "student" | "content_creator";
+  archived?: boolean;
+}
+
+export interface UpdateUserResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    archived: boolean;
+    profilePictureUrl: string | null;
+  };
+}
+
+export interface UpsertUserDetailsBody {
+  description?: string;
+  /** @format email */
+  contactEmail?: string;
+  contactPhoneNumber?: string;
+  jobTitle?: string;
+}
+
+export interface UpsertUserDetailsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export interface AdminUpdateUserBody {
+  firstName?: string;
+  lastName?: string;
+  groupId?: string | null;
+  /** @format email */
+  email?: string;
+  role?: "admin" | "student" | "content_creator";
+  archived?: boolean;
+}
+
+export interface AdminUpdateUserResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    archived: boolean;
+    profilePictureUrl: string | null;
+  };
+}
+
+export interface ChangePasswordBody {
+  newPassword: string;
+  /**
+   * @minLength 8
+   * @maxLength 64
+   */
+  oldPassword: string;
+}
+
+export type ChangePasswordResponse = null;
+
+export type DeleteUserResponse = null;
+
+export interface DeleteBulkUsersBody {
+  userIds: string[];
+}
+
+export type DeleteBulkUsersResponse = null;
+
+export interface BulkAssignUsersToGroupBody {
+  userIds: string[];
+  /** @format uuid */
+  groupId: string;
+}
+
+export interface ArchiveBulkUsersBody {
+  userIds: string[];
+}
+
+export interface ArchiveBulkUsersResponse {
+  data: {
+    archivedUsersCount: number;
+    usersAlreadyArchivedCount: number;
+  };
+}
+
+export interface CreateUserBody {
+  /** @format email */
+  email: string;
+  /**
+   * @minLength 1
+   * @maxLength 64
+   */
+  firstName: string;
+  /**
+   * @minLength 1
+   * @maxLength 64
+   */
+  lastName: string;
+  role: "admin" | "student" | "content_creator";
+}
+
+export interface CreateUserResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export interface ImportUsersResponse {
+  data: {
+    importedUsersAmount: number;
+    skippedUsersAmount: number;
+    importedUsersList: string[];
+    skippedUsersList: {
+      /** @format email */
+      email: string;
+      reason: string;
+    }[];
+  };
+}
+
+export interface ResetOnboardingStatusResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    dashboard: boolean;
+    courses: boolean;
+    announcements: boolean;
+    profile: boolean;
+    settings: boolean;
+    providerInformation: boolean;
+  };
+}
+
+export interface MarkOnboardingCompleteResponse {
+  data: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    dashboard: boolean;
+    courses: boolean;
+    announcements: boolean;
+    profile: boolean;
+    settings: boolean;
+    providerInformation: boolean;
+  };
 }
 
 export interface GetAllCategoriesResponse {
@@ -2954,12 +2954,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name StatisticsControllerGetUserStatistics
-     * @request GET:/api/statistics/user-stats
+     * @name SettingsControllerGetPublicGlobalSettings
+     * @request GET:/api/settings/global
      */
-    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
-      this.request<GetUserStatisticsResponse, any>({
-        path: `/api/statistics/user-stats`,
+    settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
+      this.request<GetPublicGlobalSettingsResponse, any>({
+        path: `/api/settings/global`,
         method: "GET",
         format: "json",
         ...params,
@@ -2968,14 +2968,329 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name StatisticsControllerGetStats
-     * @request GET:/api/statistics/stats
+     * @name SettingsControllerGetUserSettings
+     * @request GET:/api/settings
      */
-    statisticsControllerGetStats: (params: RequestParams = {}) =>
-      this.request<GetStatsResponse, any>({
-        path: `/api/statistics/stats`,
+    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
+      this.request<GetUserSettingsResponse, any>({
+        path: `/api/settings`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUserSettings
+     * @request PUT:/api/settings
+     */
+    settingsControllerUpdateUserSettings: (
+      data: UpdateUserSettingsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserSettingsResponse, any>({
+        path: `/api/settings`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminNewUserNotification
+     * @request PATCH:/api/settings/admin/new-user-notification
+     */
+    settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminNewUserNotificationResponse, any>({
+        path: `/api/settings/admin/new-user-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
+     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
+     */
+    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
+      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
+        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateEnforceSso
+     * @request PATCH:/api/settings/admin/enforce-sso
+     */
+    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
+      this.request<UpdateEnforceSSOResponse, any>({
+        path: `/api/settings/admin/enforce-sso`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminFinishedCourseNotification
+     * @request PATCH:/api/settings/admin/finished-course-notification
+     */
+    settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
+        path: `/api/settings/admin/finished-course-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateColorSchema
+     * @request PATCH:/api/settings/admin/color-schema
+     */
+    settingsControllerUpdateColorSchema: (
+      data: UpdateColorSchemaBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateColorSchemaResponse, any>({
+        path: `/api/settings/admin/color-schema`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPlatformLogo
+     * @request GET:/api/settings/platform-logo
+     */
+    settingsControllerGetPlatformLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformLogoResponse, any>({
+        path: `/api/settings/platform-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformLogo
+     * @request PATCH:/api/settings/platform-logo
+     */
+    settingsControllerUpdatePlatformLogo: (
+      data: {
+        /** @format binary */
+        logo?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPlatformSimpleLogo
+     * @request GET:/api/settings/platform-simple-logo
+     */
+    settingsControllerGetPlatformSimpleLogo: (params: RequestParams = {}) =>
+      this.request<GetPlatformSimpleLogoResponse, any>({
+        path: `/api/settings/platform-simple-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdatePlatformSimpleLogo
+     * @request PATCH:/api/settings/platform-simple-logo
+     */
+    settingsControllerUpdatePlatformSimpleLogo: (
+      data: {
+        /** @format binary */
+        logo?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/platform-simple-logo`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetLoginBackground
+     * @request GET:/api/settings/login-background
+     */
+    settingsControllerGetLoginBackground: (params: RequestParams = {}) =>
+      this.request<GetLoginBackgroundResponse, any>({
+        path: `/api/settings/login-background`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLoginBackground
+     * @request PATCH:/api/settings/login-background
+     */
+    settingsControllerUpdateLoginBackground: (
+      data: {
+        /** @format binary */
+        "login-background"?: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/login-background`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetCompanyInformation
+     * @request GET:/api/settings/company-information
+     */
+    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
+      this.request<GetCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCompanyInformation
+     * @request PATCH:/api/settings/company-information
+     */
+    settingsControllerUpdateCompanyInformation: (
+      data: UpdateCompanyInformationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCompanyInformationResponse, any>({
+        path: `/api/settings/company-information`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateMfaEnforcedRoles
+     * @request PATCH:/api/settings/admin/mfa-enforced-roles
+     */
+    settingsControllerUpdateMfaEnforcedRoles: (
+      data: UpdateMFAEnforcedRolesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/mfa-enforced-roles`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateCertificateBackground
+     * @request PATCH:/api/settings/certificate-background
+     */
+    settingsControllerUpdateCertificateBackground: (
+      data: {
+        /** @format binary */
+        "certificate-background"?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/certificate-background`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateDefaultCourseCurrency
+     * @request PATCH:/api/settings/admin/default-course-currency
+     */
+    settingsControllerUpdateDefaultCourseCurrency: (
+      data: UpdateDefaultCourseCurrencyBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/default-course-currency`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateInviteOnlyRegistration
+     * @request PATCH:/api/settings/admin/invite-only-registration
+     */
+    settingsControllerUpdateInviteOnlyRegistration: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/invite-only-registration`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateUserEmailTriggers
+     * @request PATCH:/api/settings/admin/user-email-triggers/{triggerKey}
+     */
+    settingsControllerUpdateUserEmailTriggers: (triggerKey: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/user-email-triggers/${triggerKey}`,
+        method: "PATCH",
         ...params,
       }),
 
@@ -3020,6 +3335,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/file`,
         method: "DELETE",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetUserStatistics
+     * @request GET:/api/statistics/user-stats
+     */
+    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
+      this.request<GetUserStatisticsResponse, any>({
+        path: `/api/statistics/user-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetStats
+     * @request GET:/api/statistics/stats
+     */
+    statisticsControllerGetStats: (params: RequestParams = {}) =>
+      this.request<GetStatsResponse, any>({
+        path: `/api/statistics/stats`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -3408,349 +3751,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/user/onboarding-status/${page}`,
         method: "PATCH",
         format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetPublicGlobalSettings
-     * @request GET:/api/settings/global
-     */
-    settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
-      this.request<GetPublicGlobalSettingsResponse, any>({
-        path: `/api/settings/global`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetUserSettings
-     * @request GET:/api/settings
-     */
-    settingsControllerGetUserSettings: (params: RequestParams = {}) =>
-      this.request<GetUserSettingsResponse, any>({
-        path: `/api/settings`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateUserSettings
-     * @request PUT:/api/settings
-     */
-    settingsControllerUpdateUserSettings: (
-      data: UpdateUserSettingsBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateUserSettingsResponse, any>({
-        path: `/api/settings`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateAdminNewUserNotification
-     * @request PATCH:/api/settings/admin/new-user-notification
-     */
-    settingsControllerUpdateAdminNewUserNotification: (params: RequestParams = {}) =>
-      this.request<UpdateAdminNewUserNotificationResponse, any>({
-        path: `/api/settings/admin/new-user-notification`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateUnregisteredUserCoursesAccessibility
-     * @request PATCH:/api/settings/admin/unregistered-user-courses-accessibility
-     */
-    settingsControllerUpdateUnregisteredUserCoursesAccessibility: (params: RequestParams = {}) =>
-      this.request<UpdateUnregisteredUserCoursesAccessibilityResponse, any>({
-        path: `/api/settings/admin/unregistered-user-courses-accessibility`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateEnforceSso
-     * @request PATCH:/api/settings/admin/enforce-sso
-     */
-    settingsControllerUpdateEnforceSso: (params: RequestParams = {}) =>
-      this.request<UpdateEnforceSSOResponse, any>({
-        path: `/api/settings/admin/enforce-sso`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateAdminFinishedCourseNotification
-     * @request PATCH:/api/settings/admin/finished-course-notification
-     */
-    settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
-      this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
-        path: `/api/settings/admin/finished-course-notification`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateColorSchema
-     * @request PATCH:/api/settings/admin/color-schema
-     */
-    settingsControllerUpdateColorSchema: (
-      data: UpdateColorSchemaBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateColorSchemaResponse, any>({
-        path: `/api/settings/admin/color-schema`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetPlatformLogo
-     * @request GET:/api/settings/platform-logo
-     */
-    settingsControllerGetPlatformLogo: (params: RequestParams = {}) =>
-      this.request<GetPlatformLogoResponse, any>({
-        path: `/api/settings/platform-logo`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdatePlatformLogo
-     * @request PATCH:/api/settings/platform-logo
-     */
-    settingsControllerUpdatePlatformLogo: (
-      data: {
-        /** @format binary */
-        logo?: File | null;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/platform-logo`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetPlatformSimpleLogo
-     * @request GET:/api/settings/platform-simple-logo
-     */
-    settingsControllerGetPlatformSimpleLogo: (params: RequestParams = {}) =>
-      this.request<GetPlatformSimpleLogoResponse, any>({
-        path: `/api/settings/platform-simple-logo`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdatePlatformSimpleLogo
-     * @request PATCH:/api/settings/platform-simple-logo
-     */
-    settingsControllerUpdatePlatformSimpleLogo: (
-      data: {
-        /** @format binary */
-        logo?: File | null;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/platform-simple-logo`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetLoginBackground
-     * @request GET:/api/settings/login-background
-     */
-    settingsControllerGetLoginBackground: (params: RequestParams = {}) =>
-      this.request<GetLoginBackgroundResponse, any>({
-        path: `/api/settings/login-background`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateLoginBackground
-     * @request PATCH:/api/settings/login-background
-     */
-    settingsControllerUpdateLoginBackground: (
-      data: {
-        /** @format binary */
-        "login-background"?: File | null;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/login-background`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerGetCompanyInformation
-     * @request GET:/api/settings/company-information
-     */
-    settingsControllerGetCompanyInformation: (params: RequestParams = {}) =>
-      this.request<GetCompanyInformationResponse, any>({
-        path: `/api/settings/company-information`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateCompanyInformation
-     * @request PATCH:/api/settings/company-information
-     */
-    settingsControllerUpdateCompanyInformation: (
-      data: UpdateCompanyInformationBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateCompanyInformationResponse, any>({
-        path: `/api/settings/company-information`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateMfaEnforcedRoles
-     * @request PATCH:/api/settings/admin/mfa-enforced-roles
-     */
-    settingsControllerUpdateMfaEnforcedRoles: (
-      data: UpdateMFAEnforcedRolesBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/admin/mfa-enforced-roles`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateCertificateBackground
-     * @request PATCH:/api/settings/certificate-background
-     */
-    settingsControllerUpdateCertificateBackground: (
-      data: {
-        /** @format binary */
-        "certificate-background"?: File;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/certificate-background`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateDefaultCourseCurrency
-     * @request PATCH:/api/settings/admin/default-course-currency
-     */
-    settingsControllerUpdateDefaultCourseCurrency: (
-      data: UpdateDefaultCourseCurrencyBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/settings/admin/default-course-currency`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateInviteOnlyRegistration
-     * @request PATCH:/api/settings/admin/invite-only-registration
-     */
-    settingsControllerUpdateInviteOnlyRegistration: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/settings/admin/invite-only-registration`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name SettingsControllerUpdateUserEmailTriggers
-     * @request PATCH:/api/settings/admin/user-email-triggers/{triggerKey}
-     */
-    settingsControllerUpdateUserEmailTriggers: (triggerKey: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/settings/admin/user-email-triggers/${triggerKey}`,
-        method: "PATCH",
         ...params,
       }),
 

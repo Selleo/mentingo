@@ -88,6 +88,17 @@ export class S3Service {
     return response.Body?.transformToString() || "";
   }
 
+  async getFileBuffer(key: string): Promise<Buffer> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    const response = await this.s3Client.send(command);
+    const bytes = await response.Body?.transformToByteArray();
+    return Buffer.from(bytes || []);
+  }
+
   async uploadFile(fileBuffer: Buffer, key: string, contentType: string): Promise<void> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
