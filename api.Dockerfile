@@ -9,6 +9,7 @@ COPY . .
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 RUN pnpm --filter="@repo/shared" run build
+RUN pnpm --filter="@repo/prompts" run build
 RUN pnpm build --filter=api
 # TODO: Move pnpm deploy to turbo prune workflow
 RUN pnpm deploy --filter=api pnpm-deploy-output --prod

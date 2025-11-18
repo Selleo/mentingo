@@ -80,7 +80,7 @@ echo -e "  ${GREEN}✓${NC} All required tools are available"
 echo ""
 
 # Version verification
-echo -e "${GREEN}[1/9]${NC} Verifying tool versions..."
+echo -e "${GREEN}[1/10]${NC} Verifying tool versions..."
 
 # Read required versions from .tool-versions
 REQUIRED_NODE_VERSION=$(grep "nodejs" .tool-versions | awk '{print $2}')
@@ -118,7 +118,7 @@ echo -e "  ${GREEN}✓${NC} pnpm version: $CURRENT_PNPM_VERSION"
 echo ""
 
 # Configure Caddy
-echo -e "${GREEN}[2/9]${NC} Configuring Caddy (first-time setup)..."
+echo -e "${GREEN}[2/10]${NC} Configuring Caddy (first-time setup)..."
 
 # Detect platform and set data directory
 if [ "$IS_MACOS" = true ]; then
@@ -229,21 +229,27 @@ fi
 echo ""
 
 #  Install dependencies
-echo -e "${GREEN}[3/9]${NC} Installing dependencies with pnpm..."
+echo -e "${GREEN}[3/10]${NC} Installing dependencies with pnpm..."
 if ! pnpm install --prefer-offline > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to install dependencies${NC}"
     exit 1
 fi
 
 #  Build shared package
-echo -e "${GREEN}[4/9]${NC} Building shared package..."
+echo -e "${GREEN}[4/10]${NC} Building shared package..."
 if ! pnpm --filter="@repo/shared" run build > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to build shared package${NC}"
     exit 1
 fi
 
+echo -e "${GREEN}[5/10]${NC} Building prompt templates..."
+if ! pnpm run --filter=@repo/prompts build > /dev/null 2>&1; then
+    echo -e "${RED}✗ Failed to build prompt templates${NC}"
+    exit 1
+fi
+
 #  Set up environment files
-echo -e "${GREEN}[5/9]${NC} Setting up environment files..."
+echo -e "${GREEN}[6/10]${NC} Setting up environment files..."
 
 # API .env
 
@@ -268,7 +274,7 @@ cp apps/web/.env.example apps/web/.env
 
 
 #  Start Docker containers
-echo -e "${GREEN}[6/9]${NC} Starting Docker containers..."
+echo -e "${GREEN}[7/10]${NC} Starting Docker containers..."
 
 # Stop only this project's containers
 echo "  → Stopping pre-existing project containers..."
@@ -305,21 +311,21 @@ if [ "$DB_READY" = false ]; then
 fi
 
 #  Run database migrations
-echo -e "${GREEN}[7/9]${NC} Running database migrations..."
+echo -e "${GREEN}[8/10]${NC} Running database migrations..."
 if ! pnpm db:migrate > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to run database migrations${NC}"
     exit 1
 fi
 
 #  Seed the database
-echo -e "${GREEN}[8/9]${NC} Seeding the database..."
+echo -e "${GREEN}[9/10]${NC} Seeding the database..."
 if ! pnpm --filter=api run db:seed-prod > /dev/null 2>&1; then
     echo -e "${RED}✗ Failed to seed database${NC}"
     exit 1
 fi
 
 #  Verify setup
-echo -e "${GREEN}[9/9]${NC} Verifying setup..."
+echo -e "${GREEN}[10/10]${NC} Verifying setup..."
 
 # Check if critical services are running
 CRITICAL_SERVICES=("project-db" "redis" "minio")

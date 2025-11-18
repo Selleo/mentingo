@@ -1,0 +1,26 @@
+{
+  "name": "@repo/prompts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "ts-node src/generation/generate-prompts.ts && tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@sinclair/typebox": "0.32.34"
+  },
+  "devDependencies": {
+    "@sinclair/typebox": "0.32.34",
+    "@types/node": "^24.10.0",
+    "ts-node": "10.9.1",
+    "typescript": "^5.4.5",
+    "yaml": "2.4.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
