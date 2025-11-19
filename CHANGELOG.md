@@ -1,6 +1,54 @@
+<a name="v3.21.0"></a>
+
+## [v3.21.0] - 18.11.2025
+
+### Features:
+
+- add prompt management to tailor AI mentor's conversations to various needs ([#897](https://github.com/Selleo/mentingo/issues/897))
+
+- improve selecting range of records in a table by holding shift button ([#913](https://github.com/Selleo/mentingo/issues/913))
+
+- added emoji picker in ai mentor ([#912](https://github.com/Selleo/mentingo/issues/912))
+
+- added evaluators and scores to langfuse ([#866](https://github.com/Selleo/mentingo/issues/866))
+
+- enhance range of email notification triggers ([#822](https://github.com/Selleo/mentingo/issues/822))
+
+- create script for easier local setup ([#917](https://github.com/Selleo/mentingo/issues/917))
+
+### Bug Fixes:
+
+- Tabs hidden from unregistered user ([#927](https://github.com/Selleo/mentingo/issues/927))
+
+- added missing compose file ([#959](https://github.com/Selleo/mentingo/issues/959))
+
+- broken sending message to AI mentor with return key ([#945](https://github.com/Selleo/mentingo/issues/945))
+
+- simplify navigation by removing back button ([#946](https://github.com/Selleo/mentingo/issues/946))
+
+- release command to work as it should ([#947](https://github.com/Selleo/mentingo/issues/947))
+
+- improve platform quality by fixing E2E test configuration ([#949](https://github.com/Selleo/mentingo/issues/949))
+
+- users unable to skip onboarding ([#885](https://github.com/Selleo/mentingo/issues/885))
+
+- sorting in course statistics shows incorrect results ([#881](https://github.com/Selleo/mentingo/issues/881))
+
+- incorrect display of course description in continue learning section ([#892](https://github.com/Selleo/mentingo/issues/892))
+
+### Chores:
+
+- added datasets for ai mentor ([#905](https://github.com/Selleo/mentingo/issues/905))
+
+- adjust deployment process to include staging step
+
+### Code Refactoring:
+
+- make Stripe an optional service ([#872](https://github.com/Selleo/mentingo/issues/872))
+
 <a name="v3.20.0"></a>
 
-## [v3.20.0] - 09.11.2025
+## [v3.20.0] - 12.11.2025
 
 ### Features:
 
@@ -39,6 +87,10 @@
 - made ai mentor input resize based on content ([#895](https://github.com/Selleo/mentingo/issues/895))
 
 - removed certificate options and made preview on click ([#890](https://github.com/Selleo/mentingo/issues/890))
+
+### Documentation:
+
+- update changelog for version v3.20.0
 
 <a name="v3.19.1"></a>
 
@@ -1930,7 +1982,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.20.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.21.0...HEAD
+[v3.21.0]: https://github.com/Selleo/mentingo/compare/v3.20.0...v3.21.0
 [v3.20.0]: https://github.com/Selleo/mentingo/compare/v3.19.1...v3.20.0
 [v3.19.1]: https://github.com/Selleo/mentingo/compare/v3.19.0...v3.19.1
 [v3.19.0]: https://github.com/Selleo/mentingo/compare/v3.18.0...v3.19.0
