@@ -705,14 +705,19 @@ export class SettingsService {
 
   async getEmailBorderCircleBuffer(): Promise<Buffer | null> {
     const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-border-circle.svg`;
+    let svgText: string | null = null;
 
-    const borderCircleResponse = await fetch(defaultLogoUrl);
+    try {
+      const borderCircleResponse = await fetch(defaultLogoUrl);
 
-    if (!borderCircleResponse.ok) {
+      if (!borderCircleResponse.ok) {
+        throw new Error(`Unexpected status ${borderCircleResponse.status}`);
+      }
+
+      svgText = await borderCircleResponse.text();
+    } catch (error) {
       return null;
     }
-
-    const svgText = await borderCircleResponse.text();
 
     const [globalSettings] = await this.db
       .select({

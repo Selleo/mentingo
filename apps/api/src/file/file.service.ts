@@ -43,13 +43,23 @@ export class FileService {
   async getFileBuffer(fileKey: string): Promise<Buffer | null> {
     if (!fileKey) return null;
 
-    if (fileKey.startsWith("https://") || fileKey.startsWith("http://")) {
-      const response = await fetch(fileKey);
-      const arrayBuffer = await response.arrayBuffer();
-      return sharp(Buffer.from(arrayBuffer), { density: 300 }).toBuffer();
-    }
+    try {
+      if (fileKey.startsWith("https://") || fileKey.startsWith("http://")) {
+        const response = await fetch(fileKey);
 
-    return await sharp(await this.s3Service.getFileBuffer(fileKey), { density: 300 }).toBuffer();
+        if (!response.ok) {
+          throw new Error(`Failed to download remote file: ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        return sharp(Buffer.from(arrayBuffer), { density: 300 }).toBuffer();
+      }
+
+      const buffer = await this.s3Service.getFileBuffer(fileKey);
+      return sharp(buffer, { density: 300 }).toBuffer();
+    } catch (error) {
+      return null;
+    }
   }
 
   async uploadFile(file: Express.Multer.File, resource: string, options?: FileValidationOptions) {
