@@ -124,13 +124,11 @@ export const LessonContent = ({
     course.id,
   ]);
 
-  useEffect(() => {
-    if (!shouldAutoplayNextLesson) return;
-
-    if (lesson.type !== LessonType.VIDEO || !isAutoplayEnabled) {
+  const handlePlaybackReady = useCallback(() => {
+    if (shouldAutoplayNextLesson) {
       setShouldAutoplayNextLesson(false);
     }
-  }, [isAutoplayEnabled, lesson.type, setShouldAutoplayNextLesson, shouldAutoplayNextLesson]);
+  }, [setShouldAutoplayNextLesson, shouldAutoplayNextLesson]);
 
   const setFullscreenPreferenceAndNavigate = useCallback(
     (navigate: () => void) => {
@@ -184,7 +182,7 @@ export const LessonContent = ({
             onVideoEnded={() => {
               setIsNextDisabled(false);
               isStudent && markLessonAsCompleted({ lessonId: lesson.id });
-              if (isAutoplayEnabled && !isLastLesson && !isPreviewMode) {
+              if (isAutoplayEnabled && !isLastLesson) {
                 setShouldAutoplayNextLesson(true);
                 handleNextWithFullscreen();
               }
@@ -192,6 +190,7 @@ export const LessonContent = ({
             isExternalUrl={lesson.isExternal}
             autoplay={shouldAutoplayCurrentLesson}
             resumeFullscreen={shouldResumeFullscreen}
+            onPlaybackReady={handlePlaybackReady}
           />
         </div>
       ))

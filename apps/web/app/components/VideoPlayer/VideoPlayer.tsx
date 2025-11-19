@@ -5,6 +5,7 @@ interface VideoPlayerProps {
   initialUrl: string;
   handleVideoEnded?: () => void;
   shouldAutoplay?: boolean;
+  onPlaybackReady?: () => void;
   resumeFullscreen?: boolean;
 }
 
@@ -28,6 +29,7 @@ export const VideoPlayer = ({
   initialUrl,
   handleVideoEnded,
   shouldAutoplay = false,
+  onPlaybackReady,
   resumeFullscreen = false,
 }: VideoPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -64,6 +66,8 @@ export const VideoPlayer = ({
           }
         }
 
+        onPlaybackReady?.();
+
         if (resumeFullscreen) {
           console.log("Enabling fullscreen…");
 
@@ -86,7 +90,7 @@ export const VideoPlayer = ({
     } catch (err) {
       console.warn("PlayerJS init failed:", err);
     }
-  }, [handleVideoEnded, resumeFullscreen, shouldAutoplay]);
+  }, [handleVideoEnded, onPlaybackReady, resumeFullscreen, shouldAutoplay]);
 
   useEffect(() => {
     return () => {
