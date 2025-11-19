@@ -13,6 +13,7 @@ export const Video = ({
   autoplay = false,
   resumeFullscreen = false,
   onPlaybackReady,
+  onFullscreenHandled,
 }: VideoPlayerProps) => {
   const { isAdmin } = useUserRole();
 
@@ -27,7 +28,12 @@ export const Video = ({
           height="100%"
           width="100%"
           playing={autoplay}
-          onReady={() => onPlaybackReady?.()}
+          onReady={() => {
+            onPlaybackReady?.();
+            if (resumeFullscreen) {
+              onFullscreenHandled?.();
+            }
+          }}
           {...(!isAdmin && { onEnded: onVideoEnded })}
         />
       </div>
@@ -41,6 +47,7 @@ export const Video = ({
       shouldAutoplay={autoplay}
       resumeFullscreen={resumeFullscreen}
       onPlaybackReady={onPlaybackReady}
+      onFullscreenHandled={onFullscreenHandled}
     />
   );
 };

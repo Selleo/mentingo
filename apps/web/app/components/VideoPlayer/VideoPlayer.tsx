@@ -7,6 +7,7 @@ interface VideoPlayerProps {
   shouldAutoplay?: boolean;
   onPlaybackReady?: () => void;
   resumeFullscreen?: boolean;
+  onFullscreenHandled?: () => void;
 }
 
 interface PlayerJSPlayer {
@@ -31,6 +32,7 @@ export const VideoPlayer = ({
   shouldAutoplay = false,
   onPlaybackReady,
   resumeFullscreen = false,
+  onFullscreenHandled,
 }: VideoPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<PlayerJSPlayer | null>(null);
@@ -40,11 +42,21 @@ export const VideoPlayer = ({
 
   const requestNativeFullscreen = () => {
     const iframe = iframeRef.current;
-    if (!iframe) return;
+    if (!iframe) return undefined;
 
-    if (iframe.requestFullscreen) {
-      iframe.requestFullscreen();
-    }
+    const capableIframe = iframe as HTMLIFrameElement & {
+      webkitRequestFullscreen?: () => Promise<void> | void;
+      msRequestFullscreen?: () => Promise<void> | void;
+      mozRequestFullScreen?: () => Promise<void> | void;
+    };
+
+    const method =
+      capableIframe.requestFullscreen?.bind(capableIframe) ??
+      capableIframe.webkitRequestFullscreen?.bind(capableIframe) ??
+      capableIframe.msRequestFullscreen?.bind(capableIframe) ??
+      capableIframe.mozRequestFullScreen?.bind(capableIframe);
+
+    return method?.();
   };
 
   const handleIframeLoad = useCallback(() => {
@@ -71,13 +83,29 @@ export const VideoPlayer = ({
         if (resumeFullscreen) {
           console.log("Enabling fullscreen…");
 
+          const markHandled = () => onFullscreenHandled?.();
+
           try {
             player.api?.("fullscreen", 1);
           } catch (err) {
             console.warn("PlayerJS fullscreen failed:", err);
           }
 
-          requestNativeFullscreen();
+          try {
+            const nativeAttempt = requestNativeFullscreen();
+
+            if (
+              nativeAttempt &&
+              typeof (nativeAttempt as Promise<unknown>).finally === "function"
+            ) {
+              (nativeAttempt as Promise<unknown>).finally(markHandled);
+            } else {
+              markHandled();
+            }
+          } catch (error) {
+            console.warn("Native fullscreen failed:", error);
+            markHandled();
+          }
         }
       };
 
@@ -90,7 +118,7 @@ export const VideoPlayer = ({
     } catch (err) {
       console.warn("PlayerJS init failed:", err);
     }
-  }, [handleVideoEnded, onPlaybackReady, resumeFullscreen, shouldAutoplay]);
+  }, [handleVideoEnded, onFullscreenHandled, onPlaybackReady, resumeFullscreen, shouldAutoplay]);
 
   useEffect(() => {
     return () => {

@@ -190,6 +190,7 @@ export const LessonContent = ({
             isExternalUrl={lesson.isExternal}
             autoplay={shouldAutoplayCurrentLesson}
             resumeFullscreen={shouldResumeFullscreen}
+            onFullscreenHandled={() => setShouldResumeFullscreen(false)}
             onPlaybackReady={handlePlaybackReady}
           />
         </div>

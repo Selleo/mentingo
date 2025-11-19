@@ -16,9 +16,15 @@ export const useLessonAutoplayStore = create<LessonAutoplayStore>()(
       isAutoplayEnabled: true,
       setAutoplayEnabled: (value) => set({ isAutoplayEnabled: value }),
       shouldAutoplayNextLesson: false,
-      setShouldAutoplayNextLesson: (value) => set({ shouldAutoplayNextLesson: value }),
+      setShouldAutoplayNextLesson: (value) =>
+        set((state) =>
+          state.shouldAutoplayNextLesson === value ? state : { shouldAutoplayNextLesson: value },
+        ),
       shouldResumeFullscreen: false,
-      setShouldResumeFullscreen: (value) => set({ shouldResumeFullscreen: value }),
+      setShouldResumeFullscreen: (value) =>
+        set((state) =>
+          state.shouldResumeFullscreen === value ? state : { shouldResumeFullscreen: value },
+        ),
     }),
     {
       name: "lesson-autoplay-preference",
