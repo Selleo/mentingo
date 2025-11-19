@@ -6,6 +6,8 @@ type LessonAutoplayStore = {
   setAutoplayEnabled: (value: boolean) => void;
   shouldAutoplayNextLesson: boolean;
   setShouldAutoplayNextLesson: (value: boolean) => void;
+  shouldResumeFullscreen: boolean;
+  setShouldResumeFullscreen: (value: boolean) => void;
 };
 
 export const useLessonAutoplayStore = create<LessonAutoplayStore>()(
@@ -15,6 +17,8 @@ export const useLessonAutoplayStore = create<LessonAutoplayStore>()(
       setAutoplayEnabled: (value) => set({ isAutoplayEnabled: value }),
       shouldAutoplayNextLesson: false,
       setShouldAutoplayNextLesson: (value) => set({ shouldAutoplayNextLesson: value }),
+      shouldResumeFullscreen: false,
+      setShouldResumeFullscreen: (value) => set({ shouldResumeFullscreen: value }),
     }),
     {
       name: "lesson-autoplay-preference",

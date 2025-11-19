@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -62,6 +62,8 @@ export const LessonContent = ({
     setAutoplayEnabled,
     shouldAutoplayNextLesson,
     setShouldAutoplayNextLesson,
+    shouldResumeFullscreen,
+    setShouldResumeFullscreen,
   } = useLessonAutoplayStore();
 
   const shouldAutoplayCurrentLesson = useMemo(
@@ -130,6 +132,32 @@ export const LessonContent = ({
     }
   }, [isAutoplayEnabled, lesson.type, setShouldAutoplayNextLesson, shouldAutoplayNextLesson]);
 
+  const setFullscreenPreferenceAndNavigate = useCallback(
+    (navigate: () => void) => {
+      const isFullscreenActive = Boolean(
+        typeof document !== "undefined" && document.fullscreenElement,
+      );
+
+      console.log("Setting fullscreen preference to:", isFullscreenActive);
+
+      setShouldResumeFullscreen(isFullscreenActive);
+      if (isFullscreenActive && typeof document !== "undefined") {
+        const exitPromise = document.exitFullscreen?.();
+        exitPromise?.catch(() => null);
+      }
+      navigate();
+    },
+    [setShouldResumeFullscreen],
+  );
+
+  const handleNextWithFullscreen = useCallback(() => {
+    setFullscreenPreferenceAndNavigate(handleNext);
+  }, [handleNext, setFullscreenPreferenceAndNavigate]);
+
+  const handlePreviousWithFullscreen = useCallback(() => {
+    setFullscreenPreferenceAndNavigate(handlePrevious);
+  }, [handlePrevious, setFullscreenPreferenceAndNavigate]);
+
   const Content = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
@@ -158,12 +186,12 @@ export const LessonContent = ({
               isStudent && markLessonAsCompleted({ lessonId: lesson.id });
               if (isAutoplayEnabled && !isLastLesson && !isPreviewMode) {
                 setShouldAutoplayNextLesson(true);
-                handleNext();
+                handleNextWithFullscreen();
               }
             }}
             isExternalUrl={lesson.isExternal}
             autoplay={shouldAutoplayCurrentLesson}
-            onPlaybackReady={() => setShouldAutoplayNextLesson(false)}
+            resumeFullscreen={shouldResumeFullscreen}
           />
         </div>
       ))
@@ -250,7 +278,7 @@ export const LessonContent = ({
                     variant="outline"
                     className="w-full gap-x-1 sm:w-auto"
                     disabled={isPreviousDisabled}
-                    onClick={handlePrevious}
+                    onClick={handlePreviousWithFullscreen}
                   >
                     <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
                   </Button>
@@ -260,7 +288,7 @@ export const LessonContent = ({
                   variant="outline"
                   disabled={isNextDisabled}
                   className="w-full gap-x-1 sm:w-auto"
-                  onClick={handleNext}
+                  onClick={handleNextWithFullscreen}
                 >
                   <Icon name="ArrowRight" className="h-auto w-4" />
                 </Button>

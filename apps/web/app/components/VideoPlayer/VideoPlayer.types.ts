@@ -4,4 +4,6 @@ export type VideoPlayerProps = {
   isExternalUrl?: boolean;
   autoplay?: boolean;
   onPlaybackReady?: () => void;
+  resumeFullscreen?: boolean;
+  onFullscreenHandled?: () => void;
 };

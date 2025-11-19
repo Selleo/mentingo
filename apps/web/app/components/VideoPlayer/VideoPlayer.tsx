@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-
 import { cn } from "~/lib/utils";
 
 interface VideoPlayerProps {
   initialUrl: string;
   handleVideoEnded?: () => void;
   shouldAutoplay?: boolean;
-  onPlaybackReady?: () => void;
+  resumeFullscreen?: boolean;
 }
 
 interface PlayerJSPlayer {
@@ -14,7 +13,7 @@ interface PlayerJSPlayer {
   off: (event: "ready" | "ended", callback: () => void) => void;
   destroy?: () => void;
   play?: () => void;
-  api?: (command: "play" | "pause" | string, value?: unknown) => void;
+  api?: (command: string, value?: unknown) => void;
 }
 
 declare global {
@@ -29,14 +28,22 @@ export const VideoPlayer = ({
   initialUrl,
   handleVideoEnded,
   shouldAutoplay = false,
-  onPlaybackReady,
+  resumeFullscreen = false,
 }: VideoPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<PlayerJSPlayer | null>(null);
   const readyCallbackRef = useRef<(() => void) | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log("VideoPlayer rendered with shouldAutoplay:", shouldAutoplay);
+  const requestNativeFullscreen = () => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    if (iframe.requestFullscreen) {
+      iframe.requestFullscreen();
+    }
+  };
 
   const handleIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
@@ -50,55 +57,52 @@ export const VideoPlayer = ({
         setIsLoading(false);
 
         if (shouldAutoplay) {
-          console.log("Autoplaying video");
-
           try {
             player.play?.();
-
-            console.log("Called player.play()");
-          } catch (error) {
-            console.warn("Autoplay via play() failed, attempting api fallback", error);
+          } catch {
+            player.api?.("play");
           }
+        }
+
+        if (resumeFullscreen) {
+          console.log("Enabling fullscreen…");
 
           try {
-            console.log("Calling player.api('play')");
-
-            player.api?.("play");
-          } catch (error) {
-            console.warn("Autoplay via api('play') failed", error);
+            player.api?.("fullscreen", 1);
+          } catch (err) {
+            console.warn("PlayerJS fullscreen failed:", err);
           }
 
-          onPlaybackReady?.();
+          requestNativeFullscreen();
         }
       };
+
       readyCallbackRef.current = onReady;
       player.on("ready", onReady);
 
       if (handleVideoEnded) {
         player.on("ended", handleVideoEnded);
       }
-    } catch (error) {
-      console.warn("Player initialization failed:", error);
+    } catch (err) {
+      console.warn("PlayerJS init failed:", err);
     }
-  }, [handleVideoEnded, onPlaybackReady, shouldAutoplay]);
+  }, [handleVideoEnded, resumeFullscreen, shouldAutoplay]);
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    const player = playerRef.current;
-
     return () => {
+      const player = playerRef.current;
+      if (!player) return;
+
       try {
-        if (player && iframe?.contentWindow) {
-          if (readyCallbackRef.current) {
-            player.off("ready", readyCallbackRef.current);
-          }
-          if (handleVideoEnded) {
-            player.off("ended", handleVideoEnded);
-          }
-          player.destroy?.();
+        if (readyCallbackRef.current) {
+          player.off("ready", readyCallbackRef.current);
         }
+        if (handleVideoEnded) {
+          player.off("ended", handleVideoEnded);
+        }
+        player.destroy?.();
       } catch (err) {
-        console.warn("Error during player cleanup:", err);
+        console.warn("Destroy error:", err);
       }
     };
   }, [handleVideoEnded]);
@@ -110,17 +114,17 @@ export const VideoPlayer = ({
           <div className="size-12 animate-spin rounded-full border-y-2 border-primary-500" />
         </div>
       )}
+
       <iframe
         ref={iframeRef}
         src={initialUrl}
         onLoad={handleIframeLoad}
-        className={cn("size-full border-none", {
+        className={cn("size-full border-none transition-opacity duration-300", {
           "opacity-0": isLoading,
           "opacity-100": !isLoading,
         })}
-        allow="autoplay; accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
         title="Video Player"
-        loading="lazy"
       />
     </div>
   );
