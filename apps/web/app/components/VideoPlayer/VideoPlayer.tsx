@@ -44,19 +44,7 @@ export const VideoPlayer = ({
     const iframe = iframeRef.current;
     if (!iframe) return undefined;
 
-    const capableIframe = iframe as HTMLIFrameElement & {
-      webkitRequestFullscreen?: () => Promise<void> | void;
-      msRequestFullscreen?: () => Promise<void> | void;
-      mozRequestFullScreen?: () => Promise<void> | void;
-    };
-
-    const method =
-      capableIframe.requestFullscreen?.bind(capableIframe) ??
-      capableIframe.webkitRequestFullscreen?.bind(capableIframe) ??
-      capableIframe.msRequestFullscreen?.bind(capableIframe) ??
-      capableIframe.mozRequestFullScreen?.bind(capableIframe);
-
-    return method?.();
+    iframe.requestFullscreen();
   };
 
   const handleIframeLoad = useCallback(() => {
@@ -80,32 +68,19 @@ export const VideoPlayer = ({
 
         onPlaybackReady?.();
 
+        const markFullscreenHandled = () => onFullscreenHandled?.();
+
         if (resumeFullscreen) {
           console.log("Enabling fullscreen…");
-
-          const markHandled = () => onFullscreenHandled?.();
 
           try {
             player.api?.("fullscreen", 1);
           } catch (err) {
+            requestNativeFullscreen();
             console.warn("PlayerJS fullscreen failed:", err);
           }
-
-          try {
-            const nativeAttempt = requestNativeFullscreen();
-
-            if (
-              nativeAttempt &&
-              typeof (nativeAttempt as Promise<unknown>).finally === "function"
-            ) {
-              (nativeAttempt as Promise<unknown>).finally(markHandled);
-            } else {
-              markHandled();
-            }
-          } catch (error) {
-            console.warn("Native fullscreen failed:", error);
-            markHandled();
-          }
+        } else {
+          markFullscreenHandled();
         }
       };
 
