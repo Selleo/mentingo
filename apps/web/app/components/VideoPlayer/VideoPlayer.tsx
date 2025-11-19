@@ -5,12 +5,16 @@ import { cn } from "~/lib/utils";
 interface VideoPlayerProps {
   initialUrl: string;
   handleVideoEnded?: () => void;
+  shouldAutoplay?: boolean;
+  onPlaybackReady?: () => void;
 }
 
 interface PlayerJSPlayer {
   on: (event: "ready" | "ended", callback: () => void) => void;
   off: (event: "ready" | "ended", callback: () => void) => void;
   destroy?: () => void;
+  play?: () => void;
+  api?: (command: "play" | "pause" | string, value?: unknown) => void;
 }
 
 declare global {
@@ -21,10 +25,18 @@ declare global {
   }
 }
 
-export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) => {
+export const VideoPlayer = ({
+  initialUrl,
+  handleVideoEnded,
+  shouldAutoplay = false,
+  onPlaybackReady,
+}: VideoPlayerProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<PlayerJSPlayer | null>(null);
+  const readyCallbackRef = useRef<(() => void) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  console.log("VideoPlayer rendered with shouldAutoplay:", shouldAutoplay);
 
   const handleIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
@@ -34,7 +46,32 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
       const player = new window.playerjs.Player(iframe);
       playerRef.current = player;
 
-      const onReady = () => setIsLoading(false);
+      const onReady = () => {
+        setIsLoading(false);
+
+        if (shouldAutoplay) {
+          console.log("Autoplaying video");
+
+          try {
+            player.play?.();
+
+            console.log("Called player.play()");
+          } catch (error) {
+            console.warn("Autoplay via play() failed, attempting api fallback", error);
+          }
+
+          try {
+            console.log("Calling player.api('play')");
+
+            player.api?.("play");
+          } catch (error) {
+            console.warn("Autoplay via api('play') failed", error);
+          }
+
+          onPlaybackReady?.();
+        }
+      };
+      readyCallbackRef.current = onReady;
       player.on("ready", onReady);
 
       if (handleVideoEnded) {
@@ -43,7 +80,7 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
     } catch (error) {
       console.warn("Player initialization failed:", error);
     }
-  }, [handleVideoEnded]);
+  }, [handleVideoEnded, onPlaybackReady, shouldAutoplay]);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -52,7 +89,9 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
     return () => {
       try {
         if (player && iframe?.contentWindow) {
-          player.off("ready", () => {});
+          if (readyCallbackRef.current) {
+            player.off("ready", readyCallbackRef.current);
+          }
           if (handleVideoEnded) {
             player.off("ended", handleVideoEnded);
           }
@@ -79,7 +118,7 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
           "opacity-0": isLoading,
           "opacity-100": !isLoading,
         })}
-        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allow="autoplay; accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
         title="Video Player"
         loading="lazy"
       />

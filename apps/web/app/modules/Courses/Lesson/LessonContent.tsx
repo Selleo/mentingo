@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -10,6 +10,7 @@ import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useUserRole } from "~/hooks/useUserRole";
@@ -21,6 +22,7 @@ import Presentation from "../../../components/Presentation/Presentation";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
+import { useLessonAutoplayStore } from "./store/useLessonAutoplayStore";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
@@ -54,6 +56,19 @@ export const LessonContent = ({
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { t } = useTranslation();
   const { isAdminLike, isStudent } = useUserRole();
+
+  const {
+    isAutoplayEnabled,
+    setAutoplayEnabled,
+    shouldAutoplayNextLesson,
+    setShouldAutoplayNextLesson,
+  } = useLessonAutoplayStore();
+
+  const shouldAutoplayCurrentLesson = useMemo(
+    () =>
+      Boolean(shouldAutoplayNextLesson && isAutoplayEnabled && lesson.type === LessonType.VIDEO),
+    [isAutoplayEnabled, lesson.type, shouldAutoplayNextLesson],
+  );
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
     chapter.lessons.some(({ id }) => id === lesson.id),
@@ -107,6 +122,14 @@ export const LessonContent = ({
     course.id,
   ]);
 
+  useEffect(() => {
+    if (!shouldAutoplayNextLesson) return;
+
+    if (lesson.type !== LessonType.VIDEO || !isAutoplayEnabled) {
+      setShouldAutoplayNextLesson(false);
+    }
+  }, [isAutoplayEnabled, lesson.type, setShouldAutoplayNextLesson, shouldAutoplayNextLesson]);
+
   const Content = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
@@ -119,14 +142,30 @@ export const LessonContent = ({
         />
       ))
       .with("video", () => (
-        <Video
-          url={lesson.fileUrl}
-          onVideoEnded={() => {
-            setIsNextDisabled(false);
-            isStudent && markLessonAsCompleted({ lessonId: lesson.id });
-          }}
-          isExternalUrl={lesson.isExternal}
-        />
+        <div className="flex flex-col border rounded-t-xl">
+          <div className=" flex items-center justify-end border-b gap-2 px-6 py-4">
+            <p className="text-sm">{t("studentLessonView.controls.autoplay")}</p>
+            <Switch
+              checked={isAutoplayEnabled}
+              onCheckedChange={setAutoplayEnabled}
+              aria-label={t("studentLessonView.controls.autoplayToggle")}
+            />
+          </div>
+          <Video
+            url={lesson.fileUrl}
+            onVideoEnded={() => {
+              setIsNextDisabled(false);
+              isStudent && markLessonAsCompleted({ lessonId: lesson.id });
+              if (isAutoplayEnabled && !isLastLesson && !isPreviewMode) {
+                setShouldAutoplayNextLesson(true);
+                handleNext();
+              }
+            }}
+            isExternalUrl={lesson.isExternal}
+            autoplay={shouldAutoplayCurrentLesson}
+            onPlaybackReady={() => setShouldAutoplayNextLesson(false)}
+          />
+        </div>
       ))
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />

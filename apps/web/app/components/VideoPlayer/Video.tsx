@@ -6,7 +6,13 @@ import { VideoPlayer } from "./VideoPlayer";
 
 import type { VideoPlayerProps } from "./VideoPlayer.types";
 
-export const Video = ({ url, onVideoEnded, isExternalUrl }: VideoPlayerProps) => {
+export const Video = ({
+  url,
+  onVideoEnded,
+  isExternalUrl,
+  autoplay = false,
+  onPlaybackReady,
+}: VideoPlayerProps) => {
   const { isAdmin } = useUserRole();
 
   if (!url) throw new Error("Something went wrong");
@@ -19,11 +25,24 @@ export const Video = ({ url, onVideoEnded, isExternalUrl }: VideoPlayerProps) =>
           controls
           height="100%"
           width="100%"
+          playing={autoplay}
+          onStart={() => {
+            if (autoplay) {
+              onPlaybackReady?.();
+            }
+          }}
           {...(!isAdmin && { onEnded: onVideoEnded })}
         />
       </div>
     );
   }
 
-  return <VideoPlayer initialUrl={url} handleVideoEnded={onVideoEnded} />;
+  return (
+    <VideoPlayer
+      initialUrl={url}
+      handleVideoEnded={onVideoEnded}
+      shouldAutoplay={autoplay}
+      onPlaybackReady={onPlaybackReady}
+    />
+  );
 };
