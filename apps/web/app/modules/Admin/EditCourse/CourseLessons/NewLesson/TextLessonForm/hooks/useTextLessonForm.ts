@@ -66,13 +66,14 @@ export const useTextLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateTextBlockItem({
-          // @ts-expect-error - Need to be refactored
-          data: { ...values, language: SUPPORTED_LANGUAGES.EN as Languages },
+          data: {
+            ...values,
+            language: SUPPORTED_LANGUAGES.EN as Languages,
+          },
           lessonId: lessonToEdit.id,
         });
       } else {
         await createTextBlock({
-          // @ts-expect-error - Need to be refactored
           data: {
             ...values,
             chapterId: chapterToEdit.id,
