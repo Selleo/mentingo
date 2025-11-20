@@ -4,20 +4,14 @@ import { Icon } from "../Icon";
 import { Button } from "../ui/button";
 
 interface VideoPreviewProps {
-  acceptedTypes: string;
-  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileDelete: () => void;
-  isUploading: boolean;
   setFile: (file: File | null) => void;
   setVideoPreview: (url: string | null) => void;
   videoPreview: string | null;
 }
 
 export const VideoPreview = ({
-  acceptedTypes,
-  handleFileChange,
   handleFileDelete,
-  isUploading,
   setFile,
   setVideoPreview,
   videoPreview,
@@ -41,18 +35,13 @@ export const VideoPreview = ({
           </div>
           <div className="details text-neutral-200">{t("uploadFile.details.video")}</div>
         </div>
-        <input
-          type="file"
-          id="file-upload"
-          accept={acceptedTypes}
-          onChange={handleFileChange}
-          disabled={isUploading}
-          className="sr-only"
-        />
+
         <Button
           variant="destructive"
           className="mt-2 gap-x-1"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
             handleFileDelete();
             setFile(null);
             setVideoPreview(null);

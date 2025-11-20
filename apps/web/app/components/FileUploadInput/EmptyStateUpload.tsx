@@ -5,12 +5,7 @@ import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { Icon } from "../Icon";
 
-import type { ChangeEvent } from "react";
-
 interface EmptyStateUploadProps {
-  acceptedTypes: string;
-  handleFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  isUploading: boolean;
   contentTypeToDisplay: string;
   className?: string;
 }
@@ -20,19 +15,14 @@ const contentTypeFormats = {
   [ContentTypes.PRESENTATION_FORM]: "PPT/PPTX (max. 100MB)",
 };
 
-const EmptyStateUpload = ({
-  acceptedTypes,
-  handleFileChange,
-  isUploading,
-  contentTypeToDisplay,
-  className,
-}: EmptyStateUploadProps) => {
+const EmptyStateUpload = ({ contentTypeToDisplay, className }: EmptyStateUploadProps) => {
   const { t } = useTranslation();
+
   return (
     <label
       htmlFor="file-upload"
       className={cn(
-        "flex h-[240px] w-full max-w-[440px] flex-col items-center justify-center gap-y-3 rounded-lg border border-neutral-200 bg-white",
+        "flex h-[240px] w-full max-w-[440px] flex-col items-center justify-center gap-y-3 rounded-lg border border-neutral-200 bg-white cursor-pointer",
         className,
       )}
     >
@@ -46,14 +36,6 @@ const EmptyStateUpload = ({
           {contentTypeFormats[contentTypeToDisplay]}
         </div>
       </div>
-      <input
-        type="file"
-        id="file-upload"
-        accept={acceptedTypes}
-        onChange={handleFileChange}
-        disabled={isUploading}
-        className="sr-only"
-      />
     </label>
   );
 };

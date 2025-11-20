@@ -33,9 +33,13 @@ export class FileGuard {
 
   private static validateType(file: Express.Multer.File, allowedTypes: readonly string[]) {
     let type: string | undefined = file.mimetype;
-    if (!type) {
+
+    // For video files, also check extension if MIME type is generic
+    if (type === "application/octet-stream" || !type) {
       const extension = file.originalname.split(".").pop()?.toLowerCase();
-      type = extension ? EXTENSION_TO_MIME_TYPE_MAP[extension] : undefined;
+      if (extension) {
+        type = EXTENSION_TO_MIME_TYPE_MAP[extension];
+      }
     }
 
     if (!type || !allowedTypes.includes(type)) {
