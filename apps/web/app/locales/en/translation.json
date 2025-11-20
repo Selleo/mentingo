@@ -26,6 +26,10 @@
       "contentCreator": "Content creator",
       "student": "Student"
     },
+    "languages": {
+      "en": "English",
+      "pl": "Polish"
+    },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
     },
@@ -716,13 +720,15 @@
     "editUserHeader": "User Information",
     "placeholder": {
       "role": "Select a role",
-      "groupId": "Select a group"
+      "groupId": "Select a group",
+      "language": "Select a language"
     },
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email",
       "role": "Role",
+      "language": "Language",
       "status": "Status",
       "groupId": "Group"
     },

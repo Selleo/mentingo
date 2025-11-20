@@ -27,6 +27,10 @@
       "contentCreator": "Twórca treści",
       "student": "Uczeń"
     },
+    "languages": {
+      "en": "Angielski",
+      "pl": "Polski"
+    },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
     },
@@ -695,13 +699,15 @@
     "editUserHeader": "Informacje o użytkowniku",
     "placeholder": {
       "role": "Wybierz rolę",
-      "groupId": "Wybierz grupę"
+      "groupId": "Wybierz grupę",
+      "language": "Wybierz język"
     },
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
       "email": "Email",
       "role": "Rola",
+      "language": "Język",
       "status": "Status",
       "groupId": "Grupa"
     },

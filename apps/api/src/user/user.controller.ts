@@ -333,8 +333,9 @@ export class UserController {
   })
   async createUser(
     @Body() data: CreateUserBody,
+    @CurrentUser("userId") adminId: UUIDType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.usersService.createUser(data);
+    const { id } = await this.usersService.createUser(data, undefined, adminId);
 
     return new BaseResponse({
       id,
@@ -360,8 +361,11 @@ export class UserController {
   @Validate({
     response: baseResponse(importUserResponseSchema),
   })
-  async importUsers(@UploadedFile() usersFile: Express.Multer.File) {
-    const importStats = await this.usersService.importUsers(usersFile);
+  async importUsers(
+    @UploadedFile() usersFile: Express.Multer.File,
+    @CurrentUser("userId") adminId: UUIDType,
+  ) {
+    const importStats = await this.usersService.importUsers(usersFile, adminId);
 
     return new BaseResponse(importStats);
   }

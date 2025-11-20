@@ -12,6 +12,7 @@ import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, not, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
+import { SUPPORTED_LANGUAGES } from "src/ai/utils/ai.type";
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
@@ -60,6 +61,7 @@ import type {
   UpdateUserBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
+import type { SupportedLanguages } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
@@ -393,7 +395,7 @@ export class UserService {
     }
   }
 
-  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg) {
+  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, adminId?: UUIDType) {
     const db = dbInstance ?? this.db;
 
     const [existingUser] = await db.select().from(users).where(eq(users.email, data.email));
@@ -405,6 +407,23 @@ export class UserService {
     return await this.db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
+
+      if (adminId) {
+        const { language: adminsLanguage } = await this.settingsService.getUserSettings(adminId);
+
+        const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
+          data.language as SupportedLanguages,
+        )
+          ? data.language
+          : adminsLanguage;
+
+        await this.settingsService.createSettingsIfNotExists(
+          createdUser.id,
+          createdUser.role as UserRole,
+          { language: finalLanguage },
+          trx,
+        );
+      }
 
       const token = nanoid(64);
 
@@ -494,7 +513,7 @@ export class UserService {
     return adminsWithSettings;
   }
 
-  async importUsers(usersDataFile: Express.Multer.File) {
+  async importUsers(usersDataFile: Express.Multer.File, adminId: UUIDType) {
     const importStats: ImportUserResponse = {
       importedUsersAmount: 0,
       skippedUsersAmount: 0,
@@ -506,6 +525,8 @@ export class UserService {
       usersDataFile,
       importUserSchema,
     );
+
+    const { language: adminsLanguage } = await this.settingsService.getUserSettings(adminId);
 
     for (const userData of usersData) {
       const [existingUser] = await this.db
@@ -526,10 +547,17 @@ export class UserService {
         const { groupName, ...userInfo } = userData;
 
         const createdUser = await this.createUser({ ...userInfo }, trx);
+
+        const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
+          userData.language as SupportedLanguages,
+        )
+          ? userData.language
+          : adminsLanguage;
+
         await this.settingsService.createSettingsIfNotExists(
           createdUser.id,
           createdUser.role as UserRole,
-          undefined,
+          { language: finalLanguage },
           trx,
         );
 

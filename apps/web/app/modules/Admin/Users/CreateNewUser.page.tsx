@@ -6,6 +6,7 @@ import * as z from "zod";
 
 import { useCreateUser } from "~/api/mutations/admin/useCreateUser";
 import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
+import { useUserSettings } from "~/api/queries/useUserSettings";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
@@ -22,9 +23,11 @@ import {
 } from "~/components/ui/select";
 import { USER_ROLE } from "~/config/userRoles";
 import { CreatePageHeader } from "~/modules/Admin/components";
+import { SupportedLanguages } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
+import type { Language } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.createNewUser");
 
@@ -35,14 +38,19 @@ const formSchema = z.object({
   role: z.enum([USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student], {
     required_error: "Please select a role.",
   }),
+  language: z.enum([SupportedLanguages.ENGLISH, SupportedLanguages.POLISH]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export default function CreateNewUserPage() {
-  const { mutateAsync: createUser } = useCreateUser();
   const navigate = useNavigate();
+
   const { t } = useTranslation();
+
+  const { data: adminsSettings } = useUserSettings();
+  const { mutateAsync: createUser } = useCreateUser();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,6 +58,7 @@ export default function CreateNewUserPage() {
       lastName: "",
       email: "",
       role: USER_ROLE.student,
+      language: adminsSettings?.language as Language,
     },
   });
 
@@ -133,6 +142,30 @@ export default function CreateNewUserPage() {
                       <SelectItem value={USER_ROLE.contentCreator}>
                         {t("common.roles.contentCreator")}
                       </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="language"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="language">{t("adminUserView.field.language")}</Label>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger id="language">
+                        <SelectValue placeholder={t("adminUserView.placeholder.language")} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.values(SupportedLanguages).map((lang) => (
+                        <SelectItem key={lang} value={lang}>
+                          {t(`common.languages.${lang}`)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
