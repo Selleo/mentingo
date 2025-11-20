@@ -197,8 +197,7 @@ test.describe("Course settings flow", () => {
 
       await test.step("unregistered user tries to access free chapter", async () => {
         const newPage = page;
-        // const newPage = await logout(browser);
-        await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+        await page.getByRole("button", { name: "test Student profile test" }).click();
         await page
           .getByRole("menuitem", { name: /logout/i })
           .locator("div")

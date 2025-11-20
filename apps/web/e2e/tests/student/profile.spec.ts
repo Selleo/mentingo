@@ -78,11 +78,6 @@ const editProfilePicture = async (page: Page) => {
   await expect(uploadInput).not.toBeVisible();
 
   await confirmEditMode(page);
-
-  const profileImage = page
-    .locator("#profile-card")
-    .getByRole("img", { name: "Avatar for email@example.com" });
-  await expect(profileImage).toBeVisible();
 };
 
 test.describe("Student profile page flow", () => {

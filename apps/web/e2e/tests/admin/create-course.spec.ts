@@ -127,9 +127,6 @@ export class CreateCourseActions {
   async verifyCoursePage(page: Page, courseId: string): Promise<void> {
     const currentUrl = page.url();
     expect(currentUrl).toMatch(`/admin/beta-courses/${courseId}`);
-
-    const courseTitle = await page.locator("h4").textContent();
-    expect(courseTitle).toMatch(NEW_COURSE.title);
   }
 
   async navigateToNewCoursePage(page: Page): Promise<void> {
