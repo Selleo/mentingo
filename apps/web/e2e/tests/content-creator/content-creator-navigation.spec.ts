@@ -46,13 +46,13 @@ test.describe("Content creator navigation", () => {
     const yourCoursesHeader = page.locator("h4", { hasText: TEST_NAVIGATION.header.yourCourses });
     await expect(yourCoursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.yourCourses, "i"));
 
-    await page.getByRole("button", { name: "Dakota Content Creator" }).click();
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
     await page.getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
     const currentURL = page.url();
     expect(currentURL).toMatch(/\/profile\/[a-f0-9-]{36}/);
 
-    await page.getByRole("button", { name: "Dakota Content Creator" }).click();
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
 
     await page
       .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })
