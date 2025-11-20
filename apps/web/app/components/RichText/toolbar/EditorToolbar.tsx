@@ -1,3 +1,4 @@
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import {
   Bold,
   Code,
@@ -64,6 +65,8 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
     fileUploadRef.current?.click();
   });
 
+  const acceptedImages = ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",");
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
@@ -104,7 +107,7 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
             </TooltipTrigger>
             <TooltipContent>{t("richTextEditor.toolbar.link.tooltip")}</TooltipContent>
           </Tooltip>
-          {allowFiles && (
+          {lessonId && allowFiles && (
             <Tooltip>
               <TooltipTrigger>
                 <Input
@@ -112,7 +115,7 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
                   className="hidden"
                   ref={fileUploadRef}
                   onChange={handleUpload}
-                  accept="image/*"
+                  accept={acceptedImages}
                 />
                 <Button
                   size="sm"

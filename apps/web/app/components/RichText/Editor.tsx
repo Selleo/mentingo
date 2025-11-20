@@ -1,3 +1,4 @@
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -46,14 +47,14 @@ const Editor = ({
       return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
     }
 
-    if (file.type.startsWith("image/")) {
+    if (ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type)) {
+      e.preventDefault();
+
       const uploaded = await uploadFile({ file, lessonId });
 
       const imageUrl = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
 
       editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
-
-      e.preventDefault?.();
     }
   };
 
@@ -64,11 +65,15 @@ const Editor = ({
       onChange(editor.getHTML());
     },
     onPaste: async (e) => {
+      if (!lessonId) return;
+
       const file = e.clipboardData?.files[0];
 
       await handleFileInsert(e, file, editor);
     },
     onDrop: async (e) => {
+      if (!lessonId) return;
+
       const file = e.dataTransfer?.files[0];
 
       await handleFileInsert(e, file, editor);
