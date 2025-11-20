@@ -91,7 +91,7 @@ export class PromptService implements OnModuleInit {
       });
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
-    const contextInfo = content + history[history.length - 1].content;
+    const contextInfo = content + history[history.length - 1]?.content ?? "";
 
     const { chunks: context } = await observe(
       async () => {
@@ -155,7 +155,7 @@ export class PromptService implements OnModuleInit {
   }
 
   async loadPrompt<K extends keyof typeof PROMPT_MAP>(id: K, vars: Static<(typeof PROMPT_MAP)[K]>) {
-    const langfusePrompt = await this.langfuseClient.prompt.get(id).catch(() => undefined);
+    const langfusePrompt = await this.langfuseClient?.prompt?.get(id).catch(() => undefined);
 
     if (langfusePrompt?.prompt) {
       return Handlebars.compile(langfusePrompt.prompt)(vars);
