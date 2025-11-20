@@ -79,10 +79,9 @@ const editProfilePicture = async (page: Page) => {
 
   await confirmEditMode(page);
 
-  const profileImage = page.locator("main").getByRole("img", {
-    name: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName} profile`,
-  });
-
+  const profileImage = page
+    .locator("#profile-card")
+    .getByRole("img", { name: "Avatar for email@example.com" });
   await expect(profileImage).toBeVisible();
 };
 
