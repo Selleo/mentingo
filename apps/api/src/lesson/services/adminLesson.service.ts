@@ -1,23 +1,26 @@
 import {
-  BadRequestException,
-  ForbiddenException,
+  BadRequestException, ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
 import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { FileService } from "src/file/file.service";
 import { DocumentService } from "src/ingestion/services/document.service";
+import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
-import { MAX_LESSON_TITLE_LENGTH } from "../repositories/lesson.constants";
 import { LessonRepository } from "../repositories/lesson.repository";
 
 import type {
@@ -31,8 +34,11 @@ import type {
   CreateEmbedLessonBody,
   UpdateEmbedLessonBody,
 } from "../lesson.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { UserRole } from "src/user/schemas/userRoles";
+
+
 
 @Injectable()
 export class AdminLessonService {
@@ -43,6 +49,7 @@ export class AdminLessonService {
     private aiRepository: AiRepository,
     private documentService: DocumentService,
     private fileService: FileService,
+    private localizationService: LocalizationService,
   ) {}
 
   async createLessonForChapter(
@@ -59,6 +66,11 @@ export class AdminLessonService {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
 
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
+
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
         message: `adminCourseView.toast.maxTitleLengthExceeded`,
@@ -68,10 +80,13 @@ export class AdminLessonService {
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
-    const lesson = await this.adminLessonRepository.createLessonForChapter({
-      ...data,
-      displayOrder: maxDisplayOrder + 1,
-    });
+    const lesson = await this.adminLessonRepository.createLessonForChapter(
+      {
+        ...data,
+        displayOrder: maxDisplayOrder + 1,
+      },
+      language,
+    );
 
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
 
@@ -122,9 +137,15 @@ export class AdminLessonService {
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
+
     const lesson = await this.createQuizLessonWithQuestionsAndOptions(
       data,
       authorId,
+      language,
       maxDisplayOrder + 1,
     );
 
@@ -139,8 +160,17 @@ export class AdminLessonService {
     currentUserRole: UserRole,
   ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+    
+    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      id,
+    );
 
-    const lesson = await this.lessonRepository.getLesson(id);
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(id, data.language);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -157,15 +187,11 @@ export class AdminLessonService {
     return await this.updateAiMentorLessonWithTransaction(id, data, currentUserId);
   }
 
-  async updateQuizLesson(
-    id: UUIDType,
-    data: UpdateQuizLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
+  async updateQuizLesson(    id: UUIDType,
+                             data: UpdateQuizLessonBody,
+                             currentUserId: UUIDType,
+                             currentUserRole: UserRole,) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, id);
-
-    const lesson = await this.lessonRepository.getLesson(id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -173,7 +199,18 @@ export class AdminLessonService {
         count: MAX_LESSON_TITLE_LENGTH,
       });
     }
+    
+    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      id,
+    );
 
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(id, data.language);
+    
     if (!lesson) throw new NotFoundException("Lesson not found");
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
@@ -189,7 +226,16 @@ export class AdminLessonService {
   ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, id);
 
-    const lesson = await this.lessonRepository.getLesson(id);
+    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      id,
+    );
+
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(id, data.language);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -216,7 +262,12 @@ export class AdminLessonService {
   async removeLesson(lessonId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
 
-    const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      lessonId,
+    );
+
+    const [lesson] = await this.adminLessonRepository.getLesson(lessonId, language);
 
     if (!lesson) {
       throw new NotFoundException("Lesson not found");
@@ -243,7 +294,15 @@ export class AdminLessonService {
       lessonObject.lessonId,
     );
 
-    const [lessonToUpdate] = await this.adminLessonRepository.getLesson(lessonObject.lessonId);
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      lessonObject.lessonId,
+    );
+
+    const [lessonToUpdate] = await this.adminLessonRepository.getLesson(
+      lessonObject.lessonId,
+      language,
+    );
 
     const oldDisplayOrder = lessonToUpdate.displayOrder;
     if (!lessonToUpdate || oldDisplayOrder === null) {
@@ -263,7 +322,17 @@ export class AdminLessonService {
     displayOrder: number,
   ) {
     return await this.db.transaction(async (trx) => {
-      const lesson = await this.adminLessonRepository.createAiMentorLesson(data, displayOrder, trx);
+      const { language } = await this.localizationService.getLanguageByEntity(
+        ENTITY_TYPE.CHAPTER,
+        data.chapterId,
+      );
+
+      const lesson = await this.adminLessonRepository.createAiMentorLesson(
+        data,
+        displayOrder,
+        language,
+        trx,
+      );
 
       await this.adminLessonRepository.createAiMentorLessonData(
         {
@@ -287,6 +356,15 @@ export class AdminLessonService {
   ) {
     return await this.db.transaction(async (trx) => {
       const { type: _type, ...rest } = data;
+      
+      const { availableLocales } = await this.localizationService.getLanguageByEntity(
+        ENTITY_TYPE.LESSON,
+        id,
+      );
+
+      if (!availableLocales.includes(data.language)) {
+        throw new BadRequestException("This course does not support this language");
+      }
 
       const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
 
@@ -317,12 +395,14 @@ export class AdminLessonService {
   private async createQuizLessonWithQuestionsAndOptions(
     data: CreateQuizLessonBody,
     authorId: UUIDType,
+    language: SupportedLanguages,
     displayOrder: number,
   ) {
     return await this.db.transaction(async (trx) => {
       const lesson = await this.adminLessonRepository.createQuizLessonWithQuestionsAndOptions(
         data,
         displayOrder,
+        language,
         trx,
       );
 
@@ -332,23 +412,31 @@ export class AdminLessonService {
         lessonId: lesson.id,
         authorId,
         type: question.type,
-        description: question.description || null,
-        title: question.title,
+        description: buildJsonbField(language, question.description),
+        title: buildJsonbField(language, question.title),
         displayOrder: question.displayOrder,
-        solutionExplanation: question.solutionExplanation,
+        solutionExplanation: buildJsonbField(language, question.solutionExplanation),
         photoS3Key: question.photoS3Key,
       }));
 
-      const insertedQuestions = await trx.insert(questions).values(questionsToInsert).returning();
+      const insertedQuestions = await trx
+        .insert(questions)
+        .values(questionsToInsert)
+        .returning({
+          ...getTableColumns(questions),
+          description: sql<string>`questions.description->>${language}`,
+          title: sql<string>`questions.title->>${language}`,
+          solutionExplanation: sql<string>`questions.solution_explanation->>${language}`,
+        });
 
       const optionsToInsert = insertedQuestions.flatMap(
         (question, index) =>
           data.questions?.[index].options?.map((option) => ({
             questionId: question.id,
-            optionText: option.optionText,
+            optionText: buildJsonbField(language, option.optionText),
             isCorrect: option.isCorrect,
             displayOrder: option.displayOrder,
-            matchedWord: option.matchedWord,
+            matchedWord: buildJsonbField(language, option.matchedWord),
             scaleAnswer: option.scaleAnswer,
           })) || [],
       );
@@ -367,6 +455,15 @@ export class AdminLessonService {
     currentUserId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
+      const { availableLocales } = await this.localizationService.getLanguageByEntity(
+        ENTITY_TYPE.LESSON,
+        id,
+      );
+
+      if (!availableLocales.includes(data.language)) {
+        throw new BadRequestException("This course does not support this language");
+      }
+
       await this.adminLessonRepository.updateQuizLessonWithQuestionsAndOptions(id, data);
 
       const existingQuestions = await this.adminLessonRepository.getExistingQuestions(id, trx);
@@ -393,6 +490,7 @@ export class AdminLessonService {
             displayOrder: question.displayOrder,
             solutionExplanation: question.solutionExplanation,
             photoS3Key: question.photoS3Key,
+            language: data.language,
           };
 
           const questionId = await this.adminLessonRepository.upsertQuestion(
@@ -426,6 +524,7 @@ export class AdminLessonService {
                 displayOrder: option.displayOrder,
                 matchedWord: option.matchedWord,
                 scaleAnswer: option.scaleAnswer,
+                language: data.language,
               };
 
               if (option.id) {
@@ -465,19 +564,27 @@ export class AdminLessonService {
   ) {
     await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
 
-    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
-
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
         message: `adminCourseView.toast.maxTitleLengthExceeded`,
         count: MAX_LESSON_TITLE_LENGTH,
       });
     }
+    
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
+    
+    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
-    const lesson = await this.adminLessonRepository.createLessonForChapter({
-      ...data,
-      displayOrder: maxDisplayOrder + 1,
-    });
+    const lesson = await this.adminLessonRepository.createLessonForChapter(
+      {
+        ...data,
+        displayOrder: maxDisplayOrder + 1,
+      },
+      language,
+    );
 
     if (!lesson) throw new BadRequestException("Failed to create embed lesson");
 
@@ -507,14 +614,23 @@ export class AdminLessonService {
   ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
 
-    const lesson = await this.lessonRepository.getLesson(lessonId);
-
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
         message: `adminCourseView.toast.maxTitleLengthExceeded`,
         count: MAX_LESSON_TITLE_LENGTH,
       });
     }
+    
+    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      lessonId,
+    );
+
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(lessonId, data.language);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 

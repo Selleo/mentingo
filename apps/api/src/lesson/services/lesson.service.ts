@@ -15,6 +15,8 @@ import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { QuizCompletedEvent } from "src/events";
 import { FileService } from "src/file/file.service";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
@@ -33,7 +35,7 @@ import type {
   QuestionDetails,
 } from "../lesson.schema";
 import type { Response } from "express";
-import type { SupportedLanguages } from "src/ai/utils/ai.type";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -47,13 +49,14 @@ export class LessonService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly aiService: AiService,
     private readonly eventBus: EventBus,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async getLessonById(
     id: UUIDType,
     userId: UUIDType,
     userRole: UserRole,
-    userLanguage?: SupportedLanguages,
+    language?: SupportedLanguages,
   ): Promise<LessonShow> {
     const isStudent = userRole === USER_ROLES.STUDENT;
 
@@ -61,7 +64,13 @@ export class LessonService {
 
     if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
 
-    const lesson = await this.lessonRepository.getLessonDetails(id, userId);
+    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      id,
+      language,
+    );
+
+    const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 
@@ -106,7 +115,7 @@ export class LessonService {
       const { data: thread } = await this.aiService.getThreadWithSetup({
         lessonId: id,
         status: THREAD_STATUS.ACTIVE,
-        userLanguage: userLanguage ?? "en",
+        userLanguage: actualLanguage,
         userId,
       });
 
@@ -138,6 +147,7 @@ export class LessonService {
       lesson.id,
       lesson.lessonCompleted,
       userId,
+      actualLanguage,
     );
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
@@ -198,6 +208,11 @@ export class LessonService {
       userId,
     );
 
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      studentQuizAnswers.lessonId,
+    );
+
     if (accessCourseLessonWithDetails.lessonIsCompleted) {
       throw new ConflictException("You have already answered this quiz");
     }
@@ -205,10 +220,16 @@ export class LessonService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
+    const quizSettings = await this.lessonRepository.getLessonSettings(
+      studentQuizAnswers.lessonId,
+      language,
+    );
 
     const correctAnswersForQuizQuestions =
-      await this.questionRepository.getQuizQuestionsToEvaluation(studentQuizAnswers.lessonId);
+      await this.questionRepository.getQuizQuestionsToEvaluation(
+        studentQuizAnswers.lessonId,
+        language,
+      );
 
     if (correctAnswersForQuizQuestions.length !== studentQuizAnswers.questionsAnswers.length) {
       throw new ConflictException("Quiz is not completed");
@@ -302,7 +323,12 @@ export class LessonService {
       throw new ConflictException("You are not enrolled to this course");
     }
 
-    const quizSettings = await this.lessonRepository.getLessonSettings(lessonId);
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.LESSON,
+      lessonId,
+    );
+
+    const quizSettings = await this.lessonRepository.getLessonSettings(lessonId, language);
 
     let attempts = accessCourseLessonWithDetails.attempts ?? 1;
 
@@ -372,8 +398,9 @@ export class LessonService {
   async getEnrolledLessons(
     userId: UUIDType,
     filters: EnrolledLessonsFilters,
+    language: SupportedLanguages,
   ): Promise<EnrolledLesson[]> {
-    return await this.lessonRepository.getEnrolledLessons(userId, filters);
+    return await this.lessonRepository.getEnrolledLessons(userId, filters, language);
   }
 
   async convertUrlsToImages(content: string) {

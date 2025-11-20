@@ -2,8 +2,11 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { chapters } from "src/storage/schema";
 
 import { AdminChapterRepository } from "./repositories/adminChapter.repository";
@@ -18,6 +21,7 @@ export class AdminChapterService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonService: AdminLessonService,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async createChapterForCourse(body: CreateChapterBody, authorId: UUIDType, role: UserRole) {
@@ -28,6 +32,11 @@ export class AdminChapterService {
         .select({ displayOrder: sql<number>`COALESCE(MAX(${chapters.displayOrder}), 0)` })
         .from(chapters)
         .where(eq(chapters.courseId, body.courseId));
+
+      const { language } = await this.localizationService.getLanguageByEntity(
+        ENTITY_TYPE.COURSE,
+        body.courseId,
+      );
 
       if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
         throw new BadRequestException({
@@ -41,6 +50,7 @@ export class AdminChapterService {
         .values({
           ...body,
           authorId,
+          title: buildJsonbField(language, body.title),
           displayOrder: maxDisplayOrder.displayOrder + 1,
         })
         .returning();
@@ -81,9 +91,15 @@ export class AdminChapterService {
       chapterObject.currentUserId,
       chapterObject.chapterId,
     );
+    
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.CHAPTER,
+      chapterObject.chapterId,
+    );
 
     const [chapterToUpdate] = await this.adminChapterRepository.getChapterById(
       chapterObject.chapterId,
+      language,
     );
 
     const oldDisplayOrder = chapterToUpdate.displayOrder;
@@ -117,6 +133,16 @@ export class AdminChapterService {
       });
     }
 
+    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.CHAPTER,
+      id,
+      body.language,
+    );
+
+    if (!availableLocales.includes(body.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
     const [chapter] = await this.adminChapterRepository.updateChapter(id, body);
 
     if (!chapter) throw new NotFoundException("Chapter not found");
@@ -130,7 +156,12 @@ export class AdminChapterService {
       chapterId,
     );
 
-    const [chapter] = await this.adminChapterRepository.getChapterById(chapterId);
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.CHAPTER,
+      chapterId,
+    );
+
+    const [chapter] = await this.adminChapterRepository.getChapterById(chapterId, language);
 
     if (!chapter) throw new NotFoundException("Chapter not found");
 

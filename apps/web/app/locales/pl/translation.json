@@ -916,6 +916,7 @@
       "status": "Status",
       "pricing": "Cennik",
       "preview": "Podgląd",
+      "generateMissingTranslations": "Wygeneruj brakujące tłumaczenia",
       "enrolledStudents": "Zapisani studenci",
       "testAiMentor": "Przetestuj AI Mentora"
     },

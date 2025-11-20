@@ -9,7 +9,8 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { CreatePasswordReminderEmail } from "@repo/email-templates";
-import { OnboardingPages } from "@repo/shared";
+import { CreatePasswordEmail } from "@repo/email-templates";
+import { OnboardingPages, type SupportedLanguages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, isNull, not, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -724,17 +725,6 @@ export class UserService {
       default:
         return users.firstName;
     }
-  }
-
-  private async hasCoursesWithAuthor(authorId: UUIDType): Promise<boolean> {
-    const course = await this.db
-      .select({ id: courses.id })
-      .from(courses)
-      .where(eq(courses.authorId, authorId))
-      .limit(1)
-      .then((results) => results[0]);
-
-    return !!course;
   }
 
   public async getAdminsToNotifyAboutFinishedCourse(): Promise<{ email: string; id: string }[]> {

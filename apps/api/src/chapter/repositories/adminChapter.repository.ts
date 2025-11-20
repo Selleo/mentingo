@@ -1,7 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import {
   aiMentorLessons,
   chapters,
@@ -12,6 +13,7 @@ import {
 } from "src/storage/schema";
 
 import type { UpdateChapterBody } from "../schemas/chapter.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
   AdminLessonWithContentSchema,
@@ -26,8 +28,14 @@ import type * as schema from "src/storage/schema";
 export class AdminChapterRepository {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
 
-  async getChapterById(chapterId: UUIDType) {
-    return await this.db.select().from(chapters).where(eq(chapters.id, chapterId));
+  async getChapterById(chapterId: UUIDType, language: SupportedLanguages) {
+    return this.db
+      .select({
+        ...getTableColumns(chapters),
+        title: sql<string>`chapters.title->>${language}`,
+      })
+      .from(chapters)
+      .where(eq(chapters.id, chapterId));
   }
 
   async changeChapterDisplayOrder(
@@ -62,7 +70,7 @@ export class AdminChapterRepository {
   async updateChapterDisplayOrder(courseId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {
     const dbInstance = trx ?? this.db;
 
-    return await dbInstance.execute(sql`
+    return dbInstance.execute(sql`
         WITH ranked_chapters AS (
           SELECT id, row_number() OVER (ORDER BY display_order) AS new_display_order
           FROM ${chapters}
@@ -82,14 +90,17 @@ export class AdminChapterRepository {
     return dbInstance.delete(chapters).where(eq(chapters.id, chapterId)).returning();
   }
 
-  async getBetaChapterLessons(chapterId: UUIDType): Promise<AdminLessonWithContentSchema[]> {
+  async getBetaChapterLessons(
+    chapterId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<AdminLessonWithContentSchema[]> {
     return this.db
       .select({
         updatedAt: sql<string>`${lessons.updatedAt}`,
         id: lessons.id,
-        title: lessons.title,
+        title: sql<string>`lessons.title->>${language}`,
         type: sql<LessonTypes>`${lessons.type}`,
-        description: sql<string>`${lessons.description}`,
+        description: sql<string>`lessons.description->>${language}`,
         fileS3Key: sql<string>`${lessons.fileS3Key}`,
         fileType: sql<string>`${lessons.fileType}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
@@ -102,19 +113,19 @@ export class AdminChapterRepository {
           SELECT ARRAY(
             SELECT json_build_object(
               'id', ${questions.id},
-              'title', ${questions.title},
+              'title', ${questions.title}->>${language},
               'type', ${questions.type},
-              'description', ${questions.description},
+              'description', ${questions.description}->>${language},
               'photoS3Key', ${questions.photoS3Key},
               'displayOrder', ${questions.displayOrder},
               'options', (
                 SELECT ARRAY(
                   SELECT json_build_object(
                     'id', ${questionAnswerOptions.id},
-                    'optionText', ${questionAnswerOptions.optionText},
+                    'optionText', ${questionAnswerOptions.optionText}->>${language},
                     'isCorrect', ${questionAnswerOptions.isCorrect},
                     'displayOrder', ${questionAnswerOptions.displayOrder},
-                    'matchedWord', ${questionAnswerOptions.matchedWord},
+                    'matchedWord', ${questionAnswerOptions.matchedWord}->>${language},
                     'scaleAnswer', ${questionAnswerOptions.scaleAnswer}
                   )
                   FROM ${questionAnswerOptions} questionAnswerOptions
@@ -171,7 +182,14 @@ export class AdminChapterRepository {
   }
 
   async updateChapter(id: UUIDType, body: UpdateChapterBody) {
-    return this.db.update(chapters).set(body).where(eq(chapters.id, id)).returning();
+    return this.db
+      .update(chapters)
+      .set({
+        ...body,
+        title: setJsonbField(chapters.title, body.language, body.title),
+      })
+      .where(eq(chapters.id, id))
+      .returning();
   }
 
   async updateChapterCountForCourse(courseId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {

@@ -3,6 +3,8 @@ import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_FIELD, ENTITY_TYPE } from "src/localization/localization.types";
 import {
   chapters,
   courses,
@@ -19,6 +21,7 @@ import {
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
 import type { NextLesson } from "src/lesson/lesson.schema";
@@ -27,7 +30,10 @@ import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class StatisticsRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   async getQuizStats(userId: UUIDType) {
     const [quizStatsResult] = await this.db
@@ -144,10 +150,11 @@ export class StatisticsRepository {
     return result;
   }
 
-  async getFiveMostPopularCourses(userId?: UUIDType) {
+  async getFiveMostPopularCourses(userId?: UUIDType, language?: SupportedLanguages) {
+    const languageJsonPath = language ? `${language}` : courses.baseLanguage;
     return this.db
       .select({
-        courseName: courses.title,
+        courseName: sql<string>`courses.title->>${languageJsonPath}`,
         studentCount: sql<number>`${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}`,
       })
       .from(coursesSummaryStats)
@@ -304,7 +311,10 @@ export class StatisticsRepository {
       .groupBy(studentCourses.courseId);
   }
 
-  async getNextLessonForStudent(studentId: UUIDType): Promise<NextLesson> {
+  async getNextLessonForStudent(
+    studentId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<NextLesson> {
     const [lesson] = (await this.db.execute(sql`
       WITH user_courses AS (
         SELECT course_id
@@ -361,28 +371,40 @@ export class StatisticsRepository {
       SELECT * FROM next_lesson_in_other_courses
       WHERE NOT EXISTS (SELECT 1 FROM next_lesson_in_current_course)
         LIMIT 1
-        )
-      SELECT
-        c.id AS "courseId",
-        c.title AS "courseTitle",
-        c.description AS "courseDescription",
-        c.thumbnail_s3_key AS "courseThumbnail",
+      )
+      SELECT 
+        courses.id AS "courseId",
+        ${this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.TITLE,
+          language,
+        )} AS "courseTitle",
+        ${this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.DESCRIPTION,
+          language,
+        )} AS "courseDescription",
+        courses.thumbnail_s3_key AS "courseThumbnail",
         nl.lesson_id AS "lessonId",
-        ch.title AS "chapterTitle",
-        CASE
+        ${this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.CHAPTER,
+          ENTITY_FIELD.TITLE,
+          language,
+        )} AS "chapterTitle",
+        CASE 
           WHEN scp.completed_at IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
           WHEN scp.completed_lesson_count > 0 THEN ${PROGRESS_STATUSES.IN_PROGRESS}
           ELSE ${PROGRESS_STATUSES.NOT_STARTED}
           END AS "chapterProgress",
         COALESCE(scp.completed_lesson_count, 0) AS "completedLessonCount",
-        ch.lesson_count AS "lessonCount",
-        ch.display_order AS "chapterDisplayOrder"
+        chapters.lesson_count AS "lessonCount",
+        chapters.display_order AS "chapterDisplayOrder"
       FROM next_lesson nl
-             JOIN courses c ON nl.course_id = c.id
-             JOIN chapters ch ON nl.chapter_id = ch.id
-             JOIN student_courses sc ON sc.course_id = c.id AND sc.student_id = ${studentId}
-             LEFT JOIN student_chapter_progress scp ON ch.id = scp.chapter_id
-        AND scp.student_id = ${studentId}
+      JOIN courses ON nl.course_id = courses.id
+      JOIN chapters ON nl.chapter_id = chapters.id
+      JOIN student_courses sc ON sc.course_id = c.id AND sc.student_id = ${studentId}
+      LEFT JOIN student_chapter_progress scp ON chapters.id = scp.chapter_id 
+        AND scp.student_id = ${studentId};
       WHERE sc.status = ${COURSE_ENROLLMENT.ENROLLED};
     `)) as unknown as NextLesson[];
 

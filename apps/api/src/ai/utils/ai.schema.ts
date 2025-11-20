@@ -1,7 +1,7 @@
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
-import { THREAD_STATUS, SUPPORTED_LANGUAGES, MESSAGE_ROLE } from "src/ai/utils/ai.type";
+import { THREAD_STATUS, MESSAGE_ROLE } from "src/ai/utils/ai.type";
 import { UUIDSchema } from "src/common";
 
 export const requestThreadSchema = Type.Object({

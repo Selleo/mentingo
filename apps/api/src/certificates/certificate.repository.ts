@@ -3,20 +3,27 @@ import { eq, and, countDistinct, sql, isNull } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { addPagination } from "src/common/pagination";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { certificates, users, courses, studentCourses } from "src/storage/schema";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class CertificateRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   async findCertificatesByUserId(
     userId: string,
     page: number,
     perPage: number,
     sortOrder: any,
+    language: SupportedLanguages,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const dbInstance = trx || this.db;
@@ -25,7 +32,7 @@ export class CertificateRepository {
       .select({
         id: certificates.id,
         courseId: certificates.courseId,
-        courseTitle: courses.title,
+        courseTitle: sql<string>`courses.title->>'${language}'`,
         completionDate: studentCourses.completedAt,
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         userId: certificates.userId,
@@ -45,8 +52,7 @@ export class CertificateRepository {
       .where(and(eq(certificates.userId, userId), isNull(users.deletedAt)))
       .orderBy(sortOrder(certificates.createdAt));
 
-    const paginatedQuery = addPagination(queryDB.$dynamic(), page, perPage);
-    return await paginatedQuery;
+    return addPagination(queryDB.$dynamic(), page, perPage);
   }
 
   async countByUserId(userId: string, trx?: PostgresJsDatabase<typeof schema>) {
@@ -78,9 +84,14 @@ export class CertificateRepository {
   async findCourseById(courseId: string, trx?: PostgresJsDatabase<typeof schema>) {
     const dbInstance = trx || this.db;
 
+    const { language } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.COURSE,
+      courseId,
+    );
+
     const [course] = await dbInstance
       .select({
-        title: courses.title,
+        title: sql<string>`courses.title->>${language}`,
         certificateEnabled: courses.hasCertificate,
       })
       .from(courses)
@@ -116,6 +127,7 @@ export class CertificateRepository {
   async findCertificateByUserAndCourse(
     userId: string,
     courseId: string,
+    language: SupportedLanguages,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const dbInstance = trx || this.db;
@@ -124,7 +136,7 @@ export class CertificateRepository {
       .select({
         id: certificates.id,
         courseId: certificates.courseId,
-        courseTitle: courses.title,
+        courseTitle: sql<string>`courses.title->>'${language}'`,
         completionDate: studentCourses.completedAt,
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         userId: certificates.userId,

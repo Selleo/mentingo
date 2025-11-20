@@ -1,4 +1,5 @@
 import type { certificateSchema, allCertificatesSchema } from "./certificates.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Static } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 
@@ -11,4 +12,5 @@ export type CertificatesQuery = {
   page?: number;
   perPage?: number;
   sort?: "createdAt";
+  language: SupportedLanguages;
 };

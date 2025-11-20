@@ -1,4 +1,5 @@
 import { useNavigate } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +15,7 @@ import { cn } from "~/lib/utils";
 import { useScormFormStore } from "../store/scormForm.store";
 
 import type { CourseFormData, CourseStatus, StepComponentProps } from "../types/scorm.types";
+import type { Languages } from "@repo/shared";
 
 export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
   const navigate = useNavigate();
@@ -44,7 +46,8 @@ export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
           title: data.details.title,
           thumbnailS3Key: thumbnailResult?.fileKey,
           isScorm: true,
-          priceInCents: data.pricing.price || 0 * 100,
+          priceInCents: data.pricing.price || 0,
+          language: SUPPORTED_LANGUAGES.EN as Languages,
         },
       });
 

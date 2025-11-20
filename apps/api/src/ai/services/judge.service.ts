@@ -24,7 +24,10 @@ export class JudgeService {
     if (thread.data.status !== THREAD_STATUS.ACTIVE)
       throw new BadRequestException("Thread must be active");
 
-    const mentorLesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
+    const mentorLesson = await this.aiRepository.findMentorLessonByThreadId(
+      data.threadId,
+      thread.data.userLanguage,
+    );
 
     const messages = await this.messageService.findMessageHistory(
       data.threadId,

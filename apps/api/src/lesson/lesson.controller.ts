@@ -12,17 +12,18 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
+import { SupportedLanguages } from "@repo/shared";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { SupportedLanguages } from "src/ai/utils/ai.type";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -68,6 +69,7 @@ export class LessonController {
       { type: "query", name: "description", schema: Type.String() },
       { type: "query", name: "searchQuery", schema: Type.String() },
       { type: "query", name: "lessonCompleted", schema: Type.String() },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: baseResponse(Type.Array(enrolledLessonSchema)),
   })
@@ -76,6 +78,7 @@ export class LessonController {
     @Query("description") description: string,
     @Query("searchQuery") searchQuery: string,
     @Query("lessonCompleted") lessonCompleted: string,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<EnrolledLesson[]>> {
     const filters: EnrolledLessonsFilters = {
@@ -84,23 +87,27 @@ export class LessonController {
       searchQuery,
       lessonCompleted: lessonCompleted ? lessonCompleted === "true" : undefined,
     };
-    const lessons = await this.lessonService.getEnrolledLessons(userId, filters);
+    const lessons = await this.lessonService.getEnrolledLessons(userId, filters, language);
     return new BaseResponse(lessons);
   }
 
   @Get(":id")
   @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
     response: baseResponse(lessonShowSchema),
   })
   async getLessonById(
     @Param("id") id: UUIDType,
-    @Query("userLanguage") userLanguage: SupportedLanguages,
+    @Query("language") language: SupportedLanguages,
+    @Query("studentId") studentId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") userRole: UserRole,
-    @Query("studentId") studentId: UUIDType,
   ): Promise<BaseResponse<LessonShow>> {
     return new BaseResponse(
-      await this.lessonService.getLessonById(id, studentId || userId, userRole, userLanguage),
+      await this.lessonService.getLessonById(id, studentId || userId, userRole, language),
     );
   }
 

@@ -20,6 +20,7 @@ import type {
   StatsByMonth,
   UserStats,
 } from "./schemas/userStats.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { UserRole } from "src/user/schemas/userRoles";
 
@@ -31,7 +32,7 @@ export class StatisticsService {
     private readonly eventBus: EventBus,
   ) {}
 
-  async getUserStats(userId: UUIDType): Promise<UserStats> {
+  async getUserStats(userId: UUIDType, language: SupportedLanguages): Promise<UserStats> {
     const coursesStatsByMonth: StatsByMonth[] =
       await this.statisticsRepository.getCoursesStatsByMonth(userId);
     const coursesTotalStats = this.calculateTotalStats(coursesStatsByMonth);
@@ -41,7 +42,7 @@ export class StatisticsService {
     const lessonsTotalStats = this.calculateTotalStats(lessonsStatsByMonth);
 
     const quizStats = await this.statisticsRepository.getQuizStats(userId);
-    const nextLesson = await this.getLastLesson(userId);
+    const nextLesson = await this.getLastLesson(userId, language);
 
     const activityStats = (await this.statisticsRepository.getActivityStats(userId)) ?? {};
 
@@ -69,9 +70,10 @@ export class StatisticsService {
     };
   }
 
-  async getStats(userId: UUIDType, userRole: UserRole) {
+  async getStats(userId: UUIDType, userRole: UserRole, language: SupportedLanguages) {
     const fiveMostPopularCourses = await this.statisticsRepository.getFiveMostPopularCourses(
       userRole !== USER_ROLES.ADMIN ? userId : undefined,
+      language,
     );
     const [totalCoursesCompletionStats] = await this.statisticsRepository.getTotalCoursesCompletion(
       userRole !== USER_ROLES.ADMIN ? userId : undefined,
@@ -266,8 +268,8 @@ export class StatisticsService {
     return monthlyStats;
   }
 
-  private async getLastLesson(userId: UUIDType) {
-    const nextLesson = await this.statisticsRepository.getNextLessonForStudent(userId);
+  private async getLastLesson(userId: UUIDType, language: SupportedLanguages) {
+    const nextLesson = await this.statisticsRepository.getNextLessonForStudent(userId, language);
 
     if (!nextLesson) return null;
 

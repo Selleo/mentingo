@@ -15,7 +15,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
-import { OnboardingPages } from "@repo/shared";
+import { OnboardingPages, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
@@ -35,6 +35,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import {
   type CreateUserBody,
   createUserSchema,
@@ -273,12 +274,19 @@ export class UserController {
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: nullResponse(),
-    request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
   })
   async deleteUser(
     @Query("id") id: UUIDType,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<null> {
+    if (currentUserId !== id) {
+      throw new ForbiddenException("You can only delete your own account");
+    }
+
     await this.usersService.deleteUser(currentUserId, id);
 
     return null;
@@ -288,7 +296,10 @@ export class UserController {
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: nullResponse(),
-    request: [{ type: "body", schema: deleteUsersSchema }],
+    request: [
+      { type: "body", schema: deleteUsersSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
   })
   async deleteBulkUsers(
     @Body() data: DeleteUsersSchema,

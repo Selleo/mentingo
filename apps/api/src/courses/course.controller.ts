@@ -14,6 +14,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request } from "express";
 import { Validate } from "nestjs-typebox";
@@ -40,6 +41,7 @@ import {
   courseAverageQuizScoresSchema,
   getCourseStatisticsSchema,
   getLessonSequenceEnabledSchema,
+  supportedLanguagesSchema,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -113,6 +115,7 @@ export class CourseController {
     @Query("sort") sort: SortCourseFieldsOptions,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
     @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<PaginatedResponse<AllCoursesResponse>> {
@@ -137,6 +140,7 @@ export class CourseController {
       sort,
       currentUserId,
       currentUserRole,
+      language,
     };
 
     const data = await this.courseService.getAllCourses(query);
@@ -157,6 +161,7 @@ export class CourseController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCourseFieldsOptions,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<PaginatedResponse<AllStudentCoursesResponse>> {
     const filters: CoursesFilterSchema = {
@@ -170,7 +175,7 @@ export class CourseController {
           ? [creationDateRangeStart, creationDateRangeEnd]
           : undefined,
     };
-    const query = { filters, page, perPage, sort };
+    const query = { filters, page, perPage, sort, language };
 
     const data = await this.courseService.getCoursesForUser(query, currentUserId);
 
@@ -209,6 +214,7 @@ export class CourseController {
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCourseFieldsOptions,
     @Query("excludeCourseId") excludeCourseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId?: UUIDType,
   ): Promise<PaginatedResponse<AllStudentCoursesResponse>> {
     const filters: CoursesFilterSchema = {
@@ -222,7 +228,7 @@ export class CourseController {
           ? [creationDateRangeStart, creationDateRangeEnd]
           : undefined,
     };
-    const query = { filters, page, perPage, sort, excludeCourseId };
+    const query = { filters, page, perPage, sort, excludeCourseId, language };
 
     const data = await this.courseService.getAvailableCourses(query, currentUserId);
 
@@ -243,6 +249,7 @@ export class CourseController {
       { type: "query", name: "title", schema: Type.String() },
       { type: "query", name: "description", schema: Type.String() },
       { type: "query", name: "searchQuery", schema: Type.String() },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: baseResponse(allCoursesForContentCreatorSchema),
   })
@@ -253,6 +260,7 @@ export class CourseController {
     @Query("title") title: string,
     @Query("description") description: string,
     @Query("searchQuery") searchQuery: string,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<AllCoursesForContentCreatorResponse>> {
     const query = {
@@ -263,6 +271,7 @@ export class CourseController {
       title,
       description,
       searchQuery,
+      language,
     };
 
     return new BaseResponse(await this.courseService.getContentCreatorCourses(query));
@@ -271,29 +280,37 @@ export class CourseController {
   @Public()
   @Get()
   @Validate({
-    request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
     response: baseResponse(commonShowCourseSchema),
   })
   async getCourse(
     @Query("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<CommonShowCourse>> {
-    return new BaseResponse(await this.courseService.getCourse(id, currentUserId));
+    return new BaseResponse(await this.courseService.getCourse(id, currentUserId, language));
   }
 
   @Get("beta-course-by-id")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
-    request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
     response: baseResponse(commonShowBetaCourseSchema),
   })
   async getBetaCourseById(
     @Query("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
     @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<BaseResponse<CommonShowBetaCourse>> {
     return new BaseResponse(
-      await this.courseService.getBetaCourseById(id, currentUserId, currentUserRole),
+      await this.courseService.getBetaCourseById(id, language, currentUserId, currentUserRole),
     );
   }
 
@@ -552,6 +569,7 @@ export class CourseController {
         name: "sort",
         schema: sortCourseStudentProgressionOptions,
       },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: paginatedResponse(allStudentCourseProgressionSchema),
   })
@@ -561,6 +579,7 @@ export class CourseController {
     @Query("perPage") perPage: number,
     @Query("search") searchQuery: string,
     @Query("sort") sort: SortCourseStudentProgressionOptions,
+    @Query("language") language: SupportedLanguages,
   ): Promise<PaginatedResponse<AllStudentCourseProgressionResponse>> {
     const query = {
       courseId,
@@ -568,6 +587,7 @@ export class CourseController {
       perPage,
       searchQuery,
       sort,
+      language,
     };
 
     const studentsProgression = await this.courseService.getStudentsProgress(query);
@@ -588,6 +608,7 @@ export class CourseController {
         name: "sort",
         schema: sortCourseStudentQuizResultsOptions,
       },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: paginatedResponse(allStudentQuizResultsSchema),
   })
@@ -597,6 +618,7 @@ export class CourseController {
     @Query("perPage") perPage: number,
     @Query("quizId") quizId: string,
     @Query("sort") sort: SortCourseStudentQuizResultsOptions,
+    @Query("language") language: SupportedLanguages,
   ): Promise<PaginatedResponse<AllStudentQuizResultsResponse>> {
     const query = {
       courseId,
@@ -604,6 +626,7 @@ export class CourseController {
       perPage,
       quizId,
       sort,
+      language,
     };
 
     const studentQuizResults = await this.courseService.getStudentsQuizResults(query);
@@ -624,6 +647,7 @@ export class CourseController {
         name: "sort",
         schema: sortCourseStudentAiMentorResultsOptions,
       },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: paginatedResponse(allStudentAiMentorResultsSchema),
   })
@@ -633,6 +657,7 @@ export class CourseController {
     @Query("perPage") perPage: number,
     @Query("lessonId") lessonId: string,
     @Query("sort") sort: SortCourseStudentAiMentorResultsOptions,
+    @Query("language") language: SupportedLanguages,
   ): Promise<PaginatedResponse<AllStudentAiMentorResultsResponse>> {
     const query = {
       courseId,
@@ -640,6 +665,7 @@ export class CourseController {
       perPage,
       lessonId,
       sort,
+      language,
     };
 
     const studentQuizResults = await this.courseService.getStudentsAiMentorResults(query);

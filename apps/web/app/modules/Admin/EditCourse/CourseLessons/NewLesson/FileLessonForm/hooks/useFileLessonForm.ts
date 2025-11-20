@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
@@ -14,6 +15,7 @@ import { fileLessonFormSchema } from "../validators/fileLessonFormSchema";
 
 import type { LessonTypes } from "../../../CourseLessons.types";
 import type { FileLessonFormValues } from "../validators/fileLessonFormSchema";
+import type { Languages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type FileLessonFormProps = {
@@ -59,7 +61,7 @@ export const useFileLessonForm = ({
 
     try {
       if (lessonToEdit) {
-        await updateFileItem({ data: { ...values }, fileLessonId: lessonToEdit.id });
+        await updateFileItem({ data: { ...values, language: SUPPORTED_LANGUAGES.EN as Languages }, fileLessonId: lessonToEdit.id });
         await queryClient.invalidateQueries({ queryKey: ["lesson", lessonToEdit.id] });
       } else {
         await createFile({
