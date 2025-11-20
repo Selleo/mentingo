@@ -67,7 +67,7 @@ import {
   userSchema,
   userOnboardingStatusSchema,
 } from "./schemas/user.schema";
-import { SortUserFieldsOptions } from "./schemas/userQuery";
+import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
 import { UserService } from "./user.service";
 
@@ -89,7 +89,7 @@ export class UserController {
       { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
-      { type: "query", name: "sort", schema: Type.String() },
+      { type: "query", name: "sort", schema: sortUserFieldsOptions },
       { type: "query", name: "groupId", schema: Type.String() },
     ],
     response: paginatedResponse(allUsersSchema),

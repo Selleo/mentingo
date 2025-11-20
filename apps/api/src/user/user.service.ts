@@ -79,9 +79,9 @@ export class UserService {
 
   public async getUsers(query: UsersQuery = {}) {
     const {
-      sort = UserSortFields.title,
-      perPage = DEFAULT_PAGE_SIZE,
+      sort = UserSortFields.firstName,
       page = 1,
+      perPage = DEFAULT_PAGE_SIZE,
       filters = {},
     } = query;
 
@@ -98,7 +98,9 @@ export class UserService {
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions))
-      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
+      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)))
+      .limit(perPage)
+      .offset((page - 1) * perPage);
 
     const usersWithProfilePictures = await Promise.all(
       usersData.map(async (user) => {
@@ -602,10 +604,16 @@ export class UserService {
 
   private getColumnToSortBy(sort: UserSortField) {
     switch (sort) {
+      case UserSortFields.firstName:
+        return users.firstName;
+      case UserSortFields.lastName:
+        return users.lastName;
+      case UserSortFields.email:
+        return users.email;
       case UserSortFields.createdAt:
         return users.createdAt;
-      case UserSortFields.role:
-        return users.role;
+      case UserSortFields.groupName:
+        return groups.name;
       default:
         return users.firstName;
     }

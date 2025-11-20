@@ -3108,7 +3108,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
-        sort?: string;
+        sort?:
+          | "firstName"
+          | "lastName"
+          | "email"
+          | "createdAt"
+          | "groupName"
+          | "-firstName"
+          | "-lastName"
+          | "-email"
+          | "-createdAt"
+          | "-groupName";
         groupId?: string;
       },
       params: RequestParams = {},

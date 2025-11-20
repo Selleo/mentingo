@@ -40,7 +40,7 @@ export const GlobalSearchAdminResults = ({
       const [courses, users, categories, groups, announcements] = results;
 
       const coursesData = courses?.data;
-      const usersData = users?.data;
+      const usersData = users?.data?.data;
       const categoriesData = categories?.data;
       const groupsData = groups?.data;
       const announcementsData = announcements?.data;

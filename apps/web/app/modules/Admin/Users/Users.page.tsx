@@ -3,14 +3,12 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
-  type RowSelectionState,
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { camelCase } from "lodash-es";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
@@ -20,6 +18,7 @@ import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useAllUsersSuspense, usersQueryOptions } from "~/api/queries/useUsers";
 import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -43,11 +42,14 @@ import {
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { setPageTitle } from "~/utils/setPageTitle";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
+import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 import { USER_ROLES } from "~/utils/userRoles";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
 import type { GetUsersResponse } from "~/api/generated-api";
+import type { UsersParams } from "~/api/queries/useUsers";
+import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import type { UserRole } from "~/config/userRoles";
 
 type TUser = GetUsersResponse["data"][number];
@@ -63,6 +65,9 @@ export const clientLoader = async () => {
 
 const Users = () => {
   const navigate = useNavigate();
+
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+
   const [searchParams, setSearchParams] = React.useState<{
     keyword?: string;
     role?: UserRole;
@@ -70,14 +75,17 @@ const Users = () => {
     status?: string;
     groupId?: string;
   }>({ archived: false });
+
+  const usersQueryParams = useMemo(() => {
+    const sort = tanstackSortingToParam(sorting) as UsersParams["sort"];
+    return { ...searchParams, sort };
+  }, [searchParams, sorting]);
+
   const [isPending, startTransition] = React.useTransition();
 
-  const { data } = useAllUsersSuspense(searchParams);
+  const { data: userData } = useAllUsersSuspense(usersQueryParams);
   const { data: groupData } = useGroupsQuerySuspense();
   const groups = groupData.map(({ id, name }) => ({ groupId: id, groupName: name }));
-
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   const [selectedValue, setSelectedValue] = React.useState<string>("");
 
@@ -242,17 +250,22 @@ const Users = () => {
     },
   ];
 
+  const handleSortingChange = useCallback(
+    (updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
+      setSorting(updaterOrValue);
+    },
+    [],
+  );
+
   const table = useReactTable({
     getRowId: (row) => row.id,
-    data,
+    data: userData.data || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setRowSelection,
+    onSortingChange: handleSortingChange,
+    manualSorting: true,
     state: {
       sorting,
-      rowSelection,
     },
   });
 
@@ -294,6 +307,8 @@ const Users = () => {
     delete: handleDeleteUsers,
     archive: handleArchiveUsers,
   };
+
+  const { totalItems, perPage, page } = userData?.pagination || {};
 
   return (
     <PageWrapper
@@ -377,6 +392,17 @@ const Users = () => {
             ))}
           </TableBody>
         </Table>
+        <Pagination
+          className="border-b border-x bg-neutral-50 rounded-b-lg"
+          totalItems={totalItems}
+          itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
+          currentPage={page}
+          onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
+          onItemsPerPageChange={(newPerPage) => {
+            handleFilterChange("page", "1");
+            handleFilterChange("perPage", newPerPage);
+          }}
+        />
       </div>
     </PageWrapper>
   );
