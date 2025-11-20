@@ -14,7 +14,7 @@ import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-dat
 import { COURSE_SETTINGS_UI } from "./data/course-settings-data";
 
 const allowUnregisteredUsersToBrowseCourses = async (page: Page) => {
-  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+  await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
   await page.getByRole("link", { name: /settings/i }).click();
 
   await page
@@ -198,7 +198,7 @@ test.describe("Course settings flow", () => {
       await test.step("unregistered user tries to access free chapter", async () => {
         const newPage = page;
         // const newPage = await logout(browser);
-        await page.getByRole("button", { name: "test Student profile test" }).click();
+        await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
         await page
           .getByRole("menuitem", { name: /logout/i })
           .locator("div")
@@ -262,8 +262,8 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
       );
 
-      const nextLessonButton = page.getByTestId("next-lesson-button");
-      await expect(nextLessonButton).toBeVisible();
+      const chaptersText = page.getByRole("tab", { name: "Chapters" });
+      await expect(chaptersText).toBeVisible();
     });
 
     await test.step("unregistered user tries to enroll", async () => {

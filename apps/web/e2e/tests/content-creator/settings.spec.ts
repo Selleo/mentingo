@@ -18,7 +18,7 @@ test.describe("Content creator settings", () => {
     await page.goto("/");
   });
   test("should change content creator informations", async ({ page }) => {
-    const userName = page.getByRole("button", { name: "Dakota Content Creator" });
+    const userName = page.getByRole("button", { name: "Avatar for email@example.com" });
     await userName.click();
     await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
     await page.waitForURL("/settings");
