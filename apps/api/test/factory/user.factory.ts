@@ -25,6 +25,7 @@ export const credentialFactory = Factory.define<Credential>(() => ({
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   archived: false,
+  deletedAt: null,
 }));
 
 class UserFactory extends Factory<UserWithCredentials> {
@@ -104,6 +105,7 @@ export const createUserFactory = (db: DatabasePg) => {
       role: USER_ROLES.STUDENT,
       archived: false,
       avatarReference: null,
+      deletedAt: null,
     };
   });
 };
