@@ -171,7 +171,7 @@ const ChapterCard = ({
             <div className="flex items-center gap-x-3">
               {dragTrigger}
               <hgroup className="flex w-full flex-col-reverse">
-                <h3 className="body-base-md text-neutral-950">{chapter.title}</h3>
+                <h3 className="body-base-md text-neutral-950 break-all">{chapter.title}</h3>
                 <div className="body-sm-md text-neutral-800">
                   {t("adminCourseView.curriculum.other.chapter")} {chapter.displayOrder} •{" "}
                   {t("adminCourseView.curriculum.other.lessonNumber")} {chapter.lessons.length}

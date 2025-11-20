@@ -80,7 +80,7 @@ const EditCourse = () => {
       >
         <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
           <div className="flex items-center justify-between">
-            <h4 className="h4 flex items-center text-neutral-950">
+            <h4 className="h4 flex items-center text-neutral-950 break-all">
               {course?.title || ""}
 
               {course?.status === "published" && (
