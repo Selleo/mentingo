@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
@@ -418,7 +419,7 @@ export class AdminLessonService {
   }
 
   async uploadFileToLesson(lessonId: UUIDType, file: Express.Multer.File) {
-    if (!file.mimetype.startsWith("image/")) {
+    if (!ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.mimetype)) {
       throw new BadRequestException("Invalid file type");
     }
 
