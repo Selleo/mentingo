@@ -115,6 +115,9 @@ jobs:
       - name: Build shared packages
         run: pnpm --filter="@repo/shared" run build
 
+      - name: Build prompts
+        run: pnpm --filter="@repo/prompts" run build
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:

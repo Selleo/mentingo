@@ -55,9 +55,11 @@ const setCourseAsFree = async (page: Page) => {
 };
 
 const enterCourse = async (page: Page, courseHandle: string) => {
-  const courseCard = page.getByTestId(new RegExp(courseHandle, "i"));
+  const courseCard = page.getByTestId(courseHandle);
 
-  if (!(await courseCard.isVisible())) {
+  const isVisible = await courseCard.isVisible();
+
+  if (!isVisible) {
     return false;
   }
 
@@ -184,11 +186,9 @@ test.describe("Course settings flow", () => {
         page.getByRole("heading", { name: COURSE_SETTINGS_UI.header.chapterTitle2 }),
       ).toBeVisible();
 
-      await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle3, { exact: true }).click();
+      await page.getByTestId(COURSE_SETTINGS_UI.header.chapterTitle3).click();
 
-      await page
-        .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
-        .click();
+      await page.getByRole("button", { name: "Repeat lessons" }).click();
 
       const nextLessonButton = page.getByTestId(
         new RegExp(COURSE_SETTINGS_UI.button.nextLesson, "i"),
@@ -257,12 +257,13 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
       );
 
-      expect(
-        await studentEnrollToCourse(
-          page,
-          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
-        ),
-      ).toBeTruthy();
+      await studentEnrollToCourse(
+        page,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
+      );
+
+      const nextLessonButton = page.getByTestId("next-lesson-button");
+      await expect(nextLessonButton).toBeVisible();
     });
 
     await test.step("unregistered user tries to enroll", async () => {
