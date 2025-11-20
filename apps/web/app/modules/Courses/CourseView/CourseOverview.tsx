@@ -29,36 +29,40 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const navigateToEditCourse = () => navigate(`/admin/beta-courses/${course.id}`);
 
   return (
-    <Card className="w-full border-none pt-6 drop-shadow-primary lg:pt-0">
-      <CardContent className="align-center flex flex-col gap-6 lg:p-8 2xl:flex-row">
-        <div className="relative aspect-video w-full self-start lg:max-w-[320px]">
-          <img
-            src={imageUrl}
-            alt={title}
-            loading="eager"
-            decoding="async"
-            className="h-full w-full rounded-lg object-cover drop-shadow-sm"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = CardPlaceholder;
-            }}
-          />
+    <Card className="w-full border-none pt-1 drop-shadow-primary lg:pt-0">
+      <CardContent className="flex flex-col px-0">
+        <div className="border-b border-1 border-neutral-200 flex items-center justify-end p-4 px-6 mb-8 xl:mb-0">
+          {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
+            <Button className="flex gap-2" variant="primary" onClick={navigateToEditCourse}>
+              <Icon name="Edit" className="size-4" />
+              {t("pages.editCourse")}
+            </Button>
+          )}
         </div>
-        <div className="flex w-full flex-col gap-y-2">
-          <div className="flex justify-between items-center">
-            <CategoryChip category={course?.category} className="bg-primary-50" />
-            {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
-              <Button className="flex gap-2" variant="primary" onClick={navigateToEditCourse}>
-                <Icon name="Edit" className="size-4" />
-                {t("pages.editCourse")}
-              </Button>
-            )}
+        <div className="align-center flex flex-col gap-6 lg:p-8 2xl:flex-row">
+          <div className="relative aspect-video w-full self-start lg:max-w-[320px]">
+            <img
+              src={imageUrl}
+              alt={title}
+              loading="eager"
+              decoding="async"
+              className="h-full w-full rounded-lg object-cover drop-shadow-sm"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = CardPlaceholder;
+              }}
+            />
           </div>
-          <h5 className="h5">{title}</h5>
-          <Viewer
-            content={description}
-            className="body-base mt-2 text-neutral-900"
-            variant="lesson"
-          />
+          <div className="flex w-full flex-col gap-y-2">
+            <div className="flex justify-between items-center">
+              <CategoryChip category={course?.category} className="bg-primary-50" />
+            </div>
+            <h5 className="h5">{title}</h5>
+            <Viewer
+              content={description}
+              className="body-base mt-2 text-neutral-900"
+              variant="lesson"
+            />
+          </div>
         </div>
       </CardContent>
     </Card>
