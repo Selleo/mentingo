@@ -47,9 +47,8 @@ export const LessonCardList = ({
         return;
       }
 
-      const contentType = lesson.type === "file" ? lesson.fileType : lesson.type;
       setSelectedLesson(lesson);
-      switch (contentType) {
+      switch (lesson.type) {
         case "video":
           setContentTypeToDisplay(ContentTypes.VIDEO_LESSON_FORM);
           break;

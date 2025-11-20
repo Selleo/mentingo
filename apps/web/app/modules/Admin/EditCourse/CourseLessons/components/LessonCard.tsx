@@ -18,10 +18,9 @@ interface LessonCardProps {
 }
 
 const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: LessonCardProps) => {
-  const contentType = item.type === "file" ? item.fileType : item.type;
   const { t } = useTranslation();
 
-  const getIcon = useMemo(() => mapTypeToIcon(contentType as string), [contentType]);
+  const getIcon = useMemo(() => mapTypeToIcon(item.type), [item.type]);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -66,7 +65,7 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
             )}
           </p>
           <p className="details text-neutral-600">
-            {t(`adminCoursesView.lessonCard.mappedTypes.${contentType}`)}
+            {t(`adminCoursesView.lessonCard.mappedTypes.${item.type}`)}
           </p>
         </hgroup>
       </div>
