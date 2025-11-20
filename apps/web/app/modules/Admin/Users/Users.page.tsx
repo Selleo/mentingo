@@ -394,6 +394,7 @@ const Users = () => {
         </Table>
         <Pagination
           className="border-b border-x bg-neutral-50 rounded-b-lg"
+          emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
           totalItems={totalItems}
           itemsPerPage={perPage as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
           currentPage={page}
