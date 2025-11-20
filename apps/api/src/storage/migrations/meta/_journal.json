@@ -351,6 +351,41 @@
       "when": 1762507996209,
       "tag": "0049_add_missing_properties_to_user_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1763382711704,
+      "tag": "0050_create_json_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1763382743624,
+      "tag": "0051_transfer_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1763382755130,
+      "tag": "0052_drop_and_rename_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1763383500954,
+      "tag": "0053_altered_text_to_json",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1763454280792,
+      "tag": "0054_added_locales_to_course",
+      "breakpoints": true
     }
   ]
 }

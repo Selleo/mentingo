@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { CreatePasswordEmail } from "@repo/email-templates";
-import { OnboardingPages } from "@repo/shared";
+import { OnboardingPages, type SupportedLanguages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, not, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -370,8 +370,8 @@ export class UserService {
       .where(eq(credentials.userId, id));
   }
 
-  public async deleteUser(id: UUIDType) {
-    await this.validateWhetherUserCanBeDeleted(id);
+  public async deleteUser(id: UUIDType, language: SupportedLanguages) {
+    await this.validateWhetherUserCanBeDeleted(id, language);
     const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning();
 
     if (!deletedUser) {
@@ -379,8 +379,8 @@ export class UserService {
     }
   }
 
-  public async deleteBulkUsers(ids: UUIDType[]) {
-    await this.validateWhetherUsersCanBeDeleted(ids);
+  public async deleteBulkUsers(ids: UUIDType[], language: SupportedLanguages) {
+    await this.validateWhetherUsersCanBeDeleted(ids, language);
     const deletedUsers = await this.db.delete(users).where(inArray(users.id, ids)).returning();
 
     if (deletedUsers.length !== ids.length) {
@@ -603,8 +603,11 @@ export class UserService {
     }
   }
 
-  private async validateWhetherUserCanBeDeleted(userId: UUIDType): Promise<void> {
-    const userQuizAttempts = await this.statisticsService.getUserStats(userId);
+  private async validateWhetherUserCanBeDeleted(
+    userId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<void> {
+    const userQuizAttempts = await this.statisticsService.getUserStats(userId, language);
     const hasCourses = await this.hasCoursesWithAuthor(userId);
 
     if (userQuizAttempts.quizzes.totalAttempts > 0) {
@@ -616,8 +619,13 @@ export class UserService {
     }
   }
 
-  private async validateWhetherUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
-    const validationPromises = userIds.map((id) => this.validateWhetherUserCanBeDeleted(id));
+  private async validateWhetherUsersCanBeDeleted(
+    userIds: UUIDType[],
+    language: SupportedLanguages,
+  ): Promise<void> {
+    const validationPromises = userIds.map((id) =>
+      this.validateWhetherUserCanBeDeleted(id, language),
+    );
     await Promise.all(validationPromises);
   }
 

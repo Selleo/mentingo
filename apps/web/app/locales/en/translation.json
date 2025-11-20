@@ -819,6 +819,7 @@
       "status": "Status",
       "pricing": "Pricing",
       "preview": "Preview",
+      "generateMissingTranslations": "Generate missing translations",
       "enrolledStudents": "Enrolled students",
       "testAiMentor": "Test AI Mentor"
     },

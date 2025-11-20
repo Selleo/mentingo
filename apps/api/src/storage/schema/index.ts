@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -125,8 +126,8 @@ export const coursesStatusEnum = pgEnum("status", ["draft", "published", "privat
 export const courses = pgTable("courses", {
   ...id,
   ...timestamps,
-  title: varchar("title", { length: 250 }).notNull(),
-  description: varchar("description", { length: 20_000 }),
+  title: jsonb("title").default({}).notNull(),
+  description: jsonb("description").default({}).notNull(),
   thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
   status: coursesStatusEnum("status").notNull().default("draft"),
   hasCertificate: boolean("has_certificate").notNull().default(false),
@@ -142,12 +143,17 @@ export const courses = pgTable("courses", {
     .notNull(),
   stripeProductId: text("stripe_product_id"),
   stripePriceId: text("stripe_price_id"),
+  baseLanguage: text("base_language").notNull().default("en"),
+  availableLocales: text("available_locales")
+    .array()
+    .notNull()
+    .default(sql`ARRAY['en']::text[]`),
 });
 
 export const chapters = pgTable("chapters", {
   ...id,
   ...timestamps,
-  title: varchar("title", { length: 250 }).notNull(),
+  title: jsonb("title").default({}).notNull(),
   courseId: uuid("course_id")
     .references(() => courses.id, { onDelete: "cascade" })
     .notNull(),
@@ -166,8 +172,8 @@ export const lessons = pgTable("lessons", {
     .references(() => chapters.id, { onDelete: "cascade" })
     .notNull(),
   type: varchar("type", { length: 20 }).notNull(),
-  title: varchar("title", { length: 250 }).notNull(),
-  description: text("description"),
+  title: jsonb("title").default({}).notNull(),
+  description: jsonb("description"),
   thresholdScore: integer("threshold_score"),
   attemptsLimit: integer("attempts_limit"),
   quizCooldownInHours: integer("quiz_cooldown_in_hours"),
@@ -223,11 +229,11 @@ export const questions = pgTable("questions", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   type: text("type").notNull(),
-  title: varchar("title", { length: 250 }).notNull(),
+  title: jsonb("title").default({}).notNull(),
   displayOrder: integer("display_order"),
   photoS3Key: varchar("photo_s3_key", { length: 200 }),
-  description: text("description"),
-  solutionExplanation: text("solution_explanation"),
+  description: jsonb("description"),
+  solutionExplanation: jsonb("solution_explanation"),
 });
 
 export const questionAnswerOptions = pgTable("question_answer_options", {
@@ -236,10 +242,10 @@ export const questionAnswerOptions = pgTable("question_answer_options", {
   questionId: uuid("question_id")
     .references(() => questions.id, { onDelete: "cascade" })
     .notNull(),
-  optionText: text("option_text").notNull(),
+  optionText: jsonb("option_text").default({}).notNull(),
   isCorrect: boolean("is_correct").notNull(),
   displayOrder: integer("display_order"),
-  matchedWord: varchar("matched_word", { length: 100 }),
+  matchedWord: jsonb("matched_word"),
   scaleAnswer: integer("scale_answer"),
 });
 

@@ -25,17 +25,19 @@ import { isEmpty } from "lodash";
 
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { EnvService } from "src/env/services/env.service";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_FIELD, ENTITY_TYPE } from "src/localization/localization.types";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
-import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
@@ -93,6 +95,7 @@ import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment"
 import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { BaseResponse, Pagination, UUIDType } from "src/common";
 import type {
@@ -116,6 +119,7 @@ export class CourseService {
     private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
     private readonly envService: EnvService,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -129,6 +133,7 @@ export class CourseService {
       sort = CourseSortFields.title,
       currentUserId,
       currentUserRole,
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -142,8 +147,16 @@ export class CourseService {
     const queryDB = this.db
       .select({
         id: courses.id,
-        title: courses.title,
-        description: sql<string>`${courses.description}`,
+        title: this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.TITLE,
+          language,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.DESCRIPTION,
+          language,
+        ),
         thumbnailUrl: courses.thumbnailS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorAvatarUrl: sql<string>`${users.avatarReference}`,
@@ -228,6 +241,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       filters = {},
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -240,7 +254,7 @@ export class CourseService {
       conditions.push(...this.getFiltersConditions(filters, false));
 
       const queryDB = trx
-        .select(this.getSelectField())
+        .select(this.getSelectField(language))
         .from(studentCourses)
         .innerJoin(courses, eq(studentCourses.courseId, courses.id))
         .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -364,6 +378,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       filters = {},
+      language,
     } = query;
     const { sortOrder, sortedField } = getSortOptions(sort);
 
@@ -385,8 +400,16 @@ export class CourseService {
       const queryDB = trx
         .select({
           id: courses.id,
-          description: sql<string>`${courses.description}`,
-          title: courses.title,
+          title: this.localizationService.getLocalizedSqlField(
+            ENTITY_TYPE.COURSE,
+            ENTITY_FIELD.TITLE,
+            language,
+          ),
+          description: this.localizationService.getLocalizedSqlField(
+            ENTITY_TYPE.COURSE,
+            ENTITY_FIELD.DESCRIPTION,
+            language,
+          ),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
           authorId: sql<string>`${courses.authorId}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -471,19 +494,29 @@ export class CourseService {
     });
   }
 
-  async getCourse(id: UUIDType, userId: UUIDType): Promise<CommonShowCourse> {
+  async getCourse(
+    id: UUIDType,
+    userId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<CommonShowCourse> {
     //TODO: to remove
     const testDeployment = "test";
 
     testDeployment;
 
+    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.COURSE,
+      id,
+      language,
+    );
+
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: courses.title,
+        title: sql<string>`courses.title->>${actualLanguage}`,
         thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
         category: sql<string>`${categories.title}`,
-        description: sql<string>`${courses.description}`,
+        description: sql<string>`courses.description->>${actualLanguage}`,
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
@@ -521,7 +554,7 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: chapters.title,
+        title: sql<string>`chapters.title->>${actualLanguage}`,
         isSubmitted: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -560,7 +593,7 @@ export class CourseService {
               FROM (
                 SELECT
                   ${lessons.id} AS id,
-                  ${lessons.title} AS title,
+                  ${lessons.title}->>${actualLanguage} AS title,
                   ${lessons.type} AS type,
                   ${lessons.displayOrder} AS "displayOrder",
                   ${lessons.isExternal} AS "isExternal",
@@ -616,15 +649,26 @@ export class CourseService {
     };
   }
 
-  async getBetaCourseById(id: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
+  async getBetaCourseById(
+    id: UUIDType,
+    language: SupportedLanguages,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.COURSE,
+      id,
+      language,
+    );
+
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: courses.title,
+        title: sql<string>`courses.title->>${actualLanguage}`,
         thumbnailS3Key: sql<string>`COALESCE(${courses.thumbnailS3Key}, '')`,
         category: categories.title,
         categoryId: categories.id,
-        description: sql<string>`${courses.description}`,
+        description: sql<string>`courses.description->>${actualLanguage}`,
         courseChapterCount: courses.chapterCount,
         status: courses.status,
         priceInCents: courses.priceInCents,
@@ -645,7 +689,7 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: chapters.title,
+        title: sql<string>`chapters.title->>${actualLanguage}`,
         displayOrder: sql<number>`${chapters.displayOrder}`,
         lessonCount: chapters.lessonCount,
         updatedAt: chapters.updatedAt,
@@ -672,7 +716,7 @@ export class CourseService {
     const updatedCourseLessonList = await Promise.all(
       courseChapterList?.map(async (chapter) => {
         const lessons: AdminLessonWithContentSchema[] =
-          await this.adminChapterRepository.getBetaChapterLessons(chapter.id);
+          await this.adminChapterRepository.getBetaChapterLessons(chapter.id, actualLanguage);
 
         const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(lessons);
 
@@ -698,6 +742,7 @@ export class CourseService {
     title,
     description,
     searchQuery,
+    language,
   }: {
     currentUserId: UUIDType;
     authorId: UUIDType;
@@ -706,6 +751,7 @@ export class CourseService {
     title?: string;
     description?: string;
     searchQuery?: string;
+    language: SupportedLanguages;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
@@ -727,18 +773,31 @@ export class CourseService {
     }
 
     if (title) {
-      conditions.push(ilike(courses.title, `%${title}%`));
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${title}%`})`,
+      );
     }
 
     if (description) {
-      conditions.push(ilike(courses.description, `%${description}%`));
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${description}%`})`,
+      );
     }
 
     if (searchQuery) {
       const searchCondition = or(
-        ilike(courses.title, `%${searchQuery}%`),
-        ilike(courses.description, `%${searchQuery}%`),
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
       );
+
       if (searchCondition) {
         conditions.push(searchCondition);
       }
@@ -747,8 +806,16 @@ export class CourseService {
     const contentCreatorCourses = await this.db
       .select({
         id: courses.id,
-        description: sql<string>`${courses.description}`,
-        title: courses.title,
+        description: this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.DESCRIPTION,
+          language,
+        ),
+        title: this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.TITLE,
+          language,
+        ),
         thumbnailUrl: courses.thumbnailS3Key,
         authorId: sql<string>`${courses.authorId}`,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -875,8 +942,8 @@ export class CourseService {
       const [newCourse] = await trx
         .insert(courses)
         .values({
-          title: createCourseBody.title,
-          description: createCourseBody.description,
+          title: buildJsonbField(createCourseBody.language, createCourseBody.title),
+          description: buildJsonbField(createCourseBody.language, createCourseBody.description),
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
           status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
@@ -943,10 +1010,12 @@ export class CourseService {
         }
       }
 
-      const { priceInCents, currency, ...rest } = updateCourseBody;
+      const { priceInCents, currency, title, description, ...rest } = updateCourseBody;
 
       const updateData = {
         ...rest,
+        title: buildJsonbField(rest.language, title),
+        description: buildJsonbField(rest.language, description),
         ...(isStripeConfigured ? { priceInCents, currency } : {}),
         ...(imageKey && { imageUrl: imageKey.fileUrl }),
       };
@@ -965,8 +1034,10 @@ export class CourseService {
         // --- create stripe product if it doesn't exist yet ---
         if (!updatedCourse.stripeProductId) {
           const { productId, priceId } = await this.stripeService.createProduct({
-            name: updatedCourse.title,
-            description: updatedCourse.description ?? "",
+            name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
+            description:
+              (updatedCourse.description as Record<string, string>)[updatedCourse.baseLanguage] ??
+              "",
             amountInCents: updatedCourse.priceInCents ?? 0,
             currency: updatedCourse.currency ?? "usd",
           });
@@ -980,12 +1051,14 @@ export class CourseService {
             .where(eq(courses.id, id));
         } else {
           // --- stripe product update ---
-          const productUpdatePayload = {
-            ...(updateCourseBody.title && { name: updateCourseBody.title }),
-            ...(updateCourseBody.description && { description: updateCourseBody.description }),
-          };
+          if (updateCourseBody.language === updatedCourse.baseLanguage) {
+            const productUpdatePayload = {
+              name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
+              description: (updatedCourse.description as Record<string, string>)[
+                updatedCourse.baseLanguage
+              ],
+            };
 
-          if (hasDataToUpdate(productUpdatePayload)) {
             await this.stripeService.updateProduct(
               updatedCourse.stripeProductId,
               productUpdatePayload,
@@ -1370,11 +1443,19 @@ export class CourseService {
     );
   }
 
-  private getSelectField() {
+  private getSelectField(language: SupportedLanguages) {
     return {
       id: courses.id,
-      description: sql<string>`${courses.description}`,
-      title: courses.title,
+      title: this.localizationService.getLocalizedSqlField(
+        ENTITY_TYPE.COURSE,
+        ENTITY_FIELD.TITLE,
+        language,
+      ),
+      description: this.localizationService.getLocalizedSqlField(
+        ENTITY_TYPE.COURSE,
+        ENTITY_FIELD.DESCRIPTION,
+        language,
+      ),
       thumbnailUrl: courses.thumbnailS3Key,
       authorId: sql<string>`${courses.authorId}`,
       author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -1399,21 +1480,33 @@ export class CourseService {
 
   private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
     const conditions = [];
+
     if (filters.title) {
-      conditions.push(ilike(courses.title, `%${filters.title.toLowerCase()}%`));
-    }
-    if (filters.description) {
-      conditions.push(ilike(courses.description, `%${filters.description}%`));
-    }
-    if (filters.searchQuery) {
-      const searchCondition = or(
-        ilike(courses.title, `%${filters.searchQuery}%`),
-        ilike(courses.description, `%${filters.searchQuery}%`),
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.title}%`})`,
       );
-      if (searchCondition) {
-        conditions.push(searchCondition);
-      }
     }
+
+    if (filters.description) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
+      );
+    }
+
+    if (filters.searchQuery) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
+      );
+    }
+
     if (filters.category) {
       conditions.push(like(categories.title, `%${filters.category}%`));
     }
@@ -1578,16 +1671,23 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       searchQuery = "",
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
+
+    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.COURSE,
+      courseId,
+      language,
+    );
 
     const {
       studentNameExpression,
       lastActivityExpression,
       completedLessonsCountExpression,
       groupNameExpression,
-    } = this.getStudentCourseStatisticsExpressions(courseId);
+    } = await this.getStudentCourseStatisticsExpressions(courseId, actualLanguage);
 
     const studentsProgress = await this.db
       .select({
@@ -1616,9 +1716,10 @@ export class CourseService {
       .offset((page - 1) * perPage)
       .orderBy(
         sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
+          await this.getCourseStatisticsColumnToSortBy(
             sortedField as CourseStudentProgressionSortField,
             courseId,
+            actualLanguage,
           ),
         ),
       );
@@ -1666,6 +1767,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       quizId = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
+      language,
     } = query;
 
     const conditions = [
@@ -1678,8 +1780,22 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
+    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.COURSE,
+      courseId,
+      language,
+    );
+
     const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
-      this.getStudentCourseStatisticsExpressions(courseId);
+      await this.getStudentCourseStatisticsExpressions(courseId, actualLanguage);
+
+    const order = sortOrder(
+      await this.getCourseStatisticsColumnToSortBy(
+        sortedField as CourseStudentQuizResultsSortField,
+        courseId,
+        actualLanguage,
+      ),
+    );
 
     const quizResults = await this.db
       .select({
@@ -1697,14 +1813,7 @@ export class CourseService {
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
-      .orderBy(
-        sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentQuizResultsSortField,
-            courseId,
-          ),
-        ),
-      )
+      .orderBy(order)
       .limit(perPage)
       .offset((page - 1) * perPage)
       .where(and(...conditions));
@@ -1742,6 +1851,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       lessonId = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
+      language,
     } = query;
 
     const conditions = [
@@ -1754,14 +1864,31 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const { studentNameExpression } = this.getStudentCourseStatisticsExpressions(courseId);
+    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.COURSE,
+      courseId,
+      language,
+    );
+
+    const { studentNameExpression } = await this.getStudentCourseStatisticsExpressions(
+      courseId,
+      actualLanguage,
+    );
+
+    const order = sortOrder(
+      await this.getCourseStatisticsColumnToSortBy(
+        sortedField as CourseStudentAiMentorResultsSortField,
+        courseId,
+        actualLanguage,
+      ),
+    );
 
     const quizResults = await this.db
       .select({
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
-        lessonName: sql<string>`${lessons.title}`,
+        lessonName: sql<string>`lessons.title->>${actualLanguage}`,
         score: sql<number>`${aiMentorStudentLessonProgress.percentage}`,
         lastSession: sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
@@ -1773,14 +1900,7 @@ export class CourseService {
         eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
       )
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
-      .orderBy(
-        sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentAiMentorResultsSortField,
-            courseId,
-          ),
-        ),
-      )
+      .orderBy(order)
       .limit(perPage)
       .offset((page - 1) * perPage)
       .where(and(...conditions));
@@ -1815,12 +1935,13 @@ export class CourseService {
     };
   }
 
-  private getCourseStatisticsColumnToSortBy(
+  private async getCourseStatisticsColumnToSortBy(
     sort:
       | CourseStudentProgressionSortField
       | CourseStudentQuizResultsSortField
       | CourseStudentAiMentorResultsSortField,
     courseId: UUIDType,
+    language: SupportedLanguages,
   ) {
     const {
       lastAttemptExpression,
@@ -1829,7 +1950,7 @@ export class CourseService {
       groupNameExpression,
       lastActivityExpression,
       completedLessonsCountExpression,
-    } = this.getStudentCourseStatisticsExpressions(courseId);
+    } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     switch (sort) {
       case CourseStudentProgressionSortFields.studentName:
@@ -1849,7 +1970,7 @@ export class CourseService {
       case CourseStudentQuizResultsSortFields.quizScore:
         return studentLessonProgress.quizScore;
       case CourseStudentAiMentorResultsSortFields.lessonName:
-        return lessons.title;
+        return sql<string>`lessons.title->>${language}`;
       case CourseStudentAiMentorResultsSortFields.score:
         return aiMentorStudentLessonProgress.percentage;
       case CourseStudentAiMentorResultsSortFields.lastSession:
@@ -1859,7 +1980,10 @@ export class CourseService {
     }
   }
 
-  private getStudentCourseStatisticsExpressions(courseId: UUIDType) {
+  private async getStudentCourseStatisticsExpressions(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+  ) {
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -1899,7 +2023,7 @@ export class CourseService {
         )`;
 
     const quizNameExpression = sql<string>`(
-          SELECT l.title
+          SELECT l.title->>${language}
           FROM ${lessons} l
           WHERE l.id = ${studentLessonProgress.lessonId}
             AND l.type = 'quiz'

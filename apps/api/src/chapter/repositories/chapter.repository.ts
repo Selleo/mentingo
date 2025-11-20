@@ -5,6 +5,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { chapters, lessons, studentChapterProgress, studentCourses } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
 @Injectable()
@@ -26,12 +27,12 @@ export class ChapterRepository {
       .where(eq(chapters.id, id));
   }
 
-  async getChapterForUser(id: UUIDType, userId: UUIDType) {
+  async getChapterForUser(id: UUIDType, userId: UUIDType, language: SupportedLanguages) {
     const [chapter] = await this.db
       .select({
         displayOrder: sql<number>`${lessons.displayOrder}`,
         id: chapters.id,
-        title: chapters.title,
+        title: sql<string>`chapters.title->>${language}`,
         isFreemium: chapters.isFreemium,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN true ELSE false END`,
         lessonCount: chapters.lessonCount,
@@ -56,20 +57,6 @@ export class ChapterRepository {
         studentCourses,
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
-      .where(eq(chapters.id, id));
-
-    return chapter;
-  }
-
-  async getChapter(id: UUIDType) {
-    const [chapter] = await this.db
-      .select({
-        id: chapters.id,
-        title: chapters.title,
-        isFreemium: chapters.isFreemium,
-        itemsCount: chapters.lessonCount,
-      })
-      .from(chapters)
       .where(eq(chapters.id, id));
 
     return chapter;

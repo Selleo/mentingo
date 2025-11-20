@@ -1,6 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { lessonForChapterSchema, lessonSchema } from "src/lesson/lesson.schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
@@ -27,7 +28,10 @@ export const createChapterSchema = Type.Intersect([
   }),
 ]);
 
-export const updateChapterSchema = Type.Partial(createChapterSchema);
+export const updateChapterSchema = Type.Intersect([
+  Type.Partial(createChapterSchema),
+  Type.Object({ language: supportedLanguagesSchema }),
+]);
 
 export const chapter = Type.Object({
   id: UUIDSchema,

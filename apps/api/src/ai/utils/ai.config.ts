@@ -1,5 +1,5 @@
+import type { SupportedLanguages } from "@repo/shared";
 import type { AiMentorGroupsBody, AiMentorLessonBody } from "src/ai/utils/ai.schema";
-import type { SupportedLanguages } from "src/ai/utils/ai.type";
 
 export const SUMMARY_PROMPT = (content: string, language: SupportedLanguages) => {
   return `You are an expert conversation summarizer. I will provide you with a full chat transcript.

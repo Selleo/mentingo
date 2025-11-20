@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TYPE, type Languages, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -108,12 +108,16 @@ export const useAiMentorLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateAiMentorLesson({
-          data: { ...values, type: values.type },
+          data: { ...values, type: values.type, language: SUPPORTED_LANGUAGES.EN as Languages },
           lessonId: lessonToEdit.id,
         });
       } else {
         await createAiMentorLesson({
-          data: { ...values, chapterId: chapterToEdit.id, type: values.type },
+          data: {
+            ...values,
+            chapterId: chapterToEdit.id,
+            type: values.type,
+          },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }

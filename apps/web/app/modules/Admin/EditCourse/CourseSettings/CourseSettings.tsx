@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -32,6 +33,8 @@ import CourseCardPreview from "../compontents/CourseCardPreview";
 
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
+import type { Languages } from "@repo/shared";
+
 type CourseSettingsProps = {
   courseId?: string;
   title?: string;
@@ -58,6 +61,7 @@ const CourseSettings = ({
     categoryId,
     thumbnailS3Key,
     courseId: courseId || "",
+    courseLanguage: SUPPORTED_LANGUAGES.EN as Languages,
   });
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);

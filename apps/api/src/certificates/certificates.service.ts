@@ -13,6 +13,7 @@ import { SettingsService } from "src/settings/settings.service";
 import { CertificateRepository } from "./certificate.repository";
 
 import type { CertificatesQuery, AllCertificatesResponse } from "./certificates.types";
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { PaginatedResponse, UUIDType } from "src/common";
 import type * as schema from "src/storage/schema";
@@ -27,7 +28,7 @@ export class CertificatesService {
   async getAllCertificates(
     query: CertificatesQuery,
   ): Promise<PaginatedResponse<AllCertificatesResponse>> {
-    const { userId, page = 1, perPage = DEFAULT_PAGE_SIZE, sort = "createdAt" } = query;
+    const { userId, page = 1, perPage = DEFAULT_PAGE_SIZE, sort = "createdAt", language } = query;
     const { sortOrder } = getSortOptions(sort);
 
     try {
@@ -37,6 +38,7 @@ export class CertificatesService {
           page,
           perPage,
           sortOrder,
+          language,
           trx,
         );
 
@@ -128,11 +130,12 @@ export class CertificatesService {
     }
   }
 
-  async getCertificate(userId: UUIDType, courseId: UUIDType) {
+  async getCertificate(userId: UUIDType, courseId: UUIDType, language: SupportedLanguages) {
     try {
       const certificate = await this.certificateRepository.findCertificateByUserAndCourse(
         userId,
         courseId,
+        language,
       );
 
       if (!certificate) {

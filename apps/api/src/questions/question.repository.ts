@@ -12,6 +12,7 @@ import {
 import { QUESTION_TYPE, type QuestionType } from "./schema/question.types";
 
 import type { AnswerQuestionSchema, QuestionSchema } from "./schema/question.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { OptionBody, QuestionBody } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
@@ -24,15 +25,16 @@ export class QuestionRepository {
     lessonId: UUIDType,
     isCompleted: boolean,
     userId: UUIDType,
+    language: SupportedLanguages,
   ): Promise<QuestionBody[]> {
     return this.db
       .select({
         id: sql<UUIDType>`${questions.id}`,
         type: sql<QuestionType>`${questions.type}`,
-        title: questions.title,
-        description: sql<string>`${questions.description}`,
+        title: sql<string>`questions.title->>${language}`,
+        description: sql<string>`questions.description->>${language}`,
         solutionExplanation: sql<string | null>`CASE
-              WHEN ${isCompleted} THEN ${questions.solutionExplanation} 
+              WHEN ${isCompleted} THEN ${questions.solutionExplanation}->>${language} 
               ELSE NULL 
             END`,
         photoS3Key: sql<string>`${questions.photoS3Key}`,
@@ -62,7 +64,7 @@ export class QuestionRepository {
                       WHEN ${!isCompleted} AND ${questions.type} = ${
                         QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT
                       } THEN NULL
-                      ELSE qao.option_text
+                      ELSE qao.option_text->>${language}
                     END,
                   'isCorrect', CASE WHEN ${isCompleted} THEN qao.is_correct ELSE NULL END,
                   'displayOrder',
@@ -75,7 +77,7 @@ export class QuestionRepository {
                       WHEN ${studentQuestionAnswers.id} IS NULL THEN NULL
                       WHEN ${
                         studentQuestionAnswers.answer
-                      }->>CAST(qao.display_order AS text) = qao.option_text AND
+                      }->>CAST(qao.display_order AS text) = qao.option_text->>${language} AND
                       ${questions.type} IN (${QUESTION_TYPE.FILL_IN_THE_BLANKS_DND}, ${
                         QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT
                       })
@@ -88,7 +90,7 @@ export class QuestionRepository {
                     WHEN EXISTS (
                       SELECT 1
                       FROM jsonb_object_keys(${studentQuestionAnswers.answer}) AS key
-                      WHERE ${studentQuestionAnswers.answer}->key = to_jsonb(qao.option_text))
+                      WHERE ${studentQuestionAnswers.answer}->key = to_jsonb(qao.option_text->>${language}))
                       AND  ${questions.type} NOT IN (${QUESTION_TYPE.FILL_IN_THE_BLANKS_DND}, ${
                         QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT
                       })
@@ -234,7 +236,7 @@ export class QuestionRepository {
     return;
   }
 
-  async getQuizQuestionsToEvaluation(lessonId: UUIDType) {
+  async getQuizQuestionsToEvaluation(lessonId: UUIDType, language: SupportedLanguages) {
     return this.db
       .select({
         id: questions.id,
@@ -245,7 +247,7 @@ export class QuestionRepository {
               SELECT json_build_object(
                 'answerId', ${questionAnswerOptions.id},
                 'displayOrder', ${questionAnswerOptions.displayOrder},
-                'value', ${questionAnswerOptions.optionText}
+                'value', ${questionAnswerOptions.optionText}->>${language}
               )
               FROM ${questionAnswerOptions}
               WHERE ${questionAnswerOptions.questionId} = ${questions.id} AND ${questionAnswerOptions.isCorrect} = TRUE
@@ -262,7 +264,7 @@ export class QuestionRepository {
               SELECT json_build_object(
                 'answerId', ${questionAnswerOptions.id},
                 'displayOrder', ${questionAnswerOptions.displayOrder},
-                'value', ${questionAnswerOptions.optionText},
+                'value', ${questionAnswerOptions.optionText}->>${language},
                 'isCorrect', ${questionAnswerOptions.isCorrect}
               )
               FROM ${questionAnswerOptions}

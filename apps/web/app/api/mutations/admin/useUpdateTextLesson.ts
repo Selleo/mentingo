@@ -19,9 +19,12 @@ export function useUpdateTextLesson() {
 
   return useMutation({
     mutationFn: async (options: UpdateTextLessonOptions) => {
-      const response = await ApiClient.api.lessonControllerBetaUpdateLesson(options.data, {
-        id: options.lessonId,
-      });
+      const response = await ApiClient.api.lessonControllerBetaUpdateLesson(
+        { ...options.data },
+        {
+          id: options.lessonId,
+        },
+      );
 
       return response.data;
     },

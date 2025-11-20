@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -6,6 +7,7 @@ import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/commo
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import { AdminChapterService } from "./adminChapter.service";
@@ -31,16 +33,25 @@ export class ChapterController {
   @Get()
   @Roles(...Object.values(USER_ROLES))
   @Validate({
-    request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
     response: baseResponse(showChapterSchema),
   })
   async getChapterWithLesson(
     @Query("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("role") userRole: UserRole,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<ChapterResponse>> {
     return new BaseResponse(
-      await this.chapterService.getChapterWithLessons(id, userId, userRole === USER_ROLES.ADMIN),
+      await this.chapterService.getChapterWithLessons(
+        id,
+        userId,
+        language,
+        userRole === USER_ROLES.ADMIN,
+      ),
     );
   }
 

@@ -1,5 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+
 import { coursesStatusOptions } from "./courseQuery";
 
 export const baseCourseSchema = Type.Object({
@@ -12,6 +14,7 @@ export const baseCourseSchema = Type.Object({
   categoryId: Type.String({ format: "uuid" }),
   isScorm: Type.Optional(Type.Boolean()),
   hasCertificate: Type.Optional(Type.Boolean()),
+  language: supportedLanguagesSchema,
 });
 
 export const createCourseSchema = Type.Intersect([

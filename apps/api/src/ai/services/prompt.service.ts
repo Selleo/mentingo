@@ -70,7 +70,7 @@ export class PromptService {
       eq(aiMentorThreads.id, data.threadId),
     ]);
 
-    const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
+    const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId, userLanguage);
 
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
 

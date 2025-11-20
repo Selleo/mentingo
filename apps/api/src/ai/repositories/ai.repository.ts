@@ -21,7 +21,7 @@ import {
   studentLessonProgress,
 } from "src/storage/schema";
 
-import type { AiMentorType } from "@repo/shared";
+import type { SupportedLanguages, AiMentorType } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
@@ -178,10 +178,13 @@ export class AiRepository {
     return this.db.insert(aiMentorThreadMessages).values(data).returning();
   }
 
-  async findMentorLessonByThreadId(threadId: UUIDType): Promise<AiMentorLessonBody> {
+  async findMentorLessonByThreadId(
+    threadId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<AiMentorLessonBody> {
     const [lesson] = await this.db
       .select({
-        title: lessons.title,
+        title: sql<string>`lessons.title->>${language}::text`,
         instructions: aiMentorLessons.aiMentorInstructions,
         conditions: aiMentorLessons.completionConditions,
         type: sql<AiMentorType>`${aiMentorLessons.type}`,

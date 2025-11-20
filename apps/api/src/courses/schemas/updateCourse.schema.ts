@@ -1,5 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+
 import { coursesStatusOptions } from "./courseQuery";
 
 export const updateCourseSchema = Type.Partial(
@@ -13,6 +15,7 @@ export const updateCourseSchema = Type.Partial(
     categoryId: Type.String({ format: "uuid" }),
     chapters: Type.Array(Type.String({ format: "uuid" })),
     archived: Type.Optional(Type.Boolean()),
+    language: supportedLanguagesSchema,
   }),
 );
 

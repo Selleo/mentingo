@@ -2,6 +2,7 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema, type UUIDType } from "src/common";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 export const courseSortFields = [
@@ -83,6 +84,7 @@ export type CoursesQuery = {
   currentUserId?: UUIDType;
   currentUserRole?: UserRole;
   excludeCourseId?: UUIDType;
+  language: SupportedLanguages;
 };
 
 export const COURSE_ENROLLMENT_SCOPES = {
@@ -159,6 +161,7 @@ export type CourseStudentProgressionQuery = {
   perPage?: number;
   searchQuery?: string;
   sort?: SortCourseStudentProgressionOptions;
+  language: SupportedLanguages;
 };
 
 // Course student quiz results query options
@@ -197,6 +200,7 @@ export type CourseStudentQuizResultsQuery = {
   perPage?: number;
   quizId?: string;
   sort?: SortCourseStudentQuizResultsOptions;
+  language: SupportedLanguages;
 };
 
 // Course student ai mentor results query options
@@ -236,4 +240,5 @@ export type CourseStudentAiMentorResultsQuery = {
   perPage?: number;
   lessonId?: UUIDType;
   sort?: SortCourseStudentAiMentorResultsOptions;
+  language: SupportedLanguages;
 };

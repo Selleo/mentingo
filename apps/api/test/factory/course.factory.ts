@@ -66,8 +66,8 @@ export const createCourseFactory = (db: DatabasePg) => {
       id: faker.string.uuid(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      title: faker.commerce.department() + randomHex,
-      description: faker.commerce.productDescription(),
+      title: { en: faker.commerce.department() + randomHex },
+      description: { en: faker.commerce.productDescription() },
       thumbnailS3Key: faker.system.directoryPath(),
       status: "published",
       hasCertificate: false,
@@ -79,6 +79,8 @@ export const createCourseFactory = (db: DatabasePg) => {
       isScorm: false,
       stripeProductId: null,
       stripePriceId: null,
+      baseLanguage: "en",
+      availableLocales: ["en"],
     };
   });
 };

@@ -13,6 +13,8 @@ import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { CourseCompletedEvent } from "src/events";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
@@ -42,6 +44,7 @@ export class StudentLessonProgressService {
     private readonly statisticsRepository: StatisticsRepository,
     private readonly certificatesService: CertificatesService,
     private readonly eventBus: EventBus,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async markLessonAsCompleted({
@@ -500,10 +503,15 @@ export class StudentLessonProgressService {
     courseId: UUIDType,
     completedAtFromTrx?: string,
   ) {
+    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+      ENTITY_TYPE.COURSE,
+      courseId,
+    );
+
     const [courseCompletionDetails] = await this.db
       .select({
         userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        courseTitle: sql<string>`${courses.title}`,
+        courseTitle: sql<string>`courses.title->>${actualLanguage}`,
         groupName: sql<string>`${groups.name}`,
         completedAt: sql<string>`${studentCourses.completedAt}`,
       })

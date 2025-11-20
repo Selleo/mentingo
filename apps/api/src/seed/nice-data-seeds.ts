@@ -16,6 +16,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 0,
     category: "Data Science",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     hasCertificate: true,
     chapters: [
@@ -41,20 +42,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Data collection",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Data cleaning",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Data analysis",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Data destruction",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -69,6 +75,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 9900,
     category: "Web Development",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     chapters: [
       {
@@ -90,6 +97,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.BRIEF_RESPONSE,
                 title: "Why is HTML considered the backbone of any website?",
                 description: "Explain its role in web development.",
+                language: "en",
               },
             ],
           },
@@ -124,20 +132,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "flexbox",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "color properties",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "grid",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "flex",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.MULTIPLE_CHOICE,
@@ -146,20 +159,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "background-color",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "color",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "border-color",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "box-shadow",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -180,20 +198,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "<a>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<link>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<button>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<input>",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.SINGLE_CHOICE,
@@ -202,20 +225,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "<tr>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<td>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<table>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<th>",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -238,20 +266,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "<img>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<picture>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<video>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<audio>",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.MULTIPLE_CHOICE,
@@ -261,28 +294,35 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "<html>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<head>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<body>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<title>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<h1>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<p>",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.SINGLE_CHOICE,
@@ -291,20 +331,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "<a>",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "<link>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<button>",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "<input>",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.MULTIPLE_CHOICE,
@@ -314,24 +359,30 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "alt",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "src",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "width",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "height",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "srcset",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -344,32 +395,40 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "HTML",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "interactivity",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "styles",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "functions",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "content",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "elements",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "animations",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -382,12 +441,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "flexbox",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "color properties",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -400,12 +462,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "variables",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "functions",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -428,20 +493,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "color",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "text-color",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "font-color",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "text-style",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.MULTIPLE_CHOICE,
@@ -450,24 +520,30 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: ".class-name",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "#id-name",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "element",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "[attribute]",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "$variable",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -480,20 +556,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "flexbox",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "color properties",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "grid",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "flex",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -506,12 +587,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "0",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "auto",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -536,6 +620,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.BRIEF_RESPONSE,
                 title:
                   "Why is HTML considered the backbone of any website? Explain its role in web development.",
+                language: "en",
               },
             ],
           },
@@ -560,20 +645,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "flexbox",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "color properties",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "grid",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "flex",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -586,20 +676,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "line-height",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "margin",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "padding",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "letter-spacing",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -615,6 +710,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 0,
     category: "Mobile Development",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     chapters: [
       {
@@ -636,6 +732,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.BRIEF_RESPONSE,
                 title: "Explain why Java is the preferred language for Android development.",
                 description: "",
+                language: "en",
               },
             ],
           },
@@ -659,12 +756,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "classes",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "objects",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -683,12 +783,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "layouts",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "activities",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -709,20 +812,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "new",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "create",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "instance",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "object",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -744,20 +852,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Activity",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Service",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "BroadcastReceiver",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "ContentProvider",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -772,6 +885,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 0,
     category: "Mobile Development",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     hasCertificate: true,
     chapters: [
@@ -800,14 +914,16 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.SINGLE_CHOICE,
                 title: "Which keyword is used to declare a variable in Kotlin?",
                 options: [
-                  { optionText: "var", isCorrect: true },
-                  { optionText: "val", isCorrect: false },
-                  { optionText: "let", isCorrect: false },
+                  { optionText: "var", isCorrect: true, language: "en" },
+                  { optionText: "val", isCorrect: false, language: "en" },
+                  { optionText: "let", isCorrect: false, language: "en" },
                   {
                     optionText: "data",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -840,9 +956,10 @@ export const niceCourses: NiceCourseData[] = [
                 solutionExplanation:
                   "<p>In Kotlin, <strong>val</strong> are immutable variables, while <strong>var</strong> are mutable variables.</p>",
                 options: [
-                  { optionText: "val", isCorrect: true },
-                  { optionText: "var", isCorrect: true },
+                  { optionText: "val", isCorrect: true, language: "en" },
+                  { optionText: "var", isCorrect: true, language: "en" },
                 ],
+                language: "en",
               },
             ],
           },
@@ -857,6 +974,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 0,
     category: "Mathematics",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     chapters: [
       {
@@ -878,6 +996,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.BRIEF_RESPONSE,
                 title:
                   "Why is arithmetic fundamental in math? Give a real-life example of its use.",
+                language: "en",
               },
             ],
           },
@@ -899,12 +1018,14 @@ export const niceCourses: NiceCourseData[] = [
                 solutionExplanation:
                   "<p>In arithmetic, <strong>sum</strong> is the result of addition, while <strong>difference</strong> is the result of subtraction.</p>",
                 options: [
-                  { optionText: "sum", isCorrect: true },
+                  { optionText: "sum", isCorrect: true, language: "en" },
                   {
                     optionText: "difference",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -938,20 +1059,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "length × width",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "length + width",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "length × height",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "2 × (length + width)",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -982,12 +1108,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "variables",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "expressions",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1016,17 +1145,21 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Triangle",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Variable",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Equation",
                     isCorrect: false,
+                    language: "en",
                   },
-                  { optionText: "Sum", isCorrect: false },
+                  { optionText: "Sum", isCorrect: false, language: "en" },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.MULTIPLE_CHOICE,
@@ -1035,24 +1168,30 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Addition",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Subtraction",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Multiplication",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Division",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Integration",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -1065,12 +1204,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "variables",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "equations",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1085,6 +1227,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 0,
     category: "Language Learning",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     hasCertificate: true,
     chapters: [
@@ -1113,6 +1256,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.BRIEF_RESPONSE,
                 title: "Explain the difference between a noun and a verb in a sentence.",
                 description: "Explain its role in sentence construction.",
+                language: "en",
               },
             ],
           },
@@ -1132,9 +1276,10 @@ export const niceCourses: NiceCourseData[] = [
                 description: "Fill in the blanks: 'She [word] to the store yesterday.'",
                 solutionExplanation: "<p>She <strong>went</strong> to the store yesterday.</p>",
                 options: [
-                  { optionText: "went", isCorrect: true },
-                  { optionText: "go", isCorrect: false },
+                  { optionText: "went", isCorrect: true, language: "en" },
+                  { optionText: "go", isCorrect: false, language: "en" },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1173,13 +1318,16 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Joyful",
                     isCorrect: true,
+                    language: "en",
                   },
-                  { optionText: "Sad", isCorrect: false },
+                  { optionText: "Sad", isCorrect: false, language: "en" },
                   {
                     optionText: "Angry",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1193,12 +1341,14 @@ export const niceCourses: NiceCourseData[] = [
                 description: "I [word] to the park every day.",
                 solutionExplanation: "I <strong>go</strong> to the park every day.",
                 options: [
-                  { optionText: "go", isCorrect: true },
+                  { optionText: "go", isCorrect: true, language: "en" },
                   {
                     optionText: "went",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1231,10 +1381,11 @@ export const niceCourses: NiceCourseData[] = [
                 title:
                   "Which of the following sounds is most commonly mispronounced by non-native English speakers?",
                 options: [
-                  { optionText: "Th", isCorrect: true },
-                  { optionText: "S", isCorrect: false },
-                  { optionText: "K", isCorrect: false },
+                  { optionText: "Th", isCorrect: true, language: "en" },
+                  { optionText: "S", isCorrect: false, language: "en" },
+                  { optionText: "K", isCorrect: false, language: "en" },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1256,16 +1407,20 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "swimming",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "swim",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "swam",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1289,16 +1444,20 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Adverb",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Verb",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Adjective",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1312,12 +1471,14 @@ export const niceCourses: NiceCourseData[] = [
                 description: "She [word] to the park every day.",
                 solutionExplanation: "She <strong>went</strong> to the park every day.",
                 options: [
-                  { optionText: "goes", isCorrect: true },
+                  { optionText: "goes", isCorrect: true, language: "en" },
                   {
                     optionText: "went",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1333,12 +1494,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Children",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Childs",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1351,13 +1515,15 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.SINGLE_CHOICE,
                 title: "Which of these words is a conjunction?",
                 options: [
-                  { optionText: "And", isCorrect: true },
-                  { optionText: "Run", isCorrect: false },
+                  { optionText: "And", isCorrect: true, language: "en" },
+                  { optionText: "Run", isCorrect: false, language: "en" },
                   {
                     optionText: "Quickly",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1372,6 +1538,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 0,
     category: "Language Learning",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     hasCertificate: true,
     chapters: [
@@ -1392,20 +1559,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Time, reason, contrast, or condition",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "The subject of the sentence",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Additional information about nouns",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "The main action in a sentence",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.MULTIPLE_CHOICE,
@@ -1414,29 +1586,36 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Although",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "However",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Despite",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Because",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.BRIEF_RESPONSE,
                 title: "Provide an example of a sentence using an adverbial clause of reason.",
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.DETAILED_RESPONSE,
                 title:
                   "Explain the role of adverbial clauses in improving sentence complexity and fluency. Provide examples to support your explanation.",
+                language: "en",
               },
               // {
               //   type: QUESTION_TYPE.SCALE_1_5,
@@ -1482,32 +1661,39 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Adverbial clauses are used to modify nouns.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText:
                       "Adverbial clauses provide information about the verb, adjective, or another adverb.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Noun clauses can modify adjectives and adverbs.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText:
                       "Relative clauses are used to introduce more detail about the noun they modify.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText:
                       "A sentence can have multiple adverbial clauses with different functions.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText:
                       "A noun clause can act as a subject, object, or complement in a sentence.",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
@@ -1520,12 +1706,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "written",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "grammatical",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -1538,28 +1727,35 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "focus",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "context",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "second",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "method",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "learning",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "primary",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.PHOTO_QUESTION_SINGLE_CHOICE,
@@ -1574,20 +1770,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "She went to the park after she finished her homework.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "The book was on the table.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "I like reading books because it's relaxing.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "He plays basketball every weekend.",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.PHOTO_QUESTION_MULTIPLE_CHOICE,
@@ -1602,20 +1803,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "The man who is wearing a red shirt is my brother.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "She enjoys playing the piano every evening.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "This is the book that changed my life.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "They are playing outside in the yard.",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1649,20 +1855,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Relative clauses are used to modify nouns",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Relative clauses are used to introduce new information",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Noun clauses are used to modify nouns",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Noun clauses are used to introduce new information",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1683,9 +1894,10 @@ export const niceCourses: NiceCourseData[] = [
                 solutionExplanation:
                   "The book <strong>that</strong> I borrowed yesterday was fascinating.",
                 options: [
-                  { optionText: "that", isCorrect: true },
-                  { optionText: "who", isCorrect: false },
+                  { optionText: "that", isCorrect: true, language: "en" },
+                  { optionText: "who", isCorrect: false, language: "en" },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1725,13 +1937,16 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Analyze",
                     isCorrect: true,
+                    language: "en",
                   },
-                  { optionText: "Run", isCorrect: false },
+                  { optionText: "Run", isCorrect: false, language: "en" },
                   {
                     optionText: "Quick",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1748,16 +1963,20 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "support",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "supported",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "supports",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1791,20 +2010,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "A way to start a conversation.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "A way to end a conversation.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "A way to make a person feel better.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "An idiom for a person who is not interested in a conversation.",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.MULTIPLE_CHOICE,
@@ -1814,20 +2038,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "I'm not interested in talking to you anymore.",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "I don't want to talk to you anymore.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "I'm not interested anymore in talking to you.",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "You're not interested in talking to me anymore.",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
@@ -1840,20 +2069,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "make",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "feel",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "start",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "end",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1877,16 +2111,20 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "over the moon",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "over the mooning",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "over the mooned",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1901,6 +2139,7 @@ export const niceCourses: NiceCourseData[] = [
     status: "published",
     priceInCents: 12900,
     category: "Artificial Intelligence",
+    language: "en",
     thumbnailS3Key: faker.image.urlPicsumPhotos(),
     chapters: [
       {
@@ -1938,20 +2177,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Replace human workers",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Automate repetitive tasks",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Improve decision-making",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Eliminate operational costs",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1968,20 +2212,25 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Customer service chatbots",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Predictive analytics",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Supply chain optimization",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Space exploration tools",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -1997,12 +2246,15 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "True",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "False",
                     isCorrect: true,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -2018,16 +2270,20 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Image 1 (Chatbot Interface)",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Image 2 (Calculator)",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Image 3 (Spreadsheet)",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -2046,24 +2302,30 @@ export const niceCourses: NiceCourseData[] = [
                   {
                     optionText: "Intelligence",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Automation",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Learning",
                     isCorrect: false,
+                    language: "en",
                   },
                   {
                     optionText: "Human",
                     isCorrect: true,
+                    language: "en",
                   },
                   {
                     optionText: "Animal",
                     isCorrect: false,
+                    language: "en",
                   },
                 ],
+                language: "en",
               },
             ],
           },
@@ -2075,6 +2337,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.BRIEF_RESPONSE,
                 title: "In one sentence, explain why businesses are adopting AI.",
+                language: "en",
               },
             ],
           },
@@ -2087,6 +2350,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.DETAILED_RESPONSE,
                 title:
                   "Describe how AI can improve decision-making in a specific industry of your choice.",
+                language: "en",
               },
             ],
           },
