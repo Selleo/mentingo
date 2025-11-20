@@ -142,7 +142,7 @@ const EditCourse = () => {
             hasCertificate={course?.hasCertificate || false}
           />
         </TabsContent>
-        <TabsContent value="Curriculum" className="h-full overflow-hidden">
+        <TabsContent value="Curriculum" className="h-full">
           <LeaveModalProvider>
             <CourseLessons
               chapters={course?.chapters as Chapter[]}

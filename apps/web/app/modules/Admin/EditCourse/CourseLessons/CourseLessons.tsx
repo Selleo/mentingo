@@ -127,9 +127,9 @@ const CourseLessons = ({ chapters, canRefetchChapterList }: CourseLessonsProps) 
   );
 
   return (
-    <div className="flex h-full basis-full gap-x-8 rounded-lg">
-      <div className="flex h-full w-full flex-col justify-between md:max-w-[480px]">
-        <div className="flex h-full flex-col overflow-y-auto">
+    <div className="flex basis-full gap-x-8 rounded-lg md:items-start">
+      <div className="flex w-full overflow-y-auto flex-col justify-between md:max-w-[480px]">
+        <div className="flex flex-col">
           <ChaptersList
             canRefetchChapterList={canRefetchChapterList}
             chapters={sortableChapters}
@@ -145,7 +145,7 @@ const CourseLessons = ({ chapters, canRefetchChapterList }: CourseLessonsProps) 
           {t("adminCourseView.curriculum.chapter.button.addChapter")}
         </Button>
       </div>
-      <div className="h-auto w-full overflow-y-auto">{renderContent}</div>
+      <div className="size-full md:sticky md:top-4 self-start">{renderContent}</div>
     </div>
   );
 };
