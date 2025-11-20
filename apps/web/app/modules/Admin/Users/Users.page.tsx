@@ -250,11 +250,14 @@ const Users = () => {
     },
   ];
 
+  const resetPage = useCallback(() => handleFilterChange("page", "1"), []);
+
   const handleSortingChange = useCallback(
     (updaterOrValue: SortingState | ((old: SortingState) => SortingState)) => {
       setSorting(updaterOrValue);
+      resetPage();
     },
-    [],
+    [resetPage],
   );
 
   const table = useReactTable({
@@ -359,7 +362,10 @@ const Users = () => {
           <SearchFilter
             filters={filterConfig}
             values={searchParams}
-            onChange={handleFilterChange}
+            onChange={(key, value) => {
+              resetPage();
+              handleFilterChange(key, value);
+            }}
             isLoading={isPending}
           />
         </div>
@@ -400,7 +406,7 @@ const Users = () => {
           currentPage={page}
           onPageChange={(newPage) => handleFilterChange("page", String(newPage))}
           onItemsPerPageChange={(newPerPage) => {
-            handleFilterChange("page", "1");
+            resetPage();
             handleFilterChange("perPage", newPerPage);
           }}
         />
