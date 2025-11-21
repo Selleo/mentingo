@@ -1023,7 +1023,48 @@
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "anyOf": [
+                {
+                  "const": "firstName",
+                  "type": "string"
+                },
+                {
+                  "const": "lastName",
+                  "type": "string"
+                },
+                {
+                  "const": "email",
+                  "type": "string"
+                },
+                {
+                  "const": "createdAt",
+                  "type": "string"
+                },
+                {
+                  "const": "groupName",
+                  "type": "string"
+                },
+                {
+                  "const": "-firstName",
+                  "type": "string"
+                },
+                {
+                  "const": "-lastName",
+                  "type": "string"
+                },
+                {
+                  "const": "-email",
+                  "type": "string"
+                },
+                {
+                  "const": "-createdAt",
+                  "type": "string"
+                },
+                {
+                  "const": "-groupName",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
