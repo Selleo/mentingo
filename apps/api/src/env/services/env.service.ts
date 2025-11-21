@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-import { ALLOWED_SECRETS, ENCRYPTION_ALG } from "src/env/env.config";
+import { ALLOWED_SECRETS, ENCRYPTION_ALG, SERVICE_GROUPS } from "src/env/env.config";
 import { EnvRepository } from "src/env/repositories/env.repository";
 
 import type { BulkUpsertEnvBody, EncryptedEnvBody } from "src/env/env.schema";
@@ -131,5 +131,46 @@ export class EnvService {
     const enabled = !!(stripeWebhookSecret && stripeSecretKey);
 
     return { enabled };
+  }
+
+  async getEnvSetup(userId: string) {
+    const allKeys = Object.values(SERVICE_GROUPS).flat();
+
+    const envValues = await Promise.all(
+      allKeys.map(async (key) => {
+        try {
+          const env = await this.getEnv(key);
+          return { key, value: env?.value };
+        } catch (error) {
+          return { key, value: process.env[key] };
+        }
+      }),
+    );
+
+    const envMap = new Map(envValues.map(({ key, value }) => [key, value]));
+
+    const fullyConfigured: string[] = [];
+    const partiallyConfigured: Array<{ service: string; missingKeys: string[] }> = [];
+    const notConfigured: Array<{ service: string; missingKeys: string[] }> = [];
+
+    for (const [service, keys] of Object.entries(SERVICE_GROUPS)) {
+      const unsetKeys = keys.filter((key) => !envMap.get(key)?.trim());
+
+      if (unsetKeys.length === 0) {
+        fullyConfigured.push(service);
+      } else if (unsetKeys.length < keys.length) {
+        partiallyConfigured.push({ service, missingKeys: unsetKeys });
+      } else {
+        notConfigured.push({ service, missingKeys: unsetKeys });
+      }
+    }
+
+    return {
+      fullyConfigured,
+      partiallyConfigured,
+      notConfigured,
+      hasIssues: partiallyConfigured.length > 0,
+      isWarningDismissed: await this.envRepository.getIsEnvConfigWarningDismissed(userId),
+    };
   }
 }

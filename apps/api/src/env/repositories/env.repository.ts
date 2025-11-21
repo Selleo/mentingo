@@ -1,8 +1,8 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { secrets } from "src/storage/schema";
+import { secrets, settings } from "src/storage/schema";
 
 import type { EncryptedEnvBody } from "src/env/env.schema";
 
@@ -45,5 +45,20 @@ export class EnvRepository {
     const [env] = await this.db.select().from(secrets).where(eq(secrets.secretName, envName));
 
     return env;
+  }
+
+  async getIsEnvConfigWarningDismissed(userId: string) {
+    const [existingSettings] = await this.db
+      .select({
+        configWarningDismissed: sql<boolean>`(settings.settings->>'configWarningDismissed')::boolean`,
+      })
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (!existingSettings) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    return existingSettings.configWarningDismissed || false;
   }
 }

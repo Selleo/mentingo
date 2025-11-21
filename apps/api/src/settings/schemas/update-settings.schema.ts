@@ -36,7 +36,12 @@ export const updateGlobalColorSchema = Type.Object({
   }),
 });
 
+export const updateConfigWarningDismissedSchema = Type.Object({
+  dismissed: Type.Boolean(),
+});
+
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateMFAEnforcedRolesRequest = Static<typeof updateMFAEnforcedRolesSchema>;
 export type UpdateDefaultCourseCurrencyBody = Static<typeof updateDefaultCourseCurrencySchema>;
 export type UpdateGlobalColorSchemaBody = Static<typeof updateGlobalColorSchema>;
+export type UpdateConfigWarningDismissedBody = Static<typeof updateConfigWarningDismissedSchema>;

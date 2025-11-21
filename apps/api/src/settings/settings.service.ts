@@ -741,6 +741,37 @@ export class SettingsService {
     return pngBuffer;
   }
 
+  public async updateConfigWarningDismissed(
+    userId: UUIDType,
+    dismissed: boolean,
+  ): Promise<AdminSettingsJSONContentSchema> {
+    const [currentUserSettings] = await this.db
+      .select({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (!currentUserSettings) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    const [{ settings: updatedUserSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{configWarningDismissed}',
+            to_jsonb(${dismissed}::boolean),
+            true
+          )
+        `,
+      })
+      .where(eq(settings.userId, userId))
+      .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedUserSettings;
+  }
+
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
     switch (role) {
       case USER_ROLES.ADMIN:
