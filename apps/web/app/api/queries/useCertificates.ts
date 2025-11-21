@@ -12,7 +12,7 @@ type CertificatesParams = {
 };
 
 type CertificateQueryParams = {
-  userId: string;
+  userId?: string;
   courseId?: string;
 };
 

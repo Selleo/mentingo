@@ -2,10 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
-import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
-import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
-import { queryClient } from "~/api/queryClient";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
@@ -20,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Toggle } from "~/components/ui/toggle";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import {
@@ -30,6 +26,7 @@ import {
 import { InlineCategoryCreationForm } from "../../Categories/components/InlineCategoryCreationForm";
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
+import CourseCertificateSetting from "./components/CourseCertificateSetting";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
 type CourseSettingsProps = {
@@ -76,10 +73,6 @@ const CourseSettings = ({
   const descriptionFieldCharactersLeft =
     MAX_COURSE_DESCRIPTION_LENGTH - strippedDescriptionTextLength;
 
-  const [isCertificateEnabled, setIsCertificateEnabled] = useState(hasCertificate);
-
-  const updateHasCertificate = useUpdateHasCertificate();
-
   const categoryName = useMemo(() => {
     return categories.find((category) => category.id === watchedCategoryId)?.title;
   }, [categories, watchedCategoryId]);
@@ -109,44 +102,14 @@ const CourseSettings = ({
     }
   };
 
-  const handleCertificateToggle = (newValue: boolean) => {
-    setIsCertificateEnabled(newValue);
-
-    if (courseId) {
-      updateHasCertificate.mutate(
-        { courseId, data: { hasCertificate: newValue } },
-        {
-          onSuccess: async () => {
-            await queryClient.invalidateQueries(courseQueryOptions(courseId));
-          },
-          onError: (error) => {
-            console.error(`Error updating certificate:`, error);
-            setIsCertificateEnabled(!newValue);
-          },
-        },
-      );
-    }
-  };
-
   return (
     <div className="flex h-full w-full gap-x-6">
       <div className="w-full basis-full">
         <div className="flex h-full w-full flex-col gap-y-6 overflow-y-auto rounded-lg border border-gray-200 bg-white p-8 shadow-md">
           <div className="flex flex-col gap-y-1">
-            <div className="flex items-center justify-between">
-              <h5 className="h5 text-neutral-950">{t("adminCourseView.settings.editHeader")}</h5>
-              <Toggle
-                pressed={isCertificateEnabled}
-                onPressedChange={handleCertificateToggle}
-                disabled={updateHasCertificate.isPending}
-                aria-label="Enable certificate"
-              >
-                {isCertificateEnabled
-                  ? t("adminCourseView.settings.button.includesCertificate")
-                  : t("adminCourseView.settings.button.doesNotIncludeCertificate")}
-                {updateHasCertificate.isPending && t("common.button.saving")}
-              </Toggle>
-            </div>
+            {courseId && (
+              <CourseCertificateSetting courseId={courseId} hasCertificate={hasCertificate} />
+            )}
             <div className="flex items-center gap-x-2"></div>
             <p className="body-lg-md text-neutral-800">
               {t("adminCourseView.settings.editSubHeader")}

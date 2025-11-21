@@ -1,9 +1,7 @@
-import { X, Download } from "lucide-react";
 import { useState } from "react";
 
-import RectangularSwitch from "~/components/RectangularSwitch";
-
 import CertificateContent from "./CertificateContent";
+import CertificateControls from "./CertificateControls";
 import useCertificatePDF from "./useCertificatePDF";
 
 interface CertificatePreviewProps {
@@ -23,12 +21,8 @@ const CertificatePreview = ({
   platformLogo,
   certificateBackgroundImageUrl,
 }: CertificatePreviewProps) => {
-  const { downloadCertificatePdf, HiddenCertificate } = useCertificatePDF();
+  const { HiddenCertificate, downloadCertificatePdf } = useCertificatePDF();
   const [toggled, setToggled] = useState<boolean>(false);
-
-  const handleDownload = () => {
-    downloadCertificatePdf(courseName);
-  };
 
   const lang = toggled ? "pl" : "en";
 
@@ -49,29 +43,13 @@ const CertificatePreview = ({
             <h2 className="text-sm text-gray-400">{completionDate}</h2>
           </div>
 
-          <div className="flex gap-3">
-            <RectangularSwitch
-              switchLabel="Language Toggle"
-              onLabel="PL"
-              offLabel="EN"
-              toggled={toggled}
-              setToggled={setToggled}
-            />
-            <button
-              className="flex size-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              onClick={handleDownload}
-            >
-              <Download className="size-5" />
-            </button>
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="flex size-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-              >
-                <X className="size-5" />
-              </button>
-            )}
-          </div>
+          <CertificateControls
+            onClose={onClose}
+            courseName={courseName}
+            languageToggled={toggled}
+            setLanguageToggled={setToggled}
+            downloadCertificatePdf={downloadCertificatePdf}
+          />
         </div>
 
         <CertificateContent
