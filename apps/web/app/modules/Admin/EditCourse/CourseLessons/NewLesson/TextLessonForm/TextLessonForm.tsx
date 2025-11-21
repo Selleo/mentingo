@@ -62,7 +62,7 @@ const TextLessonForm = ({
               <span className="text-neutral-600">
                 {t("adminCourseView.curriculum.other.edit")}:{" "}
               </span>
-              <span className="font-bold">{lessonToEdit.title}</span>
+              <span className="font-bold break-words">{lessonToEdit.title}</span>
             </>
           ) : (
             t("common.button.create")

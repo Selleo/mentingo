@@ -175,14 +175,14 @@ export const LessonContent = ({
   return (
     <TooltipProvider>
       <div
-        className={cn("flex size-full flex-col items-center", {
+        className={cn("flex size-full min-w-0 flex-col items-center", {
           "py-10": !isPreviewMode,
         })}
       >
-        <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
+        <div className="flex size-full min-w-0 flex-col gap-y-10 px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8">
           {!isPreviewMode && (
             <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
-              <div className="flex w-full flex-col gap-y-4">
+              <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
                 <div className="flex items-center gap-x-2">
                   <p className="body-sm-md text-neutral-800">
                     {t("studentLessonView.other.lesson")}{" "}
@@ -203,7 +203,7 @@ export const LessonContent = ({
                     </Tooltip>
                   )}
                 </div>
-                <p className="h4 text-neutral-950">{lesson.title}</p>
+                <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
               </div>
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
                 {!isFirstLesson && (
