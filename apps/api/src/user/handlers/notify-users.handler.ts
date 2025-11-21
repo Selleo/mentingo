@@ -101,14 +101,15 @@ export class NotifyUsersHandler implements IEventHandler {
 
   async notifyUserAboutInvite(event: UserInviteEvent) {
     const { userInvite } = event;
-    const { email, createdByUserName, token } = userInvite;
+    const { email, creatorId, token } = userInvite;
 
     const url = `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${email}`;
 
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+    const { firstName, lastName } = await this.userService.getUserById(creatorId);
 
     const { text, html } = new UserInviteEmail({
-      invitedByUserName: createdByUserName,
+      invitedByUserName: `${firstName} ${lastName}`,
       createPasswordLink: url,
       ...defaultEmailSettings,
     });

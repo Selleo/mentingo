@@ -10,7 +10,7 @@ export type UserAssignedToCourseProps = {
 export const UserAssignedToCourse = ({
   courseLink,
   courseName,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: UserAssignedToCourseProps) => {
   return BaseEmailTemplate({
     heading: "New course",

@@ -10,7 +10,7 @@ export type UserInviteProps = {
 export const UserInviteEmail = ({
   invitedByUserName,
   createPasswordLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: UserInviteProps) => {
   return BaseEmailTemplate({
     heading: "You're invited",

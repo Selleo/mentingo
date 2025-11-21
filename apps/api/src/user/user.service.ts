@@ -421,10 +421,8 @@ export class UserService {
       const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
 
       if (currentUserId) {
-        const [createdByUser] = await db.select().from(users).where(eq(users.id, currentUserId));
-
         const userInviteDetails: UserInvite = {
-          createdByUserName: createdByUser.firstName + " " + createdByUser.lastName,
+          creatorId: currentUserId,
           email: createdUser.email,
           token,
           ...defaultEmailSettings,

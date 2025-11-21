@@ -26,7 +26,7 @@ export const BaseEmailTemplate = ({
   paragraphs,
   buttonText,
   buttonLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: BaseEmailTemplateProps) => {
   const styles = getBaseEmailStyles(primaryColor);
 

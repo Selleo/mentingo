@@ -10,7 +10,7 @@ export type UserShortInactivityProps = {
 export const UserShortInactivityEmail = ({
   courseName,
   courseLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: UserShortInactivityProps) => {
   return BaseEmailTemplate({
     heading: "Reminder",

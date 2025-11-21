@@ -8,7 +8,7 @@ export type CreatePasswordReminderEmailProps = {
 
 export const CreatePasswordReminderEmail = ({
   createPasswordLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: CreatePasswordReminderEmailProps) => {
   return BaseEmailTemplate({
     heading: "Reminder",

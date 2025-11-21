@@ -1,5 +1,5 @@
 export type UserInvite = {
-  createdByUserName: string;
+  creatorId: string;
   token: string;
   email: string;
 };

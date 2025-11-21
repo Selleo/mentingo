@@ -10,7 +10,7 @@ export type UserLongInactivityProps = {
 export const UserLongInactivityEmail = ({
   courseName,
   courseLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: UserLongInactivityProps) => {
   return BaseEmailTemplate({
     heading: "Time to resume your course",

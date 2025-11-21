@@ -10,7 +10,7 @@ export type UserFinishedCourseProps = {
 export const UserFinishedCourseEmail = ({
   courseName,
   certificateDownloadLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: UserFinishedCourseProps) => {
   return BaseEmailTemplate({
     heading: "Course completed",

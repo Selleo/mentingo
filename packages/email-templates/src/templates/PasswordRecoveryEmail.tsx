@@ -10,7 +10,7 @@ export type PasswordRecoveryEmailProps = {
 export const PasswordRecoveryEmail = ({
   name,
   resetLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: PasswordRecoveryEmailProps) => {
   return BaseEmailTemplate({
     heading: "Password Recovery",

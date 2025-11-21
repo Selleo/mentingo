@@ -12,7 +12,7 @@ export const UserFinishedChapterEmail = ({
   chapterName,
   courseLink,
   courseName,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: UserFinishedChapterProps) => {
   return BaseEmailTemplate({
     heading: "Chapter completed",

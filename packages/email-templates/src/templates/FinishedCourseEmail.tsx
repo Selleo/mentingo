@@ -12,7 +12,7 @@ export const FinishedCourseEmail = ({
   userName,
   courseName,
   progressLink,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: FinishedCourseEmailProps) => {
   return BaseEmailTemplate({
     heading: "User finished the course",

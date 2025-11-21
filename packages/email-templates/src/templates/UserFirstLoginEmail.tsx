@@ -10,7 +10,7 @@ type UserFirstLoginEmailProps = {
 export const UserFirstLoginEmail = ({
   name,
   coursesUrl,
-  primaryColor = "#4796FD",
+  primaryColor,
 }: UserFirstLoginEmailProps) => {
   return BaseEmailTemplate({
     heading: "Welcome",

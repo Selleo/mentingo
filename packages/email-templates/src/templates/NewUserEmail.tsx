@@ -7,11 +7,7 @@ export type NewUserEmailProps = {
   profileLink: string;
 } & DefaultEmailSettings;
 
-export const NewUserEmail = ({
-  userName,
-  profileLink,
-  primaryColor = "#4796FD",
-}: NewUserEmailProps) => {
+export const NewUserEmail = ({ userName, profileLink, primaryColor }: NewUserEmailProps) => {
   return BaseEmailTemplate({
     heading: "New user profile",
     paragraphs: ["Hello! 🧑‍💻", `${userName} has joined. Review the profile and assign courses.`],
