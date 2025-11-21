@@ -17,15 +17,22 @@ release:
 				;; \
 		esac; \
 	fi
+
 	git tag -a ${TAG} -m "${TAG}" && \
 	git push origin HEAD --tags --no-verify;
 
-	git fetch origin && \
-	git switch staging || git switch -c staging origin/staging && \
-	git pull --ff-only origin staging && \
-	git rebase origin/main && \
-	git push origin staging --no-verify --force-with-lease && \
-	git switch -;
+	case "${TAG}" in \
+		v*) \
+			git fetch origin && \
+			git switch main || git switch -c main origin/main && \
+			git rebase origin/staging && \
+			git push origin main --no-verify \
+			;; \
+		*) \
+			echo "Warning: TAG does not start with 'v', skipping staging to main promotion"; \
+			exit 0 \
+			;; \
+	esac; \
 
 .PHONY: dry-release
 dry-release:
