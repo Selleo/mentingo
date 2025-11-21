@@ -1,3 +1,4 @@
+import { getPasswordRecoveryEmailTranslations } from "translations/passwordRecovery";
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -11,14 +12,14 @@ export const PasswordRecoveryEmail = ({
   name,
   resetLink,
   primaryColor,
+  language = "en",
 }: PasswordRecoveryEmailProps) => {
+  const { heading, paragraphs, buttonText } = getPasswordRecoveryEmailTranslations(language, name);
+
   return BaseEmailTemplate({
-    heading: "Password Recovery",
-    paragraphs: [
-      `Hey ${name}, you've requested a password reset 🔑`,
-      "You can reset your password using the button below.",
-    ],
-    buttonText: "RESET PASSWORD",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: resetLink,
     primaryColor,
   });

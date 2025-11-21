@@ -10,6 +10,7 @@ import {
 } from "@repo/email-templates";
 
 import { EmailService } from "src/common/emails/emails.service";
+import { getEmailSubject } from "src/common/emails/translations";
 import { CourseService } from "src/courses/course.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
@@ -101,11 +102,11 @@ export class NotifyUsersHandler implements IEventHandler {
 
   async notifyUserAboutInvite(event: UserInviteEvent) {
     const { userInvite } = event;
-    const { email, creatorId, token } = userInvite;
+    const { email, creatorId, token, userId } = userInvite;
 
     const url = `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${email}`;
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
     const { firstName, lastName } = await this.userService.getUserById(creatorId);
 
     const { text, html } = new UserInviteEmail({
@@ -116,7 +117,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
     await this.emailService.sendEmailWithLogo({
       to: email,
-      subject: "Witaj na platformie!",
+      subject: getEmailSubject("userInviteEmail", defaultEmailSettings.language),
       text,
       html,
       from: process.env.SES_EMAIL || "",
@@ -129,7 +130,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
     const user = await this.userService.getUserById(userId);
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
 
     const { text, html } = new UserFirstLoginEmail({
       name: user.firstName,
@@ -139,7 +140,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
     await this.emailService.sendEmailWithLogo({
       to: user.email,
-      subject: "Pierwsze logowanie!",
+      subject: getEmailSubject("userFirstLoginEmail", defaultEmailSettings.language),
       text,
       html,
       from: process.env.SES_EMAIL || "",
@@ -153,26 +154,28 @@ export class NotifyUsersHandler implements IEventHandler {
     const courseLink = `${process.env.CORS_ORIGIN}/course/${courseId}`;
     const courseName = await this.courseService.getCourseName(courseId);
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
-
-    const { text, html } = new UserAssignedToCourseEmail({
-      courseName,
-      courseLink,
-      ...defaultEmailSettings,
-    });
-
-    const userEmails = await this.userService.getStudentEmailsByIds(studentIds);
+    const studentContacts = await this.userService.getStudentEmailsByIds(studentIds);
 
     await Promise.all(
-      userEmails.map((email) =>
-        this.emailService.sendEmailWithLogo({
+      studentContacts.map(async ({ id: studentId, email }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(studentId);
+
+        const { text, html } = new UserAssignedToCourseEmail({
+          courseName,
+          courseLink,
+          ...defaultEmailSettings,
+        });
+
+        return this.emailService.sendEmailWithLogo({
           to: email,
-          subject: `Nowy kurs - ${courseName}`,
+          subject: getEmailSubject("userCourseAssignmentEmail", defaultEmailSettings.language, {
+            courseName,
+          }),
           text,
           html,
           from: process.env.SES_EMAIL || "",
-        }),
-      ),
+        });
+      }),
     );
   }
 
@@ -187,7 +190,7 @@ export class NotifyUsersHandler implements IEventHandler {
         const course = recentCourses.find((course) => course.studentId == user.userId);
         const courseLink = `${process.env.CORS_ORIGIN}/course/${course?.courseId}`;
 
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.userId);
 
         const { text, html } = new UserShortInactivityEmail({
           courseName: course?.courseName ?? "",
@@ -195,9 +198,11 @@ export class NotifyUsersHandler implements IEventHandler {
           ...defaultEmailSettings,
         });
 
-        this.emailService.sendEmailWithLogo({
+        return this.emailService.sendEmailWithLogo({
           to: user.email,
-          subject: `Kontynuuj kurs - ${course?.courseName}`,
+          subject: getEmailSubject("userShortInactivityEmail", defaultEmailSettings.language, {
+            courseName: course?.courseName ?? "",
+          }),
           text,
           html,
           from: process.env.SES_EMAIL || "",
@@ -220,7 +225,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
         const courseLink = `${process.env.CORS_ORIGIN}/course/${course?.courseId}`;
 
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.userId);
 
         const { text, html } = new UserLongInactivityEmail({
           courseName: course.courseName,
@@ -228,9 +233,9 @@ export class NotifyUsersHandler implements IEventHandler {
           ...defaultEmailSettings,
         });
 
-        this.emailService.sendEmailWithLogo({
+        return this.emailService.sendEmailWithLogo({
           to: user.email,
-          subject: "Wróć do swoich kursów",
+          subject: getEmailSubject("userLongInactivityEmail", defaultEmailSettings.language),
           text,
           html,
           from: process.env.SES_EMAIL || "",
@@ -248,7 +253,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
     const courseLink = `${process.env.CORS_ORIGIN}/course/${chapterFinishedData.courseId}`;
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
 
     const { text, html } = new UserFinishedChapterEmail({
       courseName,
@@ -259,7 +264,9 @@ export class NotifyUsersHandler implements IEventHandler {
 
     await this.emailService.sendEmailWithLogo({
       to: user.email,
-      subject: `Ukończono moduł - ${chapterName}`,
+      subject: getEmailSubject("userChapterFinishedEmail", defaultEmailSettings.language, {
+        chapterName,
+      }),
       html,
       text,
       from: process.env.SES_EMAIL || "",
@@ -274,7 +281,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
     const certificateDownloadLink = `${process.env.CORS_ORIGIN}/profile/${user.id}`;
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
 
     const { text, html } = new UserFinishedCourseEmail({
       certificateDownloadLink,
@@ -284,7 +291,9 @@ export class NotifyUsersHandler implements IEventHandler {
 
     await this.emailService.sendEmailWithLogo({
       to: user.email,
-      subject: `Ukończono kurs - ${courseName}`,
+      subject: getEmailSubject("userCourseFinishedEmail", defaultEmailSettings.language, {
+        courseName,
+      }),
       html,
       text,
       from: process.env.SES_EMAIL || "",

@@ -2,6 +2,7 @@ import { EventsHandler } from "@nestjs/cqrs";
 import { FinishedCourseEmail, NewUserEmail } from "@repo/email-templates";
 
 import { EmailService } from "src/common/emails/emails.service";
+import { getEmailSubject } from "src/common/emails/translations";
 import { CourseCompletedEvent, UserPasswordCreatedEvent, UserRegisteredEvent } from "src/events";
 
 import { UserService } from "../user.service";
@@ -37,21 +38,21 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
     const { user } = event;
     const { firstName, lastName, email } = user;
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
-
-    const { text, html } = new NewUserEmail({
-      userName: `${firstName} ${lastName}`,
-      profileLink: `${process.env.CORS_ORIGIN}/profile/${user.id}`,
-      ...defaultEmailSettings,
-    });
-
-    const adminsEmailsToNotify = await this.userService.getAdminsToNotifyAboutNewUser(email);
+    const adminsToNotify = await this.userService.getAdminsToNotifyAboutNewUser(email);
 
     await Promise.all(
-      adminsEmailsToNotify.map((adminsEmail) => {
+      adminsToNotify.map(async ({ id: adminId, email: adminsEmail }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
+
+        const { text, html } = new NewUserEmail({
+          userName: `${firstName} ${lastName}`,
+          profileLink: `${process.env.CORS_ORIGIN}/profile/${user.id}`,
+          ...defaultEmailSettings,
+        });
+
         return this.emailService.sendEmailWithLogo({
           to: adminsEmail,
-          subject: "A new user has registered on your platform",
+          subject: getEmailSubject("adminNewUserEmail", defaultEmailSettings.language),
           text,
           html,
           from: process.env.SES_EMAIL || "",
@@ -65,22 +66,22 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
       courseCompletionData: { userName, courseTitle, courseId },
     } = event;
 
-    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
-
-    const { text, html } = new FinishedCourseEmail({
-      userName,
-      courseName: courseTitle,
-      progressLink: `${process.env.CORS_ORIGIN}/course/${courseId}`,
-      ...defaultEmailSettings,
-    });
-
-    const adminsEmailsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
+    const adminsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
 
     await Promise.all(
-      adminsEmailsToNotify.map((adminsEmail) => {
+      adminsToNotify.map(async ({ id: adminId, email: adminsEmail }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
+
+        const { text, html } = new FinishedCourseEmail({
+          userName,
+          courseName: courseTitle,
+          progressLink: `${process.env.CORS_ORIGIN}/course/${courseId}`,
+          ...defaultEmailSettings,
+        });
+
         return this.emailService.sendEmail({
           to: adminsEmail,
-          subject: "A user has completed a course on your platform",
+          subject: getEmailSubject("adminCourseFinishedEmail", defaultEmailSettings.language),
           text,
           html,
           from: process.env.SES_EMAIL || "",

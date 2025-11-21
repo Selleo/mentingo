@@ -1,3 +1,5 @@
+import { getUserAssignedToCourseEmailTranslations } from "translations/userAssignedToCourse";
+
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -11,14 +13,17 @@ export const UserAssignedToCourse = ({
   courseLink,
   courseName,
   primaryColor,
+  language = "en",
 }: UserAssignedToCourseProps) => {
+  const { heading, paragraphs, buttonText } = getUserAssignedToCourseEmailTranslations(
+    language,
+    courseName,
+  );
+
   return BaseEmailTemplate({
-    heading: "New course",
-    paragraphs: [
-      "You’ve been enrolled 🎓",
-      `You now have access to ${courseName}. It’s available in your account.`,
-    ],
-    buttonText: "MY COURSES",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: courseLink,
     primaryColor,
   });

@@ -1,3 +1,5 @@
+import { getUserFinishedCourseEmailTranslations } from "translations/userFinishedCourse";
+
 import { BaseEmailTemplate } from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -11,14 +13,17 @@ export const UserFinishedCourseEmail = ({
   courseName,
   certificateDownloadLink,
   primaryColor,
+  language = "en",
 }: UserFinishedCourseProps) => {
+  const { heading, paragraphs, buttonText } = getUserFinishedCourseEmailTranslations(
+    language,
+    courseName,
+  );
+
   return BaseEmailTemplate({
-    heading: "Course completed",
-    paragraphs: [
-      "Congratulations! 🏁",
-      `You’ve completed ${courseName}. Your certificate is ready to download; check the recommended next steps.`,
-    ],
-    buttonText: "DOWNLOAD CERTIFICATE",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: certificateDownloadLink,
     primaryColor,
   });

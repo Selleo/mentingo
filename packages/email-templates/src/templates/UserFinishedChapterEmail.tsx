@@ -1,3 +1,5 @@
+import { getUserFinishedChapterEmailTranslations } from "translations/userFinishedChapter";
+
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -13,14 +15,18 @@ export const UserFinishedChapterEmail = ({
   courseLink,
   courseName,
   primaryColor,
+  language = "en",
 }: UserFinishedChapterProps) => {
+  const { heading, paragraphs, buttonText } = getUserFinishedChapterEmailTranslations(
+    language,
+    chapterName,
+    courseName,
+  );
+
   return BaseEmailTemplate({
-    heading: "Chapter completed",
-    paragraphs: [
-      "Progress updated 🧩",
-      `You’ve finished ${chapterName} in ${courseName}. The next materials are ready.`,
-    ],
-    buttonText: "NEXT CHAPTER",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: courseLink,
     primaryColor,
   });

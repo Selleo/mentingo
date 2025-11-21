@@ -1,3 +1,5 @@
+import { getUserShortInactivityEmailTranslations } from "translations/userShortInactivity";
+
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -11,14 +13,17 @@ export const UserShortInactivityEmail = ({
   courseName,
   courseLink,
   primaryColor,
+  language = "en",
 }: UserShortInactivityProps) => {
+  const { heading, paragraphs, buttonText } = getUserShortInactivityEmailTranslations(
+    language,
+    courseName,
+  );
+
   return BaseEmailTemplate({
-    heading: "Reminder",
-    paragraphs: [
-      "Resume learning 🔔",
-      `14 days since last activity in ${courseName}. Continue to keep your progress on track.`,
-    ],
-    buttonText: "CONTINUE COURSE",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: courseLink,
     primaryColor,
   });
