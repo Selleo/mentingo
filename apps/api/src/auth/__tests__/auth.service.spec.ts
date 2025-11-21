@@ -213,7 +213,7 @@ describe("AuthService", () => {
       const email = "user@example.com";
       const password = "password123";
 
-      await userFactory.withCredentials({ password }).create({ email });
+      await userFactory.withCredentials({ password }).withUserSettings(db).create({ email });
       await settingsFactory.create({ userId: null });
 
       const expiryDate = new Date();
