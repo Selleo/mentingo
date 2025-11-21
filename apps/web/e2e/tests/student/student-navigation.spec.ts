@@ -4,7 +4,7 @@ const TEST_NAVIGATION = {
   button: {
     createNew: "create new",
     dashboard: "dashboard",
-    browseCourses: "browse courses",
+    browseCourses: "Courses",
     profile: "profile",
     settings: "settings",
   },
@@ -31,19 +31,20 @@ test.describe("Student navigation", () => {
     await expect(welcomeText).toHaveText(new RegExp(TEST_NAVIGATION.header.welcomeBack, "i"));
 
     await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.browseCourses, "i") })
+      .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.browseCourses, "i") })
       .click();
     await page.waitForURL("/courses");
     const yourCoursesHeader = page.locator("h4", { hasText: TEST_NAVIGATION.header.yourCourses });
     await expect(yourCoursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.yourCourses, "i"));
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    const userName = "test Student profile test";
+    await page.getByRole("button", { name: userName }).click();
     await page.getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
     const currentURL = page.url();
     expect(currentURL).toMatch(/\/profile\/[a-f0-9-]{36}/);
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("button", { name: userName }).click();
     await page
       .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.settings, "i") })
       .click();

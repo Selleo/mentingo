@@ -22,7 +22,7 @@ test.describe("Admin settings", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
 
     await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
 
@@ -36,7 +36,7 @@ test.describe("Admin settings", () => {
     await page.locator('label[for="jobTitle"] + input').fill(TEST_SETTINGS.jobTitle);
     await page.locator('#user-details button[type="submit"]').click();
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
     await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.profile, "i") }).click();
     await page.waitForURL(/\/profile\/[a-f0-9-]{36}/);
 
@@ -102,7 +102,7 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "unchecked");
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
 
     await page
       .getByRole("menuitem", { name: /logout/i })
@@ -133,7 +133,7 @@ test.describe("Admin settings", () => {
     }
     await expect(coursesSwitch).toHaveAttribute("data-state", "checked");
 
-    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
 
     await page
       .getByRole("menuitem", { name: /logout/i })
