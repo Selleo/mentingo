@@ -395,9 +395,9 @@ export class LessonController {
     request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
   })
   async getLessonImage(
-    @CurrentUser("id") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
     @Param("resourceId") resourceId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
     @Res() res: Response,
   ) {
     return await this.lessonService.getLessonImage(res, userId, role, resourceId);
