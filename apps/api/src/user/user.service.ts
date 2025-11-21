@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { CreatePasswordReminderEmail } from "@repo/email-templates";
 import { OnboardingPages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, not, or, sql } from "drizzle-orm";
@@ -15,6 +16,7 @@ import { nanoid } from "nanoid";
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
+import { getEmailSubject } from "src/common/emails/translations";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -404,7 +406,7 @@ export class UserService {
       throw new ConflictException("User already exists");
     }
 
-    return await this.db.transaction(async (trx) => {
+    const { createdUser, token } = await this.db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
@@ -413,33 +415,65 @@ export class UserService {
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
-      await trx.insert(createTokens).values({
-        userId: createdUser.id,
-        createToken: token,
-        expiryDate,
-        reminderCount: 0,
-      });
+      const [{ createToken }] = await trx
+        .insert(createTokens)
+        .values({
+          userId: createdUser.id,
+          createToken: token,
+          expiryDate,
+          reminderCount: 0,
+        })
+        .returning();
 
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
-
-      if (currentUserId) {
-        const userInviteDetails: UserInvite = {
-          creatorId: currentUserId,
-          email: createdUser.email,
-          token,
-          ...defaultEmailSettings,
-        };
-
-        this.eventBus.publish(new UserInviteEvent(userInviteDetails));
-      }
+      await this.settingsService.createSettingsIfNotExists(
+        createdUser.id,
+        createdUser.role as UserRole,
+        undefined,
+        trx,
+      );
 
       if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
 
-      return createdUser;
+      return { createdUser, token: createToken };
     });
+
+    if (!createdUser || !token) {
+      throw new Error("Failed to create user");
+    }
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
+
+    if (!currentUserId) {
+      const createPasswordEmail = new CreatePasswordReminderEmail({
+        createPasswordLink: `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
+        ...defaultEmailSettings,
+      });
+
+      await this.emailService.sendEmailWithLogo({
+        to: createdUser.email,
+        subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
+        text: createPasswordEmail.text,
+        html: createPasswordEmail.html,
+        from: process.env.SES_EMAIL || "",
+      });
+
+      return createdUser;
+    }
+
+    const userInviteDetails: UserInvite = {
+      creatorId: currentUserId,
+      email: createdUser.email,
+      token,
+      userId: createdUser.id,
+      ...defaultEmailSettings,
+    };
+
+    this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+
+    return createdUser;
   }
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
@@ -447,9 +481,10 @@ export class UserService {
     return await this.s3Service.getSignedUrl(avatarReference);
   };
 
-  public async getAdminsToNotifyAboutNewUser(emailToExclude: string): Promise<string[]> {
-    const adminEmails = await this.db
+  public async getAdminsToNotifyAboutNewUser(emailToExclude: string) {
+    return this.db
       .select({
+        id: users.id,
         email: users.email,
       })
       .from(users)
@@ -461,19 +496,16 @@ export class UserService {
           not(eq(users.email, emailToExclude)),
         ),
       );
-
-    return adminEmails.map((admin) => admin.email);
   }
 
   public async getStudentEmailsByIds(studentIds: UUIDType[]) {
-    const userEmails = await this.db
+    return this.db
       .select({
+        id: users.id,
         email: users.email,
       })
       .from(users)
       .where(and(eq(users.role, USER_ROLES.STUDENT), inArray(users.id, studentIds)));
-
-    return userEmails.map((user) => user.email);
   }
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
@@ -533,12 +565,6 @@ export class UserService {
         const { groupName, ...userInfo } = userData;
 
         const createdUser = await this.createUser({ ...userInfo }, currentUserId, trx);
-        await this.settingsService.createSettingsIfNotExists(
-          createdUser.id,
-          createdUser.role as UserRole,
-          undefined,
-          trx,
-        );
 
         importStats.importedUsersAmount++;
         importStats.importedUsersList.push(userData.email);
@@ -653,9 +679,10 @@ export class UserService {
     return !!course;
   }
 
-  public async getAdminsToNotifyAboutFinishedCourse(): Promise<string[]> {
-    const adminEmails = await this.db
+  public async getAdminsToNotifyAboutFinishedCourse() {
+    return this.db
       .select({
+        id: users.id,
         email: users.email,
       })
       .from(users)
@@ -666,8 +693,6 @@ export class UserService {
           sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
         ),
       );
-
-    return adminEmails.map((admin) => admin.email);
   }
 
   async checkUsersInactivity() {

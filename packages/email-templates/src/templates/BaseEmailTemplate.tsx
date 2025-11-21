@@ -10,7 +10,7 @@ import {
   Text,
 } from "@react-email/components";
 
-import { DefaultEmailSettings } from "types";
+import { BaseEmailSettings } from "types";
 
 import { getBaseEmailStyles } from "../utils";
 
@@ -19,7 +19,7 @@ export type BaseEmailTemplateProps = {
   paragraphs: string[];
   buttonText: string;
   buttonLink: string;
-} & DefaultEmailSettings;
+} & BaseEmailSettings;
 
 export const BaseEmailTemplate = ({
   heading,

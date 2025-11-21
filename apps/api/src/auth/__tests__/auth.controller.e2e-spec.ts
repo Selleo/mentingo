@@ -344,9 +344,12 @@ describe("AuthController (e2e)", () => {
         .withCredentials({
           password: "Password123@",
         })
+        .withUserSettings(db)
         .create({
           email: "test_2@example.com",
         });
+
+      settingsFactory.create({ userId: user.id });
 
       const response = await request(app.getHttpServer())
         .post("/api/auth/forgot-password")

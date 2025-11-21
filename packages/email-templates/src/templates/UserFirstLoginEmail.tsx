@@ -1,3 +1,5 @@
+import { getUserFirstLoginEmailTranslations } from "translations/userFirstLogin";
+
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -11,14 +13,14 @@ export const UserFirstLoginEmail = ({
   name,
   coursesUrl,
   primaryColor,
+  language = "en",
 }: UserFirstLoginEmailProps) => {
+  const { heading, paragraphs, buttonText } = getUserFirstLoginEmailTranslations(language, name);
+
   return BaseEmailTemplate({
-    heading: "Welcome",
-    paragraphs: [
-      "Good to have you here 🙂",
-      `Your first sign-in was successful. ${name} check your assigned courses.`,
-    ],
-    buttonText: "MY COURSES",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: coursesUrl,
     primaryColor,
   });

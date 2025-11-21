@@ -1,3 +1,5 @@
+import { getFinishedCourseEmailTranslations } from "translations/finishedCourse";
+
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -13,11 +15,18 @@ export const FinishedCourseEmail = ({
   courseName,
   progressLink,
   primaryColor,
+  language = "en",
 }: FinishedCourseEmailProps) => {
+  const { heading, paragraphs, buttonText } = getFinishedCourseEmailTranslations(
+    language,
+    userName,
+    courseName,
+  );
+
   return BaseEmailTemplate({
-    heading: "User finished the course",
-    paragraphs: ["Hello! 🧑‍💻", `${userName} completed ${courseName}. Review their progress.`],
-    buttonText: "VIEW PROGRESS",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: progressLink,
     primaryColor,
   });

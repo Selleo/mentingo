@@ -1,3 +1,4 @@
+import { getCreatePasswordReminderEmailTranslations } from "translations/createPasswordReminder";
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -9,14 +10,14 @@ export type CreatePasswordReminderEmailProps = {
 export const CreatePasswordReminderEmail = ({
   createPasswordLink,
   primaryColor,
+  language = "en",
 }: CreatePasswordReminderEmailProps) => {
+  const { heading, paragraphs, buttonText } = getCreatePasswordReminderEmailTranslations(language);
+
   return BaseEmailTemplate({
-    heading: "Reminder",
-    paragraphs: [
-      "This is a friendly reminder that your account is not yet fully set up. 🔒",
-      "To complete your account setup, please create your password by clicking the button below. If you have already created your password, please disregard this reminder.",
-    ],
-    buttonText: "CREATE PASSWORD",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: createPasswordLink,
     primaryColor,
   });

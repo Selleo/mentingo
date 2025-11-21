@@ -1,3 +1,5 @@
+import { getUserInviteEmailTranslations } from "translations/userInvite";
+
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -11,14 +13,17 @@ export const UserInviteEmail = ({
   invitedByUserName,
   createPasswordLink,
   primaryColor,
+  language = "en",
 }: UserInviteProps) => {
+  const { heading, paragraphs, buttonText } = getUserInviteEmailTranslations(
+    language,
+    invitedByUserName,
+  );
+
   return BaseEmailTemplate({
-    heading: "You're invited",
-    paragraphs: [
-      "Hello there 👋",
-      `You've been invited to the e-learning platform by ${invitedByUserName}. Click the button below to start improving your skills.`,
-    ],
-    buttonText: "JOIN NOW",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: createPasswordLink,
     primaryColor,
   });

@@ -1,3 +1,5 @@
+import { getUserLongInactivityEmailTranslations } from "translations/userLongInactivity";
+
 import { BaseEmailTemplate } from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -11,14 +13,17 @@ export const UserLongInactivityEmail = ({
   courseName,
   courseLink,
   primaryColor,
+  language = "en",
 }: UserLongInactivityProps) => {
+  const { heading, paragraphs, buttonText } = getUserLongInactivityEmailTranslations(
+    language,
+    courseName,
+  );
+
   return BaseEmailTemplate({
-    heading: "Time to resume your course",
-    paragraphs: [
-      "Continue learning 📚",
-      `It’s been 30 days since your last activity in ${courseName}. Resuming now will help you finish on time.`,
-    ],
-    buttonText: "RESUME COURSE",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: courseLink,
     primaryColor,
   });

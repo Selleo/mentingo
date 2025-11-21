@@ -1,3 +1,5 @@
+import { getNewUserEmailTranslations } from "translations/newUser";
+
 import BaseEmailTemplate from "./BaseEmailTemplate";
 
 import { DefaultEmailSettings } from "types";
@@ -7,11 +9,18 @@ export type NewUserEmailProps = {
   profileLink: string;
 } & DefaultEmailSettings;
 
-export const NewUserEmail = ({ userName, profileLink, primaryColor }: NewUserEmailProps) => {
+export const NewUserEmail = ({
+  userName,
+  profileLink,
+  primaryColor,
+  language = "en",
+}: NewUserEmailProps) => {
+  const { heading, paragraphs, buttonText } = getNewUserEmailTranslations(language, userName);
+
   return BaseEmailTemplate({
-    heading: "New user profile",
-    paragraphs: ["Hello! 🧑‍💻", `${userName} has joined. Review the profile and assign courses.`],
-    buttonText: "OPEN PROFILE",
+    heading,
+    paragraphs,
+    buttonText,
     buttonLink: profileLink,
     primaryColor,
   });
