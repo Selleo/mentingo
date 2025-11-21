@@ -35,6 +35,7 @@ type LessonContentProps = {
   isLastLesson: boolean;
   lessonLoading: boolean;
   isPreviewMode?: boolean;
+  previewUserId?: string;
 };
 
 export const LessonContent = ({
@@ -47,6 +48,7 @@ export const LessonContent = ({
   lessonLoading,
   isLastLesson,
   isPreviewMode = false,
+  previewUserId = undefined,
 }: LessonContentProps) => {
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const { data: user } = useCurrentUser();
@@ -105,6 +107,7 @@ export const LessonContent = ({
     isPreviewMode,
     queryClient,
     course.id,
+    previewUserId,
   ]);
 
   const Content = () =>
@@ -131,7 +134,14 @@ export const LessonContent = ({
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
-      .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
+      .with("ai_mentor", () => (
+        <AiMentorLesson
+          lesson={lesson}
+          lessonLoading={lessonLoading}
+          isPreviewMode={isPreviewMode}
+          userId={previewUserId ?? user?.id}
+        />
+      ))
       .with("embed", () => (
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
       ))
@@ -190,7 +200,7 @@ export const LessonContent = ({
                     <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
                     <span data-testid="lesson-type">{startCase(lesson.type)}</span>
                   </p>
-                  {lesson.type === "ai_mentor" && (
+                  {lesson.type === LessonType.AI_MENTOR && (
                     <Tooltip>
                       <TooltipTrigger>
                         <Badge variant="secondary" className="uppercase">

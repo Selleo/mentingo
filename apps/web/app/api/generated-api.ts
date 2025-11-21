@@ -1233,6 +1233,8 @@ export interface GetCourseStudentsAiMentorResultsResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
+    /** @format uuid */
+    lessonId: string;
     lessonName: string;
     score: number;
     lastSession: string;
@@ -1558,6 +1560,13 @@ export interface GetLessonByIdResponse {
       createdAt: string;
       updatedAt: string;
     }[];
+    aiMentorDetails?: {
+      minScore: number | null;
+      maxScore: number | null;
+      score: number | null;
+      percentage: number | null;
+      requiredScore: number | null;
+    } | null;
   };
 }
 
@@ -2103,6 +2112,7 @@ export interface GetThreadMessagesResponse {
   } & {
     role: "system" | "user" | "assistant" | "tool" | "summary";
     isJudge?: boolean;
+    userName?: string | null;
   }) & {
     id: string;
   })[];
@@ -4907,9 +4917,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/ai/thread/messages
      */
     aiControllerGetThreadMessages: (
-      query?: {
+      query: {
         /** @format uuid */
         thread?: string;
+        studentId: string;
       },
       params: RequestParams = {},
     ) =>
