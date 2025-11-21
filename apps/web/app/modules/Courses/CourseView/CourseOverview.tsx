@@ -47,8 +47,8 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
               loading="eager"
               decoding="async"
               className="h-full w-full rounded-lg object-cover drop-shadow-sm"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = CardPlaceholder;
+              onError={(event) => {
+                event.currentTarget.src = CardPlaceholder;
               }}
             />
           </div>
