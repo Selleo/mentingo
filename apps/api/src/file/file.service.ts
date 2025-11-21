@@ -5,6 +5,7 @@ import { BadRequestException, ConflictException, Injectable } from "@nestjs/comm
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import Excel from "exceljs";
 import { isEmpty } from "lodash";
+import sharp from "sharp";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { S3Service } from "src/s3/s3.service";
@@ -37,6 +38,28 @@ export class FileService {
       return this.bunnyStreamService.getUrl(videoId);
     }
     return await this.s3Service.getSignedUrl(fileKey);
+  }
+
+  async getFileBuffer(fileKey: string): Promise<Buffer | null> {
+    if (!fileKey) return null;
+
+    try {
+      if (fileKey.startsWith("https://") || fileKey.startsWith("http://")) {
+        const response = await fetch(fileKey);
+
+        if (!response.ok) {
+          throw new Error(`Failed to download remote file: ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        return sharp(Buffer.from(arrayBuffer), { density: 300 }).toBuffer();
+      }
+
+      const buffer = await this.s3Service.getFileBuffer(fileKey);
+      return sharp(buffer, { density: 300 }).toBuffer();
+    } catch (error) {
+      return null;
+    }
   }
 
   async uploadFile(file: Express.Multer.File, resource: string, options?: FileValidationOptions) {

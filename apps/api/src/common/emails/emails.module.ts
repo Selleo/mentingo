@@ -1,12 +1,14 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+
+import { SettingsModule } from "src/settings/settings.module";
 
 import { EmailAdapter } from "./adapters/email.adapter";
 import { EmailService } from "./emails.service";
 import { EmailAdapterFactory } from "./factory/email-adapters.factory";
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, forwardRef(() => SettingsModule)],
   providers: [
     EmailService,
     EmailAdapterFactory,

@@ -111,8 +111,14 @@ export class AuthService {
       const usersProfilePictureUrl =
         await this.userService.getUsersProfilePictureUrl(avatarReference);
 
-      const emailTemplate = new WelcomeEmail({ email, name: email });
-      await this.emailService.sendEmail({
+      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+
+      const emailTemplate = new WelcomeEmail({
+        coursesLink: `${process.env.CORS_ORIGIN}/courses`,
+        ...defaultEmailSettings,
+      });
+
+      await this.emailService.sendEmailWithLogo({
         to: email,
         subject: "Welcome to our platform",
         text: emailTemplate.text,
@@ -274,13 +280,15 @@ export class AuthService {
       expiryDate,
     });
 
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+
     const emailTemplate = new PasswordRecoveryEmail({
-      email,
-      name: email,
+      name: user.firstName,
       resetLink: `${CORS_ORIGIN}/auth/create-new-password?resetToken=${resetToken}&email=${email}`,
+      ...defaultEmailSettings,
     });
 
-    await this.emailService.sendEmail({
+    await this.emailService.sendEmailWithLogo({
       to: email,
       subject: "Password recovery",
       text: emailTemplate.text,
@@ -362,10 +370,14 @@ export class AuthService {
       );
   }
 
-  private generateNewTokenAndEmail(email: string) {
+  private async generateNewTokenAndEmail(email: string) {
     const createToken = nanoid(64);
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties();
+
     const emailTemplate = new CreatePasswordReminderEmail({
       createPasswordLink: `${CORS_ORIGIN}/auth/create-new-password?createToken=${createToken}&email=${email}`,
+      ...defaultEmailSettings,
     });
 
     return { createToken, emailTemplate };
@@ -389,7 +401,7 @@ export class AuthService {
           reminderCount,
         });
 
-        await this.emailService.sendEmail({
+        await this.emailService.sendEmailWithLogo({
           to: email,
           subject: "Account creation reminder",
           text: emailTemplate.text,
@@ -413,7 +425,7 @@ export class AuthService {
     expiryDate.setHours(expiryDate.getHours() + 24);
 
     expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
-      const { createToken, emailTemplate } = this.generateNewTokenAndEmail(email);
+      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(email);
 
       await this.sendEmailAndUpdateDatabase(
         userId,
