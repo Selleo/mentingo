@@ -1786,7 +1786,7 @@
       },
       "upload": {
         "uploadFailed": "Nie udało się przesłać pliku",
-        "tooltip": "Prześlij: Pozwala przesłać obraz"
+        "tooltip": "Prześlij: Pozwala przesłać plik"
       }
     }
   },
