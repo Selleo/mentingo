@@ -131,7 +131,7 @@ export default function LessonPage() {
 
   const breadcrumbs = [
     {
-      title: t("studentCourseView.breadcrumbs.courses"),
+      title: t("studentCoursesView.breadcrumbs.courses"),
       href: "/courses",
     },
     { title: course.title, href: `/course/${courseId}` },

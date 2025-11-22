@@ -75,7 +75,7 @@ export const aiMentorLessonSchema = Type.Object({
   type: Type.Enum(AI_MENTOR_TYPE),
 });
 
-export const lessonResourceType = Type.Union([Type.Literal("embed")]);
+export const lessonResourceType = Type.Union([Type.Literal("embed", Type.Literal("text"))]);
 
 export const lessonResourceSchema = Type.Object({
   id: UUIDSchema,

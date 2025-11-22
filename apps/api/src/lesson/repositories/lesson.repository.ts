@@ -410,4 +410,13 @@ export class LessonRepository {
   //         ),
   //       );
   //   }
+
+  async getLessonResource(resourceId: UUIDType) {
+    const [lessonResource] = await this.db
+      .select()
+      .from(lessonResources)
+      .where(eq(lessonResources.id, resourceId));
+
+    return lessonResource;
+  }
 }
