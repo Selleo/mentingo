@@ -1,27 +1,35 @@
-import { Html, Text } from "@react-email/components";
+import { getFinishedCourseEmailTranslations } from "translations/finishedCourse";
+
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type FinishedCourseEmailProps = {
   userName: string;
   courseName: string;
-  completedAt: string;
-  groupName?: string;
-};
+  progressLink: string;
+} & DefaultEmailSettings;
 
 export const FinishedCourseEmail = ({
   userName,
   courseName,
-  completedAt,
-  groupName,
+  progressLink,
+  primaryColor,
+  language = "en",
 }: FinishedCourseEmailProps) => {
-  return (
-    <Html>
-      <Text>
-        <b>{userName}</b> finished the course <b>{courseName}</b>.
-      </Text>
-      <Text>Completed at: {completedAt}</Text>
-      {groupName && <Text>Belongs to group: {groupName}</Text>}
-    </Html>
+  const { heading, paragraphs, buttonText } = getFinishedCourseEmailTranslations(
+    language,
+    userName,
+    courseName,
   );
+
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: progressLink,
+    primaryColor,
+  });
 };
 
 export default FinishedCourseEmail;

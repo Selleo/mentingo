@@ -35,22 +35,58 @@ export class AWSSESAdapter extends EmailAdapter {
   }
 
   async sendMail(email: Email): Promise<void> {
-    const params = {
-      Source: email.from,
+    const params: any = {
+      FromEmailAddress: email.from,
       Destination: {
         ToAddresses: [email.to],
       },
-      Message: {
-        Subject: {
-          Data: email.subject,
-        },
-        Body: {
-          Text: {
-            Data: email.text,
+      Content: {
+        Simple: {
+          Subject: {
+            Data: email.subject,
           },
-          Html: {
-            Data: email.html,
+          Body: {
+            ...(email.text && {
+              Text: {
+                Data: email.text,
+              },
+            }),
+            ...(email.html && {
+              Html: {
+                Data: email.html,
+              },
+            }),
           },
+          ...(email.attachments &&
+            email.attachments.length > 0 && {
+              Attachments: email.attachments.map((attachment) => {
+                let base64Content: string;
+                if (attachment.content) {
+                  if (Buffer.isBuffer(attachment.content)) {
+                    base64Content = attachment.content.toString("base64");
+                  } else {
+                    base64Content = Buffer.from(attachment.content).toString("base64");
+                  }
+                } else if (attachment.path) {
+                  throw new Error("File path attachments not yet supported in SES adapter");
+                } else {
+                  throw new Error("Attachment must have either content or path");
+                }
+
+                return {
+                  RawContent: base64Content,
+                  ContentDisposition: attachment.cid ? "INLINE" : "ATTACHMENT",
+                  FileName: attachment.filename,
+                  ...(attachment.contentType && {
+                    ContentType: attachment.contentType,
+                  }),
+                  ...(attachment.cid && {
+                    ContentId: attachment.cid,
+                  }),
+                  ContentTransferEncoding: "BASE64",
+                };
+              }),
+            }),
         },
       },
     };

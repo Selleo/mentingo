@@ -20,10 +20,11 @@ import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
-import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "src/ai/utils/ai.type";
+import { type Languages, SUPPORTED_LANGUAGES, type SupportedLanguages } from "src/ai/utils/ai.type";
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
+import { getEmailSubject } from "src/common/emails/translations";
 import hashPassword from "src/common/helpers/hashPassword";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
@@ -78,7 +79,7 @@ export class AuthService {
 
     const hashedPassword = await hashPassword(password);
 
-    return this.db.transaction(async (trx) => {
+    const createdUser = await this.db.transaction(async (trx) => {
       const [newUser] = await trx
         .insert(users)
         .values({
@@ -111,19 +112,33 @@ export class AuthService {
       const usersProfilePictureUrl =
         await this.userService.getUsersProfilePictureUrl(avatarReference);
 
-      const emailTemplate = new WelcomeEmail({ email, name: email });
-      await this.emailService.sendEmail({
-        to: email,
-        subject: "Welcome to our platform",
-        text: emailTemplate.text,
-        html: emailTemplate.html,
-        from: process.env.SES_EMAIL || "",
-      });
-
       this.eventBus.publish(new UserRegisteredEvent(newUser));
 
       return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
     });
+
+    if (!createdUser) {
+      throw new BadRequestException("Failed to create user");
+    }
+
+    const createdSettings = await this.settingsService.getUserSettings(createdUser.id);
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
+
+    const emailTemplate = new WelcomeEmail({
+      coursesLink: `${process.env.CORS_ORIGIN}/courses`,
+      ...defaultEmailSettings,
+    });
+
+    await this.emailService.sendEmailWithLogo({
+      to: email,
+      subject: getEmailSubject("welcomeEmail", createdSettings.language as Languages),
+      text: emailTemplate.text,
+      html: emailTemplate.html,
+      from: process.env.SES_EMAIL || "",
+    });
+
+    return createdUser;
   }
 
   public async login(data: { email: string; password: string }, MFAEnforcedRoles: UserRole[]) {
@@ -274,15 +289,17 @@ export class AuthService {
       expiryDate,
     });
 
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
+
     const emailTemplate = new PasswordRecoveryEmail({
-      email,
-      name: email,
+      name: user.firstName,
       resetLink: `${CORS_ORIGIN}/auth/create-new-password?resetToken=${resetToken}&email=${email}`,
+      ...defaultEmailSettings,
     });
 
-    await this.emailService.sendEmail({
+    await this.emailService.sendEmailWithLogo({
       to: email,
-      subject: "Password recovery",
+      subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
       text: emailTemplate.text,
       html: emailTemplate.html,
       from: process.env.SES_EMAIL || "",
@@ -362,10 +379,14 @@ export class AuthService {
       );
   }
 
-  private generateNewTokenAndEmail(email: string) {
+  private async generateNewTokenAndEmail(userId: UUIDType, email: string) {
     const createToken = nanoid(64);
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
+
     const emailTemplate = new CreatePasswordReminderEmail({
       createPasswordLink: `${CORS_ORIGIN}/auth/create-new-password?createToken=${createToken}&email=${email}`,
+      ...defaultEmailSettings,
     });
 
     return { createToken, emailTemplate };
@@ -389,9 +410,11 @@ export class AuthService {
           reminderCount,
         });
 
-        await this.emailService.sendEmail({
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(userId);
+
+        await this.emailService.sendEmailWithLogo({
           to: email,
-          subject: "Account creation reminder",
+          subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
           text: emailTemplate.text,
           html: emailTemplate.html,
           from: process.env.SES_EMAIL || "",
@@ -413,7 +436,7 @@ export class AuthService {
     expiryDate.setHours(expiryDate.getHours() + 24);
 
     expiryTokens.map(async ({ userId, email, oldCreateToken, reminderCount }) => {
-      const { createToken, emailTemplate } = this.generateNewTokenAndEmail(email);
+      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId, email);
 
       await this.sendEmailAndUpdateDatabase(
         userId,
@@ -450,12 +473,6 @@ export class AuthService {
         lastName: userCallback.lastName,
         role: USER_ROLES.STUDENT,
       });
-
-      await this.settingsService.createSettingsIfNotExists(
-        user.id,
-        user.role as UserRole,
-        undefined,
-      );
     }
 
     const tokens = await this.getTokens(user);

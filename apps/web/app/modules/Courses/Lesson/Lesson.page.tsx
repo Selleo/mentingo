@@ -144,7 +144,7 @@ export default function LessonPage() {
   return (
     <PageWrapper className="h-auto max-w-full" breadcrumbs={breadcrumbs}>
       <div className="flex size-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
-        <div className="flex size-full flex-col divide-y rounded-lg bg-white">
+        <div className="flex size-full min-w-0 flex-col divide-y rounded-lg bg-white">
           <div className="flex items-center p-6 sm:px-10 3xl:px-8">
             <p className="h6 text-neutral-950">
               <span className="text-neutral-800">

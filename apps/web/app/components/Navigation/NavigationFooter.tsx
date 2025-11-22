@@ -24,9 +24,13 @@ import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
 
 type NavigationFooterProps = {
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
+  hasConfigurationIssues?: boolean;
 };
 
-export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) {
+export function NavigationFooter({
+  setIsMobileNavOpen,
+  hasConfigurationIssues,
+}: NavigationFooterProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const { mutate: logout } = useLogoutUser();
@@ -53,13 +57,17 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
         <Separator className="bg-primary-200 2xl:h-px 3xl:my-2" />
       </li>
 
-      <MobileNavigationFooterItems setIsMobileNavOpen={setIsMobileNavOpen} userId={user?.id} />
+      <MobileNavigationFooterItems
+        setIsMobileNavOpen={setIsMobileNavOpen}
+        userId={user?.id}
+        hasConfigurationIssues={hasConfigurationIssues}
+      />
 
       <div className="col-span-1 hidden cursor-pointer select-none items-center justify-center md:col-span-2 2xl:flex">
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
             onClick={() => setIsDropdownOpen((prev) => !prev)}
-            className={cn("flex w-full items-center justify-between gap-2 p-2", {
+            className={cn("flex w-full items-center justify-between gap-2 p-2 relative", {
               "justify-center": isBetween1440And1680,
             })}
           >
@@ -81,6 +89,9 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
                 },
               )}
             />
+            {hasConfigurationIssues && (
+              <span className="absolute top-2 left-2 size-2 rounded-full bg-error-500" />
+            )}
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
@@ -109,7 +120,7 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
                 />
               </DropdownMenuItem>
 
-              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
+              <DropdownMenuItem onClick={() => setIsDropdownOpen(false)} className="relative">
                 <NavigationMenuItemLink
                   item={{
                     iconName: "Settings",
@@ -117,6 +128,9 @@ export function NavigationFooter({ setIsMobileNavOpen }: NavigationFooterProps) 
                     link: `/settings`,
                   }}
                 />
+                {hasConfigurationIssues && (
+                  <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
+                )}
               </DropdownMenuItem>
 
               <Separator className="my-1 bg-neutral-200" />

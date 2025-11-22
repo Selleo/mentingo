@@ -147,6 +147,307 @@ export interface MFAVerifyResponse {
   };
 }
 
+export interface GetPublicGlobalSettingsResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+  };
+}
+
+export interface GetUserSettingsResponse {
+  data:
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+      }
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+        adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
+        configWarningDismissed: boolean;
+      };
+}
+
+export type UpdateUserSettingsBody =
+  | {
+      language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
+    }
+  | {
+      language?: string;
+      /** @default false */
+      isMFAEnabled?: boolean;
+      MFASecret?: string | null;
+      adminNewUserNotification?: boolean;
+      adminFinishedCourseNotification?: boolean;
+      configWarningDismissed?: boolean;
+    };
+
+export interface UpdateUserSettingsResponse {
+  data:
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+      }
+    | {
+        language: string;
+        /** @default false */
+        isMFAEnabled: boolean;
+        MFASecret: string | null;
+        adminNewUserNotification: boolean;
+        adminFinishedCourseNotification: boolean;
+        configWarningDismissed: boolean;
+      };
+}
+
+export interface UpdateAdminNewUserNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
+  };
+}
+
+export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+  };
+}
+
+export interface UpdateEnforceSSOResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+  };
+}
+
+export interface UpdateAdminFinishedCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
+  };
+}
+
+export interface UpdateColorSchemaBody {
+  /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
+  primaryColor: string;
+  /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
+  contrastColor: string;
+}
+
+export interface UpdateColorSchemaResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+  };
+}
+
+export interface GetPlatformLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetPlatformSimpleLogoResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetLoginBackgroundResponse {
+  data: {
+    url: string | null;
+  };
+}
+
+export interface GetCompanyInformationResponse {
+  data: {
+    companyName?: string;
+    /** @maxLength 10 */
+    companyShortName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
+  };
+}
+
+export interface UpdateCompanyInformationBody {
+  companyName?: string;
+  /** @maxLength 10 */
+  companyShortName?: string;
+  registeredAddress?: string;
+  taxNumber?: string;
+  emailAddress?: string;
+  courtRegisterNumber?: string;
+}
+
+export interface UpdateCompanyInformationResponse {
+  data: {
+    companyName?: string;
+    /** @maxLength 10 */
+    companyShortName?: string;
+    registeredAddress?: string;
+    taxNumber?: string;
+    emailAddress?: string;
+    courtRegisterNumber?: string;
+  };
+}
+
+export interface UpdateMFAEnforcedRolesBody {
+  admin?: boolean;
+  student?: boolean;
+  content_creator?: boolean;
+}
+
+export interface UpdateDefaultCourseCurrencyBody {
+  defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+}
+
+export interface UpdateConfigWarningDismissedBody {
+  dismissed: boolean;
+}
+
+export interface UpdateConfigWarningDismissedResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
+  };
+}
+
+export interface FileUploadResponse {
+  fileKey: string;
+  fileUrl: string;
+}
+
 export interface GetUserStatisticsResponse {
   data: {
     averageStats: {
@@ -216,11 +517,6 @@ export interface GetStatsResponse {
       answerCount: number;
     };
   };
-}
-
-export interface FileUploadResponse {
-  fileKey: string;
-  fileUrl: string;
 }
 
 export interface GetUsersResponse {
@@ -443,281 +739,6 @@ export interface MarkOnboardingCompleteResponse {
     settings: boolean;
     providerInformation: boolean;
   };
-}
-
-export interface GetPublicGlobalSettingsResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      /** @maxLength 10 */
-      companyShortName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    loginBackgroundImageS3Key: string | null;
-    platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-    inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
-    primaryColor: string | null;
-    contrastColor: string | null;
-  };
-}
-
-export interface GetUserSettingsResponse {
-  data:
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-      }
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-        adminNewUserNotification: boolean;
-        adminFinishedCourseNotification: boolean;
-      };
-}
-
-export type UpdateUserSettingsBody =
-  | {
-      language?: string;
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-    }
-  | {
-      language?: string;
-      /** @default false */
-      isMFAEnabled?: boolean;
-      MFASecret?: string | null;
-      adminNewUserNotification?: boolean;
-      adminFinishedCourseNotification?: boolean;
-    };
-
-export interface UpdateUserSettingsResponse {
-  data:
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-      }
-    | {
-        language: string;
-        /** @default false */
-        isMFAEnabled: boolean;
-        MFASecret: string | null;
-        adminNewUserNotification: boolean;
-        adminFinishedCourseNotification: boolean;
-      };
-}
-
-export interface UpdateAdminNewUserNotificationResponse {
-  data: {
-    language: string;
-    /** @default false */
-    isMFAEnabled: boolean;
-    MFASecret: string | null;
-    adminNewUserNotification: boolean;
-    adminFinishedCourseNotification: boolean;
-  };
-}
-
-export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      /** @maxLength 10 */
-      companyShortName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    loginBackgroundImageS3Key: string | null;
-    platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-    inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
-    primaryColor: string | null;
-    contrastColor: string | null;
-  };
-}
-
-export interface UpdateEnforceSSOResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      /** @maxLength 10 */
-      companyShortName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    loginBackgroundImageS3Key: string | null;
-    platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-    inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
-    primaryColor: string | null;
-    contrastColor: string | null;
-  };
-}
-
-export interface UpdateAdminFinishedCourseNotificationResponse {
-  data: {
-    language: string;
-    /** @default false */
-    isMFAEnabled: boolean;
-    MFASecret: string | null;
-    adminNewUserNotification: boolean;
-    adminFinishedCourseNotification: boolean;
-  };
-}
-
-export interface UpdateColorSchemaBody {
-  /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
-  primaryColor: string;
-  /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
-  contrastColor: string;
-}
-
-export interface UpdateColorSchemaResponse {
-  data: {
-    unregisteredUserCoursesAccessibility: boolean;
-    enforceSSO: boolean;
-    certificateBackgroundImage: string | null;
-    companyInformation?: {
-      companyName?: string;
-      /** @maxLength 10 */
-      companyShortName?: string;
-      registeredAddress?: string;
-      taxNumber?: string;
-      emailAddress?: string;
-      courtRegisterNumber?: string;
-    };
-    platformLogoS3Key: string | null;
-    loginBackgroundImageS3Key: string | null;
-    platformSimpleLogoS3Key: string | null;
-    MFAEnforcedRoles: ("admin" | "student" | "content_creator")[];
-    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
-    inviteOnlyRegistration: boolean;
-    userEmailTriggers: {
-      userFirstLogin: boolean;
-      userCourseAssignment: boolean;
-      userShortInactivity: boolean;
-      userLongInactivity: boolean;
-      userChapterFinished: boolean;
-      userCourseFinished: boolean;
-    };
-    primaryColor: string | null;
-    contrastColor: string | null;
-  };
-}
-
-export interface GetPlatformLogoResponse {
-  data: {
-    url: string | null;
-  };
-}
-
-export interface GetPlatformSimpleLogoResponse {
-  data: {
-    url: string | null;
-  };
-}
-
-export interface GetLoginBackgroundResponse {
-  data: {
-    url: string | null;
-  };
-}
-
-export interface GetCompanyInformationResponse {
-  data: {
-    companyName?: string;
-    /** @maxLength 10 */
-    companyShortName?: string;
-    registeredAddress?: string;
-    taxNumber?: string;
-    emailAddress?: string;
-    courtRegisterNumber?: string;
-  };
-}
-
-export interface UpdateCompanyInformationBody {
-  companyName?: string;
-  /** @maxLength 10 */
-  companyShortName?: string;
-  registeredAddress?: string;
-  taxNumber?: string;
-  emailAddress?: string;
-  courtRegisterNumber?: string;
-}
-
-export interface UpdateCompanyInformationResponse {
-  data: {
-    companyName?: string;
-    /** @maxLength 10 */
-    companyShortName?: string;
-    registeredAddress?: string;
-    taxNumber?: string;
-    emailAddress?: string;
-    courtRegisterNumber?: string;
-  };
-}
-
-export interface UpdateMFAEnforcedRolesBody {
-  admin?: boolean;
-  student?: boolean;
-  content_creator?: boolean;
-}
-
-export interface UpdateDefaultCourseCurrencyBody {
-  defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
 }
 
 export interface GetAllCategoriesResponse {
@@ -1234,6 +1255,8 @@ export interface GetCourseStudentsAiMentorResultsResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
+    /** @format uuid */
+    lessonId: string;
     lessonName: string;
     score: number;
     lastSession: string;
@@ -1559,6 +1582,13 @@ export interface GetLessonByIdResponse {
       createdAt: string;
       updatedAt: string;
     }[];
+    aiMentorDetails?: {
+      minScore: number | null;
+      maxScore: number | null;
+      score: number | null;
+      percentage: number | null;
+      requiredScore: number | null;
+    } | null;
   };
 }
 
@@ -2104,6 +2134,7 @@ export interface GetThreadMessagesResponse {
   } & {
     role: "system" | "user" | "assistant" | "tool" | "summary";
     isJudge?: boolean;
+    userName?: string | null;
   }) & {
     id: string;
   })[];
@@ -2564,6 +2595,22 @@ export interface GetStripeConfiguredResponse {
   };
 }
 
+export interface GetIsConfigSetupResponse {
+  data: {
+    fullyConfigured: string[];
+    partiallyConfigured: {
+      service: string;
+      missingKeys: string[];
+    }[];
+    notConfigured: {
+      service: string;
+      missingKeys: string[];
+    }[];
+    hasIssues: boolean;
+    isWarningDismissed: boolean;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -2955,466 +3002,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name StatisticsControllerGetUserStatistics
-     * @request GET:/api/statistics/user-stats
-     */
-    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
-      this.request<GetUserStatisticsResponse, any>({
-        path: `/api/statistics/user-stats`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StatisticsControllerGetStats
-     * @request GET:/api/statistics/stats
-     */
-    statisticsControllerGetStats: (params: RequestParams = {}) =>
-      this.request<GetStatsResponse, any>({
-        path: `/api/statistics/stats`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerUploadFile
-     * @request POST:/api/file
-     */
-    fileControllerUploadFile: (
-      data: {
-        /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FileUploadResponse, any>({
-        path: `/api/file`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name HealthControllerCheck
-     * @request GET:/api/healthcheck
-     */
-    healthControllerCheck: (params: RequestParams = {}) =>
-      this.request<
-        {
-          /** @example "ok" */
-          status?: string;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-        },
-        {
-          /** @example "error" */
-          status?: string;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-        }
-      >({
-        path: `/api/healthcheck`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerGetUsers
-     * @request GET:/api/user/all
-     */
-    userControllerGetUsers: (
-      query?: {
-        keyword?: string;
-        role?: "admin" | "student" | "content_creator";
-        archived?: string;
-        /** @min 1 */
-        page?: number;
-        perPage?: number;
-        sort?: string;
-        groupId?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetUsersResponse, any>({
-        path: `/api/user/all`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerGetUserById
-     * @request GET:/api/user
-     */
-    userControllerGetUserById: (
-      query: {
-        /** @format uuid */
-        id: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetUserByIdResponse, any>({
-        path: `/api/user`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerUpdateUser
-     * @request PATCH:/api/user
-     */
-    userControllerUpdateUser: (
-      query: {
-        /** @format uuid */
-        id: string;
-      },
-      data: UpdateUserBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateUserResponse, any>({
-        path: `/api/user`,
-        method: "PATCH",
-        query: query,
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerDeleteBulkUsers
-     * @request DELETE:/api/user
-     */
-    userControllerDeleteBulkUsers: (data: DeleteBulkUsersBody, params: RequestParams = {}) =>
-      this.request<DeleteBulkUsersResponse, any>({
-        path: `/api/user`,
-        method: "DELETE",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerCreateUser
-     * @request POST:/api/user
-     */
-    userControllerCreateUser: (data: CreateUserBody, params: RequestParams = {}) =>
-      this.request<CreateUserResponse, any>({
-        path: `/api/user`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerGetUserDetails
-     * @request GET:/api/user/details
-     */
-    userControllerGetUserDetails: (
-      query: {
-        /** @format uuid */
-        userId: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetUserDetailsResponse, any>({
-        path: `/api/user/details`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerUpsertUserDetails
-     * @request PATCH:/api/user/details
-     */
-    userControllerUpsertUserDetails: (data: UpsertUserDetailsBody, params: RequestParams = {}) =>
-      this.request<UpsertUserDetailsResponse, any>({
-        path: `/api/user/details`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerUpdateUserProfile
-     * @request PATCH:/api/user/profile
-     */
-    userControllerUpdateUserProfile: (
-      data: {
-        /** @format binary */
-        userAvatar?: File;
-        /** @format string */
-        data?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/user/profile`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.FormData,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerAdminUpdateUser
-     * @request PATCH:/api/user/admin
-     */
-    userControllerAdminUpdateUser: (
-      query: {
-        /** @format uuid */
-        id: string;
-      },
-      data: AdminUpdateUserBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<AdminUpdateUserResponse, any>({
-        path: `/api/user/admin`,
-        method: "PATCH",
-        query: query,
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerChangePassword
-     * @request PATCH:/api/user/change-password
-     */
-    userControllerChangePassword: (
-      query: {
-        /** @format uuid */
-        id: string;
-      },
-      data: ChangePasswordBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<ChangePasswordResponse, any>({
-        path: `/api/user/change-password`,
-        method: "PATCH",
-        query: query,
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerDeleteUser
-     * @request DELETE:/api/user/user
-     */
-    userControllerDeleteUser: (
-      query: {
-        /** @format uuid */
-        id: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<DeleteUserResponse, any>({
-        path: `/api/user/user`,
-        method: "DELETE",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerBulkAssignUsersToGroup
-     * @request PATCH:/api/user/bulk/groups
-     */
-    userControllerBulkAssignUsersToGroup: (
-      data: BulkAssignUsersToGroupBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/user/bulk/groups`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerArchiveBulkUsers
-     * @request PATCH:/api/user/bulk/archive
-     */
-    userControllerArchiveBulkUsers: (data: ArchiveBulkUsersBody, params: RequestParams = {}) =>
-      this.request<ArchiveBulkUsersResponse, any>({
-        path: `/api/user/bulk/archive`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerImportUsers
-     * @request POST:/api/user/import
-     */
-    userControllerImportUsers: (
-      data: {
-        /** @format binary */
-        usersFile?: File;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<ImportUsersResponse, any>({
-        path: `/api/user/import`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerResetOnboardingStatus
-     * @request PATCH:/api/user/onboarding-status/reset
-     */
-    userControllerResetOnboardingStatus: (params: RequestParams = {}) =>
-      this.request<ResetOnboardingStatusResponse, any>({
-        path: `/api/user/onboarding-status/reset`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerMarkOnboardingComplete
-     * @request PATCH:/api/user/onboarding-status/{page}
-     */
-    userControllerMarkOnboardingComplete: (page: string, params: RequestParams = {}) =>
-      this.request<MarkOnboardingCompleteResponse, any>({
-        path: `/api/user/onboarding-status/${page}`,
-        method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name SettingsControllerGetPublicGlobalSettings
      * @request GET:/api/settings/global
      */
@@ -3752,6 +3339,495 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/settings/admin/user-email-triggers/${triggerKey}`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateConfigWarningDismissed
+     * @request PATCH:/api/settings/admin/config-warning-dismissed
+     */
+    settingsControllerUpdateConfigWarningDismissed: (
+      data: UpdateConfigWarningDismissedBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateConfigWarningDismissedResponse, any>({
+        path: `/api/settings/admin/config-warning-dismissed`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerUploadFile
+     * @request POST:/api/file
+     */
+    fileControllerUploadFile: (
+      data: {
+        /** @format binary */
+        file?: File;
+        /** Optional resource type */
+        resource?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FileUploadResponse, any>({
+        path: `/api/file`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerDeleteFile
+     * @request DELETE:/api/file
+     */
+    fileControllerDeleteFile: (
+      query: {
+        /** Key of the file to delete */
+        fileKey: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetUserStatistics
+     * @request GET:/api/statistics/user-stats
+     */
+    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
+      this.request<GetUserStatisticsResponse, any>({
+        path: `/api/statistics/user-stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StatisticsControllerGetStats
+     * @request GET:/api/statistics/stats
+     */
+    statisticsControllerGetStats: (params: RequestParams = {}) =>
+      this.request<GetStatsResponse, any>({
+        path: `/api/statistics/stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name HealthControllerCheck
+     * @request GET:/api/healthcheck
+     */
+    healthControllerCheck: (params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example "ok" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        },
+        {
+          /** @example "error" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        }
+      >({
+        path: `/api/healthcheck`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerGetUsers
+     * @request GET:/api/user/all
+     */
+    userControllerGetUsers: (
+      query?: {
+        keyword?: string;
+        role?: "admin" | "student" | "content_creator";
+        archived?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?:
+          | "firstName"
+          | "lastName"
+          | "email"
+          | "createdAt"
+          | "groupName"
+          | "-firstName"
+          | "-lastName"
+          | "-email"
+          | "-createdAt"
+          | "-groupName";
+        groupId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUsersResponse, any>({
+        path: `/api/user/all`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerGetUserById
+     * @request GET:/api/user
+     */
+    userControllerGetUserById: (
+      query: {
+        /** @format uuid */
+        id: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserByIdResponse, any>({
+        path: `/api/user`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerUpdateUser
+     * @request PATCH:/api/user
+     */
+    userControllerUpdateUser: (
+      query: {
+        /** @format uuid */
+        id: string;
+      },
+      data: UpdateUserBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateUserResponse, any>({
+        path: `/api/user`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerDeleteBulkUsers
+     * @request DELETE:/api/user
+     */
+    userControllerDeleteBulkUsers: (data: DeleteBulkUsersBody, params: RequestParams = {}) =>
+      this.request<DeleteBulkUsersResponse, any>({
+        path: `/api/user`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerCreateUser
+     * @request POST:/api/user
+     */
+    userControllerCreateUser: (data: CreateUserBody, params: RequestParams = {}) =>
+      this.request<CreateUserResponse, any>({
+        path: `/api/user`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerGetUserDetails
+     * @request GET:/api/user/details
+     */
+    userControllerGetUserDetails: (
+      query: {
+        /** @format uuid */
+        userId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserDetailsResponse, any>({
+        path: `/api/user/details`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerUpsertUserDetails
+     * @request PATCH:/api/user/details
+     */
+    userControllerUpsertUserDetails: (data: UpsertUserDetailsBody, params: RequestParams = {}) =>
+      this.request<UpsertUserDetailsResponse, any>({
+        path: `/api/user/details`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerUpdateUserProfile
+     * @request PATCH:/api/user/profile
+     */
+    userControllerUpdateUserProfile: (
+      data: {
+        /** @format binary */
+        userAvatar?: File;
+        /** @format string */
+        data?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/user/profile`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerAdminUpdateUser
+     * @request PATCH:/api/user/admin
+     */
+    userControllerAdminUpdateUser: (
+      query: {
+        /** @format uuid */
+        id: string;
+      },
+      data: AdminUpdateUserBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AdminUpdateUserResponse, any>({
+        path: `/api/user/admin`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerChangePassword
+     * @request PATCH:/api/user/change-password
+     */
+    userControllerChangePassword: (
+      query: {
+        /** @format uuid */
+        id: string;
+      },
+      data: ChangePasswordBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ChangePasswordResponse, any>({
+        path: `/api/user/change-password`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerDeleteUser
+     * @request DELETE:/api/user/user
+     */
+    userControllerDeleteUser: (
+      query: {
+        /** @format uuid */
+        id: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteUserResponse, any>({
+        path: `/api/user/user`,
+        method: "DELETE",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerBulkAssignUsersToGroup
+     * @request PATCH:/api/user/bulk/groups
+     */
+    userControllerBulkAssignUsersToGroup: (
+      data: BulkAssignUsersToGroupBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/user/bulk/groups`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerArchiveBulkUsers
+     * @request PATCH:/api/user/bulk/archive
+     */
+    userControllerArchiveBulkUsers: (data: ArchiveBulkUsersBody, params: RequestParams = {}) =>
+      this.request<ArchiveBulkUsersResponse, any>({
+        path: `/api/user/bulk/archive`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerImportUsers
+     * @request POST:/api/user/import
+     */
+    userControllerImportUsers: (
+      data: {
+        /** @format binary */
+        usersFile?: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ImportUsersResponse, any>({
+        path: `/api/user/import`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerResetOnboardingStatus
+     * @request PATCH:/api/user/onboarding-status/reset
+     */
+    userControllerResetOnboardingStatus: (params: RequestParams = {}) =>
+      this.request<ResetOnboardingStatusResponse, any>({
+        path: `/api/user/onboarding-status/reset`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerMarkOnboardingComplete
+     * @request PATCH:/api/user/onboarding-status/{page}
+     */
+    userControllerMarkOnboardingComplete: (page: string, params: RequestParams = {}) =>
+      this.request<MarkOnboardingCompleteResponse, any>({
+        path: `/api/user/onboarding-status/${page}`,
+        method: "PATCH",
+        format: "json",
         ...params,
       }),
 
@@ -4908,9 +4984,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/ai/thread/messages
      */
     aiControllerGetThreadMessages: (
-      query?: {
+      query: {
         /** @format uuid */
         thread?: string;
+        studentId: string;
       },
       params: RequestParams = {},
     ) =>
@@ -5540,6 +5617,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetStripeConfigured: (params: RequestParams = {}) =>
       this.request<GetStripeConfiguredResponse, any>({
         path: `/api/env/frontend/stripe`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetIsConfigSetup
+     * @request GET:/api/env/config/setup
+     */
+    envControllerGetIsConfigSetup: (params: RequestParams = {}) =>
+      this.request<GetIsConfigSetupResponse, any>({
+        path: `/api/env/config/setup`,
         method: "GET",
         format: "json",
         ...params,

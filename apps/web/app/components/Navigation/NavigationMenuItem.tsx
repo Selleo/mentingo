@@ -11,12 +11,14 @@ type NavigationMenuItemProps = {
   item: MenuItemType;
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
   className?: string;
+  showBadge?: boolean;
 };
 
 export function NavigationMenuItem({
   item,
   setIsMobileNavOpen,
   className,
+  showBadge,
 }: NavigationMenuItemProps) {
   return (
     <li key={item.label} className={className}>
@@ -27,7 +29,7 @@ export function NavigationMenuItem({
             onClick={() => setIsMobileNavOpen(false)}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+                "relative flex items-center gap-x-3 rounded-lg px-4 py-3.5 hover:outline hover:outline-1 hover:outline-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
                 {
                   "border border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
                   "bg-white text-neutral-900": !isActive,
@@ -50,6 +52,9 @@ export function NavigationMenuItem({
                 >
                   {item.label}
                 </span>
+                {showBadge && (
+                  <span className="absolute right-2 top-2 size-2 rounded-full bg-red-500" />
+                )}
               </>
             )}
           </NavLink>

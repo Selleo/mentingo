@@ -253,6 +253,41 @@
       "registerRedirect": "Rejestracja możliwa wyłącznie na podstawie zaproszenia."
     }
   },
+  "environmentConfigurationView": {
+    "header": "Konfiguracja środowiska",
+    "description": "Zobacz szczegółowe informacje o konfiguracji środowiska, w tym w pełni skonfigurowane usługi, częściowo skonfigurowane usługi oraz brakujące zmienne środowiskowe.",
+    "button": {
+      "viewStatus": "Zobacz status",
+      "loading": "Ładowanie...",
+      "dismissWarning": "Odrzuć ostrzeżenie"
+    },
+    "dialog": {
+      "title": "Status konfiguracji środowiska",
+      "fullyConfigured": "W pełni skonfigurowane",
+      "partiallyConfigured": "Częściowo skonfigurowane",
+      "youMightWantToSetThisUp": "Możesz chcieć to skonfigurować",
+      "noFullyConfigured": "Brak w pełni skonfigurowanych usług.",
+      "noPartiallyConfigured": "Brak częściowo skonfigurowanych usług.",
+      "allConfigured": "Wszystkie zmienne środowiskowe są poprawnie skonfigurowane.",
+      "dismissWarning": "Odrzuć",
+      "serviceNames": {
+        "stripe": "Płatności Stripe",
+        "bunny": "Bunny CDN",
+        "google_authorization": "Google OAuth",
+        "microsoft_authorization": "Microsoft OAuth",
+        "slack_authorization": "Slack OAuth",
+        "openAI": "OpenAI"
+      },
+      "serviceDescriptions": {
+        "stripe": "Przetwarzanie płatności za kursy i zarządzanie subskrypcjami",
+        "bunny": "Przesyłanie strumieniowe wideo i efektywna dostawa treści",
+        "google_authorization": "Umożliwia użytkownikom logowanie przez konto Google",
+        "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
+        "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
+        "openAI": "Włączenie funkcji AI Mentora"
+      }
+    }
+  },
   "mostPopularCoursesView": {
     "header": "Najpopularniejsze",
     "subHeader": "5 najlepszych kursów",
@@ -734,25 +769,63 @@
     "updateSuccessful": "Sekrety zostały pomyślnie zaktualizowane",
     "form": {
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      "MICROSOFT_CLIENT_ID": { "label": "Microsoft Client ID" },
-      "MICROSOFT_CLIENT_SECRET": { "label": "Microsoft Client Secret" },
-      "MICROSOFT_OAUTH_ENABLED": { "label": "Microsoft OAuth Enabled (true/false)" },
-      "VITE_MICROSOFT_OAUTH_ENABLED": { "label": "Vite Microsoft OAuth Enabled (true/false)" },
-      "OPENAI_API_KEY": { "label": "OpenAI API Key" },
-      "BUNNY_STREAM_API_KEY": { "label": "Bunny Stream API Key" },
-      "BUNNY_STREAM_SIGNING_KEY": { "label": "Bunny Stream Signing Key" },
-      "BUNNY_STREAM_LIBRARY_ID": { "label": "Bunny Stream Library ID" },
-      "BUNNY_STREAM_CDN_URL": { "label": "Bunny Stream CDN URL" },
-      "GOOGLE_CLIENT_ID": { "label": "Google Client ID" },
-      "GOOGLE_CLIENT_SECRET": { "label": "Google Client Secret" },
-      "GOOGLE_OAUTH_ENABLED": { "label": "Google OAuth Enabled (true/false)" },
-      "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
-      "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
-      "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
-      "SLACK_CLIENT_ID": { "label": "Slack Client ID" },
-      "SLACK_CLIENT_SECRET": { "label": "Slack Client Secret" },
-      "SLACK_OAUTH_ENABLED": { "label": "Slack OAuth Enabled (true/false)" },
-      "VITE_SLACK_OAUTH_ENABLED": { "label": "Vite Slack OAuth Enabled (true/false)" },
+      "MICROSOFT_CLIENT_ID": {
+        "label": "Microsoft Client ID"
+      },
+      "MICROSOFT_CLIENT_SECRET": {
+        "label": "Microsoft Client Secret"
+      },
+      "MICROSOFT_OAUTH_ENABLED": {
+        "label": "Microsoft OAuth Enabled (true/false)"
+      },
+      "VITE_MICROSOFT_OAUTH_ENABLED": {
+        "label": "Vite Microsoft OAuth Enabled (true/false)"
+      },
+      "OPENAI_API_KEY": {
+        "label": "OpenAI API Key"
+      },
+      "BUNNY_STREAM_API_KEY": {
+        "label": "Bunny Stream API Key"
+      },
+      "BUNNY_STREAM_SIGNING_KEY": {
+        "label": "Bunny Stream Signing Key"
+      },
+      "BUNNY_STREAM_LIBRARY_ID": {
+        "label": "Bunny Stream Library ID"
+      },
+      "BUNNY_STREAM_CDN_URL": {
+        "label": "Bunny Stream CDN URL"
+      },
+      "GOOGLE_CLIENT_ID": {
+        "label": "Google Client ID"
+      },
+      "GOOGLE_CLIENT_SECRET": {
+        "label": "Google Client Secret"
+      },
+      "GOOGLE_OAUTH_ENABLED": {
+        "label": "Google OAuth Enabled (true/false)"
+      },
+      "VITE_GOOGLE_OAUTH_ENABLED": {
+        "label": "Vite Google OAuth Enabled (true/false)"
+      },
+      "STRIPE_WEBHOOK_SECRET": {
+        "label": "Stripe Webhook Secret"
+      },
+      "STRIPE_SECRET_KEY": {
+        "label": "Stripe Secret Key"
+      },
+      "SLACK_CLIENT_ID": {
+        "label": "Slack Client ID"
+      },
+      "SLACK_CLIENT_SECRET": {
+        "label": "Slack Client Secret"
+      },
+      "SLACK_OAUTH_ENABLED": {
+        "label": "Slack OAuth Enabled (true/false)"
+      },
+      "VITE_SLACK_OAUTH_ENABLED": {
+        "label": "Vite Slack OAuth Enabled (true/false)"
+      },
       "save": "Zapisz"
     },
     "breadcrumbs": {

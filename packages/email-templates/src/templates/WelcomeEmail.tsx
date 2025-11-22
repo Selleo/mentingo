@@ -1,21 +1,27 @@
-import { Button, Html } from "@react-email/components";
+import { getWelcomeEmailTranslations } from "translations/welcome";
+
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type WelcomeEmailProps = {
-  email: string;
-  name: string;
-};
+  coursesLink: string;
+} & DefaultEmailSettings;
 
-export const WelcomeEmail = ({ email, name }: WelcomeEmailProps) => {
-  return (
-    <Html>
-      <Button
-        href="https://selleo.com"
-        style={{ background: "#000", color: "#fff", padding: "12px 20px" }}
-      >
-        Hello there! {name}({email})
-      </Button>
-    </Html>
-  );
+export const WelcomeEmail = ({
+  coursesLink,
+  primaryColor = "#4796FD",
+  language = "en",
+}: WelcomeEmailProps) => {
+  const { heading, paragraphs, buttonText } = getWelcomeEmailTranslations(language);
+
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: coursesLink,
+    primaryColor,
+  });
 };
 
 export default WelcomeEmail;

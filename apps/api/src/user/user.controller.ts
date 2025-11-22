@@ -67,7 +67,7 @@ import {
   userSchema,
   userOnboardingStatusSchema,
 } from "./schemas/user.schema";
-import { SortUserFieldsOptions } from "./schemas/userQuery";
+import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
 import { UserService } from "./user.service";
 
@@ -89,7 +89,7 @@ export class UserController {
       { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
-      { type: "query", name: "sort", schema: Type.String() },
+      { type: "query", name: "sort", schema: sortUserFieldsOptions },
       { type: "query", name: "groupId", schema: Type.String() },
     ],
     response: paginatedResponse(allUsersSchema),
@@ -333,9 +333,9 @@ export class UserController {
   })
   async createUser(
     @Body() data: CreateUserBody,
-    @CurrentUser("userId") adminId: UUIDType,
+    @CurrentUser("userId") creatorId: UUIDType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.usersService.createUser(data, undefined, adminId);
+    const { id } = await this.usersService.createUser(data, undefined, creatorId);
 
     return new BaseResponse({
       id,
@@ -363,9 +363,9 @@ export class UserController {
   })
   async importUsers(
     @UploadedFile() usersFile: Express.Multer.File,
-    @CurrentUser("userId") adminId: UUIDType,
+    @CurrentUser("userId") creatorId: UUIDType,
   ) {
-    const importStats = await this.usersService.importUsers(usersFile, adminId);
+    const importStats = await this.usersService.importUsers(usersFile, creatorId);
 
     return new BaseResponse(importStats);
   }

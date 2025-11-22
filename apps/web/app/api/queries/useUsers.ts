@@ -5,12 +5,19 @@ import { ApiClient } from "../api-client";
 import type { GetUsersResponse } from "../generated-api";
 import type { UserRole } from "~/config/userRoles";
 
+const SORTABLE_FIELDS = ["firstName", "lastName", "email", "groupName", "createdAt"] as const;
+
+type UsersSortField = (typeof SORTABLE_FIELDS)[number];
+type UsersSort = UsersSortField | `-${UsersSortField}`;
+
 export type UsersParams = {
   keyword?: string;
   role?: UserRole;
   archived?: boolean;
-  sort?: string;
+  sort?: UsersSort;
   groupId?: string;
+  page?: number;
+  perPage?: number;
 };
 
 type QueryOptions = {
@@ -21,11 +28,12 @@ export const usersQueryOptions = (
   searchParams?: UsersParams,
   options: QueryOptions = { enabled: true },
 ) => ({
+  placeholderData: (previousData: GetUsersResponse | undefined) => previousData,
   queryKey: ["users", searchParams],
   queryFn: async () => {
     const response = await ApiClient.api.userControllerGetUsers({
-      page: 1,
-      perPage: 100,
+      page: searchParams?.page || 1,
+      perPage: searchParams?.perPage || 10,
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),
       ...(searchParams?.role && { role: searchParams.role }),
       ...(searchParams?.archived !== undefined && {
@@ -36,7 +44,6 @@ export const usersQueryOptions = (
     });
     return response.data;
   },
-  select: (data: GetUsersResponse) => data.data,
   ...options,
 });
 

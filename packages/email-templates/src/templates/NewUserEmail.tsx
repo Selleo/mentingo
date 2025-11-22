@@ -1,22 +1,29 @@
-import { Html, Text } from "@react-email/components";
+import { getNewUserEmailTranslations } from "translations/newUser";
+
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type NewUserEmailProps = {
-  first_name: string;
-  last_name: string;
-  email: string;
-};
+  userName: string;
+  profileLink: string;
+} & DefaultEmailSettings;
 
-export const NewUserEmail = ({ first_name, last_name, email }: NewUserEmailProps) => {
-  return (
-    <Html>
-      <Text>A new user has registered on your platform</Text>
-      <Text>
-        Name: {first_name} {last_name}
-        <br />
-        Email:{email}
-      </Text>
-    </Html>
-  );
+export const NewUserEmail = ({
+  userName,
+  profileLink,
+  primaryColor,
+  language = "en",
+}: NewUserEmailProps) => {
+  const { heading, paragraphs, buttonText } = getNewUserEmailTranslations(language, userName);
+
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: profileLink,
+    primaryColor,
+  });
 };
 
 export default NewUserEmail;

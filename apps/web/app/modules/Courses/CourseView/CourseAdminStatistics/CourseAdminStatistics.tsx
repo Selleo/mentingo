@@ -178,9 +178,9 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
           </div>
           <AverageScorePerQuizChart averageQuizScores={averageQuizScores} />
           <Tabs value={activeTab} className="h-full">
-            <div className="flex items-start md:items-center gap-2 flex-col md:flex-row">
+            <div className="flex items-start md:items-center gap-2 flex-col md:flex-row pb-6 lg:flex-col lg:items-start xl:flex-row xl:items-center">
               <h6 className="h6">{t("adminCourseView.statistics.details")}</h6>
-              <div className="flex items-center justify-end gap-2 grow">
+              <div className="flex flex-col md:flex-row md:items-center justify-end gap-2 grow w-full md:w-auto">
                 {match(activeTab)
                   .with("progress", () => (
                     <div className="max-w-56">
@@ -189,7 +189,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                         values={{ search: progressSearchParams.search }}
                         onChange={handleProgressFilterChange}
                         isLoading={isPending}
-                        className="flex-nowrap"
+                        className="flex-nowrap py-0"
                       />
                     </div>
                   ))
@@ -198,7 +198,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                       value={(quizSearchParams.quizId as string) || "all"}
                       onValueChange={(value) => handleQuizFilterChange("quizId", value)}
                     >
-                      <SelectTrigger className="max-w-52 my-6">
+                      <SelectTrigger className="max-w-52">
                         <SelectValue placeholder={t("adminCourseView.statistics.filterByQuiz")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -218,7 +218,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                       value={(aiMentorSearchParams.lessonId as string) || "all"}
                       onValueChange={(value) => handleAiMentorFilterChange("lessonId", value)}
                     >
-                      <SelectTrigger className="max-w-52 my-6">
+                      <SelectTrigger className="max-w-52">
                         <SelectValue placeholder={t("adminCourseView.statistics.filterByLesson")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -234,11 +234,11 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                     </Select>
                   ))
                   .exhaustive()}
-                <TabsList className="h-[42px] rounded-sm p-1 bg-primary-50">
+                <TabsList className="h-[42px] rounded-sm p-1 bg-primary-50 flex items-center">
                   {Object.values(StatisticsTabs).map((tab) => (
                     <TabsTrigger
                       key={tab}
-                      className="h-full"
+                      className="h-full grow md:w-fit"
                       value={tab}
                       onClick={() => setActiveTab(tab)}
                     >
@@ -264,6 +264,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
             </TabsContent>
             <TabsContent value="aiMentorResults">
               <CourseStudentsAiMentorResultsTable
+                course={course}
                 searchParams={aiMentorSearchParams}
                 onFilterChange={handleAiMentorFilterChange}
               />

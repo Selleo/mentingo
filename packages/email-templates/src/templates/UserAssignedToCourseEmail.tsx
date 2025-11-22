@@ -1,19 +1,32 @@
-import { Button, Html, Text } from "@react-email/components";
+import { getUserAssignedToCourseEmailTranslations } from "translations/userAssignedToCourse";
+
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type UserAssignedToCourseProps = {
   courseName: string;
   courseLink: string;
-};
+} & DefaultEmailSettings;
 
-export const UserAssignedToCourse = ({ courseLink, courseName }: UserAssignedToCourseProps) => {
-  return (
-    <Html>
-      <Text>Zostałeś zapisany na kurs: {courseName}.</Text>
-      <Text>
-        <Button href={courseLink}>Kliknij</Button>, aby rozpocząć naukę.
-      </Text>
-    </Html>
+export const UserAssignedToCourse = ({
+  courseLink,
+  courseName,
+  primaryColor,
+  language = "en",
+}: UserAssignedToCourseProps) => {
+  const { heading, paragraphs, buttonText } = getUserAssignedToCourseEmailTranslations(
+    language,
+    courseName,
   );
+
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: courseLink,
+    primaryColor,
+  });
 };
 
 export default UserAssignedToCourse;
