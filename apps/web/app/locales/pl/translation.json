@@ -27,6 +27,10 @@
       "contentCreator": "Twórca treści",
       "student": "Uczeń"
     },
+    "languages": {
+      "en": "Angielski",
+      "pl": "Polski"
+    },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
     },
@@ -701,7 +705,7 @@
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "archive": "Czy na pewno chcesz zarchiwizować te konta?",
-        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne).",
+        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne), language (en lub pl).",
         "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
         "noUsersSkipped": "Nie pominięto żadnych użytkowników."
       },
@@ -710,7 +714,7 @@
         "role": "Wybierz rolę"
       },
       "note": {
-        "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa."
+        "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa. Jeśli język nie jest podany, bądź podany będzie nieprawidłowy to domyślnie zostanie ustawiony na język interfejsu administratora."
       },
       "tabs": {
         "imported": "Zaimportowani użytkownicy",
@@ -730,13 +734,15 @@
     "editUserHeader": "Informacje o użytkowniku",
     "placeholder": {
       "role": "Wybierz rolę",
-      "groupId": "Wybierz grupę"
+      "groupId": "Wybierz grupę",
+      "language": "Wybierz język"
     },
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
       "email": "Email",
       "role": "Rola",
+      "language": "Język",
       "status": "Status",
       "groupId": "Grupa"
     },

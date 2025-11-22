@@ -687,6 +687,7 @@ export interface CreateUserBody {
    */
   lastName: string;
   role: "admin" | "student" | "content_creator";
+  language?: string;
 }
 
 export interface CreateUserResponse {

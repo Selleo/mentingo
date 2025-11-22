@@ -26,6 +26,10 @@
       "contentCreator": "Content creator",
       "student": "Student"
     },
+    "languages": {
+      "en": "English",
+      "pl": "Polish"
+    },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
     },
@@ -722,7 +726,7 @@
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
         "archive": "Are you sure you want to archive these accounts?",
-        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName.",
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName, language (en or pl).",
         "noUsersImported": "No users were imported.",
         "noUsersSkipped": "No users were skipped."
       },
@@ -731,7 +735,7 @@
         "role": "Select role"
       },
       "note": {
-        "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created."
+        "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created. The language field is optional; if not provided or invalid, the default language will be set to admin's language."
       },
       "tabs": {
         "imported": "Imported",
@@ -751,13 +755,15 @@
     "editUserHeader": "User Information",
     "placeholder": {
       "role": "Select a role",
-      "groupId": "Select a group"
+      "groupId": "Select a group",
+      "language": "Select a language"
     },
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email",
       "role": "Role",
+      "language": "Language",
       "status": "Status",
       "groupId": "Group"
     },

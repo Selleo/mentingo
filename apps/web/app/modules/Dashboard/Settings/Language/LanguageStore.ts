@@ -3,7 +3,12 @@ import { persist } from "zustand/middleware";
 
 import { detectBrowserLanguage, isSupportedLanguage } from "../../../../utils/browser-language";
 
-export type Language = "en" | "pl";
+export const SupportedLanguages = {
+  ENGLISH: "en",
+  POLISH: "pl",
+} as const;
+
+export type Language = (typeof SupportedLanguages)[keyof typeof SupportedLanguages];
 
 type LanguageStore = {
   language: Language;

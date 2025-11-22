@@ -7,6 +7,7 @@ export const createUserSchema = Type.Object({
   firstName: Type.String({ minLength: 1, maxLength: 64 }),
   lastName: Type.String({ minLength: 1, maxLength: 64 }),
   role: Type.Enum(USER_ROLES),
+  language: Type.Optional(Type.String()),
 });
 
 export type CreateUserBody = Static<typeof createUserSchema>;
@@ -17,6 +18,7 @@ export const importUserSchema = Type.Object({
   lastName: Type.String(),
   role: Type.Enum(USER_ROLES),
   groupName: Type.Optional(Type.String()),
+  language: Type.Optional(Type.String()),
 });
 
 export const skippedUserImportSchema = Type.Object({

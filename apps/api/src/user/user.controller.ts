@@ -333,9 +333,9 @@ export class UserController {
   })
   async createUser(
     @Body() data: CreateUserBody,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("userId") creatorId: UUIDType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.usersService.createUser(data, currentUserId);
+    const { id } = await this.usersService.createUser(data, undefined, creatorId);
 
     return new BaseResponse({
       id,
@@ -363,9 +363,9 @@ export class UserController {
   })
   async importUsers(
     @UploadedFile() usersFile: Express.Multer.File,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("userId") creatorId: UUIDType,
   ) {
-    const importStats = await this.usersService.importUsers(usersFile, currentUserId);
+    const importStats = await this.usersService.importUsers(usersFile, creatorId);
 
     return new BaseResponse(importStats);
   }
