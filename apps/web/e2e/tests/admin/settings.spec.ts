@@ -22,7 +22,7 @@ test.describe("Admin settings", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+    await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
 
     await page.getByRole("link", { name: new RegExp(TEST_SETTINGS.button.settings, "i") }).click();
 

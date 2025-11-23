@@ -16,6 +16,8 @@ export const LANGUAGE_PAGE_UI = {
         users: "użytkownicy",
         groups: "grupy",
       },
+      settings: "Ustawienia",
+      changeLanguage: "Zmień język",
     },
     english: {
       language: "english",
@@ -26,6 +28,8 @@ export const LANGUAGE_PAGE_UI = {
         users: "users",
         groups: "groups",
       },
+      settings: "Settings",
+      changeLanguage: "Change Language",
     },
   },
 };

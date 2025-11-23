@@ -269,6 +269,8 @@ test.describe("Course settings flow", () => {
       const newPage = await logout(browser);
 
       await newPage.goto("/courses");
+      await newPage.waitForLoadState("networkidle");
+      await newPage.waitForURL("/courses");
 
       const header = newPage.getByRole("heading", {
         name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.availableCourses, "i"),
