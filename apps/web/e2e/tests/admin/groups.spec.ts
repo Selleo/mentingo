@@ -23,13 +23,9 @@ const goIntoCreateMode = async (page: Page) => {
 };
 
 const findAndClickCheckbox = async (page: Page) => {
-  const checkboxes = await page.getByLabel("Select row").all();
+  const selectAllCheckbox = page.getByRole("cell", { name: "Select all" });
 
-  for (const checkbox of checkboxes) {
-    await expect(checkbox).not.toBeChecked();
-    await checkbox.click();
-    await expect(checkbox).toBeChecked();
-  }
+  await selectAllCheckbox.click();
 };
 
 const goIntoEditMode = async (page: Page) => {
