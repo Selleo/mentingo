@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
+import { GROUPS_BY_COURSE_QUERY_KEY } from "~/api/queries/admin/useGroupsByCourse";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
@@ -16,6 +17,7 @@ export function useBulkGroupCourseEnroll(courseId = "") {
       const { data } = await ApiClient.api.courseControllerEnrollGroupsToCourse(courseId, input);
 
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: [GROUPS_BY_COURSE_QUERY_KEY, courseId] });
 
       return data;
     },

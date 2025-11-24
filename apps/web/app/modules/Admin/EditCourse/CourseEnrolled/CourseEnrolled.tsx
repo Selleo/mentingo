@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBulkCourseEnroll } from "~/api/mutations/admin/useBulkCourseEnroll";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
+import { useGroupsByCourseQuery } from "~/api/queries/admin/useGroupsByCourse";
 import { useAllUsersEnrolledSuspense } from "~/api/queries/admin/useUsersEnrolled";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
@@ -38,6 +39,8 @@ import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 
+import { GroupEnrollModal } from "./GroupEnrollModal";
+
 import type { Row, SortingState, RowSelectionState, ColumnDef } from "@tanstack/react-table";
 import type { ReactElement, FormEvent } from "react";
 import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
@@ -51,12 +54,14 @@ export const CourseEnrolled = (): ReactElement => {
   const { id: courseId } = useParams();
   const { mutate: bulkEnroll } = useBulkCourseEnroll(courseId);
   const { data: groupData } = useGroupsQuerySuspense();
+  const { data: enrolledGroups } = useGroupsByCourseQuery(courseId ?? "");
 
   const [searchParams, setSearchParams] = useState<UsersEnrolledSearchParams>({});
   const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [isIndividualEnrollDialogOpen, setIsIndividualEnrollDialogOpen] = useState<boolean>(false);
+  const [isGroupEnrollDialogOpen, setIsGroupEnrollDialogOpen] = useState<boolean>(false);
 
   const { data: usersData } = useAllUsersEnrolledSuspense(courseId, searchParams);
 
@@ -205,7 +210,7 @@ export const CourseEnrolled = (): ReactElement => {
     }
 
     setRowSelection({});
-    setIsDialogOpen(false);
+    setIsIndividualEnrollDialogOpen(false);
   };
 
   const isDisabled = Object.values(rowSelection).length === 0;
@@ -220,35 +225,43 @@ export const CourseEnrolled = (): ReactElement => {
           isLoading={false}
         />
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger disabled={isDisabled}>
-            <Button
-              className="border border-primary-500 bg-transparent text-accent-foreground"
-              disabled={isDisabled}
-            >
-              {t("adminCourseView.enrolled.enrollSelected")}
-            </Button>
-          </DialogTrigger>
-          <DialogPortal>
-            <DialogOverlay />
-            <DialogContent>
-              <DialogTitle>{t("adminCourseView.enrolled.confirmation.title")}</DialogTitle>
-              <DialogDescription>
-                {t("adminCourseView.enrolled.confirmation.description")}
-              </DialogDescription>
-              <form onSubmit={handleFormSubmit}>
-                <div className="flex justify-end gap-4">
-                  <DialogClose>
-                    <Button type="reset" variant="ghost">
-                      {t("common.button.cancel")}
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit">{t("common.button.save")}</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </DialogPortal>
-        </Dialog>
+        <div className="flex gap-2">
+          <GroupEnrollModal
+            isOpen={isGroupEnrollDialogOpen}
+            onOpenChange={setIsGroupEnrollDialogOpen}
+            courseId={courseId ?? ""}
+            groups={groupData}
+            enrolledGroups={enrolledGroups}
+          />
+
+          <Dialog
+            open={isIndividualEnrollDialogOpen}
+            onOpenChange={setIsIndividualEnrollDialogOpen}
+          >
+            <DialogTrigger disabled={isDisabled}>
+              <Button disabled={isDisabled}>{t("adminCourseView.enrolled.enrollSelected")}</Button>
+            </DialogTrigger>
+            <DialogPortal>
+              <DialogOverlay />
+              <DialogContent>
+                <DialogTitle>{t("adminCourseView.enrolled.confirmation.title")}</DialogTitle>
+                <DialogDescription>
+                  {t("adminCourseView.enrolled.confirmation.description")}
+                </DialogDescription>
+                <form onSubmit={handleFormSubmit}>
+                  <div className="flex justify-end gap-4">
+                    <DialogClose>
+                      <Button type="reset" variant="ghost">
+                        {t("common.button.cancel")}
+                      </Button>
+                    </DialogClose>
+                    <Button type="submit">{t("common.button.save")}</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </DialogPortal>
+          </Dialog>
+        </div>
       </div>
       <Table className="border bg-neutral-50">
         <TableHeader>

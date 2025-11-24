@@ -5,7 +5,17 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, countDistinct, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import {
+  and,
+  countDistinct,
+  eq,
+  getTableColumns,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
@@ -35,6 +45,7 @@ import type {
   GroupsQuery,
   GroupResponse,
 } from "src/group/group.types";
+import type { UserResponse } from "src/user/schemas/user.schema";
 
 @Injectable()
 export class GroupService {
@@ -55,7 +66,32 @@ export class GroupService {
 
     return this.db.transaction(async (trx) => {
       const queryDB = trx
-        .select()
+        .select({
+          ...getTableColumns(groups),
+          users: sql<UserResponse[]>`
+            COALESCE(
+              (
+                SELECT json_agg(
+                  json_build_object(
+                    'id', u.id,
+                    'createdAt', u.created_at,
+                    'updatedAt', u.updated_at,
+                    'email', u.email,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name,
+                    'role', u.role,
+                    'archived', u.archived,
+                    'profilePictureUrl', u.avatar_reference
+                  )
+                )
+                FROM users u
+                INNER JOIN group_users gu ON u.id = gu.user_id
+                WHERE gu.group_id = groups.id
+              ),
+              '[]'::json
+            )
+          `,
+        })
         .from(groups)
         .where(and(...conditions))
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as GroupSortField)));

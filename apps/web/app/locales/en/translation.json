@@ -1269,7 +1269,14 @@
         "title": "Confirm enrollment",
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
       },
-      "successResponse": "students have been assigned to the course."
+      "successResponse": "students have been assigned to the course.",
+      "enrollGroups": "Enroll groups",
+      "enrollGroupsModal": {
+        "title": "Enroll groups to course",
+        "description": "Select groups to enroll. All members of selected groups will be automatically enrolled in this course."
+      },
+      "alreadyEnrolled": "Already Enrolled",
+      "members": "{{count}} members"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
