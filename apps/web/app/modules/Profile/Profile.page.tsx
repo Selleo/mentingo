@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Navigate, useParams } from "@remix-run/react";
 import { OnboardingPages } from "@repo/shared";
+import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -130,6 +131,20 @@ export default function ProfilePage() {
     completionDate: "",
     certData: undefined,
   });
+  const formatedDate = useMemo(() => {
+    const raw = certificatePreview.completionDate?.trim();
+    if (!raw) return "";
+
+    // If already formatted as dd.MM.yyyy, use as-is
+    if (/^\d{2}\.\d{2}\.\d{4}$/.test(raw)) return raw;
+
+    const parsed = new Date(raw);
+    if (!isNaN(parsed.getTime())) {
+      return format(parsed, "dd.MM.yyyy");
+    }
+
+    return raw;
+  }, [certificatePreview.completionDate]);
 
   const handleOpenCertificatePreview = (data: {
     completionDate: string;
@@ -178,7 +193,7 @@ export default function ProfilePage() {
             <CertificatePreview
               studentName={certificatePreview.certData?.fullName || ""}
               courseName={certificatePreview.certData?.courseTitle || ""}
-              completionDate={certificatePreview.completionDate}
+              completionDate={formatedDate}
               onClose={handleCloseCertificatePreview}
               platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}
