@@ -18,7 +18,7 @@ env:
   AWS_SECRET_ACCESS_KEY: "test"
   AWS_BUCKET_NAME: "test-bucket"
   AWS_ENDPOINT_URL: "http://localhost:4566"
-  SES_EMAIL: "noreply@lms.selleo.app"
+  SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
 
 on:
   workflow_call:

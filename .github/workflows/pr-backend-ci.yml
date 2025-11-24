@@ -15,7 +15,7 @@ env:
   SMTP_USER: ""
   SMTP_PASSWORD: ""
 
-  SES_EMAIL: "noreply@lms.selleo.app"
+  SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
   STRIPE_SECRET_KEY: "test_secret"
   STRIPE_PUBLISHABLE_KEY: "test_secret"
   STRIPE_WEBHOOK_SECRET: "test_secret"

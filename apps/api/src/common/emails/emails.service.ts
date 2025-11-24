@@ -15,6 +15,7 @@ import type { DefaultEmailSettings } from "src/events/types";
 @Injectable()
 export class EmailService {
   private readonly usingMailhogAdapter: boolean;
+  private readonly fromEmail: string;
 
   constructor(
     private emailAdapter: EmailAdapter,
@@ -24,13 +25,17 @@ export class EmailService {
     this.usingMailhogAdapter =
       this.configService.get<EmailConfigSchema["EMAIL_ADAPTER"]>("email.EMAIL_ADAPTER") ===
       "mailhog";
+
+    this.fromEmail = this.configService.get<EmailConfigSchema["SMTP_EMAIL_FROM"]>(
+      "email.SMTP_EMAIL_FROM",
+    ) as string;
   }
 
   async sendEmail(email: Email): Promise<void> {
-    await this.emailAdapter.sendMail(email);
+    await this.emailAdapter.sendMail({ ...email, from: this.fromEmail });
   }
 
-  async sendEmailWithLogo(email: Omit<Email, "attachments">): Promise<void> {
+  async sendEmailWithLogo(email: Omit<Email, "from" | "attachments">): Promise<void> {
     const logoBuffer = await this.settingsService.getPlatformLogoBuffer();
     const simpleLogoBuffer = await this.settingsService.getPlatformSimpleLogoBuffer();
     const borderCircleBuffer = await this.settingsService.getEmailBorderCircleBuffer();
@@ -66,6 +71,7 @@ export class EmailService {
 
     await this.emailAdapter.sendMail({
       ...(email as Email),
+      from: this.fromEmail,
       attachments: attachments.length > 0 ? attachments : undefined,
     });
   }

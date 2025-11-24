@@ -135,7 +135,6 @@ export class AuthService {
       subject: getEmailSubject("welcomeEmail", createdSettings.language as Languages),
       text: emailTemplate.text,
       html: emailTemplate.html,
-      from: process.env.SES_EMAIL || "",
     });
 
     return createdUser;
@@ -302,7 +301,6 @@ export class AuthService {
       subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
       text: emailTemplate.text,
       html: emailTemplate.html,
-      from: process.env.SES_EMAIL || "",
     });
   }
 
@@ -417,7 +415,6 @@ export class AuthService {
           subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
           text: emailTemplate.text,
           html: emailTemplate.html,
-          from: process.env.SES_EMAIL || "",
         });
 
         await transaction.delete(createTokens).where(eq(createTokens.createToken, oldCreateToken));

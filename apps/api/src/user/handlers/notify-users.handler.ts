@@ -120,7 +120,6 @@ export class NotifyUsersHandler implements IEventHandler {
       subject: getEmailSubject("userInviteEmail", defaultEmailSettings.language),
       text,
       html,
-      from: process.env.SES_EMAIL || "",
     });
   }
 
@@ -143,7 +142,6 @@ export class NotifyUsersHandler implements IEventHandler {
       subject: getEmailSubject("userFirstLoginEmail", defaultEmailSettings.language),
       text,
       html,
-      from: process.env.SES_EMAIL || "",
     });
   }
 
@@ -173,7 +171,6 @@ export class NotifyUsersHandler implements IEventHandler {
           }),
           text,
           html,
-          from: process.env.SES_EMAIL || "",
         });
       }),
     );
@@ -205,7 +202,6 @@ export class NotifyUsersHandler implements IEventHandler {
           }),
           text,
           html,
-          from: process.env.SES_EMAIL || "",
         });
       }),
     );
@@ -238,7 +234,6 @@ export class NotifyUsersHandler implements IEventHandler {
           subject: getEmailSubject("userLongInactivityEmail", defaultEmailSettings.language),
           text,
           html,
-          from: process.env.SES_EMAIL || "",
         });
       }),
     );
@@ -269,7 +264,6 @@ export class NotifyUsersHandler implements IEventHandler {
       }),
       html,
       text,
-      from: process.env.SES_EMAIL || "",
     });
   }
 
@@ -296,7 +290,6 @@ export class NotifyUsersHandler implements IEventHandler {
       }),
       html,
       text,
-      from: process.env.SES_EMAIL || "",
     });
   }
 
