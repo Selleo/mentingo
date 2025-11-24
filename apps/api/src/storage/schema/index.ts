@@ -15,11 +15,13 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
+import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, id, timestamps } from "./utils";
 
 import type { ActivityHistory, AllSettings } from "src/common/types";
+import type { CourseSettings } from "src/courses/types/settings";
 
 export const users = pgTable("users", {
   ...id,
@@ -147,6 +149,10 @@ export const courses = pgTable("courses", {
     .notNull(),
   stripeProductId: text("stripe_product_id"),
   stripePriceId: text("stripe_price_id"),
+  settings: jsonb("settings")
+    .$type<CourseSettings>()
+    .notNull()
+    .default({ lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED }),
 });
 
 export const chapters = pgTable("chapters", {

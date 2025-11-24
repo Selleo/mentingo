@@ -27,6 +27,7 @@ import { InlineCategoryCreationForm } from "../../Categories/components/InlineCa
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
 import CourseCertificateSetting from "./components/CourseCertificateSetting";
+import CourseLessonSequenceSwitch from "./components/CourseLessonSequenceSwitch";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
 type CourseSettingsProps = {
@@ -169,8 +170,11 @@ const CourseSettings = ({
                 </p>
               )}
               {descriptionFieldCharactersLeft <= 0 && (
-                <p className="text-sm text-red-500">You have reached the character limit.</p>
+                <p className="text-sm text-red-500">
+                  {t("adminCourseView.settings.other.reachedCharactersLimit")}
+                </p>
               )}
+              {courseId && <CourseLessonSequenceSwitch courseId={courseId} />}
               <FormField
                 control={form.control}
                 name="thumbnailS3Key"

@@ -93,7 +93,7 @@ export class PromptService implements OnModuleInit {
       });
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
-    const contextInfo = content + history[history.length - 1]?.content ?? "";
+    const contextInfo = content + (history[history.length - 1]?.content ?? "");
 
     const { chunks: context } = await observe(
       async () => {

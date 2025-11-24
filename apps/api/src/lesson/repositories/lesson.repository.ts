@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, desc, eq, getTableColumns, ilike, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, ilike, isNull, lt, or, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
@@ -12,6 +12,7 @@ import {
   quizAttempts,
   studentCourses,
   studentLessonProgress,
+  studentChapterProgress,
 } from "src/storage/schema";
 
 import type { LessonTypes } from "../lesson.type";
@@ -31,6 +32,76 @@ export class LessonRepository {
   async getLesson(id: UUIDType) {
     const [lesson] = await this.db.select().from(lessons).where(eq(lessons.id, id));
     return lesson;
+  }
+
+  async getHasLessonAccess(id: UUIDType, userId: UUIDType, isStudent: boolean) {
+    if (!isStudent) {
+      return true;
+    }
+
+    const [{ isSequenceEnabled, courseId }] = await this.db
+      .select({
+        isSequenceEnabled: sql<boolean>`(${courses.settings}->>'lessonSequenceEnabled')::boolean`,
+        courseId: sql<UUIDType>`${courses.id}`,
+      })
+      .from(lessons)
+      .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(lessons.id, id))
+      .limit(1);
+
+    if (!isSequenceEnabled) {
+      return true;
+    }
+
+    const [{ currentChapterDisplayOrder }] = await this.db
+      .select({
+        currentChapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
+      })
+      .from(lessons)
+      .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .where(eq(lessons.id, id));
+
+    const [{ hasCompletedAllChapterLessons }] = await this.db
+      .select({
+        hasCompletedAllChapterLessons: sql<boolean>`
+          ${lessons.displayOrder} <= (COALESCE(${studentChapterProgress.completedLessonCount}, 0) + 1)
+        `,
+      })
+      .from(chapters)
+      .leftJoin(
+        studentChapterProgress,
+        and(
+          eq(studentChapterProgress.chapterId, chapters.id),
+          eq(studentChapterProgress.studentId, userId),
+        ),
+      )
+      .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .where(and(eq(lessons.id, id), eq(chapters.displayOrder, currentChapterDisplayOrder)));
+
+    if (hasCompletedAllChapterLessons && currentChapterDisplayOrder === 1) {
+      return true;
+    }
+
+    const [{ hasCompletedAllLessons }] = await this.db
+      .select({
+        hasCompletedAllLessons: sql<boolean>`
+          bool_and(COALESCE(${studentChapterProgress.completedLessonCount}, 0) = ${chapters.lessonCount})
+        `,
+      })
+      .from(chapters)
+      .leftJoin(
+        studentChapterProgress,
+        and(
+          eq(studentChapterProgress.chapterId, chapters.id),
+          eq(studentChapterProgress.studentId, userId),
+        ),
+      )
+      .where(
+        and(eq(chapters.courseId, courseId), lt(chapters.displayOrder, currentChapterDisplayOrder)),
+      );
+
+    return hasCompletedAllLessons && hasCompletedAllChapterLessons;
   }
 
   async getLessonDetails(id: UUIDType, userId: UUIDType) {
