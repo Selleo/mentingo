@@ -31,14 +31,14 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   return (
     <Card className="w-full border-none pt-1 drop-shadow-primary lg:pt-0">
       <CardContent className="flex flex-col px-0">
-        <div className="border-b border-1 border-neutral-200 flex items-center justify-end p-4 px-6 mb-8 xl:mb-0">
-          {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
+        {(isAdmin || (isAdminLike && course.authorId === currentUser?.id)) && (
+          <div className="border-b border-1 border-neutral-200 flex items-center justify-end p-4 px-6 mb-8 xl:mb-0">
             <Button className="flex gap-2" variant="primary" onClick={navigateToEditCourse}>
               <Icon name="Edit" className="size-4" />
               {t("pages.editCourse")}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
         <div className="align-center flex flex-col gap-6 lg:p-8 2xl:flex-row">
           <div className="relative aspect-video w-full self-start lg:max-w-[320px]">
             <img
