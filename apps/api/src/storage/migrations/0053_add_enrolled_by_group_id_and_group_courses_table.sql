@@ -8,8 +8,7 @@ CREATE TABLE IF NOT EXISTS "group_courses" (
 	CONSTRAINT "group_courses_group_id_course_id_unique" UNIQUE("group_id","course_id")
 );
 --> statement-breakpoint
-ALTER TABLE "student_courses" ADD COLUMN "enrolled_by_group_id" uuid;
---> statement-breakpoint
+ALTER TABLE "student_courses" ADD COLUMN "enrolled_by_group_id" uuid;--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "group_courses" ADD CONSTRAINT "group_courses_group_id_groups_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."groups"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION

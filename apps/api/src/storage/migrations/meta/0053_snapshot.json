@@ -1,6 +1,6 @@
 {
-  "id": "8375a2bc-c5e5-4b82-b00b-99c68b6aacf8",
-  "prevId": "b78443e2-b25d-4dcc-adcb-f8807c955842",
+  "id": "e187a161-a177-4539-a911-ef47321db816",
+  "prevId": "66480f66-4b8a-47b7-b344-ad432a96f1e8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -46,6 +46,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'mentor'"
         }
       },
       "indexes": {},
@@ -544,7 +551,7 @@
         },
         "title": {
           "name": "title",
-          "type": "varchar(100)",
+          "type": "varchar(250)",
           "primaryKey": false,
           "notNull": true
         },
@@ -739,13 +746,13 @@
         },
         "title": {
           "name": "title",
-          "type": "varchar(100)",
+          "type": "varchar(250)",
           "primaryKey": false,
           "notNull": true
         },
         "description": {
           "name": "description",
-          "type": "varchar(1000)",
+          "type": "varchar(20000)",
           "primaryKey": false,
           "notNull": false
         },
@@ -1761,7 +1768,7 @@
         },
         "title": {
           "name": "title",
-          "type": "varchar(100)",
+          "type": "varchar(250)",
           "primaryKey": false,
           "notNull": true
         },
@@ -1960,7 +1967,7 @@
         },
         "title": {
           "name": "title",
-          "type": "varchar(200)",
+          "type": "varchar(250)",
           "primaryKey": false,
           "notNull": true
         },
@@ -3405,6 +3412,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
