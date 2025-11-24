@@ -476,7 +476,6 @@ export class UserService {
         subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
         text: createPasswordEmail.text,
         html: createPasswordEmail.html,
-        from: process.env.SES_EMAIL || "",
       });
 
       return createdUser;

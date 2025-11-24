@@ -603,7 +603,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     SMTP_PORT="2465"
     SMTP_USER="<smtp_user_access_key>"
     SMTP_PASSWORD="<smtp_user_secret_key>"
-    SES_EMAIL="noreply@<client-domain>"
+    SMTP_EMAIL_FROM="noreply@<client-domain>"
 
     # S3 (Hetzner Object Storage)
     S3_ENDPOINT="https://<region>.your-objectstorage.com" # e.g., fsn1

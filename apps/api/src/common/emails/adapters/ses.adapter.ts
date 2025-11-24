@@ -1,10 +1,12 @@
-import { SES, type SESClientConfig } from "@aws-sdk/client-ses";
+import { SES } from "@aws-sdk/client-ses";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import MailComposer = require("nodemailer/lib/mail-composer");
 
 import { EmailAdapter } from "./email.adapter";
 
 import type { Email } from "../email.interface";
+import type { SESClientConfig } from "@aws-sdk/client-ses";
 
 @Injectable()
 export class AWSSESAdapter extends EmailAdapter {
@@ -12,8 +14,7 @@ export class AWSSESAdapter extends EmailAdapter {
 
   constructor(private configService: ConfigService) {
     super();
-    const config: SESClientConfig = this.getAWSConfig();
-    this.ses = new SES(config);
+    this.ses = new SES(this.getAWSConfig());
   }
 
   private getAWSConfig(): SESClientConfig {
@@ -35,64 +36,26 @@ export class AWSSESAdapter extends EmailAdapter {
   }
 
   async sendMail(email: Email): Promise<void> {
-    const params: any = {
-      FromEmailAddress: email.from,
-      Destination: {
-        ToAddresses: [email.to],
-      },
-      Content: {
-        Simple: {
-          Subject: {
-            Data: email.subject,
-          },
-          Body: {
-            ...(email.text && {
-              Text: {
-                Data: email.text,
-              },
-            }),
-            ...(email.html && {
-              Html: {
-                Data: email.html,
-              },
-            }),
-          },
-          ...(email.attachments &&
-            email.attachments.length > 0 && {
-              Attachments: email.attachments.map((attachment) => {
-                let base64Content: string;
-                if (attachment.content) {
-                  if (Buffer.isBuffer(attachment.content)) {
-                    base64Content = attachment.content.toString("base64");
-                  } else {
-                    base64Content = Buffer.from(attachment.content).toString("base64");
-                  }
-                } else if (attachment.path) {
-                  throw new Error("File path attachments not yet supported in SES adapter");
-                } else {
-                  throw new Error("Attachment must have either content or path");
-                }
+    const mail = new MailComposer({
+      from: email.from,
+      to: email.to,
+      subject: email.subject,
+      text: email.text,
+      html: email.html,
+      attachments: email.attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        cid: a.cid,
+        contentType: a.contentType,
+      })),
+    });
 
-                return {
-                  RawContent: base64Content,
-                  ContentDisposition: attachment.cid ? "INLINE" : "ATTACHMENT",
-                  FileName: attachment.filename,
-                  ...(attachment.contentType && {
-                    ContentType: attachment.contentType,
-                  }),
-                  ...(attachment.cid && {
-                    ContentId: attachment.cid,
-                  }),
-                  ContentTransferEncoding: "BASE64",
-                };
-              }),
-            }),
-        },
-      },
-    };
+    const message = await mail.compile().build();
 
     try {
-      await this.ses.sendEmail(params);
+      await this.ses.sendRawEmail({
+        RawMessage: { Data: message },
+      });
     } catch (error) {
       console.error("Error sending email via AWS SES:", error);
       throw error;

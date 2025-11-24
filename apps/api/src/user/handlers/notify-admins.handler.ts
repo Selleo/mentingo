@@ -55,7 +55,6 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           subject: getEmailSubject("adminNewUserEmail", defaultEmailSettings.language),
           text,
           html,
-          from: process.env.SES_EMAIL || "",
         });
       }),
     );
@@ -79,12 +78,11 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           ...defaultEmailSettings,
         });
 
-        return this.emailService.sendEmail({
+        return this.emailService.sendEmailWithLogo({
           to: adminsEmail,
           subject: getEmailSubject("adminCourseFinishedEmail", defaultEmailSettings.language),
           text,
           html,
-          from: process.env.SES_EMAIL || "",
         });
       }),
     );
