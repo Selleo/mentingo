@@ -54,7 +54,7 @@ const NewChapter = ({ setContentTypeToDisplay, chapter }: NewChapterProps) => {
               <span className="text-neutral-600">
                 {t("adminCourseView.curriculum.other.edit")}:{" "}
               </span>
-              <span className="font-bold">{chapter.title}</span>
+              <span className="font-bold break-all">{chapter.title}</span>
             </>
           ) : (
             t("adminCourseView.curriculum.other.create")
