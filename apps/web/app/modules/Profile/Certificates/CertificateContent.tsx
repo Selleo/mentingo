@@ -32,6 +32,10 @@ const translations = {
     signature: "Signature",
   },
 };
+const hrClasses = "mx-auto mb-3 w-full";
+const textClasses = "text-md uppercase text-gray-800";
+const text2Classes = "text-md text-gray-600";
+const signatureClasses = "flex w-[200px] flex-col items-center";
 
 const CertificateContent = ({
   studentName,
@@ -93,20 +97,20 @@ const CertificateContent = ({
         )}
       >
         <p className="mb-4 text-3xl tracking-wider text-gray-800">{studentName}</p>
-        <p className="text-md text-gray-600">{translations[lang].successfulCompletion}</p>
+        <p className={text2Classes}>{translations[lang].successfulCompletion}</p>
         <p className="text-lg text-gray-800">&quot;{courseName}&quot;</p>
-        <p className="text-md text-gray-600">{translations[lang].confirmation}</p>
+        <p className={text2Classes}>{translations[lang].confirmation}</p>
       </div>
 
       <div className={cn("flex items-end gap-x-40", !isModal && "scale-75 xl:scale-100")}>
-        <div className="flex w-[200px] flex-col items-center">
-          <p className="text-md text-gray-600">{completionDate}</p>
-          <hr className="mx-auto mb-3 w-full" />
-          <p className="text-md uppercase text-gray-800">{translations[lang].date}</p>
+        <div className={signatureClasses}>
+          <p className={text2Classes}>{completionDate}</p>
+          <hr className={hrClasses} />
+          <p className={textClasses}>{translations[lang].date}</p>
         </div>
-        <div className="flex w-[200px] flex-col items-center">
-          <hr className="mx-auto mb-3 w-full" />
-          <p className="text-md uppercase text-gray-800">{translations[lang].signature}</p>
+        <div className={signatureClasses}>
+          <hr className={hrClasses} />
+          <p className={textClasses}>{translations[lang].signature}</p>
         </div>
       </div>
     </div>

@@ -932,7 +932,8 @@
         },
         "other": {
           "noDescription": "Brak opisu.",
-          "untitled": "Bez tytułu"
+          "untitled": "Bez tytułu",
+          "enableCertificate": "Włącz certyfikat"
         }
       },
       "field": {

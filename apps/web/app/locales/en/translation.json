@@ -974,7 +974,8 @@
       "other": {
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
-        "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit."
+        "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
+        "enableCertificate": "Enable certificate"
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
