@@ -62,6 +62,7 @@ import {
   users,
 } from "../storage/schema";
 
+import { LESSON_SEQUENCE_ENABLED } from "./constants";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseSortFields,
@@ -79,6 +80,7 @@ import type {
   CourseAverageQuizScoresResponse,
   CourseStatisticsResponse,
   CourseStatusDistribution,
+  LessonSequenceEnabledResponse,
 } from "./schemas/course.schema";
 import type {
   CourseStudentProgressionSortField,
@@ -361,6 +363,20 @@ export class CourseService {
 
     return {
       data: data ?? [],
+    };
+  }
+
+  async getCourseSequenceEnabled(courseId: UUIDType): Promise<LessonSequenceEnabledResponse> {
+    const course = await this.db.query.courses.findFirst({
+      where: (courses, { eq }) => eq(courses.id, courseId),
+    });
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    return {
+      lessonSequenceEnabled: course?.settings.lessonSequenceEnabled,
     };
   }
 
@@ -842,6 +858,35 @@ export class CourseService {
     return updatedCourse;
   }
 
+  async updateLessonSequenceEnabled(courseId: UUIDType, lessonSequenceEnabled: boolean) {
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const [updatedCourse] = await this.db
+      .update(courses)
+      .set({
+        settings: sql`
+        jsonb_set(
+          courses.settings,
+          '{lessonSequenceEnabled}',
+          to_jsonb(${lessonSequenceEnabled}),
+          true
+        )
+      `,
+      })
+      .where(eq(courses.id, courseId))
+      .returning();
+
+    if (!updatedCourse) {
+      throw new ConflictException("Failed to update course");
+    }
+
+    return updatedCourse;
+  }
+
   async createCourse(
     createCourseBody: CreateCourseBody,
     authorId: UUIDType,
@@ -881,6 +926,10 @@ export class CourseService {
         }
       }
 
+      const settings = {
+        lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
+      };
+
       const [newCourse] = await trx
         .insert(courses)
         .values({
@@ -895,6 +944,7 @@ export class CourseService {
           categoryId: createCourseBody.categoryId,
           stripeProductId: productId,
           stripePriceId: priceId,
+          settings,
         })
         .returning();
 

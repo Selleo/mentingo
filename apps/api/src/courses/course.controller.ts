@@ -39,6 +39,7 @@ import {
   allStudentQuizResultsSchema,
   courseAverageQuizScoresSchema,
   getCourseStatisticsSchema,
+  getLessonSequenceEnabledSchema,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -81,6 +82,7 @@ import type {
   AllStudentCoursesResponse,
   AllStudentQuizResultsResponse,
   CourseStatisticsResponse,
+  LessonSequenceEnabledResponse,
 } from "src/courses/schemas/course.schema";
 import type {
   CoursesFilterSchema,
@@ -363,6 +365,38 @@ export class CourseController {
     await this.courseService.updateHasCertificate(id, body.hasCertificate);
 
     return new BaseResponse({ message: "Pomyślnie_zaktualizowano_kurs" });
+  }
+
+  @Patch("update-lesson-sequence/:id")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: Type.Object({ lessonSequenceEnabled: Type.Boolean() }) },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateLessonSequenceEnabled(
+    @Param("id") id: UUIDType,
+    @Body() body: { lessonSequenceEnabled: boolean },
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.updateLessonSequenceEnabled(id, body.lessonSequenceEnabled);
+
+    return new BaseResponse({ message: "Pomyślnie zaktualizowano sekwencję lekcji" });
+  }
+
+  @Get("lesson-sequence-enabled/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
+  @Validate({
+    response: baseResponse(getLessonSequenceEnabledSchema),
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+  })
+  async getLessonSequenceEnabled(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<BaseResponse<LessonSequenceEnabledResponse>> {
+    const data = await this.courseService.getCourseSequenceEnabled(courseId);
+
+    return new BaseResponse(data);
   }
 
   @Post("enroll-course")

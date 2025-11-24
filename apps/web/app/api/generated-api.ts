@@ -1098,6 +1098,22 @@ export interface UpdateHasCertificateResponse {
   };
 }
 
+export interface UpdateLessonSequenceEnabledBody {
+  lessonSequenceEnabled: boolean;
+}
+
+export interface UpdateLessonSequenceEnabledResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface GetLessonSequenceEnabledResponse {
+  data: {
+    lessonSequenceEnabled: boolean;
+  };
+}
+
 export interface EnrollCourseResponse {
   data: {
     message: string;
@@ -4069,6 +4085,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUpdateLessonSequenceEnabled
+     * @request PATCH:/api/course/update-lesson-sequence/{id}
+     */
+    courseControllerUpdateLessonSequenceEnabled: (
+      id: string,
+      data: UpdateLessonSequenceEnabledBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateLessonSequenceEnabledResponse, any>({
+        path: `/api/course/update-lesson-sequence/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetLessonSequenceEnabled
+     * @request GET:/api/course/lesson-sequence-enabled/{courseId}
+     */
+    courseControllerGetLessonSequenceEnabled: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetLessonSequenceEnabledResponse, any>({
+        path: `/api/course/lesson-sequence-enabled/${courseId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),

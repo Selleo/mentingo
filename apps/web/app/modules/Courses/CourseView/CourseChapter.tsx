@@ -17,8 +17,12 @@ import { CourseChapterLesson } from "~/modules/Courses/CourseView/CourseChapterL
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
+export type Lesson = GetCourseResponse["data"]["chapters"][0]["lessons"][0] & {
+  hasAccess: boolean;
+};
+type Chapter = GetCourseResponse["data"]["chapters"][0] & { lessons: Lesson[] };
 type CourseChapterProps = {
-  chapter: GetCourseResponse["data"]["chapters"][0];
+  chapter: Chapter;
   courseId: string;
   isEnrolled: boolean;
 };
@@ -35,6 +39,7 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
     t("courseChapterView.other.quiz"),
     t("courseChapterView.other.quizzes"),
   );
+  const hasAccessToChapter = chapter.lessons.some((lesson: Lesson) => lesson.hasAccess);
 
   const navigate = useNavigate();
 
@@ -112,10 +117,10 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
             </AccordionTrigger>
             <AccordionContent>
               <div className="divide-y divide-neutral-200 rounded-b-lg border-x border-b border-primary-500 pb-4 pl-14 pt-3">
-                {chapter?.lessons?.map((lesson) => {
+                {chapter?.lessons?.map((lesson: Lesson) => {
                   if (!lesson) return null;
 
-                  return chapter.isFreemium || isEnrolled ? (
+                  return (chapter.isFreemium || isEnrolled) && lesson.hasAccess ? (
                     <Link to={`/course/${courseId}/lesson/${lesson.id}`}>
                       <CourseChapterLesson key={lesson.id} lesson={lesson} />
                     </Link>
@@ -123,7 +128,7 @@ export const CourseChapter = ({ chapter, courseId, isEnrolled }: CourseChapterPr
                     <CourseChapterLesson key={lesson.id} lesson={lesson} />
                   );
                 })}
-                {chapter.isFreemium && (
+                {chapter.isFreemium && hasAccessToChapter && (
                   <Button
                     variant="primary"
                     className="mt-4 gap-2"

@@ -1,8 +1,9 @@
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
+import { cn } from "~/lib/utils";
 import { LessonTypes, LessonTypesIcons } from "~/modules/Courses/CourseView/lessonTypes";
 
-import type { GetCourseResponse } from "~/api/generated-api";
+import type { Lesson } from "./CourseChapter";
 
 const progressBadge = {
   completed: "completed",
@@ -11,25 +12,41 @@ const progressBadge = {
   blocked: "blocked",
 } as const;
 
-type Lesson = GetCourseResponse["data"]["chapters"][number]["lessons"][number];
-
 type CourseChapterLessonProps = {
   lesson: Lesson;
 };
+
 export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
-  return (
-    <div className="flex w-full gap-x-2 p-2">
+  const hasAccess = lesson.hasAccess;
+
+  const lessonElement = (
+    <div
+      className={cn("flex w-full gap-x-2 p-2", {
+        "opacity-30": !hasAccess,
+      })}
+    >
       <Icon name={LessonTypesIcons[lesson.type]} className="size-6 text-accent-foreground" />
       <div className="flex w-full flex-col justify-center">
-        <p className="body-sm-md text-neutral-950 break-all overflow-x-hidden">
+        <p className="body-sm-md text-neutral-950 break-all overflow-x-hidden text-left">
           {lesson.title}{" "}
           <span className="text-neutral-800">
             {lesson.quizQuestionCount ? `(${lesson.quizQuestionCount})` : null}
           </span>
         </p>
-        <span className="details text-neutral-800">{LessonTypes[lesson.type]}</span>
+        <span className="details text-neutral-800 text-left">{LessonTypes[lesson.type]}</span>
       </div>
-      <ProgressBadge progress={progressBadge[lesson.status]} className="self-center" />
+      <ProgressBadge
+        progress={progressBadge[hasAccess ? lesson.status : "blocked"]}
+        className="self-center"
+      />
     </div>
   );
+
+  const content = hasAccess ? (
+    lessonElement
+  ) : (
+    <button className="w-full flex cursor-not-allowed">{lessonElement}</button>
+  );
+
+  return content;
 };

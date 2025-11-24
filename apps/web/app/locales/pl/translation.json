@@ -53,6 +53,10 @@
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
     "continueWithSlack": "Kontynuuj z użyciem Slack"
   },
+  "lessons": {
+    "sequenceUpdatedSuccessfully": "Kolejność lekcji została pomyślnie zaktualizowana",
+    "sequenceUpdateFailed": "Nie udało się zaktualizować kolejności lekcji"
+  },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
     "subHeader": "lub przeciągnij i upuść",
@@ -522,6 +526,11 @@
     }
   },
   "adminCoursesView": {
+    "settings": {
+      "other": {
+        "reachedCharactersLimit": "Osiągnięto limit znaków."
+      }
+    },
     "filters": {
       "placeholder": {
         "title": "Szukaj po tytule ...",
@@ -954,7 +963,9 @@
       "other": {
         "charactersLeft": "Pozostało znaków",
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
-        "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie."
+        "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
+        "enforceLessonSequence": "Wymuś sekwencję lekcji",
+        "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności"
       },
       "validation": {
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
@@ -1446,7 +1457,10 @@
   },
   "studentLessonView": {
     "error": {
-      "lessonIdNotFound": "Nie znaleziono ID lekcji"
+      "lessonIdNotFound": "Nie znaleziono ID lekcji",
+      "notAuthorizedTitle": "Brak uprawnień",
+      "notAuthorizedDescription": "Nie masz uprawnień do dostępu do tej lekcji.",
+      "goBackToCourse": "Wróć do kursu"
     },
     "other": {
       "lesson": "Lekcja",
