@@ -115,6 +115,14 @@ export class FileService {
     }
   }
 
+  async getFileStream(fileKey: string) {
+    try {
+      return await this.s3Service.getFileStream(fileKey);
+    } catch (error) {
+      throw new BadRequestException("Failed to retrieve file");
+    }
+  }
+
   async parseExcelFile<T extends TSchema>(
     file: Express.Multer.File,
     schema: T,

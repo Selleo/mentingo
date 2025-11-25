@@ -1863,6 +1863,10 @@
           "urlInvalid": "Nieprawidłowy format linku",
           "linkTextRequired": "Tekst linku jest wymagany"
         }
+      },
+      "upload": {
+        "uploadFailed": "Nie udało się przesłać pliku",
+        "tooltip": "Prześlij: Pozwala przesłać plik"
       }
     }
   },

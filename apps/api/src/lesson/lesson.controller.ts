@@ -7,9 +7,15 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import { Type } from "@sinclair/typebox";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { SupportedLanguages } from "src/ai/utils/ai.type";
@@ -161,6 +167,7 @@ export class LessonController {
     await this.adminLessonsService.updateAiMentorLesson(id, data, userId);
     return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
   }
+
   @Post("beta-create-lesson/quiz")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
@@ -285,6 +292,35 @@ export class LessonController {
     });
   }
 
+  @Post("upload-files-to-lesson")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        lessonId: { type: "string", format: "uuid" },
+        file: {
+          type: "string",
+          format: "binary",
+        },
+      },
+      required: ["lessonId", "file"],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "File uploaded successfully",
+    type: String,
+  })
+  async uploadImageToLesson(
+    @Body("lessonId") lessonId: UUIDType,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.adminLessonsService.uploadFileToLesson(lessonId, file);
+  }
+
   @Delete("delete-student-quiz-answers")
   @Roles(USER_ROLES.STUDENT)
   @Validate({
@@ -353,6 +389,19 @@ export class LessonController {
   //       message: "Evaluation quiz ending in error",
   //     });
   //   }
+
+  @Get("lesson-image/:resourceId")
+  @Validate({
+    request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
+  })
+  async getLessonImage(
+    @Param("resourceId") resourceId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
+    @Res() res: Response,
+  ) {
+    return this.lessonService.getLessonImage(res, userId, role, resourceId);
+  }
 
   @Patch("update-lesson-display-order")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)

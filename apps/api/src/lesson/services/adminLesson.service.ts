@@ -1,7 +1,9 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
+import { FileService } from "src/file/file.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
@@ -31,6 +33,7 @@ export class AdminLessonService {
     private lessonRepository: LessonRepository,
     private aiRepository: AiRepository,
     private documentService: DocumentService,
+    private fileService: FileService,
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody) {
@@ -413,5 +416,23 @@ export class AdminLessonService {
       await this.adminLessonRepository.upsertLessonResources(resourcesToUpdate);
 
     return updatedLesson.id;
+  }
+
+  async uploadFileToLesson(lessonId: UUIDType, file: Express.Multer.File) {
+    if (!ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException("Invalid file type");
+    }
+
+    const uploadedFile = await this.fileService.uploadFile(file, "lesson");
+
+    const [resource] = await this.adminLessonRepository.createLessonResources([
+      {
+        source: uploadedFile.fileKey,
+        type: "text",
+        lessonId,
+      },
+    ]);
+
+    return resource.id;
   }
 }
