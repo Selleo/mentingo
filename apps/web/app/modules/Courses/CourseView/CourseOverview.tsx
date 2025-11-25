@@ -1,4 +1,5 @@
 import { useNavigate } from "@remix-run/react";
+import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
@@ -19,14 +20,17 @@ type CourseOverviewProps = {
 };
 
 export default function CourseOverview({ course }: CourseOverviewProps) {
-  const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
-  const title = course?.title;
-  const description = course?.description || "";
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { isAdminLike, isAdmin } = useUserRole();
   const { currentUser } = useCurrentUserStore();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+
+  const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
+  const title = course?.title;
+  const description = course?.description || "";
+  // TODO: Get due date from api
+  const DUE_DATE = new Date();
 
   const navigateToEditCourse = () => navigate(`/admin/beta-courses/${course.id}`);
 
@@ -55,8 +59,16 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
             />
           </div>
           <div className="flex w-full flex-col gap-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
               <CategoryChip category={course?.category} className="bg-primary-50" />
+              {DUE_DATE && (
+                <CategoryChip
+                  category={"Due date: " + formatDate(DUE_DATE, "dd.MM.yyyy")}
+                  color="text-[#F59E0B]"
+                  className="bg-[#FEF3C7]"
+                  textClassName="text-[#92400E]"
+                />
+              )}
 
               <Badge variant="default" className="flex gap-2">
                 {courseLanguages
