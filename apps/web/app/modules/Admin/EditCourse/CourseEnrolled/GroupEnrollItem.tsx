@@ -121,7 +121,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                       <label htmlFor={`groups.${index}.deadline`} className="text-[#0A0A0A]">
                         {t("adminCourseView.deadline")} *
                       </label>
-                      <FormControl>
+                      <FormControl className="relative">
                         {/* TODO: change from native input view to that on figma, colors in dark mode should be adjusted */}
                         <Input
                           type="date"
