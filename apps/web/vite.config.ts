@@ -35,6 +35,12 @@ export default defineConfig(({ mode }) => {
             src: "app/assets/svgs/app-signet.svg",
             dest: "",
           },
+          { src: "app/assets/svgs/app-logo.svg", dest: "app/assets/svgs" },
+          { src: "app/assets/svgs/app-email-logo.svg", dest: "app/assets/svgs" },
+          {
+            src: "app/assets/svgs/app-email-border-circle.svg",
+            dest: "app/assets/svgs",
+          },
           {
             src: "app/locales/en/translation.json",
             dest: "locales/en",
