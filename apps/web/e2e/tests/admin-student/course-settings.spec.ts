@@ -14,7 +14,7 @@ import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-dat
 import { COURSE_SETTINGS_UI } from "./data/course-settings-data";
 
 const allowUnregisteredUsersToBrowseCourses = async (page: Page) => {
-  await page.getByRole("button", { name: /(avatar for|profile test)/i }).click();
+  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
   await page.getByRole("link", { name: /settings/i }).click();
 
   await page
@@ -55,9 +55,11 @@ const setCourseAsFree = async (page: Page) => {
 };
 
 const enterCourse = async (page: Page, courseHandle: string) => {
-  const courseCard = page.getByTestId(new RegExp(courseHandle, "i"));
+  const courseCard = page.getByTestId(courseHandle);
 
-  if (!(await courseCard.isVisible())) {
+  const isVisible = await courseCard.isVisible();
+
+  if (!isVisible) {
     return false;
   }
 
@@ -100,7 +102,7 @@ test.describe("Course settings flow", () => {
     await test.step("admin publishes course", async () => {
       await selectCourseAndOpenEnrollmentTab(
         page,
-        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.secondCourseToAssign,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
       );
       await enrollAllStudents(page);
       await setCourseStatus(page, COURSE_SETTINGS_UI.button.published);
@@ -114,10 +116,7 @@ test.describe("Course settings flow", () => {
       );
 
       expect(
-        await verifyStudentSeesCourse(
-          page,
-          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.secondCourseToAssign,
-        ),
+        await verifyStudentSeesCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign),
       ).toBeTruthy();
     });
   });
@@ -126,7 +125,7 @@ test.describe("Course settings flow", () => {
     await test.step("admin drafts course", async () => {
       await selectCourseAndOpenEnrollmentTab(
         page,
-        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.secondCourseToAssign,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign,
       );
       await enrollAllStudents(page);
       await setCourseStatus(page, COURSE_SETTINGS_UI.button.draft);
@@ -140,20 +139,16 @@ test.describe("Course settings flow", () => {
       );
 
       expect(
-        await verifyStudentSeesCourse(
-          page,
-          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.secondCourseToAssign,
-        ),
+        await verifyStudentSeesCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign),
       ).toBeFalsy();
     });
   });
 
   test("should set first chapter as freemium and check if a student can access it and check if an unregistered user must log in", async ({
     page,
-    browser,
   }) => {
     await test.step("admin sets course as freemium", async () => {
-      await selectCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
+      await selectCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.courseToAssign);
       await page.getByRole("tab", { name: COURSE_SETTINGS_UI.button.curriculum }).click();
       const freemiumToggle = page.locator("#freemiumToggle").first();
 
@@ -187,11 +182,13 @@ test.describe("Course settings flow", () => {
 
       await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
 
-      await page.getByTestId(new RegExp(COURSE_SETTINGS_UI.header.chapterTitle, "i")).click();
+      await expect(
+        page.getByRole("heading", { name: COURSE_SETTINGS_UI.header.chapterTitle2 }),
+      ).toBeVisible();
 
-      await page
-        .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
-        .click();
+      await page.getByTestId(COURSE_SETTINGS_UI.header.chapterTitle3).click();
+
+      await page.getByRole("button", { name: "Repeat lessons" }).click();
 
       const nextLessonButton = page.getByTestId(
         new RegExp(COURSE_SETTINGS_UI.button.nextLesson, "i"),
@@ -199,7 +196,14 @@ test.describe("Course settings flow", () => {
       await expect(nextLessonButton).toBeVisible();
 
       await test.step("unregistered user tries to access free chapter", async () => {
-        const newPage = await logout(browser);
+        const newPage = page;
+        await page.getByRole("button", { name: "test Student profile test" }).click();
+        await page
+          .getByRole("menuitem", { name: /logout/i })
+          .locator("div")
+          .click();
+        await page.waitForURL("/auth/login");
+        await expect(page).toHaveURL("/auth/login");
 
         await newPage.goto("/courses");
 
@@ -207,7 +211,11 @@ test.describe("Course settings flow", () => {
 
         await enterCourse(newPage, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
 
-        await newPage.getByTestId(new RegExp(COURSE_SETTINGS_UI.header.chapterTitle, "i")).click();
+        await newPage.waitForURL(
+          /course\/[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i,
+        );
+
+        await page.getByText(COURSE_SETTINGS_UI.header.chapterTitle3, { exact: true }).click();
 
         await newPage
           .getByRole("button", { name: new RegExp(COURSE_SETTINGS_UI.button.playChapter, "i") })
@@ -248,18 +256,21 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
       );
 
-      expect(
-        await studentEnrollToCourse(
-          page,
-          ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
-        ),
-      ).toBeTruthy();
+      await studentEnrollToCourse(
+        page,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
+      );
+
+      const chaptersText = page.getByRole("tab", { name: "Chapters" });
+      await expect(chaptersText).toBeVisible();
     });
 
     await test.step("unregistered user tries to enroll", async () => {
       const newPage = await logout(browser);
 
       await newPage.goto("/courses");
+      await newPage.waitForLoadState("networkidle");
+      await newPage.waitForURL("/courses");
 
       const header = newPage.getByRole("heading", {
         name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.availableCourses, "i"),

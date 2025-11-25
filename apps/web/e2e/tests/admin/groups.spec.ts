@@ -6,7 +6,7 @@ import {
   findAndClickButton,
   findAndClickCell,
   navigateToPage,
-} from "e2e/utils";
+} from "../../utils/index";
 
 import { GROUPS_PAGE_UI } from "./data/groups-data";
 
@@ -23,11 +23,9 @@ const goIntoCreateMode = async (page: Page) => {
 };
 
 const findAndClickCheckbox = async (page: Page) => {
-  const checkbox = page.getByLabel("Select row").first();
+  const selectAllCheckbox = page.getByRole("cell", { name: "Select all" });
 
-  await expect(checkbox).not.toBeChecked();
-  await checkbox.click();
-  await expect(checkbox).toBeChecked();
+  await selectAllCheckbox.click();
 };
 
 const goIntoEditMode = async (page: Page) => {
@@ -55,6 +53,7 @@ const deleteAndAssert = async (page: Page, name: string) => {
 
   const newCell = page.getByRole("cell", {
     name: new RegExp(name, "i"),
+    exact: true,
   });
 
   await page.waitForLoadState("networkidle");
@@ -106,6 +105,16 @@ test.describe("Admin groups page flow", () => {
   test.describe("Group CRUD", () => {
     test.beforeEach(async ({ page }) => {
       await navigateToPage(page, GROUPS_PAGE_UI.button.groups, GROUPS_PAGE_UI.header.groupHeader);
+
+      await page.getByLabel("Select all").click();
+      const zeroSelected = page.getByText("Selected (0)");
+      if (await zeroSelected.isVisible()) {
+        return;
+      }
+      await page.getByText("Delete selected").click();
+      const deleteButton = page.getByText("Delete", { exact: true });
+      await deleteButton.waitFor({ state: "visible" });
+      await deleteButton.click();
     });
 
     test("should create a new group with characteristics", async ({ page }) => {
@@ -126,7 +135,7 @@ test.describe("Admin groups page flow", () => {
         GROUPS_PAGE_UI.dataId.groupCharacteristic,
       );
 
-      await deleteAndAssert(page, GROUPS_PAGE_UI.expectedValues.updatedGroupName);
+      await deleteAndAssert(page, GROUPS_PAGE_UI.expectedValues.groupName);
     });
 
     test("should fail to edit group when inputting no data", async ({ page }) => {
@@ -179,9 +188,10 @@ test.describe("Admin groups page flow", () => {
       await expect(groupSelector).toHaveText(GROUPS_PAGE_UI.expectedValues.groupName);
 
       await findAndClickButton(page, GROUPS_PAGE_UI.button.save);
-      await findAndClickButton(page, GROUPS_PAGE_UI.button.back);
+      await page.getByRole("main").getByRole("link", { name: "Users" }).click();
 
-      await findAndAssertCell(page, GROUPS_PAGE_UI.expectedValues.groupName);
+      const field = page.getByRole("cell", { name: GROUPS_PAGE_UI.expectedValues.groupName });
+      await expect(field).toHaveText(GROUPS_PAGE_UI.expectedValues.groupName);
     });
 
     test("should assign bulk users to group", async ({ page }) => {

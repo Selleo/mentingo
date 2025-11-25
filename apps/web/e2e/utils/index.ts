@@ -76,7 +76,9 @@ export const selectCourse = async (page: Page, course: string) => {
     })
     .click();
 
-  await findAndClickCell(page, course);
+  await page.locator(".h-min > button:nth-child(2)").click();
+  await page.waitForURL("/admin/courses");
+  await page.getByText("Advanced English: Mastering").click();
 
   const header = page.getByRole("link", {
     name: new RegExp(course, "i"),

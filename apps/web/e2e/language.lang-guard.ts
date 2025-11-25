@@ -46,15 +46,15 @@ test.describe("Switch language flow", () => {
 
     if (!(await announcementsButton.isVisible())) {
       await page
-        .getByRole("button", { name: /manage/i })
+        .getByRole("button", { name: /(manage|Zarządzaj)/i })
         .first()
         .click();
     }
 
     await navigateToPage(
       page,
-      LANGUAGE_PAGE_UI.button.settings,
-      LANGUAGE_PAGE_UI.header.changeLanguage,
+      `${LANGUAGE_PAGE_UI.languages.polish.settings}|${LANGUAGE_PAGE_UI.languages.english.settings}`,
+      `${LANGUAGE_PAGE_UI.languages.polish.changeLanguage}|${LANGUAGE_PAGE_UI.languages.english.changeLanguage}`,
     );
   });
 
