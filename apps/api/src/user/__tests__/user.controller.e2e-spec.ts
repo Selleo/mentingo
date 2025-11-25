@@ -83,8 +83,7 @@ describe("UsersController (e2e)", () => {
       expect(response.body.data).toStrictEqual({
         ...omit(testUser, "credentials", "avatarReference"),
         profilePictureUrl: null,
-        groupId: null,
-        groupName: null,
+        groups: [],
       });
     });
 
@@ -103,10 +102,10 @@ describe("UsersController (e2e)", () => {
       const response = await request(app.getHttpServer())
         .patch(`/api/user?id=${testUser.id}`)
         .set("Cookie", testCookies)
-        .send({ groupId: updateData.id })
+        .send({ groups: [updateData.id] })
         .expect(200);
 
-      expect(response.body.data.groupId).toBe(updateData.id);
+      expect(response.body.data.groups[0].id).toBe(updateData.id);
     });
 
     it("should update user", async () => {
@@ -293,7 +292,10 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch(`/api/user/bulk/groups`)
         .set("Cookie", testCookies)
-        .send({ userIds: [firstUser.id, secondUser.id], groupId: updateData.id })
+        .send([
+          { userId: firstUser.id, groups: [updateData.id] },
+          { userId: secondUser.id, groups: [updateData.id] },
+        ])
         .expect(200);
     });
 
@@ -335,7 +337,10 @@ describe("UsersController (e2e)", () => {
       await request(app.getHttpServer())
         .patch(`/api/user/bulk/groups`)
         .set("Cookie", cookies)
-        .send({ userIds: [firstUser.id, secondUser.id], groupId: updateData.id })
+        .send([
+          { userId: firstUser.id, groups: [updateData.id] },
+          { userId: secondUser.id, groups: [updateData.id] },
+        ])
         .expect(403);
     });
   });

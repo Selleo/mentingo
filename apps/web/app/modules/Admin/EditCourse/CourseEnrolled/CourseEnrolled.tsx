@@ -35,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
@@ -117,11 +118,43 @@ export const CourseEnrolled = (): ReactElement => {
       ),
     },
     {
-      accessorKey: "groupName",
-      header: ({ column }) => (
-        <SortButton column={column}>{t("adminUsersView.field.group")}</SortButton>
-      ),
-      cell: ({ row }) => row.original.groupName,
+      accessorKey: "groups",
+      header: t("adminUsersView.field.group"),
+      cell: ({ row }) => {
+        const groups = row.original.groups;
+        const visibleGroups = groups.slice(0, 1);
+        const remainingCount = groups.length - visibleGroups.length;
+
+        return (
+          <div className="flex gap-1">
+            {visibleGroups.map((group) => (
+              <Badge key={group.id} variant="secondary">
+                {group.name}
+              </Badge>
+            ))}
+            {remainingCount > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="default" className="cursor-help">
+                      +{remainingCount}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="p-2 rounded-lg">
+                    <div className="flex flex-col gap-1 !px-0">
+                      {groups.slice(1).map((group) => (
+                        <Badge key={group.id} variant="secondary">
+                          {group.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "enrolledAt",
@@ -172,9 +205,9 @@ export const CourseEnrolled = (): ReactElement => {
       placeholder: t("adminCourseView.enrolled.filters.placeholder.searchByKeyword"),
     },
     {
-      name: "groupId",
-      type: "select",
-      placeholder: t("adminCourseView.enrolled.filters.placeholder.groups"),
+      name: "groups",
+      type: "multiselect",
+      placeholder: t("adminUsersView.filters.placeholder.groups"),
       options:
         groupData.map((item) => ({
           value: item.id,

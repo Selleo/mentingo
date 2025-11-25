@@ -33,7 +33,8 @@ import { GroupService } from "src/group/group.service";
 import { UpsertGroupBody, GroupSortFieldsOptions } from "src/group/group.types";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import type { AllGroupsResponse, GroupsFilterSchema, GroupResponse } from "src/group/group.types";
+import type { GroupKeywordFilterBody } from "src/group/group.schema";
+import type { AllGroupsResponse, GroupResponse } from "src/group/group.types";
 
 @Controller("group")
 @UseGuards(RolesGuard)
@@ -57,7 +58,7 @@ export class GroupController {
     @Query("perPage") perPage: number,
     @Query("sort") sort: GroupSortFieldsOptions,
   ): Promise<PaginatedResponse<AllGroupsResponse>> {
-    const filters: GroupsFilterSchema = {
+    const filters: GroupKeywordFilterBody = {
       keyword,
     };
     const query = { filters, page, perPage, sort };
@@ -96,7 +97,7 @@ export class GroupController {
     @Query("perPage") perPage: number,
     @Query("sort") sort: GroupSortFieldsOptions,
   ): Promise<PaginatedResponse<AllGroupsResponse>> {
-    const filters: GroupsFilterSchema = {
+    const filters: GroupKeywordFilterBody = {
       keyword,
     };
     const query = { filters, page, perPage, sort };
@@ -168,40 +169,22 @@ export class GroupController {
     });
   }
 
-  @Post("assign")
+  @Post("set")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     request: [
       { type: "query", name: "userId", schema: UUIDSchema },
-      { type: "query", name: "groupId", schema: UUIDSchema },
+      { type: "body", name: "groupIds", schema: Type.Array(UUIDSchema) },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
-  async assignUserToGroup(
+  async setUserGroups(
     @Query("userId") userId: UUIDType,
-    @Query("groupId") groupId: UUIDType,
+    @Body() groupIds: UUIDType[],
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.groupService.assignUserToGroup(groupId, userId);
+    await this.groupService.setUserGroups(groupIds, userId);
 
     return new BaseResponse({ message: "User assigned successfully" });
-  }
-
-  @Delete("unassign")
-  @Roles(USER_ROLES.ADMIN)
-  @Validate({
-    request: [
-      { type: "query", name: "userId", schema: UUIDSchema },
-      { type: "query", name: "groupId", schema: UUIDSchema },
-    ],
-    response: baseResponse(Type.Object({ message: Type.String() })),
-  })
-  async unassignUserFromGroup(
-    @Query("userId") userId: UUIDType,
-    @Query("groupId") groupId: UUIDType,
-  ): Promise<BaseResponse<{ message: string }>> {
-    await this.groupService.unassignUserFromGroup(groupId, userId);
-
-    return new BaseResponse({ message: "User unassigned successfully" });
   }
 
   @Get("by-course/:courseId")

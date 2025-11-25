@@ -1,4 +1,4 @@
-import { Type } from "@sinclair/typebox";
+import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
@@ -25,9 +25,13 @@ export const upsertGroupSchema = Type.Object({
 });
 export const bulkDeleteGroupsSchema = Type.Array(UUIDSchema);
 
-export const groupsFilterSchema = Type.Object({
+export const groupsFilterSchema = Type.Array(Type.String());
+
+export const groupKeywordFilterSchema = Type.Object({
   keyword: Type.Optional(Type.String()),
 });
+
+export type GroupKeywordFilterBody = Static<typeof groupKeywordFilterSchema>;
 
 export const groupSortFields = ["name", "createdAt"] as const;
 export const groupSortFieldsOptions = Type.Union([Type.Literal("name"), Type.Literal("createdAt")]);

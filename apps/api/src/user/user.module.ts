@@ -7,6 +7,8 @@ import { EmailModule } from "src/common/emails/emails.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
+import { GroupModule } from "src/group/group.module";
+import { GroupService } from "src/group/group.service";
 import { S3Module } from "src/s3/s3.module";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsModule } from "src/settings/settings.module";
@@ -26,10 +28,12 @@ import { UserService } from "./user.service";
     StatisticsModule,
     SettingsModule,
     forwardRef(() => CourseModule),
+    GroupModule,
   ],
   controllers: [UserController],
   providers: [
     UserService,
+    GroupService,
     FileService,
     S3Service,
     BunnyStreamService,

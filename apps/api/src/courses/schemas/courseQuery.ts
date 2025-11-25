@@ -1,7 +1,8 @@
 import { type Static, Type } from "@sinclair/typebox";
 
-import { UUIDSchema, type UUIDType } from "src/common";
+import { groupsFilterSchema } from "src/group/group.schema";
 
+import type { UUIDType } from "src/common";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 export const courseSortFields = [
@@ -114,7 +115,7 @@ export type SortEnrolledStudentsOptions = Static<typeof sortEnrolledStudentsOpti
 export const enrolledStudentFilterSchema = Type.Object({
   keyword: Type.String(),
   sort: sortEnrolledStudentsOptions,
-  groupId: UUIDSchema,
+  groups: Type.Optional(groupsFilterSchema),
 });
 
 export type EnrolledStudentFilterSchema = Static<typeof enrolledStudentFilterSchema>;
@@ -140,11 +141,9 @@ export const CourseStudentProgressionSortFields: Record<CourseStudentProgression
 
 export const sortCourseStudentProgressionOptions = Type.Union([
   Type.Literal("studentName"),
-  Type.Literal("groupName"),
   Type.Literal("completedLessonsCount"),
   Type.Literal("lastActivity"),
   Type.Literal("-studentName"),
-  Type.Literal("-groupName"),
   Type.Literal("-completedLessonsCount"),
   Type.Literal("-lastActivity"),
 ]);

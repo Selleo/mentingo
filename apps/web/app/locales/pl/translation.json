@@ -654,7 +654,7 @@
       "placeholder": {
         "searchByKeyword": "Szukaj po słowie kluczowym...",
         "roles": "Role",
-        "groups": "Grupy"
+        "groups": "Wszystkie Grupy"
       }
     },
     "field": {
@@ -714,7 +714,7 @@
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "archive": "Czy na pewno chcesz zarchiwizować te konta?",
-        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne), language (en lub pl).",
+        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (admin, student lub content_creator), groups (\"group1,group2\"), language (en lub pl).",
         "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
         "noUsersSkipped": "Nie pominięto żadnych użytkowników."
       },
@@ -753,7 +753,7 @@
       "role": "Rola",
       "language": "Język",
       "status": "Status",
-      "groupId": "Grupa"
+      "groups": "Grupa"
     },
     "toast": {
       "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie",
@@ -844,6 +844,10 @@
   "adminGroupsView": {
     "name": "Nazwa grupy",
     "characteristic": "Charakterystyka",
+    "groupSelect": {
+      "label": "Wybierz grupy",
+      "noGroups": "Nie znaleziono grup"
+    },
     "buttons": {
       "create": "Stwórz nową grupę",
       "deleteSelected": "Usuń wybrane"
@@ -1244,7 +1248,7 @@
       "filters": {
         "placeholder": {
           "searchByKeyword": "Szukaj po słowie kluczowym...",
-          "groups": "Grupy"
+          "groups": "Wszystkie Grupy"
         }
       },
       "enrollSelected": "Zapisz wybranych na kurs",

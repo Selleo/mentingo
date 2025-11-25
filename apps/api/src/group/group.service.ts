@@ -23,25 +23,21 @@ import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { GroupSortFields } from "src/group/group.schema";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
-  chapters,
-  groupCourses,
   groups,
   groupUsers,
-  lessons,
-  studentChapterProgress,
-  studentCourses,
-  studentLessonProgress,
   users,
+  groupCourses,
+  studentCourses,
+  chapters,
+  studentChapterProgress, lessons, studentLessonProgress,
 } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SQL } from "drizzle-orm";
 import type { PaginatedResponse, Pagination, UUIDType } from "src/common";
-import type { GroupSortField } from "src/group/group.schema";
+import type { GroupSortField, GroupKeywordFilterBody } from "src/group/group.schema";
 import type {
   AllGroupsResponse,
   UpsertGroupBody,
-  GroupsFilterSchema,
   GroupsQuery,
   GroupResponse,
 } from "src/group/group.types";
@@ -217,41 +213,74 @@ export class GroupService {
     await this.db.delete(groups).where(inArray(groups.id, groupIds)).returning();
   }
 
-  async assignUserToGroup(groupId: UUIDType, userId: UUIDType) {
-    // Check if group exists
-    const [group] = await this.db.select().from(groups).where(eq(groups.id, groupId));
-    if (!group) throw new NotFoundException("Group not found");
+  async setUserGroups(groupIds: UUIDType[], userId: UUIDType, db: DatabasePg = this.db) {
+    return db.transaction(async (trx) => {
+      const [user] = await trx.select().from(users).where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
-    // Check if user exists and is a student
-    const [user] = await this.db.select().from(users).where(eq(users.id, userId));
-    if (!user) throw new NotFoundException("User not found");
-    if (user.role !== USER_ROLES.STUDENT) throw new ConflictException("User is not a student");
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
 
-    const [existingAssociation] = await this.db
-      .select()
-      .from(groupUsers)
-      .leftJoin(users, eq(users.id, groupUsers.userId))
-      .where(
-        and(
-          eq(groupUsers.groupId, groupId),
-          eq(groupUsers.userId, userId),
-          isNull(users.deletedAt),
-        ),
-      );
+      await trx.delete(groupUsers).where(eq(groupUsers.userId, userId));
 
-    if (existingAssociation) throw new ConflictException("User already assigned to the group");
+      if (groupIds.length === 0) return;
 
-    await this.db.transaction(async (trx) => {
-      // Assign user to group
-      const [assigned] = await trx.insert(groupUsers).values({ userId, groupId }).returning();
+      const existingGroups = await trx
+        .select({ id: groups.id })
+        .from(groups)
+        .where(inArray(groups.id, groupIds));
 
-      if (!assigned) throw new ConflictException("Unable to assign user to the group");
+      if (existingGroups.length !== groupIds.length)
+        throw new BadRequestException("One or more groups doesn't exist");
+      
+      if (existingGroups.length > 0) {
+        const groupsToAssign = existingGroups.map((group) => ({ userId, groupId: group.id }))
+        
+        await trx
+          .insert(groupUsers)
+          .values(groupsToAssign)
+          .returning();
 
-      // Auto-enroll user to all courses the group is enrolled in
-      await this.enrollUserToGroupCourses(userId, groupId, trx);
+        await Promise.all((existingGroups.map((group) => this.enrollUserToGroupCourses(userId, group.id, trx))));
+      }
+      
+      return;
     });
+  }
 
-    return;
+  private getFiltersConditions(filters: GroupKeywordFilterBody) {
+    const conditions = [];
+
+    if (filters.keyword) {
+      conditions.push(
+        or(
+          ilike(groups.name, `%${filters.keyword.toLowerCase()}%`),
+          ilike(groups.characteristic, `%${filters.keyword.toLowerCase()}%`),
+        ) as SQL,
+      );
+    }
+
+    return conditions ?? [sql`1=1`];
+  }
+
+  private getColumnToSortBy(sort: GroupSortField) {
+    switch (sort) {
+      default:
+        return groups.createdAt;
+    }
+  }
+
+  async getGroupsByCourse(courseId: UUIDType) {
+    return this.db
+      .select({
+        id: groups.id,
+        name: groups.name,
+        createdAt: groups.createdAt,
+        updatedAt: groups.updatedAt,
+      })
+      .from(groupCourses)
+      .innerJoin(groups, eq(groups.id, groupCourses.groupId))
+      .where(eq(groupCourses.courseId, courseId));
   }
 
   private async enrollUserToGroupCourses(
@@ -259,7 +288,6 @@ export class GroupService {
     groupId: UUIDType,
     trx: any,
   ): Promise<void> {
-    // Get all courses the group is enrolled in
     const groupCoursesList = await trx
       .select({ courseId: groupCourses.courseId })
       .from(groupCourses)
@@ -267,7 +295,6 @@ export class GroupService {
 
     if (groupCoursesList.length === 0) return;
 
-    // Check which courses the user is already enrolled in
     const existingEnrollments = await trx
       .select({ courseId: studentCourses.courseId })
       .from(studentCourses)
@@ -288,7 +315,6 @@ export class GroupService {
 
     if (newCourseIds.length === 0) return;
 
-    // Insert student course enrollments
     const studentCoursesValues = newCourseIds.map((courseId: any) => ({
       studentId: userId,
       courseId,
@@ -297,9 +323,7 @@ export class GroupService {
 
     await trx.insert(studentCourses).values(studentCoursesValues);
 
-    // Create course dependencies for each course
     for (const courseId of newCourseIds) {
-      // Get course chapters
       const courseChapters = await trx
         .select({ id: chapters.id })
         .from(chapters)
@@ -307,7 +331,6 @@ export class GroupService {
 
       if (courseChapters.length === 0) continue;
 
-      // Create chapter progress
       await trx.insert(studentChapterProgress).values(
         courseChapters.map((chapter: any) => ({
           studentId: userId,
@@ -317,7 +340,6 @@ export class GroupService {
         })),
       );
 
-      // Create lesson progress for each chapter
       for (const chapter of courseChapters) {
         const chapterLessons = await trx
           .select({ id: lessons.id, type: lessons.type })
@@ -338,71 +360,5 @@ export class GroupService {
         );
       }
     }
-  }
-
-  async unassignUserFromGroup(groupId: UUIDType, userId: UUIDType) {
-    const [assigned] = await this.db
-      .select()
-      .from(groupUsers)
-      .innerJoin(users, eq(users.id, groupUsers.userId))
-      .where(
-        and(
-          eq(groupUsers.groupId, groupId),
-          eq(groupUsers.userId, userId),
-          isNull(users.deletedAt),
-        ),
-      );
-
-    if (!assigned) throw new ConflictException("User is not assigned to this group");
-
-    const [unassigned] = await this.db
-      .delete(groupUsers)
-      .where(and(eq(groupUsers.userId, userId), eq(groupUsers.groupId, groupId)))
-      .returning();
-
-    if (!unassigned) throw new ConflictException("Unable to unassign from the group");
-
-    return;
-  }
-
-  private getFiltersConditions(filters: GroupsFilterSchema) {
-    const conditions = [];
-
-    if (filters.keyword) {
-      conditions.push(
-        or(
-          ilike(groups.name, `%${filters.keyword.toLowerCase()}%`),
-          ilike(groups.characteristic, `%${filters.keyword.toLowerCase()}%`),
-        ) as SQL,
-      );
-    }
-
-    return conditions ?? [sql`1=1`];
-  }
-
-  private getColumnToSortBy(sort: GroupSortField) {
-    switch (sort) {
-      case GroupSortFields.createdAt:
-        return groups.createdAt;
-      case GroupSortFields.name:
-        return groups.name;
-      default:
-        return groups.createdAt;
-    }
-  }
-
-  async getGroupsByCourse(courseId: UUIDType) {
-    const enrolledGroups = await this.db
-      .select({
-        id: groups.id,
-        name: groups.name,
-        createdAt: groups.createdAt,
-        updatedAt: groups.updatedAt,
-      })
-      .from(groupCourses)
-      .innerJoin(groups, eq(groups.id, groupCourses.groupId))
-      .where(eq(groupCourses.courseId, courseId));
-
-    return enrolledGroups;
   }
 }
