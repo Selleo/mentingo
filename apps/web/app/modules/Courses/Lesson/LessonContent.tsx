@@ -185,11 +185,11 @@ export const LessonContent = ({
   return (
     <TooltipProvider>
       <div
-        className={cn("flex size-full min-w-0 flex-col items-center", {
+        className={cn("flex w-full min-w-0 flex-col items-center h-auto", {
           "py-10": !isPreviewMode,
         })}
       >
-        <div className="flex size-full min-w-0 flex-col gap-y-10 px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8">
+        <div className="flex w-full min-w-0 flex-col gap-y-10 px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
           {!isPreviewMode && (
             <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
               <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
