@@ -289,7 +289,6 @@ html {
   }
 }
 
-
 @supports (scrollbar-width: thin) {
   .scrollbar-thin {
     scrollbar-width: thin;

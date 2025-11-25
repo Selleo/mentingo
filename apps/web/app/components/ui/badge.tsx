@@ -11,7 +11,7 @@ const badgeVariants = cva("", {
   variants: {
     variant: {
       default: "text-neutral-900 bg-white border border-neutral-200",
-      success: "text-success-800 bg-success-100",
+      success: "text-[#008236] bg-[#F0FDF4] border border-[#B9F8CF]",
       successFilled: "text-success-800 bg-success-50",
       inProgress: "text-warning-800 bg-warning-100",
       inProgressFilled: "text-secondary-700 bg-secondary-50",
