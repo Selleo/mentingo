@@ -10,11 +10,9 @@ export type CourseStudentsProgressQueryParams = {
   search?: string;
   sort?:
     | "studentName"
-    | "groupName"
     | "completedLessonsCount"
     | "lastActivity"
     | "-studentName"
-    | "-groupName"
     | "-completedLessonsCount"
     | "-lastActivity";
 };

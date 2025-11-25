@@ -12,15 +12,13 @@ import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { GroupSortFields } from "src/group/group.schema";
 import { groups, groupUsers, users } from "src/storage/schema";
-import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SQL } from "drizzle-orm";
 import type { PaginatedResponse, Pagination, UUIDType } from "src/common";
-import type { GroupSortField } from "src/group/group.schema";
+import type { GroupSortField, GroupKeywordFilterBody } from "src/group/group.schema";
 import type {
   AllGroupsResponse,
   UpsertGroupBody,
-  GroupsFilterSchema,
   GroupsQuery,
   GroupResponse,
 } from "src/group/group.types";
@@ -169,66 +167,38 @@ export class GroupService {
     await this.db.delete(groups).where(inArray(groups.id, groupIds)).returning();
   }
 
-  async assignUserToGroup(groupId: UUIDType, userId: UUIDType) {
-    const [dbOutput] = await this.db
-      .select({
-        groupId: groups.id,
-        userId: users.id,
-        userRole: users.role,
-        associatedRow: groupUsers,
-      })
-      .from(groupUsers)
-      .leftJoin(users, and(eq(users.id, userId)))
-      .leftJoin(groups, and(eq(groups.id, groupId)))
-      .where(
-        and(
-          eq(groupUsers.groupId, groupId),
-          eq(groupUsers.userId, userId),
-          isNull(users.deletedAt),
-        ),
-      );
+  async setUserGroups(groupIds: UUIDType[], userId: UUIDType, db: DatabasePg = this.db) {
+    return db.transaction(async (trx) => {
+      const [user] = await trx.select().from(users).where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
-    if (!dbOutput.groupId) throw new NotFoundException("Group not found");
-    if (!dbOutput.userId) throw new NotFoundException("User not found");
+      if (!user) {
+        throw new NotFoundException("User not found");
+      }
 
-    if (dbOutput.userRole !== USER_ROLES.STUDENT)
-      throw new ConflictException("User is not a student");
+      await trx.delete(groupUsers).where(eq(groupUsers.userId, userId));
 
-    if (dbOutput.associatedRow) throw new ConflictException("User already assigned to the group");
+      if (groupIds.length === 0) return;
 
-    const [assigned] = await this.db.insert(groupUsers).values({ userId, groupId }).returning();
+      const existingGroups = await trx
+        .select({ id: groups.id })
+        .from(groups)
+        .where(inArray(groups.id, groupIds));
 
-    if (!assigned) throw new ConflictException("Unable to assign user to the group");
+      if (existingGroups.length !== groupIds.length)
+        throw new BadRequestException("One or more groups doesn't exist");
 
-    return;
+      if (existingGroups.length > 0) {
+        await trx
+          .insert(groupUsers)
+          .values(existingGroups.map((group) => ({ userId, groupId: group.id })))
+          .returning();
+      }
+
+      return;
+    });
   }
 
-  async unassignUserFromGroup(groupId: UUIDType, userId: UUIDType) {
-    const [assigned] = await this.db
-      .select()
-      .from(groupUsers)
-      .innerJoin(users, eq(users.id, groupUsers.userId))
-      .where(
-        and(
-          eq(groupUsers.groupId, groupId),
-          eq(groupUsers.userId, userId),
-          isNull(users.deletedAt),
-        ),
-      );
-
-    if (!assigned) throw new ConflictException("User is not assigned to this group");
-
-    const [unassigned] = await this.db
-      .delete(groupUsers)
-      .where(and(eq(groupUsers.userId, userId), eq(groupUsers.groupId, groupId)))
-      .returning();
-
-    if (!unassigned) throw new ConflictException("Unable to unassign from the group");
-
-    return;
-  }
-
-  private getFiltersConditions(filters: GroupsFilterSchema) {
+  private getFiltersConditions(filters: GroupKeywordFilterBody) {
     const conditions = [];
 
     if (filters.keyword) {
@@ -245,10 +215,6 @@ export class GroupService {
 
   private getColumnToSortBy(sort: GroupSortField) {
     switch (sort) {
-      case GroupSortFields.createdAt:
-        return groups.createdAt;
-      case GroupSortFields.name:
-        return groups.name;
       default:
         return groups.createdAt;
     }

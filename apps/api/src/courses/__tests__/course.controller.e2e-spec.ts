@@ -843,8 +843,7 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
               },
               {
                 firstName: students[1].firstName,
@@ -852,8 +851,7 @@ describe("CourseController (e2e)", () => {
                 email: students[1].email,
                 id: students[1].id,
                 enrolledAt: null,
-                groupName: null,
-                groupId: null,
+                groups: [],
               },
             ],
           });
@@ -900,8 +898,7 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
               },
             ],
           });
@@ -948,8 +945,7 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
               },
             ],
           });
@@ -996,8 +992,7 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
               },
             ],
           });
@@ -1044,8 +1039,7 @@ describe("CourseController (e2e)", () => {
                 email: students[1].email,
                 id: students[1].id,
                 enrolledAt: null,
-                groupName: null,
-                groupId: null,
+                groups: [],
               },
               {
                 firstName: students[0].firstName,
@@ -1053,8 +1047,7 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
               },
             ],
           });

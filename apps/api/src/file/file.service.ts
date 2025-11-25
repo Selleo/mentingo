@@ -163,12 +163,18 @@ export class FileService {
     const parsedCsvData = rows.map((rowValues) => {
       if (!Array.isArray(rowValues)) return;
 
-      const parsedObject: Record<string, string> = {};
+      const parsedObject: Record<string, string | string[]> = {};
 
       headers.forEach((header, colIndex) => {
         const normalizedHeader = header.trim();
 
         const cellValue = rowValues[colIndex];
+
+        if (header === "groups" && typeof cellValue === "string") {
+          parsedObject[normalizedHeader] = cellValue.split(",");
+
+          return;
+        }
 
         if (cellValue && typeof cellValue === "object" && "hyperlink" in cellValue) {
           parsedObject[normalizedHeader] = String((cellValue as ExcelHyperlinkCell).hyperlink)

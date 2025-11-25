@@ -33,6 +33,8 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { groupsFilterSchema } from "src/group/group.schema";
+import { GroupsFilterSchema } from "src/group/group.types";
 import {
   type CreateUserBody,
   createUserSchema,
@@ -90,7 +92,7 @@ export class UserController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: sortUserFieldsOptions },
-      { type: "query", name: "groupId", schema: Type.String() },
+      { type: "query", name: "groups", schema: groupsFilterSchema },
     ],
     response: paginatedResponse(allUsersSchema),
   })
@@ -101,13 +103,13 @@ export class UserController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortUserFieldsOptions,
-    @Query("groupId") groupId: string,
+    @Query("groups") groups: GroupsFilterSchema,
   ): Promise<PaginatedResponse<AllUsersResponse>> {
     const filters: UsersFilterSchema = {
       keyword,
       role,
       archived: archived ? archived === "true" : undefined,
-      groupId,
+      groups,
     };
 
     const query = { filters, page, perPage, sort };

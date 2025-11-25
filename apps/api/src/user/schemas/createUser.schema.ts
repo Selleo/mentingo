@@ -17,7 +17,7 @@ export const importUserSchema = Type.Object({
   firstName: Type.String(),
   lastName: Type.String(),
   role: Type.Enum(USER_ROLES),
-  groupName: Type.Optional(Type.String()),
+  groups: Type.Optional(Type.Array(Type.String())),
   language: Type.Optional(Type.String()),
 });
 

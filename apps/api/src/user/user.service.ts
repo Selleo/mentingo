@@ -19,11 +19,13 @@ import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
+import { GroupService } from "src/group/group.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
@@ -79,9 +81,10 @@ export class UserService {
     private readonly emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
+    private statisticsService: StatisticsService,
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
-    private statisticsService: StatisticsService,
+    private readonly groupService: GroupService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -99,13 +102,17 @@ export class UserService {
     const usersData = await this.db
       .select({
         ...getTableColumns(users),
-        groupId: groups.id,
-        groupName: groups.name,
+        groups: sql<
+          Array<{ id: string; name: string }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
+          "groups",
+        ),
       })
       .from(users)
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions))
+      .groupBy(users.id)
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)))
       .limit(perPage)
       .offset((page - 1) * perPage);
@@ -141,11 +148,19 @@ export class UserService {
 
   public async getUserById(id: UUIDType) {
     const [user] = await this.db
-      .select({ ...getTableColumns(users), groupName: groups.name, groupId: groups.id })
+      .select({
+        ...getTableColumns(users),
+        groups: sql<
+          Array<{ id: string; name: string }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
+          "groups",
+        ),
+      })
       .from(users)
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(eq(users.id, id), isNull(users.deletedAt)));
+      .where(and(eq(users.id, id), isNull(users.deletedAt)))
+      .groupBy(users.id);
 
     if (!user) {
       throw new NotFoundException("User not found");
@@ -157,8 +172,6 @@ export class UserService {
     return {
       ...userWithoutAvatar,
       profilePictureUrl: usersProfilePictureUrl,
-      groupId: user.groupId,
-      groupName: user.groupName,
     };
   }
 
@@ -232,44 +245,30 @@ export class UserService {
     }
 
     return this.db.transaction(async (trx) => {
-      const { groupId, ...userData } = data;
+      const { groups, ...userData } = data;
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
         ? await trx
             .update(users)
             .set(userData)
-            .where(and(eq(users.id, id)))
+            .where(eq(users.id, id))
             .returning()
         : [existingUser.users];
-
-      if (!groupId) {
-        return {
-          ...updatedUser,
-          groupId: existingUser.groups?.id ?? null,
-          groupName: existingUser.groups?.name ?? null,
-        };
-      }
-
-      await trx
-        .insert(groupUsers)
-        .values({ userId: id, groupId })
-        .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
-
-      const [groupData] = await trx
-        .select(getTableColumns(groups))
-        .from(groups)
-        .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
-        .where(eq(groupUsers.userId, id));
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
+      if (groups !== undefined) {
+        await this.groupService.setUserGroups(groups ?? [], id);
+      }
+
+      const newGroups = await this.groupService.getUserGroups({}, id);
+
       return {
         ...userWithoutAvatar,
         profilePictureUrl: usersProfilePictureUrl,
-        groupId: groupData.id,
-        groupName: groupData.name,
+        groups: newGroups.data.map((group) => ({ id: group.id, name: group.name })),
       };
     });
   }
@@ -595,21 +594,9 @@ export class UserService {
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
     await this.db.transaction(async (trx) => {
-      const existingUsers = await trx
-        .select({ id: users.id })
-        .from(users)
-        .where(and(inArray(users.id, data.userIds), isNull(users.deletedAt)));
-
-      const validUserIds = existingUsers.map((u) => u.id);
-      if (validUserIds.length === 0) return;
-
-      await trx
-        .insert(groupUsers)
-        .values(validUserIds.map((userId) => ({ userId, groupId: data.groupId })))
-        .onConflictDoUpdate({
-          target: [groupUsers.userId],
-          set: { groupId: data.groupId },
-        });
+      await Promise.all(
+        data.map((user) => this.groupService.setUserGroups(user.groups, user.userId, trx)),
+      );
     });
   }
 
@@ -655,23 +642,27 @@ export class UserService {
       }
 
       await this.db.transaction(async (trx) => {
-        const { groupName, ...userInfo } = userData;
+        const { groups: groupNames, ...userInfo } = userData;
 
         const createdUser = await this.createUser({ ...userInfo }, trx, creatorId);
 
         importStats.importedUsersAmount++;
         importStats.importedUsersList.push(userData.email);
 
-        if (!groupName) return;
+        if (!groupNames?.length) return;
 
-        const [group] = await trx.select().from(groups).where(eq(groups.name, groupName));
+        const existingGroups = await trx
+          .select()
+          .from(groups)
+          .where(inArray(groups.name, groupNames));
 
-        if (!group) return;
+        if (!existingGroups.length) return;
 
-        await trx
-          .insert(groupUsers)
-          .values({ userId: createdUser.id, groupId: group.id })
-          .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
+        await this.groupService.setUserGroups(
+          existingGroups.map((group) => group.id),
+          createdUser.id,
+          trx,
+        );
       });
     }
 
@@ -719,8 +710,8 @@ export class UserService {
       conditions.push(eq(users.role, filters.role));
     }
 
-    if (filters.groupId) {
-      conditions.push(eq(groupUsers.groupId, filters.groupId));
+    if (filters.groups?.length) {
+      conditions.push(getGroupFilterConditions(filters.groups));
     }
 
     return conditions.length ? conditions : [sql`1=1`];
@@ -736,8 +727,6 @@ export class UserService {
         return users.email;
       case UserSortFields.createdAt:
         return users.createdAt;
-      case UserSortFields.groupName:
-        return groups.name;
       default:
         return users.firstName;
     }
@@ -775,8 +764,8 @@ export class UserService {
   public async getAdminsToNotifyAboutFinishedCourse(): Promise<{ email: string; id: string }[]> {
     return this.db
       .select({
-        email: users.email,
         id: users.id,
+        email: users.email,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))

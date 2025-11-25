@@ -27,6 +27,7 @@ import { isEmpty } from "lodash";
 
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { EnvService } from "src/env/services/env.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
@@ -331,8 +332,8 @@ export class CourseService {
       );
     }
 
-    if (filters.groupId) {
-      conditions.push(eq(groupUsers.groupId, filters.groupId));
+    if (filters.groups?.length) {
+      conditions.push(getGroupFilterConditions(filters.groups));
     }
 
     conditions.push(isNull(users.deletedAt));
@@ -344,8 +345,11 @@ export class CourseService {
         email: users.email,
         id: users.id,
         enrolledAt: studentCourses.createdAt,
-        groupId: groups.id,
-        groupName: groups.name,
+        groups: sql<
+          Array<{ id: string; name: string }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
+          "groups",
+        ),
       })
       .from(users)
       .leftJoin(
@@ -355,6 +359,7 @@ export class CourseService {
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
+      .groupBy(users.id, studentCourses.createdAt)
       .orderBy(sortOrder(studentCourses.createdAt));
 
     return {
@@ -1619,7 +1624,7 @@ export class CourseService {
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
-        groupName: groupNameExpression,
+        groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
         lastActivity: lastActivityExpression,
       })
@@ -1639,6 +1644,7 @@ export class CourseService {
       )
       .limit(perPage)
       .offset((page - 1) * perPage)
+      .groupBy(users.id)
       .orderBy(
         sortOrder(
           this.getCourseStatisticsColumnToSortBy(
@@ -1907,8 +1913,8 @@ export class CourseService {
             AND slp.completed_at IS NOT NULL
         ), 0)::float`;
 
-    const groupNameExpression = sql<string | null>`(
-          SELECT g.name
+    const groupNameExpression = sql<Array<{ id: string; name: string }>>`(
+          SELECT json_agg(json_build_object('id', g.id, 'name', g.name))
           FROM ${groups} g
           JOIN ${groupUsers} gu ON gu.group_id = g.id
           WHERE gu.user_id = ${users.id}
