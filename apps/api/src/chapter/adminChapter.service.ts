@@ -1,7 +1,8 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { chapters } from "src/storage/schema";
 
 import { AdminChapterRepository } from "./repositories/adminChapter.repository";
@@ -22,6 +23,13 @@ export class AdminChapterService {
         .select({ displayOrder: sql<number>`COALESCE(MAX(${chapters.displayOrder}), 0)` })
         .from(chapters)
         .where(eq(chapters.courseId, body.courseId));
+
+      if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
+        throw new BadRequestException({
+          message: `adminCourseView.toast.maxTitleLengthExceeded`,
+          count: MAX_LESSON_TITLE_LENGTH,
+        });
+      }
 
       const [chapter] = await trx
         .insert(chapters)
@@ -69,6 +77,13 @@ export class AdminChapterService {
   }
 
   async updateChapter(id: UUIDType, body: UpdateChapterBody) {
+    if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
+
     const [chapter] = await this.adminChapterRepository.updateChapter(id, body);
 
     if (!chapter) throw new NotFoundException("Chapter not found");

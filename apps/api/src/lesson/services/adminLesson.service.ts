@@ -43,9 +43,10 @@ export class AdminLessonService {
     }
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
@@ -64,9 +65,10 @@ export class AdminLessonService {
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
@@ -83,9 +85,10 @@ export class AdminLessonService {
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
@@ -104,9 +107,10 @@ export class AdminLessonService {
     const lesson = await this.lessonRepository.getLesson(id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     if (!lesson) throw new NotFoundException("Lesson not found");
@@ -121,9 +125,10 @@ export class AdminLessonService {
     const lesson = await this.lessonRepository.getLesson(id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     if (!lesson) throw new NotFoundException("Lesson not found");
@@ -138,9 +143,10 @@ export class AdminLessonService {
     const lesson = await this.lessonRepository.getLesson(id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     if (!lesson) {
@@ -389,9 +395,10 @@ export class AdminLessonService {
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     const lesson = await this.adminLessonRepository.createLessonForChapter({
@@ -423,9 +430,10 @@ export class AdminLessonService {
     const lesson = await this.lessonRepository.getLesson(lessonId);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException(
-        `Title cannot be longer than ${MAX_LESSON_TITLE_LENGTH} characters`,
-      );
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
     }
 
     if (!lesson) throw new NotFoundException("Lesson not found");

@@ -8,6 +8,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { ApiClient } from "../../api-client";
 
 import type { UpdateEmbedLessonBody } from "../../generated-api";
+import type { AxiosError } from "axios";
 
 type UpdateEmbedLessonOptions = {
   data: UpdateEmbedLessonBody;
@@ -36,10 +37,11 @@ export function useUpdateEmbedLesson() {
       queryClient.invalidateQueries(courseQueryOptions(variables.courseId));
       queryClient.invalidateQueries(lessonQueryOptions(variables.lessonId));
     },
-    onError: () => {
+    onError: (error: AxiosError) => {
+      const apiResponseData = error.response?.data as { message: string; count: number };
       toast({
+        description: t(apiResponseData.message, { count: apiResponseData.count }),
         variant: "destructive",
-        description: t("adminCourseView.curriculum.lesson.toast.embedLessonUpdateError"),
       });
     },
   });

@@ -828,7 +828,11 @@
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
       "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
       "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
-      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu"
+      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu",
+      "maxTitleLengthExceeded_one": "Tytuł nie może mieć więcej niż {{count}} znak",
+      "maxTitleLengthExceeded_few": "Tytuł nie może mieć więcej niż {{count}} znaki",
+      "maxTitleLengthExceeded_many": "Tytuł nie może mieć więcej niż {{count}} znaków",
+      "maxTitleLengthExceeded_other": "Tytuł nie może mieć więcej niż {{count}} znaków"
     },
     "settings": {
       "breadcrumbs": {
