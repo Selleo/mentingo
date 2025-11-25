@@ -30,6 +30,11 @@ export const users = pgTable("users", {
   avatarReference: varchar("avatar_reference", { length: 200 }),
   role: text("role").notNull().default(USER_ROLES.STUDENT),
   archived,
+  deletedAt: timestamp("deleted_at", {
+    mode: "string",
+    withTimezone: true,
+    precision: 3,
+  }),
 });
 
 export const userDetails = pgTable("user_details", {

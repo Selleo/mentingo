@@ -235,10 +235,11 @@ export class AuthService {
         role: users.role,
         archived: users.archived,
         avatarReference: users.avatarReference,
+        deletedAt: users.deletedAt,
       })
       .from(users)
       .leftJoin(credentials, eq(users.id, credentials.userId))
-      .where(eq(users.email, email));
+      .where(and(eq(users.email, email), isNull(users.deletedAt)));
 
     if (!userWithCredentials || !userWithCredentials.password) return null;
 
@@ -319,6 +320,7 @@ export class AuthService {
         role: users.role,
         archived: users.archived,
         avatarReference: users.avatarReference,
+        deletedAt: users.deletedAt,
       })
       .from(users)
       .where(eq(users.id, createToken.userId));
@@ -453,7 +455,10 @@ export class AuthService {
     }
 
     const { inviteOnlyRegistration } = await this.settingsService.getGlobalSettings();
-    let [user] = await this.db.select().from(users).where(eq(users.email, userCallback.email));
+    let [user] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, userCallback.email), isNull(users.deletedAt)));
 
     if (user?.archived) {
       throw new UnauthorizedException("Your account has been archived");
@@ -518,6 +523,12 @@ export class AuthService {
       throw new BadRequestException("User ID and token are required");
     }
 
+    const user = await this.userService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException("Failed to retrieve user");
+    }
+
     const settings = await this.settingsService.getUserSettings(userId);
 
     if (!settings.MFASecret) return false;
@@ -526,12 +537,6 @@ export class AuthService {
 
     if (!isValid) {
       throw new BadRequestException("Invalid MFA token");
-    }
-
-    const user = await this.userService.getUserById(userId);
-
-    if (!user) {
-      throw new NotFoundException("Failed to retrieve user");
     }
 
     const { refreshToken, accessToken } = await this.getTokens(user);

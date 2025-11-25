@@ -5093,6 +5093,16 @@
               "archived": {
                 "type": "boolean"
               },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -5113,6 +5123,7 @@
               "lastName",
               "role",
               "archived",
+              "deletedAt",
               "profilePictureUrl"
             ]
           }
@@ -5172,6 +5183,16 @@
               "archived": {
                 "type": "boolean"
               },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -5242,6 +5263,7 @@
               "lastName",
               "role",
               "archived",
+              "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
               "onboardingStatus"
@@ -5288,6 +5310,16 @@
               "archived": {
                 "type": "boolean"
               },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -5358,6 +5390,7 @@
               "lastName",
               "role",
               "archived",
+              "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
               "onboardingStatus"
@@ -7305,6 +7338,16 @@
                     "archived": {
                       "type": "boolean"
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "profilePictureUrl": {
                       "anyOf": [
                         {
@@ -7325,6 +7368,7 @@
                     "lastName",
                     "role",
                     "archived",
+                    "deletedAt",
                     "profilePictureUrl"
                   ]
                 },
@@ -7422,6 +7466,16 @@
               "archived": {
                 "type": "boolean"
               },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -7463,6 +7517,7 @@
               "lastName",
               "role",
               "archived",
+              "deletedAt",
               "profilePictureUrl",
               "groupId",
               "groupName"
@@ -7662,6 +7717,16 @@
               "archived": {
                 "type": "boolean"
               },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -7682,6 +7747,7 @@
               "lastName",
               "role",
               "archived",
+              "deletedAt",
               "profilePictureUrl"
             ]
           }
@@ -7807,6 +7873,16 @@
               "archived": {
                 "type": "boolean"
               },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "profilePictureUrl": {
                 "anyOf": [
                   {
@@ -7827,6 +7903,7 @@
               "lastName",
               "role",
               "archived",
+              "deletedAt",
               "profilePictureUrl"
             ]
           }
@@ -15625,6 +15702,16 @@
                       "archived": {
                         "type": "boolean"
                       },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
                       "profilePictureUrl": {
                         "anyOf": [
                           {
@@ -15645,6 +15732,7 @@
                       "lastName",
                       "role",
                       "archived",
+                      "deletedAt",
                       "profilePictureUrl"
                     ]
                   }
@@ -15746,6 +15834,16 @@
                     "archived": {
                       "type": "boolean"
                     },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "profilePictureUrl": {
                       "anyOf": [
                         {
@@ -15766,6 +15864,7 @@
                     "lastName",
                     "role",
                     "archived",
+                    "deletedAt",
                     "profilePictureUrl"
                   ]
                 }
@@ -15842,6 +15941,16 @@
                       "archived": {
                         "type": "boolean"
                       },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
                       "profilePictureUrl": {
                         "anyOf": [
                           {
@@ -15862,6 +15971,7 @@
                       "lastName",
                       "role",
                       "archived",
+                      "deletedAt",
                       "profilePictureUrl"
                     ]
                   }
