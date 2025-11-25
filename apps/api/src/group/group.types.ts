@@ -2,6 +2,7 @@ import type { Static } from "@sinclair/typebox";
 import type {
   allGroupsSchema,
   baseGroupSchema,
+  GroupKeywordFilterBody,
   groupSchema,
   groupsFilterSchema,
   groupSortFieldsOptions,
@@ -14,7 +15,7 @@ export type GroupsFilterSchema = Static<typeof groupsFilterSchema>;
 export type GroupSortFieldsOptions = Static<typeof groupSortFieldsOptions>;
 
 export type GroupsQuery = {
-  filters?: GroupsFilterSchema;
+  filters?: GroupKeywordFilterBody;
   page?: number;
   perPage?: number;
   sort?: GroupSortFieldsOptions;

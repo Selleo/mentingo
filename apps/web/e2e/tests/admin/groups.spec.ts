@@ -180,12 +180,14 @@ test.describe("Admin groups page flow", () => {
       });
       await expect(header).toHaveText(GROUPS_PAGE_UI.header.userInformation);
 
-      const groupSelector = page.getByTestId(GROUPS_PAGE_UI.dataId.groupSelect);
+      const groupSelector = page.getByPlaceholder(GROUPS_PAGE_UI.placeholder.selectGroup);
       await groupSelector.click();
 
       await page.locator(".p-1 > div > div").first().click();
 
-      await expect(groupSelector).toHaveText(GROUPS_PAGE_UI.expectedValues.groupName);
+      const selectedItem = page.getByText(GROUPS_PAGE_UI.expectedValues.groupName);
+
+      await expect(selectedItem).toBeVisible();
 
       await findAndClickButton(page, GROUPS_PAGE_UI.button.save);
       await page.getByRole("main").getByRole("link", { name: "Users" }).click();
@@ -205,7 +207,13 @@ test.describe("Admin groups page flow", () => {
       await groupSelector.click();
 
       await page.locator(".p-1 > div > div").first().click();
-      await expect(groupSelector).toHaveText(GROUPS_PAGE_UI.expectedValues.groupName);
+
+      const selectedItem = page.getByText(GROUPS_PAGE_UI.expectedValues.groupName).first();
+      await expect(selectedItem).toBeVisible();
+
+      await groupSelector.click();
+
+      await page.getByRole("heading", { name: GROUPS_PAGE_UI.header.modifyGroups }).click();
 
       await findAndClickButton(page, GROUPS_PAGE_UI.button.save);
       await findAndClickButton(page, GROUPS_PAGE_UI.button.confirm);

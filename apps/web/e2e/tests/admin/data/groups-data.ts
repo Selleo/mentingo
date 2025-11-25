@@ -22,6 +22,7 @@ export const GROUPS_PAGE_UI = {
     updateGroup: "Update group",
     usersHeader: "Users",
     userInformation: "User Information",
+    modifyGroups: "Modify groups (2)",
   },
   dataId: {
     groupName: "groupName",
@@ -29,6 +30,9 @@ export const GROUPS_PAGE_UI = {
     firstUser: "contentcreator@example.com",
     secondUser: "student@example.com",
     groupSelect: "groupSelect",
+  },
+  placeholder: {
+    selectGroup: "Select groups",
   },
   expectedValues: {
     groupName: "Developer",

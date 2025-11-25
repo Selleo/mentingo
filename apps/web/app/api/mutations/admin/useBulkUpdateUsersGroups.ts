@@ -19,10 +19,7 @@ export function useBulkUpdateUsersGroups() {
 
   return useMutation({
     mutationFn: async (options: BulkAssignUsersToGroups) => {
-      const response = await ApiClient.api.userControllerBulkAssignUsersToGroup({
-        userIds: options.data.userIds,
-        groupId: options.data.groupId,
-      });
+      const response = await ApiClient.api.userControllerBulkAssignUsersToGroup(options.data);
 
       await queryClient.invalidateQueries({ queryKey: ["users"] });
 
