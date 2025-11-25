@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
+import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
@@ -33,10 +34,14 @@ const CourseCard = ({
   priceInCents,
   title,
 }: CourseCardProps) => {
-  const { isAdmin } = useUserRole();
   const { pathname } = useLocation();
-  const isScormCreatePage = pathname.includes("/admin/courses/new-scorm");
   const { t } = useTranslation();
+  const isScormCreatePage = pathname.includes("/admin/courses/new-scorm");
+
+  const { isAdmin } = useUserRole();
+
+  // TODO: Get due date from api
+  const DUE_DATE = new Date();
 
   return (
     <Link
@@ -74,6 +79,14 @@ const CourseCard = ({
               <Icon name="FreeRight" className="w-4" />
               {t("studentCoursesView.other.freeLessons")}
             </CardBadge>
+          )}
+          {DUE_DATE && (
+            <CategoryChip
+              category={"Due date: " + formatDate(DUE_DATE, "dd.MM.yyyy")}
+              color="text-[#F59E0B]"
+              className="bg-[#FEF3C7]"
+              textClassName="text-[#92400E]"
+            />
           )}
         </div>
       </div>
