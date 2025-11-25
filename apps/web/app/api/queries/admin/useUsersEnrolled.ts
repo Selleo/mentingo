@@ -3,11 +3,12 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ApiClient } from "~/api/api-client";
 
 import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
+import type { Option } from "~/components/ui/multiselect";
 
 export type UsersEnrolledSearchParams = {
   keyword?: string;
   sort?: "enrolledAt" | "-enrolledAt" | undefined;
-  groupId?: string;
+  groups?: Option[];
 };
 
 export const ENROLLED_USERS_QUERY_KEY = "users-enrollments";
@@ -21,7 +22,7 @@ export const useUsersEnrolledQuery = (
     const { data } = await ApiClient.api.courseControllerGetStudentsWithEnrollmentDate(courseId, {
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
-      ...(searchParams?.groupId && { groupId: searchParams.groupId }),
+      ...(searchParams?.groups && { groups: searchParams.groups.map((group) => group.value) }),
     });
     return data;
   },

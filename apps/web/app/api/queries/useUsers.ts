@@ -3,6 +3,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetUsersResponse } from "../generated-api";
+import type { Option } from "~/components/ui/multiselect";
 import type { UserRole } from "~/config/userRoles";
 
 const SORTABLE_FIELDS = ["firstName", "lastName", "email", "groupName", "createdAt"] as const;
@@ -15,7 +16,7 @@ export type UsersParams = {
   role?: UserRole;
   archived?: boolean;
   sort?: UsersSort;
-  groupId?: string;
+  groups?: Option[];
   page?: number;
   perPage?: number;
 };
@@ -39,8 +40,8 @@ export const usersQueryOptions = (
       ...(searchParams?.archived !== undefined && {
         archived: String(searchParams.archived),
       }),
-      ...(searchParams?.groupId && { groupId: searchParams.groupId }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
+      ...(searchParams?.groups && { groups: searchParams.groups.map((group) => group.value) }),
     });
     return response.data;
   },

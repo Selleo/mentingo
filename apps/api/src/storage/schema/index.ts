@@ -433,8 +433,7 @@ export const groupUsers = pgTable(
     ...timestamps,
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
-      .notNull()
-      .unique(),
+      .notNull(),
     groupId: uuid("group_id")
       .references(() => groups.id, { onDelete: "cascade" })
       .notNull(),

@@ -1,14 +1,15 @@
 import request from "supertest";
 import { v4 as uuidv4 } from "uuid";
 
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { groupUsers } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
-import { DEFAULT_PAGE_SIZE } from "../../common/pagination";
-import { groupUsers } from "../../storage/schema";
-import { USER_ROLES } from "../../user/schemas/userRoles";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -129,8 +130,8 @@ describe("groupController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data).toHaveLength(2);
-        expect(response.body.data[0].id).toBe(group2.id);
-        expect(response.body.data[1].id).toBe(group1.id);
+        expect(response.body.data[1].id).toBe(group2.id);
+        expect(response.body.data[0].id).toBe(group1.id);
       });
 
       it("returns all groups with sorting by created at", async () => {
