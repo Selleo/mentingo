@@ -8,6 +8,7 @@ import {
   UserFinishedChapterEmail,
   UserFinishedCourseEmail,
 } from "@repo/email-templates";
+import { formatDate } from "date-fns";
 
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
@@ -151,6 +152,9 @@ export class NotifyUsersHandler implements IEventHandler {
 
     const courseLink = `${process.env.CORS_ORIGIN}/course/${courseId}`;
     const courseName = await this.courseService.getCourseName(courseId);
+    // TODO: get due date from course
+    const courseDueDate = new Date();
+    const formatedCourseDueDate = courseDueDate ? formatDate(new Date(), "dd.MM.yyyy") : null;
 
     const studentContacts = await this.userService.getStudentEmailsByIds(studentIds);
 
@@ -161,6 +165,7 @@ export class NotifyUsersHandler implements IEventHandler {
         const { text, html } = new UserAssignedToCourseEmail({
           courseName,
           courseLink,
+          formatedCourseDueDate,
           ...defaultEmailSettings,
         });
 
