@@ -1,0 +1,1 @@
+export const MAX_LESSON_TITLE_LENGTH = 250;

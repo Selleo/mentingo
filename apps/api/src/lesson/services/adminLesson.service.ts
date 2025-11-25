@@ -10,6 +10,7 @@ import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
+import { MAX_LESSON_TITLE_LENGTH } from "../repositories/lesson.constants";
 import { LessonRepository } from "../repositories/lesson.repository";
 
 import type {
@@ -44,6 +45,13 @@ export class AdminLessonService {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
 
+    if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
+
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     const lesson = await this.adminLessonRepository.createLessonForChapter({
@@ -59,6 +67,13 @@ export class AdminLessonService {
   async createAiMentorLesson(data: CreateAiMentorLessonBody) {
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
+    if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
+
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
 
@@ -71,6 +86,13 @@ export class AdminLessonService {
 
   async createQuizLesson(data: CreateQuizLessonBody, authorId: UUIDType) {
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
+
+    if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
@@ -87,6 +109,13 @@ export class AdminLessonService {
   async updateAiMentorLesson(id: UUIDType, data: UpdateAiMentorLessonBody, userId: UUIDType) {
     const lesson = await this.lessonRepository.getLesson(id);
 
+    if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
+
     if (!lesson) throw new NotFoundException("Lesson not found");
 
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
@@ -98,6 +127,13 @@ export class AdminLessonService {
   async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, authorId: UUIDType) {
     const lesson = await this.lessonRepository.getLesson(id);
 
+    if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
+
     if (!lesson) throw new NotFoundException("Lesson not found");
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
@@ -108,6 +144,13 @@ export class AdminLessonService {
 
   async updateLesson(id: UUIDType, data: UpdateLessonBody) {
     const lesson = await this.lessonRepository.getLesson(id);
+
+    if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
 
     if (!lesson) {
       throw new NotFoundException("Lesson not found");
@@ -354,6 +397,13 @@ export class AdminLessonService {
   async createEmbedLesson(data: CreateEmbedLessonBody) {
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
+    if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
+
     const lesson = await this.adminLessonRepository.createLessonForChapter({
       ...data,
       displayOrder: maxDisplayOrder + 1,
@@ -381,6 +431,13 @@ export class AdminLessonService {
 
   async updateEmbedLesson(lessonId: UUIDType, data: UpdateEmbedLessonBody) {
     const lesson = await this.lessonRepository.getLesson(lessonId);
+
+    if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 

@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { useToast } from "~/components/ui/use-toast";
 
+import type { AxiosError } from "axios";
 import type { BetaUpdateAiMentorLessonBody } from "~/api/generated-api";
 
 type BetaAiMentorLessonOptions = {
@@ -29,16 +29,11 @@ export function useUpdateAiMentorLesson() {
         description: t("adminCourseView.curriculum.lesson.toast.aiMentorLessonUpdatedSuccessfully"),
       });
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: error.response?.data.message,
-        });
-      }
+    onError: (error: AxiosError) => {
+      const apiResponseData = error.response?.data as { message: string; count: number };
       toast({
+        description: t(apiResponseData.message, { count: apiResponseData.count }),
         variant: "destructive",
-        description: error.message,
       });
     },
   });

@@ -932,7 +932,9 @@
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
-      "certificateUpdateError": "Error updating certificate"
+      "certificateUpdateError": "Error updating certificate",
+      "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
+      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters"
     },
     "settings": {
       "breadcrumbs": {
