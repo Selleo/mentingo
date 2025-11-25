@@ -973,6 +973,10 @@
     }
   },
   "adminCourseView": {
+    "mandatoryCourse": "Kurs obowiązkowy",
+    "deadline": "Termin wykonania",
+    "selectDate": "Wybierz datę",
+    "deadlineRequired": "Termin wykonania jest wymagany dla obowiązkowego kursu",
     "common": {
       "settings": "Ustawienia",
       "curriculum": "Program nauczania",
@@ -1345,7 +1349,7 @@
       "enrollGroups": "Zapisz wybrane grupy na kurs",
       "enrollGroupsModal": {
         "title": "Zapisz grupy do kursu",
-        "description": "Wybierz grupy do zapisania. Wszyscy członkowie wybranych grup zostaną automatycznie zapisani na ten kurs."
+        "description": "Wybierz grupy do przypisania. Wszyscy członkowie wybranych grup zostaną automatycznie zapisani do tego kursu. Możesz oznaczyć kurs jako obowiązkowy i ustawić termin wykonania."
       },
       "alreadyEnrolled": "Już zapisana",
       "members": "{{count}} członków",

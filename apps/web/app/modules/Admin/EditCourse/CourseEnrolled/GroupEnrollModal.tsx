@@ -1,11 +1,11 @@
 import { t } from "i18next";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { useForm, useWatch } from "react-hook-form";
 
-import { useBulkGroupCourseEnroll } from "~/api/mutations/admin/useBulkGroupCourseEnroll";
-import { Icon } from "~/components/Icon";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
+import { ScrollArea } from "~/components/ui/scroll-area";
+
+import { useBulkGroupCourseEnroll } from "../../../../api/mutations/admin/useBulkGroupCourseEnroll";
+import { Button } from "../../../../components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -15,10 +15,23 @@ import {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
-} from "~/components/ui/dialog";
+} from "../../../../components/ui/dialog";
+import { Form } from "../../../../components/ui/form";
 
-import type { FormEvent } from "react";
+import { GroupEnrollItem } from "./GroupEnrollItem";
+
 import type { GetAllGroupsResponse, GetGroupsByCourseResponse } from "~/api/generated-api";
+
+type GroupFormItem = {
+  id: string;
+  selected: boolean;
+  obligatory: boolean;
+  deadline: string;
+};
+
+type FormValues = {
+  groups: GroupFormItem[];
+};
 
 type Props = {
   isOpen: boolean;
@@ -39,31 +52,46 @@ export const GroupEnrollModal = ({
 }: Props) => {
   const { mutate: bulkGroupEnroll } = useBulkGroupCourseEnroll(courseId);
 
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
-
   const enrolledIds = useMemo(
     () => new Set(enrolledGroups?.map((g) => g.id) ?? []),
     [enrolledGroups],
   );
 
-  const toggleGroupEnrollment = (groupId: string, isChecked: boolean, disabled?: boolean) => {
-    if (disabled) return;
+  const form = useForm<FormValues>({
+    defaultValues: { groups: [] },
+    mode: "onChange",
+  });
 
-    setSelectedGroupIds((prev) =>
-      isChecked ? [...prev, groupId] : prev.filter((id) => id !== groupId),
+  useEffect(() => {
+    const list =
+      groups?.map((g) => ({
+        id: g.id,
+        selected: false,
+        obligatory: false,
+        deadline: "",
+      })) ?? [];
+    form.reset({ groups: list });
+  }, [groups, form]);
+
+  const watched = useWatch({ control: form.control, name: "groups" });
+  const selectedCount = (watched ?? []).filter((g) => g?.selected).length;
+
+  const handleSubmit = async (values: FormValues) => {
+    const invalid = values.groups.find(
+      (g) => g.selected && g.obligatory && (!g.deadline || Number.isNaN(Date.parse(g.deadline))),
     );
-  };
-
-  const handleGroupFormSubmit = (event: FormEvent) => {
-    event.preventDefault();
-
-    const groupIds = selectedGroupIds.filter(Boolean);
-
-    if (groupIds.length > 0) {
-      bulkGroupEnroll({ groupIds });
+    if (invalid) {
+      await form.trigger();
+      return;
     }
 
-    setSelectedGroupIds([]);
+    const idsToEnroll = values.groups
+      .filter((g) => g.selected && !enrolledIds.has(g.id))
+      .map((g) => g.id);
+
+    if (idsToEnroll.length > 0) {
+      bulkGroupEnroll({ groupIds: idsToEnroll });
+    }
     onOpenChange(false);
   };
 
@@ -76,68 +104,43 @@ export const GroupEnrollModal = ({
       )}
       <DialogPortal>
         <DialogOverlay />
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl gap-2">
           <DialogTitle>{t("adminCourseView.enrolled.enrollGroupsModal.title")}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="leading-5">
             {t("adminCourseView.enrolled.enrollGroupsModal.description")}
           </DialogDescription>
 
-          <div className="mt-4 grid gap-3">
-            {(groups || []).map((group) => {
-              const isGroupEnrolled = enrolledIds.has(group.id);
-              const isChecked = isGroupEnrolled || selectedGroupIds.includes(group.id);
-
-              return (
-                <div
-                  key={group.id}
-                  className="flex items-center justify-between gap-4 rounded-lg border bg-white px-4 py-3 shadow-sm"
-                >
-                  <div className="flex items-center gap-4">
-                    <Checkbox
-                      checked={isChecked}
-                      disabled={isGroupEnrolled}
-                      onCheckedChange={(currentValue) =>
-                        toggleGroupEnrollment(group.id, !!currentValue, isGroupEnrolled)
-                      }
-                      aria-label={`select-group-${group.id}`}
-                    />
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-100">
-                        <Icon name="User" className="size-5 text-neutral-600" />
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="text-sm font-medium text-neutral-900">{group.name}</div>
-                        <div className="text-xs text-neutral-500">
-                          {t("adminCourseView.enrolled.members", {
-                            count: group.users?.length ?? 0,
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {isGroupEnrolled && (
-                      <Badge className="bg-primary-50 text-primary-700" fontWeight="normal">
-                        {t("adminCourseView.enrolled.alreadyEnrolled")}
-                      </Badge>
-                    )}
-                  </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+              <ScrollArea className="max-h-[60vh] h-[60vh]">
+                <div className="mt-2 grid gap-3 pr-3">
+                  {(groups || []).map((group, index) => {
+                    const isGroupEnrolled = enrolledIds.has(group.id);
+                    return (
+                      <GroupEnrollItem
+                        key={group.id}
+                        index={index}
+                        id={group.id}
+                        name={group.name}
+                        usersCount={group.users?.length ?? 0}
+                        isGroupEnrolled={isGroupEnrolled}
+                      />
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
-          <form onSubmit={handleGroupFormSubmit}>
-            <div className="flex justify-end gap-4 mt-6">
-              <DialogClose>
-                <Button type="reset" variant="ghost">
-                  {t("common.button.cancel")}
+              </ScrollArea>
+              <div className="flex justify-end gap-4 mt-6">
+                <DialogClose>
+                  <Button type="reset" variant="outline">
+                    {t("common.button.cancel")}
+                  </Button>
+                </DialogClose>
+                <Button type="submit" variant="primary" disabled={!selectedCount}>
+                  {t("adminCourseView.enrolled.enrollGroups")} ({selectedCount})
                 </Button>
-              </DialogClose>
-              <Button type="submit" variant="primary" disabled={!selectedGroupIds.length}>
-                {t("adminCourseView.enrolled.enrollGroups")}
-              </Button>
-            </div>
-          </form>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </DialogPortal>
     </Dialog>
