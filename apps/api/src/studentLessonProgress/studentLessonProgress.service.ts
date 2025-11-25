@@ -7,7 +7,6 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
-import { format } from "date-fns";
 
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";

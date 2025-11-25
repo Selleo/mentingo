@@ -40,6 +40,7 @@ import {
   userOnboarding,
   studentCourses,
   coursesSummaryStats,
+  courses,
 } from "../storage/schema";
 
 import {
@@ -771,7 +772,7 @@ export class UserService {
     return !!course;
   }
 
-  public async getAdminsToNotifyAboutFinishedCourse(): Promise<string[]> {
+  public async getAdminsToNotifyAboutFinishedCourse(): Promise<{ email: string; id: string }[]> {
     return this.db
       .select({
         email: users.email,
