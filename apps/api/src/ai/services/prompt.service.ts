@@ -142,6 +142,7 @@ export class PromptService implements OnModuleInit {
 
     const prompt = await this.loadPrompt(promptChoice, {
       lessonTitle: lesson.title,
+      name: lesson.name,
       lessonInstructions: lesson.instructions,
       groups: groups.map((group) => `${group.name}: ${group.characteristic}\n`),
       securityAndRagBlock: securityAndRagBlock,

@@ -69,6 +69,7 @@ export const aiMentorLessonSchema = Type.Object({
   instructions: Type.String(),
   conditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
+  name: Type.String(),
 });
 
 export const aiJudgeJudgementSchema = Type.Object({

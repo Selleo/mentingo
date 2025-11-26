@@ -126,6 +126,7 @@ export class AdminLessonRepository {
       aiMentorInstructions: string;
       completionConditions: string;
       type: AiMentorType;
+      name?: string;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
@@ -141,6 +142,7 @@ export class AdminLessonRepository {
       aiMentorInstructions: string;
       completionConditions: string;
       type: AiMentorType;
+      name?: string;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
@@ -465,5 +467,12 @@ export class AdminLessonRepository {
 
   async getCourse(courseId: UUIDType) {
     return this.db.select().from(courses).where(eq(courses.id, courseId));
+  }
+
+  async updateAiMentorAvatar(lessonId: UUIDType, fileKey: string | null) {
+    return this.db
+      .update(aiMentorLessons)
+      .set({ avatarS3Key: fileKey })
+      .where(eq(aiMentorLessons.lessonId, lessonId));
   }
 }

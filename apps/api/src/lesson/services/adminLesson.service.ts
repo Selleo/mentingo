@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
@@ -271,6 +271,7 @@ export class AdminLessonService {
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
           type: data.type,
+          name: data?.name,
         },
         trx,
       );
@@ -286,10 +287,15 @@ export class AdminLessonService {
   ) {
     return await this.db.transaction(async (trx) => {
       const { type: _type, ...rest } = data;
+
       const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
 
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
         throw new BadRequestException("Instructions and conditions required");
+
+      if (data.name?.length === 0) {
+        data.name = "AI Mentor";
+      }
 
       await this.adminLessonRepository.updateAiMentorLessonData(
         id,
@@ -297,6 +303,7 @@ export class AdminLessonService {
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
           type: data.type,
+          name: data?.name,
         },
         trx,
       );
@@ -568,6 +575,34 @@ export class AdminLessonService {
     ]);
 
     return resource.id;
+  }
+
+  async uploadAvatarToAiMentorLesson(
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+    lessonId: UUIDType,
+    file: Express.Multer.File | null,
+  ) {
+    const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
+
+    if (!file) {
+      await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
+      return;
+    }
+
+    if (!(currentUserRole === USER_ROLES.ADMIN && course.authorId === currentUserId)) {
+      throw new ForbiddenException({ message: "common.toast.noAccess" });
+    }
+
+    if (!ALLOWED_AVATAR_IMAGE_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException({
+        message: "adminCourseView.toast.aiMentorAvatarIncorrectType",
+      });
+    }
+
+    const { fileKey } = await this.fileService.uploadFile(file, "lessons/ai-mentor-avatars");
+
+    await this.adminLessonRepository.updateAiMentorAvatar(lessonId, fileKey);
   }
 
   async validateAccess(

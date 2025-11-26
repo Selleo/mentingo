@@ -200,6 +200,7 @@ export class AiRepository {
         instructions: aiMentorLessons.aiMentorInstructions,
         conditions: aiMentorLessons.completionConditions,
         type: sql<AiMentorType>`${aiMentorLessons.type}`,
+        name: aiMentorLessons.name,
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))

@@ -19,6 +19,9 @@
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie..."
     },
+    "toast": {
+      "noAccess": "Nie masz uprawnień do tego zasobu"
+    },
     "tooltip": {
       "soon": "Dostępne wkrótce"
     },
@@ -924,7 +927,8 @@
       "maxTitleLengthExceeded_one": "Tytuł nie może mieć więcej niż {{count}} znak",
       "maxTitleLengthExceeded_few": "Tytuł nie może mieć więcej niż {{count}} znaki",
       "maxTitleLengthExceeded_many": "Tytuł nie może mieć więcej niż {{count}} znaków",
-      "maxTitleLengthExceeded_other": "Tytuł nie może mieć więcej niż {{count}} znaków"
+      "maxTitleLengthExceeded_other": "Tytuł nie może mieć więcej niż {{count}} znaków",
+      "aiMentorAvatarIncorrectType": "Nieprawidłowy typ pliku. Prześlij obraz w formacie JPG, JPEG, PNG lub SVG."
     },
     "settings": {
       "breadcrumbs": {
@@ -1114,6 +1118,7 @@
           "words": "Słowa",
           "sentence": "Zdanie",
           "sourceUrl": "Adres URL źródła",
+          "aiMentor": "AI Mentor",
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
           "passThreshold": "Próg zaliczenia",

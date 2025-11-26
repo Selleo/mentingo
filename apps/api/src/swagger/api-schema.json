@@ -3721,6 +3721,49 @@
         }
       }
     },
+    "/api/lesson/ai-mentor/avatar": {
+      "post": {
+        "operationId": "LessonController_uploadAiMentorAvatar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lessonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "lessonId",
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/update-lesson-display-order": {
       "patch": {
         "operationId": "LessonController_updateLessonDisplayOrder",
@@ -10028,6 +10071,9 @@
                               }
                             ]
                           },
+                          "avatarS3SignedUrl": {
+                            "type": "string"
+                          },
                           "fileType": {
                             "anyOf": [
                               {
@@ -10233,6 +10279,16 @@
                                         "type": "string"
                                       }
                                     ]
+                                  },
+                                  "avatarS3Key": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -10240,7 +10296,8 @@
                                   "lessonId",
                                   "aiMentorInstructions",
                                   "completionConditions",
-                                  "type"
+                                  "type",
+                                  "avatarS3Key"
                                 ]
                               },
                               {
@@ -11404,6 +11461,9 @@
                         }
                       ]
                     },
+                    "avatarS3SignedUrl": {
+                      "type": "string"
+                    },
                     "fileType": {
                       "anyOf": [
                         {
@@ -11609,6 +11669,16 @@
                                   "type": "string"
                                 }
                               ]
+                            },
+                            "avatarS3Key": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -11616,7 +11686,8 @@
                             "lessonId",
                             "aiMentorInstructions",
                             "completionConditions",
-                            "type"
+                            "type",
+                            "avatarS3Key"
                           ]
                         },
                         {
@@ -11789,6 +11860,9 @@
                         }
                       ]
                     },
+                    "avatarS3SignedUrl": {
+                      "type": "string"
+                    },
                     "fileType": {
                       "anyOf": [
                         {
@@ -11994,6 +12068,16 @@
                                   "type": "string"
                                 }
                               ]
+                            },
+                            "avatarS3Key": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -12001,7 +12085,8 @@
                             "lessonId",
                             "aiMentorInstructions",
                             "completionConditions",
-                            "type"
+                            "type",
+                            "avatarS3Key"
                           ]
                         },
                         {
@@ -12805,6 +12890,34 @@
                     "type": "null"
                   }
                 ]
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "avatarS3Url": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -12885,6 +12998,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "avatarS3SignedUrl": {
+                "type": "string"
               },
               "fileType": {
                 "anyOf": [
@@ -13091,6 +13207,16 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "avatarS3Key": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -13098,7 +13224,8 @@
                       "lessonId",
                       "aiMentorInstructions",
                       "completionConditions",
-                      "type"
+                      "type",
+                      "avatarS3Key"
                     ]
                   },
                   {
@@ -13185,6 +13312,9 @@
                   }
                 ]
               },
+              "avatarS3SignedUrl": {
+                "type": "string"
+              },
               "fileType": {
                 "anyOf": [
                   {
@@ -13390,6 +13520,16 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "avatarS3Key": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -13397,7 +13537,8 @@
                       "lessonId",
                       "aiMentorInstructions",
                       "completionConditions",
-                      "type"
+                      "type",
+                      "avatarS3Key"
                     ]
                   },
                   {
@@ -13444,6 +13585,9 @@
                     "type": "string"
                   }
                 ]
+              },
+              "name": {
+                "type": "string"
               }
             },
             "required": [
@@ -13508,6 +13652,9 @@
                   }
                 ]
               },
+              "avatarS3SignedUrl": {
+                "type": "string"
+              },
               "fileType": {
                 "anyOf": [
                   {
@@ -13713,6 +13860,16 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "avatarS3Key": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -13720,7 +13877,8 @@
                       "lessonId",
                       "aiMentorInstructions",
                       "completionConditions",
-                      "type"
+                      "type",
+                      "avatarS3Key"
                     ]
                   },
                   {
@@ -13760,6 +13918,9 @@
                     "type": "string"
                   }
                 ]
+              },
+              "name": {
+                "type": "string"
               }
             },
             "required": [
@@ -14347,6 +14508,9 @@
                   }
                 ]
               },
+              "avatarS3SignedUrl": {
+                "type": "string"
+              },
               "fileType": {
                 "anyOf": [
                   {
@@ -14552,6 +14716,16 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "avatarS3Key": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -14559,7 +14733,8 @@
                       "lessonId",
                       "aiMentorInstructions",
                       "completionConditions",
-                      "type"
+                      "type",
+                      "avatarS3Key"
                     ]
                   },
                   {

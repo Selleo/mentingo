@@ -18,6 +18,9 @@
       "edit": "Edit",
       "uploading": "Uploading..."
     },
+    "toast": {
+      "noAccess": "You do not have permission to access this resource"
+    },
     "tooltip": {
       "soon": "Cooming soon"
     },
@@ -942,7 +945,8 @@
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
       "certificateUpdateError": "Error updating certificate",
       "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
-      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters"
+      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters",
+      "aiMentorAvatarIncorrectType": "Invalid file type. Please upload a JPG, JPEG, PNG, or SVG image."
     },
     "settings": {
       "breadcrumbs": {
@@ -1132,6 +1136,7 @@
           "sourceUrl": "Source URL",
           "aiMentorInstructions": "AI Mentor Instructions",
           "completionConditions": "Completion Conditions",
+          "aiMentor": "AI Mentor",
           "passThreshold": "Pass Threshold",
           "additionalContext": "Additional context",
           "aiMentorTypes": "AI Mentor Type",

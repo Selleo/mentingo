@@ -196,6 +196,8 @@ export const aiMentorLessons = pgTable("ai_mentor_lessons", {
     .notNull(),
   aiMentorInstructions: text("ai_mentor_instructions").notNull(),
   completionConditions: text("completion_conditions").notNull(),
+  name: text("name").notNull().default("AI Mentor"),
+  avatarS3Key: varchar("avatar_s3_key", { length: 200 }),
   type: text("type").notNull().default("mentor"),
 });
 
