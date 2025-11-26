@@ -1,0 +1,81 @@
+name: Publish to PUBLIC GitHub packages
+
+env:
+  HUSKY: 0
+  REGISTRY: ghcr.io
+  IMAGE_NAME: selleo/mentingo
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "dev*"
+
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Save version in apps/api
+        run: |
+          TAG_VERSION=${{ github.ref_name }}
+          echo "{ \"version\": \"$TAG_VERSION\" }" > apps/api/version.json
+          echo "✅ Wrote version $TAG_VERSION to apps/api/version.json"
+
+      - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: api.Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:api-${{ github.ref_name }}
+          build-args: |
+            VERSION=${{ github.ref_name }}
+
+  build-web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Save version in apps/web
+        run: |
+          TAG_VERSION=${{ github.ref_name }}
+          echo "{ \"version\": \"$TAG_VERSION\" }" > apps/web/version.json
+          echo "✅ Wrote version $TAG_VERSION to apps/web/version.json"
+
+      - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: web.Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-${{ github.ref_name }}
+          build-args: |
+            VERSION=${{ github.ref_name }}
+            VITE_SENTRY_DSN=
+            VITE_POSTHOG_KEY=
+            VITE_POSTHOG_HOST=
+

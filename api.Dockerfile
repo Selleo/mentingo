@@ -1,4 +1,8 @@
 FROM node:20.15.0-alpine AS base
+
+LABEL org.opencontainers.image.source=https://github.com/Selleo/mentingo
+LABEL org.opencontainers.image.description="Unlock the Power of Learning with AI mentor."
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN npm install -g pnpm@9.15.2
