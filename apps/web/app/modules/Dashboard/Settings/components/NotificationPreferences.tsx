@@ -46,8 +46,8 @@ export default function NotificationPreferences({ adminSettings }: NotificationP
         />
         <SettingItem
           id="studentsWithOverdueCourseNotification"
-          label="Students with overdue courses notifications"
-          description="Receive notifications when students have overdue courses"
+          label={t("adminPreferences.field.studentsWithOverdueCourseNotification")}
+          description={t("adminPreferences.field.studentsWithOverdueCourseNotificationDescription")}
           checked={adminSettings.adminOverdueCourseNotification}
           onCheckedChange={changeOverdueCourseNotification}
         />
