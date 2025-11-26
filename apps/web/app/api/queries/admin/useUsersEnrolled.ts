@@ -22,7 +22,7 @@ export const useUsersEnrolledQuery = (
     const { data } = await ApiClient.api.courseControllerGetStudentsWithEnrollmentDate(courseId, {
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
-      ...(searchParams?.groups && { groups: searchParams.groups.map((group) => group.value) }),
+      ...(searchParams?.groups && { groups: searchParams.groups.map(({ value }) => value) }),
     });
     return data;
   },
