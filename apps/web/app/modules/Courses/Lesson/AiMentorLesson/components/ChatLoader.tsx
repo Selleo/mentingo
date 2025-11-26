@@ -1,26 +1,34 @@
 import { useTranslation } from "react-i18next";
 
 import { Icon } from "~/components/Icon";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
-const ChatLoader = () => {
+const ChatLoader = ({ aiName, avatarUrl }: { aiName?: string; avatarUrl?: string }) => {
   const { t } = useTranslation();
+  const displayName = aiName ?? t("studentCourseView.lesson.aiMentorLesson.aiMentorName");
 
   return (
-    <div className="flex items-start gap-x-3">
-      <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-100 text-lg font-bold text-primary-600">
-        <Icon name="AiMentor" className="size-5 text-primary-600" />
+    <div className="flex max-w-full gap-3 items-start">
+      <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full">
+        <Avatar className="size-full flex items-center justify-center bg-primary-100">
+          <AvatarImage src={avatarUrl} />
+          <AvatarFallback>
+            <Icon name="AiMentor" className="p-1 text-primary-600" />
+          </AvatarFallback>
+        </Avatar>
       </div>
-      <div className="max-w-4/5 flex flex-col">
-        <span className="mb-1 text-sm font-semibold text-primary-900">
-          {t("studentCourseView.lesson.aiMentorLesson.aiMentorName")}
-        </span>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <div className="flex animate-pulse space-x-1">
-            <div className="size-2 animate-bounce rounded-full bg-gray-400"></div>
-            <div className="size-2 animate-bounce rounded-full bg-gray-400 delay-100"></div>
-            <div className="size-2 animate-bounce rounded-full bg-gray-400 delay-200"></div>
+
+      <div className="min-w-0 max-w-[90%] flex flex-col gap-1 items-start">
+        <span className="text-sm font-semibold text-primary-900">{displayName}</span>
+        <div className="w-fit max-w-full rounded-xl text-sm text-gray-600">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <span className="size-2 rounded-full bg-gray-400 animate-bounce" />
+              <span className="size-2 rounded-full bg-gray-400 animate-bounce delay-100" />
+              <span className="size-2 rounded-full bg-gray-400 animate-bounce delay-200" />
+            </div>
+            <span>{t("studentCourseView.lesson.aiMentorLesson.typing")}</span>
           </div>
-          <span>{t("studentCourseView.lesson.aiMentorLesson.typing")}</span>
         </div>
       </div>
     </div>

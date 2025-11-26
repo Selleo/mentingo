@@ -5,6 +5,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import {
   aiMentorLessons,
   chapters,
+  courses,
   lessonResources,
   lessons,
   questionAnswerOptions,
@@ -125,6 +126,7 @@ export class AdminLessonRepository {
       aiMentorInstructions: string;
       completionConditions: string;
       type: AiMentorType;
+      name?: string;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
@@ -140,6 +142,7 @@ export class AdminLessonRepository {
       aiMentorInstructions: string;
       completionConditions: string;
       type: AiMentorType;
+      name?: string;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
@@ -443,5 +446,21 @@ export class AdminLessonRepository {
         },
       })
       .returning();
+  }
+
+  async getCourseByLesson(lessonId: UUIDType) {
+    return this.db
+      .select({ ...getTableColumns(courses) })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(lessons.id, lessonId));
+  }
+
+  async updateAiMentorAvatar(lessonId: UUIDType, fileKey: string | null) {
+    return this.db
+      .update(aiMentorLessons)
+      .set({ avatarS3Key: fileKey })
+      .where(eq(aiMentorLessons.lessonId, lessonId));
   }
 }

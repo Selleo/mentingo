@@ -1,11 +1,13 @@
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TYPE, ALLOWED_EXTENSIONS } from "@repo/shared";
 import { capitalize } from "lodash-es";
-import { useState } from "react";
+import { Minus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
 import Editor from "~/components/RichText/Editor";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -24,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Separator } from "~/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
@@ -31,6 +34,7 @@ import {
   TooltipTrigger,
   TooltipArrow,
 } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/MultiFileUploadForm";
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
@@ -42,6 +46,7 @@ import Breadcrumb from "../components/Breadcrumb";
 import { useAiMentorLessonForm } from "./hooks/useAiMentorLessonForm";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
+import type React from "react";
 
 type AiMentorLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -74,6 +79,26 @@ const AiMentorLessonForm = ({
   const { t } = useTranslation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    lessonToEdit?.avatarS3SignedUrl ?? null,
+  );
+  const [removeAvatar, setRemoveAvatar] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setAvatarPreview(lessonToEdit?.avatarS3SignedUrl ?? null);
+    setRemoveAvatar(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  }, [lessonToEdit]);
 
   const onCloseModal = () => {
     setIsModalOpen(false);
@@ -86,7 +111,36 @@ const AiMentorLessonForm = ({
   const onOpenPreview = () => setPreviewOpen(true);
   const onClosePreview = () => setPreviewOpen(false);
 
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      objectUrlRef.current = objectUrl;
+      setAvatarPreview(objectUrl);
+      setRemoveAvatar(false);
+    } else {
+      setAvatarPreview(lessonToEdit?.avatarS3SignedUrl ?? null);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    setAvatarPreview(null);
+    setRemoveAvatar(true);
+  };
 
   return (
     <>
@@ -117,20 +171,83 @@ const AiMentorLessonForm = ({
             </div>
           </div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex grow flex-col">
-              <div className="flex items-center">
-                <span className="mr-1 text-red-500">*</span>
-                <Label htmlFor="title" className="mr-2">
-                  {t("adminCourseView.curriculum.lesson.field.title")}
-                </Label>
+            <form
+              onSubmit={form.handleSubmit((data) =>
+                onSubmit(data, removeAvatar ? null : fileInputRef.current?.files?.[0]),
+              )}
+              className="flex grow flex-col"
+            >
+              <div className="flex lg:items-center flex-col-reverse lg:flex-row lg:gap-4 gap-2">
+                <div className="flex flex-col flex-1">
+                  <div className="flex items-center">
+                    <span className="mr-1 text-red-500">*</span>
+                    <Label htmlFor="title" className="mr-2">
+                      {t("adminCourseView.curriculum.lesson.field.title")}
+                    </Label>
+                  </div>
+                  <FormTextField
+                    control={form.control}
+                    name="title"
+                    id="title"
+                    placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
+                    className="mb-4"
+                  />
+                </div>
+
+                <Separator orientation="vertical" className="lg:h-14" />
+
+                <div className="flex gap-2">
+                  <div className="relative size-12 ">
+                    <Avatar
+                      className={cn("size-12 border-2 border-border", {
+                        "hover:opacity-75 cursor-pointer": lessonToEdit,
+                      })}
+                      onClick={() => lessonToEdit && fileInputRef.current?.click()}
+                    >
+                      <AvatarImage src={avatarPreview ?? undefined} />
+
+                      <AvatarFallback>
+                        <Icon name="AiMentor" className="size-8 text-primary" />
+                      </AvatarFallback>
+                      <input
+                        type="file"
+                        hidden
+                        ref={fileInputRef}
+                        accept={ALLOWED_EXTENSIONS}
+                        onChange={handleFileChange}
+                      />
+                    </Avatar>
+                    {avatarPreview && (
+                      <button
+                        type="button"
+                        className="size-4 absolute bg-primary text-contrast rounded-full flex left-0 bottom-0 items-center justify-center cursor-pointer hover:opacity-80"
+                        onClick={handleRemoveAvatar}
+                      >
+                        <Minus className="size-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-1 lg:flex-0 flex-col gap-1">
+                    <FormField
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label className="text-muted-foreground text-sm">
+                            {t("adminCourseView.curriculum.lesson.field.aiMentor")}
+                          </Label>
+                          <input
+                            type="text"
+                            className="outline-0 text-sm bg-transparent border-b"
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormItem>
+                      )}
+                      name="name"
+                    />
+                  </div>
+                </div>
               </div>
-              <FormTextField
-                control={form.control}
-                name="title"
-                id="title"
-                placeholder={t("adminCourseView.curriculum.lesson.placeholder.title")}
-                className="mb-4"
-              />
 
               <FormField
                 render={({ field }) => (

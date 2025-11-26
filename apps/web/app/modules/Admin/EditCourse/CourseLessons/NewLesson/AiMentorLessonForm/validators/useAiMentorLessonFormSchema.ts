@@ -66,6 +66,7 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
         },
       ),
     type: z.nativeEnum(AI_MENTOR_TYPE).default(AI_MENTOR_TYPE.MENTOR),
+    name: z.string(),
   });
 
 export const aiMentorLessonFileSchema = (t: TFunction) =>

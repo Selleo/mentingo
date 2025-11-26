@@ -13,6 +13,7 @@ type AiMentor = {
   aiMentorInstructions: string;
   completionConditions: string;
   type: AiMentorType;
+  name: string;
 };
 
 export interface LessonResource {
@@ -37,6 +38,7 @@ export interface Lesson {
   quizCooldownInHours?: number;
   fileS3Key?: string;
   fileS3SignedUrl?: string;
+  avatarS3SignedUrl?: string;
   fileType?: string;
   chapterId?: string;
   questions?: Question[];
