@@ -29,7 +29,7 @@ type GroupFormItem = {
   deadline: string;
 };
 
-type FormValues = {
+export type GroupEnrollFormValues = {
   groups: GroupFormItem[];
 };
 
@@ -57,30 +57,18 @@ export const GroupEnrollModal = ({
     [enrolledGroups],
   );
 
-  const form = useForm<FormValues>({
+  const form = useForm<GroupEnrollFormValues>({
     defaultValues: { groups: [] },
     mode: "onChange",
   });
-
-  useEffect(() => {
-    const list =
-      groups?.map((g) => ({
-        id: g.id,
-        selected: false,
-        obligatory: false,
-        deadline: "",
-      })) ?? [];
-    form.reset({ groups: list });
-  }, [groups, form]);
-
   const watched = useWatch({ control: form.control, name: "groups" });
   const selectedCount = (watched ?? []).filter((g) => g?.selected).length;
 
-  const handleSubmit = async (values: FormValues) => {
-    const invalid = values.groups.find(
+  const handleSubmit = async (values: GroupEnrollFormValues) => {
+    const formHasErrors = !!values.groups.find(
       (g) => g.selected && g.obligatory && (!g.deadline || Number.isNaN(Date.parse(g.deadline))),
     );
-    if (invalid) {
+    if (formHasErrors) {
       await form.trigger();
       return;
     }
@@ -94,6 +82,17 @@ export const GroupEnrollModal = ({
     }
     onOpenChange(false);
   };
+
+  useEffect(() => {
+    const list =
+      groups?.map((g) => ({
+        id: g.id,
+        selected: false,
+        obligatory: false,
+        deadline: "",
+      })) ?? [];
+    form.reset({ groups: list });
+  }, [groups, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

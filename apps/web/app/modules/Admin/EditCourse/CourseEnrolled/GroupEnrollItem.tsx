@@ -10,6 +10,8 @@ import { FormControl, FormField, FormItem, FormMessage } from "../../../../compo
 import { Input } from "../../../../components/ui/input";
 import { Switch } from "../../../../components/ui/switch";
 
+import type { GroupEnrollFormValues } from "./GroupEnrollModal";
+
 type Props = {
   index: number;
   id: string;
@@ -20,7 +22,7 @@ type Props = {
 
 export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }: Props) => {
   const { t } = useTranslation();
-  const { control, getValues } = useFormContext();
+  const { control, getValues } = useFormContext<GroupEnrollFormValues>();
 
   const selected = useWatch({ control, name: `groups.${index}.selected` });
   const obligatory = useWatch({ control, name: `groups.${index}.obligatory` });
