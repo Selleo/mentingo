@@ -64,9 +64,9 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
               {DUE_DATE && (
                 <CategoryChip
                   category={"Due date: " + formatDate(DUE_DATE, "dd.MM.yyyy")}
-                  color="text-[#F59E0B]"
-                  className="bg-[#FEF3C7]"
-                  textClassName="text-[#92400E]"
+                  color="text-warning-600"
+                  className="bg-warning-50"
+                  textClassName="text-zest-900"
                 />
               )}
 
