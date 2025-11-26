@@ -230,6 +230,7 @@ export class GroupService {
     const [existingAssociation] = await this.db
       .select()
       .from(groupUsers)
+      .leftJoin(users, eq(users.id, groupUsers.userId))
       .where(
         and(
           eq(groupUsers.groupId, groupId),

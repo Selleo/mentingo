@@ -255,16 +255,16 @@ export class UserService {
         };
       }
 
+      const [groupExists] = await trx.select().from(groups).where(eq(groups.id, groupId));
+
+      if (!groupExists) {
+        throw new NotFoundException("Group not found");
+      }
+
       await trx
         .insert(groupUsers)
         .values({ userId: id, groupId })
         .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
-
-      const [groupData] = await trx
-        .select(getTableColumns(groups))
-        .from(groups)
-        .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
-        .where(eq(groupUsers.userId, id));
 
       const existingCourses = await trx
         .select({ id: courses.id })
@@ -272,25 +272,18 @@ export class UserService {
         .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
         .where(eq(groupCourses.groupId, groupId));
 
-      const insertedStudentCourses = await trx
-        .insert(studentCourses)
-        .values(
-          existingCourses.map((course) => ({
-            studentId: id,
-            courseId: course.id,
-            enrolledByGroupId: groupId,
-          })),
-        )
-        .onConflictDoNothing()
-        .returning({
-          courseId: studentCourses.courseId,
-        });
+      if (!!existingCourses.length)
+        await this.enrollUserToGroupCourses(
+          id,
+          groupId,
+          existingCourses.map(({ id }) => id),
+          trx,
+        );
 
-      await Promise.all(
-        insertedStudentCourses.map(async ({ courseId }) =>
-          this.courseService.createCourseDependencies(courseId, id, null, trx),
-        ),
-      );
+      const [groupData] = await trx
+        .select(getTableColumns(groups))
+        .from(groups)
+        .where(eq(groups.id, groupId));
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
@@ -303,6 +296,38 @@ export class UserService {
       };
     });
   }
+
+  enrollUserToGroupCourses = async (
+    userId: UUIDType,
+    groupId: UUIDType,
+    existingCourseIds: UUIDType[],
+    trx: DatabasePg,
+  ) => {
+    await trx
+      .insert(groupUsers)
+      .values({ userId, groupId })
+      .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
+
+    const insertedStudentCourses = await trx
+      .insert(studentCourses)
+      .values(
+        existingCourseIds.map((courseId) => ({
+          studentId: userId,
+          courseId,
+          enrolledByGroupId: groupId,
+        })),
+      )
+      .onConflictDoNothing()
+      .returning({
+        courseId: studentCourses.courseId,
+      });
+
+    await Promise.all(
+      insertedStudentCourses.map(async ({ courseId }) =>
+        this.courseService.createCourseDependencies(courseId, userId, null, trx),
+      ),
+    );
+  };
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
     const existingUser = await this.getExistingUser(userId);
