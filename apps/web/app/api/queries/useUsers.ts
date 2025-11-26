@@ -41,7 +41,7 @@ export const usersQueryOptions = (
         archived: String(searchParams.archived),
       }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
-      ...(searchParams?.groups && { groups: searchParams.groups.map((group) => group.value) }),
+      ...(searchParams?.groups && { groups: searchParams.groups.map(({ value }) => value) }),
     });
     return response.data;
   },

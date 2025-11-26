@@ -55,7 +55,6 @@ const User = () => {
   if (!user) throw new Error(t("adminUserView.error.userNotFound"));
 
   const onSubmit = (data: UpdateUserBody) => {
-    console.log(data);
     updateUser({ data, userId: id }).then(() => {
       queryClient.invalidateQueries(userQueryOptions(id));
       queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY], exact: false });
