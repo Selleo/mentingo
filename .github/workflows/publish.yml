@@ -76,6 +76,6 @@ jobs:
           build-args: |
             VERSION=${{ github.ref_name }}
             VITE_SENTRY_DSN=
-            VITE_POSTHOG_KEY=
-            VITE_POSTHOG_HOST=
+            VITE_POSTHOG_KEY=none
+            VITE_POSTHOG_HOST=none
 
