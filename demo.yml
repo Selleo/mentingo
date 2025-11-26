@@ -1,0 +1,83 @@
+services:
+  demo-api:
+    image: ghcr.io/selleo/mentingo:api-dev03
+    env_file:
+      - apps/api/.env
+    ports:
+      - 3000:3000
+
+  demo-web:
+    image: ghcr.io/selleo/mentingo:web-dev03
+    ports:
+      - 8080:8080
+
+  demo-db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: guidebook
+      POSTGRES_DB: guidebook
+    volumes:
+      - demo-lms-db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  demo-redis:
+    image: redis:8.0-M02-alpine3.20
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - demo-lms-redis-data:/data
+  demo-mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
+
+  demo-minio:
+    image: quay.io/minio/minio:latest
+    container_name: demo-minio
+    ports:
+      - "9100:9000" # MinIO API
+      - "9101:9001" # Web console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - demo-minio-data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  demo-create-minio-bucket:
+    image: quay.io/minio/mc:latest
+    container_name: demo-minio-setup
+    depends_on:
+      demo-minio:
+        condition: service_healthy
+    restart: "no"
+    env_file: ./apps/api/.env
+    volumes:
+      - ./create-minio-bucket.sh:/create-minio-bucket.sh
+    entrypoint: ["/bin/sh", "/create-minio-bucket.sh"]
+
+volumes:
+  demo-lms-db-data:
+    driver: local
+  demo-lms-redis-data:
+    driver: local
+  demo-minio-data:
+    driver: local
