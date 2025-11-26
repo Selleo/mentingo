@@ -2139,12 +2139,12 @@
         }
       }
     },
-    "/api/course/update-lesson-sequence/{id}": {
+    "/api/course/update-lesson-sequence/{courseId}": {
       "patch": {
         "operationId": "CourseController_updateLessonSequenceEnabled",
         "parameters": [
           {
-            "name": "id",
+            "name": "courseId",
             "required": true,
             "in": "path",
             "schema": {

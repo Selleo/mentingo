@@ -5,6 +5,8 @@ import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
+import { getLessonSequenceQueryKey } from "../queries/useLessonSequence";
+
 import type { UpdateLessonSequenceEnabledBody } from "../generated-api";
 
 type UpdateLessonSequenceParams = {
@@ -24,8 +26,8 @@ export function useUpdateLessonSequence() {
       );
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lessons-sequence"] });
+    onSuccess: (_, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: getLessonSequenceQueryKey({ courseId }) });
       toast({
         variant: "default",
         description: t("lessons.sequenceUpdatedSuccessfully"),

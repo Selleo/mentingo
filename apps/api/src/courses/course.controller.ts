@@ -314,7 +314,7 @@ export class CourseController {
       currentUserId,
       !!isPlaywrightTest,
     );
-    return new BaseResponse({ id, message: "Pomyślnie utworzono kurs" });
+    return new BaseResponse({ id, message: "Course created successfully" });
   }
 
   @Patch(":id")
@@ -346,7 +346,7 @@ export class CourseController {
       image,
     );
 
-    return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
+    return new BaseResponse({ message: "Course updated successfully" });
   }
 
   @Patch("update-has-certificate/:id")
@@ -364,25 +364,25 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.updateHasCertificate(id, body.hasCertificate);
 
-    return new BaseResponse({ message: "Pomyślnie_zaktualizowano_kurs" });
+    return new BaseResponse({ message: "Course with certificate updated successfully" });
   }
 
-  @Patch("update-lesson-sequence/:id")
+  @Patch("update-lesson-sequence/:courseId")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [
-      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "param", name: "courseId", schema: UUIDSchema },
       { type: "body", schema: Type.Object({ lessonSequenceEnabled: Type.Boolean() }) },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async updateLessonSequenceEnabled(
-    @Param("id") id: UUIDType,
+    @Param("courseId") courseId: UUIDType,
     @Body() body: { lessonSequenceEnabled: boolean },
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateLessonSequenceEnabled(id, body.lessonSequenceEnabled);
+    await this.courseService.updateLessonSequenceEnabled(courseId, body.lessonSequenceEnabled);
 
-    return new BaseResponse({ message: "Pomyślnie zaktualizowano sekwencję lekcji" });
+    return new BaseResponse({ message: "Course lesson sequence updated successfully" });
   }
 
   @Get("lesson-sequence-enabled/:courseId")
@@ -412,7 +412,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourse(id, currentUserId, testKey);
 
-    return new BaseResponse({ message: "Pomyślnie zapisano na kurs" });
+    return new BaseResponse({ message: "Course enrolled successfully" });
   }
 
   @Post("/:courseId/enroll-courses")
@@ -437,7 +437,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourses(courseId, body);
 
-    return new BaseResponse({ message: "Pomyślnie zapisano na kursy" });
+    return new BaseResponse({ message: "Courses enrolled successfully" });
   }
 
   @Post("/:courseId/enroll-groups-to-course")
