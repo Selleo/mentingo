@@ -60,6 +60,7 @@ export const useFileLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateFileItem({ data: { ...values }, fileLessonId: lessonToEdit.id });
+        await queryClient.invalidateQueries({ queryKey: ["lesson", lessonToEdit.id] });
       } else {
         await createFile({
           data: { ...values, chapterId: chapterToEdit.id },

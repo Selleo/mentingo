@@ -103,6 +103,7 @@
     "react-colorful": "5.6.1",
     "react-day-picker": "8.10.0",
     "react-dom": "18.3.1",
+    "react-dropzone": "^14.3.8",
     "react-easy-crop": "^5.5.3",
     "react-hook-form": "7.52.1",
     "react-i18next": "^15.4.0",
