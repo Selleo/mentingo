@@ -42,8 +42,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
             <FormItem>
               <FormControl>
                 <Checkbox
-                  checked={isGroupEnrolled || !!field.value}
-                  disabled={isGroupEnrolled}
+                  checked={!!field.value}
                   onCheckedChange={(currentValue) => field.onChange(Boolean(currentValue))}
                   aria-label={`select-group-${id}`}
                   className="mt-2"
@@ -61,20 +60,22 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
         <div className="flex flex-col">
           <p className="text-color-black text-sm font-medium whitespace-normal">
             <span className="break-all">{name}</span>
-            <Badge
-              variant="success"
-              icon="InputRoundedMarkerSuccess"
-              className="ml-2 !inline-flex text-xs align-middle max-h-6"
-              iconClasses="size-3"
-            >
-              Już zapisana
-            </Badge>
+            {isGroupEnrolled && (
+              <Badge
+                variant="success"
+                icon="InputRoundedMarkerSuccess"
+                className="ml-2 !inline-flex text-xs align-middle max-h-6"
+                iconClasses="size-3"
+              >
+                {t("adminCourseView.enrolled.alreadyEnrolled")}
+              </Badge>
+            )}
           </p>
           <div className="text-neutral-700 text-base leading-[150%]">
             {t("adminCourseView.enrolled.members", { count: usersCount })}
           </div>
         </div>
-        {!isGroupEnrolled && selected ? (
+        {selected ? (
           <div className="rounded-lg border border-neutral-200 bg-white p-4 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

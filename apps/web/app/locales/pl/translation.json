@@ -53,6 +53,7 @@
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka",
+      "dueDate": "Termin do wykonania: {{date}}",
       "appVersion": "Wersja aplikacji: {{version}}"
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
@@ -1346,7 +1347,7 @@
       },
       "enroll": "Zapisz",
       "enrollSelected": "Zapisz wybranych na kurs",
-      "enrollGroups": "Zapisz wybrane grupy na kurs",
+      "enrollGroups": "Zapisz grupy na kurs",
       "enrollGroupsModal": {
         "title": "Zapisz grupy do kursu",
         "description": "Wybierz grupy do przypisania. Wszyscy członkowie wybranych grup zostaną automatycznie zapisani do tego kursu. Możesz oznaczyć kurs jako obowiązkowy i ustawić termin wykonania."
@@ -1833,13 +1834,17 @@
       "coursesVisibility": "Pokazuj kursy odwiedzającym",
       "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
-      "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs"
+      "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
+      "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
+      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
-      "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach"
+      "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
+      "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
+      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },

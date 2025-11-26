@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { userSettingsQueryOptions } from "~/api/queries/useUserSettings";
 import { queryClient } from "~/api/queryClient";
@@ -6,6 +7,7 @@ import { useToast } from "~/components/ui/use-toast";
 
 export function useChangeOverdueCourseNotification() {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async () => {
@@ -17,13 +19,13 @@ export function useChangeOverdueCourseNotification() {
       queryClient.invalidateQueries(userSettingsQueryOptions);
       toast({
         variant: "default",
-        description: "Overdue course notifications preference changed successfully",
+        description: t("adminPreferences.toast.overdueCourseNotificationsPreferenceChangeSuccess"),
       });
     },
     onError: () => {
       toast({
         variant: "destructive",
-        description: "Failed to change overdue course notifications preference",
+        description: t("adminPreferences.toast.overdueCourseNotificationsPreferenceChangeError"),
       });
     },
   });

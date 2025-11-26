@@ -52,6 +52,7 @@
       "publish": "Publish",
       "uploadingImage": "Uploading image...",
       "copyUrl": "The URL address was copied to the clipboard",
+      "dueDate": "Due date: {{date}}",
       "appVersion": "App Version: {{version}}"
     },
     "continueWithGoogle": "Continue with Google",
@@ -1803,13 +1804,17 @@
       "coursesVisibility": "Show courses to visitors",
       "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
       "finishedCourseNotification": "Finished Course Notifications",
-      "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course"
+      "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
+      "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
+      "studentsWithOverdueCourseNotificationDescription": "Receive notifications when students have overdue courses"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
-      "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences"
+      "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
+      "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
+      "overdueCourseNotificationsPreferenceChangeError": "Failed to update overdue course notification preferences"
     }
   },
   "mfa": {

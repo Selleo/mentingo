@@ -63,7 +63,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
               <CategoryChip category={course?.category} className="bg-primary-50" />
               {DUE_DATE && (
                 <CategoryChip
-                  category={"Due date: " + formatDate(DUE_DATE, "dd.MM.yyyy")}
+                  category={t("common.other.dueDate", { date: formatDate(DUE_DATE, "dd.MM.yyyy") })}
                   color="text-warning-600"
                   className="bg-warning-50"
                   textClassName="text-zest-900"
