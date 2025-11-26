@@ -6,8 +6,13 @@ export type LessonSequenceParams = {
   courseId?: string;
 };
 
+export const getLessonSequenceQueryKey = (searchParams: LessonSequenceParams) => [
+  "lessons-sequence",
+  searchParams,
+];
+
 export const lessonSequenceQueryOptions = (searchParams: LessonSequenceParams) => ({
-  queryKey: ["lessons-sequence", searchParams],
+  queryKey: getLessonSequenceQueryKey(searchParams),
   queryFn: async () => {
     const response = await ApiClient.api.courseControllerGetLessonSequenceEnabled(
       searchParams.courseId!,

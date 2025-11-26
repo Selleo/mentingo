@@ -106,14 +106,14 @@ export const LessonContent = ({
 
     const nextLessonId =
       currentChapter?.lessons?.[nextLessonIndex]?.id ?? nextChapter?.lessons?.[0]?.id;
-    const isNextLessonBlocked = nextLessonId ? !canAccessLesson(course, nextLessonId) : false;
+    const cannotEnterNextLesson = nextLessonId ? !canAccessLesson(course, nextLessonId) : false;
     setIsNextDisabled(
       isNextBlocked(
         currentLessonIndex,
         totalLessons,
         nextChapter?.isFreemium ?? false,
         course.enrolled ?? false,
-        isNextLessonBlocked,
+        cannotEnterNextLesson,
       ),
     );
     setIsPreviousDisabled(

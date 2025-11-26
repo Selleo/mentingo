@@ -249,13 +249,14 @@ export const isNextBlocked = (
   totalLessons: number,
   isNextChapterFreemium: boolean,
   isEnrolled: boolean,
-  isNextLessonBlocked: boolean,
+  cannotEnterNextLesson: boolean,
 ) => {
   const isLastLessonInChapter = currentLessonIndex === totalLessons - 1;
   const isNextChapterPaid = !isNextChapterFreemium;
   const isUserNotEnrolled = !isEnrolled;
+  const isNextChapterAvailable = isLastLessonInChapter && isNextChapterPaid && isUserNotEnrolled;
 
-  return (isLastLessonInChapter && isNextChapterPaid && isUserNotEnrolled) || isNextLessonBlocked;
+  return isNextChapterAvailable || cannotEnterNextLesson;
 };
 
 export const isPreviousBlocked = (

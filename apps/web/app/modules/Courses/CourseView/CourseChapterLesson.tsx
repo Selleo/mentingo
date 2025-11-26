@@ -42,11 +42,9 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
     </div>
   );
 
-  const content = hasAccess ? (
-    lessonElement
-  ) : (
-    <button className="w-full flex cursor-not-allowed">{lessonElement}</button>
-  );
+  if (!hasAccess) {
+    return <button className="w-full flex cursor-not-allowed">{lessonElement}</button>;
+  }
 
-  return content;
+  return lessonElement;
 };
