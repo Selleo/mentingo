@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -22,6 +23,7 @@ import { getEmailSubject } from "src/common/emails/translations";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CourseService } from "src/courses/course.service";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
@@ -41,6 +43,7 @@ import {
   studentCourses,
   coursesSummaryStats,
   courses,
+  groupCourses,
 } from "../storage/schema";
 
 import {
@@ -82,6 +85,7 @@ export class UserService {
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
     private statisticsService: StatisticsService,
+    @Inject(forwardRef(() => CourseService)) private courseService: CourseService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -261,6 +265,32 @@ export class UserService {
         .from(groups)
         .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
         .where(eq(groupUsers.userId, id));
+
+      const existingCourses = await trx
+        .select({ id: courses.id })
+        .from(courses)
+        .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
+        .where(eq(groupCourses.groupId, groupId));
+
+      const insertedStudentCourses = await trx
+        .insert(studentCourses)
+        .values(
+          existingCourses.map((course) => ({
+            studentId: id,
+            courseId: course.id,
+            enrolledByGroupId: groupId,
+          })),
+        )
+        .onConflictDoNothing()
+        .returning({
+          courseId: studentCourses.courseId,
+        });
+
+      await Promise.all(
+        insertedStudentCourses.map(async ({ courseId }) =>
+          this.courseService.createCourseDependencies(courseId, id, null, trx),
+        ),
+      );
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);

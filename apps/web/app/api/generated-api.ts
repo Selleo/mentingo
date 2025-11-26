@@ -36,6 +36,7 @@ export interface RegisterResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -61,6 +62,7 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -92,6 +94,7 @@ export interface CurrentUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -529,6 +532,7 @@ export interface GetUsersResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   } & {
     groupId: string | null;
@@ -552,6 +556,7 @@ export interface GetUserByIdResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     groupId: string | null;
     groupName: string | null;
@@ -593,6 +598,7 @@ export interface UpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -633,6 +639,7 @@ export interface AdminUpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -738,75 +745,6 @@ export interface MarkOnboardingCompleteResponse {
     profile: boolean;
     settings: boolean;
     providerInformation: boolean;
-  };
-}
-
-export interface GetAllCategoriesResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    archived: boolean | null;
-    createdAt: string | null;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface GetCategoryByIdResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    archived: boolean | null;
-    createdAt: string | null;
-  };
-}
-
-export interface CreateCategoryBody {
-  title: string;
-}
-
-export interface CreateCategoryResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    message: string;
-  };
-}
-
-export interface UpdateCategoryBody {
-  /** @format uuid */
-  id?: string;
-  title?: string;
-  archived?: boolean;
-}
-
-export interface UpdateCategoryResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    archived: boolean | null;
-    createdAt: string | null;
-  };
-}
-
-export interface DeleteCategoryResponse {
-  data: {
-    message: string;
-  };
-}
-
-export type DeleteManyCategoriesBody = string[];
-
-export interface DeleteManyCategoriesResponse {
-  data: {
-    message: string;
   };
 }
 
@@ -2325,6 +2263,75 @@ export interface UpdatePromotionCodeResponse {
   };
 }
 
+export interface GetAllCategoriesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    archived: boolean | null;
+    createdAt: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetCategoryByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    archived: boolean | null;
+    createdAt: string | null;
+  };
+}
+
+export interface CreateCategoryBody {
+  title: string;
+}
+
+export interface CreateCategoryResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export interface UpdateCategoryBody {
+  /** @format uuid */
+  id?: string;
+  title?: string;
+  archived?: boolean;
+}
+
+export interface UpdateCategoryResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    archived: boolean | null;
+    createdAt: string | null;
+  };
+}
+
+export interface DeleteCategoryResponse {
+  data: {
+    message: string;
+  };
+}
+
+export type DeleteManyCategoriesBody = string[];
+
+export interface DeleteManyCategoriesResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface GetAllGroupsResponse {
   data: {
     /** @format uuid */
@@ -2340,6 +2347,7 @@ export interface GetAllGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2368,6 +2376,7 @@ export interface GetGroupByIdResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2390,6 +2399,7 @@ export interface GetUserGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -3462,77 +3472,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name HealthControllerCheck
-     * @request GET:/api/healthcheck
-     */
-    healthControllerCheck: (params: RequestParams = {}) =>
-      this.request<
-        {
-          /** @example "ok" */
-          status?: string;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-        },
-        {
-          /** @example "error" */
-          status?: string;
-          /** @example {"database":{"status":"up"}} */
-          info?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
-          error?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
-          details?: Record<
-            string,
-            {
-              status: string;
-              [key: string]: any;
-            }
-          >;
-        }
-      >({
-        path: `/api/healthcheck`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name UserControllerGetUsers
      * @request GET:/api/user/all
      */
@@ -3853,140 +3792,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<MarkOnboardingCompleteResponse, any>({
         path: `/api/user/onboarding-status/${page}`,
         method: "PATCH",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TestConfigControllerSetup
-     * @request POST:/api/test-config/setup
-     */
-    testConfigControllerSetup: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/test-config/setup`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TestConfigControllerTeardown
-     * @request POST:/api/test-config/teardown
-     */
-    testConfigControllerTeardown: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/test-config/teardown`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CategoryControllerGetAllCategories
-     * @request GET:/api/category
-     */
-    categoryControllerGetAllCategories: (
-      query?: {
-        title?: string;
-        archived?: string;
-        /** @min 1 */
-        page?: number;
-        perPage?: number;
-        sort?: "title" | "creationDate" | "-title" | "-creationDate";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAllCategoriesResponse, any>({
-        path: `/api/category`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CategoryControllerCreateCategory
-     * @request POST:/api/category
-     */
-    categoryControllerCreateCategory: (data: CreateCategoryBody, params: RequestParams = {}) =>
-      this.request<CreateCategoryResponse, any>({
-        path: `/api/category`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CategoryControllerGetCategoryById
-     * @request GET:/api/category/{id}
-     */
-    categoryControllerGetCategoryById: (id: string, params: RequestParams = {}) =>
-      this.request<GetCategoryByIdResponse, any>({
-        path: `/api/category/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CategoryControllerUpdateCategory
-     * @request PATCH:/api/category/{id}
-     */
-    categoryControllerUpdateCategory: (
-      id: string,
-      data: UpdateCategoryBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateCategoryResponse, any>({
-        path: `/api/category/${id}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CategoryControllerDeleteCategory
-     * @request DELETE:/api/category/deleteCategory/{id}
-     */
-    categoryControllerDeleteCategory: (id: string, params: RequestParams = {}) =>
-      this.request<DeleteCategoryResponse, any>({
-        path: `/api/category/deleteCategory/${id}`,
-        method: "DELETE",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name CategoryControllerDeleteManyCategories
-     * @request DELETE:/api/category/deleteManyCategories
-     */
-    categoryControllerDeleteManyCategories: (
-      data: DeleteManyCategoriesBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<DeleteManyCategoriesResponse, any>({
-        path: `/api/category/deleteManyCategories`,
-        method: "DELETE",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -4924,16 +4729,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name LessonControllerGetLessonImage
-     * @request GET:/api/lesson/lesson-image/{lessonId}/{fileKey}
+     * @request GET:/api/lesson/lesson-image/{resourceId}
      */
-    lessonControllerGetLessonImage: (
-      resourceId: string,
-      lessonId: string,
-      fileKey: string,
-      params: RequestParams = {},
-    ) =>
+    lessonControllerGetLessonImage: (resourceId: string, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/api/lesson/lesson-image/${lessonId}/${fileKey}`,
+        path: `/api/lesson/lesson-image/${resourceId}`,
         method: "GET",
         ...params,
       }),
@@ -5297,6 +5097,211 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<CreatePromotionCouponResponse, any>({
         path: `/api/stripe/promotion-code`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name HealthControllerCheck
+     * @request GET:/api/healthcheck
+     */
+    healthControllerCheck: (params: RequestParams = {}) =>
+      this.request<
+        {
+          /** @example "ok" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        },
+        {
+          /** @example "error" */
+          status?: string;
+          /** @example {"database":{"status":"up"}} */
+          info?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"redis":{"status":"down","message":"Could not connect"}} */
+          error?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+          /** @example {"database":{"status":"up"},"redis":{"status":"down","message":"Could not connect"}} */
+          details?: Record<
+            string,
+            {
+              status: string;
+              [key: string]: any;
+            }
+          >;
+        }
+      >({
+        path: `/api/healthcheck`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TestConfigControllerSetup
+     * @request POST:/api/test-config/setup
+     */
+    testConfigControllerSetup: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/test-config/setup`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TestConfigControllerTeardown
+     * @request POST:/api/test-config/teardown
+     */
+    testConfigControllerTeardown: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/test-config/teardown`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerGetAllCategories
+     * @request GET:/api/category
+     */
+    categoryControllerGetAllCategories: (
+      query?: {
+        title?: string;
+        archived?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: "title" | "creationDate" | "-title" | "-creationDate";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllCategoriesResponse, any>({
+        path: `/api/category`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerCreateCategory
+     * @request POST:/api/category
+     */
+    categoryControllerCreateCategory: (data: CreateCategoryBody, params: RequestParams = {}) =>
+      this.request<CreateCategoryResponse, any>({
+        path: `/api/category`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerGetCategoryById
+     * @request GET:/api/category/{id}
+     */
+    categoryControllerGetCategoryById: (id: string, params: RequestParams = {}) =>
+      this.request<GetCategoryByIdResponse, any>({
+        path: `/api/category/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerUpdateCategory
+     * @request PATCH:/api/category/{id}
+     */
+    categoryControllerUpdateCategory: (
+      id: string,
+      data: UpdateCategoryBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCategoryResponse, any>({
+        path: `/api/category/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerDeleteCategory
+     * @request DELETE:/api/category/deleteCategory/{id}
+     */
+    categoryControllerDeleteCategory: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteCategoryResponse, any>({
+        path: `/api/category/deleteCategory/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CategoryControllerDeleteManyCategories
+     * @request DELETE:/api/category/deleteManyCategories
+     */
+    categoryControllerDeleteManyCategories: (
+      data: DeleteManyCategoriesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteManyCategoriesResponse, any>({
+        path: `/api/category/deleteManyCategories`,
+        method: "DELETE",
         body: data,
         type: ContentType.Json,
         format: "json",

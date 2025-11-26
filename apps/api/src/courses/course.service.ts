@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  forwardRef,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import {
@@ -116,11 +117,11 @@ export class CourseService {
     private readonly fileService: FileService,
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
-    private readonly userService: UserService,
     private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
     private readonly envService: EnvService,
     private readonly eventBus: EventBus,
+    @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{

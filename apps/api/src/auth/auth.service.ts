@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -49,7 +50,7 @@ export class AuthService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private jwtService: JwtService,
-    private userService: UserService,
+    @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private configService: ConfigService,
     private emailService: EmailService,
     private createPasswordService: CreatePasswordService,

@@ -16,7 +16,6 @@ import { StatisticsService } from "src/statistics/statistics.service";
 import { NotifyAdminsHandler } from "src/user/handlers/notify-admins.handler";
 import { NotifyUsersHandler } from "src/user/handlers/notify-users.handler";
 import { UserModule } from "src/user/user.module";
-import { UserService } from "src/user/user.service";
 
 @Global()
 @Module({
@@ -36,7 +35,6 @@ import { UserService } from "src/user/user.service";
   providers: [
     NotifyAdminsHandler,
     NotifyUsersHandler,
-    UserService,
     FileService,
     S3Service,
     BunnyStreamService,
