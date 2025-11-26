@@ -28,61 +28,58 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
   return (
     <div
       className={cn(
-        "rounded-lg flex border-2 bg-white px-4 py-3 gap-4 shadow-sm border-[#E5E7EB]",
+        "rounded-lg flex border-2 bg-white px-4 py-3 gap-4 shadow-sm border-neutral-200",
         {
-          "bg-[#F3F4F6] border-[#030213]": selected,
+          "bg-neutral-50 border-color-black": selected,
         },
       )}
     >
       <div className="flex gap-4">
-        <div className="flex gap-4">
-          <FormField
-            control={control}
-            name={`groups.${index}.selected`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Checkbox
-                    checked={isGroupEnrolled || !!field.value}
-                    disabled={isGroupEnrolled}
-                    onCheckedChange={(currentValue) => field.onChange(Boolean(currentValue))}
-                    aria-label={`select-group-${id}`}
-                    className="mt-2"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <div className="flex h-9 w-9 min-w-9 items-center justify-center rounded-md bg-[#F3F4F6]">
-            <Icon name="Group" className="size-5 text-[#4A5565]" />
-          </div>
+        <FormField
+          control={control}
+          name={`groups.${index}.selected`}
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Checkbox
+                  checked={isGroupEnrolled || !!field.value}
+                  disabled={isGroupEnrolled}
+                  onCheckedChange={(currentValue) => field.onChange(Boolean(currentValue))}
+                  aria-label={`select-group-${id}`}
+                  className="mt-2"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <div className="flex h-9 w-9 min-w-9 items-center justify-center rounded-md bg-neutral-50">
+          <Icon name="Group" className="size-5 text-nautral-900" />
         </div>
       </div>
 
       <div className="flex flex-col gap-4 w-full">
         <div className="flex flex-col">
-          <p className="text-[#0A0A0A] text-sm font-medium whitespace-normal">
+          <p className="text-color-black text-sm font-medium whitespace-normal">
             <span className="break-all">{name}</span>
-            {isGroupEnrolled && (
-              <Badge
-                variant="success"
-                icon="InputRoundedMarkerSuccess"
-                className="ml-2 !inline-flex align-middle max-h-6"
-              >
-                Już zapisana
-              </Badge>
-            )}
+            <Badge
+              variant="success"
+              icon="InputRoundedMarkerSuccess"
+              className="ml-2 !inline-flex text-xs align-middle max-h-6"
+              iconClasses="size-3"
+            >
+              Już zapisana
+            </Badge>
           </p>
-          <div className="text-[#717182] text-base leading-[150%]">
+          <div className="text-neutral-700 text-base leading-[150%]">
             {t("adminCourseView.enrolled.members", { count: usersCount })}
           </div>
         </div>
         {!isGroupEnrolled && selected ? (
-          <div className="rounded-lg border border-[#E5E7EB] bg-white p-4 flex flex-col gap-3">
+          <div className="rounded-lg border border-neutral-200 bg-white p-4 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#0A0A0A]">{t("adminCourseView.mandatoryCourse")}</span>
-                <Icon name="Info" className="size-4 text-[#FF6900]" />
+                <span className="text-color-black">{t("adminCourseView.mandatoryCourse")}</span>
+                <Icon name="Info" className="size-4 text-zest-600" />
               </div>
               <FormField
                 control={control}
@@ -118,11 +115,10 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <label htmlFor={`groups.${index}.deadline`} className="text-[#0A0A0A]">
+                      <label htmlFor={`groups.${index}.deadline`} className="text-color-black">
                         {t("adminCourseView.deadline")} *
                       </label>
                       <FormControl className="relative">
-                        {/* TODO: change from native input view to that on figma, colors in dark mode should be adjusted */}
                         <Input
                           type="date"
                           value={field.value ?? ""}
