@@ -3,22 +3,27 @@ import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
+import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { chapters } from "src/storage/schema";
 
 import { AdminChapterRepository } from "./repositories/adminChapter.repository";
 
 import type { CreateChapterBody, UpdateChapterBody } from "./schemas/chapter.schema";
 import type { UUIDType } from "src/common";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AdminChapterService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly adminChapterRepository: AdminChapterRepository,
+    private readonly adminLessonService: AdminLessonService,
   ) {}
 
-  async createChapterForCourse(body: CreateChapterBody, authorId: UUIDType) {
+  async createChapterForCourse(body: CreateChapterBody, authorId: UUIDType, role: UserRole) {
     return await this.db.transaction(async (trx) => {
+      await this.adminLessonService.validateAccess("course", role, authorId, body.courseId);
+
       const [maxDisplayOrder] = await trx
         .select({ displayOrder: sql<number>`COALESCE(MAX(${chapters.displayOrder}), 0)` })
         .from(chapters)
@@ -48,14 +53,35 @@ export class AdminChapterService {
     });
   }
 
-  async updateFreemiumStatus(chapterId: UUIDType, isFreemium: boolean) {
+  async updateFreemiumStatus(
+    chapterId: UUIDType,
+    isFreemium: boolean,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.adminLessonService.validateAccess(
+      "chapter",
+      currentUserRole,
+      currentUserId,
+      chapterId,
+    );
+
     return await this.adminChapterRepository.updateFreemiumStatus(chapterId, isFreemium);
   }
 
   async updateChapterDisplayOrder(chapterObject: {
     chapterId: UUIDType;
     displayOrder: number;
+    currentUserId: UUIDType;
+    currentUserRole: UserRole;
   }): Promise<void> {
+    await this.adminLessonService.validateAccess(
+      "chapter",
+      chapterObject.currentUserRole,
+      chapterObject.currentUserId,
+      chapterObject.chapterId,
+    );
+
     const [chapterToUpdate] = await this.adminChapterRepository.getChapterById(
       chapterObject.chapterId,
     );
@@ -76,7 +102,14 @@ export class AdminChapterService {
     );
   }
 
-  async updateChapter(id: UUIDType, body: UpdateChapterBody) {
+  async updateChapter(
+    id: UUIDType,
+    body: UpdateChapterBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.adminLessonService.validateAccess("chapter", currentUserRole, currentUserId, id);
+
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
         message: `adminCourseView.toast.maxTitleLengthExceeded`,
@@ -89,7 +122,14 @@ export class AdminChapterService {
     if (!chapter) throw new NotFoundException("Chapter not found");
   }
 
-  async removeChapter(chapterId: UUIDType) {
+  async removeChapter(chapterId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
+    await this.adminLessonService.validateAccess(
+      "chapter",
+      currentUserRole,
+      currentUserId,
+      chapterId,
+    );
+
     const [chapter] = await this.adminChapterRepository.getChapterById(chapterId);
 
     if (!chapter) throw new NotFoundException("Chapter not found");

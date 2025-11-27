@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -6,6 +12,7 @@ import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { questionAnswerOptions, questions } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { LESSON_TYPES } from "../lesson.type";
@@ -25,6 +32,7 @@ import type {
   UpdateEmbedLessonBody,
 } from "../lesson.schema";
 import type { UUIDType } from "src/common";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AdminLessonService {
@@ -37,7 +45,13 @@ export class AdminLessonService {
     private fileService: FileService,
   ) {}
 
-  async createLessonForChapter(data: CreateLessonBody) {
+  async createLessonForChapter(
+    data: CreateLessonBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+
     if (
       (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
       (!data.fileS3Key || !data.fileType)
@@ -64,7 +78,13 @@ export class AdminLessonService {
     return lesson.id;
   }
 
-  async createAiMentorLesson(data: CreateAiMentorLessonBody) {
+  async createAiMentorLesson(
+    data: CreateAiMentorLessonBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -84,7 +104,13 @@ export class AdminLessonService {
     return lesson?.id;
   }
 
-  async createQuizLesson(data: CreateQuizLessonBody, authorId: UUIDType) {
+  async createQuizLesson(
+    data: CreateQuizLessonBody,
+    authorId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.validateAccess("chapter", currentUserRole, authorId, data.chapterId);
+
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -106,7 +132,14 @@ export class AdminLessonService {
 
     return lesson?.id;
   }
-  async updateAiMentorLesson(id: UUIDType, data: UpdateAiMentorLessonBody, userId: UUIDType) {
+  async updateAiMentorLesson(
+    id: UUIDType,
+    data: UpdateAiMentorLessonBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+
     const lesson = await this.lessonRepository.getLesson(id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -121,10 +154,17 @@ export class AdminLessonService {
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
 
-    return await this.updateAiMentorLessonWithTransaction(id, data, userId);
+    return await this.updateAiMentorLessonWithTransaction(id, data, currentUserId);
   }
 
-  async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, authorId: UUIDType) {
+  async updateQuizLesson(
+    id: UUIDType,
+    data: UpdateQuizLessonBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+
     const lesson = await this.lessonRepository.getLesson(id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -138,11 +178,17 @@ export class AdminLessonService {
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
-    const updatedLessonId = await this.updateQuizLessonWithQuestionsAndOptions(id, data, authorId);
-    return updatedLessonId;
+    return this.updateQuizLessonWithQuestionsAndOptions(id, data, currentUserId);
   }
 
-  async updateLesson(id: UUIDType, data: UpdateLessonBody) {
+  async updateLesson(
+    id: UUIDType,
+    data: UpdateLessonBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+
     const lesson = await this.lessonRepository.getLesson(id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -167,7 +213,9 @@ export class AdminLessonService {
     return updatedLesson.id;
   }
 
-  async removeLesson(lessonId: UUIDType) {
+  async removeLesson(lessonId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
+    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
     if (!lesson) {
@@ -185,7 +233,16 @@ export class AdminLessonService {
   async updateLessonDisplayOrder(lessonObject: {
     lessonId: UUIDType;
     displayOrder: number;
+    currentUserId: UUIDType;
+    currentUserRole: UserRole;
   }): Promise<void> {
+    await this.validateAccess(
+      "lesson",
+      lessonObject.currentUserRole,
+      lessonObject.currentUserId,
+      lessonObject.lessonId,
+    );
+
     const [lessonToUpdate] = await this.adminLessonRepository.getLesson(lessonObject.lessonId);
 
     const oldDisplayOrder = lessonToUpdate.displayOrder;
@@ -300,7 +357,7 @@ export class AdminLessonService {
   async updateQuizLessonWithQuestionsAndOptions(
     id: UUIDType,
     data: UpdateQuizLessonBody,
-    authorId: UUIDType,
+    currentUserId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
       await this.adminLessonRepository.updateQuizLessonWithQuestionsAndOptions(id, data);
@@ -334,7 +391,7 @@ export class AdminLessonService {
           const questionId = await this.adminLessonRepository.upsertQuestion(
             questionData,
             id,
-            authorId,
+            currentUserId,
             trx,
             question.id,
           );
@@ -394,7 +451,13 @@ export class AdminLessonService {
     });
   }
 
-  async createEmbedLesson(data: CreateEmbedLessonBody) {
+  async createEmbedLesson(
+    data: CreateEmbedLessonBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
+    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -429,7 +492,14 @@ export class AdminLessonService {
     return lesson;
   }
 
-  async updateEmbedLesson(lessonId: UUIDType, data: UpdateEmbedLessonBody) {
+  async updateEmbedLesson(
+    lessonId: UUIDType,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+    data: UpdateEmbedLessonBody,
+  ) {
+    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+
     const lesson = await this.lessonRepository.getLesson(lessonId);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -475,7 +545,14 @@ export class AdminLessonService {
     return updatedLesson.id;
   }
 
-  async uploadFileToLesson(lessonId: UUIDType, file: Express.Multer.File) {
+  async uploadFileToLesson(
+    lessonId: UUIDType,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+    file: Express.Multer.File,
+  ) {
+    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+
     if (!ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.mimetype)) {
       throw new BadRequestException("Invalid file type");
     }
@@ -491,5 +568,32 @@ export class AdminLessonService {
     ]);
 
     return resource.id;
+  }
+
+  async validateAccess(
+    entity: "chapter" | "lesson" | "course",
+    currentUserRole: UserRole,
+    currentUserId: UUIDType,
+    id: UUIDType,
+  ) {
+    let course;
+
+    switch (entity) {
+      case "lesson":
+        [course] = await this.adminLessonRepository.getCourseByLesson(id);
+        break;
+      case "chapter":
+        [course] = await this.adminLessonRepository.getCourseByChapter(id);
+        break;
+
+      case "course":
+        [course] = await this.adminLessonRepository.getCourse(id);
+    }
+
+    if (!course) throw new NotFoundException("Course not found");
+
+    if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {
+      throw new ForbiddenException({ message: "common.toast.noAccess" });
+    }
   }
 }
