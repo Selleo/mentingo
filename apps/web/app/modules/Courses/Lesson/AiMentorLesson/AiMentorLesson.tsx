@@ -86,7 +86,6 @@ const AiMentorLesson = ({
   const isSubmitted = status === "submitted";
   const isThreadActive = lesson.status === "active";
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -94,11 +93,7 @@ const AiMentorLesson = ({
 
     if (!container) return;
 
-    try {
-      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-    } catch (e) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   return (
@@ -127,7 +122,6 @@ const AiMentorLesson = ({
         {!lessonLoading && messages.map((messages, idx) => <ChatMessage key={idx} {...messages} />)}
 
         {isSubmitted || (isJudgePending && <ChatLoader />)}
-        <div ref={messagesEndRef} />
       </div>
 
       {isThreadActive && !isJudgePending && (
