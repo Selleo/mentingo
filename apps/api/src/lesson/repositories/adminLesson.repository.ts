@@ -5,6 +5,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import {
   aiMentorLessons,
   chapters,
+  courses,
   lessonResources,
   lessons,
   questionAnswerOptions,
@@ -443,5 +444,26 @@ export class AdminLessonRepository {
         },
       })
       .returning();
+  }
+
+  async getCourseByLesson(lessonId: UUIDType) {
+    return this.db
+      .select({ ...getTableColumns(courses) })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(lessons.id, lessonId));
+  }
+
+  async getCourseByChapter(chapterId: UUIDType) {
+    return this.db
+      .select({ ...getTableColumns(courses) })
+      .from(chapters)
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(chapters.id, chapterId));
+  }
+
+  async getCourse(courseId: UUIDType) {
+    return this.db.select().from(courses).where(eq(courses.id, courseId));
   }
 }

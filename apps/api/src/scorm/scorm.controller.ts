@@ -21,7 +21,7 @@ import { baseResponse, BaseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
-import { USER_ROLES } from "src/user/schemas/userRoles";
+import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import { scormMetadataSchema, scormUploadResponseSchema } from "./schemas/scorm.schema";
 import { ScormService } from "./services/scorm.service";
@@ -57,6 +57,7 @@ export class ScormController {
     @UploadedFile() file: Express.Multer.File,
     @Query("courseId") courseId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ) {
     if (!courseId) {
       throw new BadRequestException("courseId is required");
@@ -66,7 +67,7 @@ export class ScormController {
       throw new BadRequestException("file is required");
     }
 
-    const metadata = await this.scormService.processScormPackage(file, courseId, userId);
+    const metadata = await this.scormService.processScormPackage(file, courseId, userId, role);
 
     return new BaseResponse({
       message: "SCORM package uploaded successfully",
