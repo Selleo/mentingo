@@ -86,10 +86,14 @@ const AiMentorLesson = ({
   const isSubmitted = status === "submitted";
   const isThreadActive = lesson.status === "active";
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+
+    if (!container) return;
+
+    container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   return (
@@ -111,11 +115,13 @@ const AiMentorLesson = ({
       )}
 
       {lessonLoading && <Loader />}
-      <div className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll">
+      <div
+        ref={messagesContainerRef}
+        className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"
+      >
         {!lessonLoading && messages.map((messages, idx) => <ChatMessage key={idx} {...messages} />)}
 
         {isSubmitted || (isJudgePending && <ChatLoader />)}
-        <div ref={messagesEndRef} />
       </div>
 
       {isThreadActive && !isJudgePending && (
