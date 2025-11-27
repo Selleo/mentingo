@@ -123,10 +123,10 @@ export class LessonRepository {
               END
           )
         `,
-        aiMentor: sql<{ name: string; avatarS3Key: string } | null>`
+        aiMentor: sql<{ name: string; avatarReference: string } | null>`
           json_build_object(
              'name', ai_mentor_lessons.name,
-             'avatarS3Key', ai_mentor_lessons.avatar_s3_key
+             'avatarReference', ai_mentor_lessons.avatar_reference
           )
         `,
         isExternal: sql<boolean>`${lessons.isExternal}`,

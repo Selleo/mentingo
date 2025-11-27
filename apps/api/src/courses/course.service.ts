@@ -1544,10 +1544,10 @@ export class CourseService {
           }
         }
 
-        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarS3Key) {
-          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarS3Key);
+        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarReference) {
+          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
 
-          return { ...updatedLesson, avatarS3SignedUrl: signedUrl };
+          return { ...updatedLesson, avatarReferenceUrl: signedUrl };
         }
 
         if (lesson.questions && Array.isArray(lesson.questions)) {

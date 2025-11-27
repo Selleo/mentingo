@@ -138,7 +138,7 @@ export class AdminChapterRepository {
             'completionConditions', aml.completion_conditions,
             'type', aml.type,
             'name', aml.name,
-            'avatarS3Key', aml.avatar_s3_key
+            'avatarReference', aml.avatar_reference
           )
           FROM ${aiMentorLessons} aml
           WHERE lessons.id = aml.lesson_id 

@@ -112,15 +112,15 @@ export class LessonService {
 
       let avatarUrl = undefined;
 
-      if (lesson.aiMentor?.avatarS3Key) {
-        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarS3Key);
+      if (lesson.aiMentor?.avatarReference) {
+        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
       }
 
       return {
         ...lesson,
         aiMentor: {
           name: lesson.aiMentor?.name ?? "AI Mentor",
-          avatarS3Url: avatarUrl,
+          avatarReferenceUrl: avatarUrl,
         },
         threadId: thread.id,
         userLanguage: thread.userLanguage,

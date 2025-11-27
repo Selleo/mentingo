@@ -81,7 +81,7 @@ const AiMentorLessonForm = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    lessonToEdit?.avatarS3SignedUrl ?? null,
+    lessonToEdit?.avatarReferenceUrl ?? null,
   );
   const [removeAvatar, setRemoveAvatar] = useState(false);
 
@@ -89,7 +89,7 @@ const AiMentorLessonForm = ({
   const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    setAvatarPreview(lessonToEdit?.avatarS3SignedUrl ?? null);
+    setAvatarPreview(lessonToEdit?.avatarReferenceUrl ?? null);
     setRemoveAvatar(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -124,7 +124,7 @@ const AiMentorLessonForm = ({
       setAvatarPreview(objectUrl);
       setRemoveAvatar(false);
     } else {
-      setAvatarPreview(lessonToEdit?.avatarS3SignedUrl ?? null);
+      setAvatarPreview(lessonToEdit?.avatarReferenceUrl ?? null);
     }
   };
 

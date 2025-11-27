@@ -128,20 +128,23 @@ const AiMentorLesson = ({
       )}
 
       {lessonLoading && <Loader />}
-      <div
-        ref={messagesContainerRef}
-        className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"
-      >
-        {!lessonLoading && messages.map((messages, idx) => <ChatMessage
-            key={idx}
-            aiName={lesson.aiMentor?.name}
-            avatarUrl={lesson.aiMentor?.avatarS3Url}
-            {...messages}
-        />)}
+      <div ref={messagesContainerRef} className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll">
+        {!lessonLoading &&
+          messages.map((messages, idx) => (
+            <ChatMessage
+              key={idx}
+              aiName={lesson.aiMentor?.name}
+              avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
+              {...messages}
+            />
+          ))}
 
         {isSubmitted ||
           (isJudgePending && (
-            <ChatLoader aiName={lesson.aiMentor?.name} avatarUrl={lesson.aiMentor?.avatarS3Url} />
+            <ChatLoader
+              aiName={lesson.aiMentor?.name}
+              avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
+            />
           ))}
       </div>
 
