@@ -8,7 +8,6 @@ import {
   UserFinishedChapterEmail,
   UserFinishedCourseEmail,
 } from "@repo/email-templates";
-import { format } from "date-fns";
 
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
@@ -162,8 +161,6 @@ export class NotifyUsersHandler implements IEventHandler {
         const { text, html } = new UserAssignedToCourseEmail({
           courseName,
           courseLink,
-          // TODO: missing actual due date
-          formatedCourseDueDate: format(new Date(), "dd.MM.yyyy"),
           ...defaultEmailSettings,
         });
 
