@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useChangeChapterDisplayOrder } from "~/api/mutations/admin/changeChapterDisplayOrder";
 import { useUpdateLessonFreemiumStatus } from "~/api/mutations/admin/useUpdateLessonFreemiumStatus";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { getCourseQueryKey } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { type Sortable, SortableList } from "~/components/SortableList/SortableList";
@@ -144,6 +145,7 @@ const ChapterCard = ({
         console.error("Failed to update chapter premium status:", error);
       } finally {
         await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+        await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId!) });
         await queryClient.invalidateQueries({ queryKey: ["available-courses"] });
         setTimeout(() => {
           setOpenItem(currentOpenState);

@@ -38,6 +38,7 @@ type CourseSettingsProps = {
   thumbnailS3Key?: string;
   hasCertificate?: boolean;
 };
+
 const CourseSettings = ({
   courseId,
   title,
