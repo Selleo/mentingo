@@ -1,11 +1,18 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { questionAnswerOptions, questions } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { LESSON_TYPES } from "../lesson.type";
@@ -25,6 +32,7 @@ import type {
   UpdateEmbedLessonBody,
 } from "../lesson.schema";
 import type { UUIDType } from "src/common";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
 export class AdminLessonService {
@@ -214,6 +222,7 @@ export class AdminLessonService {
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
           type: data.type,
+          name: data?.name,
         },
         trx,
       );
@@ -229,10 +238,15 @@ export class AdminLessonService {
   ) {
     return await this.db.transaction(async (trx) => {
       const { type: _type, ...rest } = data;
+
       const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
 
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
         throw new BadRequestException("Instructions and conditions required");
+
+      if (data.name?.trim().length === 0) {
+        data.name = "AI Mentor";
+      }
 
       await this.adminLessonRepository.updateAiMentorLessonData(
         id,
@@ -240,6 +254,7 @@ export class AdminLessonService {
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
           type: data.type,
+          name: data?.name,
         },
         trx,
       );
@@ -491,5 +506,33 @@ export class AdminLessonService {
     ]);
 
     return resource.id;
+  }
+
+  async uploadAvatarToAiMentorLesson(
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+    lessonId: UUIDType,
+    file: Express.Multer.File | null,
+  ) {
+    const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
+
+    if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {
+      throw new ForbiddenException({ message: "common.toast.noAccess" });
+    }
+
+    if (!file) {
+      await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
+      return;
+    }
+
+    if (!ALLOWED_AVATAR_IMAGE_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException({
+        message: "adminCourseView.toast.aiMentorAvatarIncorrectType",
+      });
+    }
+
+    const { fileKey } = await this.fileService.uploadFile(file, "lessons/ai-mentor-avatars");
+
+    await this.adminLessonRepository.updateAiMentorAvatar(lessonId, fileKey);
   }
 }

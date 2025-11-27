@@ -66,7 +66,7 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     <TooltipProvider>
       <header
         className={cn(
-          "sticky top-0 z-10 h-min w-full transition-all duration-300 ease-in-out",
+          "sticky top-0 h-min w-full transition-all duration-300 ease-in-out",
           "2xl:flex 2xl:h-dvh 2xl:w-14 2xl:flex-col 2xl:gap-y-6 2xl:px-2 2xl:py-4",
           "3xl:static 3xl:w-64 3xl:p-4",
         )}

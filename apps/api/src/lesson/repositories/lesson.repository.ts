@@ -3,6 +3,7 @@ import { and, desc, eq, getTableColumns, ilike, isNull, or, sql } from "drizzle-
 
 import { DatabasePg, type UUIDType } from "src/common";
 import {
+  aiMentorLessons,
   aiMentorStudentLessonProgress,
   chapters,
   courses,
@@ -71,6 +72,12 @@ export class LessonRepository {
               END
           )
         `,
+        aiMentor: sql<{ name: string; avatarReference: string } | null>`
+          json_build_object(
+             'name', ai_mentor_lessons.name,
+             'avatarReference', ai_mentor_lessons.avatar_reference
+          )
+        `,
         isExternal: sql<boolean>`${lessons.isExternal}`,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,
         isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NULL THEN FALSE ELSE TRUE END`,
@@ -93,6 +100,7 @@ export class LessonRepository {
         `,
       })
       .from(lessons)
+      .leftJoin(aiMentorLessons, eq(aiMentorLessons.lessonId, id))
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .leftJoin(
         studentCourses,

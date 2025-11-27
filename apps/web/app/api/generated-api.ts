@@ -36,6 +36,7 @@ export interface RegisterResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -61,6 +62,7 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -92,6 +94,7 @@ export interface CurrentUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -529,6 +532,7 @@ export interface GetUsersResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   } & {
     groupId: string | null;
@@ -552,6 +556,7 @@ export interface GetUserByIdResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     groupId: string | null;
     groupName: string | null;
@@ -593,6 +598,7 @@ export interface UpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -633,6 +639,7 @@ export interface AdminUpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -1033,6 +1040,7 @@ export interface GetBetaCourseByIdResponse {
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
+        avatarReferenceUrl?: string;
         fileType?: string | null;
         questions?: {
           /** @format uuid */
@@ -1076,6 +1084,7 @@ export interface GetBetaCourseByIdResponse {
           aiMentorInstructions: string;
           completionConditions: string;
           type: "mentor" | "teacher" | "roleplay";
+          avatarReference: string | null;
         } | null;
         updatedAt?: string;
       }[];
@@ -1321,6 +1330,7 @@ export type BetaCreateChapterBody = {
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
+    avatarReferenceUrl?: string;
     fileType?: string | null;
     questions?: {
       /** @format uuid */
@@ -1364,6 +1374,7 @@ export type BetaCreateChapterBody = {
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      avatarReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -1397,6 +1408,7 @@ export type UpdateChapterBody = {
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
+    avatarReferenceUrl?: string;
     fileType?: string | null;
     questions?: {
       /** @format uuid */
@@ -1440,6 +1452,7 @@ export type UpdateChapterBody = {
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      avatarReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -1590,6 +1603,10 @@ export interface GetLessonByIdResponse {
       percentage: number | null;
       requiredScore: number | null;
     } | null;
+    aiMentor?: {
+      name: string;
+      avatarReferenceUrl?: string;
+    } | null;
   };
 }
 
@@ -1598,6 +1615,7 @@ export type BetaCreateLessonBody = {
   type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1641,6 +1659,7 @@ export type BetaCreateLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -1661,6 +1680,7 @@ export type BetaCreateAiMentorLessonBody = {
   title: string;
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1704,6 +1724,7 @@ export type BetaCreateAiMentorLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -1713,6 +1734,7 @@ export type BetaCreateAiMentorLessonBody = {
   aiMentorInstructions: string;
   completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
+  name?: string;
 };
 
 export interface BetaCreateAiMentorLessonResponse {
@@ -1727,6 +1749,7 @@ export type BetaUpdateAiMentorLessonBody = {
   title: string;
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1770,12 +1793,14 @@ export type BetaUpdateAiMentorLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
   aiMentorInstructions: string;
   completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
+  name?: string;
 };
 
 export interface BetaUpdateAiMentorLessonResponse {
@@ -1903,6 +1928,7 @@ export type BetaUpdateLessonBody = {
   type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1946,6 +1972,7 @@ export type BetaUpdateLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -2330,6 +2357,7 @@ export interface GetAllGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2358,6 +2386,7 @@ export interface GetGroupByIdResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2380,6 +2409,7 @@ export interface GetUserGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -4879,17 +4909,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name LessonControllerGetLessonImage
-     * @request GET:/api/lesson/lesson-image/{lessonId}/{fileKey}
+     * @request GET:/api/lesson/lesson-image/{resourceId}
      */
-    lessonControllerGetLessonImage: (
-      resourceId: string,
-      lessonId: string,
-      fileKey: string,
+    lessonControllerGetLessonImage: (resourceId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/lesson/lesson-image/${resourceId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerUploadAiMentorAvatar
+     * @request POST:/api/lesson/ai-mentor/avatar
+     */
+    lessonControllerUploadAiMentorAvatar: (
+      data: {
+        /** @format uuid */
+        lessonId: string;
+        /** @format binary */
+        file: File | null;
+      },
       params: RequestParams = {},
     ) =>
-      this.request<void, any>({
-        path: `/api/lesson/lesson-image/${lessonId}/${fileKey}`,
-        method: "GET",
+      this.request<string, any>({
+        path: `/api/lesson/ai-mentor/avatar`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
         ...params,
       }),
 

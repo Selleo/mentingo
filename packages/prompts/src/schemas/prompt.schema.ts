@@ -20,6 +20,7 @@ export const aiPromptSchema = Type.Object({
   lessonTitle: Type.String(),
   lessonInstructions: Type.String(),
   securityAndRagBlock: Type.String(),
+  name: Type.String(),
   groups: groupsSchema,
 });
 
