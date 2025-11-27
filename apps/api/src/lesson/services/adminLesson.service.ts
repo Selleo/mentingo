@@ -293,7 +293,7 @@ export class AdminLessonService {
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
         throw new BadRequestException("Instructions and conditions required");
 
-      if (data.name?.length === 0) {
+      if (data.name?.trim().length === 0) {
         data.name = "AI Mentor";
       }
 
@@ -585,13 +585,13 @@ export class AdminLessonService {
   ) {
     const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
 
+    if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {
+      throw new ForbiddenException({ message: "common.toast.noAccess" });
+    }
+
     if (!file) {
       await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
       return;
-    }
-
-    if (!(currentUserRole === USER_ROLES.ADMIN && course.authorId === currentUserId)) {
-      throw new ForbiddenException({ message: "common.toast.noAccess" });
     }
 
     if (!ALLOWED_AVATAR_IMAGE_TYPES.includes(file.mimetype)) {
