@@ -117,14 +117,17 @@ const AiMentorLesson = ({
             <ChatMessage
               key={idx}
               aiName={lesson.aiMentor?.name}
-              avatarUrl={lesson.aiMentor?.avatarS3Url}
+              avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
               {...messages}
             />
           ))}
 
         {isSubmitted ||
           (isJudgePending && (
-            <ChatLoader aiName={lesson.aiMentor?.name} avatarUrl={lesson.aiMentor?.avatarS3Url} />
+            <ChatLoader
+              aiName={lesson.aiMentor?.name}
+              avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
+            />
           ))}
         <div ref={messagesEndRef} />
       </div>

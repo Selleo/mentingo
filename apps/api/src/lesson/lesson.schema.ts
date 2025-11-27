@@ -73,7 +73,7 @@ export const aiMentorLessonSchema = Type.Object({
   aiMentorInstructions: Type.String(),
   completionConditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
-  avatarS3Key: Type.Union([Type.String(), Type.Null()]),
+  avatarReference: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const lessonResourceType = Type.Union([Type.Literal("embed", Type.Literal("text"))]);
@@ -113,7 +113,7 @@ export const lessonSchema = Type.Object({
   description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   displayOrder: Type.Number(),
   fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  avatarS3SignedUrl: Type.Optional(Type.String()),
+  avatarReferenceUrl: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
   aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
@@ -197,8 +197,8 @@ export const lessonShowSchema = Type.Object({
   aiMentor: Type.Optional(
     Type.Union([
       Type.Object({
-        name: Type.Union([Type.String(), Type.Null()]),
-        avatarS3Url: Type.Optional(Type.String()),
+        name: Type.String(),
+        avatarReferenceUrl: Type.Optional(Type.String()),
       }),
       Type.Null(),
     ]),

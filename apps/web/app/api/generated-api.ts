@@ -1040,7 +1040,7 @@ export interface GetBetaCourseByIdResponse {
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
-        avatarS3SignedUrl?: string;
+        avatarReferenceUrl?: string;
         fileType?: string | null;
         questions?: {
           /** @format uuid */
@@ -1084,7 +1084,7 @@ export interface GetBetaCourseByIdResponse {
           aiMentorInstructions: string;
           completionConditions: string;
           type: "mentor" | "teacher" | "roleplay";
-          avatarS3Key: string | null;
+          avatarReference: string | null;
         } | null;
         updatedAt?: string;
       }[];
@@ -1330,7 +1330,7 @@ export type BetaCreateChapterBody = {
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
-    avatarS3SignedUrl?: string;
+    avatarReferenceUrl?: string;
     fileType?: string | null;
     questions?: {
       /** @format uuid */
@@ -1374,7 +1374,7 @@ export type BetaCreateChapterBody = {
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
-      avatarS3Key: string | null;
+      avatarReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -1408,7 +1408,7 @@ export type UpdateChapterBody = {
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
-    avatarS3SignedUrl?: string;
+    avatarReferenceUrl?: string;
     fileType?: string | null;
     questions?: {
       /** @format uuid */
@@ -1452,7 +1452,7 @@ export type UpdateChapterBody = {
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
-      avatarS3Key: string | null;
+      avatarReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -1603,9 +1603,9 @@ export interface GetLessonByIdResponse {
       percentage: number | null;
       requiredScore: number | null;
     } | null;
-    aiMentor: {
+    aiMentor?: {
       name: string;
-      avatarS3Url?: string;
+      avatarReferenceUrl?: string;
     } | null;
   };
 }
@@ -1615,7 +1615,7 @@ export type BetaCreateLessonBody = {
   type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
-  avatarS3SignedUrl?: string;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1659,7 +1659,7 @@ export type BetaCreateLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
-    avatarS3Key: string | null;
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -1680,7 +1680,7 @@ export type BetaCreateAiMentorLessonBody = {
   title: string;
   description?: string | null;
   fileS3Key?: string | null;
-  avatarS3SignedUrl?: string;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1724,7 +1724,7 @@ export type BetaCreateAiMentorLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
-    avatarS3Key: string | null;
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -1749,7 +1749,7 @@ export type BetaUpdateAiMentorLessonBody = {
   title: string;
   description?: string | null;
   fileS3Key?: string | null;
-  avatarS3SignedUrl?: string;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1793,7 +1793,7 @@ export type BetaUpdateAiMentorLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
-    avatarS3Key: string | null;
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -1928,7 +1928,7 @@ export type BetaUpdateLessonBody = {
   type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
-  avatarS3SignedUrl?: string;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1972,7 +1972,7 @@ export type BetaUpdateLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
-    avatarS3Key: string | null;
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {

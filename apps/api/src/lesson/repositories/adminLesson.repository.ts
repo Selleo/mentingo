@@ -460,7 +460,7 @@ export class AdminLessonRepository {
   async updateAiMentorAvatar(lessonId: UUIDType, fileKey: string | null) {
     return this.db
       .update(aiMentorLessons)
-      .set({ avatarS3Key: fileKey })
+      .set({ avatarReference: fileKey })
       .where(eq(aiMentorLessons.lessonId, lessonId));
   }
 }

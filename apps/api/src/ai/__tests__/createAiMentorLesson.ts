@@ -58,7 +58,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       completionConditions: faker.commerce.productDescription(),
       type: AI_MENTOR_TYPE.MENTOR,
       name: "AI Mentor",
-      avatarS3Key: null,
+      avatarReference: null,
     };
   });
 };

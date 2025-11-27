@@ -1,5 +1,5 @@
 {
-  "id": "044645bf-32f3-4e36-9204-8763511b8a6d",
+  "id": "e552e066-8171-4f40-b71b-2282ff22e7b7",
   "prevId": "66480f66-4b8a-47b7-b344-ad432a96f1e8",
   "version": "7",
   "dialect": "postgresql",
@@ -54,8 +54,8 @@
           "notNull": true,
           "default": "'AI Mentor'"
         },
-        "avatar_s3_key": {
-          "name": "avatar_s3_key",
+        "avatar_reference": {
+          "name": "avatar_reference",
           "type": "varchar(200)",
           "primaryKey": false,
           "notNull": false

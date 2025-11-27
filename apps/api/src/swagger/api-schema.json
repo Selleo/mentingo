@@ -9665,7 +9665,7 @@
                               }
                             ]
                           },
-                          "avatarS3SignedUrl": {
+                          "avatarReferenceUrl": {
                             "type": "string"
                           },
                           "fileType": {
@@ -9874,7 +9874,7 @@
                                       }
                                     ]
                                   },
-                                  "avatarS3Key": {
+                                  "avatarReference": {
                                     "anyOf": [
                                       {
                                         "type": "string"
@@ -9891,7 +9891,7 @@
                                   "aiMentorInstructions",
                                   "completionConditions",
                                   "type",
-                                  "avatarS3Key"
+                                  "avatarReference"
                                 ]
                               },
                               {
@@ -10964,7 +10964,7 @@
                         }
                       ]
                     },
-                    "avatarS3SignedUrl": {
+                    "avatarReferenceUrl": {
                       "type": "string"
                     },
                     "fileType": {
@@ -11173,7 +11173,7 @@
                                 }
                               ]
                             },
-                            "avatarS3Key": {
+                            "avatarReference": {
                               "anyOf": [
                                 {
                                   "type": "string"
@@ -11190,7 +11190,7 @@
                             "aiMentorInstructions",
                             "completionConditions",
                             "type",
-                            "avatarS3Key"
+                            "avatarReference"
                           ]
                         },
                         {
@@ -11363,7 +11363,7 @@
                         }
                       ]
                     },
-                    "avatarS3SignedUrl": {
+                    "avatarReferenceUrl": {
                       "type": "string"
                     },
                     "fileType": {
@@ -11572,7 +11572,7 @@
                                 }
                               ]
                             },
-                            "avatarS3Key": {
+                            "avatarReference": {
                               "anyOf": [
                                 {
                                   "type": "string"
@@ -11589,7 +11589,7 @@
                             "aiMentorInstructions",
                             "completionConditions",
                             "type",
-                            "avatarS3Key"
+                            "avatarReference"
                           ]
                         },
                         {
@@ -12400,16 +12400,9 @@
                     "type": "object",
                     "properties": {
                       "name": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
+                        "type": "string"
                       },
-                      "avatarS3Url": {
+                      "avatarReferenceUrl": {
                         "type": "string"
                       }
                     },
@@ -12502,7 +12495,7 @@
                   }
                 ]
               },
-              "avatarS3SignedUrl": {
+              "avatarReferenceUrl": {
                 "type": "string"
               },
               "fileType": {
@@ -12711,7 +12704,7 @@
                           }
                         ]
                       },
-                      "avatarS3Key": {
+                      "avatarReference": {
                         "anyOf": [
                           {
                             "type": "string"
@@ -12728,7 +12721,7 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarS3Key"
+                      "avatarReference"
                     ]
                   },
                   {
@@ -12815,7 +12808,7 @@
                   }
                 ]
               },
-              "avatarS3SignedUrl": {
+              "avatarReferenceUrl": {
                 "type": "string"
               },
               "fileType": {
@@ -13024,7 +13017,7 @@
                           }
                         ]
                       },
-                      "avatarS3Key": {
+                      "avatarReference": {
                         "anyOf": [
                           {
                             "type": "string"
@@ -13041,7 +13034,7 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarS3Key"
+                      "avatarReference"
                     ]
                   },
                   {
@@ -13155,7 +13148,7 @@
                   }
                 ]
               },
-              "avatarS3SignedUrl": {
+              "avatarReferenceUrl": {
                 "type": "string"
               },
               "fileType": {
@@ -13364,7 +13357,7 @@
                           }
                         ]
                       },
-                      "avatarS3Key": {
+                      "avatarReference": {
                         "anyOf": [
                           {
                             "type": "string"
@@ -13381,7 +13374,7 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarS3Key"
+                      "avatarReference"
                     ]
                   },
                   {
@@ -14011,7 +14004,7 @@
                   }
                 ]
               },
-              "avatarS3SignedUrl": {
+              "avatarReferenceUrl": {
                 "type": "string"
               },
               "fileType": {
@@ -14220,7 +14213,7 @@
                           }
                         ]
                       },
-                      "avatarS3Key": {
+                      "avatarReference": {
                         "anyOf": [
                           {
                             "type": "string"
@@ -14237,7 +14230,7 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
-                      "avatarS3Key"
+                      "avatarReference"
                     ]
                   },
                   {
