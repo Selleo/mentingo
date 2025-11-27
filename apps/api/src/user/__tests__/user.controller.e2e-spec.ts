@@ -1,6 +1,7 @@
 import { omit } from "lodash";
-import { GroupService } from "src/group/group.service";
 import request from "supertest";
+
+import { GroupService } from "src/group/group.service";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
