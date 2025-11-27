@@ -49,8 +49,8 @@ import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.
 export class AuthService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    private jwtService: JwtService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    private jwtService: JwtService,
     private configService: ConfigService,
     private emailService: EmailService,
     private createPasswordService: CreatePasswordService,
