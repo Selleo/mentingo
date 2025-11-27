@@ -1,6 +1,7 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
+
 import { ApiClient } from "../api-client";
 
 import type { GetCourseResponse } from "../generated-api";
