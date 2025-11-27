@@ -161,6 +161,7 @@ export class NotifyUsersHandler implements IEventHandler {
         const { text, html } = new UserAssignedToCourseEmail({
           courseName,
           courseLink,
+          formatedCourseDueDate: null,
           ...defaultEmailSettings,
         });
 
