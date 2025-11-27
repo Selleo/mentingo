@@ -14,6 +14,7 @@ module.exports = {
   },
   ignorePatterns: [".eslintrc.js"],
   settings: {
+    "import/internal-regex": "^src/",
     "import/resolver": {
       typescript: true,
       node: true,
