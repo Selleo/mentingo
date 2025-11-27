@@ -727,6 +727,20 @@ export class UserService {
           .insert(groupUsers)
           .values({ userId: createdUser.id, groupId: group.id })
           .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
+
+        const existingCourses = await trx
+          .select({ id: courses.id })
+          .from(courses)
+          .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
+          .where(eq(groupCourses.groupId, group.id));
+
+        if (!!existingCourses.length)
+          await this.enrollUserToGroupCourses(
+            createdUser.id,
+            group.id,
+            existingCourses.map(({ id }) => id),
+            trx,
+          );
       });
     }
 
