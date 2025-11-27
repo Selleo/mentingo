@@ -1,12 +1,13 @@
 import { t } from "i18next";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 
-import { cn } from "~/lib/utils";
-
+import { cn } from "../../lib/utils";
 import { Icon } from "../Icon";
 
-import { generateImageCrop } from "./utils";
+import { useSvgPreprocessEffects } from "./useSvgPreprocessEffects";
+import { isSvgUrl, preprocessSvgFile, preprocessSvgUrl } from "./utils/svgUtils";
+import { generateImageCrop } from "./utils/utils";
 
 import type { Area, Point } from "react-easy-crop";
 
@@ -35,6 +36,8 @@ export const ImageCropUploadInput = ({
 }: ImageCropUploadProps) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [processedImageUrl, setProcessedImageUrl] = useState<string | null>(null);
+  const previousObjectUrlRef = useRef<string | null>(null);
 
   const onCropChange = (crop: Point) => {
     setCrop(crop);
@@ -45,19 +48,29 @@ export const ImageCropUploadInput = ({
   };
 
   const onCropComplete = async (_croppedArea: Area, croppedAreaPixels: Area) => {
-    if (imageUrl) {
-      handleImageCropUpload(await generateImageCrop(imageUrl, croppedAreaPixels, maxResolution));
-    }
+    const src = processedImageUrl ?? imageUrl;
+
+    if (!src) return;
+
+    handleImageCropUpload(await generateImageCrop(src, croppedAreaPixels, maxResolution));
   };
+
+  useSvgPreprocessEffects(
+    imageUrl ?? null,
+    isSvgUrl,
+    preprocessSvgUrl,
+    previousObjectUrlRef,
+    setProcessedImageUrl,
+  );
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-2">
       <div className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100">
-        {imageUrl ? (
+        {processedImageUrl ? (
           <>
             {isCroppable ? (
               <Cropper
-                image={imageUrl}
+                image={processedImageUrl}
                 crop={crop}
                 zoom={zoom}
                 aspect={aspect}
@@ -68,7 +81,7 @@ export const ImageCropUploadInput = ({
                 onCropComplete={onCropComplete}
               />
             ) : (
-              <img src={imageUrl} alt="Uploaded" className="h-full w-full object-cover" />
+              <img src={processedImageUrl} alt="Uploaded" className="h-full w-full object-cover" />
             )}
           </>
         ) : (
@@ -106,9 +119,15 @@ export const ImageCropUploadInput = ({
               accept=".png, .jpg, .jpeg, .svg"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (file) {
-                  handleImageUpload(file);
+
+                if (!file) return;
+
+                if (file.type === "image/svg+xml") {
+                  preprocessSvgFile(file).then((fixed) => handleImageUpload(fixed));
+                  return;
                 }
+
+                handleImageUpload(file);
               }}
               disabled={isUploading}
               className="absolute inset-0 cursor-pointer opacity-0"
