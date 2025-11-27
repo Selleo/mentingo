@@ -69,23 +69,38 @@ export class LocalizationService {
   /**
    * Note: callers must join `courses` so `courses.baseLanguage` and `courses.availableLocales` are available.
    */
-  getLocalizedSqlField(entityType: EntityType, field: EntityField, language?: SupportedLanguages) {
-    const lang = language ?? courses.baseLanguage;
-
-    const fieldIdentifier = sql.identifier(field);
-
-    const tableMap: Record<EntityType, string> = {
-      [ENTITY_TYPE.COURSE]: "courses",
-      [ENTITY_TYPE.CHAPTER]: "chapters",
-      [ENTITY_TYPE.LESSON]: "lessons",
+  getLocalizedSqlField(
+    entityType: EntityType,
+    field: EntityField,
+    language?: SupportedLanguages,
+  ) {
+    const columnMap: Record<EntityType, Record<EntityField, any>> = {
+      [ENTITY_TYPE.COURSE]: {
+        title: courses.title,
+        description: courses.description,
+      },
+      [ENTITY_TYPE.CHAPTER]: {
+        title: chapters.title,
+        description: chapters.title,
+      },
+      [ENTITY_TYPE.LESSON]: {
+        title: lessons.title,
+        description: lessons.description,
+      },
     };
 
-    const tableName = tableMap[entityType];
+    const fieldColumn = columnMap[entityType][field];
+    const langExpr = language ? sql`${language}` : courses.baseLanguage;
 
-    return sql<string>`CASE WHEN ${courses.availableLocales} @> ARRAY[${lang}] THEN ${sql.raw(
-      tableName,
-    )}.${fieldIdentifier}->>${lang} ELSE ${sql.raw(tableName)}.${fieldIdentifier}->>${
-      courses.baseLanguage
-    } END`;
+    return sql<string>`
+      CASE
+        WHEN ${courses.availableLocales} @> ARRAY[${langExpr}]::text[]
+          THEN COALESCE(
+            ${fieldColumn}::jsonb ->> ${langExpr}::text,
+            ${fieldColumn}::jsonb ->> ${courses.baseLanguage}::text
+          )
+        ELSE ${fieldColumn}::jsonb ->> ${courses.baseLanguage}::text
+      END
+    `;
   }
 }

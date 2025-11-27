@@ -502,8 +502,9 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              authorAvatarUrl,
+            );
 
             return {
               ...itemWithoutReferences,
@@ -547,10 +548,18 @@ export class CourseService {
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: sql<string>`courses.title->>${actualLanguage}`,
+        title: this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.TITLE,
+          actualLanguage,
+        ),
         thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
         category: sql<string>`${categories.title}`,
-        description: sql<string>`courses.description->>${actualLanguage}`,
+        description: this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.COURSE,
+          ENTITY_FIELD.DESCRIPTION,
+          actualLanguage,
+        ),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
@@ -588,7 +597,11 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: sql<string>`chapters.title->>${actualLanguage}`,
+        title: this.localizationService.getLocalizedSqlField(
+          ENTITY_TYPE.CHAPTER,
+          ENTITY_FIELD.TITLE,
+          actualLanguage,
+        ),
         isSubmitted: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -630,13 +643,23 @@ export class CourseService {
               FROM (
                 SELECT
                   ${lessons.id} AS id,
-                  ${lessons.title}->>${actualLanguage} AS title,
+                  ${this.localizationService.getLocalizedSqlField(
+                    ENTITY_TYPE.LESSON,
+                    ENTITY_FIELD.TITLE,
+                    actualLanguage,
+                  )} AS title,
                   ${lessons.type} AS type,
                   ${lessons.displayOrder} AS "displayOrder",
                   ${lessons.isExternal} AS "isExternal",
                   CASE
-                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${PROGRESS_STATUSES.BLOCKED}
-                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${studentLessonProgress.isQuizPassed} IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${PROGRESS_STATUSES.COMPLETED}
+                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${
+                      PROGRESS_STATUSES.BLOCKED
+                    }
+                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${
+                      studentLessonProgress.isQuizPassed
+                    } IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${
+                      PROGRESS_STATUSES.COMPLETED
+                    }
                     WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
@@ -645,7 +668,9 @@ export class CourseService {
                     ELSE NULL
                   END AS "quizQuestionCount"
                 FROM ${lessons}
-                LEFT JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
+                LEFT JOIN ${studentLessonProgress} ON ${lessons.id} = ${
+                  studentLessonProgress.lessonId
+                }
                   AND ${studentLessonProgress.studentId} = ${userId}
                 LEFT JOIN ${questions} ON ${lessons.id} = ${questions.lessonId}
                 WHERE ${lessons.chapterId} = ${chapters.id}
@@ -678,10 +703,14 @@ export class CourseService {
         studentCourses,
         and(eq(studentCourses.courseId, course.id), eq(studentCourses.studentId, userId)),
       )
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
     const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailS3Key);
+
+    console.log(courseChapterList)
+    console.log(courseChapterList.map(({ lessons }) => lessons));
 
     return {
       ...course,
@@ -913,8 +942,9 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl =
-          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+          authorAvatarUrl,
+        );
 
         return {
           ...courseWithoutReferences,
