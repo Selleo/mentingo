@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 import { useLesson } from "~/api/queries";
 import { Button } from "~/components/ui/button";
@@ -16,15 +17,14 @@ const AiMentorLessonPreview = ({ onClose, lesson }: AiMentorPreviewProps) => {
   const { language } = useLanguageStore();
   const { data: lessonData, isFetching: lessonLoading } = useLesson(lesson.id, language);
 
-  return (
-    <div className="fixed left-0 top-0 z-[100] box-border flex size-full max-h-dvh justify-center bg-gray-900/50 p-4">
+  const modal = (
+    <div className="fixed left-0 top-0 z-10 box-border flex size-full justify-center bg-gray-900/50 p-4">
       <div className="flex w-full max-w-6xl flex-col">
         <div className="flex items-center justify-between rounded-t-lg bg-white p-4">
           <div>
             <h2 className="font-medium text-primary-800">{lesson.title}</h2>
             <h2 className="text-sm text-gray-400">AI Mentor</h2>
           </div>
-
           <div className="flex gap-3">
             <Button
               onClick={onClose}
@@ -41,6 +41,13 @@ const AiMentorLessonPreview = ({ onClose, lesson }: AiMentorPreviewProps) => {
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return modal;
+  }
+
+  // portal is used to avoid z-index issues
+  return createPortal(modal, document.body);
 };
 
 export default AiMentorLessonPreview;

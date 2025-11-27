@@ -5,7 +5,12 @@ import { useTranslation } from "react-i18next";
 
 import { useJudgeLesson } from "~/api/mutations/useJudgeLesson";
 import { useRetakeLesson } from "~/api/mutations/useRetakeLesson";
-import { useCurrentThreadMessages } from "~/api/queries/useCurrentThreadMessages";
+import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
+import {
+  getCurrentThreadQueryKey,
+  useCurrentThreadMessages,
+} from "~/api/queries/useCurrentThreadMessages";
+import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -62,6 +67,14 @@ const AiMentorLesson = ({
             content: body.messages[body.messages.length - 1]?.content || "",
             threadId: lesson.threadId ?? "",
           }),
+        });
+      },
+      onFinish: () => {
+        queryClient.invalidateQueries({
+          queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY, { id: courseId }],
+        });
+        queryClient.invalidateQueries({
+          queryKey: getCurrentThreadQueryKey(lesson.id),
         });
       },
     });

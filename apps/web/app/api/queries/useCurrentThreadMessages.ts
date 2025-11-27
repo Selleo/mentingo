@@ -9,6 +9,12 @@ interface CurrentThreadQueryParams {
   studentId?: string | null;
 }
 
+export const getCurrentThreadQueryKey = (lessonId: string, studentId?: string | null) => [
+  "threadMessages",
+  { lessonId },
+  studentId ? { studentId } : null,
+];
+
 export const currentThreadQueryOptions = ({
   lessonId,
   isThreadLoading,
@@ -17,7 +23,7 @@ export const currentThreadQueryOptions = ({
 }: CurrentThreadQueryParams) =>
   queryOptions({
     enabled: !!threadId && !isThreadLoading,
-    queryKey: ["threadMessages", { lessonId }, studentId ? { studentId } : null],
+    queryKey: getCurrentThreadQueryKey(lessonId, studentId),
     queryFn: async () => {
       const response = await ApiClient.api.aiControllerGetThreadMessages({
         thread: threadId,
