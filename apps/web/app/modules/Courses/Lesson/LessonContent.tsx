@@ -160,11 +160,12 @@ export const LessonContent = ({
       .with("video", () => (
         <Video
           url={lesson.fileUrl}
+          isExternalUrl={lesson.isExternal}
           onVideoEnded={() => {
             setIsNextDisabled(false);
             isStudent && markLessonAsCompleted({ lessonId: lesson.id, language });
+            handleNext();
           }}
-          isExternalUrl={lesson.isExternal}
         />
       ))
       .with("presentation", () => (
