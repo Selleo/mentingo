@@ -53,7 +53,7 @@ fi
 echo ""
 
 # Prerequisites check
-echo -e "${GREEN}[0/9]${NC} Checking prerequisites..."
+echo -e "${GREEN}[0/10]${NC} Checking prerequisites..."
 
 # Check if .tool-versions exists
 if [[ ! -f ".tool-versions" ]]; then

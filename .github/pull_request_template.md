@@ -11,9 +11,17 @@
 ## Issue(s)
 [](https://github.com/Selleo/mentingo/issues/)
 
-## Overview
+## Overview 
+<!--
+General description what it does
+-->
 
-## Screenshots
+## Business Value
+<!--
+Why are we doing this from a business perspective? What value does this bring to the project from end-users perspective?
+-->
+
+## Screenshots / Video
 
 <!-- ## Testing prerequisites
 
@@ -22,6 +30,8 @@
 - [ ] A
 - [ ] B
 - [ ] C 
+
+# Video showing the complete working flow of the feature / enhancement / bug-fix included in this code change.
 -->
 
 ### Notes 
