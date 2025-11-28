@@ -822,6 +822,291 @@
         }
       }
     },
+    "/api/group/all": {
+      "get": {
+        "operationId": "GroupController_getAllGroups",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/{groupId}": {
+      "get": {
+        "operationId": "GroupController_getGroupById",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupByIdResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "GroupController_updateGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGroupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GroupController_deleteGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/user/{userId}": {
+      "get": {
+        "operationId": "GroupController_getUserGroups",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group": {
+      "post": {
+        "operationId": "GroupController_createGroup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GroupController_bulkDeleteGroups",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDeleteGroupsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkDeleteGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/set": {
+      "post": {
+        "operationId": "GroupController_setUserGroups",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/groupIds"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetUserGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/healthcheck": {
       "get": {
         "operationId": "HealthController_check",
@@ -1095,11 +1380,14 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "groups",
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2129,12 +2417,14 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "groups",
             "required": false,
             "in": "query",
             "schema": {
-              "format": "uuid",
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2797,10 +3087,6 @@
                   "type": "string"
                 },
                 {
-                  "const": "groupName",
-                  "type": "string"
-                },
-                {
                   "const": "completedLessonsCount",
                   "type": "string"
                 },
@@ -2810,10 +3096,6 @@
                 },
                 {
                   "const": "-studentName",
-                  "type": "string"
-                },
-                {
-                  "const": "-groupName",
                   "type": "string"
                 },
                 {
@@ -4277,326 +4559,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreatePromotionCouponResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/all": {
-      "get": {
-        "operationId": "GroupController_getAllGroups",
-        "parameters": [
-          {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAllGroupsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/{groupId}": {
-      "get": {
-        "operationId": "GroupController_getGroupById",
-        "parameters": [
-          {
-            "name": "groupId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetGroupByIdResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "GroupController_updateGroup",
-        "parameters": [
-          {
-            "name": "groupId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateGroupBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "GroupController_deleteGroup",
-        "parameters": [
-          {
-            "name": "groupId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/user/{userId}": {
-      "get": {
-        "operationId": "GroupController_getUserGroups",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserGroupsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group": {
-      "post": {
-        "operationId": "GroupController_createGroup",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateGroupBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "GroupController_bulkDeleteGroups",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkDeleteGroupsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BulkDeleteGroupsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/assign": {
-      "post": {
-        "operationId": "GroupController_assignUserToGroup",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AssignUserToGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/unassign": {
-      "delete": {
-        "operationId": "GroupController_unassignUserFromGroup",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnassignUserFromGroupResponse"
                 }
               }
             }
@@ -7303,6 +7265,524 @@
           "data"
         ]
       },
+      "GetAllGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "characteristic": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "archived": {
+                        "type": "boolean"
+                      },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "createdAt",
+                      "updatedAt",
+                      "email",
+                      "firstName",
+                      "lastName",
+                      "role",
+                      "archived",
+                      "deletedAt",
+                      "profilePictureUrl"
+                    ]
+                  }
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "characteristic"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetGroupByIdResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "characteristic": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "role",
+                    "archived",
+                    "deletedAt",
+                    "profilePictureUrl"
+                  ]
+                }
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "characteristic"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "characteristic": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "archived": {
+                        "type": "boolean"
+                      },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "createdAt",
+                      "updatedAt",
+                      "email",
+                      "firstName",
+                      "lastName",
+                      "role",
+                      "archived",
+                      "deletedAt",
+                      "profilePictureUrl"
+                    ]
+                  }
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "characteristic"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreateGroupBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "characteristic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateGroupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateGroupBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "characteristic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateGroupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "characteristic": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteGroupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BulkDeleteGroupsBody": {
+        "type": "array",
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "BulkDeleteGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "groupIds": {
+        "type": "array",
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "SetUserGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetUsersResponse": {
         "type": "object",
         "properties": {
@@ -7375,31 +7855,28 @@
                 {
                   "type": "object",
                   "properties": {
-                    "groupId": {
-                      "anyOf": [
-                        {
-                          "format": "uuid",
-                          "type": "string"
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "groupName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "id",
+                          "name"
+                        ]
+                      }
                     }
                   },
                   "required": [
-                    "groupId",
-                    "groupName"
+                    "groups"
                   ]
                 }
               ]
@@ -7486,26 +7963,24 @@
                   }
                 ]
               },
-              "groupId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "groupName": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [
@@ -7519,8 +7994,7 @@
               "archived",
               "deletedAt",
               "profilePictureUrl",
-              "groupId",
-              "groupName"
+              "groups"
             ]
           }
         },
@@ -7651,11 +8125,13 @@
           "lastName": {
             "type": "string"
           },
-          "groupId": {
+          "groups": {
             "anyOf": [
               {
-                "format": "uuid",
-                "type": "string"
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               {
                 "type": "null"
@@ -7807,11 +8283,13 @@
           "lastName": {
             "type": "string"
           },
-          "groupId": {
+          "groups": {
             "anyOf": [
               {
-                "format": "uuid",
-                "type": "string"
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               {
                 "type": "null"
@@ -7984,24 +8462,27 @@
         "type": "null"
       },
       "BulkAssignUsersToGroupBody": {
-        "type": "object",
-        "properties": {
-          "userIds": {
-            "type": "array",
-            "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "userId": {
               "format": "uuid",
               "type": "string"
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
             }
           },
-          "groupId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "userIds",
-          "groupId"
-        ]
+          "required": [
+            "userId",
+            "groups"
+          ]
+        }
       },
       "ArchiveBulkUsersBody": {
         "type": "object",
@@ -8870,26 +9351,24 @@
                     }
                   ]
                 },
-                "groupId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
+                "groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
                     },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "groupName": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
                 },
                 "id": {
                   "format": "uuid",
@@ -8901,8 +9380,7 @@
                 "lastName",
                 "email",
                 "enrolledAt",
-                "groupId",
-                "groupName",
+                "groups",
                 "id"
               ]
             }
@@ -10394,15 +10872,23 @@
                     }
                   ]
                 },
-                "groupName": {
-                  "anyOf": [
-                    {
-                      "type": "string"
+                "groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
                     },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
                 },
                 "completedLessonsCount": {
                   "type": "number"
@@ -10422,7 +10908,7 @@
                 "studentId",
                 "studentName",
                 "studentAvatarUrl",
-                "groupName",
+                "groups",
                 "completedLessonsCount",
                 "lastActivity"
               ]
@@ -15641,536 +16127,6 @@
               "created",
               "restrictions",
               "timesRedeemed"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetAllGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "characteristic": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "users": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string"
-                      },
-                      "updatedAt": {
-                        "type": "string"
-                      },
-                      "email": {
-                        "type": "string"
-                      },
-                      "firstName": {
-                        "type": "string"
-                      },
-                      "lastName": {
-                        "type": "string"
-                      },
-                      "role": {
-                        "type": "string"
-                      },
-                      "archived": {
-                        "type": "boolean"
-                      },
-                      "deletedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "createdAt",
-                      "updatedAt",
-                      "email",
-                      "firstName",
-                      "lastName",
-                      "role",
-                      "archived",
-                      "deletedAt",
-                      "profilePictureUrl"
-                    ]
-                  }
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "characteristic"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "GetGroupByIdResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "characteristic": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "users": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "createdAt": {
-                      "type": "string"
-                    },
-                    "updatedAt": {
-                      "type": "string"
-                    },
-                    "email": {
-                      "type": "string"
-                    },
-                    "firstName": {
-                      "type": "string"
-                    },
-                    "lastName": {
-                      "type": "string"
-                    },
-                    "role": {
-                      "type": "string"
-                    },
-                    "archived": {
-                      "type": "boolean"
-                    },
-                    "deletedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "profilePictureUrl": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "email",
-                    "firstName",
-                    "lastName",
-                    "role",
-                    "archived",
-                    "deletedAt",
-                    "profilePictureUrl"
-                  ]
-                }
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "characteristic"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetUserGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "characteristic": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "users": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string"
-                      },
-                      "updatedAt": {
-                        "type": "string"
-                      },
-                      "email": {
-                        "type": "string"
-                      },
-                      "firstName": {
-                        "type": "string"
-                      },
-                      "lastName": {
-                        "type": "string"
-                      },
-                      "role": {
-                        "type": "string"
-                      },
-                      "archived": {
-                        "type": "boolean"
-                      },
-                      "deletedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "createdAt",
-                      "updatedAt",
-                      "email",
-                      "firstName",
-                      "lastName",
-                      "role",
-                      "archived",
-                      "deletedAt",
-                      "profilePictureUrl"
-                    ]
-                  }
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "characteristic"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "CreateGroupBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "characteristic": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "CreateGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateGroupBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "characteristic": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "UpdateGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "characteristic": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "DeleteGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "BulkDeleteGroupsBody": {
-        "type": "array",
-        "items": {
-          "format": "uuid",
-          "type": "string"
-        }
-      },
-      "BulkDeleteGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "AssignUserToGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UnassignUserFromGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
             ]
           }
         },

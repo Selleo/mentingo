@@ -36,6 +36,7 @@ export interface RegisterResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -61,6 +62,7 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -92,6 +94,7 @@ export interface CurrentUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -534,6 +537,7 @@ export interface GetAllGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -562,6 +566,7 @@ export interface GetGroupByIdResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -584,6 +589,7 @@ export interface GetUserGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -654,6 +660,7 @@ export interface GetUsersResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   } & {
     groups: {
@@ -680,6 +687,7 @@ export interface GetUserByIdResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     groups: {
       /** @format uuid */
@@ -724,6 +732,7 @@ export interface UpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -764,6 +773,7 @@ export interface AdminUpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
