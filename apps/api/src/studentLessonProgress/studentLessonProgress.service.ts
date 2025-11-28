@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
@@ -448,8 +449,14 @@ export class StudentLessonProgressService {
     if (progress === PROGRESS_STATUSES.COMPLETED) {
       const [studentCourse] = await dbInstance
         .update(studentCourses)
-        .set({ progress, completedAt: sql`now()`, finishedChapterCount })
-        .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)))
+        .set({ progress, completedAt: sql`NOW()`, finishedChapterCount })
+        .where(
+          and(
+            eq(studentCourses.studentId, studentId),
+            eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ),
+        )
         .returning();
 
       const courseCompletionDetails = await this.getUserCourseCompletionDetails(
@@ -476,7 +483,7 @@ export class StudentLessonProgressService {
   ) {
     return dbInstance
       .select({
-        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
         attempts: sql<number>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
@@ -516,6 +523,7 @@ export class StudentLessonProgressService {
         and(
           eq(studentCourses.studentId, studentId),
           eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           isNull(users.deletedAt),
         ),
       );

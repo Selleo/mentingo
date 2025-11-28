@@ -285,6 +285,12 @@ export const studentCourses = pgTable(
       withTimezone: true,
       precision: 3,
     }),
+    enrolledAt: timestamp("enrolled_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).defaultNow(),
+    status: varchar("status").notNull().default("enrolled"), // enrolled/not_enrolled
     paymentId: varchar("payment_id", { length: 50 }),
   },
   (table) => ({

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -16,7 +17,7 @@ export class ChapterRepository {
       .select({
         id: chapters.id,
         isFreemium: chapters.isFreemium,
-        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
       })
       .from(chapters)
       .leftJoin(
@@ -33,7 +34,7 @@ export class ChapterRepository {
         id: chapters.id,
         title: chapters.title,
         isFreemium: chapters.isFreemium,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN true ELSE false END`,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
         lessonCount: chapters.lessonCount,
         completedLessonCount: sql<number>`COALESCE(${studentChapterProgress.completedLessonCount}, 0)`,
         progress: sql<ProgressStatus>`

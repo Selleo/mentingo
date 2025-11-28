@@ -1,0 +1,2 @@
+ALTER TABLE "student_courses" ADD COLUMN "enrolled_at" timestamp(3) with time zone DEFAULT now();--> statement-breakpoint
+ALTER TABLE "student_courses" ADD COLUMN "status" varchar DEFAULT 'enrolled' NOT NULL;

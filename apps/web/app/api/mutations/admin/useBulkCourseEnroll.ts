@@ -6,6 +6,7 @@ import { courseStatisticsQueryOptions } from "~/api/queries/admin/useCourseStati
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
+import { invalidateAllStatisticsQueries } from "~/modules/Courses/CourseView/CourseAdminStatistics/CourseAdminStatistics";
 
 import type { EnrollCoursesBody } from "~/api/generated-api";
 
@@ -28,6 +29,7 @@ export function useBulkCourseEnroll(courseId = "") {
       });
 
       await queryClient.invalidateQueries(courseStatisticsQueryOptions({ id: courseId }));
+      await invalidateAllStatisticsQueries(courseId);
     },
 
     onError: (error) => {

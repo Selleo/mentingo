@@ -36,6 +36,7 @@ export interface RegisterResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -61,6 +62,7 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -92,6 +94,7 @@ export interface CurrentUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
     onboardingStatus: {
@@ -529,6 +532,7 @@ export interface GetUsersResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   } & {
     groupId: string | null;
@@ -552,6 +556,7 @@ export interface GetUserByIdResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
     groupId: string | null;
     groupName: string | null;
@@ -593,6 +598,7 @@ export interface UpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -633,6 +639,7 @@ export interface AdminUpdateUserResponse {
     lastName: string;
     role: string;
     archived: boolean;
+    deletedAt: string | null;
     profilePictureUrl: string | null;
   };
 }
@@ -1184,7 +1191,7 @@ export interface DeleteManyCoursesBody {
 
 export type DeleteManyCoursesResponse = null;
 
-export type UnenrollCourseResponse = null;
+export type UnenrollCoursesResponse = null;
 
 export interface GetCourseStatisticsResponse {
   data: {
@@ -2330,6 +2337,7 @@ export interface GetAllGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2358,6 +2366,7 @@ export interface GetGroupByIdResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -2380,6 +2389,7 @@ export interface GetUserGroupsResponse {
       lastName: string;
       role: string;
       archived: boolean;
+      deletedAt: string | null;
       profilePictureUrl: string | null;
     }[];
     createdAt?: string;
@@ -4317,17 +4327,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CourseControllerUnenrollCourse
+     * @name CourseControllerUnenrollCourses
      * @request DELETE:/api/course/unenroll-course
      */
-    courseControllerUnenrollCourse: (
+    courseControllerUnenrollCourses: (
       query?: {
         /** @format uuid */
-        id?: string;
+        courseId?: string;
+        userIds?: string[];
       },
       params: RequestParams = {},
     ) =>
-      this.request<UnenrollCourseResponse, any>({
+      this.request<UnenrollCoursesResponse, any>({
         path: `/api/course/unenroll-course`,
         method: "DELETE",
         query: query,
@@ -4879,16 +4890,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name LessonControllerGetLessonImage
-     * @request GET:/api/lesson/lesson-image/{lessonId}/{fileKey}
+     * @request GET:/api/lesson/lesson-image/{resourceId}
      */
-    lessonControllerGetLessonImage: (
-      resourceId: string,
-      lessonId: string,
-      fileKey: string,
-      params: RequestParams = {},
-    ) =>
+    lessonControllerGetLessonImage: (resourceId: string, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/api/lesson/lesson-image/${lessonId}/${fileKey}`,
+        path: `/api/lesson/lesson-image/${resourceId}`,
         method: "GET",
         ...params,
       }),

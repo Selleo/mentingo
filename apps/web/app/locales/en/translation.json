@@ -1253,7 +1253,9 @@
           "groups": "Groups"
         }
       },
+      "enroll": "Enroll",
       "enrollSelected": "Enroll selected",
+      "unenrollSelected": "Unenroll selected",
       "table": {
         "name": "Name",
         "surname": "Surname",
@@ -1269,7 +1271,14 @@
         "title": "Confirm enrollment",
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
       },
-      "successResponse": "students have been assigned to the course."
+      "unenrollConfirmation": {
+        "title": "Unenroll confirmation",
+        "description": "Are you sure you want to unenroll the selected students from this course? This action cannot be undone."
+      },
+      "toast": {
+        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled."
+      },
+      "successResponse": "Students have been assigned to the course."
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",

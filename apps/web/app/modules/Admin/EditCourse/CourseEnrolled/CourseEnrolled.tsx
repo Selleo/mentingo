@@ -1,3 +1,4 @@
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { useParams } from "@remix-run/react";
 import {
   useReactTable,
@@ -6,12 +7,15 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { Minus } from "lucide-react";
 import { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useUnenrollCourse } from "~/api/mutations";
 import { useBulkCourseEnroll } from "~/api/mutations/admin/useBulkCourseEnroll";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useAllUsersEnrolledSuspense } from "~/api/queries/admin/useUsersEnrolled";
+import { Icon } from "~/components/Icon";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -24,8 +28,12 @@ import {
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -50,13 +58,18 @@ export const CourseEnrolled = (): ReactElement => {
   const { t } = useTranslation();
   const { id: courseId } = useParams();
   const { mutate: bulkEnroll } = useBulkCourseEnroll(courseId);
+  const { mutateAsync: unenrollCourse } = useUnenrollCourse();
+
   const { data: groupData } = useGroupsQuerySuspense();
 
   const [searchParams, setSearchParams] = useState<UsersEnrolledSearchParams>({});
   const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const [openDropdown, setOpenDropdown] = useState(false);
+
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [isUnenrollDialogOpen, setIsUnenrollDialogOpen] = useState<boolean>(false);
 
   const { data: usersData } = useAllUsersEnrolledSuspense(courseId, searchParams);
 
@@ -195,9 +208,9 @@ export const CourseEnrolled = (): ReactElement => {
     event.preventDefault();
 
     const mutationData = {
-      studentIds: Object.keys(rowSelection)
-        .map((idx) => idx)
-        .filter((id) => usersData.some((user) => user.id === id && !user.enrolledAt)),
+      studentIds: Object.keys(rowSelection).filter((id) =>
+        usersData.some((user) => user.id === id && !user.enrolledAt),
+      ),
     };
 
     if (mutationData.studentIds.length > 0) {
@@ -208,7 +221,23 @@ export const CourseEnrolled = (): ReactElement => {
     setIsDialogOpen(false);
   };
 
-  const isDisabled = Object.values(rowSelection).length === 0;
+  const handleUnenrollFormSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+
+    const userIds = Object.keys(rowSelection).filter((id) =>
+      usersData.some((user) => user.id === id && user.enrolledAt),
+    );
+
+    if (userIds.length > 0 && courseId) {
+      await unenrollCourse({ courseId, userIds });
+    }
+
+    setRowSelection({});
+    setIsUnenrollDialogOpen(false);
+  };
+
+  const handleOpenUnenroll = () => setIsUnenrollDialogOpen(true);
+  const handleOpenEnroll = () => setIsDialogOpen(true);
 
   return (
     <div className="flex flex-col">
@@ -220,15 +249,62 @@ export const CourseEnrolled = (): ReactElement => {
           isLoading={false}
         />
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger disabled={isDisabled}>
-            <Button
-              className="border border-primary-500 bg-transparent text-accent-foreground"
-              disabled={isDisabled}
-            >
-              {t("adminCourseView.enrolled.enrollSelected")}
+        <DropdownMenu onOpenChange={(open) => setOpenDropdown(open)}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex gap-2">
+              {t("adminCourseView.enrolled.enroll")}
+              <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
             </Button>
-          </DialogTrigger>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
+            <DropdownMenuItem>
+              <Button
+                className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
+                variant="ghost"
+                onClick={handleOpenEnroll}
+              >
+                <Icon name="Plus" className="size-4 text-accent-foreground" />
+                {t("adminCourseView.enrolled.enrollSelected")}
+              </Button>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem>
+              <Button
+                onClick={handleOpenUnenroll}
+                variant="ghost"
+                className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
+              >
+                <Minus className="size-4 text-errir-700" />
+                {t("adminCourseView.enrolled.unenrollSelected")}
+              </Button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Dialog open={isUnenrollDialogOpen} onOpenChange={setIsUnenrollDialogOpen}>
+          <DialogPortal>
+            <DialogOverlay />
+            <DialogContent>
+              <DialogTitle>{t("adminCourseView.enrolled.unenrollConfirmation.title")}</DialogTitle>
+              <DialogDescription>
+                {t("adminCourseView.enrolled.unenrollConfirmation.description")}
+              </DialogDescription>
+              <form onSubmit={handleUnenrollFormSubmit}>
+                <div className="flex justify-end gap-4">
+                  <DialogClose>
+                    <Button type="reset" variant="ghost">
+                      {t("common.button.cancel")}
+                    </Button>
+                  </DialogClose>
+                  <Button type="submit">{t("common.button.save")}</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </DialogPortal>
+        </Dialog>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogPortal>
             <DialogOverlay />
             <DialogContent>

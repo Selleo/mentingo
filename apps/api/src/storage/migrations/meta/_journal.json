@@ -372,6 +372,13 @@
       "when": 1764078304253,
       "tag": "0052_add_deletedAt_to_users_table",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1764252125212,
+      "tag": "0053_added_enrollment_status_to_student_courses",
+      "breakpoints": true
     }
   ]
 }
