@@ -1251,6 +1251,7 @@
           "groups": "Wszystkie Grupy"
         }
       },
+      "enroll": "Zapisz",
       "enrollSelected": "Zapisz wybranych na kurs",
       "enrollGroups": "Zapisz wybrane grupy na kurs",
       "enrollGroupsModal": {
@@ -1263,12 +1264,16 @@
       "members_few": "{{count}} członków",
       "members_many": "{{count}} członków",
       "members_other": "{{count}} członków",
+      "unenrollSelected": "Wypisz wybranych z kursu",
       "table": {
         "name": "Imię",
         "surname": "Nazwisko",
         "email": "Email",
         "status": "Status uczestnictwa",
         "enrollmentDate": "Data zapisania na kurs"
+      },
+      "toast": {
+        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled."
       },
       "statuses": {
         "enrolled": "Zapisany",
@@ -1277,6 +1282,10 @@
       "confirmation": {
         "title": "Potwierdź zapis",
         "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
+      },
+      "unenrollConfirmation": {
+        "title": "Potwierdź wypisanie",
+        "description": "Czy na pewno chcesz wypisać wybranych studentów z tego kursu? Tej operacji nie można cofnąć."
       },
       "successResponse": "studentów zostało zapisanych do kursu."
     },

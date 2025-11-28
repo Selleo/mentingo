@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -56,6 +57,7 @@ export class StatisticsRepository {
         ${studentCourses.studentId} = ${userId}
           AND ${studentCourses.completedAt} IS NOT NULL
           AND ${studentCourses.completedAt} >= date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'
+          
         GROUP BY
           date_trunc('month', ${studentCourses.completedAt})
       ),
@@ -307,7 +309,7 @@ export class StatisticsRepository {
       WITH user_courses AS (
         SELECT course_id
         FROM student_courses
-        WHERE student_id = ${studentId}
+        WHERE student_id = ${studentId} AND student_courses.status = ${COURSE_ENROLLMENT.ENROLLED}
       ),
       last_completed_lesson AS (
         SELECT 
@@ -398,10 +400,15 @@ export class StatisticsRepository {
       .from(studentLessonProgress)
       .innerJoin(chapters, eq(chapters.id, studentLessonProgress.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .innerJoin(
+        studentCourses,
+        and(inArray(studentCourses.studentId, studentIds), eq(studentCourses.courseId, courses.id)),
+      )
       .where(
         and(
           isNull(studentLessonProgress.completedAt),
           inArray(studentLessonProgress.studentId, studentIds),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
       )
       .orderBy(studentLessonProgress.studentId, desc(studentLessonProgress.createdAt));

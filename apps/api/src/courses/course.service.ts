@@ -9,6 +9,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
   between,
@@ -60,7 +61,6 @@ import {
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
-  studentQuestionAnswers,
   users,
 } from "../storage/schema";
 
@@ -245,6 +245,7 @@ export class CourseService {
     return this.db.transaction(async (trx) => {
       const conditions = [
         eq(studentCourses.studentId, userId),
+        eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         or(eq(courses.status, "published"), eq(courses.status, "private")),
         isNull(users.deletedAt),
       ];
@@ -349,7 +350,9 @@ export class CourseService {
         lastName: users.lastName,
         email: users.email,
         id: users.id,
-        enrolledAt: studentCourses.createdAt,
+        enrolledAt: sql<
+          string | null
+        >`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.enrolledAt} ELSE NULL END`,
         groups: sql<
           Array<{ id: string; name: string }>
         >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
@@ -516,8 +519,8 @@ export class CourseService {
         category: sql<string>`${categories.title}`,
         description: sql<string>`${courses.description}`,
         courseChapterCount: courses.chapterCount,
-        completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         status: courses.status,
         isScorm: courses.isScorm,
         priceInCents: courses.priceInCents,
@@ -557,10 +560,12 @@ export class CourseService {
           EXISTS (
             SELECT 1
             FROM ${studentChapterProgress}
+            JOIN ${studentCourses} ON ${studentCourses.courseId} = ${course.id} AND ${studentCourses.studentId} = ${studentChapterProgress.studentId} 
             WHERE ${studentChapterProgress.chapterId} = ${chapters.id}
               AND ${studentChapterProgress.courseId} = ${course.id}
               AND ${studentChapterProgress.studentId} = ${userId}
               AND ${studentChapterProgress.completedAt} IS NOT NULL
+              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
           )::BOOLEAN`,
         lessonCount: chapters.lessonCount,
         quizCount: sql<number>`
@@ -568,9 +573,10 @@ export class CourseService {
           FROM ${lessons}
           WHERE ${lessons.chapterId} = ${chapters.id}
             AND ${lessons.type} = ${LESSON_TYPES.QUIZ})::INTEGER`,
-        completedLessonCount: sql<number>`COALESCE(${studentChapterProgress.completedLessonCount}, 0)`,
+        completedLessonCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentChapterProgress.completedLessonCount}, 0) ELSE 0 END`,
         chapterProgress: sql<ProgressStatus>`
           CASE
+            WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
             WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
             WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
               SELECT 1
@@ -634,6 +640,10 @@ export class CourseService {
           eq(studentChapterProgress.chapterId, chapters.id),
           eq(studentChapterProgress.studentId, userId),
         ),
+      )
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.courseId, course.id), eq(studentCourses.studentId, userId)),
       )
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
@@ -741,7 +751,12 @@ export class CourseService {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
     if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
-      conditions.push(eq(studentCourses.studentId, currentUserId));
+      conditions.push(
+        ...[
+          eq(studentCourses.studentId, currentUserId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ],
+      );
     }
 
     if (scope === COURSE_ENROLLMENT_SCOPES.AVAILABLE) {
@@ -786,7 +801,7 @@ export class CourseService {
         authorEmail: sql<string>`${users.email}`,
         authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN true ELSE false END`,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
         enrolledParticipantCount: sql<number>`0`,
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`0`,
@@ -1092,7 +1107,7 @@ export class CourseService {
     const [course] = await this.db
       .select({
         id: courses.id,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         price: courses.priceInCents,
         userDeletedAt: users.deletedAt,
       })
@@ -1112,7 +1127,7 @@ export class CourseService {
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
 
-    this.db.transaction(async (trx) => {
+    await this.db.transaction(async (trx) => {
       await this.createStudentCourse(id, studentId, paymentId, null);
       await this.createCourseDependencies(id, studentId, paymentId, trx);
     });
@@ -1132,7 +1147,11 @@ export class CourseService {
       })
       .from(studentCourses)
       .where(
-        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
+        and(
+          eq(studentCourses.courseId, courseId),
+          inArray(studentCourses.studentId, studentIds),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
       );
 
     const studentsToEnroll = await this.db
@@ -1160,11 +1179,19 @@ export class CourseService {
         return {
           studentId,
           courseId,
+          enrolledAt: sql`NOW()`,
+          status: COURSE_ENROLLMENT.ENROLLED,
           enrolledByGroupId: null,
         };
       });
 
-      await trx.insert(studentCourses).values(studentCoursesValues);
+      await trx
+        .insert(studentCourses)
+        .values(studentCoursesValues)
+        .onConflictDoUpdate({
+          target: [studentCourses.studentId, studentCourses.courseId],
+          set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+        });
 
       this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
 
@@ -1275,7 +1302,18 @@ export class CourseService {
   ): Promise<StudentCourseSelect> {
     const [enrolledCourse] = await this.db
       .insert(studentCourses)
-      .values({ studentId, courseId, paymentId, enrolledByGroupId })
+      .values({
+        studentId,
+        courseId,
+        paymentId,
+        enrolledAt: sql`NOW()`,
+        status: COURSE_ENROLLMENT.ENROLLED,
+        enrolledByGroupId
+      })
+      .onConflictDoUpdate({
+        target: [studentCourses.studentId, studentCourses.courseId],
+        set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+      })
       .returning();
 
     if (!enrolledCourse) throw new ConflictException("Course not enrolled");
@@ -1289,6 +1327,17 @@ export class CourseService {
     paymentId: string | null = null,
     trx: PostgresJsDatabase<typeof schema>,
   ) {
+    const alreadyHasEnrollmentRecord = Boolean(
+      (
+        await trx
+          .select({ id: studentCourses.id })
+          .from(studentCourses)
+          .where(
+            and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)),
+          )
+      ).length,
+    );
+
     const courseChapterList = await trx
       .select({
         id: chapters.id,
@@ -1305,22 +1354,27 @@ export class CourseService {
       trx,
     );
 
-    await this.createStatisicRecordForCourse(
-      courseId,
-      paymentId,
-      isEmpty(existingLessonProgress),
-      trx,
-    );
+    if (!alreadyHasEnrollmentRecord) {
+      await this.createStatisicRecordForCourse(
+        courseId,
+        paymentId,
+        isEmpty(existingLessonProgress),
+        trx,
+      );
+    }
 
     if (courseChapterList.length > 0) {
-      await trx.insert(studentChapterProgress).values(
-        courseChapterList.map((chapter) => ({
-          studentId,
-          chapterId: chapter.id,
-          courseId,
-          completedLessonItemCount: 0,
-        })),
-      );
+      await trx
+        .insert(studentChapterProgress)
+        .values(
+          courseChapterList.map((chapter) => ({
+            studentId,
+            chapterId: chapter.id,
+            courseId,
+            completedLessonItemCount: 0,
+          })),
+        )
+        .onConflictDoNothing();
 
       await Promise.all(
         courseChapterList.map(async (chapter) => {
@@ -1329,16 +1383,19 @@ export class CourseService {
             .from(lessons)
             .where(eq(lessons.chapterId, chapter.id));
 
-          await trx.insert(studentLessonProgress).values(
-            chapterLessons.map((lesson) => ({
-              studentId,
-              lessonId: lesson.id,
-              chapterId: chapter.id,
-              completedQuestionCount: 0,
-              quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
-              completedAt: null,
-            })),
-          );
+          await trx
+            .insert(studentLessonProgress)
+            .values(
+              chapterLessons.map((lesson) => ({
+                studentId,
+                lessonId: lesson.id,
+                chapterId: chapter.id,
+                completedQuestionCount: 0,
+                quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
+                completedAt: null,
+              })),
+            )
+            .onConflictDoNothing();
         }),
       );
     }
@@ -1406,76 +1463,37 @@ export class CourseService {
     });
   }
 
-  async unenrollCourse(id: UUIDType, userId: UUIDType) {
-    const [course] = await this.db
+  async unenrollCourse(courseId: UUIDType, userIds: UUIDType[]) {
+    const studentEnrollments = await this.db
       .select({
-        id: courses.id,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        id: studentCourses.id,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
       })
       .from(courses)
-      .leftJoin(
-        studentCourses,
-        and(eq(courses.id, studentCourses.courseId), eq(studentCourses.studentId, userId)),
-      )
-      .where(and(eq(courses.id, id)));
+      .leftJoin(studentCourses, eq(courses.id, studentCourses.courseId))
+      .where(and(eq(courses.id, courseId), inArray(studentCourses.studentId, userIds)));
 
-    if (!course) throw new NotFoundException("Course not found");
+    const unenrolledStudents = studentEnrollments.filter(
+      (enrollment) => !enrollment.enrolled,
+    ).length;
 
-    if (!course.enrolled) throw new ConflictException("Course is not enrolled");
+    if (unenrolledStudents > 0) {
+      throw new BadRequestException({
+        message: "adminCourseView.enrolled.toast.someStudentsUnenrolled",
+        count: unenrolledStudents,
+      });
+    }
 
     await this.db.transaction(async (trx) => {
-      const [deletedCourse] = await trx
-        .delete(studentCourses)
-        .where(and(eq(studentCourses.courseId, id), eq(studentCourses.studentId, userId)))
-        .returning();
-
-      if (!deletedCourse) throw new ConflictException("Course not unenrolled");
-
-      const courseChapterList = await trx
-        .select({ id: chapters.id })
-        .from(chapters)
-        .where(eq(chapters.courseId, id));
-
-      const courseChapterIds = courseChapterList.map((l) => l.id);
-
       await trx
-        .delete(studentChapterProgress)
+        .update(studentCourses)
+        .set({
+          enrolledAt: null,
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+        })
         .where(
-          and(
-            eq(studentChapterProgress.courseId, id),
-            inArray(studentChapterProgress.chapterId, courseChapterIds),
-            eq(studentChapterProgress.studentId, userId),
-          ),
-        )
-        .returning();
-
-      const courseQuestionList = await trx
-        .select({ id: questions.id })
-        .from(questions)
-        .leftJoin(lessons, eq(lessons.id, questions.lessonId))
-        .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
-        .where(eq(chapters.courseId, id));
-      const courseStudentQuestionIds = courseQuestionList.map((question) => question.id);
-
-      await trx
-        .delete(studentQuestionAnswers)
-        .where(
-          and(
-            inArray(studentQuestionAnswers.questionId, courseStudentQuestionIds),
-            eq(studentQuestionAnswers.studentId, userId),
-          ),
-        )
-        .returning();
-
-      await trx
-        .delete(studentLessonProgress)
-        .where(
-          and(
-            inArray(studentLessonProgress.lessonId, courseChapterIds),
-            eq(studentLessonProgress.studentId, userId),
-          ),
-        )
-        .returning();
+          and(inArray(studentCourses.studentId, userIds), eq(studentCourses.courseId, courseId)),
+        );
     });
   }
 
@@ -1637,6 +1655,7 @@ export class CourseService {
     excludeCourseId?: UUIDType,
   ) {
     const conditions = [];
+
     if (authorId) {
       conditions.push(eq(courses.authorId, authorId));
     }
@@ -1651,7 +1670,9 @@ export class CourseService {
       WHERE ${conditions.length ? and(...conditions) : true} AND ${courses.id} NOT IN (
         SELECT DISTINCT ${studentCourses.courseId}
         FROM ${studentCourses}
-        WHERE ${studentCourses.studentId} = ${currentUserId}
+        WHERE ${studentCourses.studentId} = ${currentUserId} AND ${studentCourses.status} = ${
+          COURSE_ENROLLMENT.ENROLLED
+        }
       )
     `);
 
@@ -1673,26 +1694,27 @@ export class CourseService {
                 COUNT(DISTINCT CASE WHEN sc.progress = 'completed' THEN sc.student_id END) AS completed_count,
                 COUNT(DISTINCT sc.student_id) AS total_count
               FROM ${studentCourses} AS sc
-              WHERE sc.course_id = ${id}
+              WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
             ) AS stats
           ),
           0
         )::float`,
         averageCompletionPercentage: sql<number>`COALESCE(
-          (
+        (
+          SELECT
+            ROUND((CAST(total_completed AS DECIMAL) / NULLIF(total_rows, 0)) * 100, 2)
+          FROM (
             SELECT
-              ROUND((CAST(total_completed AS DECIMAL) / NULLIF(total_rows, 0)) * 100, 0)
-            FROM (
-              SELECT
-                COUNT(*) FILTER (WHERE slp.completed_at IS NOT NULL) AS total_completed,
-                COUNT(*) AS total_rows
-              FROM ${studentLessonProgress} AS slp
-              JOIN ${lessons} AS l ON slp.lesson_id = l.id
-              JOIN ${chapters} AS ch ON l.chapter_id = ch.id
-              WHERE ch.course_id = ${id}
-            ) AS stats
-          ),
-          0
+              COUNT(*) FILTER (WHERE slp.completed_at IS NOT NULL) AS total_completed,
+              COUNT(*) AS total_rows
+            FROM ${studentLessonProgress} AS slp
+            JOIN ${lessons} AS l ON slp.lesson_id = l.id
+            JOIN ${chapters} AS ch ON l.chapter_id = ch.id
+            JOIN ${studentCourses} AS sc ON slp.student_id = sc.student_id AND ch.course_id = sc.course_id
+            WHERE ch.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+          ) AS stats
+        ),
+        0
         )::float`,
         courseStatusDistribution: sql<CourseStatusDistribution>`COALESCE(
           (
@@ -1701,7 +1723,7 @@ export class CourseService {
                 sc.progress AS progress,
                 COUNT(*) AS count
               FROM ${studentCourses} AS sc
-              WHERE sc.course_id = ${id}
+              WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
               GROUP BY sc.progress
             ) AS progress_counts
           ),
@@ -1710,7 +1732,12 @@ export class CourseService {
       })
       .from(coursesSummaryStats)
       .leftJoin(studentCourses, eq(coursesSummaryStats.courseId, studentCourses.courseId))
-      .where(eq(coursesSummaryStats.courseId, id));
+      .where(
+        and(
+          eq(coursesSummaryStats.courseId, id),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
 
     return courseStats;
   }
@@ -1731,7 +1758,8 @@ export class CourseService {
               FROM ${lessons} l
               JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
               JOIN ${chapters} c ON l.chapter_id = c.id
-              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL
+              JOIN ${studentCourses} sc ON slp.student_id = sc.student_id AND sc.course_id = c.course_id
+              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
               GROUP BY l.id, l.title, l.display_order
               ORDER BY l.display_order
             ) AS subquery
@@ -1758,6 +1786,16 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
+    const conditions = [
+      eq(studentCourses.courseId, courseId),
+      or(
+        ilike(users.firstName, `%${searchQuery}%`),
+        ilike(users.lastName, `%${searchQuery}%`),
+        ilike(groups.name, `%${searchQuery}%`),
+      ),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+    ];
+
     const {
       studentNameExpression,
       lastActivityExpression,
@@ -1778,16 +1816,7 @@ export class CourseService {
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groups.id, groupUsers.groupId))
-      .where(
-        and(
-          eq(studentCourses.courseId, courseId),
-          or(
-            ilike(users.firstName, `%${searchQuery}%`),
-            ilike(users.lastName, `%${searchQuery}%`),
-            ilike(groups.name, `%${searchQuery}%`),
-          ),
-        ),
-      )
+      .where(and(...conditions))
       .limit(perPage)
       .offset((page - 1) * perPage)
       .groupBy(users.id)
@@ -1806,16 +1835,7 @@ export class CourseService {
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groups.id, groupUsers.groupId))
-      .where(
-        and(
-          eq(studentCourses.courseId, courseId),
-          or(
-            ilike(users.firstName, `%${searchQuery}%`),
-            ilike(users.lastName, `%${searchQuery}%`),
-            ilike(groups.name, `%${searchQuery}%`),
-          ),
-        ),
-      );
+      .where(and(...conditions));
 
     const allStudentsProgress = await Promise.all(
       studentsProgress.map(async (studentProgress) => {
@@ -1849,6 +1869,8 @@ export class CourseService {
       eq(studentCourses.courseId, courseId),
       isNotNull(studentLessonProgress.completedAt),
       isNotNull(studentLessonProgress.attempts),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      eq(chapters.courseId, courseId),
     ];
 
     if (quizId) conditions.push(eq(lessons.id, quizId));
@@ -1874,6 +1896,7 @@ export class CourseService {
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .where(and(...conditions))
       .orderBy(
         sortOrder(
           this.getCourseStatisticsColumnToSortBy(
@@ -1883,14 +1906,14 @@ export class CourseService {
         ),
       )
       .limit(perPage)
-      .offset((page - 1) * perPage)
-      .where(and(...conditions));
+      .offset((page - 1) * perPage);
 
     const [{ totalCount }] = await this.db
       .select({ totalCount: count() })
       .from(studentLessonProgress)
       .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
       .where(and(...conditions));
 
     const allStudentsResults = await Promise.all(
@@ -1925,6 +1948,8 @@ export class CourseService {
       eq(studentCourses.courseId, courseId),
       eq(lessons.type, LESSON_TYPES.AI_MENTOR),
       eq(studentLessonProgress.id, aiMentorStudentLessonProgress.studentLessonProgressId),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      eq(chapters.courseId, courseId),
     ];
 
     if (lessonId) conditions.push(eq(lessons.id, lessonId));
@@ -1951,6 +1976,8 @@ export class CourseService {
         eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
       )
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(and(...conditions))
       .orderBy(
         sortOrder(
           this.getCourseStatisticsColumnToSortBy(
@@ -1960,8 +1987,7 @@ export class CourseService {
         ),
       )
       .limit(perPage)
-      .offset((page - 1) * perPage)
-      .where(and(...conditions));
+      .offset((page - 1) * perPage);
 
     const [{ totalCount }] = await this.db
       .select({ totalCount: count() })
@@ -1972,6 +1998,7 @@ export class CourseService {
       )
       .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .where(and(...conditions));
 
     const allStudentsResults = await Promise.all(

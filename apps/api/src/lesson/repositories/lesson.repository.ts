@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, desc, eq, getTableColumns, ilike, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -123,8 +124,8 @@ export class LessonRepository {
         `,
         isExternal: sql<boolean>`${lessons.isExternal}`,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,
-        isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.id} IS NULL THEN FALSE ELSE TRUE END`,
-        studentCourses: studentCourses.id,
+        isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
+        studentCourses: sql<string>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.id} ELSE NULL END`,
         nextLessonId: sql<string | null>`
           COALESCE(
             (
@@ -153,6 +154,7 @@ export class LessonRepository {
         and(
           eq(studentLessonProgress.lessonId, lessons.id),
           eq(studentLessonProgress.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
       )
       .leftJoin(
@@ -314,7 +316,7 @@ export class LessonRepository {
   ) {
     const dbInstance = trx ?? this.db;
 
-    return await dbInstance
+    return dbInstance
       .select({
         lessonId: studentLessonProgress.lessonId,
         completedLessonCount: studentLessonProgress.completedQuestionCount,
@@ -330,7 +332,7 @@ export class LessonRepository {
   async checkLessonAssignment(id: UUIDType, userId: UUIDType) {
     return this.db
       .select({
-        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.status} IS NOT NULL THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
         updatedAt: studentLessonProgress.updatedAt,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
@@ -355,7 +357,7 @@ export class LessonRepository {
   }
 
   async getQuizResult(lessonId: UUIDType, quizScore: number, userId: UUIDType) {
-    return await this.db
+    return this.db
       .select({
         score: sql<number>`${quizAttempts.score}`,
         correctAnswerCount: sql<number>`${quizAttempts.correctAnswers}`,
@@ -374,7 +376,7 @@ export class LessonRepository {
   }
 
   async getLessonResources(lessonId: UUIDType) {
-    return await this.db
+    return this.db
       .select({
         ...getTableColumns(lessonResources),
         type: sql<LessonResourceType>`${lessonResources.type}`,
@@ -385,7 +387,10 @@ export class LessonRepository {
   }
 
   async getEnrolledLessons(userId: UUIDType, filters: EnrolledLessonsFilters) {
-    const conditions = [eq(studentCourses.studentId, userId)];
+    const conditions = [
+      eq(studentCourses.studentId, userId),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+    ];
 
     if (filters.title) {
       conditions.push(ilike(lessons.title, `%${filters.title}%`));
@@ -412,7 +417,7 @@ export class LessonRepository {
       }
     }
 
-    return await this.db
+    return this.db
       .select({
         id: lessons.id,
         title: lessons.title,

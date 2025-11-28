@@ -288,6 +288,10 @@ export class LessonService {
       throw new ConflictException("You have not answered this quiz yet");
     }
 
+    if (!accessCourseLessonWithDetails.isAssigned) {
+      throw new ConflictException("You are not enrolled to this course");
+    }
+
     const quizSettings = await this.lessonRepository.getLessonSettings(lessonId);
 
     let attempts = accessCourseLessonWithDetails.attempts ?? 1;
@@ -350,7 +354,7 @@ export class LessonService {
 
     const s3Stream = await this.fileService.getFileStream(lessonResource.source);
 
-    if (!s3Stream) throw new Error("Error");
+    if (!s3Stream) throw new Error("Error fetching file stream");
 
     s3Stream.pipe(res);
   }

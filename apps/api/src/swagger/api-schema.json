@@ -2685,15 +2685,26 @@
     },
     "/api/course/unenroll-course": {
       "delete": {
-        "operationId": "CourseController_unenrollCourse",
+        "operationId": "CourseController_unenrollCourses",
         "parameters": [
           {
-            "name": "id",
+            "name": "courseId",
             "required": false,
             "in": "query",
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "userIds",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2702,7 +2713,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnenrollCourseResponse"
+                  "$ref": "#/components/schemas/UnenrollCoursesResponse"
                 }
               }
             }
@@ -10734,7 +10745,7 @@
       "DeleteManyCoursesResponse": {
         "type": "null"
       },
-      "UnenrollCourseResponse": {
+      "UnenrollCoursesResponse": {
         "type": "null"
       },
       "GetCourseStatisticsResponse": {
