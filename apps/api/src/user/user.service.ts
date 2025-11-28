@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -22,6 +23,7 @@ import { getEmailSubject } from "src/common/emails/translations";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CourseService } from "src/courses/course.service";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
@@ -41,6 +43,7 @@ import {
   studentCourses,
   coursesSummaryStats,
   courses,
+  groupCourses,
 } from "../storage/schema";
 
 import {
@@ -82,6 +85,7 @@ export class UserService {
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
     private statisticsService: StatisticsService,
+    @Inject(forwardRef(() => CourseService)) private courseService: CourseService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -251,16 +255,35 @@ export class UserService {
         };
       }
 
+      const [groupExists] = await trx.select().from(groups).where(eq(groups.id, groupId));
+
+      if (!groupExists) {
+        throw new NotFoundException("Group not found");
+      }
+
       await trx
         .insert(groupUsers)
         .values({ userId: id, groupId })
         .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
 
+      const existingCourses = await trx
+        .select({ id: courses.id })
+        .from(courses)
+        .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
+        .where(eq(groupCourses.groupId, groupId));
+
+      if (!!existingCourses.length)
+        await this.enrollUserToGroupCourses(
+          id,
+          groupId,
+          existingCourses.map(({ id }) => id),
+          trx,
+        );
+
       const [groupData] = await trx
         .select(getTableColumns(groups))
         .from(groups)
-        .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
-        .where(eq(groupUsers.userId, id));
+        .where(eq(groups.id, groupId));
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
@@ -273,6 +296,38 @@ export class UserService {
       };
     });
   }
+
+  enrollUserToGroupCourses = async (
+    userId: UUIDType,
+    groupId: UUIDType,
+    existingCourseIds: UUIDType[],
+    trx: DatabasePg,
+  ) => {
+    await trx
+      .insert(groupUsers)
+      .values({ userId, groupId })
+      .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
+
+    const insertedStudentCourses = await trx
+      .insert(studentCourses)
+      .values(
+        existingCourseIds.map((courseId) => ({
+          studentId: userId,
+          courseId,
+          enrolledByGroupId: groupId,
+        })),
+      )
+      .onConflictDoNothing()
+      .returning({
+        courseId: studentCourses.courseId,
+      });
+
+    await Promise.all(
+      insertedStudentCourses.map(async ({ courseId }) =>
+        this.courseService.createCourseDependencies(courseId, userId, null, trx),
+      ),
+    );
+  };
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
     const existingUser = await this.getExistingUser(userId);
@@ -672,6 +727,20 @@ export class UserService {
           .insert(groupUsers)
           .values({ userId: createdUser.id, groupId: group.id })
           .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
+
+        const existingCourses = await trx
+          .select({ id: courses.id })
+          .from(courses)
+          .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
+          .where(eq(groupCourses.groupId, group.id));
+
+        if (!!existingCourses.length)
+          await this.enrollUserToGroupCourses(
+            createdUser.id,
+            group.id,
+            existingCourses.map(({ id }) => id),
+            trx,
+          );
       });
     }
 

@@ -27,6 +27,7 @@ import {
   baseGroupSchema,
   bulkDeleteGroupsSchema,
   groupSchema,
+  upsertGroupSchema,
 } from "src/group/group.schema";
 import { GroupService } from "src/group/group.service";
 import { UpsertGroupBody, GroupSortFieldsOptions } from "src/group/group.types";
@@ -108,7 +109,7 @@ export class GroupController {
   @Post()
   @Roles(USER_ROLES.ADMIN)
   @Validate({
-    request: [{ type: "body", schema: baseGroupSchema }],
+    request: [{ type: "body", schema: upsertGroupSchema }],
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
   })
   async createGroup(
@@ -124,7 +125,7 @@ export class GroupController {
   @Validate({
     request: [
       { type: "param", name: "groupId", schema: Type.String() },
-      { type: "body", schema: baseGroupSchema },
+      { type: "body", schema: upsertGroupSchema },
     ],
     response: baseResponse(baseGroupSchema),
   })
@@ -201,5 +202,27 @@ export class GroupController {
     await this.groupService.unassignUserFromGroup(groupId, userId);
 
     return new BaseResponse({ message: "User unassigned successfully" });
+  }
+
+  @Get("by-course/:courseId")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "courseId",
+        schema: UUIDSchema,
+      },
+    ],
+    response: baseResponse(Type.Array(baseGroupSchema)),
+  })
+  async getGroupsByCourse(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<
+    BaseResponse<Array<{ id: string; name: string; createdAt: string; updatedAt: string }>>
+  > {
+    const groups = await this.groupService.getGroupsByCourse(courseId);
+
+    return new BaseResponse(groups);
   }
 }

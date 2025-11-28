@@ -71,9 +71,7 @@ const User = () => {
       <div className="flex flex-col">
         <form onSubmit={handleSubmit(onSubmit)} className="h-full rounded-lg">
           <div className="flex items-center justify-between">
-            <h2 className="mb-4 text-2xl font-semibold text-neutral-950">
-              {t("adminUserView.editUserHeader")}
-            </h2>
+            <h2 className="mb-4 h4 text-neutral-950">{t("adminUserView.editUserHeader")}</h2>
             <Button type="submit" disabled={!isDirty} className="mr-2">
               {t("common.button.save")}
             </Button>

@@ -35,7 +35,7 @@ describe("UsersController (e2e)", () => {
 
   afterAll(async () => {
     await app.close();
-  }, 10000);
+  });
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
@@ -286,7 +286,9 @@ describe("UsersController (e2e)", () => {
         avatarReference: null,
       };
 
-      const updateData = await groupService.createGroup({ name: "Test group" });
+      const updateData = await groupService.createGroup({
+        name: "Test group",
+      });
 
       await request(app.getHttpServer())
         .patch(`/api/user/bulk/groups`)

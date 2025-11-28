@@ -2,20 +2,20 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
-import { courseStatisticsQueryOptions } from "~/api/queries/admin/useCourseStatistics";
+import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { GROUPS_BY_COURSE_QUERY_KEY } from "~/api/queries/admin/useGroupsByCourse";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { EnrollCoursesBody } from "~/api/generated-api";
+import type { EnrollGroupsToCourseBody } from "~/api/generated-api";
 
-export function useBulkCourseEnroll(courseId = "") {
+export function useBulkGroupCourseEnroll(courseId = "") {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (input: EnrollCoursesBody) => {
-      const { data } = await ApiClient.api.courseControllerEnrollCourses(courseId, input);
+    mutationFn: async (input: EnrollGroupsToCourseBody) => {
+      const { data } = await ApiClient.api.courseControllerEnrollGroupsToCourse(courseId, input);
 
       return data;
     },
@@ -26,9 +26,9 @@ export function useBulkCourseEnroll(courseId = "") {
         description: data.message,
       });
 
-      await queryClient.invalidateQueries(courseStatisticsQueryOptions({ id: courseId }));
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_BY_COURSE_QUERY_KEY, courseId] });
+      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
     },
 
     onError: (error) => {

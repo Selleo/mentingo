@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  forwardRef,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import {
@@ -48,6 +49,7 @@ import {
   chapters,
   courses,
   coursesSummaryStats,
+  groupCourses,
   groups,
   groupUsers,
   lessons,
@@ -115,11 +117,11 @@ export class CourseService {
     private readonly fileService: FileService,
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
-    private readonly userService: UserService,
     private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
     private readonly envService: EnvService,
     private readonly eventBus: EventBus,
+    @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -1055,7 +1057,7 @@ export class CourseService {
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
 
     this.db.transaction(async (trx) => {
-      await this.createStudentCourse(id, studentId);
+      await this.createStudentCourse(id, studentId, paymentId, null);
       await this.createCourseDependencies(id, studentId, paymentId, trx);
     });
   }
@@ -1102,6 +1104,7 @@ export class CourseService {
         return {
           studentId,
           courseId,
+          enrolledByGroupId: null,
         };
       });
 
@@ -1117,14 +1120,107 @@ export class CourseService {
     });
   }
 
+  async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], adminId?: UUIDType) {
+    const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
+    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+
+    const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
+    if (!groupExists.length) throw new NotFoundException("Groups not found");
+
+    const groupUsersList = await this.db
+      .select()
+      .from(groupUsers)
+      .where(inArray(groupUsers.groupId, groupIds));
+
+    // Check if groups are already enrolled to this course
+    const existingGroupEnrollments = await this.db
+      .select({ groupId: groupCourses.groupId })
+      .from(groupCourses)
+      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
+
+    const existingGroupIds = existingGroupEnrollments.map((e: any) => e.groupId);
+    const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
+
+    // Get existing student enrollments to avoid duplicates (only if there are users)
+    let existingStudentIds: string[] = [];
+    let newStudentIds: string[] = [];
+
+    if (groupUsersList.length > 0) {
+      const existingEnrollments = await this.db
+        .select({
+          studentId: studentCourses.studentId,
+        })
+        .from(studentCourses)
+        .where(
+          and(
+            eq(studentCourses.courseId, courseId),
+            inArray(
+              studentCourses.studentId,
+              groupUsersList.map((gu: any) => gu.userId),
+            ),
+          ),
+        );
+
+      existingStudentIds = existingEnrollments.map((e: any) => e.studentId);
+      newStudentIds = groupUsersList
+        .map((gu: any) => gu.userId)
+        .filter((userId: any) => !existingStudentIds.includes(userId));
+    }
+
+    await this.db.transaction(async (trx) => {
+      // Save group-course relationships (even if group is empty or all users were already enrolled)
+      if (newGroupIds.length > 0) {
+        const groupCoursesValues = newGroupIds.map((groupId: any) => ({
+          groupId,
+          courseId,
+          enrolledBy: adminId || null,
+        }));
+
+        await trx.insert(groupCourses).values(groupCoursesValues);
+      }
+
+      // Create student course enrollments with enrolledByGroupId for new students
+      if (newStudentIds.length > 0 && newGroupIds.length > 0) {
+        // Create a map of userId to groupId for users enrolled from groups
+        const userIdToGroupId = new Map<string, string>();
+        for (const groupId of newGroupIds) {
+          const usersInGroup = groupUsersList.filter((gu: any) => gu.groupId === groupId);
+          usersInGroup.forEach((gu: any) => {
+            if (newStudentIds.includes(gu.userId)) {
+              userIdToGroupId.set(gu.userId, groupId);
+            }
+          });
+        }
+
+        const studentCoursesValues = newStudentIds.map((studentId: any) => ({
+          studentId,
+          courseId,
+          enrolledByGroupId: userIdToGroupId.get(studentId) || null,
+        }));
+
+        await trx.insert(studentCourses).values(studentCoursesValues);
+
+        // Create course dependencies for each student
+        await Promise.all(
+          newStudentIds.map(async (studentId: any) => {
+            await this.createCourseDependencies(courseId, studentId, null, trx);
+          }),
+        );
+      }
+    });
+
+    return null;
+  }
+
   async createStudentCourse(
     courseId: UUIDType,
     studentId: UUIDType,
     paymentId: string | null = null,
+    enrolledByGroupId: UUIDType | null = null,
   ): Promise<StudentCourseSelect> {
     const [enrolledCourse] = await this.db
       .insert(studentCourses)
-      .values({ studentId, courseId, paymentId })
+      .values({ studentId, courseId, paymentId, enrolledByGroupId })
       .returning();
 
     if (!enrolledCourse) throw new ConflictException("Course not enrolled");
