@@ -22,7 +22,7 @@ const Checkbox = React.forwardRef<
       {isSquareCheck ? (
         <div className="border-px h-[9px] w-[9px] border-primary-700 bg-primary-700" />
       ) : (
-        <Check className="size-4" />
+        <Check className="size-4 text-white" />
       )}
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>

@@ -33,7 +33,6 @@ export { default as Hat } from "./hat.svg?react";
 export { default as Multi } from "./multi.svg?react";
 export { default as CertificateTrophy } from "./certificateTrophy.svg?react";
 export { default as HandCoins } from "./hand-coins.svg?react";
-
 export { default as Success } from "./success.svg?react";
 export { default as CourseEmptyState } from "./course-empty-state.svg?react";
 export { default as DragAndDropIcon } from "./drag-and-drop.svg?react";
@@ -64,6 +63,7 @@ export { default as KeyboardArrows } from "./keyboardArrows.svg?react";
 export { default as KeyboardEnter } from "./keyboardEnter.svg?react";
 export { default as KeyboardX } from "./keyboardX.svg?react";
 export { default as Archive } from "./archive.svg?react";
+export { default as Group } from "./group.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 
