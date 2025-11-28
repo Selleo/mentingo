@@ -1,29 +1,27 @@
-import ReactPlayer from "react-player/lazy";
+import { useEffect } from "react";
 
-import { useUserRole } from "~/hooks/useUserRole";
+import { useVideoPlayer } from "./VideoPlayerContext";
 
-import { VideoPlayer } from "./VideoPlayer";
-
-import type { VideoPlayerProps } from "./VideoPlayer.types";
-
-export const Video = ({ url, onVideoEnded, isExternalUrl }: VideoPlayerProps) => {
-  const { isAdmin } = useUserRole();
-
-  if (!url) throw new Error("Something went wrong");
-
-  if (isExternalUrl) {
-    return (
-      <div className="aspect-video w-full">
-        <ReactPlayer
-          url={url}
-          controls
-          height="100%"
-          width="100%"
-          {...(!isAdmin && { onEnded: onVideoEnded })}
-        />
-      </div>
-    );
-  }
-
-  return <VideoPlayer initialUrl={url} handleVideoEnded={onVideoEnded} />;
+type Props = {
+  url: string;
+  isExternalUrl: boolean;
+  onVideoEnded?: () => void;
 };
+
+export function Video({ url, isExternalUrl, onVideoEnded }: Props) {
+  const { setVideo } = useVideoPlayer();
+
+  useEffect(() => {
+    setVideo(url, isExternalUrl, onVideoEnded);
+  }, [url, isExternalUrl, onVideoEnded, setVideo]);
+
+  return (
+    <div className="w-full">
+      <VideoPlayerPlaceholder />
+    </div>
+  );
+}
+
+function VideoPlayerPlaceholder() {
+  return <div className="w-full aspect-video bg-black rounded-md" />;
+}

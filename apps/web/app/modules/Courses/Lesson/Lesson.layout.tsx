@@ -7,6 +7,8 @@ import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHisto
 
 import type { MetaFunction } from "@remix-run/react";
 import type { ParentRouteData } from "~/modules/layout";
+import { VideoPlayerSingleton } from "~/components/VideoPlayer/VideoPlayerSingleton";
+import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMatch = matches.find((match) => match.id.includes("layout"));
@@ -35,10 +37,13 @@ export const clientLoader = async ({ request }: { request: Request }) => {
 
 export default function LessonLayout() {
   return (
-    <main className="relative flex-1 overflow-y-auto bg-primary-50">
-      <RouteGuard>
-        <Outlet />
-      </RouteGuard>
-    </main>
+    <VideoProvider>
+      <main className="relative flex-1 overflow-y-auto bg-primary-50">
+        <VideoPlayerSingleton />
+        <RouteGuard>
+          <Outlet />
+        </RouteGuard>
+      </main>
+    </VideoProvider>
   );
 }
