@@ -53,6 +53,10 @@ export const getCourseStatisticsSchema = Type.Object({
   courseStatusDistribution: courseStatusDistributionSchema,
 });
 
+export const getLessonSequenceEnabledSchema = Type.Object({
+  lessonSequenceEnabled: Type.Boolean(),
+});
+
 export const courseAverageQuizScorePerQuizSchema = Type.Object({
   quizId: UUIDSchema,
   name: Type.String(),
@@ -108,6 +112,7 @@ export type AllStudentCoursesResponse = Static<typeof allStudentCoursesSchema>;
 export type AllCoursesForContentCreatorResponse = Static<typeof allCoursesForContentCreatorSchema>;
 
 export type CourseStatisticsResponse = Static<typeof getCourseStatisticsSchema>;
+export type LessonSequenceEnabledResponse = Static<typeof getLessonSequenceEnabledSchema>;
 export type CourseStatusDistribution = Static<typeof courseStatusDistributionSchema>;
 export type CourseAverageQuizScorePerQuiz = Static<typeof courseAverageQuizScorePerQuizSchema>;
 export type CourseAverageQuizScoresResponse = Static<typeof courseAverageQuizScoresSchema>;

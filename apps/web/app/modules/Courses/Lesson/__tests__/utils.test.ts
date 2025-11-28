@@ -130,6 +130,7 @@ describe("isNextBlocked", () => {
         totalLessons,
         isNextChapterFreemium ?? false,
         isEnrolled,
+        true,
       );
       expect(nextBlocked).toBe(true);
     });
@@ -148,6 +149,7 @@ describe("isNextBlocked", () => {
         totalLessons,
         isNextChapterFreemium ?? false,
         isEnrolled,
+        true,
       );
       expect(nextBlocked).toBe(true);
     });
@@ -166,6 +168,7 @@ describe("isNextBlocked", () => {
         totalLessons,
         isNextChapterFreemium ?? false,
         isEnrolled,
+        false,
       );
       expect(nextBlocked).toBe(false);
     });
@@ -183,6 +186,7 @@ describe("isNextBlocked", () => {
         totalLessons,
         isNextChapterFreemium ?? false,
         isEnrolled,
+        false,
       );
       expect(nextBlocked).toBe(false);
     });
@@ -202,6 +206,7 @@ describe("isNextBlocked", () => {
         totalLessons,
         isNextChapterFreemium ?? false,
         isEnrolled,
+        false,
       );
       expect(nextBlocked).toBe(false);
     });
@@ -221,6 +226,7 @@ describe("isNextBlocked", () => {
         totalLessons,
         isNextChapterFreemium ?? false,
         isEnrolled,
+        false,
       );
       expect(nextBlocked).toBe(false);
     });

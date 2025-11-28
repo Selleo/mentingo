@@ -57,6 +57,10 @@ export class LessonService {
   ): Promise<LessonShow> {
     const isStudent = userRole === USER_ROLES.STUDENT;
 
+    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
+
+    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
+
     const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");

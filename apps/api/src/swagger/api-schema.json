@@ -2139,6 +2139,70 @@
         }
       }
     },
+    "/api/course/update-lesson-sequence/{courseId}": {
+      "patch": {
+        "operationId": "CourseController_updateLessonSequenceEnabled",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLessonSequenceEnabledBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateLessonSequenceEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/lesson-sequence-enabled/{courseId}": {
+      "get": {
+        "operationId": "CourseController_getLessonSequenceEnabled",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLessonSequenceEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/enroll-course": {
       "post": {
         "operationId": "CourseController_enrollCourse",
@@ -9977,6 +10041,55 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateLessonSequenceEnabledBody": {
+        "type": "object",
+        "properties": {
+          "lessonSequenceEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "lessonSequenceEnabled"
+        ]
+      },
+      "UpdateLessonSequenceEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLessonSequenceEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "lessonSequenceEnabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lessonSequenceEnabled"
             ]
           }
         },

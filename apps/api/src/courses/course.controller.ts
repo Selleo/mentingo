@@ -39,6 +39,7 @@ import {
   allStudentQuizResultsSchema,
   courseAverageQuizScoresSchema,
   getCourseStatisticsSchema,
+  getLessonSequenceEnabledSchema,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -81,6 +82,7 @@ import type {
   AllStudentCoursesResponse,
   AllStudentQuizResultsResponse,
   CourseStatisticsResponse,
+  LessonSequenceEnabledResponse,
 } from "src/courses/schemas/course.schema";
 import type {
   CoursesFilterSchema,
@@ -312,7 +314,7 @@ export class CourseController {
       currentUserId,
       !!isPlaywrightTest,
     );
-    return new BaseResponse({ id, message: "Pomyślnie utworzono kurs" });
+    return new BaseResponse({ id, message: "Course created successfully" });
   }
 
   @Patch(":id")
@@ -344,7 +346,7 @@ export class CourseController {
       image,
     );
 
-    return new BaseResponse({ message: "Pomyślnie zaktualizowano kurs" });
+    return new BaseResponse({ message: "Course updated successfully" });
   }
 
   @Patch("update-has-certificate/:id")
@@ -362,7 +364,39 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.updateHasCertificate(id, body.hasCertificate);
 
-    return new BaseResponse({ message: "Pomyślnie_zaktualizowano_kurs" });
+    return new BaseResponse({ message: "Course with certificate updated successfully" });
+  }
+
+  @Patch("update-lesson-sequence/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: Type.Object({ lessonSequenceEnabled: Type.Boolean() }) },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateLessonSequenceEnabled(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: { lessonSequenceEnabled: boolean },
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.updateLessonSequenceEnabled(courseId, body.lessonSequenceEnabled);
+
+    return new BaseResponse({ message: "Course lesson sequence updated successfully" });
+  }
+
+  @Get("lesson-sequence-enabled/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR, USER_ROLES.STUDENT)
+  @Validate({
+    response: baseResponse(getLessonSequenceEnabledSchema),
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+  })
+  async getLessonSequenceEnabled(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<BaseResponse<LessonSequenceEnabledResponse>> {
+    const data = await this.courseService.getCourseSequenceEnabled(courseId);
+
+    return new BaseResponse(data);
   }
 
   @Post("enroll-course")
@@ -378,7 +412,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourse(id, currentUserId, testKey);
 
-    return new BaseResponse({ message: "Pomyślnie zapisano na kurs" });
+    return new BaseResponse({ message: "Course enrolled successfully" });
   }
 
   @Post("/:courseId/enroll-courses")
@@ -403,7 +437,7 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.enrollCourses(courseId, body);
 
-    return new BaseResponse({ message: "Pomyślnie zapisano na kursy" });
+    return new BaseResponse({ message: "Courses enrolled successfully" });
   }
 
   @Post("/:courseId/enroll-groups-to-course")

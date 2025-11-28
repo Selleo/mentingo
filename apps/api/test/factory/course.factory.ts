@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
 
+import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
+
 import { categories, courses, users } from "../../src/storage/schema";
 
 import type { InferSelectModel } from "drizzle-orm";
@@ -79,6 +81,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       isScorm: false,
       stripeProductId: null,
       stripePriceId: null,
+      settings: { lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED },
     };
   });
 };

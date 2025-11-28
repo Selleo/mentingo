@@ -52,6 +52,10 @@
     "continueWithMicrosoft": "Continue with Microsoft",
     "continueWithSlack": "Continue with Slack"
   },
+  "lessons": {
+    "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
+    "sequenceUpdateFailed": "Failed to update lesson sequence"
+  },
   "uploadFile": {
     "header": "Click to upload",
     "subHeader": "or drag and drop",
@@ -977,7 +981,9 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
-        "enableCertificate": "Enable certificate"
+        "enableCertificate": "Enable certificate",
+        "enforceLessonSequence": "Enforce lesson sequence",
+        "requireSequentialLessons": "Require students to complete lessons in order"
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
@@ -1457,7 +1463,10 @@
   },
   "studentLessonView": {
     "error": {
-      "lessonIdNotFound": "Lesson ID not found"
+      "lessonIdNotFound": "Lesson ID not found",
+      "notAuthorizedTitle": "Not authorized",
+      "notAuthorizedDescription": "You're not authorized to access this lesson.",
+      "goBackToCourse": "Go back to course"
     },
     "other": {
       "lesson": "Lesson",
