@@ -7,6 +7,7 @@ import {
   type DragStartEvent,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -69,6 +70,11 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
         distance: isCompleted ? Infinity : 0,
       },
     }),
+    useSensor(TouchSensor, {
+      activationConstraint: isCompleted
+        ? { delay: 999999, tolerance: 0 }
+        : { delay: 150, tolerance: 8 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
       keyboardCodes: {
@@ -128,11 +134,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
     });
   };
 
-  const handleCompletion = () => {
-    // return (
-    //   // handleCompletionForMediaLesson(, true))
-    // );
-  };
+  const handleCompletion = () => {};
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -256,7 +258,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   });
 
   return (
-    <div className="rounded-lg border bg-card p-8 text-card-foreground shadow-sm">
+    <div className="rounded-lg border bg-card p-8 text-card-foreground shadow-sm select-none touch-none">
       <div className="details uppercase text-primary-700">
         {t("studentLessonView.other.question")} {question.displayOrder}
       </div>
@@ -275,7 +277,6 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
           content={question.description}
           replacement={(index) => {
             const blankId = `${index + 1}`;
-
             const wordsInBlank = words.filter((word) => word.blankId === blankId);
 
             return (
