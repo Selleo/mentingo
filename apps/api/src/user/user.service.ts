@@ -252,11 +252,7 @@ export class UserService {
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
-        ? await trx
-            .update(users)
-            .set(userData)
-            .where(eq(users.id, id))
-            .returning()
+        ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
         : [existingUser.users];
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;

@@ -215,7 +215,10 @@ export class GroupService {
 
   async setUserGroups(groupIds: UUIDType[], userId: UUIDType, db: DatabasePg = this.db) {
     return db.transaction(async (trx) => {
-      const [user] = await trx.select().from(users).where(and(eq(users.id, userId), isNull(users.deletedAt)));
+      const [user] = await trx
+        .select()
+        .from(users)
+        .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
       if (!user) {
         throw new NotFoundException("User not found");
