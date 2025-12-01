@@ -4,10 +4,12 @@ type VideoState = {
   currentUrl: string | null;
   isExternal: boolean;
   onEnded?: () => void;
+  placeholderElement: HTMLElement | null;
 };
 
 type VideoContextValue = {
   setVideo: (url: string, isExternal: boolean, onEnded?: () => void) => void;
+  setPlaceholderElement: (el: HTMLElement | null) => void;
   state: VideoState;
 };
 
@@ -26,15 +28,25 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     currentUrl: null,
     isExternal: false,
     onEnded: undefined,
+    placeholderElement: null,
   });
 
   const setVideo = useCallback((url: string, isExternal: boolean, onEnded?: () => void) => {
-    setState({
+    setState((prev) => ({
+      ...prev,
       currentUrl: url,
       isExternal,
       onEnded,
-    });
+    }));
   }, []);
 
-  return <VideoContext.Provider value={{ state, setVideo }}>{children}</VideoContext.Provider>;
+  const setPlaceholderElement = useCallback((el: HTMLElement | null) => {
+    setState((prev) => ({ ...prev, placeholderElement: el }));
+  }, []);
+
+  return (
+    <VideoContext.Provider value={{ state, setVideo, setPlaceholderElement }}>
+      {children}
+    </VideoContext.Provider>
+  );
 }

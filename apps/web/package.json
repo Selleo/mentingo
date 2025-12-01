@@ -162,7 +162,7 @@
     "postcss": "^8.4.38",
     "react-router-dom": "^6.25.1",
     "rollup-plugin-visualizer": "^5.14.0",
-    "swagger-typescript-api": "^13.0.12",
+    "swagger-typescript-api": "13.0.12",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5",
     "vite": "^5.1.0",
