@@ -52,7 +52,6 @@ export const LessonForm = ({
     };
 
     resize();
-
     el.addEventListener("input", resize);
 
     return () => {

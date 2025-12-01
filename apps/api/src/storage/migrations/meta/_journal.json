@@ -379,6 +379,13 @@
       "when": 1764158826115,
       "tag": "0053_add_enrolled_by_group_id_and_group_courses_table",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1764335280537,
+      "tag": "0054_add_settings_to_courses",
+      "breakpoints": true
     }
   ]
 }

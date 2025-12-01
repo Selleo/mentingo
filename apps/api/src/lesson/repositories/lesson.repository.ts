@@ -12,6 +12,7 @@ import {
   quizAttempts,
   studentCourses,
   studentLessonProgress,
+  studentChapterProgress,
 } from "src/storage/schema";
 
 import type { LessonTypes } from "../lesson.type";
@@ -31,6 +32,55 @@ export class LessonRepository {
   async getLesson(id: UUIDType) {
     const [lesson] = await this.db.select().from(lessons).where(eq(lessons.id, id));
     return lesson;
+  }
+
+  async getHasLessonAccess(id: UUIDType, userId: UUIDType, isStudent: boolean) {
+    if (!isStudent) return true;
+
+    const [{ isSequenceEnabled, courseId }] = await this.db
+      .select({
+        isSequenceEnabled: sql<boolean>`(${courses.settings}->>'lessonSequenceEnabled')::boolean`,
+        courseId: sql<UUIDType>`${courses.id}`,
+      })
+      .from(lessons)
+      .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(lessons.id, id))
+      .limit(1);
+
+    if (!isSequenceEnabled) return true;
+
+    const [{ currentChapterDisplayOrder, hasCompletedAllChapterLessons, hasCompletedAllLessons }] =
+      await this.db
+        .select({
+          currentChapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
+          hasCompletedAllChapterLessons: sql<boolean>`
+          ${lessons.displayOrder} <= (COALESCE(${studentChapterProgress.completedLessonCount}, 0) + 1)
+        `,
+          hasCompletedAllLessons: sql<boolean>`
+          (
+            SELECT bool_and(COALESCE(scp.completed_lesson_count, 0) = c.lesson_count)
+            FROM ${chapters} c
+            LEFT JOIN ${studentChapterProgress} scp
+              ON scp.chapter_id = c.id AND scp.student_id = ${userId}
+            WHERE c.course_id = ${courseId} AND c.display_order < ${chapters.displayOrder}
+          )
+        `,
+        })
+        .from(lessons)
+        .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+        .leftJoin(
+          studentChapterProgress,
+          and(
+            eq(studentChapterProgress.chapterId, chapters.id),
+            eq(studentChapterProgress.studentId, userId),
+          ),
+        )
+        .where(eq(lessons.id, id));
+
+    if (hasCompletedAllChapterLessons && currentChapterDisplayOrder === 1) return true;
+
+    return hasCompletedAllLessons && hasCompletedAllChapterLessons;
   }
 
   async getLessonDetails(id: UUIDType, userId: UUIDType) {
