@@ -80,6 +80,7 @@ export class PromptService implements OnModuleInit {
       history.unshift({
         id: summary.id,
         role: summary.role,
+        userName: null,
         content: summary.content,
       });
 
@@ -87,11 +88,12 @@ export class PromptService implements OnModuleInit {
       history.unshift({
         id: systemPrompt.id,
         role: systemPrompt.role,
+        userName: null,
         content: systemPrompt.content,
       });
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
-    const contextInfo = content + history[history.length - 1].content;
+    const contextInfo = content + history[history.length - 1]?.content ?? "";
 
     const { chunks: context } = await observe(
       async () => {
@@ -100,8 +102,10 @@ export class PromptService implements OnModuleInit {
       { name: "RAG", asType: "retriever" },
     )();
 
-    history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, content });
-    history.push(...context.map(({ role, content }) => ({ id: "", role, content })));
+    history.push({ id: tempMessageId ?? "", role: MESSAGE_ROLE.USER, userName: null, content });
+    history.push(
+      ...context.map(({ role, content }) => ({ id: "", role, userName: null, content })),
+    );
 
     return history;
   }
@@ -155,7 +159,7 @@ export class PromptService implements OnModuleInit {
   }
 
   async loadPrompt<K extends keyof typeof PROMPT_MAP>(id: K, vars: Static<(typeof PROMPT_MAP)[K]>) {
-    const langfusePrompt = await this.langfuseClient.prompt.get(id).catch(() => undefined);
+    const langfusePrompt = await this.langfuseClient?.prompt?.get(id).catch(() => undefined);
 
     if (langfusePrompt?.prompt) {
       return Handlebars.compile(langfusePrompt.prompt)(vars);

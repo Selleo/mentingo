@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useChangeChapterDisplayOrder } from "~/api/mutations/admin/changeChapterDisplayOrder";
 import { useUpdateLessonFreemiumStatus } from "~/api/mutations/admin/useUpdateLessonFreemiumStatus";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { getCourseQueryKey } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { type Sortable, SortableList } from "~/components/SortableList/SortableList";
@@ -144,6 +145,7 @@ const ChapterCard = ({
         console.error("Failed to update chapter premium status:", error);
       } finally {
         await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
+        await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId!) });
         await queryClient.invalidateQueries({ queryKey: ["available-courses"] });
         setTimeout(() => {
           setOpenItem(currentOpenState);
@@ -171,7 +173,7 @@ const ChapterCard = ({
             <div className="flex items-center gap-x-3">
               {dragTrigger}
               <hgroup className="flex w-full flex-col-reverse">
-                <h3 className="body-base-md text-neutral-950">{chapter.title}</h3>
+                <h3 className="body-base-md text-neutral-950 break-all">{chapter.title}</h3>
                 <div className="body-sm-md text-neutral-800">
                   {t("adminCourseView.curriculum.other.chapter")} {chapter.displayOrder} •{" "}
                   {t("adminCourseView.curriculum.other.lessonNumber")} {chapter.lessons.length}

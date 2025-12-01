@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
@@ -7,6 +6,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { ApiClient } from "../../api-client";
 
 import type { BetaUpdateLessonBody } from "../../generated-api";
+import type { AxiosError } from "axios";
 
 type UpdateFileOptions = {
   data: BetaUpdateLessonBody;
@@ -30,15 +30,10 @@ export function useUpdateFileItem() {
         description: t("adminCourseView.curriculum.lesson.toast.fileLessonUpdatedSuccessfully"),
       });
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          description: error.response?.data.message,
-          variant: "destructive",
-        });
-      }
+    onError: (error: AxiosError) => {
+      const apiResponseData = error.response?.data as { message: string; count: number };
       toast({
-        description: error.message,
+        description: t(apiResponseData.message, { count: apiResponseData.count }),
         variant: "destructive",
       });
     },

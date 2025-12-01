@@ -1,3 +1,4 @@
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import {
   Bold,
   Code,
@@ -11,13 +12,17 @@ import {
   Undo,
   CheckSquare,
   Link2,
+  UploadCloudIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { ToggleGroup, Toolbar } from "~/components/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 
 import { InsertLinkDialog } from "../components/InsertLinkDialog";
@@ -25,13 +30,21 @@ import { InsertLinkDialog } from "../components/InsertLinkDialog";
 import { FormatType } from "./FormatType";
 
 import type { Editor } from "@tiptap/react";
+import type React from "react";
 
 type EditorToolbarProps = {
   editor: Editor;
+  allowFiles?: boolean;
+  lessonId?: string;
 };
 
-const EditorToolbar = ({ editor }: EditorToolbarProps) => {
+const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarProps) => {
   const { t } = useTranslation();
+  const { toast } = useToast();
+
+  const { mutateAsync: uploadImage } = useLessonFileUpload();
+
+  const fileUploadRef = useRef<HTMLInputElement | null>(null);
 
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
 
@@ -47,6 +60,30 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
       setIsLinkDialogOpen(true);
     }
   });
+
+  const handleUploadToggle = handleToggle(() => {
+    fileUploadRef.current?.click();
+  });
+
+  const acceptedImages = ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",");
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file || !lessonId) {
+      return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
+    }
+
+    const uploaded = await uploadImage({ file, lessonId });
+
+    const imageUrl = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
+
+    editor.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
+
+    if (fileUploadRef.current) {
+      fileUploadRef.current.value = "";
+    }
+  };
 
   return (
     <Toolbar
@@ -70,6 +107,31 @@ const EditorToolbar = ({ editor }: EditorToolbarProps) => {
             </TooltipTrigger>
             <TooltipContent>{t("richTextEditor.toolbar.link.tooltip")}</TooltipContent>
           </Tooltip>
+          {lessonId && allowFiles && (
+            <Tooltip>
+              <TooltipTrigger>
+                <Input
+                  type="file"
+                  className="hidden"
+                  ref={fileUploadRef}
+                  onChange={handleUpload}
+                  accept={acceptedImages}
+                />
+                <Button
+                  size="sm"
+                  className={cn("bg-transparent text-black", {
+                    "bg-primary-100": editor.isActive("upload"),
+                    "hover:bg-primary-100": !editor.isActive("upload"),
+                  })}
+                  onClick={handleUploadToggle}
+                >
+                  <UploadCloudIcon className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t("richTextEditor.toolbar.upload.tooltip")}</TooltipContent>
+            </Tooltip>
+          )}
+
           <Tooltip>
             <TooltipTrigger>
               <Button

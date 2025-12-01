@@ -43,6 +43,16 @@ export default defineConfig(({ mode }) => {
             src: "app/locales/pl/translation.json",
             dest: "locales/pl",
           },
+          ...(process.env.NODE_ENV === "production"
+            ? [
+                { src: "app/assets/svgs/app-logo.svg", dest: "app/assets/svgs" },
+                { src: "app/assets/svgs/app-email-logo.svg", dest: "app/assets/svgs" },
+                {
+                  src: "app/assets/svgs/app-email-border-circle.svg",
+                  dest: "app/assets/svgs",
+                },
+              ]
+            : []),
         ],
       }),
       tsconfigPaths(),

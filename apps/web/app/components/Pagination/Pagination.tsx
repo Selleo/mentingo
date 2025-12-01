@@ -9,6 +9,7 @@ import { PaginationButton } from "./PaginationButton";
 
 interface PaginationProps {
   className?: string;
+  emptyDataClassName?: string;
   totalItems?: number;
   itemsPerPage?: (typeof ITEMS_PER_PAGE_OPTIONS)[number];
   currentPage?: number;
@@ -20,6 +21,7 @@ export const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100] as const;
 
 export const Pagination = ({
   className,
+  emptyDataClassName,
   totalItems = 0,
   itemsPerPage = 10,
   currentPage = 1,
@@ -106,7 +108,11 @@ export const Pagination = ({
   };
 
   if (totalItems === 0) {
-    return <div className="w-full text-center py-8 body-base-md">{t("pagination.noData")}</div>;
+    return (
+      <div className={cn("w-full text-center py-8 body-base-md", emptyDataClassName)}>
+        {t("pagination.noData")}
+      </div>
+    );
   }
 
   return (

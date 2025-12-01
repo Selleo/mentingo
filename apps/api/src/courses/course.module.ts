@@ -17,7 +17,7 @@ import { CourseService } from "./course.service";
     StatisticsModule,
     ChapterModule,
     LessonModule,
-    UserModule,
+    forwardRef(() => UserModule),
     SettingsModule,
     forwardRef(() => StripeModule),
   ],

@@ -35,6 +35,7 @@ type LessonContentProps = {
   isLastLesson: boolean;
   lessonLoading: boolean;
   isPreviewMode?: boolean;
+  previewUserId?: string;
 };
 
 export const LessonContent = ({
@@ -47,6 +48,7 @@ export const LessonContent = ({
   lessonLoading,
   isLastLesson,
   isPreviewMode = false,
+  previewUserId = undefined,
 }: LessonContentProps) => {
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const { data: user } = useCurrentUser();
@@ -105,6 +107,7 @@ export const LessonContent = ({
     isPreviewMode,
     queryClient,
     course.id,
+    previewUserId,
   ]);
 
   const Content = () =>
@@ -131,7 +134,14 @@ export const LessonContent = ({
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))
-      .with("ai_mentor", () => <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} />)
+      .with("ai_mentor", () => (
+        <AiMentorLesson
+          lesson={lesson}
+          lessonLoading={lessonLoading}
+          isPreviewMode={isPreviewMode}
+          userId={previewUserId ?? user?.id}
+        />
+      ))
       .with("embed", () => (
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
       ))
@@ -175,14 +185,14 @@ export const LessonContent = ({
   return (
     <TooltipProvider>
       <div
-        className={cn("flex size-full flex-col items-center", {
+        className={cn("flex w-full min-w-0 flex-col items-center h-auto", {
           "py-10": !isPreviewMode,
         })}
       >
-        <div className="flex size-full flex-col gap-y-10 px-6 sm:px-10 3xl:max-w-[1024px] 3xl:px-8">
+        <div className="flex w-full min-w-0 flex-col gap-y-10 px-6 sm:px-10 max-w-full 3xl:max-w-[1024px] 3xl:px-8 h-auto">
           {!isPreviewMode && (
             <div className="flex w-full flex-col pb-6 sm:flex-row sm:items-end">
-              <div className="flex w-full flex-col gap-y-4">
+              <div className="flex w-full min-w-0 flex-col gap-y-4 overflow-x-hidden">
                 <div className="flex items-center gap-x-2">
                   <p className="body-sm-md text-neutral-800">
                     {t("studentLessonView.other.lesson")}{" "}
@@ -190,7 +200,7 @@ export const LessonContent = ({
                     <span data-testid="lessons-count">{lessonsAmount}</span> –{" "}
                     <span data-testid="lesson-type">{startCase(lesson.type)}</span>
                   </p>
-                  {lesson.type === "ai_mentor" && (
+                  {lesson.type === LessonType.AI_MENTOR && (
                     <Tooltip>
                       <TooltipTrigger>
                         <Badge variant="secondary" className="uppercase">
@@ -203,7 +213,7 @@ export const LessonContent = ({
                     </Tooltip>
                   )}
                 </div>
-                <p className="h4 text-neutral-950">{lesson.title}</p>
+                <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
               </div>
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
                 {!isFirstLesson && (

@@ -1,24 +1,26 @@
-import { Button, Html, Text } from "@react-email/components";
+import { getCreatePasswordReminderEmailTranslations } from "translations/createPasswordReminder";
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type CreatePasswordReminderEmailProps = {
   createPasswordLink: string;
-};
+} & DefaultEmailSettings;
 
 export const CreatePasswordReminderEmail = ({
   createPasswordLink,
+  primaryColor,
+  language = "en",
 }: CreatePasswordReminderEmailProps) => {
-  return (
-    <Html>
-      <Text>Hello,</Text>
-      <Text>
-        This is a friendly reminder that your account is not yet fully set up.
-        <br />
-        To complete your account setup, please create your password by clicking the button below.
-      </Text>
-      <Button href={createPasswordLink}>Create your password</Button>
-      <Text>If you have already created your password, please disregard this reminder.</Text>
-    </Html>
-  );
+  const { heading, paragraphs, buttonText } = getCreatePasswordReminderEmailTranslations(language);
+
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: createPasswordLink,
+    primaryColor,
+  });
 };
 
 export default CreatePasswordReminderEmail;

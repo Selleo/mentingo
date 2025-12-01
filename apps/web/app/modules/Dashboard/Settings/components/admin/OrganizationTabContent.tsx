@@ -6,6 +6,7 @@ import { PlatformSimpleLogoForm } from "../../forms/PlatformSimpleLogoForm";
 import SSOEnforceSwitch from "../SSOEnforceSwitch";
 
 import { CertificateBackgroundUpload } from "./CertificateBackgroundUpload";
+import { ConfigurationStatus } from "./ConfigurationStatus";
 import { DefaultCourseCurrencySelect } from "./DefaultCourseCurrencySelect";
 import { OrganizationLoginBackgroundUpload } from "./OrganizationLoginBackgroundUpload";
 import { OrganizationTheme } from "./OrganizationTheme";
@@ -31,6 +32,7 @@ export default function OrganizationTabContent({
 
   return (
     <>
+      <ConfigurationStatus />
       <AdminPreferences globalSettings={globalSettings} />
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
       <UserEmailTriggers userEmailTriggers={globalSettings.userEmailTriggers} />

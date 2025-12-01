@@ -1,24 +1,28 @@
-import { Button, Html } from "@react-email/components";
+import { getPasswordRecoveryEmailTranslations } from "translations/passwordRecovery";
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type PasswordRecoveryEmailProps = {
-  email: string;
   name: string;
   resetLink: string;
-};
+} & DefaultEmailSettings;
 
-export const PasswordRecoveryEmail = ({ email, name, resetLink }: PasswordRecoveryEmailProps) => {
-  return (
-    <Html>
-      <Button
-        href="https://selleo.com"
-        style={{ background: "#000", color: "#fff", padding: "12px 20px" }}
-      >
-        Hello there! {name}({email})
-      </Button>
+export const PasswordRecoveryEmail = ({
+  name,
+  resetLink,
+  primaryColor,
+  language = "en",
+}: PasswordRecoveryEmailProps) => {
+  const { heading, paragraphs, buttonText } = getPasswordRecoveryEmailTranslations(language, name);
 
-      <p>Your recovery token: {resetLink}</p>
-    </Html>
-  );
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: resetLink,
+    primaryColor,
+  });
 };
 
 export default PasswordRecoveryEmail;

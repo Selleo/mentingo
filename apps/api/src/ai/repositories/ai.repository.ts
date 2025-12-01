@@ -19,6 +19,7 @@ import {
   lessons,
   studentCourses,
   studentLessonProgress,
+  users,
 } from "src/storage/schema";
 
 import type { AiMentorType } from "@repo/shared";
@@ -110,14 +111,24 @@ export class AiRepository {
     return tokens.total;
   }
 
-  async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
-    return this.db
+  async findMessageHistory(
+    threadId: UUIDType,
+    archived?: boolean,
+    role?: MessageRole,
+    userId?: UUIDType,
+  ) {
+    const userCondition = userId ? eq(aiMentorThreads.userId, userId) : undefined;
+
+    const messageHistory = await this.db
       .select({
         id: aiMentorThreadMessages.id,
         role: sql<MessageRole>`${aiMentorThreadMessages.role}`,
+        userName: sql<string | null>`${users.firstName} || ' ' || ${users.lastName}`,
         content: aiMentorThreadMessages.content,
       })
       .from(aiMentorThreadMessages)
+      .leftJoin(aiMentorThreads, eq(aiMentorThreadMessages.threadId, aiMentorThreads.id))
+      .leftJoin(users, eq(aiMentorThreads.userId, users.id))
       .where(
         and(
           eq(aiMentorThreadMessages.threadId, threadId),
@@ -127,9 +138,12 @@ export class AiRepository {
           ),
           not(inArray(aiMentorThreadMessages.role, [MESSAGE_ROLE.SYSTEM, MESSAGE_ROLE.SUMMARY])),
           eq(aiMentorThreadMessages.role, role ? role : aiMentorThreadMessages.role),
+          userCondition,
         ),
       )
       .orderBy(asc(aiMentorThreadMessages.createdAt));
+
+    return messageHistory;
   }
 
   async findFirstMessageByRoleAndThread(threadId: UUIDType, role: MessageRole) {

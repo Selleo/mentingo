@@ -1,11 +1,13 @@
 import {
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import * as cheerio from "cheerio";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
@@ -30,6 +32,7 @@ import type {
   QuestionBody,
   QuestionDetails,
 } from "../lesson.schema";
+import type { Response } from "express";
 import type { SupportedLanguages } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 
@@ -61,7 +64,13 @@ export class LessonService {
     if (isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("You don't have access");
 
-    if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) return lesson;
+    if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) {
+      const { description, ...rest } = lesson;
+
+      const updatedDescription = await this.convertUrlsToImages(description);
+
+      return { ...rest, description: updatedDescription };
+    }
 
     if (
       lesson.type === LESSON_TYPES.QUIZ ||
@@ -321,11 +330,58 @@ export class LessonService {
     });
   }
 
+  async getLessonImage(res: Response, userId: UUIDType, role: UserRole, resourceId: UUIDType) {
+    const isStudent = role === USER_ROLES.STUDENT;
+
+    const lessonResource = await this.lessonRepository.getLessonResource(resourceId);
+
+    const [lesson] = await this.lessonRepository.checkLessonAssignment(
+      lessonResource.lessonId,
+      userId,
+    );
+
+    if (!lesson.isAssigned && isStudent && !lesson.isFreemium) {
+      throw new ForbiddenException("You are not allowed to access this lesson!");
+    }
+
+    const s3Stream = await this.fileService.getFileStream(lessonResource.source);
+
+    if (!s3Stream) throw new Error("Error");
+
+    s3Stream.pipe(res);
+  }
+
   async getEnrolledLessons(
     userId: UUIDType,
     filters: EnrolledLessonsFilters,
   ): Promise<EnrolledLesson[]> {
     return await this.lessonRepository.getEnrolledLessons(userId, filters);
+  }
+
+  async convertUrlsToImages(content: string) {
+    const $ = cheerio.load(content);
+
+    const tags = $("a").toArray();
+
+    const tagsWithImages = tags.filter((tag) =>
+      $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
+    );
+
+    tagsWithImages.forEach((tag) => {
+      const href = $(tag).attr("href");
+      if (href) {
+        const parent = $(tag).parent();
+
+        if (parent.is("p")) {
+          $(tag).replaceWith("");
+          parent.after(`<img src="${href}" alt="${href}">`);
+        } else {
+          $(tag).replaceWith(`<img src="${href}" alt="${href}">`);
+        }
+      }
+    });
+
+    return $.html($("body").children());
   }
 
   // async studentAnswerOnQuestion(

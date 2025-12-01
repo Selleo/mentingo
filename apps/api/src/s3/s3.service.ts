@@ -8,6 +8,8 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import type { Readable } from "stream";
+
 @Injectable()
 export class S3Service {
   private s3Client: S3Client;
@@ -88,6 +90,17 @@ export class S3Service {
     return response.Body?.transformToString() || "";
   }
 
+  async getFileBuffer(key: string): Promise<Buffer> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    const response = await this.s3Client.send(command);
+    const bytes = await response.Body?.transformToByteArray();
+    return Buffer.from(bytes || []);
+  }
+
   async uploadFile(fileBuffer: Buffer, key: string, contentType: string): Promise<void> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
@@ -106,5 +119,15 @@ export class S3Service {
     });
 
     await this.s3Client.send(command);
+  }
+
+  async getFileStream(key: string) {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    const response = await this.s3Client.send(command);
+    return response.Body as Readable;
   }
 }

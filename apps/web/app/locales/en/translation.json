@@ -26,6 +26,10 @@
       "contentCreator": "Content creator",
       "student": "Student"
     },
+    "languages": {
+      "en": "English",
+      "pl": "Polish"
+    },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
     },
@@ -272,6 +276,41 @@
       "inviteOnlyRegistrationUpdatedSuccessfully": "Invite-only registration settings updated successfully",
       "inviteOnlyRegistrationUpdateFailed": "Failed to update invite-only registration settings",
       "registerRedirect": "Registration is only possible by invitation."
+    }
+  },
+  "environmentConfigurationView": {
+    "header": "Environment Configuration",
+    "description": "View detailed information about your environment configuration including fully configured services, partially configured services, and missing environment variables.",
+    "button": {
+      "viewStatus": "View Status",
+      "loading": "Loading...",
+      "dismissWarning": "Dismiss warning"
+    },
+    "dialog": {
+      "title": "Environment Configuration Status",
+      "fullyConfigured": "Fully Configured",
+      "partiallyConfigured": "Partially Configured",
+      "youMightWantToSetThisUp": "You might want to set this up",
+      "noFullyConfigured": "No fully configured services.",
+      "noPartiallyConfigured": "No partially configured services.",
+      "allConfigured": "All environment keys are configured correctly.",
+      "dismissWarning": "Dismiss",
+      "serviceNames": {
+        "stripe": "Stripe Payment",
+        "bunny": "Bunny CDN",
+        "google_authorization": "Google OAuth",
+        "microsoft_authorization": "Microsoft OAuth",
+        "slack_authorization": "Slack OAuth",
+        "openAI": "OpenAI"
+      },
+      "serviceDescriptions": {
+        "stripe": "Process course payments and manage subscriptions",
+        "bunny": "Stream videos and deliver content efficiently",
+        "google_authorization": "Allow users to sign in with their Google account",
+        "microsoft_authorization": "Allow users to sign in with their Microsoft account",
+        "slack_authorization": "Allow users to sign in with their Slack account",
+        "openAI": "Enable AI Mentor features"
+      }
     }
   },
   "mostPopularCoursesView": {
@@ -687,7 +726,7 @@
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
         "archive": "Are you sure you want to archive these accounts?",
-        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName.",
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName, language (en or pl).",
         "noUsersImported": "No users were imported.",
         "noUsersSkipped": "No users were skipped."
       },
@@ -696,7 +735,7 @@
         "role": "Select role"
       },
       "note": {
-        "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created."
+        "import": "Note: Existing users will be skipped. If a group is specified and does not exist, a new group will not be created. The language field is optional; if not provided or invalid, the default language will be set to admin's language."
       },
       "tabs": {
         "imported": "Imported",
@@ -716,13 +755,15 @@
     "editUserHeader": "User Information",
     "placeholder": {
       "role": "Select a role",
-      "groupId": "Select a group"
+      "groupId": "Select a group",
+      "language": "Select a language"
     },
     "field": {
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email",
       "role": "Role",
+      "language": "Language",
       "status": "Status",
       "groupId": "Group"
     },
@@ -750,33 +791,72 @@
     "updateSuccessful": "Successfully updated secrets",
     "form": {
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      "MICROSOFT_CLIENT_ID": { "label": "Microsoft Client ID" },
-      "MICROSOFT_CLIENT_SECRET": { "label": "Microsoft Client Secret" },
-      "MICROSOFT_OAUTH_ENABLED": { "label": "Microsoft OAuth Enabled (true/false)" },
-      "VITE_MICROSOFT_OAUTH_ENABLED": { "label": "Vite Microsoft OAuth Enabled (true/false)" },
-      "OPENAI_API_KEY": { "label": "OpenAI API Key" },
-      "BUNNY_STREAM_API_KEY": { "label": "Bunny Stream API Key" },
-      "BUNNY_STREAM_SIGNING_KEY": { "label": "Bunny Stream Signing Key" },
-      "BUNNY_STREAM_LIBRARY_ID": { "label": "Bunny Stream Library ID" },
-      "BUNNY_STREAM_CDN_URL": { "label": "Bunny Stream CDN URL" },
-      "GOOGLE_CLIENT_ID": { "label": "Google Client ID" },
-      "GOOGLE_CLIENT_SECRET": { "label": "Google Client Secret" },
-      "GOOGLE_OAUTH_ENABLED": { "label": "Google OAuth Enabled (true/false)" },
-      "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
-      "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
-      "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
-      "VITE_STRIPE_PUBLISHABLE_KEY": { "label": "Vite Stripe Publishable Key" },
-      "SLACK_CLIENT_ID": { "label": "Slack Client ID" },
-      "SLACK_CLIENT_SECRET": { "label": "Slack Client Secret" },
-      "SLACK_OAUTH_ENABLED": { "label": "Slack OAuth Enabled (true/false)" },
-      "VITE_SLACK_OAUTH_ENABLED": { "label": "Vite Slack OAuth Enabled (true/false)" },
+      "MICROSOFT_CLIENT_ID": {
+        "label": "Microsoft Client ID"
+      },
+      "MICROSOFT_CLIENT_SECRET": {
+        "label": "Microsoft Client Secret"
+      },
+      "MICROSOFT_OAUTH_ENABLED": {
+        "label": "Microsoft OAuth Enabled (true/false)"
+      },
+      "VITE_MICROSOFT_OAUTH_ENABLED": {
+        "label": "Vite Microsoft OAuth Enabled (true/false)"
+      },
+      "OPENAI_API_KEY": {
+        "label": "OpenAI API Key"
+      },
+      "BUNNY_STREAM_API_KEY": {
+        "label": "Bunny Stream API Key"
+      },
+      "BUNNY_STREAM_SIGNING_KEY": {
+        "label": "Bunny Stream Signing Key"
+      },
+      "BUNNY_STREAM_LIBRARY_ID": {
+        "label": "Bunny Stream Library ID"
+      },
+      "BUNNY_STREAM_CDN_URL": {
+        "label": "Bunny Stream CDN URL"
+      },
+      "GOOGLE_CLIENT_ID": {
+        "label": "Google Client ID"
+      },
+      "GOOGLE_CLIENT_SECRET": {
+        "label": "Google Client Secret"
+      },
+      "GOOGLE_OAUTH_ENABLED": {
+        "label": "Google OAuth Enabled (true/false)"
+      },
+      "VITE_GOOGLE_OAUTH_ENABLED": {
+        "label": "Vite Google OAuth Enabled (true/false)"
+      },
+      "STRIPE_WEBHOOK_SECRET": {
+        "label": "Stripe Webhook Secret"
+      },
+      "STRIPE_SECRET_KEY": {
+        "label": "Stripe Secret Key"
+      },
+      "VITE_STRIPE_PUBLISHABLE_KEY": {
+        "label": "Vite Stripe Publishable Key"
+      },
+      "SLACK_CLIENT_ID": {
+        "label": "Slack Client ID"
+      },
+      "SLACK_CLIENT_SECRET": {
+        "label": "Slack Client Secret"
+      },
+      "SLACK_OAUTH_ENABLED": {
+        "label": "Slack OAuth Enabled (true/false)"
+      },
+      "VITE_SLACK_OAUTH_ENABLED": {
+        "label": "Vite Slack OAuth Enabled (true/false)"
+      },
       "save": "Save"
     },
     "breadcrumbs": {
       "envs": "Environment Variables"
     }
   },
-
   "adminGroupsView": {
     "name": "Group name",
     "characteristic": "Characteristic",
@@ -852,7 +932,9 @@
       "createCourseSuccessfully": "Course created successfully",
       "courseUpdatedSuccessfully": "Course updated successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
-      "certificateUpdateError": "Error updating certificate"
+      "certificateUpdateError": "Error updating certificate",
+      "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
+      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters"
     },
     "settings": {
       "breadcrumbs": {
@@ -894,7 +976,8 @@
       "other": {
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
-        "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit."
+        "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
+        "enableCertificate": "Enable certificate"
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
@@ -1186,7 +1269,14 @@
         "title": "Confirm enrollment",
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
       },
-      "successResponse": "students have been assigned to the course."
+      "successResponse": "students have been assigned to the course.",
+      "enrollGroups": "Enroll groups",
+      "enrollGroupsModal": {
+        "title": "Enroll groups to course",
+        "description": "Select groups to enroll. All members of selected groups will be automatically enrolled in this course."
+      },
+      "alreadyEnrolled": "Already Enrolled",
+      "members": "{{count}} members"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
@@ -1488,7 +1578,8 @@
         "startLearning": "Start learning",
         "enrollCourse": "Enroll to the course",
         "goToContentCreatorPage": "Go to content creator page",
-        "repeatLessons": "Repeat lessons"
+        "repeatLessons": "Repeat lessons",
+        "enrollGroups": "Enroll groups"
       }
     },
     "breadcrumbs": {
@@ -1738,7 +1829,6 @@
     "button": {
       "removeBackgroundImage": "Remove Background Image"
     },
-
     "toast": {
       "success": "Login background image changed successfully",
       "error": "Error changing login background image"
@@ -1795,6 +1885,10 @@
           "urlInvalid": "Invalid URL format",
           "linkTextRequired": "Link text is required"
         }
+      },
+      "upload": {
+        "uploadFailed": "File upload failed",
+        "tooltip": "Upload: Allows you to upload an image"
       }
     }
   },

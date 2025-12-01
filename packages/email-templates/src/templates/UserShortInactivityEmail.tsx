@@ -1,24 +1,32 @@
-import { Button, Html, Text } from "@react-email/components";
+import { getUserShortInactivityEmailTranslations } from "translations/userShortInactivity";
+
+import BaseEmailTemplate from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type UserShortInactivityProps = {
-  name: string;
   courseName: string;
   courseLink: string;
-};
+} & DefaultEmailSettings;
 
 export const UserShortInactivityEmail = ({
-  name,
   courseName,
   courseLink,
+  primaryColor,
+  language = "en",
 }: UserShortInactivityProps) => {
-  return (
-    <Html>
-      <Text>Cześć {name}, dawno Cię nie było!</Text>
-      <Text>
-        <Button href={courseLink}>Wróć</Button> do kursu {courseName} i kontynuuj naukę.
-      </Text>
-    </Html>
+  const { heading, paragraphs, buttonText } = getUserShortInactivityEmailTranslations(
+    language,
+    courseName,
   );
+
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: courseLink,
+    primaryColor,
+  });
 };
 
 export default UserShortInactivityEmail;

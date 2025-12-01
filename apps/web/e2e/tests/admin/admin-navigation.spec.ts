@@ -4,19 +4,20 @@ const TEST_NAVIGATION = {
   button: {
     createNew: "create new",
     dashboard: "dashboard",
-    myCourses: "my courses",
+    myCourses: "Courses",
     browseCourses: "browse courses",
     categories: "categories",
     users: "users",
     profile: "profile",
     settings: "settings",
     announcements: "announcements",
-    manage: "manage",
+    manage: "Manage",
   },
   header: {
     welcomeBack: "Welcome back",
     yourCourses: "Available Courses",
     settings: "Settings",
+    manageCourses: "Manage courses",
   },
 } as const;
 
@@ -29,15 +30,14 @@ test.describe("Admin navigation", () => {
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.dashboard, "i") })
       .click();
     await page.waitForURL("");
-    const welcomeText = await page
-      .locator("p")
-      .filter({ hasText: TEST_NAVIGATION.header.welcomeBack });
+    const welcomeText = page.locator("p").filter({ hasText: TEST_NAVIGATION.header.welcomeBack });
     await expect(welcomeText).toHaveText(new RegExp(TEST_NAVIGATION.header.welcomeBack, "i"));
 
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.myCourses, "i") })
       .click();
-    await page.waitForURL("/admin/courses");
+    await page.waitForURL("/courses");
+    await page.locator(".h-min > button:nth-child(2)").click();
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });
@@ -53,12 +53,8 @@ test.describe("Admin navigation", () => {
         .click();
     }
 
-    await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.browseCourses, "i") })
-      .click();
-    await page.waitForURL("/courses");
-    const yourCoursesHeader = page.locator("h4", { hasText: TEST_NAVIGATION.header.yourCourses });
-    await expect(yourCoursesHeader).toHaveText(new RegExp(TEST_NAVIGATION.header.yourCourses, "i"));
+    const manageCoursesHeader = page.getByRole("heading", { name: "Manage Courses" });
+    await expect(manageCoursesHeader).toBeVisible();
 
     await page
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.categories, "i") })
@@ -74,7 +70,7 @@ test.describe("Admin navigation", () => {
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });
 
-    const userAvatar = page.getByRole("button", { name: /(avatar for|profile test)/i });
+    const userAvatar = page.getByRole("button", { name: "Avatar for email@example.com" });
 
     await userAvatar.click();
 

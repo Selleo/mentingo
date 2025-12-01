@@ -1,23 +1,29 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { CreatePasswordReminderEmail } from "@repo/email-templates";
 import { OnboardingPages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
-import { and, count, eq, getTableColumns, ilike, inArray, not, or, sql } from "drizzle-orm";
+import { and, count, eq, getTableColumns, ilike, inArray, isNull, not, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
+import { SUPPORTED_LANGUAGES } from "src/ai/utils/ai.type";
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
+import { getEmailSubject } from "src/common/emails/translations";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CourseService } from "src/courses/course.service";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { S3Service } from "src/s3/s3.service";
@@ -33,8 +39,11 @@ import {
   userDetails,
   users,
   settings,
-  courses,
   userOnboarding,
+  studentCourses,
+  coursesSummaryStats,
+  courses,
+  groupCourses,
 } from "../storage/schema";
 
 import {
@@ -60,6 +69,7 @@ import type {
   UpdateUserBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
+import type { SupportedLanguages } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
@@ -72,21 +82,23 @@ export class UserService {
     private readonly emailService: EmailService,
     private fileService: FileService,
     private s3Service: S3Service,
-    private statisticsService: StatisticsService,
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
+    private statisticsService: StatisticsService,
+    @Inject(forwardRef(() => CourseService)) private courseService: CourseService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
     const {
-      sort = UserSortFields.title,
-      perPage = DEFAULT_PAGE_SIZE,
+      sort = UserSortFields.firstName,
       page = 1,
+      perPage = DEFAULT_PAGE_SIZE,
       filters = {},
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
     const conditions = this.getFiltersConditions(filters);
+    conditions.push(isNull(users.deletedAt));
 
     const usersData = await this.db
       .select({
@@ -98,7 +110,9 @@ export class UserService {
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions))
-      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)));
+      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)))
+      .limit(perPage)
+      .offset((page - 1) * perPage);
 
     const usersWithProfilePictures = await Promise.all(
       usersData.map(async (user) => {
@@ -135,7 +149,7 @@ export class UserService {
       .from(users)
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(eq(users.id, id));
+      .where(and(eq(users.id, id), isNull(users.deletedAt)));
 
     if (!user) {
       throw new NotFoundException("User not found");
@@ -153,7 +167,10 @@ export class UserService {
   }
 
   public async getUserByEmail(email: string) {
-    const [user] = await this.db.select().from(users).where(eq(users.email, email));
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, email), isNull(users.deletedAt)));
 
     if (!user) {
       throw new NotFoundException("User not found");
@@ -181,7 +198,7 @@ export class UserService {
       })
       .from(users)
       .leftJoin(userDetails, eq(userDetails.userId, users.id))
-      .where(eq(users.id, userId));
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 
     const canView =
       userId === currentUserId ||
@@ -212,7 +229,7 @@ export class UserService {
       .from(users)
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(eq(users.id, id));
+      .where(and(eq(users.id, id), isNull(users.deletedAt)));
 
     if (!existingUser?.users) {
       throw new NotFoundException("User not found");
@@ -223,7 +240,11 @@ export class UserService {
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
-        ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
+        ? await trx
+            .update(users)
+            .set(userData)
+            .where(and(eq(users.id, id)))
+            .returning()
         : [existingUser.users];
 
       if (!groupId) {
@@ -234,16 +255,35 @@ export class UserService {
         };
       }
 
+      const [groupExists] = await trx.select().from(groups).where(eq(groups.id, groupId));
+
+      if (!groupExists) {
+        throw new NotFoundException("Group not found");
+      }
+
       await trx
         .insert(groupUsers)
         .values({ userId: id, groupId })
         .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
 
+      const existingCourses = await trx
+        .select({ id: courses.id })
+        .from(courses)
+        .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
+        .where(eq(groupCourses.groupId, groupId));
+
+      if (!!existingCourses.length)
+        await this.enrollUserToGroupCourses(
+          id,
+          groupId,
+          existingCourses.map(({ id }) => id),
+          trx,
+        );
+
       const [groupData] = await trx
         .select(getTableColumns(groups))
         .from(groups)
-        .innerJoin(groupUsers, eq(groupUsers.groupId, groups.id))
-        .where(eq(groupUsers.userId, id));
+        .where(eq(groups.id, groupId));
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
@@ -257,8 +297,40 @@ export class UserService {
     });
   }
 
+  enrollUserToGroupCourses = async (
+    userId: UUIDType,
+    groupId: UUIDType,
+    existingCourseIds: UUIDType[],
+    trx: DatabasePg,
+  ) => {
+    await trx
+      .insert(groupUsers)
+      .values({ userId, groupId })
+      .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
+
+    const insertedStudentCourses = await trx
+      .insert(studentCourses)
+      .values(
+        existingCourseIds.map((courseId) => ({
+          studentId: userId,
+          courseId,
+          enrolledByGroupId: groupId,
+        })),
+      )
+      .onConflictDoNothing()
+      .returning({
+        courseId: studentCourses.courseId,
+      });
+
+    await Promise.all(
+      insertedStudentCourses.map(async ({ courseId }) =>
+        this.courseService.createCourseDependencies(courseId, userId, null, trx),
+      ),
+    );
+  };
+
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.id, userId));
+    const existingUser = await this.getExistingUser(userId);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -278,7 +350,7 @@ export class UserService {
     data: UpdateUserProfileBody,
     userAvatar?: Express.Multer.File,
   ) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
+    const existingUser = await this.getExistingUser(id);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -325,7 +397,7 @@ export class UserService {
   }
 
   async changePassword(id: UUIDType, oldPassword: string, newPassword: string) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
+    const existingUser = await this.getExistingUser(id);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -353,7 +425,7 @@ export class UserService {
   }
 
   async resetPassword(id: UUIDType, newPassword: string) {
-    const [existingUser] = await this.db.select().from(users).where(eq(users.id, id));
+    const existingUser = await this.getExistingUser(id);
 
     if (!existingUser) {
       throw new NotFoundException("User not found");
@@ -375,64 +447,172 @@ export class UserService {
       .where(eq(credentials.userId, id));
   }
 
-  public async deleteUser(id: UUIDType) {
-    await this.validateWhetherUserCanBeDeleted(id);
-    const [deletedUser] = await this.db.delete(users).where(eq(users.id, id)).returning();
-
-    if (!deletedUser) {
-      throw new NotFoundException("User not found");
+  public async deleteUser(currentUserId: UUIDType, id: UUIDType) {
+    if (id === currentUserId) {
+      throw new BadRequestException("You cannot delete your own account");
     }
+
+    const [userToDelete] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, id), isNull(users.deletedAt), eq(users.role, USER_ROLES.STUDENT)));
+
+    if (!userToDelete) throw new BadRequestException("You can only delete students");
+
+    return this.db.transaction(async (trx) => {
+      await this.deflateStatisticsForCourseDeletedUser(userToDelete.id, trx);
+
+      const idPart = id.split("-")[0];
+
+      const [deletedUser] = await trx
+        .update(users)
+        .set({
+          deletedAt: sql`NOW()`,
+          email: `deleted_${idPart}@user.com`,
+          firstName: "deleted user",
+          lastName: "deleted user",
+        })
+        .where(eq(users.id, id))
+        .returning();
+
+      return deletedUser;
+    });
   }
 
-  public async deleteBulkUsers(ids: UUIDType[]) {
-    await this.validateWhetherUsersCanBeDeleted(ids);
-    const deletedUsers = await this.db.delete(users).where(inArray(users.id, ids)).returning();
-
-    if (deletedUsers.length !== ids.length) {
-      throw new NotFoundException("Users not found");
+  public async deleteBulkUsers(currentUserId: UUIDType, ids: UUIDType[]) {
+    if (ids.includes(currentUserId)) {
+      throw new BadRequestException("You cannot delete yourself");
     }
+
+    const usersToDelete = await this.db
+      .select()
+      .from(users)
+      .where(
+        and(inArray(users.id, ids), isNull(users.deletedAt), eq(users.role, USER_ROLES.STUDENT)),
+      );
+
+    if (usersToDelete.length !== ids.length)
+      throw new BadRequestException("You can only delete students");
+
+    return this.db.transaction(async (trx) => {
+      await Promise.all(
+        ids.map(async (id) => {
+          await this.deflateStatisticsForCourseDeletedUser(id, trx);
+        }),
+      );
+
+      await Promise.all(
+        ids.map((id) =>
+          trx
+            .update(users)
+            .set({
+              deletedAt: sql`NOW()`,
+              email: `deleted_${id.split("-")[0]}@user.com`,
+              firstName: "deleted user",
+              lastName: "deleted user",
+            })
+            .where(eq(users.id, id)),
+        ),
+      );
+    });
   }
 
-  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg) {
+  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, creatorId?: UUIDType) {
     const db = dbInstance ?? this.db;
 
-    const [existingUser] = await db.select().from(users).where(eq(users.email, data.email));
+    const [existingUser] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, data.email)));
 
     if (existingUser) {
       throw new ConflictException("User already exists");
     }
 
-    return await this.db.transaction(async (trx) => {
+    const { createdUser, token } = await this.db.transaction(async (trx) => {
       const [createdUser] = await trx.insert(users).values(data).returning();
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
+
+      if (creatorId) {
+        const { language: adminsLanguage } = await this.settingsService.getUserSettings(creatorId);
+
+        const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
+          data.language as SupportedLanguages,
+        )
+          ? data.language
+          : adminsLanguage;
+
+        await this.settingsService.createSettingsIfNotExists(
+          createdUser.id,
+          createdUser.role as UserRole,
+          { language: finalLanguage },
+          trx,
+        );
+      }
 
       const token = nanoid(64);
 
       const expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
-      await trx.insert(createTokens).values({
-        userId: createdUser.id,
-        createToken: token,
-        expiryDate,
-        reminderCount: 0,
-      });
+      const [{ createToken }] = await trx
+        .insert(createTokens)
+        .values({
+          userId: createdUser.id,
+          createToken: token,
+          expiryDate,
+          reminderCount: 0,
+        })
+        .returning();
 
-      const userInviteDetails: UserInvite = {
-        name: createdUser.firstName,
-        email: createdUser.email,
-        token,
-      };
-
-      this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+      await this.settingsService.createSettingsIfNotExists(
+        createdUser.id,
+        createdUser.role as UserRole,
+        undefined,
+        trx,
+      );
 
       if (USER_ROLES.CONTENT_CREATOR === createdUser.role || USER_ROLES.ADMIN === createdUser.role)
         await trx
           .insert(userDetails)
           .values({ userId: createdUser.id, contactEmail: createdUser.email });
 
-      return createdUser;
+      return { createdUser, token: createToken };
     });
+
+    if (!createdUser || !token) {
+      throw new Error("Failed to create user");
+    }
+
+    const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
+
+    if (!creatorId) {
+      const createPasswordEmail = new CreatePasswordReminderEmail({
+        createPasswordLink: `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
+        ...defaultEmailSettings,
+      });
+
+      await this.emailService.sendEmailWithLogo({
+        to: createdUser.email,
+        subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
+        text: createPasswordEmail.text,
+        html: createPasswordEmail.html,
+      });
+
+      return createdUser;
+    }
+
+    const userInviteDetails: UserInvite = {
+      creatorId: creatorId,
+      email: createdUser.email,
+      token,
+      userId: createdUser.id,
+      ...defaultEmailSettings,
+    };
+
+    this.eventBus.publish(new UserInviteEvent(userInviteDetails));
+
+    return createdUser;
   }
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
@@ -440,40 +620,47 @@ export class UserService {
     return await this.s3Service.getSignedUrl(avatarReference);
   };
 
-  public async getAdminsToNotifyAboutNewUser(emailToExclude: string): Promise<string[]> {
-    const adminEmails = await this.db
+  public async getAdminsToNotifyAboutNewUser(emailToExclude: string) {
+    return this.db
       .select({
+        id: users.id,
         email: users.email,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))
       .where(
         and(
+          isNull(users.deletedAt),
           eq(users.role, USER_ROLES.ADMIN),
           sql`${settings.settings}->>'adminNewUserNotification' = 'true'`,
           not(eq(users.email, emailToExclude)),
         ),
       );
-
-    return adminEmails.map((admin) => admin.email);
   }
 
   public async getStudentEmailsByIds(studentIds: UUIDType[]) {
-    const userEmails = await this.db
+    return this.db
       .select({
+        id: users.id,
         email: users.email,
       })
       .from(users)
       .where(and(eq(users.role, USER_ROLES.STUDENT), inArray(users.id, studentIds)));
-
-    return userEmails.map((user) => user.email);
   }
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
     await this.db.transaction(async (trx) => {
+      const existingUsers = await trx
+        .select({ id: users.id })
+        .from(users)
+        .where(and(inArray(users.id, data.userIds), isNull(users.deletedAt)));
+
+      const validUserIds = existingUsers.map((u) => u.id);
+      if (validUserIds.length === 0) return;
+
       await trx
         .insert(groupUsers)
-        .values(data.userIds.map((userId) => ({ userId, groupId: data.groupId })))
+        .values(validUserIds.map((userId) => ({ userId, groupId: data.groupId })))
         .onConflictDoUpdate({
           target: [groupUsers.userId],
           set: { groupId: data.groupId },
@@ -489,12 +676,12 @@ export class UserService {
       })
       .from(users)
       .leftJoin(settings, eq(users.id, settings.userId))
-      .where(and(eq(users.role, USER_ROLES.ADMIN)));
+      .where(and(eq(users.role, USER_ROLES.ADMIN), isNull(users.deletedAt)));
 
     return adminsWithSettings;
   }
 
-  async importUsers(usersDataFile: Express.Multer.File) {
+  async importUsers(usersDataFile: Express.Multer.File, creatorId: UUIDType) {
     const importStats: ImportUserResponse = {
       importedUsersAmount: 0,
       skippedUsersAmount: 0,
@@ -525,13 +712,7 @@ export class UserService {
       await this.db.transaction(async (trx) => {
         const { groupName, ...userInfo } = userData;
 
-        const createdUser = await this.createUser({ ...userInfo }, trx);
-        await this.settingsService.createSettingsIfNotExists(
-          createdUser.id,
-          createdUser.role as UserRole,
-          undefined,
-          trx,
-        );
+        const createdUser = await this.createUser({ ...userInfo }, trx, creatorId);
 
         importStats.importedUsersAmount++;
         importStats.importedUsersList.push(userData.email);
@@ -546,6 +727,20 @@ export class UserService {
           .insert(groupUsers)
           .values({ userId: createdUser.id, groupId: group.id })
           .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
+
+        const existingCourses = await trx
+          .select({ id: courses.id })
+          .from(courses)
+          .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
+          .where(eq(groupCourses.groupId, group.id));
+
+        if (!!existingCourses.length)
+          await this.enrollUserToGroupCourses(
+            createdUser.id,
+            group.id,
+            existingCourses.map(({ id }) => id),
+            trx,
+          );
       });
     }
 
@@ -556,7 +751,7 @@ export class UserService {
     const usersToArchive = await this.db
       .select({ id: users.id })
       .from(users)
-      .where(and(inArray(users.id, userIds), eq(users.archived, false)));
+      .where(and(inArray(users.id, userIds), eq(users.archived, false), isNull(users.deletedAt)));
 
     if (!usersToArchive.length) throw new NotFoundException("No users found to archive");
 
@@ -602,10 +797,16 @@ export class UserService {
 
   private getColumnToSortBy(sort: UserSortField) {
     switch (sort) {
+      case UserSortFields.firstName:
+        return users.firstName;
+      case UserSortFields.lastName:
+        return users.lastName;
+      case UserSortFields.email:
+        return users.email;
       case UserSortFields.createdAt:
         return users.createdAt;
-      case UserSortFields.role:
-        return users.role;
+      case UserSortFields.groupName:
+        return groups.name;
       default:
         return users.firstName;
     }
@@ -640,10 +841,11 @@ export class UserService {
     return !!course;
   }
 
-  public async getAdminsToNotifyAboutFinishedCourse(): Promise<string[]> {
-    const adminEmails = await this.db
+  public async getAdminsToNotifyAboutFinishedCourse(): Promise<{ email: string; id: string }[]> {
+    return this.db
       .select({
         email: users.email,
+        id: users.id,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))
@@ -651,10 +853,9 @@ export class UserService {
         and(
           eq(users.role, USER_ROLES.ADMIN),
           sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
+          isNull(users.deletedAt),
         ),
       );
-
-    return adminEmails.map((admin) => admin.email);
   }
 
   async checkUsersInactivity() {
@@ -723,5 +924,38 @@ export class UserService {
       .returning();
 
     return updatedOnboarding;
+  }
+
+  private async deflateStatisticsForCourseDeletedUser(userId: UUIDType, trx: DatabasePg = this.db) {
+    const courseStatistics = await trx
+      .select({
+        courseId: studentCourses.courseId,
+        courseCompleted: sql<boolean>`CASE WHEN ${studentCourses.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        isPaid: sql<boolean>`CASE WHEN ${studentCourses.paymentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+      })
+      .from(studentCourses)
+      .where(eq(studentCourses.studentId, userId));
+
+    await Promise.all(
+      courseStatistics.map((courseStatistic) =>
+        trx
+          .update(coursesSummaryStats)
+          .set({
+            completedCourseStudentCount: sql`CASE WHEN ${courseStatistic.courseCompleted} THEN ${coursesSummaryStats.completedCourseStudentCount} - 1 ELSE ${coursesSummaryStats.completedCourseStudentCount} END`,
+            freePurchasedCount: sql`CASE WHEN ${courseStatistic.isPaid} THEN ${coursesSummaryStats.freePurchasedCount} ELSE ${coursesSummaryStats.freePurchasedCount} - 1 END`,
+            paidPurchasedCount: sql`CASE WHEN ${courseStatistic.isPaid} THEN ${coursesSummaryStats.paidPurchasedCount} - 1 ELSE ${coursesSummaryStats.paidPurchasedCount} END`,
+          })
+          .where(eq(coursesSummaryStats.courseId, courseStatistic.courseId)),
+      ),
+    );
+  }
+
+  private async getExistingUser(userId: UUIDType) {
+    const [existingUser] = await this.db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+
+    return existingUser;
   }
 }

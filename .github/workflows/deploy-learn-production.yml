@@ -84,7 +84,7 @@ jobs:
             EMAIL_ADAPTER
             SENTRY_DSN
             SENTRY_ENVIRONMENT
-            SES_EMAIL
+            SMTP_EMAIL_FROM
             STRIPE_PUBLISHABLE_KEY
             STRIPE_SECRET_KEY
             STRIPE_WEBHOOK_SECRET
@@ -141,7 +141,7 @@ jobs:
             EMAIL_ADAPTER
             SENTRY_DSN
             SENTRY_ENVIRONMENT
-            SES_EMAIL
+            SMTP_EMAIL_FROM
             STRIPE_PUBLISHABLE_KEY
             STRIPE_SECRET_KEY
             STRIPE_WEBHOOK_SECRET

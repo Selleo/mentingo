@@ -58,8 +58,13 @@ export class ChapterController {
   async betaCreateChapter(
     @Body() createChapterBody: CreateChapterBody,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.adminChapterService.createChapterForCourse(createChapterBody, userId);
+    const { id } = await this.adminChapterService.createChapterForCourse(
+      createChapterBody,
+      userId,
+      role,
+    );
 
     return new BaseResponse({ id, message: "Chapter created successfully" });
   }
@@ -83,8 +88,10 @@ export class ChapterController {
   async updateChapter(
     @Query("id") id: UUIDType,
     @Body() updateChapterBody: UpdateChapterBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.updateChapter(id, updateChapterBody);
+    await this.adminChapterService.updateChapter(id, updateChapterBody, userId, role);
 
     return new BaseResponse({ message: "Chapter updated successfully" });
   }
@@ -110,8 +117,14 @@ export class ChapterController {
       chapterId: UUIDType;
       displayOrder: number;
     },
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.updateChapterDisplayOrder(body);
+    await this.adminChapterService.updateChapterDisplayOrder({
+      ...body,
+      currentUserRole: role,
+      currentUserId: userId,
+    });
 
     return new BaseResponse({
       message: "Chapter display order updated successfully",
@@ -126,8 +139,10 @@ export class ChapterController {
   })
   async removeChapter(
     @Query("chapterId") chapterId: UUIDType,
+    @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.removeChapter(chapterId);
+    await this.adminChapterService.removeChapter(chapterId, userId, role);
     return new BaseResponse({
       message: "Lesson removed from course successfully",
     });
@@ -154,8 +169,10 @@ export class ChapterController {
   async updateFreemiumStatus(
     @Query("chapterId") chapterId: UUIDType,
     @Body() body: { isFreemium: boolean },
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.updateFreemiumStatus(chapterId, body.isFreemium);
+    await this.adminChapterService.updateFreemiumStatus(chapterId, body.isFreemium, userId, role);
     return new BaseResponse({
       message: "Course lesson free status updated successfully",
     });

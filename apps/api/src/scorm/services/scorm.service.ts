@@ -20,6 +20,7 @@ import { ScormRepository } from "../repositories/scorm.repository";
 
 import type { UUIDType } from "src/common";
 import type { LessonTypes } from "src/lesson/lesson.type";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 type ScormChapter = {
   title: string;
@@ -76,7 +77,12 @@ export class ScormService {
    * @returns Created metadata record with files location and entry point
    * @throws BadRequestException if package is invalid
    */
-  async processScormPackage(file: Express.Multer.File, courseId: UUIDType, userId: UUIDType) {
+  async processScormPackage(
+    file: Express.Multer.File,
+    courseId: UUIDType,
+    userId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
     return await this.db.transaction(async (tx) => {
       try {
         const { manifest, version, entries } = await this.parseAndValidateScorm(file);
@@ -124,18 +130,23 @@ export class ScormService {
               isFreemium: false,
             },
             userId,
+            currentUserRole,
           );
 
           // Create lessons
           for (const lesson of chapter.lessons) {
-            await this.adminLessonService.createLessonForChapter({
-              title: lesson.title,
-              chapterId: createdChapter.id,
-              type: lesson.type,
-              description: "",
-              fileS3Key: lesson.href ? `${s3BaseKey}/${lesson.href}` : undefined,
-              fileType: this.getContentType(lesson.href),
-            });
+            await this.adminLessonService.createLessonForChapter(
+              {
+                title: lesson.title,
+                chapterId: createdChapter.id,
+                type: lesson.type,
+                description: "",
+                fileS3Key: lesson.href ? `${s3BaseKey}/${lesson.href}` : undefined,
+                fileType: this.getContentType(lesson.href),
+              },
+              userId,
+              currentUserRole,
+            );
           }
         }
 

@@ -7,9 +7,15 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
 import { Type } from "@sinclair/typebox";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { SupportedLanguages } from "src/ai/utils/ai.type";
@@ -111,8 +117,14 @@ export class LessonController {
   })
   async betaCreateLesson(
     @Body() createLessonBody: CreateLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const id = await this.adminLessonsService.createLessonForChapter(createLessonBody);
+    const id = await this.adminLessonsService.createLessonForChapter(
+      createLessonBody,
+      userId,
+      role,
+    );
 
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
@@ -131,8 +143,14 @@ export class LessonController {
   })
   async betaCreateAiMentorLesson(
     @Body() createAiMentorLessonBody: CreateAiMentorLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const id = await this.adminLessonsService.createAiMentorLesson(createAiMentorLessonBody);
+    const id = await this.adminLessonsService.createAiMentorLesson(
+      createAiMentorLessonBody,
+      userId,
+      role,
+    );
     return new BaseResponse({ id, message: "AI Mentor lesson created successfully" });
   }
 
@@ -157,10 +175,12 @@ export class LessonController {
     @Query("id") id: UUIDType,
     @Body() data: UpdateAiMentorLessonBody,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateAiMentorLesson(id, data, userId);
+    await this.adminLessonsService.updateAiMentorLesson(id, data, userId, role);
     return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
   }
+
   @Post("beta-create-lesson/quiz")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
@@ -176,8 +196,9 @@ export class LessonController {
   async betaCreateQuizLesson(
     @Body() createQuizLessonBody: CreateQuizLessonBody,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const id = await this.adminLessonsService.createQuizLesson(createQuizLessonBody, userId);
+    const id = await this.adminLessonsService.createQuizLesson(createQuizLessonBody, userId, role);
 
     return new BaseResponse({ id, message: "Quiz created successfully" }) as any;
   }
@@ -203,8 +224,9 @@ export class LessonController {
     @Query("id") id: UUIDType,
     @Body() data: UpdateQuizLessonBody,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateQuizLesson(id, data, userId);
+    await this.adminLessonsService.updateQuizLesson(id, data, userId, role);
     return new BaseResponse({ message: "Quiz updated successfully" });
   }
 
@@ -227,8 +249,10 @@ export class LessonController {
   async betaUpdateLesson(
     @Query("id") id: UUIDType,
     @Body() data: UpdateLessonBody,
+    @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateLesson(id, data);
+    await this.adminLessonsService.updateLesson(id, data, userId, role);
     return new BaseResponse({ message: "Text block updated successfully" });
   }
 
@@ -240,8 +264,10 @@ export class LessonController {
   })
   async removeLesson(
     @Query("lessonId") lessonId: UUIDType,
+    @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.removeLesson(lessonId);
+    await this.adminLessonsService.removeLesson(lessonId, userId, role);
 
     return new BaseResponse({
       message: "Lesson removed from course successfully",
@@ -285,6 +311,37 @@ export class LessonController {
     });
   }
 
+  @Post("upload-files-to-lesson")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        lessonId: { type: "string", format: "uuid" },
+        file: {
+          type: "string",
+          format: "binary",
+        },
+      },
+      required: ["lessonId", "file"],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "File uploaded successfully",
+    type: String,
+  })
+  async uploadImageToLesson(
+    @Body("lessonId") lessonId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.adminLessonsService.uploadFileToLesson(lessonId, userId, role, file);
+  }
+
   @Delete("delete-student-quiz-answers")
   @Roles(USER_ROLES.STUDENT)
   @Validate({
@@ -307,8 +364,10 @@ export class LessonController {
   })
   async createEmbedLesson(
     @Body() data: CreateEmbedLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.createEmbedLesson(data);
+    await this.adminLessonsService.createEmbedLesson(data, userId, role);
     return new BaseResponse({ message: "Embed lesson created successfully" });
   }
 
@@ -324,8 +383,10 @@ export class LessonController {
   async updateEmbedLesson(
     @Param("id") id: UUIDType,
     @Body() data: UpdateEmbedLessonBody,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateEmbedLesson(id, data);
+    await this.adminLessonsService.updateEmbedLesson(id, userId, role, data);
     return new BaseResponse({ message: "Embed lesson updated successfully" });
   }
 
@@ -354,6 +415,19 @@ export class LessonController {
   //     });
   //   }
 
+  @Get("lesson-image/:resourceId")
+  @Validate({
+    request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
+  })
+  async getLessonImage(
+    @Param("resourceId") resourceId: UUIDType,
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
+    @Res() res: Response,
+  ) {
+    return this.lessonService.getLessonImage(res, userId, role, resourceId);
+  }
+
   @Patch("update-lesson-display-order")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
@@ -375,8 +449,14 @@ export class LessonController {
       lessonId: UUIDType;
       displayOrder: number;
     },
+    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") role: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateLessonDisplayOrder(body);
+    await this.adminLessonsService.updateLessonDisplayOrder({
+      ...body,
+      currentUserId: userId,
+      currentUserRole: role,
+    });
 
     return new BaseResponse({
       message: "Lesson display order updated successfully",

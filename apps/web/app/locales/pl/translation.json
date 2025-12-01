@@ -27,6 +27,10 @@
       "contentCreator": "Twórca treści",
       "student": "Uczeń"
     },
+    "languages": {
+      "en": "Angielski",
+      "pl": "Polski"
+    },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
     },
@@ -247,6 +251,41 @@
       "inviteOnlyRegistrationUpdatedSuccessfully": "Ustawienia rejestracji tylko na zaproszenie zostały pomyślnie zaktualizowane",
       "inviteOnlyRegistrationUpdateFailed": "Nie udało się zaktualizować ustawień rejestracji tylko na zaproszenie",
       "registerRedirect": "Rejestracja możliwa wyłącznie na podstawie zaproszenia."
+    }
+  },
+  "environmentConfigurationView": {
+    "header": "Konfiguracja środowiska",
+    "description": "Zobacz szczegółowe informacje o konfiguracji środowiska, w tym w pełni skonfigurowane usługi, częściowo skonfigurowane usługi oraz brakujące zmienne środowiskowe.",
+    "button": {
+      "viewStatus": "Zobacz status",
+      "loading": "Ładowanie...",
+      "dismissWarning": "Odrzuć ostrzeżenie"
+    },
+    "dialog": {
+      "title": "Status konfiguracji środowiska",
+      "fullyConfigured": "W pełni skonfigurowane",
+      "partiallyConfigured": "Częściowo skonfigurowane",
+      "youMightWantToSetThisUp": "Możesz chcieć to skonfigurować",
+      "noFullyConfigured": "Brak w pełni skonfigurowanych usług.",
+      "noPartiallyConfigured": "Brak częściowo skonfigurowanych usług.",
+      "allConfigured": "Wszystkie zmienne środowiskowe są poprawnie skonfigurowane.",
+      "dismissWarning": "Odrzuć",
+      "serviceNames": {
+        "stripe": "Płatności Stripe",
+        "bunny": "Bunny CDN",
+        "google_authorization": "Google OAuth",
+        "microsoft_authorization": "Microsoft OAuth",
+        "slack_authorization": "Slack OAuth",
+        "openAI": "OpenAI"
+      },
+      "serviceDescriptions": {
+        "stripe": "Przetwarzanie płatności za kursy i zarządzanie subskrypcjami",
+        "bunny": "Przesyłanie strumieniowe wideo i efektywna dostawa treści",
+        "google_authorization": "Umożliwia użytkownikom logowanie przez konto Google",
+        "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
+        "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
+        "openAI": "Włączenie funkcji AI Mentora"
+      }
     }
   },
   "mostPopularCoursesView": {
@@ -666,7 +705,7 @@
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "archive": "Czy na pewno chcesz zarchiwizować te konta?",
-        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne).",
+        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne), language (en lub pl).",
         "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
         "noUsersSkipped": "Nie pominięto żadnych użytkowników."
       },
@@ -675,7 +714,7 @@
         "role": "Wybierz rolę"
       },
       "note": {
-        "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa."
+        "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa. Jeśli język nie jest podany, bądź podany będzie nieprawidłowy to domyślnie zostanie ustawiony na język interfejsu administratora."
       },
       "tabs": {
         "imported": "Zaimportowani użytkownicy",
@@ -695,13 +734,15 @@
     "editUserHeader": "Informacje o użytkowniku",
     "placeholder": {
       "role": "Wybierz rolę",
-      "groupId": "Wybierz grupę"
+      "groupId": "Wybierz grupę",
+      "language": "Wybierz język"
     },
     "field": {
       "firstName": "Imię",
       "lastName": "Nazwisko",
       "email": "Email",
       "role": "Rola",
+      "language": "Język",
       "status": "Status",
       "groupId": "Grupa"
     },
@@ -728,25 +769,63 @@
     "updateSuccessful": "Sekrety zostały pomyślnie zaktualizowane",
     "form": {
       "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      "MICROSOFT_CLIENT_ID": { "label": "Microsoft Client ID" },
-      "MICROSOFT_CLIENT_SECRET": { "label": "Microsoft Client Secret" },
-      "MICROSOFT_OAUTH_ENABLED": { "label": "Microsoft OAuth Enabled (true/false)" },
-      "VITE_MICROSOFT_OAUTH_ENABLED": { "label": "Vite Microsoft OAuth Enabled (true/false)" },
-      "OPENAI_API_KEY": { "label": "OpenAI API Key" },
-      "BUNNY_STREAM_API_KEY": { "label": "Bunny Stream API Key" },
-      "BUNNY_STREAM_SIGNING_KEY": { "label": "Bunny Stream Signing Key" },
-      "BUNNY_STREAM_LIBRARY_ID": { "label": "Bunny Stream Library ID" },
-      "BUNNY_STREAM_CDN_URL": { "label": "Bunny Stream CDN URL" },
-      "GOOGLE_CLIENT_ID": { "label": "Google Client ID" },
-      "GOOGLE_CLIENT_SECRET": { "label": "Google Client Secret" },
-      "GOOGLE_OAUTH_ENABLED": { "label": "Google OAuth Enabled (true/false)" },
-      "VITE_GOOGLE_OAUTH_ENABLED": { "label": "Vite Google OAuth Enabled (true/false)" },
-      "STRIPE_WEBHOOK_SECRET": { "label": "Stripe Webhook Secret" },
-      "STRIPE_SECRET_KEY": { "label": "Stripe Secret Key" },
-      "SLACK_CLIENT_ID": { "label": "Slack Client ID" },
-      "SLACK_CLIENT_SECRET": { "label": "Slack Client Secret" },
-      "SLACK_OAUTH_ENABLED": { "label": "Slack OAuth Enabled (true/false)" },
-      "VITE_SLACK_OAUTH_ENABLED": { "label": "Vite Slack OAuth Enabled (true/false)" },
+      "MICROSOFT_CLIENT_ID": {
+        "label": "Microsoft Client ID"
+      },
+      "MICROSOFT_CLIENT_SECRET": {
+        "label": "Microsoft Client Secret"
+      },
+      "MICROSOFT_OAUTH_ENABLED": {
+        "label": "Microsoft OAuth Enabled (true/false)"
+      },
+      "VITE_MICROSOFT_OAUTH_ENABLED": {
+        "label": "Vite Microsoft OAuth Enabled (true/false)"
+      },
+      "OPENAI_API_KEY": {
+        "label": "OpenAI API Key"
+      },
+      "BUNNY_STREAM_API_KEY": {
+        "label": "Bunny Stream API Key"
+      },
+      "BUNNY_STREAM_SIGNING_KEY": {
+        "label": "Bunny Stream Signing Key"
+      },
+      "BUNNY_STREAM_LIBRARY_ID": {
+        "label": "Bunny Stream Library ID"
+      },
+      "BUNNY_STREAM_CDN_URL": {
+        "label": "Bunny Stream CDN URL"
+      },
+      "GOOGLE_CLIENT_ID": {
+        "label": "Google Client ID"
+      },
+      "GOOGLE_CLIENT_SECRET": {
+        "label": "Google Client Secret"
+      },
+      "GOOGLE_OAUTH_ENABLED": {
+        "label": "Google OAuth Enabled (true/false)"
+      },
+      "VITE_GOOGLE_OAUTH_ENABLED": {
+        "label": "Vite Google OAuth Enabled (true/false)"
+      },
+      "STRIPE_WEBHOOK_SECRET": {
+        "label": "Stripe Webhook Secret"
+      },
+      "STRIPE_SECRET_KEY": {
+        "label": "Stripe Secret Key"
+      },
+      "SLACK_CLIENT_ID": {
+        "label": "Slack Client ID"
+      },
+      "SLACK_CLIENT_SECRET": {
+        "label": "Slack Client Secret"
+      },
+      "SLACK_OAUTH_ENABLED": {
+        "label": "Slack OAuth Enabled (true/false)"
+      },
+      "VITE_SLACK_OAUTH_ENABLED": {
+        "label": "Vite Slack OAuth Enabled (true/false)"
+      },
       "save": "Zapisz"
     },
     "breadcrumbs": {
@@ -828,7 +907,11 @@
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
       "courseUpdatedSuccessfully": "Kurs zaktualizowany pomyślnie",
       "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
-      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu"
+      "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu",
+      "maxTitleLengthExceeded_one": "Tytuł nie może mieć więcej niż {{count}} znak",
+      "maxTitleLengthExceeded_few": "Tytuł nie może mieć więcej niż {{count}} znaki",
+      "maxTitleLengthExceeded_many": "Tytuł nie może mieć więcej niż {{count}} znaków",
+      "maxTitleLengthExceeded_other": "Tytuł nie może mieć więcej niż {{count}} znaków"
     },
     "settings": {
       "breadcrumbs": {
@@ -853,7 +936,8 @@
         },
         "other": {
           "noDescription": "Brak opisu.",
-          "untitled": "Bez tytułu"
+          "untitled": "Bez tytułu",
+          "enableCertificate": "Włącz certyfikat"
         }
       },
       "field": {
@@ -1153,6 +1237,17 @@
         }
       },
       "enrollSelected": "Zapisz wybranych na kurs",
+      "enrollGroups": "Zapisz wybrane grupy na kurs",
+      "enrollGroupsModal": {
+        "title": "Zapisz grupy do kursu",
+        "description": "Wybierz grupy do zapisania. Wszyscy członkowie wybranych grup zostaną automatycznie zapisani na ten kurs."
+      },
+      "alreadyEnrolled": "Już zapisana",
+      "members": "{{count}} członków",
+      "members_one": "{{count}} członek",
+      "members_few": "{{count}} członków",
+      "members_many": "{{count}} członków",
+      "members_other": "{{count}} członków",
       "table": {
         "name": "Imię",
         "surname": "Nazwisko",
@@ -1472,7 +1567,8 @@
         "startLearning": "Zacznij naukę",
         "enrollCourse": "Zapisz się na kurs",
         "goToContentCreatorPage": "Przejdź do strony twórcy treści",
-        "repeatLessons": "Powtórz lekcje"
+        "repeatLessons": "Powtórz lekcje",
+        "enrollGroups": "Zapisz grupy"
       }
     },
     "breadcrumbs": {
@@ -1783,6 +1879,10 @@
           "urlInvalid": "Nieprawidłowy format linku",
           "linkTextRequired": "Tekst linku jest wymagany"
         }
+      },
+      "upload": {
+        "uploadFailed": "Nie udało się przesłać pliku",
+        "tooltip": "Prześlij: Pozwala przesłać plik"
       }
     }
   },

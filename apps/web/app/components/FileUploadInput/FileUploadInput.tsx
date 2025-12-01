@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { match } from "ts-pattern";
 
 import { FileUploadLoading } from "~/components/FileUploadInput/FileUploadLoading";
@@ -10,8 +11,6 @@ import { PresentationPreview } from "./PresentationPreview";
 import { SpreadsheetPreview } from "./SpreadsheetPreview";
 import { VideoPreview } from "./VideoPreview";
 
-import type { ChangeEvent } from "react";
-
 type FileUploadInputProps = {
   handleFileUpload: (file: File) => Promise<void>;
   handleFileDelete: () => void;
@@ -21,11 +20,26 @@ type FileUploadInputProps = {
   className?: string;
 };
 
-const ACCEPTED_TYPE_FORMATS = {
-  [ContentTypes.VIDEO_LESSON_FORM]: ".mp4,.avi,.mov",
-  [ContentTypes.PRESENTATION_FORM]: ".pptx,.ppt,.odp",
-  ["Image"]: ".svg,.png,.jpg",
-  ["Spreadsheet"]: ".xlsx,.csv",
+const ACCEPTED_TYPE_FORMATS: Record<string, Record<string, string[]>> = {
+  [ContentTypes.VIDEO_LESSON_FORM]: {
+    "video/mp4": [".mp4"],
+    "video/x-msvideo": [".avi"],
+    "video/quicktime": [".mov"],
+  },
+  [ContentTypes.PRESENTATION_FORM]: {
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
+    "application/vnd.ms-powerpoint": [".ppt"],
+    "application/vnd.oasis.opendocument.presentation": [".odp"],
+  },
+  ["Image"]: {
+    "image/svg+xml": [".svg"],
+    "image/png": [".png"],
+    "image/jpeg": [".jpg"],
+  },
+  ["Spreadsheet"]: {
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+    "text/csv": [".csv"],
+  },
 };
 
 const FileUploadInput = ({
@@ -36,8 +50,19 @@ const FileUploadInput = ({
   url,
   className,
 }: FileUploadInputProps) => {
+  const acceptedTypes = ACCEPTED_TYPE_FORMATS[contentTypeToDisplay] || {};
+
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    multiple: false,
+    onDropAccepted: (acceptedFiles) => {
+      handleFileChange(acceptedFiles[0]);
+    },
+    disabled: isUploading,
+    accept: acceptedTypes,
+  });
 
   useEffect(() => {
     if (url) {
@@ -45,17 +70,14 @@ const FileUploadInput = ({
     } else setVideoPreview(null);
   }, [url]);
 
-  const acceptedTypes = ACCEPTED_TYPE_FORMATS[contentTypeToDisplay];
-
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.target.files?.[0];
-    if (uploadedFile) {
-      setFile(uploadedFile);
+  const handleFileChange = async (file?: File) => {
+    if (file) {
+      setFile(file);
       if (contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM) {
-        const videoURL = URL.createObjectURL(uploadedFile);
+        const videoURL = URL.createObjectURL(file);
         setVideoPreview(videoURL);
       }
-      await handleFileUpload(uploadedFile);
+      await handleFileUpload(file);
     }
   };
 
@@ -67,10 +89,7 @@ const FileUploadInput = ({
         return (
           <VideoPreview
             videoPreview={videoPreview}
-            acceptedTypes={acceptedTypes}
-            handleFileChange={handleFileChange}
             handleFileDelete={handleFileDelete}
-            isUploading={isUploading}
             setFile={setFile}
             setVideoPreview={setVideoPreview}
           />
@@ -78,26 +97,16 @@ const FileUploadInput = ({
       })
       .with(ContentTypes.PRESENTATION_FORM, () => {
         return (
-          <PresentationPreview
-            acceptedTypes={acceptedTypes}
-            handleFileChange={handleFileChange}
-            isUploading={isUploading}
-            setFile={setFile}
-            setVideoPreview={setVideoPreview}
-            url={url}
-          />
+          <PresentationPreview setFile={setFile} setVideoPreview={setVideoPreview} url={url} />
         );
       })
       .with("Spreadsheet", () => {
         return (
           <SpreadsheetPreview
             file={file}
-            acceptedTypes={acceptedTypes}
-            handleFileChange={handleFileChange}
             handleFileDelete={handleFileDelete}
             setVideoPreview={setVideoPreview}
             setFile={setFile}
-            isUploading={isUploading}
           />
         );
       })
@@ -108,13 +117,10 @@ const FileUploadInput = ({
 
   if (!videoPreview && !file) {
     return (
-      <EmptyStateUpload
-        acceptedTypes={acceptedTypes}
-        handleFileChange={handleFileChange}
-        isUploading={isUploading}
-        contentTypeToDisplay={contentTypeToDisplay}
-        className={className}
-      />
+      <div {...getRootProps()} className="max-w-[440px]">
+        <EmptyStateUpload contentTypeToDisplay={contentTypeToDisplay} className={className} />
+        <input {...getInputProps()} className="sr-only" />
+      </div>
     );
   }
 
@@ -124,8 +130,10 @@ const FileUploadInput = ({
         "relative h-[240px] w-full max-w-[440px] overflow-hidden rounded-lg border border-neutral-200",
         className,
       )}
+      {...getRootProps()}
     >
       {filePreview}
+      <input {...getInputProps()} className="sr-only" />
     </div>
   );
 };

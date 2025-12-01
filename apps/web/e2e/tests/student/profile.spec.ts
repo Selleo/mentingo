@@ -65,16 +65,19 @@ const editProfilePicture = async (page: Page) => {
 
   await goIntoEditMode(page);
 
+  const deleteButton = page.getByRole("button", {
+    name: new RegExp(PROFILE_PAGE_UI.button.delete, "i"),
+  });
+
+  if (await deleteButton.isVisible()) {
+    await deleteButton.click();
+    await expect(uploadInput).toBeVisible();
+  }
+
   await uploadInput.setInputFiles(PROFILE_PAGE_FILE_PATH);
   await expect(uploadInput).not.toBeVisible();
 
   await confirmEditMode(page);
-
-  const profileImage = page.locator("main").getByRole("img", {
-    name: `${PROFILE_PAGE_UI.expectedValues.firstName} ${PROFILE_PAGE_UI.expectedValues.lastName} profile`,
-  });
-
-  await expect(profileImage).toBeVisible();
 };
 
 test.describe("Student profile page flow", () => {

@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
+import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -25,12 +26,13 @@ export function useAdminUpdateUser() {
         options.data,
       );
 
-      await queryClient.invalidateQueries({ queryKey: ["users"] });
-
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({ description: t("changeUserInformationView.toast.userUpdatedSuccessfully") });
+
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

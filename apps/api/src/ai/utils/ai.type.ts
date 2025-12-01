@@ -29,3 +29,10 @@ export const SUPPORTED_LANGUAGES = {
 };
 
 export type SupportedLanguages = (typeof SUPPORTED_LANGUAGES)[keyof typeof SUPPORTED_LANGUAGES];
+
+export const LANGUAGES = {
+  PL: "pl",
+  EN: "en",
+} as const;
+
+export type Languages = (typeof LANGUAGES)[keyof typeof LANGUAGES];

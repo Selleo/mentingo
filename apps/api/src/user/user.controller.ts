@@ -67,7 +67,7 @@ import {
   userSchema,
   userOnboardingStatusSchema,
 } from "./schemas/user.schema";
-import { SortUserFieldsOptions } from "./schemas/userQuery";
+import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
 import { USER_ROLES, UserRole } from "./schemas/userRoles";
 import { UserService } from "./user.service";
 
@@ -89,7 +89,7 @@ export class UserController {
       { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
-      { type: "query", name: "sort", schema: Type.String() },
+      { type: "query", name: "sort", schema: sortUserFieldsOptions },
       { type: "query", name: "groupId", schema: Type.String() },
     ],
     response: paginatedResponse(allUsersSchema),
@@ -277,11 +277,7 @@ export class UserController {
     @Query("id") id: UUIDType,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<null> {
-    if (currentUserId !== id) {
-      throw new ForbiddenException("You can only delete your own account");
-    }
-
-    await this.usersService.deleteUser(id);
+    await this.usersService.deleteUser(currentUserId, id);
 
     return null;
   }
@@ -292,8 +288,11 @@ export class UserController {
     response: nullResponse(),
     request: [{ type: "body", schema: deleteUsersSchema }],
   })
-  async deleteBulkUsers(@Body() data: DeleteUsersSchema): Promise<null> {
-    await this.usersService.deleteBulkUsers(data.userIds);
+  async deleteBulkUsers(
+    @Body() data: DeleteUsersSchema,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<null> {
+    await this.usersService.deleteBulkUsers(currentUserId, data.userIds);
 
     return null;
   }
@@ -333,8 +332,9 @@ export class UserController {
   })
   async createUser(
     @Body() data: CreateUserBody,
+    @CurrentUser("userId") creatorId: UUIDType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.usersService.createUser(data);
+    const { id } = await this.usersService.createUser(data, undefined, creatorId);
 
     return new BaseResponse({
       id,
@@ -360,8 +360,11 @@ export class UserController {
   @Validate({
     response: baseResponse(importUserResponseSchema),
   })
-  async importUsers(@UploadedFile() usersFile: Express.Multer.File) {
-    const importStats = await this.usersService.importUsers(usersFile);
+  async importUsers(
+    @UploadedFile() usersFile: Express.Multer.File,
+    @CurrentUser("userId") creatorId: UUIDType,
+  ) {
+    const importStats = await this.usersService.importUsers(usersFile, creatorId);
 
     return new BaseResponse(importStats);
   }

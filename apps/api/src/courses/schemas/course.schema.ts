@@ -58,6 +58,7 @@ export const courseAverageQuizScorePerQuizSchema = Type.Object({
   name: Type.String(),
   averageScore: Type.Number(),
   finishedCount: Type.Number(),
+  lessonOrder: Type.Number(),
 });
 
 export const courseAverageQuizScoresSchema = Type.Object({
@@ -88,6 +89,7 @@ export const studentAiMentorResultSchema = Type.Object({
   studentId: UUIDSchema,
   studentName: Type.String(),
   studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
+  lessonId: UUIDSchema,
   lessonName: Type.String(),
   score: Type.Number(),
   lastSession: Type.String(),

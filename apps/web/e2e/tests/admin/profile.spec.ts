@@ -140,9 +140,14 @@ const editProfilePicture = async (page: Page) => {
 
   const uploadInput = page.getByTestId(PROFILE_PAGE_UI.dataId.imageUpload);
 
-  await confirmEditMode(page);
+  const deleteButton = page.getByRole("button", {
+    name: new RegExp(PROFILE_PAGE_UI.button.delete, "i"),
+  });
 
-  await goIntoEditMode(page);
+  if (await deleteButton.isVisible()) {
+    await deleteButton.click();
+    await expect(uploadInput).toBeVisible();
+  }
 
   await uploadInput.setInputFiles(PROFILE_PAGE_FILE_PATH);
   await expect(uploadInput).not.toBeVisible();

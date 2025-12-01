@@ -1,19 +1,32 @@
-import { Button, Html, Text } from "@react-email/components";
+import { getUserLongInactivityEmailTranslations } from "translations/userLongInactivity";
+
+import { BaseEmailTemplate } from "./BaseEmailTemplate";
+
+import { DefaultEmailSettings } from "types";
 
 export type UserLongInactivityProps = {
-  name: string;
+  courseName: string;
   courseLink: string;
-};
+} & DefaultEmailSettings;
 
-export const UserLongInactivityEmail = ({ name, courseLink }: UserLongInactivityProps) => {
-  return (
-    <Html>
-      <Text>
-        {name}, Twój <Button href={courseLink}>kurs</Button> nadal czeka! Nie pozwól, by postęp się
-        zatrzymał.
-      </Text>
-    </Html>
+export const UserLongInactivityEmail = ({
+  courseName,
+  courseLink,
+  primaryColor,
+  language = "en",
+}: UserLongInactivityProps) => {
+  const { heading, paragraphs, buttonText } = getUserLongInactivityEmailTranslations(
+    language,
+    courseName,
   );
+
+  return BaseEmailTemplate({
+    heading,
+    paragraphs,
+    buttonText,
+    buttonLink: courseLink,
+    primaryColor,
+  });
 };
 
 export default UserLongInactivityEmail;

@@ -42,6 +42,7 @@ export const DEFAULT_ADMIN_SETTINGS = {
   ...DEFAULT_STUDENT_SETTINGS,
   adminNewUserNotification: true,
   adminFinishedCourseNotification: false,
+  configWarningDismissed: false,
 };
 
 export const ALLOWED_CURRENCIES = ["pln", "eur", "gbp", "usd"] as const;

@@ -4,8 +4,6 @@ import request from "supertest";
 import { GroupService } from "src/group/group.service";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
-import { createCourseFactory } from "../../../test/factory/course.factory";
-import { createQuizAttemptFactory } from "../../../test/factory/quizAttempt.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
@@ -24,7 +22,6 @@ describe("UsersController (e2e)", () => {
   let db: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
-  let quizAttemptFactory: ReturnType<typeof createQuizAttemptFactory>;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -34,12 +31,11 @@ describe("UsersController (e2e)", () => {
     db = app.get("DB");
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
-    quizAttemptFactory = createQuizAttemptFactory(db);
   }, 10000);
 
   afterAll(async () => {
     await app.close();
-  }, 10000);
+  });
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
@@ -191,19 +187,14 @@ describe("UsersController (e2e)", () => {
   });
 
   describe("DELETE /user/user?id=:id", () => {
-    it("should delete user", async () => {
+    it("should fail to delete itself", async () => {
       await request(app.getHttpServer())
         .delete(`/api/user/user?id=${testUser.id}`)
         .set("Cookie", testCookies)
-        .expect(200);
-
-      await request(app.getHttpServer())
-        .get(`/api/user/user?id=${testUser.id}`)
-        .set("Cookie", testCookies)
-        .expect(404);
+        .expect(400);
     });
 
-    it("should return 403 when deleting another user", async () => {
+    it("should delete user", async () => {
       const anotherUser = await authService.register({
         email: "another3@example.com",
         password: "password123",
@@ -211,31 +202,16 @@ describe("UsersController (e2e)", () => {
         lastName: "User",
         language: "en",
       });
+
       await request(app.getHttpServer())
         .delete(`/api/user/user?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
-        .expect(403);
-    });
-
-    it("should return 409 when trying to delete user with quiz attempts", async () => {
-      await quizAttemptFactory.create({
-        userId: testUser.id,
-      });
+        .expect(200);
 
       await request(app.getHttpServer())
-        .delete(`/api/user/user?id=${testUser.id}`)
+        .get(`/api/user/user?id=${anotherUser.id}`)
         .set("Cookie", testCookies)
-        .expect(409);
-    });
-    it("should return 409 when trying to delete a user who is the author of courses", async () => {
-      const courseFactory = createCourseFactory(db);
-      await courseFactory.create({ authorId: testUser.id });
-
-      const response = await request(app.getHttpServer())
-        .delete(`/api/user/user?id=${testUser.id}`)
-        .set("Cookie", testCookies);
-
-      expect(response.status).toBe(409);
+        .expect(404);
     });
   });
   describe("GET /user/details?userId=:id", () => {
@@ -310,7 +286,9 @@ describe("UsersController (e2e)", () => {
         avatarReference: null,
       };
 
-      const updateData = await groupService.createGroup({ name: "Test group" });
+      const updateData = await groupService.createGroup({
+        name: "Test group",
+      });
 
       await request(app.getHttpServer())
         .patch(`/api/user/bulk/groups`)
