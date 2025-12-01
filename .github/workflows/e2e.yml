@@ -117,6 +117,9 @@ jobs:
 
       - name: Build prompts
         run: pnpm --filter="@repo/prompts" run build
+      
+      - name: Build API (ensures workspace packages are resolved)
+        run: pnpm --filter=api run build
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
