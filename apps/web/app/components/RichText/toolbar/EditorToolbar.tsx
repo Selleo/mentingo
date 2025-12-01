@@ -24,6 +24,7 @@ import { ToggleGroup, Toolbar } from "~/components/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
+import { baseUrl } from "~/utils/baseUrl";
 
 import { InsertLinkDialog } from "../components/InsertLinkDialog";
 
@@ -76,7 +77,7 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
 
     const uploaded = await uploadImage({ file, lessonId });
 
-    const imageUrl = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
+    const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
 
     editor.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
 

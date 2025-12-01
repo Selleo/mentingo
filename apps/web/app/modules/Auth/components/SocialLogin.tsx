@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { ProviderOAuthLoginButton } from "~/components/Auth/ProviderOAuthLoginButton";
+import { baseUrl } from "~/utils/baseUrl";
 
 interface SocialLoginProps {
   isSSOEnforced?: boolean;
@@ -16,11 +17,6 @@ export function SocialLogin({
   isSlackOAuthEnabled,
 }: SocialLoginProps) {
   const { t } = useTranslation();
-
-  const baseUrl =
-    typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.host}`
-      : "http://localhost:5173";
 
   const handleProviderSignIn = (provider: string) => () =>
     (window.location.href = `${baseUrl}/api/auth/${provider}`);
