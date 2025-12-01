@@ -68,7 +68,7 @@ export const GroupEnrollModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger>
-        <Button variant="outline">{t("adminCourseView.enrolled.enrollGroups")}</Button>
+        <Button variant="primary">{t("adminCourseView.enrolled.enrollGroups")}</Button>
       </DialogTrigger>
       <DialogPortal>
         <DialogOverlay />

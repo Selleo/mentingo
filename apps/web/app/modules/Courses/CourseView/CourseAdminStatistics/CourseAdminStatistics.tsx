@@ -59,39 +59,15 @@ interface CourseAdminStatisticsProps {
 
 export async function invalidateAllStatisticsQueries(courseId: string) {
   await queryClient.invalidateQueries({
-    predicate: (query) => {
-      const queryKey = query.queryKey;
-      return (
-        Array.isArray(queryKey) &&
-        queryKey[0] === COURSE_STUDENTS_QUIZ_RESULTS_QUERY_KEY &&
-        typeof queryKey[1] === "object" &&
-        queryKey[1]?.id === courseId
-      );
-    },
+    queryKey: [COURSE_STUDENTS_QUIZ_RESULTS_QUERY_KEY],
   });
 
   await queryClient.invalidateQueries({
-    predicate: (query) => {
-      const queryKey = query.queryKey;
-      return (
-        Array.isArray(queryKey) &&
-        queryKey[0] === COURSE_STUDENTS_PROGRESS_QUERY_KEY &&
-        typeof queryKey[1] === "object" &&
-        queryKey[1]?.id === courseId
-      );
-    },
+    queryKey: [COURSE_STUDENTS_PROGRESS_QUERY_KEY],
   });
 
   await queryClient.invalidateQueries({
-    predicate: (query) => {
-      const queryKey = query.queryKey;
-      return (
-        Array.isArray(queryKey) &&
-        queryKey[0] === COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY &&
-        typeof queryKey[1] === "object" &&
-        queryKey[1]?.id === courseId
-      );
-    },
+    queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY],
   });
 
   await queryClient.invalidateQueries(courseAverageScorePerQuizQueryOptions({ id: courseId }));

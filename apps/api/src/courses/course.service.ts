@@ -367,8 +367,8 @@ export class CourseService {
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
-      .groupBy(users.id, studentCourses.createdAt)
-      .orderBy(sortOrder(studentCourses.createdAt));
+      .groupBy(users.id, studentCourses.enrolledAt, studentCourses.status)
+      .orderBy(sortOrder(studentCourses.enrolledAt));
 
     return {
       data: data ?? [],
@@ -835,6 +835,7 @@ export class CourseService {
         users.avatarReference,
         studentCourses.studentId,
         categories.title,
+        studentCourses.status,
       )
       .orderBy(
         sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NULL THEN TRUE ELSE FALSE END`,
@@ -1236,6 +1237,7 @@ export class CourseService {
         .where(
           and(
             eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
             inArray(
               studentCourses.studentId,
               groupUsersList.map((gu) => gu.userId),
@@ -1279,9 +1281,16 @@ export class CourseService {
           studentId,
           courseId,
           enrolledByGroupId: userIdToGroupId.get(studentId) || null,
+          status: COURSE_ENROLLMENT.ENROLLED,
         }));
 
-        await trx.insert(studentCourses).values(studentCoursesValues);
+        await trx
+          .insert(studentCourses)
+          .values(studentCoursesValues)
+          .onConflictDoUpdate({
+            target: [studentCourses.courseId, studentCourses.studentId],
+            set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+          });
 
         await Promise.all(
           newStudentIds.map(async (studentId) => {
@@ -1308,7 +1317,7 @@ export class CourseService {
         paymentId,
         enrolledAt: sql`NOW()`,
         status: COURSE_ENROLLMENT.ENROLLED,
-        enrolledByGroupId
+        enrolledByGroupId,
       })
       .onConflictDoUpdate({
         target: [studentCourses.studentId, studentCourses.courseId],

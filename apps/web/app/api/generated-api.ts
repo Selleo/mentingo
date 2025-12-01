@@ -1300,7 +1300,7 @@ export interface DeleteManyCoursesBody {
 
 export type DeleteManyCoursesResponse = null;
 
-export type UnenrollCourseResponse = null;
+export type UnenrollCoursesResponse = null;
 
 export interface GetCourseStatisticsResponse {
   data: {
@@ -4267,15 +4267,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name CourseControllerUpdateLessonSequenceEnabled
-     * @request PATCH:/api/course/update-lesson-sequence/{id}
+     * @request PATCH:/api/course/update-lesson-sequence/{courseId}
      */
     courseControllerUpdateLessonSequenceEnabled: (
-      id: string,
+      courseId: string,
       data: UpdateLessonSequenceEnabledBody,
       params: RequestParams = {},
     ) =>
       this.request<UpdateLessonSequenceEnabledResponse, any>({
-        path: `/api/course/update-lesson-sequence/${id}`,
+        path: `/api/course/update-lesson-sequence/${courseId}`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
@@ -4391,17 +4391,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CourseControllerUnenrollCourse
+     * @name CourseControllerUnenrollCourses
      * @request DELETE:/api/course/unenroll-course
      */
-    courseControllerUnenrollCourse: (
+    courseControllerUnenrollCourses: (
       query?: {
         /** @format uuid */
-        id?: string;
+        courseId?: string;
+        userIds?: string[];
       },
       params: RequestParams = {},
     ) =>
-      this.request<UnenrollCourseResponse, any>({
+      this.request<UnenrollCoursesResponse, any>({
         path: `/api/course/unenroll-course`,
         method: "DELETE",
         query: query,
