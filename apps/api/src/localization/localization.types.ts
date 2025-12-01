@@ -4,6 +4,7 @@ export const ENTITY_TYPE = {
   COURSE: "course",
   CHAPTER: "chapter",
   LESSON: "lesson",
+  QUESTION: "question"
 } as const;
 
 export type EntityField = "title" | "description";

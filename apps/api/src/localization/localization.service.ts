@@ -11,6 +11,7 @@ import { chapters, courses, lessons } from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import { AnyPgColumn, PgTable, PgTableWithColumns } from "drizzle-orm/pg-core";
 
 @Injectable()
 export class LocalizationService {
@@ -70,26 +71,9 @@ export class LocalizationService {
    * Note: callers must join `courses` so `courses.baseLanguage` and `courses.availableLocales` are available.
    */
   getLocalizedSqlField(
-    entityType: EntityType,
-    field: EntityField,
+    fieldColumn: AnyPgColumn,
     language?: SupportedLanguages,
   ) {
-    const columnMap: Record<EntityType, Record<EntityField, any>> = {
-      [ENTITY_TYPE.COURSE]: {
-        title: courses.title,
-        description: courses.description,
-      },
-      [ENTITY_TYPE.CHAPTER]: {
-        title: chapters.title,
-        description: chapters.title,
-      },
-      [ENTITY_TYPE.LESSON]: {
-        title: lessons.title,
-        description: lessons.description,
-      },
-    };
-
-    const fieldColumn = columnMap[entityType][field];
     const langExpr = language ? sql`${language}` : courses.baseLanguage;
 
     return sql<string>`
