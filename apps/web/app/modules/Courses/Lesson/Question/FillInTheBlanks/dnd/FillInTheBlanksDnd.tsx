@@ -7,7 +7,6 @@ import {
   type DragStartEvent,
   KeyboardSensor,
   PointerSensor,
-  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -69,11 +68,6 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
       activationConstraint: {
         distance: isCompleted ? Infinity : 0,
       },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: isCompleted
-        ? { delay: 999999, tolerance: 0 }
-        : { delay: 150, tolerance: 8 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
