@@ -3,20 +3,33 @@ import { useLayoutEffect } from "react";
 
 import { routeAccessConfig } from "~/config/routeAccessConfig";
 import { useUserRole } from "~/hooks/useUserRole";
+import { useAuthStore } from "~/modules/Auth/authStore";
 
 import type { ReactNode } from "react";
 import type { UserRole } from "~/config/userRoles";
 
 export const checkRouteAccess = (path: string, userRole: UserRole) => {
+  const isLoggedIn = useAuthStore.getState().isLoggedIn;
+
   for (const [pattern, roles] of Object.entries(routeAccessConfig)) {
     const patternSegments = pattern.split("/");
     const pathSegments = path.split("/");
 
     if (pattern.endsWith("/*")) {
       const prefix = pattern.slice(0, -2);
-      if (path.startsWith(prefix) && roles.includes(userRole)) {
-        return true;
+
+      if (path.startsWith(prefix)) {
+        if (!isLoggedIn) {
+          return true;
+        }
+
+        if (roles.includes(userRole)) {
+          return true;
+        }
+
+        continue;
       }
+
       continue;
     }
 
@@ -32,8 +45,16 @@ export const checkRouteAccess = (path: string, userRole: UserRole) => {
       return segment === pathSegments[index];
     });
 
-    if (matches && roles.includes(userRole)) {
-      return true;
+    if (isLoggedIn) {
+      if (matches && roles.includes(userRole)) {
+        return true;
+      }
+    }
+
+    if (!isLoggedIn) {
+      if (matches) {
+        return true;
+      }
     }
   }
 
