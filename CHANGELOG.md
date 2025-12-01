@@ -1,6 +1,88 @@
+<a name="v3.22.0"></a>
+
+## [v3.22.0] - 28.11.2025
+
+### Features:
+
+- allow admin to enroll a whole group to a course ([#841](https://github.com/Selleo/mentingo/issues/841))
+
+- add email icons to improve notification appearance ([#992](https://github.com/Selleo/mentingo/issues/992))
+
+- allow to add images to text lessons ([#926](https://github.com/Selleo/mentingo/issues/926))
+
+- make email configuration easier and more reliable with updated email provider settings ([#983](https://github.com/Selleo/mentingo/issues/983))
+
+- allow admin to set default interface language when creating users ([#972](https://github.com/Selleo/mentingo/issues/972))
+
+- add Polish language support for email subjects and content ([#979](https://github.com/Selleo/mentingo/issues/979))
+
+- show admins a warning when configuration is incomplete ([#919](https://github.com/Selleo/mentingo/issues/919))
+
+- adjust users view to bigger volume of users ([#967](https://github.com/Selleo/mentingo/issues/967))
+
+- allow admin to preview student conversations with AI mentor ([#851](https://github.com/Selleo/mentingo/issues/851))
+
+- enhance email notifications for clarity and visual appeal ([#930](https://github.com/Selleo/mentingo/issues/930))
+
+### Bug Fixes:
+
+- step counter in setup script ([#1014](https://github.com/Selleo/mentingo/issues/1014))
+
+- ensure messages thread update correctly after new messages in ai mentor preview ([#1013](https://github.com/Selleo/mentingo/issues/1013))
+
+- ensure content creators can edit only their own courses ([#1008](https://github.com/Selleo/mentingo/issues/1008))
+
+- improve message scrolling behavior in AI mentor lesson ([#1011](https://github.com/Selleo/mentingo/issues/1011))
+
+- ensure cropped svg avatars display correctly ([#1009](https://github.com/Selleo/mentingo/issues/1009))
+
+- improve display of true/false questions on mobile ([#1007](https://github.com/Selleo/mentingo/issues/1007))
+
+- add option to drop files ([#896](https://github.com/Selleo/mentingo/issues/896))
+
+- added error message for lesson title length limit ([#940](https://github.com/Selleo/mentingo/issues/940))
+
+- sort lessons order in stats ([#914](https://github.com/Selleo/mentingo/issues/914))
+
+- ensure SVG email icons load correctly ([#993](https://github.com/Selleo/mentingo/issues/993))
+
+- stabilize end-to-end tests for more reliable checks ([#948](https://github.com/Selleo/mentingo/issues/948))
+
+- prevent AI mentor lesson view from resizing content incorrectly ([#990](https://github.com/Selleo/mentingo/issues/990))
+
+- long course title weirdly stretching UI ([#976](https://github.com/Selleo/mentingo/issues/976))
+
+- improve alignment of the edit course button for clearer layout in student's view ([#982](https://github.com/Selleo/mentingo/issues/982))
+
+- prevent long lesson titles from stretching the interface ([#942](https://github.com/Selleo/mentingo/issues/942))
+
+- ensure consistent and reliable releases ([#966](https://github.com/Selleo/mentingo/issues/966))
+
+- improve placement of the edit course button for admins ([#975](https://github.com/Selleo/mentingo/issues/975))
+
+- keep the lesson editor visible while scrolling the chapters list ([#974](https://github.com/Selleo/mentingo/issues/974))
+
+- annoying logo display while developing on local environment ([#925](https://github.com/Selleo/mentingo/issues/925))
+
+- AI mentor not responding ([#970](https://github.com/Selleo/mentingo/issues/970))
+
+### Chores:
+
+- simplify project delivery by removing redundant files ([#1001](https://github.com/Selleo/mentingo/issues/1001))
+
+### Code Refactoring:
+
+- improve student deletion system ([#828](https://github.com/Selleo/mentingo/issues/828))
+
+- certificates components ([#950](https://github.com/Selleo/mentingo/issues/950))
+
+### Documentation:
+
+- update documentation to clarify contributing to project ([#937](https://github.com/Selleo/mentingo/issues/937))
+
 <a name="v3.21.0"></a>
 
-## [v3.21.0] - 18.11.2025
+## [v3.21.0] - 19.11.2025
 
 ### Features:
 
@@ -45,6 +127,10 @@
 ### Code Refactoring:
 
 - make Stripe an optional service ([#872](https://github.com/Selleo/mentingo/issues/872))
+
+### Documentation:
+
+- update changelog for version v3.21.0
 
 <a name="v3.20.0"></a>
 
@@ -1982,7 +2068,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.21.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.22.0...HEAD
+[v3.22.0]: https://github.com/Selleo/mentingo/compare/v3.21.0...v3.22.0
 [v3.21.0]: https://github.com/Selleo/mentingo/compare/v3.20.0...v3.21.0
 [v3.20.0]: https://github.com/Selleo/mentingo/compare/v3.19.1...v3.20.0
 [v3.19.1]: https://github.com/Selleo/mentingo/compare/v3.19.0...v3.19.1
