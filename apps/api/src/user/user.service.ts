@@ -132,8 +132,6 @@ export class UserService {
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
       .from(users)
-      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions));
 
     return {
