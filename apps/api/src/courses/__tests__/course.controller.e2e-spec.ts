@@ -1906,7 +1906,8 @@ describe("CourseController (e2e)", () => {
             const newUser = await userFactory.withCredentials({ password }).create();
 
             await request(app.getHttpServer())
-              .post(`/api/group/assign?userId=${newUser.id}&groupId=${group.id}`)
+              .post(`/api/group/set?userId=${newUser.id}`)
+              .send([group.id])
               .set("Cookie", cookies)
               .expect(201);
 

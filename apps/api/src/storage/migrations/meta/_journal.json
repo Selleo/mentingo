@@ -386,6 +386,13 @@
       "when": 1764335280537,
       "tag": "0054_add_settings_to_courses",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1764583536635,
+      "tag": "0055_removed_unique_constraint_from_group_users",
+      "breakpoints": true
     }
   ]
 }

@@ -2,11 +2,11 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  forwardRef,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import {
@@ -15,6 +15,7 @@ import {
   count,
   countDistinct,
   eq,
+  getTableColumns,
   ilike,
   inArray,
   isNotNull,
@@ -1183,8 +1184,9 @@ export class CourseService {
     if (!groupExists.length) throw new NotFoundException("Groups not found");
 
     const groupUsersList = await this.db
-      .select()
+      .select({ ...getTableColumns(groupUsers), role: users.role })
       .from(groupUsers)
+      .innerJoin(users, eq(groupUsers.userId, users.id))
       .where(inArray(groupUsers.groupId, groupIds));
 
     const existingGroupEnrollments = await this.db
@@ -1192,7 +1194,7 @@ export class CourseService {
       .from(groupCourses)
       .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
 
-    const existingGroupIds = existingGroupEnrollments.map((e: any) => e.groupId);
+    const existingGroupIds = existingGroupEnrollments.map((e) => e.groupId);
     const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
 
     let existingStudentIds: string[] = [];
@@ -1209,20 +1211,22 @@ export class CourseService {
             eq(studentCourses.courseId, courseId),
             inArray(
               studentCourses.studentId,
-              groupUsersList.map((gu: any) => gu.userId),
+              groupUsersList.map((gu) => gu.userId),
             ),
           ),
         );
 
-      existingStudentIds = existingEnrollments.map((e: any) => e.studentId);
+      existingStudentIds = existingEnrollments.map((e) => e.studentId);
       newStudentIds = groupUsersList
-        .map((gu: any) => gu.userId)
-        .filter((userId: any) => !existingStudentIds.includes(userId));
+        .filter(
+          ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
+        )
+        .map((gu) => gu.userId);
     }
 
     await this.db.transaction(async (trx) => {
       if (newGroupIds.length > 0) {
-        const groupCoursesValues = newGroupIds.map((groupId: any) => ({
+        const groupCoursesValues = newGroupIds.map((groupId) => ({
           groupId,
           courseId,
           enrolledBy: adminId || null,
@@ -1233,16 +1237,18 @@ export class CourseService {
 
       if (newStudentIds.length > 0 && newGroupIds.length > 0) {
         const userIdToGroupId = new Map<string, string>();
+
         for (const groupId of newGroupIds) {
-          const usersInGroup = groupUsersList.filter((gu: any) => gu.groupId === groupId);
-          usersInGroup.forEach((gu: any) => {
+          const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
+
+          usersInGroup.forEach((gu) => {
             if (newStudentIds.includes(gu.userId)) {
               userIdToGroupId.set(gu.userId, groupId);
             }
           });
         }
 
-        const studentCoursesValues = newStudentIds.map((studentId: any) => ({
+        const studentCoursesValues = newStudentIds.map((studentId) => ({
           studentId,
           courseId,
           enrolledByGroupId: userIdToGroupId.get(studentId) || null,
@@ -1251,7 +1257,7 @@ export class CourseService {
         await trx.insert(studentCourses).values(studentCoursesValues);
 
         await Promise.all(
-          newStudentIds.map(async (studentId: any) => {
+          newStudentIds.map(async (studentId) => {
             await this.createCourseDependencies(courseId, studentId, null, trx);
           }),
         );

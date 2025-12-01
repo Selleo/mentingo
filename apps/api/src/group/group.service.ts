@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -20,17 +21,10 @@ import {
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CourseService } from "src/courses/course.service";
 import { GroupSortFields } from "src/group/group.schema";
-import { LESSON_TYPES } from "src/lesson/lesson.type";
-import {
-  groups,
-  groupUsers,
-  users,
-  groupCourses,
-  studentCourses,
-  chapters,
-  studentChapterProgress, lessons, studentLessonProgress,
-} from "src/storage/schema";
+import { groups, groupUsers, users, groupCourses, studentCourses } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SQL } from "drizzle-orm";
 import type { PaginatedResponse, Pagination, UUIDType } from "src/common";
@@ -45,7 +39,10 @@ import type { UserResponse } from "src/user/schemas/user.schema";
 
 @Injectable()
 export class GroupService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
+  ) {}
 
   public async getAllGroups(
     query: GroupsQuery = {},
@@ -235,18 +232,21 @@ export class GroupService {
 
       if (existingGroups.length !== groupIds.length)
         throw new BadRequestException("One or more groups doesn't exist");
-      
-      if (existingGroups.length > 0) {
-        const groupsToAssign = existingGroups.map((group) => ({ userId, groupId: group.id }))
-        
-        await trx
-          .insert(groupUsers)
-          .values(groupsToAssign)
-          .returning();
 
-        await Promise.all((existingGroups.map((group) => this.enrollUserToGroupCourses(userId, group.id, trx))));
+      if (existingGroups.length > 0) {
+        const groupsToAssign = existingGroups.map((group) => ({ userId, groupId: group.id }));
+
+        await trx.insert(groupUsers).values(groupsToAssign).returning();
+
+        if (user.role === USER_ROLES.STUDENT) {
+          await Promise.all(
+            groupsToAssign.map(({ userId, groupId }) =>
+              this.enrollUserToCoursesInGroup(groupId, userId, trx),
+            ),
+          );
+        }
       }
-      
+
       return;
     });
   }
@@ -286,11 +286,36 @@ export class GroupService {
       .where(eq(groupCourses.courseId, courseId));
   }
 
-  private async enrollUserToGroupCourses(
+  async enrollUserToGroupCourses(
     userId: UUIDType,
     groupId: UUIDType,
-    trx: any,
-  ): Promise<void> {
+    existingCourseIds: UUIDType[],
+    trx: DatabasePg,
+  ) {
+    const valuesToInsert = existingCourseIds.map((courseId) => ({
+      studentId: userId,
+      courseId,
+      enrolledByGroupId: groupId,
+    }));
+
+    if (valuesToInsert.length === 0) return;
+
+    const insertedStudentCourses = await trx
+      .insert(studentCourses)
+      .values(valuesToInsert)
+      .onConflictDoNothing()
+      .returning({
+        courseId: studentCourses.courseId,
+      });
+
+    await Promise.all(
+      insertedStudentCourses.map(async ({ courseId }) =>
+        this.courseService.createCourseDependencies(courseId, userId, null, trx),
+      ),
+    );
+  }
+
+  async enrollUserToCoursesInGroup(groupId: UUIDType, userId: UUIDType, trx: DatabasePg) {
     const groupCoursesList = await trx
       .select({ courseId: groupCourses.courseId })
       .from(groupCourses)
@@ -306,62 +331,17 @@ export class GroupService {
           eq(studentCourses.studentId, userId),
           inArray(
             studentCourses.courseId,
-            groupCoursesList.map((gc: any) => gc.courseId),
+            groupCoursesList.map((gc) => gc.courseId),
           ),
         ),
       );
 
-    const existingCourseIds = existingEnrollments.map((e: any) => e.courseId);
-    const newCourseIds = groupCoursesList
-      .map((gc: any) => gc.courseId)
-      .filter((courseId: any) => !existingCourseIds.includes(courseId));
+    const existingCourseIds = existingEnrollments.map(({ courseId }) => courseId);
 
-    if (newCourseIds.length === 0) return;
+    const idsToInsert = groupCoursesList
+      .filter(({ courseId }) => !existingCourseIds.includes(courseId))
+      .map(({ courseId }) => courseId);
 
-    const studentCoursesValues = newCourseIds.map((courseId: any) => ({
-      studentId: userId,
-      courseId,
-      enrolledByGroupId: groupId,
-    }));
-
-    await trx.insert(studentCourses).values(studentCoursesValues);
-
-    for (const courseId of newCourseIds) {
-      const courseChapters = await trx
-        .select({ id: chapters.id })
-        .from(chapters)
-        .where(eq(chapters.courseId, courseId));
-
-      if (courseChapters.length === 0) continue;
-
-      await trx.insert(studentChapterProgress).values(
-        courseChapters.map((chapter: any) => ({
-          studentId: userId,
-          chapterId: chapter.id,
-          courseId,
-          completedLessonItemCount: 0,
-        })),
-      );
-
-      for (const chapter of courseChapters) {
-        const chapterLessons = await trx
-          .select({ id: lessons.id, type: lessons.type })
-          .from(lessons)
-          .where(eq(lessons.chapterId, chapter.id));
-
-        if (chapterLessons.length === 0) continue;
-
-        await trx.insert(studentLessonProgress).values(
-          chapterLessons.map((lesson: any) => ({
-            studentId: userId,
-            lessonId: lesson.id,
-            chapterId: chapter.id,
-            completedQuestionCount: 0,
-            quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
-            completedAt: null,
-          })),
-        );
-      }
-    }
+    if (idsToInsert) await this.enrollUserToGroupCourses(userId, groupId, idsToInsert, trx);
   }
 }

@@ -3,7 +3,8 @@ import request from "supertest";
 import { v4 as uuidv4 } from "uuid";
 
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { groupUsers , lessons, studentCourses } from "src/storage/schema";
+import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { groupUsers, lessons, studentCourses } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -14,7 +15,6 @@ import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
-import { LESSON_TYPES } from "src/lesson/lesson.type";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -640,7 +640,7 @@ describe("groupController (e2e)", () => {
     });
   });
 
-  describe("POST /api/group/assign - Auto enroll user to group courses", () => {
+  describe("POST /api/group/set - Auto enroll user to group courses", () => {
     it("should automatically enroll user to all courses the group is enrolled in", async () => {
       const admin = await userFactory
         .withCredentials({ password })
@@ -703,7 +703,8 @@ describe("groupController (e2e)", () => {
       const newUser = await userFactory.withCredentials({ password }).create();
 
       await request(app.getHttpServer())
-        .post(`/api/group/assign?userId=${newUser.id}&groupId=${group.id}`)
+        .post(`/api/group/set?userId=${newUser.id}`)
+        .send([group.id])
         .set("Cookie", cookies)
         .expect(201);
 
@@ -781,7 +782,8 @@ describe("groupController (e2e)", () => {
       });
 
       await request(app.getHttpServer())
-        .post(`/api/group/assign?userId=${user.id}&groupId=${group.id}`)
+        .post(`/api/group/set?userId=${user.id}`)
+        .send([group.id])
         .set("Cookie", cookies)
         .expect(201);
 

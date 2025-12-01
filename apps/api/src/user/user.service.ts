@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
-  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -24,7 +23,6 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { CourseService } from "src/courses/course.service";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
@@ -87,7 +85,6 @@ export class UserService {
     private settingsService: SettingsService,
     private readonly groupService: GroupService,
     private statisticsService: StatisticsService,
-    @Inject(forwardRef(() => CourseService)) private courseService: CourseService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -271,38 +268,6 @@ export class UserService {
       };
     });
   }
-
-  enrollUserToGroupCourses = async (
-    userId: UUIDType,
-    groupId: UUIDType,
-    existingCourseIds: UUIDType[],
-    trx: DatabasePg,
-  ) => {
-    await trx
-      .insert(groupUsers)
-      .values({ userId, groupId })
-      .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
-
-    const insertedStudentCourses = await trx
-      .insert(studentCourses)
-      .values(
-        existingCourseIds.map((courseId) => ({
-          studentId: userId,
-          courseId,
-          enrolledByGroupId: groupId,
-        })),
-      )
-      .onConflictDoNothing()
-      .returning({
-        courseId: studentCourses.courseId,
-      });
-
-    await Promise.all(
-      insertedStudentCourses.map(async ({ courseId }) =>
-        this.courseService.createCourseDependencies(courseId, userId, null, trx),
-      ),
-    );
-  };
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
     const existingUser = await this.getExistingUser(userId);
@@ -761,24 +726,6 @@ export class UserService {
       default:
         return users.firstName;
     }
-  }
-
-  private async validateWhetherUserCanBeDeleted(userId: UUIDType): Promise<void> {
-    const userQuizAttempts = await this.statisticsService.getUserStats(userId);
-    const hasCourses = await this.hasCoursesWithAuthor(userId);
-
-    if (userQuizAttempts.quizzes.totalAttempts > 0) {
-      throw new ConflictException("adminUserView.toast.userWithAttemptsError");
-    }
-
-    if (hasCourses) {
-      throw new ConflictException("adminUserView.toast.userWithCreatedCoursesError");
-    }
-  }
-
-  private async validateWhetherUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
-    const validationPromises = userIds.map((id) => this.validateWhetherUserCanBeDeleted(id));
-    await Promise.all(validationPromises);
   }
 
   private async hasCoursesWithAuthor(authorId: UUIDType): Promise<boolean> {

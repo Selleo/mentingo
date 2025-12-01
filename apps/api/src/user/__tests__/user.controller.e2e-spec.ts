@@ -1,16 +1,16 @@
 import { omit } from "lodash";
 import request from "supertest";
 
+import { AuthService } from "src/auth/auth.service";
 import { GroupService } from "src/group/group.service";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
-import { AuthService } from "../../auth/auth.service";
 
-import type { DatabasePg } from "../../common";
 import type { INestApplication } from "@nestjs/common";
+import type { DatabasePg } from "src/common";
 
 describe("UsersController (e2e)", () => {
   let app: INestApplication;
