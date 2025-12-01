@@ -674,7 +674,7 @@
       "placeholder": {
         "searchByKeyword": "Search by keyword...",
         "roles": "Roles",
-        "groups": "Groups"
+        "groups": "All Groups"
       }
     },
     "field": {
@@ -730,7 +730,7 @@
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
         "archive": "Are you sure you want to archive these accounts?",
-        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName, language (en or pl).",
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groups (\"group1,group2\"), language (en or pl).",
         "noUsersImported": "No users were imported.",
         "noUsersSkipped": "No users were skipped."
       },
@@ -769,7 +769,7 @@
       "role": "Role",
       "language": "Language",
       "status": "Status",
-      "groupId": "Group"
+      "groups": "Group"
     },
     "toast": {
       "userCreatedSuccessfully": "User created successfully",
@@ -867,6 +867,10 @@
     "buttons": {
       "create": "Create new",
       "deleteSelected": "Delete selected"
+    },
+    "groupSelect": {
+      "label": "Select groups",
+      "noGroups": "No groups found"
     },
     "newGroup": {
       "header": "Create New Group",
@@ -1256,7 +1260,7 @@
       "filters": {
         "placeholder": {
           "searchByKeyword": "Search by keyword...",
-          "groups": "Groups"
+          "groups": "All Groups"
         }
       },
       "enrollSelected": "Enroll selected",

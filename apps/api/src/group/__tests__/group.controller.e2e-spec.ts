@@ -2,6 +2,11 @@ import { and, eq } from "drizzle-orm";
 import request from "supertest";
 import { v4 as uuidv4 } from "uuid";
 
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { groupUsers, lessons, studentCourses } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
@@ -10,10 +15,6 @@ import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
-import { DEFAULT_PAGE_SIZE } from "../../common/pagination";
-import { LESSON_TYPES } from "../../lesson/lesson.type";
-import { groupUsers, lessons, studentCourses } from "../../storage/schema";
-import { USER_ROLES } from "../../user/schemas/userRoles";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -140,8 +141,8 @@ describe("groupController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data).toHaveLength(2);
-        expect(response.body.data[0].id).toBe(group2.id);
-        expect(response.body.data[1].id).toBe(group1.id);
+        expect(response.body.data[1].id).toBe(group2.id);
+        expect(response.body.data[0].id).toBe(group1.id);
       });
 
       it("returns all groups with sorting by created at", async () => {
@@ -639,7 +640,7 @@ describe("groupController (e2e)", () => {
     });
   });
 
-  describe("POST /api/group/assign - Auto enroll user to group courses", () => {
+  describe("POST /api/group/set - Auto enroll user to group courses", () => {
     it("should automatically enroll user to all courses the group is enrolled in", async () => {
       const admin = await userFactory
         .withCredentials({ password })
@@ -659,7 +660,6 @@ describe("groupController (e2e)", () => {
         status: "published",
       });
 
-      // Create chapters and lessons for course1
       const chapter1 = await chapterFactory.create({
         courseId: course1.id,
         title: "Chapter 1",
@@ -672,7 +672,6 @@ describe("groupController (e2e)", () => {
         thresholdScore: 0,
       });
 
-      // Create chapters and lessons for course2
       const chapter2 = await chapterFactory.create({
         courseId: course2.id,
         title: "Chapter 2",
@@ -685,11 +684,9 @@ describe("groupController (e2e)", () => {
         thresholdScore: 0,
       });
 
-      // Create group with existing users
       const existingUser1 = await userFactory.withCredentials({ password }).create();
       const group = await groupFactory.withMembers([existingUser1.id]).create();
 
-      // Enroll group to both courses
       const cookies = await cookieFor(admin, app);
       await request(app.getHttpServer())
         .post(`/api/course/${course1.id}/enroll-groups-to-course`)
@@ -703,16 +700,14 @@ describe("groupController (e2e)", () => {
         .set("Cookie", cookies)
         .expect(201);
 
-      // Create a new user
       const newUser = await userFactory.withCredentials({ password }).create();
 
-      // Assign new user to group
       await request(app.getHttpServer())
-        .post(`/api/group/assign?userId=${newUser.id}&groupId=${group.id}`)
+        .post(`/api/group/set?userId=${newUser.id}`)
+        .send([group.id])
         .set("Cookie", cookies)
         .expect(201);
 
-      // Check that new user is enrolled in both courses with correct enrolledByGroupId
       const enrollments = await db
         .select()
         .from(studentCourses)
@@ -726,7 +721,6 @@ describe("groupController (e2e)", () => {
       const course2Enrollment = enrollments.find((e) => e.courseId === course2.id);
       expect(course2Enrollment?.enrolledByGroupId).toBe(group.id);
 
-      // Verify that user is NOT enrolled in courses that group is NOT enrolled in
       const course3 = await courseFactory.create({
         authorId: admin.id,
         categoryId: category.id,
@@ -774,7 +768,6 @@ describe("groupController (e2e)", () => {
       const existingGroupMember = await userFactory.withCredentials({ password }).create();
       const group = await groupFactory.withMembers([existingGroupMember.id]).create();
 
-      // Enroll group to course
       const cookies = await cookieFor(admin, app);
       await request(app.getHttpServer())
         .post(`/api/course/${course.id}/enroll-groups-to-course`)
@@ -782,20 +775,18 @@ describe("groupController (e2e)", () => {
         .set("Cookie", cookies)
         .expect(201);
 
-      // Manually enroll user to course (individually, not from group)
       await db.insert(studentCourses).values({
         studentId: user.id,
         courseId: course.id,
         enrolledByGroupId: null,
       });
 
-      // Assign user to group
       await request(app.getHttpServer())
-        .post(`/api/group/assign?userId=${user.id}&groupId=${group.id}`)
+        .post(`/api/group/set?userId=${user.id}`)
+        .send([group.id])
         .set("Cookie", cookies)
         .expect(201);
 
-      // Check that user still has enrolledByGroupId: null (not overwritten)
       const enrollment = await db
         .select()
         .from(studentCourses)

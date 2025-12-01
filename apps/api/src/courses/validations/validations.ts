@@ -7,6 +7,7 @@ import {
   sortCourseFieldsOptions,
   sortEnrolledStudentsOptions,
 } from "src/courses/schemas/courseQuery";
+import { groupsFilterSchema } from "src/group/group.schema";
 
 import { enrolledStudentSchema } from "../schemas/enrolledStudent.schema";
 
@@ -111,8 +112,8 @@ export const studentsWithEnrolmentValidation = {
     },
     {
       type: "query" as const,
-      name: "groupId",
-      schema: UUIDSchema,
+      name: "groups",
+      schema: groupsFilterSchema,
     },
   ],
 };

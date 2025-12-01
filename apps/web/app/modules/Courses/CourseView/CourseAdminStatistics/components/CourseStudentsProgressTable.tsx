@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useCourseStudentsProgress } from "~/api/queries/admin/useCourseStudentsProgress";
 import { Pagination } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
+import { Badge } from "~/components/ui/badge";
 import { Progress } from "~/components/ui/progress";
 import {
   Table,
@@ -16,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
@@ -84,15 +86,45 @@ export function CourseStudentsProgressTable({
         ),
       },
       {
-        accessorKey: "groupName",
-        header: ({ column }) => (
-          <SortButton<CourseStudentsProgressColumn> column={column}>
-            {t("adminCourseView.statistics.field.groupName")}
-          </SortButton>
+        accessorKey: "groups",
+        header: () => (
+          <span className="body-sm">{t("adminCourseView.statistics.field.groupName")}</span>
         ),
-        cell: ({ row }) => (
-          <div className="text-neutral-800 font-semibold">{row.original.groupName}</div>
-        ),
+        cell: ({ row }) => {
+          const groups = row.original.groups;
+          const visibleGroups = groups.slice(0, 1);
+          const remainingCount = groups.length - visibleGroups.length;
+
+          return (
+            <div className="flex gap-1">
+              {visibleGroups.map((group) => (
+                <Badge key={group.id} variant="secondary">
+                  {group.name}
+                </Badge>
+              ))}
+              {remainingCount > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Badge variant="default" className="cursor-help">
+                        +{remainingCount}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent className="p-2 rounded-lg">
+                      <div className="flex flex-col gap-1 !px-0">
+                        {groups.slice(1).map((group) => (
+                          <Badge key={group.id} variant="secondary">
+                            {group.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "completedLessonsCount",

@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
-  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -20,12 +19,13 @@ import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
-import { CourseService } from "src/courses/course.service";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
+import { GroupService } from "src/group/group.service";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
@@ -43,7 +43,6 @@ import {
   studentCourses,
   coursesSummaryStats,
   courses,
-  groupCourses,
 } from "../storage/schema";
 
 import {
@@ -84,8 +83,8 @@ export class UserService {
     private s3Service: S3Service,
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
+    private readonly groupService: GroupService,
     private statisticsService: StatisticsService,
-    @Inject(forwardRef(() => CourseService)) private courseService: CourseService,
   ) {}
 
   public async getUsers(query: UsersQuery = {}) {
@@ -103,13 +102,17 @@ export class UserService {
     const usersData = await this.db
       .select({
         ...getTableColumns(users),
-        groupId: groups.id,
-        groupName: groups.name,
+        groups: sql<
+          Array<{ id: string; name: string }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
+          "groups",
+        ),
       })
       .from(users)
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions))
+      .groupBy(users.id)
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as UserSortField)))
       .limit(perPage)
       .offset((page - 1) * perPage);
@@ -129,8 +132,6 @@ export class UserService {
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
       .from(users)
-      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions));
 
     return {
@@ -145,11 +146,19 @@ export class UserService {
 
   public async getUserById(id: UUIDType) {
     const [user] = await this.db
-      .select({ ...getTableColumns(users), groupName: groups.name, groupId: groups.id })
+      .select({
+        ...getTableColumns(users),
+        groups: sql<
+          Array<{ id: string; name: string }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
+          "groups",
+        ),
+      })
       .from(users)
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(eq(users.id, id), isNull(users.deletedAt)));
+      .where(and(eq(users.id, id), isNull(users.deletedAt)))
+      .groupBy(users.id);
 
     if (!user) {
       throw new NotFoundException("User not found");
@@ -161,8 +170,6 @@ export class UserService {
     return {
       ...userWithoutAvatar,
       profilePictureUrl: usersProfilePictureUrl,
-      groupId: user.groupId,
-      groupName: user.groupName,
     };
   }
 
@@ -236,98 +243,29 @@ export class UserService {
     }
 
     return this.db.transaction(async (trx) => {
-      const { groupId, ...userData } = data;
+      const { groups, ...userData } = data;
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
       const [updatedUser] = hasUserDataToUpdate
-        ? await trx
-            .update(users)
-            .set(userData)
-            .where(and(eq(users.id, id)))
-            .returning()
+        ? await trx.update(users).set(userData).where(eq(users.id, id)).returning()
         : [existingUser.users];
-
-      if (!groupId) {
-        return {
-          ...updatedUser,
-          groupId: existingUser.groups?.id ?? null,
-          groupName: existingUser.groups?.name ?? null,
-        };
-      }
-
-      const [groupExists] = await trx.select().from(groups).where(eq(groups.id, groupId));
-
-      if (!groupExists) {
-        throw new NotFoundException("Group not found");
-      }
-
-      await trx
-        .insert(groupUsers)
-        .values({ userId: id, groupId })
-        .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
-
-      const existingCourses = await trx
-        .select({ id: courses.id })
-        .from(courses)
-        .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
-        .where(eq(groupCourses.groupId, groupId));
-
-      if (!!existingCourses.length)
-        await this.enrollUserToGroupCourses(
-          id,
-          groupId,
-          existingCourses.map(({ id }) => id),
-          trx,
-        );
-
-      const [groupData] = await trx
-        .select(getTableColumns(groups))
-        .from(groups)
-        .where(eq(groups.id, groupId));
 
       const { avatarReference, ...userWithoutAvatar } = updatedUser;
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
+      if (groups !== undefined) {
+        await this.groupService.setUserGroups(groups ?? [], id);
+      }
+
+      const newGroups = await this.groupService.getUserGroups({}, id);
+
       return {
         ...userWithoutAvatar,
         profilePictureUrl: usersProfilePictureUrl,
-        groupId: groupData.id,
-        groupName: groupData.name,
+        groups: newGroups.data.map((group) => ({ id: group.id, name: group.name })),
       };
     });
   }
-
-  enrollUserToGroupCourses = async (
-    userId: UUIDType,
-    groupId: UUIDType,
-    existingCourseIds: UUIDType[],
-    trx: DatabasePg,
-  ) => {
-    await trx
-      .insert(groupUsers)
-      .values({ userId, groupId })
-      .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId } });
-
-    const insertedStudentCourses = await trx
-      .insert(studentCourses)
-      .values(
-        existingCourseIds.map((courseId) => ({
-          studentId: userId,
-          courseId,
-          enrolledByGroupId: groupId,
-        })),
-      )
-      .onConflictDoNothing()
-      .returning({
-        courseId: studentCourses.courseId,
-      });
-
-    await Promise.all(
-      insertedStudentCourses.map(async ({ courseId }) =>
-        this.courseService.createCourseDependencies(courseId, userId, null, trx),
-      ),
-    );
-  };
 
   async upsertUserDetails(userId: UUIDType, data: UpsertUserDetailsBody) {
     const existingUser = await this.getExistingUser(userId);
@@ -650,21 +588,9 @@ export class UserService {
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
     await this.db.transaction(async (trx) => {
-      const existingUsers = await trx
-        .select({ id: users.id })
-        .from(users)
-        .where(and(inArray(users.id, data.userIds), isNull(users.deletedAt)));
-
-      const validUserIds = existingUsers.map((u) => u.id);
-      if (validUserIds.length === 0) return;
-
-      await trx
-        .insert(groupUsers)
-        .values(validUserIds.map((userId) => ({ userId, groupId: data.groupId })))
-        .onConflictDoUpdate({
-          target: [groupUsers.userId],
-          set: { groupId: data.groupId },
-        });
+      await Promise.all(
+        data.map((user) => this.groupService.setUserGroups(user.groups, user.userId, trx)),
+      );
     });
   }
 
@@ -710,37 +636,27 @@ export class UserService {
       }
 
       await this.db.transaction(async (trx) => {
-        const { groupName, ...userInfo } = userData;
+        const { groups: groupNames, ...userInfo } = userData;
 
         const createdUser = await this.createUser({ ...userInfo }, trx, creatorId);
 
         importStats.importedUsersAmount++;
         importStats.importedUsersList.push(userData.email);
 
-        if (!groupName) return;
+        if (!groupNames?.length) return;
 
-        const [group] = await trx.select().from(groups).where(eq(groups.name, groupName));
+        const existingGroups = await trx
+          .select()
+          .from(groups)
+          .where(inArray(groups.name, groupNames));
 
-        if (!group) return;
+        if (!existingGroups.length) return;
 
-        await trx
-          .insert(groupUsers)
-          .values({ userId: createdUser.id, groupId: group.id })
-          .onConflictDoUpdate({ target: [groupUsers.userId], set: { groupId: group.id } });
-
-        const existingCourses = await trx
-          .select({ id: courses.id })
-          .from(courses)
-          .leftJoin(groupCourses, eq(courses.id, groupCourses.courseId))
-          .where(eq(groupCourses.groupId, group.id));
-
-        if (!!existingCourses.length)
-          await this.enrollUserToGroupCourses(
-            createdUser.id,
-            group.id,
-            existingCourses.map(({ id }) => id),
-            trx,
-          );
+        await this.groupService.setUserGroups(
+          existingGroups.map((group) => group.id),
+          createdUser.id,
+          trx,
+        );
       });
     }
 
@@ -788,8 +704,8 @@ export class UserService {
       conditions.push(eq(users.role, filters.role));
     }
 
-    if (filters.groupId) {
-      conditions.push(eq(groupUsers.groupId, filters.groupId));
+    if (filters.groups?.length) {
+      conditions.push(getGroupFilterConditions(filters.groups));
     }
 
     return conditions.length ? conditions : [sql`1=1`];
@@ -805,29 +721,9 @@ export class UserService {
         return users.email;
       case UserSortFields.createdAt:
         return users.createdAt;
-      case UserSortFields.groupName:
-        return groups.name;
       default:
         return users.firstName;
     }
-  }
-
-  private async validateWhetherUserCanBeDeleted(userId: UUIDType): Promise<void> {
-    const userQuizAttempts = await this.statisticsService.getUserStats(userId);
-    const hasCourses = await this.hasCoursesWithAuthor(userId);
-
-    if (userQuizAttempts.quizzes.totalAttempts > 0) {
-      throw new ConflictException("adminUserView.toast.userWithAttemptsError");
-    }
-
-    if (hasCourses) {
-      throw new ConflictException("adminUserView.toast.userWithCreatedCoursesError");
-    }
-  }
-
-  private async validateWhetherUsersCanBeDeleted(userIds: UUIDType[]): Promise<void> {
-    const validationPromises = userIds.map((id) => this.validateWhetherUserCanBeDeleted(id));
-    await Promise.all(validationPromises);
   }
 
   private async hasCoursesWithAuthor(authorId: UUIDType): Promise<boolean> {
@@ -844,8 +740,8 @@ export class UserService {
   public async getAdminsToNotifyAboutFinishedCourse(): Promise<{ email: string; id: string }[]> {
     return this.db
       .select({
-        email: users.email,
         id: users.id,
+        email: users.email,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))

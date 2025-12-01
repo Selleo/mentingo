@@ -3,11 +3,12 @@ import { isArray, omit } from "lodash";
 import { nanoid } from "nanoid";
 import request from "supertest";
 
+import { createTokens } from "src/storage/schema";
+
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
-import { createTokens } from "../../storage/schema";
 import { AuthService } from "../auth.service";
 
 import type { DatabasePg } from "../../common/index";
@@ -327,8 +328,7 @@ describe("AuthController (e2e)", () => {
       expect(currentUser).toStrictEqual({
         ...omit(user, "credentials", "avatarReference"),
         profilePictureUrl: null,
-        groupName: null,
-        groupId: null,
+        groups: [],
         shouldVerifyMFA: false,
       });
     });

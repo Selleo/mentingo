@@ -27,8 +27,12 @@ export const allUsersSchema = Type.Array(
   Type.Intersect([
     baseUserResponseSchema,
     Type.Object({
-      groupId: Type.Union([UUIDSchema, Type.Null()]),
-      groupName: Type.Union([Type.String(), Type.Null()]),
+      groups: Type.Array(
+        Type.Object({
+          id: UUIDSchema,
+          name: Type.String(),
+        }),
+      ),
     }),
   ]),
 );
@@ -37,8 +41,12 @@ export const userSchema = Type.Composite([
   Type.Omit(commonUserSchema, ["avatarReference"]),
   Type.Object({
     profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
-    groupId: Type.Union([UUIDSchema, Type.Null()]),
-    groupName: Type.Union([Type.String(), Type.Null()]),
+    groups: Type.Array(
+      Type.Object({
+        id: UUIDSchema,
+        name: Type.String(),
+      }),
+    ),
   }),
 ]);
 
@@ -63,6 +71,5 @@ export type UserDetailsWithAvatarKey = Static<typeof userDetailsSchema> & {
 };
 
 export type UserDetailsResponse = Static<typeof userDetailsResponseSchema>;
-export type UserResponseBody = Static<typeof userSchema>;
 export type UserResponse = Static<typeof baseUserResponseSchema>;
 export type AllUsersResponse = Static<typeof allUsersSchema>;

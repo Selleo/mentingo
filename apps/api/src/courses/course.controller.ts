@@ -66,6 +66,7 @@ import {
   studentCoursesValidation,
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
+import { GroupsFilterSchema } from "src/group/group.types";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -183,12 +184,12 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @Query("keyword") keyword: string,
     @Query("sort") sort: SortEnrolledStudentsOptions,
-    @Query("groupId") groupId: string,
+    @Query("groups") groups: GroupsFilterSchema,
   ): Promise<BaseResponse<EnrolledStudent[]>> {
     const filters: EnrolledStudentFilterSchema = {
       keyword,
       sort,
-      groupId,
+      groups,
     };
     return await this.courseService.getStudentsWithEnrollmentDate(courseId, filters);
   }

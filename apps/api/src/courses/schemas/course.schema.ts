@@ -73,7 +73,12 @@ export const studentCourseProgressionSchema = Type.Object({
   studentId: UUIDSchema,
   studentName: Type.String(),
   studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
-  groupName: Type.Union([Type.String(), Type.Null()]),
+  groups: Type.Array(
+    Type.Object({
+      id: Type.String(),
+      name: Type.String(),
+    }),
+  ),
   completedLessonsCount: Type.Number(),
   lastActivity: Type.Union([Type.String(), Type.Null()]),
 });

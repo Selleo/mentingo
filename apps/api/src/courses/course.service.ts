@@ -2,11 +2,11 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  forwardRef,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import {
@@ -15,6 +15,7 @@ import {
   count,
   countDistinct,
   eq,
+  getTableColumns,
   ilike,
   inArray,
   isNotNull,
@@ -28,6 +29,7 @@ import { isEmpty } from "lodash";
 
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { EnvService } from "src/env/services/env.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
@@ -335,8 +337,8 @@ export class CourseService {
       );
     }
 
-    if (filters.groupId) {
-      conditions.push(eq(groupUsers.groupId, filters.groupId));
+    if (filters.groups?.length) {
+      conditions.push(getGroupFilterConditions(filters.groups));
     }
 
     conditions.push(isNull(users.deletedAt));
@@ -348,8 +350,11 @@ export class CourseService {
         email: users.email,
         id: users.id,
         enrolledAt: studentCourses.createdAt,
-        groupId: groups.id,
-        groupName: groups.name,
+        groups: sql<
+          Array<{ id: string; name: string }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
+          "groups",
+        ),
       })
       .from(users)
       .leftJoin(
@@ -359,6 +364,7 @@ export class CourseService {
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
+      .groupBy(users.id, studentCourses.createdAt)
       .orderBy(sortOrder(studentCourses.createdAt));
 
     return {
@@ -1178,20 +1184,19 @@ export class CourseService {
     if (!groupExists.length) throw new NotFoundException("Groups not found");
 
     const groupUsersList = await this.db
-      .select()
+      .select({ ...getTableColumns(groupUsers), role: users.role })
       .from(groupUsers)
+      .innerJoin(users, eq(groupUsers.userId, users.id))
       .where(inArray(groupUsers.groupId, groupIds));
 
-    // Check if groups are already enrolled to this course
     const existingGroupEnrollments = await this.db
       .select({ groupId: groupCourses.groupId })
       .from(groupCourses)
       .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
 
-    const existingGroupIds = existingGroupEnrollments.map((e: any) => e.groupId);
+    const existingGroupIds = existingGroupEnrollments.map((e) => e.groupId);
     const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
 
-    // Get existing student enrollments to avoid duplicates (only if there are users)
     let existingStudentIds: string[] = [];
     let newStudentIds: string[] = [];
 
@@ -1206,21 +1211,22 @@ export class CourseService {
             eq(studentCourses.courseId, courseId),
             inArray(
               studentCourses.studentId,
-              groupUsersList.map((gu: any) => gu.userId),
+              groupUsersList.map((gu) => gu.userId),
             ),
           ),
         );
 
-      existingStudentIds = existingEnrollments.map((e: any) => e.studentId);
+      existingStudentIds = existingEnrollments.map((e) => e.studentId);
       newStudentIds = groupUsersList
-        .map((gu: any) => gu.userId)
-        .filter((userId: any) => !existingStudentIds.includes(userId));
+        .filter(
+          ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
+        )
+        .map((gu) => gu.userId);
     }
 
     await this.db.transaction(async (trx) => {
-      // Save group-course relationships (even if group is empty or all users were already enrolled)
       if (newGroupIds.length > 0) {
-        const groupCoursesValues = newGroupIds.map((groupId: any) => ({
+        const groupCoursesValues = newGroupIds.map((groupId) => ({
           groupId,
           courseId,
           enrolledBy: adminId || null,
@@ -1229,20 +1235,20 @@ export class CourseService {
         await trx.insert(groupCourses).values(groupCoursesValues);
       }
 
-      // Create student course enrollments with enrolledByGroupId for new students
       if (newStudentIds.length > 0 && newGroupIds.length > 0) {
-        // Create a map of userId to groupId for users enrolled from groups
         const userIdToGroupId = new Map<string, string>();
+
         for (const groupId of newGroupIds) {
-          const usersInGroup = groupUsersList.filter((gu: any) => gu.groupId === groupId);
-          usersInGroup.forEach((gu: any) => {
+          const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
+
+          usersInGroup.forEach((gu) => {
             if (newStudentIds.includes(gu.userId)) {
               userIdToGroupId.set(gu.userId, groupId);
             }
           });
         }
 
-        const studentCoursesValues = newStudentIds.map((studentId: any) => ({
+        const studentCoursesValues = newStudentIds.map((studentId) => ({
           studentId,
           courseId,
           enrolledByGroupId: userIdToGroupId.get(studentId) || null,
@@ -1250,9 +1256,8 @@ export class CourseService {
 
         await trx.insert(studentCourses).values(studentCoursesValues);
 
-        // Create course dependencies for each student
         await Promise.all(
-          newStudentIds.map(async (studentId: any) => {
+          newStudentIds.map(async (studentId) => {
             await this.createCourseDependencies(courseId, studentId, null, trx);
           }),
         );
@@ -1765,7 +1770,7 @@ export class CourseService {
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
-        groupName: groupNameExpression,
+        groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
         lastActivity: lastActivityExpression,
       })
@@ -1785,6 +1790,7 @@ export class CourseService {
       )
       .limit(perPage)
       .offset((page - 1) * perPage)
+      .groupBy(users.id)
       .orderBy(
         sortOrder(
           this.getCourseStatisticsColumnToSortBy(
@@ -2053,8 +2059,8 @@ export class CourseService {
             AND slp.completed_at IS NOT NULL
         ), 0)::float`;
 
-    const groupNameExpression = sql<string | null>`(
-          SELECT g.name
+    const groupNameExpression = sql<Array<{ id: string; name: string }>>`(
+          SELECT json_agg(json_build_object('id', g.id, 'name', g.name))
           FROM ${groups} g
           JOIN ${groupUsers} gu ON gu.group_id = g.id
           WHERE gu.user_id = ${users.id}
