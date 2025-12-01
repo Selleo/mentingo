@@ -1,6 +1,6 @@
 import { AI_MENTOR_TYPE, ALLOWED_EXTENSIONS } from "@repo/shared";
 import { capitalize } from "lodash-es";
-import { Minus } from "lucide-react";
+import { Camera, Minus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -44,9 +44,9 @@ import { DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { useAiMentorLessonForm } from "./hooks/useAiMentorLessonForm";
+import UpdateAiAvatarModal from "./UpdateAiAvatarModal";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
-import type React from "react";
 
 type AiMentorLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -79,21 +79,21 @@ const AiMentorLessonForm = ({
   const { t } = useTranslation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     lessonToEdit?.avatarReferenceUrl ?? null,
   );
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [removeAvatar, setRemoveAvatar] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     setAvatarPreview(lessonToEdit?.avatarReferenceUrl ?? null);
+    setSelectedAvatarFile(null);
     setRemoveAvatar(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = null;
@@ -110,36 +110,46 @@ const AiMentorLessonForm = ({
 
   const onOpenPreview = () => setPreviewOpen(true);
   const onClosePreview = () => setPreviewOpen(false);
+  const onOpenAvatarDialog = () => {
+    setIsAvatarDialogOpen(true);
+  };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const revokeObjectUrl = () => {
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = null;
     }
+  };
+
+  const handleAvatarSave = ({ file, remove }: { file: File | null; remove: boolean }) => {
+    if (remove) {
+      revokeObjectUrl();
+      setAvatarPreview(null);
+      setSelectedAvatarFile(null);
+      setRemoveAvatar(true);
+      return;
+    }
 
     if (file) {
+      revokeObjectUrl();
       const objectUrl = URL.createObjectURL(file);
       objectUrlRef.current = objectUrl;
       setAvatarPreview(objectUrl);
+      setSelectedAvatarFile(file);
       setRemoveAvatar(false);
-    } else {
-      setAvatarPreview(lessonToEdit?.avatarReferenceUrl ?? null);
+      return;
     }
   };
 
   const handleRemoveAvatar = () => {
-    if (objectUrlRef.current) {
-      URL.revokeObjectURL(objectUrlRef.current);
-      objectUrlRef.current = null;
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-
+    revokeObjectUrl();
     setAvatarPreview(null);
+    setSelectedAvatarFile(null);
     setRemoveAvatar(true);
+  };
+
+  const handleAvatarDialogCancel = () => {
+    setIsAvatarDialogOpen(false);
   };
 
   return (
@@ -173,7 +183,7 @@ const AiMentorLessonForm = ({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit((data) =>
-                onSubmit(data, removeAvatar ? null : fileInputRef.current?.files?.[0]),
+                onSubmit(data, removeAvatar ? null : (selectedAvatarFile ?? undefined)),
               )}
               className="flex grow flex-col"
             >
@@ -197,34 +207,40 @@ const AiMentorLessonForm = ({
                 <Separator orientation="vertical" className="lg:h-14" />
 
                 <div className="flex gap-2">
-                  <div className="relative size-12 ">
+                  <div className="relative size-12">
                     <Avatar
-                      className={cn("size-12 border-2 border-border", {
-                        "hover:opacity-75 cursor-pointer": lessonToEdit,
-                      })}
-                      onClick={() => lessonToEdit && fileInputRef.current?.click()}
+                      className={cn(
+                        "size-12 group overflow-hidden border-2 border-border transition",
+                        {
+                          "cursor-pointer hover:ring-2 hover:ring-primary hover:ring-offset-1":
+                            lessonToEdit,
+                          "border-dotted border-neutral-300": !avatarPreview && lessonToEdit,
+                        },
+                      )}
+                      onClick={() => lessonToEdit && onOpenAvatarDialog()}
                     >
                       <AvatarImage src={avatarPreview ?? undefined} />
 
                       <AvatarFallback>
                         <Icon name="AiMentor" className="size-8 text-primary" />
                       </AvatarFallback>
-                      <input
-                        type="file"
-                        hidden
-                        ref={fileInputRef}
-                        accept={ALLOWED_EXTENSIONS}
-                        onChange={handleFileChange}
-                      />
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-neutral-950 bg-opacity-70 text-[10px] font-semibold uppercase tracking-wide text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        {t("common.button.edit")}
+                      </div>
                     </Avatar>
-                    {avatarPreview && (
+
+                    {avatarPreview ? (
                       <button
                         type="button"
-                        className="size-4 absolute bg-primary text-contrast rounded-full flex left-0 bottom-0 items-center justify-center cursor-pointer hover:opacity-80"
+                        className="size-4 absolute -left-0 -bottom-0 flex items-center justify-center rounded-full bg-primary text-contrast hover:opacity-80 shadow-md"
                         onClick={handleRemoveAvatar}
                       >
                         <Minus className="size-4" />
                       </button>
+                    ) : (
+                      <div className="size-4 absolute -left-0 -bottom-0 flex items-center justify-center rounded-full bg-neutral-100 shadow-md text-neutral-800 hover:opacity-80">
+                        <Camera className="size-3" />
+                      </div>
                     )}
                   </div>
 
@@ -232,9 +248,32 @@ const AiMentorLessonForm = ({
                     <FormField
                       render={({ field }) => (
                         <FormItem>
-                          <Label className="text-muted-foreground text-sm">
-                            {t("adminCourseView.curriculum.lesson.field.aiMentor")}
-                          </Label>
+                          <div className="flex justify-between">
+                            <Label className="text-muted-foreground text-sm">
+                              {t("adminCourseView.curriculum.lesson.field.mentorName")}
+                            </Label>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>
+                                  <Icon
+                                    name="Info"
+                                    className="h-auto w-5 cursor-default text-neutral-400"
+                                  />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="top"
+                                align="center"
+                                className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                              >
+                                {t(
+                                  "adminCourseView.curriculum.lesson.other.aiMentorPersonaTooltip",
+                                )}
+                                <TooltipArrow className="fill-black" />
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+
                           <input
                             type="text"
                             className="outline-0 text-sm bg-transparent border-b"
@@ -454,12 +493,14 @@ const AiMentorLessonForm = ({
               </div>
             </form>
           </Form>
+
           <DeleteConfirmationModal
             open={isModalOpen}
             onClose={onCloseModal}
             onDelete={onDelete}
             contentType={DeleteContentType.AI_MENTOR}
           />
+
           <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
             <DialogContent>
               <DialogHeader>
@@ -480,6 +521,23 @@ const AiMentorLessonForm = ({
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <UpdateAiAvatarModal
+            open={isAvatarDialogOpen}
+            onOpenChange={(open) => {
+              if (open) {
+                onOpenAvatarDialog();
+              } else {
+                handleAvatarDialogCancel();
+              }
+            }}
+            onCancel={handleAvatarDialogCancel}
+            onSave={(data) => {
+              handleAvatarSave(data);
+              setIsAvatarDialogOpen(false);
+            }}
+            currentPreview={avatarPreview}
+            accept={ALLOWED_EXTENSIONS}
+          />
         </div>
       </TooltipProvider>
     </>
