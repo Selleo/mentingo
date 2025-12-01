@@ -1,27 +1,28 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { useVideoPlayer } from "./VideoPlayerContext";
 
 type Props = {
-  url: string;
-  isExternalUrl: boolean;
+  url: string | null;
+  isExternalUrl?: boolean;
   onVideoEnded?: () => void;
 };
 
-export function Video({ url, isExternalUrl, onVideoEnded }: Props) {
-  const { setVideo } = useVideoPlayer();
+export function Video({ url, isExternalUrl = false, onVideoEnded }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { setVideo, setPlaceholderElement } = useVideoPlayer();
 
   useEffect(() => {
+    if (!url) return;
+
     setVideo(url, isExternalUrl, onVideoEnded);
   }, [url, isExternalUrl, onVideoEnded, setVideo]);
 
-  return (
-    <div className="w-full">
-      <VideoPlayerPlaceholder />
-    </div>
-  );
-}
+  useEffect(() => {
+    setPlaceholderElement(ref.current);
 
-function VideoPlayerPlaceholder() {
-  return <div className="w-full aspect-video bg-black rounded-md" />;
+    return () => setPlaceholderElement(null);
+  }, [setPlaceholderElement]);
+
+  return <div ref={ref} className="w-full aspect-video" />;
 }

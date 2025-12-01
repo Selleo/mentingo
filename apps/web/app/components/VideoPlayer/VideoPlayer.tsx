@@ -28,14 +28,18 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
 
   const handleIframeLoad = useCallback(() => {
     const iframe = iframeRef.current;
-    if (!iframe || !window.playerjs) return;
+    if (!iframe) return;
+
+    setIsLoading(false);
+
+    if (!window.playerjs) {
+      console.warn("PlayerJS not loaded yet");
+      return;
+    }
 
     try {
       const player = new window.playerjs.Player(iframe);
       playerRef.current = player;
-
-      const onReady = () => setIsLoading(false);
-      player.on("ready", onReady);
 
       if (handleVideoEnded) {
         player.on("ended", handleVideoEnded);
@@ -46,13 +50,29 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
   }, [handleVideoEnded]);
 
   useEffect(() => {
+    if (playerRef.current || isLoading) return;
+
     const iframe = iframeRef.current;
+    if (!iframe || !window.playerjs) return;
+
+    try {
+      const player = new window.playerjs.Player(iframe);
+      playerRef.current = player;
+
+      if (handleVideoEnded) {
+        player.on("ended", handleVideoEnded);
+      }
+    } catch (error) {
+      console.warn("Player initialization failed:", error);
+    }
+  }, [isLoading, handleVideoEnded]);
+
+  useEffect(() => {
     const player = playerRef.current;
 
     return () => {
       try {
-        if (player && iframe?.contentWindow) {
-          player.off("ready", () => {});
+        if (player) {
           if (handleVideoEnded) {
             player.off("ended", handleVideoEnded);
           }
@@ -79,9 +99,10 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
           "opacity-0": isLoading,
           "opacity-100": !isLoading,
         })}
-        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
         title="Video Player"
         loading="lazy"
+        allowFullScreen={false}
       />
     </div>
   );
