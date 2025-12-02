@@ -496,16 +496,19 @@ export class CourseController {
   }
 
   @Delete("unenroll-course")
-  @Roles(USER_ROLES.STUDENT)
+  @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: nullResponse(),
-    request: [{ type: "query", name: "id", schema: UUIDSchema }],
+    request: [
+      { type: "query", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "userIds", schema: Type.Array(UUIDSchema) },
+    ],
   })
-  async unenrollCourse(
-    @Query("id") id: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
+  async unenrollCourses(
+    @Query("courseId") courseId: UUIDType,
+    @Query("userIds") userIds: UUIDType[],
   ): Promise<null> {
-    await this.courseService.unenrollCourse(id, currentUserId);
+    await this.courseService.unenrollCourse(courseId, userIds);
 
     return null;
   }

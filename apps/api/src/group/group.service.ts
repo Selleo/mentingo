@@ -6,6 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
   countDistinct,
@@ -296,6 +297,7 @@ export class GroupService {
       studentId: userId,
       courseId,
       enrolledByGroupId: groupId,
+      status: COURSE_ENROLLMENT.ENROLLED,
     }));
 
     if (valuesToInsert.length === 0) return;
@@ -303,7 +305,10 @@ export class GroupService {
     const insertedStudentCourses = await trx
       .insert(studentCourses)
       .values(valuesToInsert)
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: [studentCourses.courseId, studentCourses.studentId],
+        set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+      })
       .returning({
         courseId: studentCourses.courseId,
       });
@@ -329,6 +334,7 @@ export class GroupService {
       .where(
         and(
           eq(studentCourses.studentId, userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
           inArray(
             studentCourses.courseId,
             groupCoursesList.map((gc) => gc.courseId),

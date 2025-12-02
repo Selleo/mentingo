@@ -4,8 +4,15 @@ import { useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
-import { useCourseAverageScorePerQuiz } from "~/api/queries/admin/useCourseAverageScorePerQuiz";
+import {
+  courseAverageScorePerQuizQueryOptions,
+  useCourseAverageScorePerQuiz,
+} from "~/api/queries/admin/useCourseAverageScorePerQuiz";
 import { useCourseStatistics } from "~/api/queries/admin/useCourseStatistics";
+import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
+import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
+import { COURSE_STUDENTS_QUIZ_RESULTS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsQuizResults";
+import { queryClient } from "~/api/queryClient";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
   Select,
@@ -48,6 +55,22 @@ type AdminCourseStatisticsTab = (typeof StatisticsTabs)[keyof typeof StatisticsT
 
 interface CourseAdminStatisticsProps {
   course?: GetCourseResponse["data"];
+}
+
+export async function invalidateAllStatisticsQueries(courseId: string) {
+  await queryClient.invalidateQueries({
+    queryKey: [COURSE_STUDENTS_QUIZ_RESULTS_QUERY_KEY],
+  });
+
+  await queryClient.invalidateQueries({
+    queryKey: [COURSE_STUDENTS_PROGRESS_QUERY_KEY],
+  });
+
+  await queryClient.invalidateQueries({
+    queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY],
+  });
+
+  await queryClient.invalidateQueries(courseAverageScorePerQuizQueryOptions({ id: courseId }));
 }
 
 export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {

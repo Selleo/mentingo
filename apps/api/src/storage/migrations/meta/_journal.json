@@ -393,6 +393,13 @@
       "when": 1764583536635,
       "tag": "0055_removed_unique_constraint_from_group_users",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1764598312293,
+      "tag": "0056_added_enrollment_status_to_student_courses",
+      "breakpoints": true
     }
   ]
 }
