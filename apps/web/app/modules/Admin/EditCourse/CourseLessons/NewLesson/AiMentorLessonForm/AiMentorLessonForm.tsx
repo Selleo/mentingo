@@ -1,9 +1,13 @@
+import { useParams } from "@remix-run/react";
 import { AI_MENTOR_TYPE, ALLOWED_EXTENSIONS } from "@repo/shared";
 import { capitalize } from "lodash-es";
 import { Camera, Minus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useUploadAiMentorAvatar } from "~/api/mutations/admin/useUploadAiMentorAvatar";
+import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { queryClient } from "~/api/queryClient";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
 import Editor from "~/components/RichText/Editor";
@@ -78,9 +82,13 @@ const AiMentorLessonForm = ({
 
   const { t } = useTranslation();
 
+  const { id = "" } = useParams();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
+
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     lessonToEdit?.avatarReferenceUrl ?? null,
   );
@@ -121,7 +129,13 @@ const AiMentorLessonForm = ({
     }
   };
 
-  const handleAvatarSave = ({ file, remove }: { file: File | null; remove: boolean }) => {
+  const handleAvatarSave = async ({ file, remove }: { file: File | null; remove: boolean }) => {
+    if (!lessonToEdit?.id) return;
+
+    await uploadAvatar({ lessonId: lessonToEdit.id, file });
+
+    await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id }] });
+
     if (remove) {
       revokeObjectUrl();
       setAvatarPreview(null);
