@@ -319,8 +319,10 @@ export class StatisticsRepository {
           c.course_id
         FROM student_lesson_progress slp
         JOIN chapters c ON slp.chapter_id = c.id
+        JOIN student_courses sc ON sc.course_id = c.course_id
         WHERE slp.completed_at IS NOT NULL
           AND slp.student_id = ${studentId}
+          AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
         ORDER BY slp.completed_at DESC
         LIMIT 1
       ),
@@ -332,11 +334,13 @@ export class StatisticsRepository {
         FROM lessons l
         JOIN chapters c ON l.chapter_id = c.id
         JOIN last_completed_lesson lcl ON c.course_id = lcl.course_id
+        JOIN student_courses sc ON sc.course_id = c.course_id
         LEFT JOIN student_lesson_progress slp ON slp.lesson_id = l.id
           AND slp.student_id = ${studentId}
         WHERE (c.display_order > (SELECT c2.display_order FROM chapters c2 WHERE c2.id = lcl.chapter_id)
           OR (c.id = lcl.chapter_id AND l.display_order > (SELECT l2.display_order FROM lessons l2 WHERE l2.id = lcl.lesson_id)))
         AND slp.completed_at IS NULL
+        AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
         ORDER BY c.display_order, l.display_order
         LIMIT 1
       ),
