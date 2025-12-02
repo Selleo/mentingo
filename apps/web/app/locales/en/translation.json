@@ -1345,7 +1345,8 @@
       },
       "empty": {
         "noUsers": "No users",
-        "enrolled": "enrolled"
+        "enrolled": "enrolled",
+        "noGroups": "No groups"
       }
     }
   },

@@ -94,7 +94,11 @@ export function CourseStudentsProgressTable({
           const groups = row.original.groups;
 
           if (!groups || !groups.length) {
-            return <span className="text-muted-foreground">No groups</span>;
+            return (
+              <span className="text-muted-foreground">
+                {t("adminCourseView.statistics.empty.noGroups")}
+              </span>
+            );
           }
 
           const visibleGroups = groups.slice(0, 1);

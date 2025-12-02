@@ -1338,7 +1338,8 @@
       },
       "empty": {
         "noUsers": "Brak zapisanych",
-        "enrolled": "użytkowników"
+        "enrolled": "użytkowników",
+        "noGroups": "Brak grup"
       }
     }
   },
