@@ -143,7 +143,6 @@ export class PromptService implements OnModuleInit {
     const prompt = await this.loadPrompt(promptChoice, {
       lessonTitle: lesson.title,
       lessonInstructions: lesson.instructions,
-      // @ts-expect-error - wrong types
       groups: groups.map((group) => `${group.name}: ${group.characteristic}\n`),
       securityAndRagBlock: securityAndRagBlock,
     });
