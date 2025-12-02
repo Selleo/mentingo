@@ -309,83 +309,81 @@ export class StatisticsRepository {
       WITH user_courses AS (
         SELECT course_id
         FROM student_courses
-        WHERE student_id = ${studentId} AND student_courses.status = ${COURSE_ENROLLMENT.ENROLLED}
+        WHERE student_id = ${studentId}
       ),
-      last_completed_lesson AS (
-        SELECT 
-          slp.student_id,
-          slp.lesson_id,
-          slp.chapter_id,
-          c.course_id
-        FROM student_lesson_progress slp
-        JOIN chapters c ON slp.chapter_id = c.id
-        JOIN student_courses sc ON sc.course_id = c.course_id
-        WHERE slp.completed_at IS NOT NULL
-          AND slp.student_id = ${studentId}
-          AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
-        ORDER BY slp.completed_at DESC
+           last_completed_lesson AS (
+             SELECT
+               slp.student_id,
+               slp.lesson_id,
+               slp.chapter_id,
+               c.course_id
+             FROM student_lesson_progress slp
+                    JOIN chapters c ON slp.chapter_id = c.id
+             WHERE slp.completed_at IS NOT NULL
+               AND slp.student_id = ${studentId}
+             ORDER BY slp.completed_at DESC
         LIMIT 1
-      ),
-      next_lesson_in_current_course AS (
-        SELECT 
-          l.id AS lesson_id,
-          l.chapter_id,
-          c.course_id
-        FROM lessons l
+        ),
+        next_lesson_in_current_course AS (
+      SELECT
+        l.id AS lesson_id,
+        l.chapter_id,
+        c.course_id
+      FROM lessons l
         JOIN chapters c ON l.chapter_id = c.id
         JOIN last_completed_lesson lcl ON c.course_id = lcl.course_id
-        JOIN student_courses sc ON sc.course_id = c.course_id
         LEFT JOIN student_lesson_progress slp ON slp.lesson_id = l.id
-          AND slp.student_id = ${studentId}
-        WHERE (c.display_order > (SELECT c2.display_order FROM chapters c2 WHERE c2.id = lcl.chapter_id)
-          OR (c.id = lcl.chapter_id AND l.display_order > (SELECT l2.display_order FROM lessons l2 WHERE l2.id = lcl.lesson_id)))
+        AND slp.student_id = ${studentId}
+      WHERE (c.display_order > (SELECT c2.display_order FROM chapters c2 WHERE c2.id = lcl.chapter_id)
+         OR (c.id = lcl.chapter_id AND l.display_order > (SELECT l2.display_order FROM lessons l2 WHERE l2.id = lcl.lesson_id)))
         AND slp.completed_at IS NULL
-        AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
-        ORDER BY c.display_order, l.display_order
+      ORDER BY c.display_order, l.display_order
         LIMIT 1
-      ),
-      next_lesson_in_other_courses AS (
-        SELECT 
-          l.id AS lesson_id,
-          l.chapter_id,
-          c.course_id
-        FROM lessons l
+        ),
+        next_lesson_in_other_courses AS (
+      SELECT
+        l.id AS lesson_id,
+        l.chapter_id,
+        c.course_id
+      FROM lessons l
         JOIN chapters c ON l.chapter_id = c.id
         JOIN user_courses uc ON c.course_id = uc.course_id
         LEFT JOIN student_lesson_progress slp ON slp.lesson_id = l.id
-          AND slp.student_id = ${studentId}
-        WHERE slp.completed_at IS NULL
+        AND slp.student_id = ${studentId}
+      WHERE slp.completed_at IS NULL
         AND NOT EXISTS (SELECT 1 FROM last_completed_lesson lcl WHERE lcl.course_id = c.course_id)
-        ORDER BY c.course_id, c.display_order, l.display_order
+      ORDER BY c.course_id, c.display_order, l.display_order
         LIMIT 1
-      ),
-      next_lesson AS (
-        SELECT * FROM next_lesson_in_current_course
-        UNION ALL
-        SELECT * FROM next_lesson_in_other_courses
-        WHERE NOT EXISTS (SELECT 1 FROM next_lesson_in_current_course)
+        ),
+        next_lesson AS (
+      SELECT * FROM next_lesson_in_current_course
+      UNION ALL
+      SELECT * FROM next_lesson_in_other_courses
+      WHERE NOT EXISTS (SELECT 1 FROM next_lesson_in_current_course)
         LIMIT 1
-      )
-      SELECT 
+        )
+      SELECT
         c.id AS "courseId",
         c.title AS "courseTitle",
         c.description AS "courseDescription",
         c.thumbnail_s3_key AS "courseThumbnail",
         nl.lesson_id AS "lessonId",
         ch.title AS "chapterTitle",
-        CASE 
+        CASE
           WHEN scp.completed_at IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
           WHEN scp.completed_lesson_count > 0 THEN ${PROGRESS_STATUSES.IN_PROGRESS}
           ELSE ${PROGRESS_STATUSES.NOT_STARTED}
-        END AS "chapterProgress",
+          END AS "chapterProgress",
         COALESCE(scp.completed_lesson_count, 0) AS "completedLessonCount",
         ch.lesson_count AS "lessonCount",
         ch.display_order AS "chapterDisplayOrder"
       FROM next_lesson nl
-      JOIN courses c ON nl.course_id = c.id
-      JOIN chapters ch ON nl.chapter_id = ch.id
-      LEFT JOIN student_chapter_progress scp ON ch.id = scp.chapter_id 
-        AND scp.student_id = ${studentId};
+             JOIN courses c ON nl.course_id = c.id
+             JOIN chapters ch ON nl.chapter_id = ch.id
+             JOIN student_courses sc ON sc.course_id = c.id AND sc.student_id = ${studentId}
+             LEFT JOIN student_chapter_progress scp ON ch.id = scp.chapter_id
+        AND scp.student_id = ${studentId}
+      WHERE sc.status = ${COURSE_ENROLLMENT.ENROLLED};
     `)) as unknown as NextLesson[];
 
     if (!lesson) return null;
