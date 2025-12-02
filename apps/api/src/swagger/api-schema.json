@@ -12897,7 +12897,14 @@
                     "type": "object",
                     "properties": {
                       "name": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       },
                       "avatarReferenceUrl": {
                         "type": "string"

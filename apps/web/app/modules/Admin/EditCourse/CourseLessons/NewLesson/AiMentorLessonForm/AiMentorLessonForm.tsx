@@ -224,24 +224,26 @@ const AiMentorLessonForm = ({
                       <AvatarFallback>
                         <Icon name="AiMentor" className="size-8 text-primary" />
                       </AvatarFallback>
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-neutral-950 bg-opacity-70 text-[10px] font-semibold uppercase tracking-wide text-white opacity-0 transition-opacity group-hover:opacity-100">
-                        {t("common.button.edit")}
-                      </div>
+                      {lessonToEdit && (
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-neutral-950 bg-opacity-70 text-[10px] font-semibold uppercase tracking-wide text-white opacity-0 transition-opacity group-hover:opacity-100">
+                          {t("common.button.edit")}
+                        </div>
+                      )}
                     </Avatar>
-
-                    {avatarPreview ? (
-                      <button
-                        type="button"
-                        className="size-4 absolute -left-0 -bottom-0 flex items-center justify-center rounded-full bg-primary text-contrast hover:opacity-80 shadow-md"
-                        onClick={handleRemoveAvatar}
-                      >
-                        <Minus className="size-4" />
-                      </button>
-                    ) : (
-                      <div className="size-4 absolute -left-0 -bottom-0 flex items-center justify-center rounded-full bg-neutral-100 shadow-md text-neutral-800 hover:opacity-80">
-                        <Camera className="size-3" />
-                      </div>
-                    )}
+                    {lessonToEdit &&
+                      (avatarPreview ? (
+                        <button
+                          type="button"
+                          className="size-4 absolute -left-0 -bottom-0 flex items-center justify-center rounded-full bg-primary text-contrast hover:opacity-80 shadow-md"
+                          onClick={handleRemoveAvatar}
+                        >
+                          <Minus className="size-4" />
+                        </button>
+                      ) : (
+                        <div className="size-4 absolute -left-0 -bottom-0 flex items-center justify-center rounded-full bg-neutral-100 shadow-md text-neutral-800 hover:opacity-80">
+                          <Camera className="size-3" />
+                        </div>
+                      ))}
                   </div>
 
                   <div className="flex flex-1 lg:flex-0 flex-col gap-1">

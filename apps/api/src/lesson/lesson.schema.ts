@@ -197,7 +197,7 @@ export const lessonShowSchema = Type.Object({
   aiMentor: Type.Optional(
     Type.Union([
       Type.Object({
-        name: Type.String(),
+        name: Type.Union([Type.String(), Type.Null()]),
         avatarReferenceUrl: Type.Optional(Type.String()),
       }),
       Type.Null(),

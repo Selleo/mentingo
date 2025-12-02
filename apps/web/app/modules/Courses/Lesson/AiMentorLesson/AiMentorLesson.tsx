@@ -128,7 +128,10 @@ const AiMentorLesson = ({
       )}
 
       {lessonLoading && <Loader />}
-      <div ref={messagesContainerRef} className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll">
+      <div
+        ref={messagesContainerRef}
+        className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"
+      >
         {!lessonLoading &&
           messages.map((messages, idx) => (
             <ChatMessage
