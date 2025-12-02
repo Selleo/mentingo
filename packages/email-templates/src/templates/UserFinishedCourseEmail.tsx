@@ -6,25 +6,28 @@ import { DefaultEmailSettings } from "types";
 
 export type UserFinishedCourseProps = {
   courseName: string;
-  certificateDownloadLink: string;
+  buttonLink: string;
+  hasCertificate: boolean;
 } & DefaultEmailSettings;
 
 export const UserFinishedCourseEmail = ({
   courseName,
-  certificateDownloadLink,
+  buttonLink,
   primaryColor,
   language = "en",
+  hasCertificate,
 }: UserFinishedCourseProps) => {
   const { heading, paragraphs, buttonText } = getUserFinishedCourseEmailTranslations(
     language,
     courseName,
+    hasCertificate,
   );
 
   return BaseEmailTemplate({
     heading,
     paragraphs,
     buttonText,
-    buttonLink: certificateDownloadLink,
+    buttonLink,
     primaryColor,
   });
 };
