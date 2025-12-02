@@ -31,17 +31,13 @@ import { isEmpty, isEqual } from "lodash";
 
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
-import {
-  CreateCourseEvent,
-  UpdateCourseEvent,
-  EnrollGroupToCourseEvent,
-  EnrollCourseEvent,
-} from "src/events";
+import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -51,21 +47,14 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
-import { StripeService } from "src/stripe/stripe.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
-import { UserService } from "src/user/user.service";
-import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
-import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
-
-import { getSortOptions } from "../common/helpers/getSortOptions";
 import {
+  groupCourses,
   aiMentorStudentLessonProgress,
   categories,
   certificates,
   chapters,
   courses,
   coursesSummaryStats,
-  groupCourses,
   groups,
   groupUsers,
   lessons,
@@ -76,7 +65,14 @@ import {
   studentCourses,
   studentLessonProgress,
   users,
-} from "../storage/schema";
+} from "src/storage/schema";
+import { StripeService } from "src/stripe/stripe.service";
+import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
+
+import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
 import {
@@ -146,6 +142,7 @@ export class CourseService {
     private readonly eventBus: EventBus,
     private readonly adminLessonService: AdminLessonService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    private readonly emailService: EmailService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -282,6 +279,13 @@ export class CourseService {
         .innerJoin(categories, eq(courses.categoryId, categories.id))
         .leftJoin(users, eq(courses.authorId, users.id))
         .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
+        .leftJoin(
+          groupCourses,
+          and(
+            eq(groupCourses.courseId, courses.id),
+            eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+          ),
+        )
         .where(and(...conditions))
         .groupBy(
           courses.id,
@@ -300,6 +304,7 @@ export class CourseService {
           studentCourses.finishedChapterCount,
           courses.availableLocales,
           courses.baseLanguage,
+          groupCourses.settings,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -512,11 +517,28 @@ export class CourseService {
                 AND ${chapters.isFreemium} = TRUE
             )
           `,
+          dueDate: sql<
+            string | null
+          >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
         })
         .from(courses)
         .leftJoin(categories, eq(courses.categoryId, categories.id))
         .leftJoin(users, eq(courses.authorId, users.id))
         .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
+        .leftJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.courseId, courses.id),
+            eq(studentCourses.studentId, currentUserId || ""),
+          ),
+        )
+        .leftJoin(
+          groupCourses,
+          and(
+            eq(groupCourses.courseId, courses.id),
+            eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+          ),
+        )
         .where(and(...conditions))
         .groupBy(
           courses.id,
@@ -533,6 +555,7 @@ export class CourseService {
           coursesSummaryStats.paidPurchasedCount,
           courses.availableLocales,
           courses.baseLanguage,
+          groupCourses.settings,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -552,8 +575,9 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              authorAvatarUrl,
+            );
 
             return {
               ...itemWithoutReferences,
@@ -583,10 +607,6 @@ export class CourseService {
     userId: UUIDType,
     language: SupportedLanguages,
   ): Promise<CommonShowCourse> {
-    //TODO: to remove
-    const testDeployment = "test";
-    testDeployment;
-
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -614,12 +634,22 @@ export class CourseService {
         stripePriceId: courses.stripePriceId,
         availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        dueDate: sql<
+          string | null
+        >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
       .leftJoin(
         studentCourses,
         and(eq(courses.id, studentCourses.courseId), eq(studentCourses.studentId, userId)),
+      )
+      .leftJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, courses.id),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
       )
       .where(eq(courses.id, id));
 
@@ -930,6 +960,9 @@ export class CourseService {
           WHERE ${chapters.courseId} = ${courses.id}
             AND ${chapters.isFreemium} = true
         )`,
+        dueDate: sql<
+          string | null
+        >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
       })
       .from(courses)
       .leftJoin(
@@ -938,6 +971,13 @@ export class CourseService {
       )
       .leftJoin(categories, eq(courses.categoryId, categories.id))
       .leftJoin(users, eq(courses.authorId, users.id))
+      .leftJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, courses.id),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
       .where(and(...conditions))
       .groupBy(
         courses.id,
@@ -954,6 +994,7 @@ export class CourseService {
         courses.availableLocales,
         courses.baseLanguage,
         studentCourses.status,
+        groupCourses.settings,
       )
       .orderBy(
         sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NULL THEN TRUE ELSE FALSE END`,
@@ -964,8 +1005,9 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl =
-          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+          authorAvatarUrl,
+        );
 
         return {
           ...courseWithoutReferences,
@@ -1470,12 +1512,23 @@ export class CourseService {
     );
   }
 
-  async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], currentUser?: CurrentUser) {
-    const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
-    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+  async enrollGroupsToCourse(
+    courseId: UUIDType,
+    groupsToEnroll: EnrolledCourseGroups,
+    userId?: UUIDType,
+    currentUserRole?: UserRole,
+  ) {
+    const groupIds = groupsToEnroll.map((groupId) => groupId.id);
+
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+    if (!course) throw new NotFoundException(`Course ${courseId} not found`);
 
     const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
     if (!groupExists.length) throw new NotFoundException("Groups not found");
+
+    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && userId !== course.authorId) {
+      throw new ForbiddenException("You don't have permission to enroll groups to this course");
+    }
 
     const groupUsersList = await this.db
       .select({ ...getTableColumns(groupUsers), role: users.role })
@@ -1497,9 +1550,12 @@ export class CourseService {
     if (groupUsersList.length > 0) {
       const existingEnrollments = await this.db
         .select({
-          studentId: studentCourses.studentId,
+          userId: users.id,
+          groupId: groupUsers.groupId,
         })
-        .from(studentCourses)
+        .from(users)
+        .leftJoin(studentCourses, eq(users.id, studentCourses.studentId))
+        .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
         .where(
           and(
             eq(studentCourses.courseId, courseId),
@@ -1511,7 +1567,7 @@ export class CourseService {
           ),
         );
 
-      existingStudentIds = existingEnrollments.map((e) => e.studentId);
+      existingStudentIds = existingEnrollments.map((e) => e.userId);
       newStudentIds = groupUsersList
         .filter(
           ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
@@ -1521,11 +1577,16 @@ export class CourseService {
 
     await this.db.transaction(async (trx) => {
       if (newGroupIds.length > 0) {
-        const groupCoursesValues = newGroupIds.map((groupId) => ({
-          groupId,
-          courseId,
-          enrolledBy: currentUser?.userId || null,
-        }));
+        const groupCoursesValues = newGroupIds.map((groupId) => {
+          const settings = groupsToEnroll.find((g) => g.id === groupId)?.settings;
+
+          return {
+            groupId,
+            courseId,
+            enrolledBy: userId || null,
+            settings: settingsToJSONBuildObject(settings || {}),
+          };
+        });
 
         await trx.insert(groupCourses).values(groupCoursesValues);
       }
@@ -1583,20 +1644,6 @@ export class CourseService {
         );
       }
     });
-
-    if (currentUser && newGroupIds.length > 0) {
-      newGroupIds.forEach((groupId) =>
-        this.eventBus.publish(
-          new EnrollGroupToCourseEvent({
-            courseId,
-            groupId,
-            actor: currentUser,
-          }),
-        ),
-      );
-    }
-
-    return null;
   }
 
   async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
@@ -2049,6 +2096,9 @@ export class CourseService {
           WHERE ${chapters.courseId} = ${courses.id}
             AND ${chapters.isFreemium} = TRUE
         )`,
+      dueDate: sql<
+        string | null
+      >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
     };
   }
 
@@ -2814,5 +2864,109 @@ export class CourseService {
         })
         .where(eq(courses.id, courseId));
     });
+  }
+
+  async sendOverdueCoursesEmails() {
+    const overdueStudents = await this.db
+      .select({
+        courseId: courses.id,
+        courseTitle: courses.title,
+        studentId: users.id,
+        studentName: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+        studentEmail: users.email,
+        groupId: groups.id,
+        groupName: groups.name,
+        dueDate: sql<string>`(${groupCourses.settings}->>'dueDate')::text`,
+      })
+      .from(groupCourses)
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .innerJoin(groups, eq(groups.id, groupCourses.groupId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.enrolledByGroupId, groups.id),
+        ),
+      )
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          sql`NULLIF(${groupCourses.settings}->>'dueDate', '') IS NOT NULL`,
+          sql`(${groupCourses.settings}->>'dueDate')::timestamptz < NOW()`,
+          eq(users.role, USER_ROLES.STUDENT),
+          isNull(users.deletedAt),
+          isNull(studentCourses.completedAt),
+        ),
+      );
+
+    if (overdueStudents.length === 0) return;
+
+    const groupedByCourse = overdueStudents.reduce(
+      (acc, row) => {
+        const key = `${row.courseTitle} (${row.courseId})`;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(row);
+        return acc;
+      },
+      {} as Record<string, typeof overdueStudents>,
+    );
+
+    const adminsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
+
+    await Promise.all(
+      adminsToNotify.map(async ({ id: adminId, email: adminEmail }) => {
+        await this.emailService.getDefaultEmailProperties(adminId);
+
+        const lines: string[] = [];
+        for (const [courseKey, rows] of Object.entries(groupedByCourse)) {
+          lines.push(`Course: ${courseKey}`);
+          rows.forEach((r) => {
+            lines.push(
+              ` - ${r.studentName} (${r.studentEmail}) in group "${r.groupName}" — due ${r.dueDate}`,
+            );
+          });
+          lines.push("");
+        }
+
+        const text = [
+          "Some users did not finish their courses on time:",
+          "",
+          ...lines,
+          "",
+          "You can review course progression in the admin panel.",
+        ].join("\n");
+
+        const html = `
+          <div>
+            <p>Some users did not finish their courses on time:</p>
+            ${Object.entries(groupedByCourse)
+              .map(
+                ([courseKey, rows]) => `
+                  <div style="margin:12px 0;">
+                    <strong>Course: ${courseKey}</strong>
+                    <ul>
+                      ${rows
+                        .map(
+                          (r) =>
+                            `<li>${r.studentName} (${r.studentEmail}) in group "${r.groupName}" — due ${r.dueDate}</li>`,
+                        )
+                        .join("")}
+                    </ul>
+                  </div>
+                `,
+              )
+              .join("")}
+            <p>You can review course progression in the admin panel.</p>
+          </div>
+        `;
+
+        return this.emailService.sendEmailWithLogo({
+          to: adminEmail,
+          subject: "Overdue courses notification",
+          text,
+          html,
+        });
+      }),
+    );
   }
 }

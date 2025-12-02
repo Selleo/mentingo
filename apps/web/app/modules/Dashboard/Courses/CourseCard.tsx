@@ -33,15 +33,13 @@ const CourseCard = ({
   thumbnailUrl,
   priceInCents,
   title,
+  dueDate,
 }: CourseCardProps) => {
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const isScormCreatePage = pathname.includes("/admin/courses/new-scorm");
 
   const { isAdmin } = useUserRole();
-
-  // TODO: Get due date from api
-  const DUE_DATE = new Date();
 
   return (
     <Link
@@ -80,9 +78,9 @@ const CourseCard = ({
               {t("studentCoursesView.other.freeLessons")}
             </CardBadge>
           )}
-          {DUE_DATE && (
+          {dueDate && (
             <CategoryChip
-              category={t("common.other.dueDate", { date: formatDate(DUE_DATE, "dd.MM.yyyy") })}
+              category={t("common.other.dueDate", { date: formatDate(dueDate, "dd.MM.yyyy") })}
               color="text-warning-600"
               className="bg-warning-50"
               textClassName="text-zest-900"

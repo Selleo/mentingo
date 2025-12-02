@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -106,14 +107,13 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                   control={control}
                   name={`groups.${index}.deadline`}
                   rules={{
-                    validate: (value) => {
+                    validate: (date) => {
                       const isSelectedNow = getValues(`groups.${index}.selected`);
                       const isObligatory = getValues(`groups.${index}.obligatory`);
                       if (!isSelectedNow || !isObligatory) return true;
-                      if (!value) return t("adminCourseView.deadlineRequired");
+                      if (!date) return t("adminCourseView.deadlineRequired");
 
-                      const timestamp = Date.parse(value);
-                      return Number.isNaN(timestamp) ? t("adminCourseView.invalidDate") : true;
+                      return true;
                     },
                   }}
                   render={({ field }) => (
@@ -124,8 +124,10 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                       <FormControl className="relative">
                         <Input
                           type="date"
-                          value={field.value ?? ""}
-                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                          }}
                           placeholder={t("adminCourseView.selectDate")}
                           className="w-full"
                         />

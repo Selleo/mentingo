@@ -29,8 +29,6 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
   const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
   const title = course?.title;
   const description = course?.description || "";
-  // TODO: Get due date from api
-  const DUE_DATE = new Date();
 
   const navigateToEditCourse = () => navigate(`/admin/beta-courses/${course.id}`);
 
@@ -61,9 +59,11 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
           <div className="flex w-full flex-col gap-y-2">
             <div className="flex items-center gap-2">
               <CategoryChip category={course?.category} className="bg-primary-50" />
-              {DUE_DATE && (
+              {course?.dueDate && (
                 <CategoryChip
-                  category={t("common.other.dueDate", { date: formatDate(DUE_DATE, "dd.MM.yyyy") })}
+                  category={t("common.other.dueDate", {
+                    date: formatDate(course?.dueDate, "dd.MM.yyyy"),
+                  })}
                   color="text-warning-600"
                   className="bg-warning-50"
                   textClassName="text-zest-900"

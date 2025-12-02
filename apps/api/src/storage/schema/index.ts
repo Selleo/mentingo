@@ -26,6 +26,7 @@ import { archived, availableLocales, baseLanguage, id, timestamps } from "./util
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { CourseSettings } from "src/courses/types/settings";
+import type { GroupCourseSettings } from "src/group/group.types";
 
 export const users = pgTable("users", {
   ...id,
@@ -508,6 +509,10 @@ export const groupCourses = pgTable(
       .references(() => courses.id, { onDelete: "cascade" })
       .notNull(),
     enrolledBy: uuid("enrolled_by").references(() => users.id),
+    settings: jsonb("settings")
+      .$type<GroupCourseSettings>()
+      .notNull()
+      .default({ isMandatory: false }),
   },
   (table) => ({
     unq: unique().on(table.groupId, table.courseId),

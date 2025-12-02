@@ -22,3 +22,8 @@ export type GroupsQuery = {
 };
 
 export type UpsertGroupBody = Static<typeof upsertGroupSchema>;
+
+export type GroupCourseSettings = {
+  isMandatory: boolean;
+  dueDate?: Date;
+};
