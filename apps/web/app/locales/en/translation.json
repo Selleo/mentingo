@@ -18,6 +18,9 @@
       "edit": "Edit",
       "uploading": "Uploading..."
     },
+    "toast": {
+      "noAccess": "You do not have permission to access this resource"
+    },
     "tooltip": {
       "soon": "Cooming soon"
     },
@@ -942,7 +945,8 @@
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
       "certificateUpdateError": "Error updating certificate",
       "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
-      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters"
+      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters",
+      "aiMentorAvatarIncorrectType": "Invalid file type. Please upload a JPG, JPEG, PNG, or SVG image."
     },
     "settings": {
       "breadcrumbs": {
@@ -1132,6 +1136,8 @@
           "sourceUrl": "Source URL",
           "aiMentorInstructions": "AI Mentor Instructions",
           "completionConditions": "Completion Conditions",
+          "aiMentor": "AI Mentor",
+          "mentorName": "Mentor Name",
           "passThreshold": "Pass Threshold",
           "additionalContext": "Additional context",
           "aiMentorTypes": "AI Mentor Type",
@@ -1190,14 +1196,19 @@
           "fillInTheBlanksWordTip": "Create and drop the word into sentence.",
           "leaveContentHeader": "Are you sure you want to leave this question editor?",
           "leaveContentBody": "It will delete all unsaved progress",
+          "dropOrClick": "Drop image here or click to upload",
+          "allowedFormats": "PNG, JPG or SVG",
           "leaveContentBodyValidate": "If you want to save the changes, you must first validate the form",
           "aiMentorInstructionsTooltip": "Describe how the AI Mentor should behave during the lesson. Include the context, role, or scenario that the AI should follow. This defines how the AI will guide the conversation.",
+          "updateAiMentorAvatarDescription": "Upload a new image for the AI mentor or remove the current one.",
+          "updateAiMentorAvatar": "Update AI mentor avatar",
           "aiMentorTypesTooltip": "Choose the AI Mentor type: Mentor guides you to answers, Teacher instructs directly, Roleplay simulates real scenarios (e.g. client and salesperson).",
           "aiMentorTypeTooltip": "Acts like a character in a scenario, but asks questions during the scene and helps draw conclusions.\nExample: \"What would you do now in the manager's role?\"",
           "aiTeacherTypeTooltip": "Explains, teaches, and asks questions — like a teacher.\nExample: \"In this situation, the client raises a price objection. What should you answer and why?\"",
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
           "completionConditionsTooltip": "List what the student must achieve to pass this lesson. Provide clear and measurable points. The AI will use this list to check progress. You can also define a pass threshold (e.g. percentage or minimum number of points to cover). If no threshold is provided, all conditions must be met to pass the lesson.",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
+          "aiMentorPersonaTooltip": "This defines the lesson's persona. You can select a name and avatar for the AI Mentor. The persona will identify itself by this name, and the selected avatar will be shown during lessons.",
           "suggestedExamples": "Suggested examples",
           "charactersLeft": "characters left",
           "optional": "optional",

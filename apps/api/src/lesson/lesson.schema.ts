@@ -73,6 +73,7 @@ export const aiMentorLessonSchema = Type.Object({
   aiMentorInstructions: Type.String(),
   completionConditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
+  avatarReference: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const lessonResourceType = Type.Union([Type.Literal("embed", Type.Literal("text"))]);
@@ -112,6 +113,7 @@ export const lessonSchema = Type.Object({
   description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   displayOrder: Type.Number(),
   fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  avatarReferenceUrl: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
   aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
@@ -126,6 +128,7 @@ export const createAiMentorLessonSchema = Type.Intersect([
     aiMentorInstructions: Type.String(),
     completionConditions: Type.String(),
     type: Type.Enum(AI_MENTOR_TYPE),
+    name: Type.Optional(Type.String()),
   }),
 ]);
 export const updateAiMentorLessonSchema = Type.Omit(createAiMentorLessonSchema, [
@@ -187,6 +190,15 @@ export const lessonShowSchema = Type.Object({
         score: Type.Union([Type.Number(), Type.Null()]),
         percentage: Type.Union([Type.Number(), Type.Null()]),
         requiredScore: Type.Union([Type.Number(), Type.Null()]),
+      }),
+      Type.Null(),
+    ]),
+  ),
+  aiMentor: Type.Optional(
+    Type.Union([
+      Type.Object({
+        name: Type.Union([Type.String(), Type.Null()]),
+        avatarReferenceUrl: Type.Optional(Type.String()),
       }),
       Type.Null(),
     ]),

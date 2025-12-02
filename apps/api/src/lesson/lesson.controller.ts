@@ -428,6 +428,43 @@ export class LessonController {
     return this.lessonService.getLessonImage(res, userId, role, resourceId);
   }
 
+  @Post("ai-mentor/avatar")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        lessonId: { type: "string", format: "uuid" },
+        file: {
+          type: "string",
+          format: "binary",
+          nullable: true,
+        },
+      },
+      required: ["lessonId", "file"],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "File uploaded successfully",
+    type: String,
+  })
+  async uploadAiMentorAvatar(
+    @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") userId: UUIDType,
+    @Body("lessonId") lessonId: UUIDType,
+    @UploadedFile() uploadedFile: Express.Multer.File | null,
+  ) {
+    await this.adminLessonsService.uploadAvatarToAiMentorLesson(
+      userId,
+      role,
+      lessonId,
+      uploadedFile,
+    );
+  }
+
   @Patch("update-lesson-display-order")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({

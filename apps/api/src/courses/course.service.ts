@@ -68,10 +68,10 @@ import { LESSON_SEQUENCE_ENABLED } from "./constants";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseSortFields,
-  EnrolledStudentSortFields,
+  CourseStudentAiMentorResultsSortFields,
   CourseStudentProgressionSortFields,
   CourseStudentQuizResultsSortFields,
-  CourseStudentAiMentorResultsSortFields,
+  EnrolledStudentSortFields,
 } from "./schemas/courseQuery";
 
 import type {
@@ -85,17 +85,17 @@ import type {
   LessonSequenceEnabledResponse,
 } from "./schemas/course.schema";
 import type {
-  CourseStudentProgressionSortField,
-  CourseStudentProgressionQuery,
   CourseEnrollmentScope,
   CoursesFilterSchema,
   CourseSortField,
   CoursesQuery,
-  EnrolledStudentFilterSchema,
-  CourseStudentQuizResultsQuery,
-  CourseStudentQuizResultsSortField,
   CourseStudentAiMentorResultsQuery,
   CourseStudentAiMentorResultsSortField,
+  CourseStudentProgressionQuery,
+  CourseStudentProgressionSortField,
+  CourseStudentQuizResultsQuery,
+  CourseStudentQuizResultsSortField,
+  EnrolledStudentFilterSchema,
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
@@ -1544,8 +1544,14 @@ export class CourseService {
           }
         }
 
+        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarReference) {
+          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+
+          return { ...updatedLesson, avatarReferenceUrl: signedUrl };
+        }
+
         if (lesson.questions && Array.isArray(lesson.questions)) {
-          const questionsWithSignedUrls = await Promise.all(
+          updatedLesson.questions = await Promise.all(
             lesson.questions.map(async (question) => {
               if (question.photoS3Key) {
                 if (!question.photoS3Key.startsWith("https://")) {
@@ -1563,7 +1569,6 @@ export class CourseService {
               return question;
             }),
           );
-          updatedLesson.questions = questionsWithSignedUrls;
         }
 
         return updatedLesson;

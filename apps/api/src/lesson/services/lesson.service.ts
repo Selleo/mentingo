@@ -110,8 +110,18 @@ export class LessonService {
         userId,
       });
 
+      let avatarUrl = undefined;
+
+      if (lesson.aiMentor?.avatarReference) {
+        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+      }
+
       return {
         ...lesson,
+        aiMentor: {
+          name: lesson.aiMentor?.name ?? "AI Mentor",
+          avatarReferenceUrl: avatarUrl,
+        },
         threadId: thread.id,
         userLanguage: thread.userLanguage,
         status: thread.status,

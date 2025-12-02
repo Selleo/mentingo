@@ -11,8 +11,8 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
-import type { DatabasePg } from "../../common/index";
 import type { INestApplication } from "@nestjs/common";
+import type { DatabasePg } from "src/common";
 
 describe("AuthController (e2e)", () => {
   let app: INestApplication;

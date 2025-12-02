@@ -1,3 +1,4 @@
+export * from "./constants/aiMentorAvatar";
 export * from "./constants/aiMentorTypes";
 export * from "./constants/courseEnrollment";
 export * from "./constants/fileTypes";
