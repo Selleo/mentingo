@@ -1576,7 +1576,8 @@
       "complete": "Complete",
       "next": "Next",
       "submit": "Submit",
-      "retake": "Retake"
+      "retake": "Retake",
+      "autoplay": "Autoplay"
     },
     "sideSection": {
       "header": "Table of content:",

@@ -10,6 +10,7 @@ import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
@@ -17,6 +18,7 @@ import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -57,6 +59,7 @@ export const LessonContent = ({
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const { clearVideo } = useVideoPlayer();
+  const { autoplay, setAutoplay } = useVideoPreferencesStore();
   const [isNextDisabled, setIsNextDisabled] = useState(false);
 
   const { language } = useLanguageStore();
@@ -82,8 +85,8 @@ export const LessonContent = ({
   const handleVideoEnded = useCallback(() => {
     setIsNextDisabled(false);
     if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
-    handleNext();
-  }, [isStudent, markLessonAsCompleted, lesson.id, handleNext]);
+    if (autoplay) handleNext();
+  }, [isStudent, markLessonAsCompleted, lesson.id, handleNext, autoplay]);
 
   useEffect(() => {
     if (lesson.type !== "video") {
@@ -270,24 +273,34 @@ export const LessonContent = ({
                 </div>
                 <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
               </div>
-              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
-                <Button
-                  variant="outline"
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  disabled={isPreviousDisabled || isFirstLesson}
-                  onClick={handlePrevious}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                </Button>
-                <Button
-                  data-testid="next-lesson-button"
-                  variant="outline"
-                  disabled={isNextDisabled}
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  onClick={handleNext}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4" />
-                </Button>
+              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
+                {lesson.type === "video" && (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-sm text-neutral-600">
+                      {t("studentLessonView.button.autoplay")}
+                    </span>
+                    <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+                  </label>
+                )}
+                <div className="flex flex-row gap-x-4">
+                  <Button
+                    variant="outline"
+                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                    disabled={isPreviousDisabled || isFirstLesson}
+                    onClick={handlePrevious}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                  </Button>
+                  <Button
+                    data-testid="next-lesson-button"
+                    variant="outline"
+                    disabled={isNextDisabled}
+                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                    onClick={handleNext}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}

@@ -1569,7 +1569,8 @@
       "complete": "Zakończ",
       "next": "Następny",
       "submit": "Prześlij",
-      "retake": "Powtórz"
+      "retake": "Powtórz",
+      "autoplay": "Autoodtwarzanie"
     },
     "sideSection": {
       "header": "Spis treści:",
