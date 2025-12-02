@@ -26,6 +26,7 @@ export const commonShowCourseSchema = Type.Object({
   title: Type.String(),
   stripeProductId: Type.Union([Type.String(), Type.Null()]),
   stripePriceId: Type.Union([Type.String(), Type.Null()]),
+  dueDate: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const commonShowBetaCourseSchema = Type.Object({

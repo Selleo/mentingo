@@ -1,0 +1,1 @@
+ALTER TABLE "group_courses" ADD COLUMN "settings" jsonb DEFAULT '{"isMandatory":false}'::jsonb NOT NULL;

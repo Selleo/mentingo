@@ -31,6 +31,7 @@ export const studentCourseSchema = Type.Object({
   ...courseSchema.properties,
   completedChapterCount: Type.Number(),
   enrolled: Type.Optional(Type.Boolean()),
+  dueDate: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const coursesForContentCreatorSchema = Type.Object({
@@ -107,6 +108,13 @@ export const studentAiMentorResultSchema = Type.Object({
   lastSession: Type.String(),
 });
 
+export const enrolledCourseGroups = Type.Array(
+  Type.Object({
+    id: UUIDSchema,
+    settings: Type.Object({ isMandatory: Type.Boolean(), dueDate: Type.String() }),
+  }),
+);
+
 export const allStudentCourseProgressionSchema = Type.Array(studentCourseProgressionSchema);
 export const allStudentQuizResultsSchema = Type.Array(studentQuizResultSchema);
 export const allStudentAiMentorResultsSchema = Type.Array(studentAiMentorResultSchema);
@@ -127,3 +135,4 @@ export type CourseAverageQuizScoresResponse = Static<typeof courseAverageQuizSco
 export type AllStudentCourseProgressionResponse = Static<typeof allStudentCourseProgressionSchema>;
 export type AllStudentQuizResultsResponse = Static<typeof allStudentQuizResultsSchema>;
 export type AllStudentAiMentorResultsResponse = Static<typeof allStudentAiMentorResultsSchema>;
+export type EnrolledCourseGroups = Static<typeof enrolledCourseGroups>;

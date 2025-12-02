@@ -9246,6 +9246,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -9260,7 +9270,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           },
@@ -9471,6 +9482,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -9485,7 +9506,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           },
@@ -9630,6 +9652,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -9646,7 +9678,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           }
@@ -9952,6 +9985,16 @@
                     "type": "null"
                   }
                 ]
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -9965,7 +10008,8 @@
               "priceInCents",
               "title",
               "stripeProductId",
-              "stripePriceId"
+              "stripePriceId",
+              "dueDate"
             ]
           }
         },
@@ -10748,19 +10792,35 @@
         ]
       },
       "EnrollGroupsToCourseBody": {
-        "type": "object",
-        "properties": {
-          "groupIds": {
-            "type": "array",
-            "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
               "format": "uuid",
               "type": "string"
+            },
+            "settings": {
+              "type": "object",
+              "properties": {
+                "isMandatory": {
+                  "type": "boolean"
+                },
+                "dueDate": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "isMandatory",
+                "dueDate"
+              ]
             }
-          }
-        },
-        "required": [
-          "groupIds"
-        ]
+          },
+          "required": [
+            "id",
+            "settings"
+          ]
+        }
       },
       "EnrollGroupsToCourseResponse": {
         "type": "object",

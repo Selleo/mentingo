@@ -952,6 +952,7 @@ export interface GetStudentCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1001,6 +1002,7 @@ export interface GetAvailableCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1034,6 +1036,7 @@ export interface GetContentCreatorCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
 }
 
@@ -1099,6 +1102,7 @@ export interface GetCourseResponse {
     title: string;
     stripeProductId: string | null;
     stripePriceId: string | null;
+    dueDate: string | null;
   };
 }
 
@@ -1284,9 +1288,14 @@ export interface EnrollCoursesResponse {
   };
 }
 
-export interface EnrollGroupsToCourseBody {
-  groupIds: string[];
-}
+export type EnrollGroupsToCourseBody = {
+  /** @format uuid */
+  id: string;
+  settings: {
+    isMandatory: boolean;
+    dueDate: string;
+  };
+}[];
 
 export interface EnrollGroupsToCourseResponse {
   data: {
