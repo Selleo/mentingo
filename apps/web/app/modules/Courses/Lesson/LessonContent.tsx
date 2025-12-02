@@ -78,7 +78,9 @@ export const LessonContent = ({
 
   const handleVideoEnded = useCallback(() => {
     setIsNextDisabled(false);
+
     if (isStudent) markLessonAsCompleted({ lessonId: lesson.id });
+
     handleNext();
   }, [isStudent, markLessonAsCompleted, lesson.id, handleNext]);
 
@@ -121,6 +123,7 @@ export const LessonContent = ({
     const nextLessonId =
       currentChapter?.lessons?.[nextLessonIndex]?.id ?? nextChapter?.lessons?.[0]?.id;
     const cannotEnterNextLesson = nextLessonId ? !canAccessLesson(course, nextLessonId) : false;
+
     setIsNextDisabled(
       isNextBlocked(
         currentLessonIndex,
@@ -130,6 +133,7 @@ export const LessonContent = ({
         cannotEnterNextLesson,
       ),
     );
+
     setIsPreviousDisabled(
       isPreviousBlocked(
         currentLessonIndex,
@@ -137,6 +141,7 @@ export const LessonContent = ({
         course.enrolled ?? false,
       ),
     );
+
     queryClient.invalidateQueries({ queryKey: ["course", { id: course.id }] });
   }, [
     isAdminLike,
@@ -157,6 +162,11 @@ export const LessonContent = ({
     course,
   ]);
 
+  /**
+   * Must be called as `{Content()}`, NOT `<Content />`.
+   * JSX syntax creates new component type on each render, causing Video to remount
+   * and breaking fullscreen persistence during video-to-video navigation.
+   */
   const Content = () =>
     match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
