@@ -102,7 +102,7 @@ export const VideoPlayer = ({ initialUrl, handleVideoEnded }: VideoPlayerProps) 
         allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
         title="Video Player"
         loading="lazy"
-        allowFullScreen={false}
+        allowFullScreen
       />
     </div>
   );

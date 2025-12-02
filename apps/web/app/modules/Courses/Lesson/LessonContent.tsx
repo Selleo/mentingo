@@ -12,6 +12,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
+import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
@@ -55,6 +56,7 @@ export const LessonContent = ({
   const { t } = useTranslation();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
+  const { clearVideo } = useVideoPlayer();
   const [isNextDisabled, setIsNextDisabled] = useState(false);
 
   const { language } = useLanguageStore();
@@ -76,6 +78,18 @@ export const LessonContent = ({
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const totalLessons = currentChapter.lessons.length;
   const queryClient = useQueryClient();
+
+  const handleVideoEnded = useCallback(() => {
+    setIsNextDisabled(false);
+    if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
+    handleNext();
+  }, [isStudent, markLessonAsCompleted, lesson.id, handleNext]);
+
+  useEffect(() => {
+    if (lesson.type !== "video") {
+      clearVideo();
+    }
+  }, [lesson.type, clearVideo]);
 
   const canAccessLesson = useCallback(
     (courseData: GetCourseResponse["data"], targetLessonId: string) => {
@@ -161,11 +175,7 @@ export const LessonContent = ({
         <Video
           url={lesson.fileUrl}
           isExternalUrl={lesson.isExternal}
-          onVideoEnded={() => {
-            setIsNextDisabled(false);
-            isStudent && markLessonAsCompleted({ lessonId: lesson.id, language });
-            handleNext();
-          }}
+          onVideoEnded={handleVideoEnded}
         />
       ))
       .with("presentation", () => (
@@ -274,9 +284,7 @@ export const LessonContent = ({
             </div>
           )}
 
-          <div>
-            <Content />
-          </div>
+          <div>{Content()}</div>
         </div>
       </div>
     </TooltipProvider>
