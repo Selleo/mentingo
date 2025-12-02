@@ -674,6 +674,38 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
+  public async updateAdminOverdueCourseNotification(
+    userId: UUIDType,
+  ): Promise<AdminSettingsJSONContentSchema> {
+    const [currentUserSettings] = await this.db
+      .select({
+        adminOverdueCourseNotification: sql<boolean>`(settings.settings->>'adminOverdueCourseNotification')::boolean`,
+      })
+      .from(settings)
+      .where(eq(settings.userId, userId));
+
+    if (!currentUserSettings) {
+      throw new NotFoundException("User settings not found");
+    }
+
+    const [{ settings: updatedUserSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{adminOverdueCourseNotification}',
+            to_jsonb(${!currentUserSettings.adminOverdueCourseNotification}::boolean),
+            true
+          )
+        `,
+      })
+      .where(eq(settings.userId, userId))
+      .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedUserSettings;
+  }
+
   async updateDefaultCourseCurrency(
     currency: AllowedCurrency,
     actor?: CurrentUser,

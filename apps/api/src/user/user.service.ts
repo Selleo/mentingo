@@ -866,6 +866,23 @@ export class UserService {
       );
   }
 
+  public async getAdminsToNotifyAboutOverdueCourse(): Promise<{ email: string; id: string }[]> {
+    return this.db
+      .select({
+        id: users.id,
+        email: users.email,
+      })
+      .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
+      .where(
+        and(
+          eq(users.role, USER_ROLES.ADMIN),
+          sql`${settings.settings}->>'adminOverdueCourseNotification' = 'true'`,
+          isNull(users.deletedAt),
+        ),
+      );
+  }
+
   async checkUsersInactivity() {
     const shortInactivity = await this.statisticsService.getInactiveStudents(
       USER_SHORT_INACTIVITY_DAYS,

@@ -44,6 +44,7 @@ export const DEFAULT_ADMIN_SETTINGS = {
   ...DEFAULT_STUDENT_SETTINGS,
   adminNewUserNotification: true,
   adminFinishedCourseNotification: false,
+  adminOverdueCourseNotification: false,
   configWarningDismissed: false,
 };
 

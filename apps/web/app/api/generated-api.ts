@@ -334,6 +334,18 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
   };
 }
 
+export interface UpdateAdminOverdueCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
+  };
+}
+
 export interface UpdateColorSchemaBody {
   /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
   primaryColor: string;
@@ -3894,6 +3906,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
       this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
         path: `/api/settings/admin/finished-course-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminOverdueCourseNotification
+     * @request PATCH:/api/settings/admin/overdue-course-notification
+     */
+    settingsControllerUpdateAdminOverdueCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminOverdueCourseNotificationResponse, any>({
+        path: `/api/settings/admin/overdue-course-notification`,
         method: "PATCH",
         format: "json",
         ...params,

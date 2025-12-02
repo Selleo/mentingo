@@ -575,9 +575,8 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarUrl,
-            );
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
             return {
               ...itemWithoutReferences,
@@ -1005,9 +1004,8 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-          authorAvatarUrl,
-        );
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
         return {
           ...courseWithoutReferences,
@@ -2911,7 +2909,9 @@ export class CourseService {
       {} as Record<string, typeof overdueStudents>,
     );
 
-    const adminsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
+    const adminsToNotify = await this.userService.getAdminsToNotifyAboutOverdueCourse();
+
+    if (adminsToNotify.length === 0) return;
 
     await Promise.all(
       adminsToNotify.map(async ({ id: adminId, email: adminEmail }) => {
