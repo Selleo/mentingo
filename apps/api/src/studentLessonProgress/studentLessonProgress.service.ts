@@ -510,7 +510,10 @@ export class StudentLessonProgressService {
       .where(and(eq(lessons.id, id), isNull(users.deletedAt)));
   }
 
-  async getUserCourseCompletionDetails(studentId: UUIDType, courseId: UUIDType) {
+  async getUserCourseCompletionDetails(
+    studentId: UUIDType,
+    courseId: UUIDType,
+  ) {
     const [courseCompletionDetails] = await this.db
       .select({
         userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,

@@ -1,13 +1,11 @@
 import {
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import * as cheerio from "cheerio";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
@@ -65,6 +63,10 @@ export class LessonService {
       id,
       language,
     );
+    
+    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
+
+    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
 
     const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
 
