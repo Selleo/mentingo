@@ -1,13 +1,11 @@
 import {
   ConflictException,
-  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import * as cheerio from "cheerio";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
@@ -34,7 +32,6 @@ import type {
   QuestionBody,
   QuestionDetails,
 } from "../lesson.schema";
-import type { Response } from "express";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
@@ -60,15 +57,15 @@ export class LessonService {
   ): Promise<LessonShow> {
     const isStudent = userRole === USER_ROLES.STUDENT;
 
-    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
-
-    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
-
-    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
+    const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       id,
       language,
     );
+    
+    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
+
+    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
 
     const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
 
@@ -208,11 +205,6 @@ export class LessonService {
       userId,
     );
 
-    const { language } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.LESSON,
-      studentQuizAnswers.lessonId,
-    );
-
     if (accessCourseLessonWithDetails.lessonIsCompleted) {
       throw new ConflictException("You have already answered this quiz");
     }
@@ -220,16 +212,10 @@ export class LessonService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    const quizSettings = await this.lessonRepository.getLessonSettings(
-      studentQuizAnswers.lessonId,
-      language,
-    );
+    const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
 
     const correctAnswersForQuizQuestions =
-      await this.questionRepository.getQuizQuestionsToEvaluation(
-        studentQuizAnswers.lessonId,
-        language,
-      );
+      await this.questionRepository.getQuizQuestionsToEvaluation(studentQuizAnswers.lessonId);
 
     if (correctAnswersForQuizQuestions.length !== studentQuizAnswers.questionsAnswers.length) {
       throw new ConflictException("Quiz is not completed");
@@ -323,12 +309,7 @@ export class LessonService {
       throw new ConflictException("You are not enrolled to this course");
     }
 
-    const { language } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.LESSON,
-      lessonId,
-    );
-
-    const quizSettings = await this.lessonRepository.getLessonSettings(lessonId, language);
+    const quizSettings = await this.lessonRepository.getLessonSettings(lessonId);
 
     let attempts = accessCourseLessonWithDetails.attempts ?? 1;
 

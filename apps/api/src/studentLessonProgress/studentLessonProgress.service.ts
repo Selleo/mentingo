@@ -16,7 +16,6 @@ import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
-import { ENTITY_TYPE } from "src/localization/localization.types";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
@@ -515,15 +514,10 @@ export class StudentLessonProgressService {
     studentId: UUIDType,
     courseId: UUIDType,
   ) {
-    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.COURSE,
-      courseId,
-    );
-
     const [courseCompletionDetails] = await this.db
       .select({
         userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        courseTitle: sql<string>`courses.title->>${actualLanguage}`,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
         groupName: sql<string>`${groups.name}`,
         completedAt: sql<string>`${studentCourses.completedAt}`,
       })

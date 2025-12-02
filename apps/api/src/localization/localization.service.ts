@@ -2,22 +2,19 @@ import { Inject, Injectable } from "@nestjs/common";
 import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import {
-  ENTITY_TYPE,
-  type EntityType,
-  type EntityField,
-} from "src/localization/localization.types";
 import { chapters, courses, lessons } from "src/storage/schema";
 
+import { ENTITY_TYPE } from "./localization.types";
+
+import type { EntityType } from "./localization.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UUIDType } from "src/common";
-import { AnyPgColumn, PgTable, PgTableWithColumns } from "drizzle-orm/pg-core";
 
 @Injectable()
 export class LocalizationService {
   constructor(@Inject("DB") private readonly db: DatabasePg) {}
-
-  async getLanguageByEntity(entityType: EntityType, entityId: UUIDType, language?: string) {
+  async getBaseLanguage(entityType: EntityType, entityId: UUIDType, language?: SupportedLanguages) {
     let query;
 
     switch (entityType) {
@@ -57,12 +54,14 @@ export class LocalizationService {
 
     const [courseLocalization] = await query;
 
-    if (language && courseLocalization.availableLocales.includes(language)) {
-      return { language, availableLocales: courseLocalization.availableLocales };
-    }
+    const newLanguage =
+      language && courseLocalization.availableLocales.includes(language)
+        ? language
+        : courseLocalization.baseLanguage;
 
     return {
-      language: courseLocalization.baseLanguage,
+      baseLanguage: courseLocalization.baseLanguage,
+      language: newLanguage,
       availableLocales: courseLocalization.availableLocales,
     };
   }
@@ -70,10 +69,7 @@ export class LocalizationService {
   /**
    * Note: callers must join `courses` so `courses.baseLanguage` and `courses.availableLocales` are available.
    */
-  getLocalizedSqlField(
-    fieldColumn: AnyPgColumn,
-    language?: SupportedLanguages,
-  ) {
+  getLocalizedSqlField(fieldColumn: AnyPgColumn, language?: SupportedLanguages) {
     const langExpr = language ? sql`${language}` : courses.baseLanguage;
 
     return sql<string>`

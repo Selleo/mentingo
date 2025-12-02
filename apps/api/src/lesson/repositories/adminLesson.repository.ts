@@ -3,6 +3,7 @@ import { eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { LocalizationService } from "src/localization/localization.service";
 import {
   aiMentorLessons,
   chapters,
@@ -32,16 +33,21 @@ import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class AdminLessonRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
-  async getLesson(id: UUIDType, language: SupportedLanguages) {
+  async getLesson(id: UUIDType, language?: SupportedLanguages) {
     return this.db
       .select({
         ...getTableColumns(lessons),
-        title: sql<string>`lessons.title->>${language}`,
-        description: sql<string>`lessons.description->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
       })
       .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.id, id));
   }
 
@@ -53,7 +59,11 @@ export class AdminLessonRepository {
         title: buildJsonbField(language, data.title),
         description: buildJsonbField(language, data.description),
       })
-      .returning();
+      .returning({
+        ...getTableColumns(lessons),
+        title: sql<string>`lessons.title->>${language}`,
+        description: sql<string>`lessons.description->>${language}`,
+      });
     return lesson;
   }
 

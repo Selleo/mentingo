@@ -4,7 +4,6 @@ import { eq, and, countDistinct, sql, isNull } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { addPagination } from "src/common/pagination";
 import { LocalizationService } from "src/localization/localization.service";
-import { ENTITY_TYPE } from "src/localization/localization.types";
 import { certificates, users, courses, studentCourses } from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -84,14 +83,9 @@ export class CertificateRepository {
   async findCourseById(courseId: string, trx?: PostgresJsDatabase<typeof schema>) {
     const dbInstance = trx || this.db;
 
-    const { language } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.COURSE,
-      courseId,
-    );
-
     const [course] = await dbInstance
       .select({
-        title: sql<string>`courses.title->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(courses.title),
         certificateEnabled: courses.hasCertificate,
       })
       .from(courses)
@@ -136,7 +130,7 @@ export class CertificateRepository {
       .select({
         id: certificates.id,
         courseId: certificates.courseId,
-        courseTitle: sql<string>`courses.title->>'${language}'`,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
         completionDate: studentCourses.completedAt,
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         userId: certificates.userId,

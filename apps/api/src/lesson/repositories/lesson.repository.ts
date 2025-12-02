@@ -4,7 +4,6 @@ import { and, desc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
-import { ENTITY_FIELD, ENTITY_TYPE } from "src/localization/localization.types";
 import {
   aiMentorLessons,
   aiMentorStudentLessonProgress,
@@ -26,7 +25,6 @@ import type {
   AdminQuestionBody,
   EnrolledLessonsFilters,
   LessonResourceType,
-  QuestionBody,
 } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 
@@ -41,10 +39,12 @@ export class LessonRepository {
     const [lesson] = await this.db
       .select({
         ...getTableColumns(lessons),
-        title: sql<string>`lessons.title->>${language}`,
-        description: sql<string>`lessons.description->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
       })
       .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.id, id));
     return lesson;
   }
@@ -103,8 +103,8 @@ export class LessonRepository {
       .select({
         id: lessons.id,
         type: sql<LessonTypes>`${lessons.type}`,
-        title: sql<string>`lessons.title->>${language}`,
-        description: sql<string>`lessons.description->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         fileUrl: lessons.fileS3Key,
         fileType: lessons.fileType,
         thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
@@ -185,6 +185,7 @@ export class LessonRepository {
           eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
         ),
       )
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.id, id));
 
     return lesson;
@@ -194,9 +195,9 @@ export class LessonRepository {
     return this.db
       .select({
         id: lessons.id,
-        title: sql<string>`lessons.title->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         type: sql<LessonTypes>`${lessons.type}`,
-        description: sql<string>`lessons.description->>${language}`,
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         fileS3Key: sql<string | undefined>`${lessons.fileS3Key}`,
         fileType: sql<string | undefined>`${lessons.fileType}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
@@ -207,11 +208,20 @@ export class LessonRepository {
               FROM (
                 SELECT
                   ${questions.id} AS id,
-                  (${questions.title}->>${language})::text AS title,
-                  (${questions.description}->>${language})::text AS description,
+                  ${this.localizationService.getLocalizedSqlField(
+                    questions.title,
+                    language,
+                  )} AS title,
+                  ${this.localizationService.getLocalizedSqlField(
+                    questions.description,
+                    language,
+                  )} AS description,
                   ${questions.type} AS type,
                   ${questions.photoS3Key} AS photoS3Key,
-                  (${questions.solutionExplanation}->>${language})::text AS solutionExplanation,
+                  ${this.localizationService.getLocalizedSqlField(
+                    questions.solutionExplanation,
+                    language,
+                  )} AS solutionExplanation,
                   ${questions.displayOrder} AS displayOrder
                 FROM ${questions}
                 WHERE ${lessons.id} = ${questions.lessonId}
@@ -223,111 +233,28 @@ export class LessonRepository {
         `,
       })
       .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.chapterId, chapterId))
       .orderBy(lessons.displayOrder);
   }
 
-  async getLessonsForChapter(chapterId: UUIDType, language: SupportedLanguages) {
-    return this.db
-      .select({
-        title: sql<string>`lessons.title->>${language}`,
-        type: lessons.type,
-        displayOrder: sql<number>`${lessons.displayOrder}`,
-        questions: sql<QuestionBody[]>`
-          COALESCE(
-            (
-              SELECT json_agg(questions_data)
-              FROM (
-                SELECT
-                  ${questions.id} AS id,
-                  ${questions.title}->>${language} AS title,
-                  ${questions.description}->>${language} AS description,
-                  ${questions.type} AS type,
-                  ${questions.photoS3Key} AS photoS3Key,
-                  ${questions.solutionExplanation}->>${language} AS solutionExplanation,
-                  ${questions.displayOrder} AS displayOrder,
-                FROM ${questions}
-                WHERE ${lessons.id} = ${questions.lessonId}
-                ORDER BY ${questions.displayOrder}
-              ) AS questions_data
-            ), 
-            '[]'::json
-          )
-        `,
-      })
-      .from(lessons)
-      .where(eq(lessons.chapterId, chapterId))
-      .orderBy(lessons.displayOrder);
-  }
-
-  async getLessonSettings(lessonId: UUIDType, language: SupportedLanguages) {
+  async getLessonSettings(lessonId: UUIDType, language?: SupportedLanguages) {
     const [lessonSettings] = await this.db
       .select({
         id: lessons.id,
-        title: sql<string>`lessons.title->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         type: sql<LessonTypes>`${lessons.type}`,
         thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
         attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
         quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
       })
       .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(lessons.id, lessonId))
       .limit(1);
     return lessonSettings;
-  }
-
-  async completeQuiz(
-    chapterId: UUIDType,
-    lessonId: UUIDType,
-    userId: UUIDType,
-    completedQuestionCount: number,
-    quizScore: number,
-    trx: PostgresJsDatabase<typeof schema>,
-  ) {
-    return trx
-      .insert(studentLessonProgress)
-      .values({
-        studentId: userId,
-        lessonId,
-        chapterId,
-        completedAt: sql`now()`,
-        completedQuestionCount,
-        quizScore,
-      })
-      .onConflictDoUpdate({
-        target: [
-          studentLessonProgress.studentId,
-          studentLessonProgress.lessonId,
-          studentLessonProgress.chapterId,
-        ],
-        set: {
-          completedAt: sql`now()`,
-          completedQuestionCount,
-          quizScore,
-        },
-      })
-      .returning();
-  }
-
-  async getLastInteractedOrNextLessonItemForUser(userId: UUIDType, language: SupportedLanguages) {
-    const [lastLesson] = await this.db
-      .select({
-        id: sql<string>`${studentLessonProgress.lessonId}`,
-        chapterId: sql<string>`${chapters.id}`,
-        courseId: sql<string>`${chapters.courseId}`,
-        courseTitle: sql<string>`courses.title->>${language}`,
-        courseDescription: sql<string>`courses.description->>${language}`,
-      })
-      .from(studentLessonProgress)
-      .leftJoin(chapters, eq(chapters.id, studentLessonProgress.chapterId))
-      .leftJoin(courses, eq(courses.id, chapters.courseId))
-      .where(
-        and(eq(studentLessonProgress.studentId, userId), isNull(studentLessonProgress.completedAt)),
-      )
-      .orderBy(desc(studentLessonProgress.createdAt))
-      .limit(1);
-
-    return lastLesson;
   }
 
   async getLessonsProgressByCourseId(
@@ -454,31 +381,15 @@ export class LessonRepository {
     return this.db
       .select({
         id: lessons.id,
-        title: this.localizationService.getLocalizedSqlField(
-          ENTITY_TYPE.LESSON,
-          ENTITY_FIELD.TITLE,
-          language,
-        ),
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         type: sql<LessonTypes>`${lessons.type}`,
-        description: this.localizationService.getLocalizedSqlField(
-          ENTITY_TYPE.LESSON,
-          ENTITY_FIELD.DESCRIPTION,
-          language,
-        ),
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         displayOrder: sql<number>`${lessons.displayOrder}`,
         lessonCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
         courseId: courses.id,
-        courseTitle: this.localizationService.getLocalizedSqlField(
-          ENTITY_TYPE.COURSE,
-          ENTITY_FIELD.TITLE,
-          language,
-        ),
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
         chapterId: chapters.id,
-        chapterTitle: this.localizationService.getLocalizedSqlField(
-          ENTITY_TYPE.CHAPTER,
-          ENTITY_FIELD.TITLE,
-          language,
-        ),
+        chapterTitle: this.localizationService.getLocalizedSqlField(chapters.title, language),
         chapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
       })
       .from(lessons)
@@ -494,34 +405,5 @@ export class LessonRepository {
       )
       .where(and(...conditions))
       .orderBy(chapters.displayOrder, lessons.displayOrder);
-  }
-
-  //   async retireQuizProgress(
-  //     courseId: UUIDType,
-  //     lessonId: UUIDType,
-  //     userId: UUIDType,
-  //     trx?: PostgresJsDatabase<typeof schema>,
-  //   ) {
-  //     const dbInstance = trx ?? this.db;
-
-  //     return await dbInstance
-  //       .update(studentLessonsProgress)
-  //       .set({ quizCompleted: false })
-  //       .where(
-  //         and(
-  //           eq(studentLessonsProgress.studentId, userId),
-  //           eq(studentLessonsProgress.lessonId, lessonId),
-  //           eq(studentLessonsProgress.courseId, courseId),
-  //         ),
-  //       );
-  //   }
-
-  async getLessonResource(resourceId: UUIDType) {
-    const [lessonResource] = await this.db
-      .select()
-      .from(lessonResources)
-      .where(eq(lessonResources.id, resourceId));
-
-    return lessonResource;
   }
 }

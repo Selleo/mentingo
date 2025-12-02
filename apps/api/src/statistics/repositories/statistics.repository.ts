@@ -4,7 +4,6 @@ import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
-import { ENTITY_FIELD, ENTITY_TYPE } from "src/localization/localization.types";
 import {
   chapters,
   courses,
@@ -374,21 +373,15 @@ export class StatisticsRepository {
       )
       SELECT 
         courses.id AS "courseId",
+        ${this.localizationService.getLocalizedSqlField(courses.title, language)} AS "courseTitle",
         ${this.localizationService.getLocalizedSqlField(
-          ENTITY_TYPE.COURSE,
-          ENTITY_FIELD.TITLE,
-          language,
-        )} AS "courseTitle",
-        ${this.localizationService.getLocalizedSqlField(
-          ENTITY_TYPE.COURSE,
-          ENTITY_FIELD.DESCRIPTION,
+          courses.description,
           language,
         )} AS "courseDescription",
         courses.thumbnail_s3_key AS "courseThumbnail",
         nl.lesson_id AS "lessonId",
         ${this.localizationService.getLocalizedSqlField(
-          ENTITY_TYPE.CHAPTER,
-          ENTITY_FIELD.TITLE,
+          chapters.title,
           language,
         )} AS "chapterTitle",
         CASE 

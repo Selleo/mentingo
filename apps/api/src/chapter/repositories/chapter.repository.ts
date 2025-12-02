@@ -3,7 +3,14 @@ import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { chapters, lessons, studentChapterProgress, studentCourses } from "src/storage/schema";
+import { LocalizationService } from "src/localization/localization.service";
+import {
+  chapters,
+  courses,
+  lessons,
+  studentChapterProgress,
+  studentCourses,
+} from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -11,7 +18,10 @@ import type { ProgressStatus } from "src/utils/types/progress.type";
 
 @Injectable()
 export class ChapterRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   async checkChapterAssignment(id: UUIDType, userId: UUIDType) {
     return this.db
@@ -33,7 +43,7 @@ export class ChapterRepository {
       .select({
         displayOrder: sql<number>`${lessons.displayOrder}`,
         id: chapters.id,
-        title: sql<string>`chapters.title->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(chapters.title, language),
         isFreemium: chapters.isFreemium,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
         lessonCount: chapters.lessonCount,
@@ -58,6 +68,7 @@ export class ChapterRepository {
         studentCourses,
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.id, id));
 
     return chapter;

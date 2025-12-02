@@ -547,11 +547,20 @@ export class CourseController {
   @Get(":courseId/statistics/average-quiz-score")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
     response: baseResponse(courseAverageQuizScoresSchema),
   })
-  async getAverageQuizScores(@Param("courseId") courseId: UUIDType) {
-    const averageQuizScores = await this.courseService.getAverageQuizScoreForCourse(courseId);
+  async getAverageQuizScores(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+  ) {
+    const averageQuizScores = await this.courseService.getAverageQuizScoreForCourse(
+      courseId,
+      language,
+    );
 
     return new BaseResponse(averageQuizScores);
   }

@@ -11,7 +11,6 @@ import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LocalizationService } from "src/localization/localization.service";
-import { ENTITY_FIELD, ENTITY_TYPE } from "src/localization/localization.types";
 import { categories, courses } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -153,10 +152,7 @@ export class CategoryService {
       const coursesWithCategory = await this.db
         .select({
           id: courses.id,
-          title: this.localizationService.getLocalizedSqlField(
-            ENTITY_TYPE.COURSE,
-            ENTITY_FIELD.TITLE,
-          ),
+          title: this.localizationService.getLocalizedSqlField(courses.title),
         })
         .from(courses)
         .where(eq(courses.categoryId, id));
@@ -189,10 +185,7 @@ export class CategoryService {
       const categoriesWithCourses = await tx
         .select({
           categoryId: courses.categoryId,
-          courseTitle: this.localizationService.getLocalizedSqlField(
-            ENTITY_TYPE.COURSE,
-            ENTITY_FIELD.TITLE,
-          ),
+          courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
         })
         .from(courses)
         .where(

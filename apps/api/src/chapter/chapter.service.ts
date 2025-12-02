@@ -1,8 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
-import { LocalizationService } from "src/localization/localization.service";
-import { ENTITY_TYPE } from "src/localization/localization.types";
 
 import { ChapterRepository } from "./repositories/chapter.repository";
 
@@ -15,7 +13,6 @@ export class ChapterService {
   constructor(
     private readonly chapterRepository: ChapterRepository,
     private readonly lessonRepository: LessonRepository,
-    private readonly localizationService: LocalizationService,
   ) {}
 
   async getChapterWithLessons(
@@ -24,21 +21,15 @@ export class ChapterService {
     language: SupportedLanguages,
     isAdmin?: boolean,
   ): Promise<ChapterResponse> {
-    const { language: actualLanguage } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.CHAPTER,
-      id,
-      language,
-    );
-
     const [courseAccess] = await this.chapterRepository.checkChapterAssignment(id, userId);
-    const chapter = await this.chapterRepository.getChapterForUser(id, userId, actualLanguage);
+    const chapter = await this.chapterRepository.getChapterForUser(id, userId, language);
 
     if (!isAdmin && !courseAccess && !chapter.isFreemium)
       throw new UnauthorizedException("You don't have access to this lesson");
 
     if (!chapter) throw new NotFoundException("Chapter not found");
 
-    const chapterLessonList = await this.lessonRepository.getLessonsByChapterId(id, actualLanguage);
+    const chapterLessonList = await this.lessonRepository.getLessonsByChapterId(id, language);
 
     return { ...chapter, lessons: chapterLessonList };
   }

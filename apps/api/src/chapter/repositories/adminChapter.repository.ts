@@ -3,6 +3,7 @@ import { and, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { LocalizationService } from "src/localization/localization.service";
 import {
   aiMentorLessons,
   chapters,
@@ -26,15 +27,19 @@ import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class AdminChapterRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
-  async getChapterById(chapterId: UUIDType, language: SupportedLanguages) {
+  async getChapterById(chapterId: UUIDType, language?: SupportedLanguages) {
     return this.db
       .select({
         ...getTableColumns(chapters),
-        title: sql<string>`chapters.title->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(chapters.title, language),
       })
       .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.id, chapterId));
   }
 
@@ -98,9 +103,9 @@ export class AdminChapterRepository {
       .select({
         updatedAt: sql<string>`${lessons.updatedAt}`,
         id: lessons.id,
-        title: sql<string>`lessons.title->>${language}`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         type: sql<LessonTypes>`${lessons.type}`,
-        description: sql<string>`lessons.description->>${language}`,
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
         fileS3Key: sql<string>`${lessons.fileS3Key}`,
         fileType: sql<string>`${lessons.fileType}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
@@ -113,23 +118,32 @@ export class AdminChapterRepository {
           SELECT ARRAY(
             SELECT json_build_object(
               'id', ${questions.id},
-              'title', ${questions.title}->>${language},
+              'title', ${this.localizationService.getLocalizedSqlField(questions.title, language)},
               'type', ${questions.type},
-              'description', ${questions.description}->>${language},
+              'description', ${this.localizationService.getLocalizedSqlField(
+                questions.description,
+                language,
+              )},
               'photoS3Key', ${questions.photoS3Key},
               'displayOrder', ${questions.displayOrder},
               'options', (
                 SELECT ARRAY(
                   SELECT json_build_object(
                     'id', ${questionAnswerOptions.id},
-                    'optionText', ${questionAnswerOptions.optionText}->>${language},
+                    'optionText', ${this.localizationService.getLocalizedSqlField(
+                      questionAnswerOptions.optionText,
+                      language,
+                    )},
                     'isCorrect', ${questionAnswerOptions.isCorrect},
                     'displayOrder', ${questionAnswerOptions.displayOrder},
-                    'matchedWord', ${questionAnswerOptions.matchedWord}->>${language},
+                    'matchedWord', ${this.localizationService.getLocalizedSqlField(
+                      questionAnswerOptions.matchedWord,
+                      language,
+                    )},
                     'scaleAnswer', ${questionAnswerOptions.scaleAnswer}
                   )
-                  FROM ${questionAnswerOptions} questionAnswerOptions
-                  WHERE questionAnswerOptions.question_id = questions.id
+                  FROM ${questionAnswerOptions}
+                  WHERE ${questionAnswerOptions.questionId} = questions.id
                   ORDER BY ${questionAnswerOptions.displayOrder}
                 )
               )
@@ -173,6 +187,8 @@ export class AdminChapterRepository {
       `,
       })
       .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(and(eq(lessons.chapterId, chapterId)))
       .orderBy(lessons.displayOrder);
   }

@@ -33,7 +33,7 @@ export class AdminChapterService {
         .from(chapters)
         .where(eq(chapters.courseId, body.courseId));
 
-      const { language } = await this.localizationService.getLanguageByEntity(
+      const { language } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.COURSE,
         body.courseId,
       );
@@ -91,12 +91,8 @@ export class AdminChapterService {
       chapterObject.currentUserId,
       chapterObject.chapterId,
     );
-    
-    const { language } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.CHAPTER,
-      chapterObject.chapterId,
-    );
 
+    const { language } = await this.localizationService.getBaseLanguage(
     const [chapterToUpdate] = await this.adminChapterRepository.getChapterById(
       chapterObject.chapterId,
       language,
@@ -118,12 +114,8 @@ export class AdminChapterService {
     );
   }
 
-  async updateChapter(
-    id: UUIDType,
-    body: UpdateChapterBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
+  async updateChapter(id: UUIDType, body: UpdateChapterBody,     currentUserId: UUIDType,
+                      currentUserRole: UserRole,) {
     await this.adminLessonService.validateAccess("chapter", currentUserRole, currentUserId, id);
 
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
@@ -133,10 +125,9 @@ export class AdminChapterService {
       });
     }
 
-    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       id,
-      body.language,
     );
 
     if (!availableLocales.includes(body.language)) {
@@ -156,12 +147,7 @@ export class AdminChapterService {
       chapterId,
     );
 
-    const { language } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.CHAPTER,
-      chapterId,
-    );
-
-    const [chapter] = await this.adminChapterRepository.getChapterById(chapterId, language);
+    const [chapter] = await this.adminChapterRepository.getChapterById(chapterId);
 
     if (!chapter) throw new NotFoundException("Chapter not found");
 

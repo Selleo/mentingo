@@ -66,7 +66,7 @@ export class AdminLessonService {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
 
-    const { language } = await this.localizationService.getLanguageByEntity(
+    const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       data.chapterId,
     );
@@ -137,7 +137,7 @@ export class AdminLessonService {
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
-    const { language } = await this.localizationService.getLanguageByEntity(
+    const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       data.chapterId,
     );
@@ -160,8 +160,8 @@ export class AdminLessonService {
     currentUserRole: UserRole,
   ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, id);
-    
-    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       id,
     );
@@ -199,8 +199,8 @@ export class AdminLessonService {
         count: MAX_LESSON_TITLE_LENGTH,
       });
     }
-    
-    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       id,
     );
@@ -210,7 +210,7 @@ export class AdminLessonService {
     }
 
     const lesson = await this.lessonRepository.getLesson(id, data.language);
-    
+
     if (!lesson) throw new NotFoundException("Lesson not found");
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
@@ -226,11 +226,10 @@ export class AdminLessonService {
   ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, id);
 
-    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       id,
     );
-
     if (!availableLocales.includes(data.language)) {
       throw new BadRequestException("This course does not support this language");
     }
@@ -262,12 +261,7 @@ export class AdminLessonService {
   async removeLesson(lessonId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
 
-    const { language } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.LESSON,
-      lessonId,
-    );
-
-    const [lesson] = await this.adminLessonRepository.getLesson(lessonId, language);
+    const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
     if (!lesson) {
       throw new NotFoundException("Lesson not found");
@@ -294,15 +288,7 @@ export class AdminLessonService {
       lessonObject.lessonId,
     );
 
-    const { language } = await this.localizationService.getLanguageByEntity(
-      ENTITY_TYPE.LESSON,
-      lessonObject.lessonId,
-    );
-
-    const [lessonToUpdate] = await this.adminLessonRepository.getLesson(
-      lessonObject.lessonId,
-      language,
-    );
+    const [lessonToUpdate] = await this.adminLessonRepository.getLesson(lessonObject.lessonId);
 
     const oldDisplayOrder = lessonToUpdate.displayOrder;
     if (!lessonToUpdate || oldDisplayOrder === null) {
@@ -322,7 +308,7 @@ export class AdminLessonService {
     displayOrder: number,
   ) {
     return await this.db.transaction(async (trx) => {
-      const { language } = await this.localizationService.getLanguageByEntity(
+      const { language } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.CHAPTER,
         data.chapterId,
       );
@@ -356,8 +342,8 @@ export class AdminLessonService {
   ) {
     return await this.db.transaction(async (trx) => {
       const { type: _type, ...rest } = data;
-      
-      const { availableLocales } = await this.localizationService.getLanguageByEntity(
+
+      const { availableLocales } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.LESSON,
         id,
       );
@@ -455,7 +441,7 @@ export class AdminLessonService {
     currentUserId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
-      const { availableLocales } = await this.localizationService.getLanguageByEntity(
+      const { availableLocales } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.LESSON,
         id,
       );
@@ -570,12 +556,12 @@ export class AdminLessonService {
         count: MAX_LESSON_TITLE_LENGTH,
       });
     }
-    
-    const { language } = await this.localizationService.getLanguageByEntity(
+
+    const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
       data.chapterId,
     );
-    
+
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     const lesson = await this.adminLessonRepository.createLessonForChapter(
@@ -620,8 +606,8 @@ export class AdminLessonService {
         count: MAX_LESSON_TITLE_LENGTH,
       });
     }
-    
-    const { availableLocales } = await this.localizationService.getLanguageByEntity(
+
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       lessonId,
     );
