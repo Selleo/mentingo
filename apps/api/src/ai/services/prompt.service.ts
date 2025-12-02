@@ -144,6 +144,7 @@ export class PromptService implements OnModuleInit {
       lessonTitle: lesson.title,
       name: lesson.name,
       lessonInstructions: lesson.instructions,
+      // @ts-expect-error - wrong types
       groups: groups.map((group) => `${group.name}: ${group.characteristic}\n`),
       securityAndRagBlock: securityAndRagBlock,
     });
