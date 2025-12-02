@@ -106,6 +106,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
 1.  In the AWS Console, go to **Elastic Container Registry (ECR)**.
 2.  Create two new **private** repositories. Replace `<client>` with the actual client's name.
+
     - `tenant/<client>/api`
     - `tenant/<client>/ui`
 
@@ -196,6 +197,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 3.  Now, create two IAM users.
 
     **User 1: `tenant-<client>-ci`**
+
     - Create a user with this name.
 
       ![Image16](images/image16.png)
@@ -217,6 +219,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
       ![Image20](images/image20.png)
 
     **User 2: `tenant-<client>-docker`**
+
     - Repeat the process to create this second user.
     - Attach the `tenant-client-docker` policy.
     - Generate and save the access keys for this user as well. You will use these on the Hetzner server.
@@ -237,6 +240,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 1.  In your GitHub repository, go to **Settings -\> Secrets and variables -\> Actions**.
 
 2.  Add the following secrets using the credentials from your `tenant-<client>-ci` IAM user and the ECR repository URIs.
+
     - `AWS_ACCESS_KEY_ID`: Access key ID for the CI user.
     - `AWS_SECRET_ACCESS_KEY`: Secret access key for the CI user.
     - `AWS_REGION`: e.g., `eu-central-1`.
@@ -245,6 +249,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
     - (Add other secrets like `VITE_STRIPE_PUBLISHABLE_KEY`, `POSTHOG_KEY`, `POSTHOG_HOST` and Sentry keys as needed).
 
 3.  If you want your E2E tests to work, create environment called `e2e` and then add these secrets:
+
     - `MASTER_KEY`: 32 byte base64 (can be generated using `openssl rand -base64 32`)
     - `STRIPE_PUBLISHABLE_KEY`
     - `STRIPE_SECRET_KEY`
@@ -686,6 +691,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 
 1.  Go back to the Hetzner Cloud firewall settings.
 2.  Add two new **inbound** rules to allow public web traffic:
+
     - Port `80` (HTTP) from any IPv4 source.
     - Port `443` (HTTPS) from any IPv4 source.
 
