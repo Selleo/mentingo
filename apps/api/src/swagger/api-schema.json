@@ -10884,22 +10884,29 @@
                   ]
                 },
                 "groups": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ]
                       }
                     },
-                    "required": [
-                      "id",
-                      "name"
-                    ]
-                  }
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "completedLessonsCount": {
                   "type": "number"
