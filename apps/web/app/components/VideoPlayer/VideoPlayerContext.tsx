@@ -1,15 +1,16 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useRef } from "react";
 
 type VideoState = {
   currentUrl: string | null;
   isExternal: boolean;
-  onEnded?: () => void;
   placeholderElement: HTMLElement | null;
 };
 
 type VideoContextValue = {
   setVideo: (url: string, isExternal: boolean, onEnded?: () => void) => void;
+  clearVideo: () => void;
   setPlaceholderElement: (el: HTMLElement | null) => void;
+  getOnEnded: () => (() => void) | undefined;
   state: VideoState;
 };
 
@@ -27,25 +28,41 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<VideoState>({
     currentUrl: null,
     isExternal: false,
-    onEnded: undefined,
     placeholderElement: null,
   });
 
+  const onEndedRef = useRef<(() => void) | undefined>();
+
   const setVideo = useCallback((url: string, isExternal: boolean, onEnded?: () => void) => {
-    setState((prev) => ({
-      ...prev,
-      currentUrl: url,
-      isExternal,
-      onEnded,
-    }));
+    onEndedRef.current = onEnded;
+
+    setState((prev) => {
+      if (prev.currentUrl === url && prev.isExternal === isExternal) {
+        return prev;
+      }
+
+      return { ...prev, currentUrl: url, isExternal };
+    });
+  }, []);
+
+  const clearVideo = useCallback(() => {
+    setState((prev) => ({ ...prev, currentUrl: null }));
   }, []);
 
   const setPlaceholderElement = useCallback((el: HTMLElement | null) => {
-    setState((prev) => ({ ...prev, placeholderElement: el }));
+    setState((prev) => {
+      if (prev.placeholderElement === el) return prev;
+
+      return { ...prev, placeholderElement: el };
+    });
   }, []);
 
+  const getOnEnded = useCallback(() => onEndedRef.current, []);
+
   return (
-    <VideoContext.Provider value={{ state, setVideo, setPlaceholderElement }}>
+    <VideoContext.Provider
+      value={{ state, setVideo, clearVideo, setPlaceholderElement, getOnEnded }}
+    >
       {children}
     </VideoContext.Provider>
   );

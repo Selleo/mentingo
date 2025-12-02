@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
 
-export function usePlaceholderRect(
-  placeholderElement: HTMLElement | null,
-  isFullscreen: boolean,
-): DOMRect | null {
+export function usePlaceholderRect(placeholderElement: HTMLElement | null): DOMRect | null {
   const [rect, setRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
-    if (!placeholderElement || isFullscreen) {
-      if (!isFullscreen) setRect(null);
-
+    if (!placeholderElement) {
       return;
     }
 
@@ -23,7 +18,7 @@ export function usePlaceholderRect(
       window.removeEventListener("scroll", updateRect, true);
       window.removeEventListener("resize", updateRect);
     };
-  }, [placeholderElement, isFullscreen]);
+  }, [placeholderElement]);
 
   return rect;
 }
