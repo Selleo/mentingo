@@ -3,6 +3,7 @@ export const ASSIGNING_STUDENT_TO_GROUP_PAGE_UI = {
     myCourses: "Courses",
     enrolledStudents: "enrolled students",
     enrollSelected: "enroll selected",
+    enroll: "Enroll",
     save: "save",
     browseCourses: "Courses",
   },
