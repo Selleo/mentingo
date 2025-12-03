@@ -114,7 +114,7 @@ export default function ClientStatistics() {
           <div className="flex h-full w-full flex-col gap-y-4 2xl:gap-x-4 2xl:gap-y-6">
             <div className="flex h-full w-full flex-wrap gap-4 2xl:flex-nowrap">
               <ContinueLearningCard isLoading={isLoading} lesson={userStatistics?.nextLesson} />
-              <div id="quiz-stats" className="flex gap-4 grow">
+              <div id="quiz-stats" className="flex gap-4 grow flex-col md:flex-row">
                 <AvgPercentScoreChart
                   label={`${userStatistics?.quizzes.averageScore}`}
                   title={t("clientStatisticsView.other.avgQuizScorePercentage")}
