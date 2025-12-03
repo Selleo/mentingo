@@ -1,4 +1,3 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { passwordSchema } from "./password.schema";

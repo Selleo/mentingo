@@ -15,7 +15,6 @@ import { fileLessonFormSchema } from "../validators/fileLessonFormSchema";
 
 import type { LessonTypes } from "../../../CourseLessons.types";
 import type { FileLessonFormValues } from "../validators/fileLessonFormSchema";
-import type { Languages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type FileLessonFormProps = {
@@ -61,8 +60,10 @@ export const useFileLessonForm = ({
 
     try {
       if (lessonToEdit) {
-        await updateFileItem({ data: { ...values, language: SUPPORTED_LANGUAGES.EN as Languages }, fileLessonId: lessonToEdit.id });
-        await queryClient.invalidateQueries({ queryKey: ["lesson", lessonToEdit.id] });
+        await updateFileItem({
+          data: { ...values, language: SUPPORTED_LANGUAGES.EN },
+          fileLessonId: lessonToEdit.id,
+        });
       } else {
         await createFile({
           data: { ...values, chapterId: chapterToEdit.id },
