@@ -9,6 +9,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { BaseEmailTemplate } from "@repo/email-templates";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
@@ -575,8 +576,9 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              authorAvatarUrl,
+            );
 
             return {
               ...itemWithoutReferences,
@@ -683,7 +685,7 @@ export class CourseService {
         completedLessonCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentChapterProgress.completedLessonCount}, 0) ELSE 0 END`,
         chapterProgress: sql<ProgressStatus>`
           CASE
-            WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
+          WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
             WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
             WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
               SELECT 1
@@ -1004,8 +1006,9 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl =
-          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+          authorAvatarUrl,
+        );
 
         return {
           ...courseWithoutReferences,
@@ -1534,17 +1537,13 @@ export class CourseService {
       .innerJoin(users, eq(groupUsers.userId, users.id))
       .where(inArray(groupUsers.groupId, groupIds));
 
-    const existingGroupEnrollments = await this.db
+    await this.db
       .select({ groupId: groupCourses.groupId })
       .from(groupCourses)
       .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
 
-    const existingGroupIds = existingGroupEnrollments.map((e) => e.groupId);
-    const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
-
     let existingStudentIds: string[] = [];
     let newStudentIds: string[] = [];
-
     if (groupUsersList.length > 0) {
       const existingEnrollments = await this.db
         .select({
@@ -1557,7 +1556,6 @@ export class CourseService {
         .where(
           and(
             eq(studentCourses.courseId, courseId),
-            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
             inArray(
               studentCourses.studentId,
               groupUsersList.map((gu) => gu.userId),
@@ -1573,40 +1571,45 @@ export class CourseService {
         .map((gu) => gu.userId);
     }
 
-    await this.db.transaction(async (trx) => {
-      if (newGroupIds.length > 0) {
-        const groupCoursesValues = newGroupIds.map((groupId) => {
-          const settings = groupsToEnroll.find((g) => g.id === groupId)?.settings;
+    const userIdToGroupId = new Map<string, string>();
+    for (const groupId of groupIds) {
+      const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
+      usersInGroup.forEach((gu) => {
+        userIdToGroupId.set(gu.userId, groupId);
+      });
+    }
 
-          return {
-            groupId,
-            courseId,
-            enrolledBy: userId || null,
-            settings: settingsToJSONBuildObject(settings || {}),
-          };
+    await this.db.transaction(async (trx) => {
+      const groupCoursesValues = groupIds.map((groupId) => {
+        const settings = groupsToEnroll.find((g) => g.id === groupId)?.settings;
+        const normalizedSettings =
+          settings && settings.isMandatory === false
+            ? { ...settings, dueDate: null }
+            : settings || {};
+        return {
+          groupId,
+          courseId,
+          enrolledBy: userId || null,
+          settings: settingsToJSONBuildObject(normalizedSettings),
+        };
+      });
+
+      await trx
+        .insert(groupCourses)
+        .values(groupCoursesValues)
+        .onConflictDoUpdate({
+          target: [groupCourses.groupId, groupCourses.courseId],
+          set: {
+            settings: sql`EXCLUDED.settings`,
+            enrolledBy: sql`EXCLUDED.enrolled_by`,
+          },
         });
 
-        await trx.insert(groupCourses).values(groupCoursesValues);
-      }
-
-      if (newStudentIds.length > 0 && newGroupIds.length > 0) {
-        const userIdToGroupId = new Map<string, string>();
-
-        for (const groupId of newGroupIds) {
-          const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
-
-          usersInGroup.forEach((gu) => {
-            if (newStudentIds.includes(gu.userId)) {
-              userIdToGroupId.set(gu.userId, groupId);
-            }
-          });
-        }
-
+      if (newStudentIds.length > 0) {
         const studentCoursesValues = newStudentIds.map((studentId) => ({
           studentId,
           courseId,
           enrolledByGroupId: userIdToGroupId.get(studentId) || null,
-          status: COURSE_ENROLLMENT.ENROLLED,
         }));
 
         const uniqueCoursesValues = Array.from(
@@ -1642,6 +1645,8 @@ export class CourseService {
         );
       }
     });
+
+    this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds: newStudentIds, courseId }));
   }
 
   async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
@@ -2193,9 +2198,9 @@ export class CourseService {
       WHERE ${conditions.length ? and(...conditions) : true} AND ${courses.id} NOT IN (
         SELECT DISTINCT ${studentCourses.courseId}
         FROM ${studentCourses}
-        WHERE ${studentCourses.studentId} = ${currentUserId} AND ${studentCourses.status} = ${
-          COURSE_ENROLLMENT.ENROLLED
-        }
+                WHERE ${studentCourses.studentId} = ${currentUserId} AND ${
+                  studentCourses.status
+                } = ${COURSE_ENROLLMENT.ENROLLED}
       )
     `);
 
@@ -2864,6 +2869,44 @@ export class CourseService {
     });
   }
 
+  async getStudentsDueDatesForCourse(
+    courseId: UUIDType,
+    studentIds: UUIDType[],
+  ): Promise<Record<string, string | null>> {
+    if (!studentIds.length) return {};
+
+    const rows = await this.db
+      .select({
+        studentId: studentCourses.studentId,
+        dueDate: sql<string | null>`
+          CASE
+            WHEN NULLIF(${groupCourses.settings}->>'dueDate', '') IS NOT NULL
+            THEN TO_CHAR((${groupCourses.settings}->>'dueDate')::timestamptz, 'DD.MM.YYYY')
+            ELSE NULL
+          END
+        `,
+      })
+      .from(studentCourses)
+      .leftJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(
+        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
+      );
+
+    return rows.reduce(
+      (acc, row) => {
+        acc[row.studentId] = row.dueDate;
+        return acc;
+      },
+      {} as Record<string, string | null>,
+    );
+  }
+
   async sendOverdueCoursesEmails() {
     const overdueStudents = await this.db
       .select({
@@ -2901,9 +2944,9 @@ export class CourseService {
 
     const groupedByCourse = overdueStudents.reduce(
       (acc, row) => {
-        const key = `${row.courseTitle} (${row.courseId})`;
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(row);
+        const courseTitle = row.courseTitle;
+        if (!acc[courseTitle]) acc[courseTitle] = [];
+        acc[courseTitle].push(row);
         return acc;
       },
       {} as Record<string, typeof overdueStudents>,
@@ -2913,52 +2956,47 @@ export class CourseService {
 
     if (adminsToNotify.length === 0) return;
 
+    const indent = "\u00A0\u00A0\u00A0\u00A0";
+
     await Promise.all(
       adminsToNotify.map(async ({ id: adminId, email: adminEmail }) => {
-        await this.emailService.getDefaultEmailProperties(adminId);
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
 
         const lines: string[] = [];
         for (const [courseKey, rows] of Object.entries(groupedByCourse)) {
           lines.push(`Course: ${courseKey}`);
+          lines.push("");
+
           rows.forEach((r) => {
-            lines.push(
-              ` - ${r.studentName} (${r.studentEmail}) in group "${r.groupName}" — due ${r.dueDate}`,
-            );
+            lines.push(`${indent}- ${r.studentName} (${r.studentEmail})`);
+            lines.push("");
           });
+
+          const uniqueDueDates = Array.from(new Set(rows.map((r) => r.dueDate).filter(Boolean)));
+          lines.push(
+            `${indent}Due date: ${uniqueDueDates.length ? uniqueDueDates.join(", ") : "-"}`,
+          );
           lines.push("");
         }
 
-        const text = [
-          "Some users did not finish their courses on time:",
-          "",
-          ...lines,
-          "",
-          "You can review course progression in the admin panel.",
-        ].join("\n");
+        const heading =
+          defaultEmailSettings.language === "pl"
+            ? "Zaległe kursy studentów"
+            : "Students with overdue courses";
+        const introParagraph =
+          defaultEmailSettings.language === "pl"
+            ? "Niektórzy studenci nie ukończyli kursów w wymaganym terminie:"
+            : "Some students did not finish their courses on time:";
+        const buttonText =
+          defaultEmailSettings.language === "pl" ? "PRZEJDŹ DO KURSÓW" : "VIEW COURSES";
 
-        const html = `
-          <div>
-            <p>Some users did not finish their courses on time:</p>
-            ${Object.entries(groupedByCourse)
-              .map(
-                ([courseKey, rows]) => `
-                  <div style="margin:12px 0;">
-                    <strong>Course: ${courseKey}</strong>
-                    <ul>
-                      ${rows
-                        .map(
-                          (r) =>
-                            `<li>${r.studentName} (${r.studentEmail}) in group "${r.groupName}" — due ${r.dueDate}</li>`,
-                        )
-                        .join("")}
-                    </ul>
-                  </div>
-                `,
-              )
-              .join("")}
-            <p>You can review course progression in the admin panel.</p>
-          </div>
-        `;
+        const { text, html } = new BaseEmailTemplate({
+          heading,
+          paragraphs: [introParagraph, "", ...lines],
+          buttonText,
+          buttonLink: `${process.env.CORS_ORIGIN}/admin/courses`,
+          ...defaultEmailSettings,
+        });
 
         return this.emailService.sendEmailWithLogo({
           to: adminEmail,

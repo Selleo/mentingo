@@ -1,6 +1,8 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "i18next";
 import { useEffect, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
 import { ScrollArea } from "~/components/ui/scroll-area";
 
@@ -33,6 +35,40 @@ export type GroupEnrollFormValues = {
   groups: GroupFormItem[];
 };
 
+const groupItemSchema = z.object({
+  id: z.string(),
+  selected: z.boolean(),
+  obligatory: z.boolean(),
+  deadline: z.string().optional().nullable(),
+});
+
+const groupEnrollSchema = z
+  .object({
+    groups: z.array(groupItemSchema),
+  })
+  .superRefine((data, ctx) => {
+    data.groups.forEach((g, index) => {
+      if (!g.selected || !g.obligatory) return;
+
+      if (!g.deadline) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("adminCourseView.deadlineRequired"),
+          path: ["groups", index, "deadline"],
+        });
+        return;
+      }
+
+      if (Number.isNaN(Date.parse(g.deadline))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("adminCourseView.invalidDate"),
+          path: ["groups", index, "deadline"],
+        });
+      }
+    });
+  });
+
 type Props = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -60,19 +96,12 @@ export const GroupEnrollModal = ({
   const form = useForm<GroupEnrollFormValues>({
     defaultValues: { groups: [] },
     mode: "onChange",
+    resolver: zodResolver(groupEnrollSchema),
   });
   const watched = useWatch({ control: form.control, name: "groups" });
   const selectedCount = (watched ?? []).filter((g) => g?.selected).length;
 
   const handleSubmit = async (values: GroupEnrollFormValues) => {
-    const formHasErrors = !!values.groups.find(
-      (g) => g.selected && g.obligatory && (!g.deadline || Number.isNaN(Date.parse(g.deadline))),
-    );
-    if (formHasErrors) {
-      await form.trigger();
-      return;
-    }
-
     const idsToEnroll = values.groups.filter((g) => g.selected).map((g) => g.id);
 
     if (idsToEnroll.length > 0) {
@@ -91,14 +120,21 @@ export const GroupEnrollModal = ({
 
   useEffect(() => {
     const list =
-      groups?.map((g) => ({
-        id: g.id,
-        selected: false,
-        obligatory: false,
-        deadline: "",
-      })) ?? [];
+      groups?.map((g) => {
+        const enrolled = enrolledGroups?.find((eg) => eg.id === g.id);
+        const isMandatory = enrolled?.settings?.isMandatory;
+        const dueDate = enrolled?.settings?.dueDate;
+
+        return {
+          id: g.id,
+          selected: false,
+          obligatory: Boolean(isMandatory),
+          deadline: typeof dueDate === "string" ? dueDate : "",
+        };
+      }) ?? [];
+
     form.reset({ groups: list });
-  }, [groups, form]);
+  }, [groups, enrolledGroups, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

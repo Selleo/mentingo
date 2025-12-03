@@ -879,6 +879,10 @@ export interface UpdateGroupResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    settings?: {
+      isMandatory: boolean;
+      dueDate: string;
+    };
   };
 }
 
@@ -912,6 +916,10 @@ export interface GetGroupsByCourseResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    settings?: {
+      isMandatory: boolean;
+      dueDate: string;
+    };
   }[];
 }
 
