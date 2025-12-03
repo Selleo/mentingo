@@ -1856,7 +1856,6 @@ export class CourseService {
                 COURSE_ENROLLMENT.ENROLLED
               }
               GROUP BY l.id, l.title, l.display_order, co.available_locales, co.base_language
-              ORDER BY l.display_order
             ) AS subquery
           ),
           '[]'::jsonb
@@ -2090,7 +2089,8 @@ export class CourseService {
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .orderBy(order)
       .limit(perPage)
-      .offset((page - 1) * perPage);
+      .offset((page - 1) * perPage)
+      .where(and(...conditions));
 
     const [{ totalCount }] = await this.db
       .select({ totalCount: count() })
@@ -2229,15 +2229,16 @@ export class CourseService {
     };
   }
 
-  async getCourseName(courseId: UUIDType, language?: SupportedLanguages) {
-    const [{ courseName }] = await this.db
+  async getCourseEmailData(courseId: UUIDType, language?: SupportedLanguages) {
+    const [courseData] = await this.db
       .select({
         courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
+        hasCertificate: courses.hasCertificate,
       })
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    return courseName;
+    return courseData;
   }
 
   async getChapterName(chapterId: UUIDType, language?: SupportedLanguages) {
