@@ -8,6 +8,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 
 import { EnvModule } from "src/env/env.module";
 
+import { ActivityLogsModule } from "./activity-logs/activity-logs.module";
 import { AiModule } from "./ai/ai.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { AuthModule } from "./auth/auth.module";
@@ -122,6 +123,7 @@ import { UserModule } from "./user/user.module";
     IngestionModule,
     EnvModule,
     LocalizationModule,
+    ActivityLogsModule,
   ],
   controllers: [],
   providers: [
