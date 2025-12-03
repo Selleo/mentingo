@@ -4,7 +4,6 @@ import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { ApiClient } from "../api-client";
 
 import type { GetCourseResponse } from "../generated-api";
-import type { Language } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 export const getCourseQueryKey = (id: string) => ["course", { id }];
 
@@ -14,7 +13,7 @@ export const courseQueryOptions = (id: string) =>
     queryFn: async () => {
       const response = await ApiClient.api.courseControllerGetCourse({
         id: id ?? "",
-        language: SUPPORTED_LANGUAGES.EN as Language,
+        language: SUPPORTED_LANGUAGES.EN,
       });
       return response.data;
     },

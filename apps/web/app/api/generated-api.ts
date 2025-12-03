@@ -23,7 +23,7 @@ export interface RegisterBody {
    */
   lastName: string;
   password: string;
-  language: "pl" | "en";
+  language: "en" | "pl";
 }
 
 export interface RegisterResponse {
@@ -124,7 +124,7 @@ export interface CreatePasswordBody {
   password: string;
   /** @minLength 1 */
   createToken: string;
-  language: "pl" | "en";
+  language: string;
 }
 
 export interface ResetPasswordBody {
@@ -1157,7 +1157,11 @@ export interface GetBetaCourseByIdResponse {
             questionId?: string;
             matchedWord?: string | null;
             scaleAnswer?: number | null;
+            /** @default "en" */
+            language?: "en" | "pl";
           }[];
+          /** @default "en" */
+          language?: "en" | "pl";
         }[];
         aiMentor?: {
           /** @format uuid */
@@ -1211,6 +1215,8 @@ export type CreateCourseBody = {
   categoryId: string;
   isScorm?: boolean;
   hasCertificate?: boolean;
+  /** @default "en" */
+  language: "en" | "pl";
 } & {
   chapters?: string[];
 };
@@ -1234,6 +1240,8 @@ export interface UpdateCourseBody {
   categoryId?: string;
   chapters?: string[];
   archived?: boolean;
+  /** @default "en" */
+  language?: "en" | "pl";
 }
 
 export interface UpdateCourseResponse {
@@ -1335,10 +1343,12 @@ export interface GetCourseStudentsProgressResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
-    groups: {
-      id: string;
-      name: string;
-    }[];
+    groups:
+      | {
+          id: string;
+          name: string;
+        }[]
+      | null;
     completedLessonsCount: number;
     lastActivity: string | null;
   }[];
@@ -1476,7 +1486,11 @@ export type BetaCreateChapterBody = {
         questionId?: string;
         matchedWord?: string | null;
         scaleAnswer?: number | null;
+        /** @default "en" */
+        language?: "en" | "pl";
       }[];
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -1510,7 +1524,7 @@ export interface BetaCreateChapterResponse {
   };
 }
 
-export type UpdateChapterBody = {
+export type UpdateChapterBody = ({
   title?: string;
   lessons?: {
     /** @format uuid */
@@ -1554,7 +1568,11 @@ export type UpdateChapterBody = {
         questionId?: string;
         matchedWord?: string | null;
         scaleAnswer?: number | null;
+        /** @default "en" */
+        language?: "en" | "pl";
       }[];
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -1578,6 +1596,9 @@ export type UpdateChapterBody = {
 } & {
   /** @format uuid */
   courseId?: string;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface UpdateChapterResponse {
@@ -1674,6 +1695,8 @@ export interface GetLessonByIdResponse {
           /** @format uuid */
           questionId?: string;
         }[];
+        /** @default "en" */
+        language?: "en" | "pl";
         passQuestion: boolean | null;
       }[];
       questionCount: number;
@@ -1691,7 +1714,7 @@ export interface GetLessonByIdResponse {
     displayOrder: number;
     isExternal?: boolean;
     nextLessonId: string | null;
-    userLanguage?: "pl" | "en";
+    userLanguage?: "en" | "pl";
     status?: "active" | "completed" | "archived";
     /** @format uuid */
     threadId?: string;
@@ -1716,7 +1739,7 @@ export interface GetLessonByIdResponse {
       requiredScore: number | null;
     } | null;
     aiMentor?: {
-      name: string;
+      name: string | null;
       avatarReferenceUrl?: string;
     } | null;
   };
@@ -1761,7 +1784,11 @@ export type BetaCreateLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -1826,7 +1853,11 @@ export type BetaCreateAiMentorLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -1857,7 +1888,7 @@ export interface BetaCreateAiMentorLessonResponse {
   };
 }
 
-export type BetaUpdateAiMentorLessonBody = {
+export type BetaUpdateAiMentorLessonBody = ({
   title: string;
   description?: string | null;
   fileS3Key?: string | null;
@@ -1895,7 +1926,11 @@ export type BetaUpdateAiMentorLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -1913,6 +1948,9 @@ export type BetaUpdateAiMentorLessonBody = {
   completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
   name?: string;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface BetaUpdateAiMentorLessonResponse {
@@ -1963,7 +2001,11 @@ export type BetaCreateQuizLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
 } & {
   /** @format uuid */
@@ -1979,7 +2021,7 @@ export interface BetaCreateQuizLessonResponse {
   };
 }
 
-export type BetaUpdateQuizLessonBody = {
+export type BetaUpdateQuizLessonBody = ({
   title?: string;
   type?: string;
   description?: string;
@@ -2021,12 +2063,19 @@ export type BetaUpdateQuizLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
 } & {
   /** @format uuid */
   chapterId?: string;
   displayOrder?: number;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface BetaUpdateQuizLessonResponse {
@@ -2035,7 +2084,7 @@ export interface BetaUpdateQuizLessonResponse {
   };
 }
 
-export type BetaUpdateLessonBody = {
+export type BetaUpdateLessonBody = ({
   title?: string;
   type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
@@ -2074,7 +2123,11 @@ export type BetaUpdateLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -2091,6 +2144,9 @@ export type BetaUpdateLessonBody = {
   /** @format uuid */
   chapterId?: string;
   displayOrder?: number;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface BetaUpdateLessonResponse {
@@ -2188,6 +2244,8 @@ export interface UpdateEmbedLessonBody {
   }[];
   /** @format uuid */
   lessonId: string;
+  /** @default "en" */
+  language: "en" | "pl";
 }
 
 export interface UpdateEmbedLessonResponse {
@@ -2261,7 +2319,7 @@ export interface GetThreadResponse {
     aiMentorLessonId: string;
     /** @format uuid */
     userId: string;
-    userLanguage: "pl" | "en";
+    userLanguage: "en" | "pl";
     createdAt: string;
     updatedAt: string;
     status: "active" | "completed" | "archived";
@@ -3491,10 +3549,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name StatisticsControllerGetUserStatistics
      * @request GET:/api/statistics/user-stats
      */
-    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
+    statisticsControllerGetUserStatistics: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetUserStatisticsResponse, any>({
         path: `/api/statistics/user-stats`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -3505,10 +3570,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name StatisticsControllerGetStats
      * @request GET:/api/statistics/stats
      */
-    statisticsControllerGetStats: (params: RequestParams = {}) =>
+    statisticsControllerGetStats: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetStatsResponse, any>({
         path: `/api/statistics/stats`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -3601,10 +3673,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UserControllerDeleteBulkUsers
      * @request DELETE:/api/user
      */
-    userControllerDeleteBulkUsers: (data: DeleteBulkUsersBody, params: RequestParams = {}) =>
+    userControllerDeleteBulkUsers: (
+      data: DeleteBulkUsersBody,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<DeleteBulkUsersResponse, any>({
         path: `/api/user`,
         method: "DELETE",
+        query: query,
         body: data,
         type: ContentType.Json,
         format: "json",
@@ -3743,6 +3823,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     userControllerDeleteUser: (
       query: {
+        /** @default "en" */
+        language?: "en" | "pl";
         /** @format uuid */
         id: string;
       },
@@ -4038,6 +4120,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4080,6 +4164,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-author"
           | "-chapterCount"
           | "-enrolledParticipantsCount";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4147,6 +4233,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-enrolledParticipantsCount";
         /** @format uuid */
         excludeCourseId?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4174,6 +4262,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         title?: string;
         description?: string;
         searchQuery?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4195,6 +4285,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4232,6 +4324,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4450,10 +4544,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CourseControllerGetAverageQuizScores
      * @request GET:/api/course/{courseId}/statistics/average-quiz-score
      */
-    courseControllerGetAverageQuizScores: (courseId: string, params: RequestParams = {}) =>
+    courseControllerGetAverageQuizScores: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetAverageQuizScoresResponse, any>({
         path: `/api/course/${courseId}/statistics/average-quiz-score`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -4477,6 +4579,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-studentName"
           | "-completedLessonsCount"
           | "-lastActivity";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4511,6 +4615,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-quizScore"
           | "-attempts"
           | "-lastAttempt";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4543,6 +4649,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-lessonName"
           | "-score"
           | "-lastSession";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4564,6 +4672,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4691,6 +4801,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         description?: string;
         searchQuery?: string;
         lessonCompleted?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4711,7 +4823,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerGetLessonById: (
       id: string,
       query: {
-        userLanguage: string;
+        /** @default "en" */
+        language?: "en" | "pl";
         studentId: string;
       },
       params: RequestParams = {},
@@ -5055,6 +5168,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         userId?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
         /** @min 1 */
         page?: number;
         perPage?: number;
@@ -5082,6 +5197,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         userId?: string;
         /** @format uuid */
         courseId?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>

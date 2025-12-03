@@ -5,4 +5,3 @@ export * from "./constants/fileTypes";
 export * from "./constants/languages";
 export * from "./constants/theme";
 export * from "./types/onboarding";
-export * from "./constants/languages";

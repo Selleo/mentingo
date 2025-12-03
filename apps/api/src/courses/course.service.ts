@@ -1852,7 +1852,9 @@ export class CourseService {
               JOIN ${chapters} c ON l.chapter_id = c.id
               JOIN ${studentCourses} sc ON slp.student_id = sc.student_id AND sc.course_id = c.course_id
               JOIN ${courses} co ON co.id = c.course_id
-              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${
+                COURSE_ENROLLMENT.ENROLLED
+              }
               GROUP BY l.id, l.title, l.display_order, co.available_locales, co.base_language
               ORDER BY l.display_order
             ) AS subquery
@@ -2088,8 +2090,7 @@ export class CourseService {
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .orderBy(order)
       .limit(perPage)
-      .offset((page - 1) * perPage)
-      .where(and(...conditions));
+      .offset((page - 1) * perPage);
 
     const [{ totalCount }] = await this.db
       .select({ totalCount: count() })
@@ -2228,19 +2229,24 @@ export class CourseService {
     };
   }
 
-  async getCourseEmailData(courseId: UUIDType) {
-    const [courseData] = await this.db
-      .select({ courseName: courses.title, hasCertificate: courses.hasCertificate })
+  async getCourseName(courseId: UUIDType, language?: SupportedLanguages) {
+    const [{ courseName }] = await this.db
+      .select({
+        courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
+      })
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    return courseData;
+    return courseName;
   }
 
-  async getChapterName(chapterId: UUIDType) {
+  async getChapterName(chapterId: UUIDType, language?: SupportedLanguages) {
     const [{ chapterName }] = await this.db
-      .select({ chapterName: chapters.title })
+      .select({
+        chapterName: this.localizationService.getLocalizedSqlField(chapters.title, language),
+      })
       .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.id, chapterId));
 
     return chapterName;

@@ -93,6 +93,10 @@ export class AdminChapterService {
     );
 
     const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.CHAPTER,
+      chapterObject.chapterId,
+    );
+
     const [chapterToUpdate] = await this.adminChapterRepository.getChapterById(
       chapterObject.chapterId,
       language,
@@ -114,8 +118,12 @@ export class AdminChapterService {
     );
   }
 
-  async updateChapter(id: UUIDType, body: UpdateChapterBody,     currentUserId: UUIDType,
-                      currentUserRole: UserRole,) {
+  async updateChapter(
+    id: UUIDType,
+    body: UpdateChapterBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
     await this.adminLessonService.validateAccess("chapter", currentUserRole, currentUserId, id);
 
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {

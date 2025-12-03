@@ -15,7 +15,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
-import { OnboardingPages, SupportedLanguages } from "@repo/shared";
+import { OnboardingPages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
@@ -36,7 +36,6 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
-import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import {
   type CreateUserBody,
   createUserSchema,
