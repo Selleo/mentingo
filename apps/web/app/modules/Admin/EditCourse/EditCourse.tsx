@@ -25,7 +25,6 @@ import CourseStatus from "./CourseStatus/CourseStatus";
 
 import type { Chapter } from "./EditCourse.types";
 import type { MetaFunction } from "@remix-run/react";
-import type { Languages } from "@repo/shared";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editCourse");
 
@@ -47,7 +46,7 @@ const EditCourse = () => {
     isLoading,
     dataUpdatedAt,
     error,
-  } = useBetaCourseById(id, SUPPORTED_LANGUAGES.EN as Languages);
+  } = useBetaCourseById(id, SUPPORTED_LANGUAGES.EN);
 
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
 

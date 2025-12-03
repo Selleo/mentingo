@@ -21,8 +21,8 @@ export class LocalizationService {
       case ENTITY_TYPE.COURSE:
         query = this.db
           .select({
-            baseLanguage: courses.baseLanguage,
-            availableLocales: courses.availableLocales,
+            baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+            availableLocales: sql<SupportedLanguages>`${courses.availableLocales}`,
           })
           .from(courses)
           .where(eq(courses.id, entityId));
@@ -30,8 +30,8 @@ export class LocalizationService {
       case ENTITY_TYPE.CHAPTER:
         query = this.db
           .select({
-            baseLanguage: courses.baseLanguage,
-            availableLocales: courses.availableLocales,
+            baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+            availableLocales: sql<SupportedLanguages>`${courses.availableLocales}`,
           })
           .from(chapters)
           .innerJoin(courses, eq(courses.id, chapters.courseId))
@@ -40,8 +40,8 @@ export class LocalizationService {
       case ENTITY_TYPE.LESSON:
         query = this.db
           .select({
-            baseLanguage: courses.baseLanguage,
-            availableLocales: courses.availableLocales,
+            baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+            availableLocales: sql<SupportedLanguages>`${courses.availableLocales}`,
           })
           .from(lessons)
           .innerJoin(chapters, eq(lessons.chapterId, chapters.id))

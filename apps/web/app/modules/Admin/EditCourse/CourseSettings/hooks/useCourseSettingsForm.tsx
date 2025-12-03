@@ -7,7 +7,7 @@ import { courseQueryOptions } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { courseSettingsFormSchema } from "~/modules/Admin/EditCourse/CourseSettings/validators/courseSettingsFormSchema";
 
-import type { Languages } from "@repo/shared";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UpdateCourseBody } from "~/api/generated-api";
 import type { CourseSettingsFormValues } from "~/modules/Admin/EditCourse/CourseSettings/validators/courseSettingsFormSchema";
 
@@ -17,7 +17,7 @@ type CourseSettingsProps = {
   categoryId?: string;
   thumbnailS3Key?: string;
   courseId: string;
-  courseLanguage: Languages;
+  courseLanguage: SupportedLanguages;
 };
 
 export const useCourseSettingsForm = ({
@@ -45,7 +45,7 @@ export const useCourseSettingsForm = ({
   const onSubmit: SubmitHandler<CourseSettingsFormValues> = async (data) => {
     const payload: UpdateCourseBody = {
       ...data,
-      language: data.language as Languages,
+      language: data.language as SupportedLanguages,
     };
 
     await updateCourse({

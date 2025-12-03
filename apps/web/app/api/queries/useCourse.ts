@@ -14,7 +14,7 @@ export const courseQueryOptions = (id: string) =>
     queryFn: async () => {
       const response = await ApiClient.api.courseControllerGetCourse({
         id: id ?? "",
-        language: SUPPORTED_LANGUAGES.PL as Language,
+        language: SUPPORTED_LANGUAGES.EN as Language,
       });
       return response.data;
     },

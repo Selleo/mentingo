@@ -15,7 +15,6 @@ import { cn } from "~/lib/utils";
 import { useScormFormStore } from "../store/scormForm.store";
 
 import type { CourseFormData, CourseStatus, StepComponentProps } from "../types/scorm.types";
-import type { Languages } from "@repo/shared";
 
 export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
           thumbnailS3Key: thumbnailResult?.fileKey,
           isScorm: true,
           priceInCents: data.pricing.price || 0,
-          language: SUPPORTED_LANGUAGES.EN as Languages,
+          language: SUPPORTED_LANGUAGES.EN,
         },
       });
 

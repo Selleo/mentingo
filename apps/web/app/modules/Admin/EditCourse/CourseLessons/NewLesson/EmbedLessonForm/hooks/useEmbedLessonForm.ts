@@ -15,7 +15,6 @@ import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { embedLessonFormSchema } from "../schemas/embedLessonForm.schema";
 
 import type { EmbedLessonFormValues } from "../schemas/embedLessonForm.schema";
-import type { Languages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type EmbedLessonFormProps = {
@@ -62,7 +61,7 @@ export const useEmbedLessonForm = ({
           ...values,
           lessonId: lessonToEdit.id,
           resources: values.resources || [],
-          language: SUPPORTED_LANGUAGES.EN as Languages,
+          language: SUPPORTED_LANGUAGES.EN,
         },
         lessonId: lessonToEdit.id,
         courseId,

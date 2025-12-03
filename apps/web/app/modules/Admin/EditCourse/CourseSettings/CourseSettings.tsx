@@ -31,8 +31,6 @@ import CourseCertificateSetting from "./components/CourseCertificateSetting";
 import CourseLessonSequenceSwitch from "./components/CourseLessonSequenceSwitch";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
-import type { Languages } from "@repo/shared";
-
 type CourseSettingsProps = {
   courseId?: string;
   title?: string;
@@ -60,7 +58,7 @@ const CourseSettings = ({
     categoryId,
     thumbnailS3Key,
     courseId: courseId || "",
-    courseLanguage: SUPPORTED_LANGUAGES.EN as Languages,
+    courseLanguage: SUPPORTED_LANGUAGES.EN,
   });
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);

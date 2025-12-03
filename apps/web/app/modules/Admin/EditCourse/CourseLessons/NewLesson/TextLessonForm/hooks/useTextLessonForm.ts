@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { type Languages, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -68,7 +68,7 @@ export const useTextLessonForm = ({
         await updateTextBlockItem({
           data: {
             ...values,
-            language: SUPPORTED_LANGUAGES.EN as Languages,
+            language: SUPPORTED_LANGUAGES.EN,
           },
           lessonId: lessonToEdit.id,
         });

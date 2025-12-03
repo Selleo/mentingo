@@ -53,6 +53,7 @@ export class AiRepository {
     const [thread] = await this.db
       .select({
         ...getTableColumns(aiMentorThreads),
+        userLanguage: sql<SupportedLanguages>`${aiMentorThreads.userLanguage}`,
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       })
       .from(aiMentorThreads)
@@ -78,6 +79,7 @@ export class AiRepository {
       .values(data)
       .returning({
         ...getTableColumns(aiMentorThreads),
+        userLanguage: sql<SupportedLanguages>`${aiMentorThreads.userLanguage}`,
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       });
 
