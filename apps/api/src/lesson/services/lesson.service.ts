@@ -70,10 +70,6 @@ export class LessonService {
 
     if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
 
-    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
-
-    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
-
     const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
