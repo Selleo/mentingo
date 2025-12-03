@@ -152,6 +152,11 @@ export class NotifyUsersHandler implements IEventHandler {
     const courseLink = `${process.env.CORS_ORIGIN}/course/${courseId}`;
     const { courseName } = await this.courseService.getCourseEmailData(courseId);
 
+    const dueDatesByStudent = await this.courseService.getStudentsDueDatesForCourse(
+      courseId,
+      studentIds,
+    );
+
     const studentContacts = await this.userService.getStudentEmailsByIds(studentIds);
 
     await Promise.all(
@@ -161,7 +166,7 @@ export class NotifyUsersHandler implements IEventHandler {
         const { text, html } = new UserAssignedToCourseEmail({
           courseName,
           courseLink,
-          formatedCourseDueDate: null,
+          formatedCourseDueDate: dueDatesByStudent[studentId] ?? null,
           ...defaultEmailSettings,
         });
 

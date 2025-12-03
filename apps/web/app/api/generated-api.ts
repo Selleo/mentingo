@@ -873,6 +873,10 @@ export interface UpdateGroupResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    settings?: {
+      isMandatory: boolean;
+      dueDate: string;
+    };
   };
 }
 
@@ -906,6 +910,10 @@ export interface GetGroupsByCourseResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    settings?: {
+      isMandatory: boolean;
+      dueDate: string;
+    };
   }[];
 }
 
@@ -1356,10 +1364,12 @@ export interface GetCourseStudentsProgressResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
-    groups: {
-      id: string;
-      name: string;
-    }[];
+    groups:
+      | {
+          id: string;
+          name: string;
+        }[]
+      | null;
     completedLessonsCount: number;
     lastActivity: string | null;
   }[];
@@ -1737,7 +1747,7 @@ export interface GetLessonByIdResponse {
       requiredScore: number | null;
     } | null;
     aiMentor?: {
-      name: string;
+      name: string | null;
       avatarReferenceUrl?: string;
     } | null;
   };
