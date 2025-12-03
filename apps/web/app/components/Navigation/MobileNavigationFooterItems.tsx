@@ -37,6 +37,7 @@ export const MobileNavigationFooterItems = ({
           link: "/provider-information",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
+        isFooter={true}
       />
 
       <NavigationMenuItem
@@ -47,6 +48,7 @@ export const MobileNavigationFooterItems = ({
           iconName: "User",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
+        isFooter={true}
       />
 
       <NavigationMenuItem
@@ -58,6 +60,7 @@ export const MobileNavigationFooterItems = ({
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
         showBadge={hasConfigurationIssues}
+        isFooter={true}
       />
 
       <li className="hidden 2xl:block">
@@ -73,7 +76,7 @@ export const MobileNavigationFooterItems = ({
                   logout();
                 });
               }}
-              className="flex w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 2xl:p-2"
+              className="flex flex-col sm:flex-row gap-y-1 sm:gap-y-0 w-full items-center gap-x-3 rounded-lg bg-white px-4 py-3.5 text-neutral-900 2xl:p-2 body-sm-md"
             >
               <Icon name="Logout" className="size-6" />
               <span
