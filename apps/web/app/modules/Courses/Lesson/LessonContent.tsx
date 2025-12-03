@@ -2,33 +2,26 @@ import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
-import Viewer from "~/components/RichText/Viever";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { Video } from "~/components/VideoPlayer/Video";
 import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
-import { Quiz } from "~/modules/Courses/Lesson/Quiz";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import Presentation from "../../../components/Presentation/Presentation";
-
-import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
-import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
+import { LessonContentRenderer } from "./LessonContentRenderer";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
-import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
+import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
 
 type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
@@ -166,44 +159,6 @@ export const LessonContent = ({
     course,
   ]);
 
-  /**
-   * Must be called as `{Content()}`, NOT `<Content />`.
-   * JSX syntax creates new component type on each render, causing Video to remount
-   * and breaking fullscreen persistence during video-to-video navigation.
-   */
-  const Content = () =>
-    match(lesson.type)
-      .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
-      .with("quiz", () => (
-        <Quiz
-          lesson={lesson}
-          userId={user?.id || ""}
-          isPreviewMode={isPreviewMode}
-          previewLessonId={lesson.id}
-        />
-      ))
-      .with("video", () => (
-        <Video
-          url={lesson.fileUrl}
-          isExternalUrl={lesson.isExternal}
-          onVideoEnded={handleVideoEnded}
-        />
-      ))
-      .with("presentation", () => (
-        <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
-      ))
-      .with("ai_mentor", () => (
-        <AiMentorLesson
-          lesson={lesson}
-          lessonLoading={lessonLoading}
-          isPreviewMode={isPreviewMode}
-        />
-      ))
-      .with("embed", () => (
-        <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
-      ))
-      .otherwise(() => null);
-
   useEffect(() => {
     if (isPreviewMode) return;
 
@@ -305,7 +260,14 @@ export const LessonContent = ({
             </div>
           )}
 
-          <div>{Content()}</div>
+          <LessonContentRenderer
+            lesson={lesson}
+            user={user}
+            isPreviewMode={isPreviewMode}
+            previewUserId={previewUserId}
+            lessonLoading={lessonLoading}
+            handleVideoEnded={handleVideoEnded}
+          />
         </div>
       </div>
     </TooltipProvider>
