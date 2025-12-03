@@ -406,13 +406,13 @@ export class StatisticsRepository {
     return lesson;
   }
 
-  async getMostRecentCourseForStudents(studentIds: UUIDType[]) {
+  async getMostRecentCourseForStudents(studentIds: UUIDType[], language?: SupportedLanguages) {
     if (!studentIds.length) return [];
     return this.db
       .selectDistinctOn([studentLessonProgress.studentId], {
         studentId: studentLessonProgress.studentId,
         courseId: courses.id,
-        courseName: courses.title,
+        courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
       })
       .from(studentLessonProgress)
       .innerJoin(chapters, eq(chapters.id, studentLessonProgress.chapterId))

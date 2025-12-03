@@ -1,5 +1,6 @@
 import {
-  BadRequestException, ForbiddenException,
+  BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -37,8 +38,6 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { UserRole } from "src/user/schemas/userRoles";
-
-
 
 @Injectable()
 export class AdminLessonService {
@@ -187,10 +186,12 @@ export class AdminLessonService {
     return await this.updateAiMentorLessonWithTransaction(id, data, currentUserId);
   }
 
-  async updateQuizLesson(    id: UUIDType,
-                             data: UpdateQuizLessonBody,
-                             currentUserId: UUIDType,
-                             currentUserRole: UserRole,) {
+  async updateQuizLesson(
+    id: UUIDType,
+    data: UpdateQuizLessonBody,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {

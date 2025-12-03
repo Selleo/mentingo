@@ -34,6 +34,8 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
     }
   };
 
+  const contentType = useMemo(() => item.type, [item.type]);
+
   return (
     <div
       key={item.id}

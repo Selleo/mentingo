@@ -14,4 +14,6 @@ ALTER TABLE "question_answer_options" ALTER COLUMN "matched_word" SET DATA TYPE 
 ALTER TABLE "questions" ALTER COLUMN "title" SET DATA TYPE jsonb;--> statement-breakpoint
 ALTER TABLE "questions" ALTER COLUMN "title" SET DEFAULT '{}'::jsonb;--> statement-breakpoint
 ALTER TABLE "questions" ALTER COLUMN "description" SET DATA TYPE jsonb;--> statement-breakpoint
-ALTER TABLE "questions" ALTER COLUMN "solution_explanation" SET DATA TYPE jsonb;
+ALTER TABLE "questions" ALTER COLUMN "solution_explanation" SET DATA TYPE jsonb;--> statement-breakpoint
+ALTER TABLE "courses" ADD COLUMN "base_language" text DEFAULT 'en' NOT NULL;--> statement-breakpoint
+ALTER TABLE "courses" ADD COLUMN "available_locales" text[] DEFAULT ARRAY['en']::text[] NOT NULL;

@@ -133,7 +133,7 @@ export class AuthService {
 
     await this.emailService.sendEmailWithLogo({
       to: email,
-      subject: getEmailSubject("welcomeEmail", createdSettings.language as Languages),
+      subject: getEmailSubject("welcomeEmail", createdSettings.language as SupportedLanguages),
       text: emailTemplate.text,
       html: emailTemplate.html,
     });

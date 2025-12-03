@@ -21,7 +21,7 @@ interface ChatMessageProps {
   name?: string;
   email?: string;
   userName?: string;
-  aiName?: string;
+  aiName?: string | null;
   avatarUrl?: string;
 }
 

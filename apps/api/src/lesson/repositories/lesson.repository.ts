@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
-import { and, desc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";

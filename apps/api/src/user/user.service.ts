@@ -9,13 +9,11 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { CreatePasswordReminderEmail } from "@repo/email-templates";
-import { CreatePasswordEmail } from "@repo/email-templates";
-import { OnboardingPages, type SupportedLanguages } from "@repo/shared";
+import { OnboardingPages, type SupportedLanguages, SUPPORTED_LANGUAGES } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, count, eq, getTableColumns, ilike, inArray, isNull, not, or, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
-import { SUPPORTED_LANGUAGES } from "src/ai/utils/ai.type";
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
@@ -43,7 +41,6 @@ import {
   userOnboarding,
   studentCourses,
   coursesSummaryStats,
-  courses,
 } from "../storage/schema";
 
 import {
@@ -69,7 +66,6 @@ import type {
   UpdateUserBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
-import type { SupportedLanguages } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
