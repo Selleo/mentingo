@@ -73,14 +73,17 @@ export class LocalizationService {
     const langExpr = language ? sql`${language}` : courses.baseLanguage;
 
     return sql<string>`
-      CASE
-        WHEN ${courses.availableLocales} @> ARRAY[${langExpr}]::text[]
-          THEN COALESCE(
-            ${fieldColumn}::jsonb ->> ${langExpr}::text,
-            ${fieldColumn}::jsonb ->> ${courses.baseLanguage}::text
-          )
-        ELSE ${fieldColumn}::jsonb ->> ${courses.baseLanguage}::text
-      END
+      COALESCE(
+        CASE
+          WHEN ${courses.availableLocales} @> ARRAY[${langExpr}]::text[]
+            THEN COALESCE(
+              ${fieldColumn}::jsonb ->> ${langExpr}::text,
+              ${fieldColumn}::jsonb ->> ${courses.baseLanguage}::text
+            )
+          ELSE ${fieldColumn}::jsonb ->> ${courses.baseLanguage}::text
+        END,
+        ''
+      )
     `;
   }
 }

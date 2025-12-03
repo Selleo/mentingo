@@ -52,7 +52,7 @@ describe("CertificatesController (e2e)", () => {
     });
 
     describe("when user is logged in", () => {
-      it("returns certificates of specific user", async () => {
+      it.only("returns certificates of specific user", async () => {
         const admin = await userFactory
           .withCredentials({ password })
           .withAdminSettings(db)

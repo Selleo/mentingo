@@ -270,28 +270,6 @@ export class UserController {
     return null;
   }
 
-  @Delete("user")
-  @Roles(USER_ROLES.ADMIN)
-  @Validate({
-    response: nullResponse(),
-    request: [
-      { type: "query", name: "id", schema: UUIDSchema, required: true },
-      { type: "query", name: "language", schema: supportedLanguagesSchema },
-    ],
-  })
-  async deleteUser(
-    @Query("id") id: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<null> {
-    if (currentUserId !== id) {
-      throw new ForbiddenException("You can only delete your own account");
-    }
-
-    await this.usersService.deleteUser(currentUserId, id);
-
-    return null;
-  }
-
   @Delete()
   @Roles(USER_ROLES.ADMIN)
   @Validate({

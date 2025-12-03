@@ -25,7 +25,6 @@ import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { CourseTest } from "../../../test/factory/course.factory";
 import type { INestApplication } from "@nestjs/common";
-import type { Record } from "@sinclair/typebox";
 import type { DatabasePg } from "src/common";
 
 describe("CourseController (e2e)", () => {
@@ -283,8 +282,8 @@ describe("CourseController (e2e)", () => {
           expect(
             response.body.data.every(
               (course: CourseTest) =>
-                (course.title as Record<string, string>)["en"].includes("Python") ||
-                (course.description as Record<string, string>)["en"].includes("Python"),
+                (course.title as string)?.includes("Python") ||
+                (course.description as string)?.includes("Python"),
             ),
           ).toBe(true);
         });
@@ -628,8 +627,8 @@ describe("CourseController (e2e)", () => {
         expect(
           response.body.data.every(
             (course: CourseTest) =>
-              (course.title as Record<string, string>)["en"].includes("Python") ||
-              (course.description as Record<string, string>)["en"]?.includes("Python"),
+              (course.title as string)?.includes("Python") ||
+              (course.description as string)?.includes("Python"),
           ),
         ).toBe(true);
       });
@@ -1230,8 +1229,8 @@ describe("CourseController (e2e)", () => {
         expect(
           response.body.data.every(
             (course: CourseTest) =>
-              (course.title as Record<string, string>)["en"].includes("Python") ||
-              (course.description as Record<string, string>)["en"].includes("Python"),
+              (course.title as string)?.includes("Python") ||
+              (course.description as string)?.includes("Python"),
           ),
         ).toBe(true);
       });

@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
+import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 
 import { categories, courses, users } from "../../src/storage/schema";
@@ -54,10 +56,16 @@ export const createCourseFactory = (db: DatabasePg) => {
         .insert(courses)
         .values({
           ...course,
+          title: buildJsonbField("en", course.title as string),
+          description: buildJsonbField("en", course.description as string),
           categoryId,
           authorId,
         })
-        .returning();
+        .returning({
+          ...getTableColumns(courses),
+          title: sql`courses.title->>'en'`,
+          description: sql`courses.description->>'en'`,
+        });
 
       return inserted;
     });
@@ -68,8 +76,8 @@ export const createCourseFactory = (db: DatabasePg) => {
       id: faker.string.uuid(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      title: { en: faker.commerce.department() + randomHex },
-      description: { en: faker.commerce.productDescription() },
+      title: faker.commerce.department() + randomHex,
+      description: faker.commerce.productDescription(),
       thumbnailS3Key: faker.system.directoryPath(),
       status: "published",
       hasCertificate: false,

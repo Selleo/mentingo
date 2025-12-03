@@ -1284,51 +1284,6 @@
         }
       }
     },
-    "/api/user/user": {
-      "delete": {
-        "operationId": "UserController_deleteUser",
-        "parameters": [
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteUserResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/user/bulk/groups": {
       "patch": {
         "operationId": "UserController_bulkAssignUsersToGroup",
@@ -8432,9 +8387,6 @@
         ]
       },
       "ChangePasswordResponse": {
-        "type": "null"
-      },
-      "DeleteUserResponse": {
         "type": "null"
       },
       "DeleteBulkUsersBody": {

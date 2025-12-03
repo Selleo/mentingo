@@ -31,7 +31,7 @@ export class CertificateRepository {
       .select({
         id: certificates.id,
         courseId: certificates.courseId,
-        courseTitle: sql<string>`courses.title->>'${language}'`,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
         completionDate: studentCourses.completedAt,
         fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         userId: certificates.userId,

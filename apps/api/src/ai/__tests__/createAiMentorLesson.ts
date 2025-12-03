@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Factory } from "fishery";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { aiMentorLessons, lessons } from "src/storage/schema";
 
@@ -31,7 +32,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
         .values({
           chapterId,
           type: LESSON_TYPES.AI_MENTOR,
-          title: faker.commerce.productName(),
+          title: buildJsonbField("en", faker.commerce.productName()),
           isExternal: true,
         })
         .returning();
