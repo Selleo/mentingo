@@ -150,7 +150,7 @@ export class NotifyUsersHandler implements IEventHandler {
     const { courseId, studentIds } = usersAssignedToCourse;
 
     const courseLink = `${process.env.CORS_ORIGIN}/course/${courseId}`;
-    const courseName = await this.courseService.getCourseName(courseId);
+    const { courseName } = await this.courseService.getCourseEmailData(courseId);
 
     const studentContacts = await this.userService.getStudentEmailsByIds(studentIds);
 
@@ -244,7 +244,9 @@ export class NotifyUsersHandler implements IEventHandler {
 
     const user = await this.userService.getUserById(chapterFinishedData.userId);
     const chapterName = await this.courseService.getChapterName(chapterFinishedData.chapterId);
-    const courseName = await this.courseService.getCourseName(chapterFinishedData.courseId);
+    const { courseName } = await this.courseService.getCourseEmailData(
+      chapterFinishedData.courseId,
+    );
 
     const courseLink = `${process.env.CORS_ORIGIN}/course/${chapterFinishedData.courseId}`;
 
@@ -271,16 +273,21 @@ export class NotifyUsersHandler implements IEventHandler {
     const { courseFinishedData } = event;
 
     const user = await this.userService.getUserById(courseFinishedData.userId);
-    const courseName = await this.courseService.getCourseName(courseFinishedData.courseId);
+    const { courseName, hasCertificate } = await this.courseService.getCourseEmailData(
+      courseFinishedData.courseId,
+    );
 
-    const certificateDownloadLink = `${process.env.CORS_ORIGIN}/profile/${user.id}`;
+    const buttonLink = hasCertificate
+      ? `${process.env.CORS_ORIGIN}/profile/${user.id}`
+      : `${process.env.CORS_ORIGIN}/courses`;
 
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(user.id);
 
     const { text, html } = new UserFinishedCourseEmail({
-      certificateDownloadLink,
+      buttonLink,
       courseName,
       ...defaultEmailSettings,
+      hasCertificate,
     });
 
     await this.emailService.sendEmailWithLogo({

@@ -1,22 +1,26 @@
 import { EmailContent, Language } from "types";
 
-export const getUserFinishedCourseEmailTranslations = (language: Language, courseName: string) => {
+export const getUserFinishedCourseEmailTranslations = (
+  language: Language,
+  courseName: string,
+  hasCertificate: boolean,
+) => {
   const emailContent: Record<Language, EmailContent> = {
     en: {
       heading: "Course completed",
       paragraphs: [
         "Congratulations! 🏁",
-        `You've completed ${courseName}. Your certificate is ready to download; check the recommended next steps.`,
+        `You've completed ${courseName}. ${hasCertificate ? "Your certificate is ready to download; check the recommended next steps." : ""}`,
       ],
-      buttonText: "DOWNLOAD CERTIFICATE",
+      buttonText: hasCertificate ? "DOWNLOAD CERTIFICATE" : "CONTINUE LEARNING",
     },
     pl: {
       heading: "Kurs ukończony",
       paragraphs: [
         "Gratulacje! 🏁",
-        `Ukończyłeś(-aś) ${courseName}. Certyfikat jest gotowy do pobrania; sprawdź też proponowane ścieżki dalszej nauki.`,
+        `Ukończyłeś(-aś) ${courseName}. ${hasCertificate ? "Certyfikat jest gotowy do pobrania; sprawdź też proponowane ścieżki dalszej nauki." : ""}`,
       ],
-      buttonText: "POBIERZ CERTYFIKAT",
+      buttonText: hasCertificate ? "POBIERZ CERTYFIKAT" : "KONTYNUUJ SWOJĄ NAUKĘ",
     },
   };
 

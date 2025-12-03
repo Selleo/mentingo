@@ -2134,13 +2134,13 @@ export class CourseService {
     };
   }
 
-  async getCourseName(courseId: UUIDType) {
-    const [{ courseName }] = await this.db
-      .select({ courseName: courses.title })
+  async getCourseEmailData(courseId: UUIDType) {
+    const [courseData] = await this.db
+      .select({ courseName: courses.title, hasCertificate: courses.hasCertificate })
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    return courseName;
+    return courseData;
   }
 
   async getChapterName(chapterId: UUIDType) {

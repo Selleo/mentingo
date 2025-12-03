@@ -53,7 +53,7 @@ const CourseCertificate = () => {
 
   return (
     <div>
-      {hasFinishedCourse && (
+      {certificate && hasFinishedCourse && (
         <Card className="p-4 md:px-8 flex items-center gap-4 bg-success-50">
           <div className="bg-success-50 aspect-square size-10 rounded-full grid place-items-center">
             <Icon name="InputRoundedMarkerSuccess" className="size-4" />
@@ -68,7 +68,7 @@ const CourseCertificate = () => {
         </Card>
       )}
 
-      {isCertificatePreviewOpen && isStudent && (
+      {certificate && isCertificatePreviewOpen && isStudent && (
         <button
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
           onClick={handleCloseCertificatePreview}
