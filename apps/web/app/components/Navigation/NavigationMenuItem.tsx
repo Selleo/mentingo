@@ -12,6 +12,7 @@ type NavigationMenuItemProps = {
   setIsMobileNavOpen: Dispatch<SetStateAction<boolean>>;
   className?: string;
   showBadge?: boolean;
+  isFooter?: boolean;
 };
 
 export function NavigationMenuItem({
@@ -19,6 +20,7 @@ export function NavigationMenuItem({
   setIsMobileNavOpen,
   className,
   showBadge,
+  isFooter = false,
 }: NavigationMenuItemProps) {
   return (
     <li key={item.label} className={className}>
@@ -33,6 +35,7 @@ export function NavigationMenuItem({
                 {
                   "border border-primary-200 bg-white text-primary-800 2xl:bg-primary-50": isActive,
                   "bg-white text-neutral-900": !isActive,
+                  "flex-col sm:flex-row gap-y-1 sm:gap-y-0": isFooter,
                 },
               )
             }
