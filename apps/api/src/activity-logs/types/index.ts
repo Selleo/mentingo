@@ -133,3 +133,13 @@ export type CourseActivityLogSnapshot = {
   stripeProductId?: string | null;
   stripePriceId?: string | null;
 };
+
+export type ChapterActivityLogSnapshot = {
+  id: UUIDType;
+  title?: string | null;
+  courseId?: UUIDType;
+  authorId?: UUIDType;
+  displayOrder?: number | null;
+  isFreemium?: boolean;
+  lessonCount?: number | null;
+};

@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { eq, getTableColumns, sql } from "drizzle-orm";
+import { isEqual } from "lodash";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -14,6 +15,8 @@ import { chapters } from "src/storage/schema";
 import { AdminChapterRepository } from "./repositories/adminChapter.repository";
 
 import type { CreateChapterBody, UpdateChapterBody } from "./schemas/chapter.schema";
+import type { SupportedLanguages } from "@repo/shared";
+import type { ChapterActivityLogSnapshot } from "src/activity-logs/types";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -69,11 +72,13 @@ export class AdminChapterService {
 
     if (!chapter) throw new BadRequestException("Chapter creation failed");
 
+    const createdChapterSnapshot = await this.buildChapterActivitySnapshot(chapter.id);
+
     await this.eventBus.publish(
       new CreateChapterEvent({
         chapterId: chapter.id,
         createdById: authorId,
-        createdChapter: chapter,
+        createdChapter: createdChapterSnapshot,
       }),
     );
 
@@ -127,7 +132,12 @@ export class AdminChapterService {
 
     const newDisplayOrder = chapterObject.displayOrder;
 
-    const updatedChapters = await this.adminChapterRepository.changeChapterDisplayOrder(
+    const previousSnapshot = await this.buildChapterActivitySnapshot(
+      chapterObject.chapterId,
+      language,
+    );
+
+    await this.adminChapterRepository.changeChapterDisplayOrder(
       chapterToUpdate.courseId,
       chapterToUpdate.id,
       oldDisplayOrder,
@@ -135,12 +145,19 @@ export class AdminChapterService {
       language,
     );
 
+    const updatedSnapshot = await this.buildChapterActivitySnapshot(
+      chapterObject.chapterId,
+      language,
+    );
+
+    if (this.areChapterSnapshotsEqual(previousSnapshot, updatedSnapshot)) return;
+
     this.eventBus.publish(
       new UpdateChapterEvent({
         chapterId: chapterToUpdate.id,
         updatedById: chapterObject.currentUserId,
-        previousChapterData: chapterToUpdate,
-        updatedChapterData: updatedChapters.find((ch) => ch.id === chapterToUpdate.id)!,
+        previousChapterData: previousSnapshot,
+        updatedChapterData: updatedSnapshot,
       }),
     );
   }
@@ -153,10 +170,6 @@ export class AdminChapterService {
   ) {
     await this.adminLessonService.validateAccess("chapter", currentUserRole, currentUserId, id);
 
-    const [previousChapter] = await this.adminChapterRepository.getChapterById(id);
-
-    if (!previousChapter) throw new NotFoundException("Chapter not found");
-
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
         message: `adminCourseView.toast.maxTitleLengthExceeded`,
@@ -164,10 +177,10 @@ export class AdminChapterService {
       });
     }
 
-    const { availableLocales } = await this.localizationService.getBaseLanguage(
-      ENTITY_TYPE.CHAPTER,
-      id,
-    );
+    const { availableLocales, language: resolvedLanguage } =
+      await this.localizationService.getBaseLanguage(ENTITY_TYPE.CHAPTER, id, body.language);
+
+    const previousSnapshot = await this.buildChapterActivitySnapshot(id, resolvedLanguage);
 
     if (!availableLocales.includes(body.language)) {
       throw new BadRequestException("This course does not support this language");
@@ -177,12 +190,16 @@ export class AdminChapterService {
 
     if (!chapter) throw new NotFoundException("Chapter not found");
 
+    const updatedSnapshot = await this.buildChapterActivitySnapshot(id, resolvedLanguage);
+
+    if (this.areChapterSnapshotsEqual(previousSnapshot, updatedSnapshot)) return;
+
     this.eventBus.publish(
       new UpdateChapterEvent({
         chapterId: chapter.id,
         updatedById: currentUserId,
-        previousChapterData: previousChapter,
-        updatedChapterData: chapter,
+        previousChapterData: previousSnapshot,
+        updatedChapterData: updatedSnapshot,
       }),
     );
   }
@@ -212,5 +229,35 @@ export class AdminChapterService {
         }),
       );
     });
+  }
+
+  private async buildChapterActivitySnapshot(
+    chapterId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<ChapterActivityLogSnapshot> {
+    const resolvedLanguage =
+      language ??
+      (await this.localizationService.getBaseLanguage(ENTITY_TYPE.CHAPTER, chapterId)).language;
+
+    const [chapter] = await this.adminChapterRepository.getChapterById(chapterId, resolvedLanguage);
+
+    if (!chapter) throw new NotFoundException("Chapter not found");
+
+    return {
+      id: chapter.id,
+      title: chapter.title,
+      courseId: chapter.courseId,
+      authorId: chapter.authorId,
+      displayOrder: chapter.displayOrder,
+      isFreemium: chapter.isFreemium,
+      lessonCount: chapter.lessonCount,
+    };
+  }
+
+  private areChapterSnapshotsEqual(
+    previousSnapshot: ChapterActivityLogSnapshot | null,
+    updatedSnapshot: ChapterActivityLogSnapshot | null,
+  ) {
+    return isEqual(previousSnapshot, updatedSnapshot);
   }
 }

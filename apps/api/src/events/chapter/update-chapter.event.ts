@@ -1,10 +1,11 @@
+import type { ChapterActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 
 type ChapterUpdateData = {
   chapterId: UUIDType;
   updatedById: UUIDType;
-  previousChapterData: Record<string, unknown> | null;
-  updatedChapterData: Record<string, unknown> | null;
+  previousChapterData: ChapterActivityLogSnapshot | null;
+  updatedChapterData: ChapterActivityLogSnapshot | null;
 };
 
 export class UpdateChapterEvent {

@@ -1,10 +1,10 @@
-import type { Chapter } from "src/chapter/schemas/chapter.schema";
+import type { ChapterActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 
 type ChapterCreationData = {
   chapterId: UUIDType;
   createdById: UUIDType;
-  createdChapter: Chapter;
+  createdChapter: ChapterActivityLogSnapshot;
 };
 
 export class CreateChapterEvent {
