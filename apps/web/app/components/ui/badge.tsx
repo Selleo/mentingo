@@ -11,7 +11,7 @@ const badgeVariants = cva("", {
   variants: {
     variant: {
       default: "text-neutral-900 bg-white border border-neutral-200",
-      success: "text-success-800 bg-success-100",
+      success: "text-success-700 bg-success-50 border border-success-200",
       successFilled: "text-success-800 bg-success-50",
       inProgress: "text-warning-800 bg-warning-100",
       inProgressFilled: "text-secondary-700 bg-secondary-50",
@@ -61,9 +61,13 @@ export const Badge = ({
 }: BadgeProps) => {
   return (
     <div
-      className={cn(badgeVariants({ variant, outline, fontWeight }), className, {
-        "flex h-min shrink-0 items-center gap-x-2 rounded-lg px-2 py-1 text-sm": children,
-      })}
+      className={cn(
+        badgeVariants({ variant, outline, fontWeight }),
+        {
+          "flex h-min shrink-0 items-center gap-x-2 rounded-lg px-2 py-1 text-sm": children,
+        },
+        className,
+      )}
       {...props}
     >
       {icon && <Icon name={icon} {...(iconClasses && { className: iconClasses })} />}

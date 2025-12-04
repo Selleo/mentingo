@@ -407,6 +407,13 @@
       "when": 1764674932236,
       "tag": "0057_added_name_and_avatar_reference_to_ai_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1764755008293,
+      "tag": "0058_add_settings_columnn_to_group_courses",
+      "breakpoints": true
     }
   ]
 }

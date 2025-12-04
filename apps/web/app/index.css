@@ -289,7 +289,6 @@ html {
   }
 }
 
-
 @supports (scrollbar-width: thin) {
   .scrollbar-thin {
     scrollbar-width: thin;
@@ -336,4 +335,20 @@ html {
     rgba(0, 0, 0, 0) 65%
   );
   animation: shimmer-sweep-45deg 1.8s linear infinite;
+}
+
+/* Custom styles for date input */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  left: 13px;
+}
+
+input::-webkit-datetime-edit {
+  position: relative;
+  left: 16px;
+}
+
+input::-webkit-datetime-edit-fields-wrapper {
+  position: relative;
+  left: 16px;
 }

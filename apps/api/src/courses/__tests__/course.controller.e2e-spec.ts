@@ -1847,7 +1847,7 @@ describe("CourseController (e2e)", () => {
 
             await request(app.getHttpServer())
               .post(`/api/course/${faker.string.uuid()}/enroll-groups-to-course`)
-              .send({ groupIds: [] })
+              .send([])
               .set("Cookie", cookies)
               .expect(404);
           });
@@ -1888,7 +1888,7 @@ describe("CourseController (e2e)", () => {
             // Enroll empty group to course
             await request(app.getHttpServer())
               .post(`/api/course/${course.id}/enroll-groups-to-course`)
-              .send({ groupIds: [group.id] })
+              .send([{ id: group.id, settings: { isMandatory: false, dueDate: "" } }])
               .set("Cookie", cookies)
               .expect(201);
 
@@ -1984,7 +1984,7 @@ describe("CourseController (e2e)", () => {
             // Enroll group to course
             await request(app.getHttpServer())
               .post(`/api/course/${course.id}/enroll-groups-to-course`)
-              .send({ groupIds: [group.id] })
+              .send([{ id: group.id, settings: { isMandatory: false, dueDate: "" } }])
               .set("Cookie", cookies)
               .expect(201);
 
@@ -2062,7 +2062,7 @@ describe("CourseController (e2e)", () => {
             // Try to enroll the group (all users are already enrolled)
             await request(app.getHttpServer())
               .post(`/api/course/${course.id}/enroll-groups-to-course`)
-              .send({ groupIds: [group.id] })
+              .send([{ id: group.id, settings: { isMandatory: false, dueDate: "" } }])
               .set("Cookie", cookies)
               .expect(201);
 

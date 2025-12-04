@@ -9,6 +9,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { BaseEmailTemplate } from "@repo/email-templates";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
@@ -30,6 +31,7 @@ import { isEmpty } from "lodash";
 
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { EmailService } from "src/common/emails/emails.service";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { EnvService } from "src/env/services/env.service";
@@ -39,20 +41,13 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
-import { StripeService } from "src/stripe/stripe.service";
-import { USER_ROLES } from "src/user/schemas/userRoles";
-import { UserService } from "src/user/user.service";
-import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
-import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
-
-import { getSortOptions } from "../common/helpers/getSortOptions";
 import {
+  groupCourses,
   aiMentorStudentLessonProgress,
   categories,
   chapters,
   courses,
   coursesSummaryStats,
-  groupCourses,
   groups,
   groupUsers,
   lessons,
@@ -62,7 +57,15 @@ import {
   studentCourses,
   studentLessonProgress,
   users,
-} from "../storage/schema";
+} from "src/storage/schema";
+import { StripeService } from "src/stripe/stripe.service";
+import { USER_ROLES } from "src/user/schemas/userRoles";
+import { UserService } from "src/user/user.service";
+import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
+
+import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
 import {
@@ -82,6 +85,7 @@ import type {
   CourseAverageQuizScoresResponse,
   CourseStatisticsResponse,
   CourseStatusDistribution,
+  EnrolledCourseGroups,
   LessonSequenceEnabledResponse,
 } from "./schemas/course.schema";
 import type {
@@ -126,6 +130,7 @@ export class CourseService {
     private readonly envService: EnvService,
     private readonly eventBus: EventBus,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
+    private readonly emailService: EmailService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -258,6 +263,13 @@ export class CourseService {
         .innerJoin(categories, eq(courses.categoryId, categories.id))
         .leftJoin(users, eq(courses.authorId, users.id))
         .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
+        .leftJoin(
+          groupCourses,
+          and(
+            eq(groupCourses.courseId, courses.id),
+            eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+          ),
+        )
         .where(and(...conditions))
         .groupBy(
           courses.id,
@@ -274,6 +286,7 @@ export class CourseService {
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
           studentCourses.finishedChapterCount,
+          groupCourses.settings,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -441,11 +454,28 @@ export class CourseService {
                 AND ${chapters.isFreemium} = TRUE
             )
           `,
+          dueDate: sql<
+            string | null
+          >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
         })
         .from(courses)
         .leftJoin(categories, eq(courses.categoryId, categories.id))
         .leftJoin(users, eq(courses.authorId, users.id))
         .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
+        .leftJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.courseId, courses.id),
+            currentUserId ? eq(studentCourses.studentId, currentUserId) : sql`FALSE`,
+          ),
+        )
+        .leftJoin(
+          groupCourses,
+          and(
+            eq(groupCourses.courseId, courses.id),
+            eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+          ),
+        )
         .where(and(...conditions))
         .groupBy(
           courses.id,
@@ -460,6 +490,7 @@ export class CourseService {
           categories.title,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
+          groupCourses.settings,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -506,11 +537,6 @@ export class CourseService {
   }
 
   async getCourse(id: UUIDType, userId: UUIDType): Promise<CommonShowCourse> {
-    //TODO: to remove
-    const testDeployment = "test";
-
-    testDeployment;
-
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -536,12 +562,22 @@ export class CourseService {
           )`,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,
+        dueDate: sql<
+          string | null
+        >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
       .leftJoin(
         studentCourses,
         and(eq(courses.id, studentCourses.courseId), eq(studentCourses.studentId, userId)),
+      )
+      .leftJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, courses.id),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
       )
       .where(eq(courses.id, id));
 
@@ -576,7 +612,7 @@ export class CourseService {
         completedLessonCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentChapterProgress.completedLessonCount}, 0) ELSE 0 END`,
         chapterProgress: sql<ProgressStatus>`
           CASE
-            WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
+          WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
             WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
             WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
               SELECT 1
@@ -814,6 +850,9 @@ export class CourseService {
           WHERE ${chapters.courseId} = ${courses.id}
             AND ${chapters.isFreemium} = true
         )`,
+        dueDate: sql<
+          string | null
+        >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
       })
       .from(courses)
       .leftJoin(
@@ -822,6 +861,13 @@ export class CourseService {
       )
       .leftJoin(categories, eq(courses.categoryId, categories.id))
       .leftJoin(users, eq(courses.authorId, users.id))
+      .leftJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, courses.id),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
       .where(and(...conditions))
       .groupBy(
         courses.id,
@@ -836,6 +882,7 @@ export class CourseService {
         studentCourses.studentId,
         categories.title,
         studentCourses.status,
+        groupCourses.settings,
       )
       .orderBy(
         sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NULL THEN TRUE ELSE FALSE END`,
@@ -1204,12 +1251,23 @@ export class CourseService {
     });
   }
 
-  async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], adminId?: UUIDType) {
-    const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
-    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+  async enrollGroupsToCourse(
+    courseId: UUIDType,
+    groupsToEnroll: EnrolledCourseGroups,
+    userId?: UUIDType,
+    currentUserRole?: UserRole,
+  ) {
+    const groupIds = groupsToEnroll.map((groupId) => groupId.id);
+
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+    if (!course) throw new NotFoundException(`Course ${courseId} not found`);
 
     const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
     if (!groupExists.length) throw new NotFoundException("Groups not found");
+
+    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && userId !== course.authorId) {
+      throw new ForbiddenException("You don't have permission to enroll groups to this course");
+    }
 
     const groupUsersList = await this.db
       .select({ ...getTableColumns(groupUsers), role: users.role })
@@ -1217,27 +1275,25 @@ export class CourseService {
       .innerJoin(users, eq(groupUsers.userId, users.id))
       .where(inArray(groupUsers.groupId, groupIds));
 
-    const existingGroupEnrollments = await this.db
+    await this.db
       .select({ groupId: groupCourses.groupId })
       .from(groupCourses)
       .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
 
-    const existingGroupIds = existingGroupEnrollments.map((e) => e.groupId);
-    const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
-
     let existingStudentIds: string[] = [];
     let newStudentIds: string[] = [];
-
     if (groupUsersList.length > 0) {
       const existingEnrollments = await this.db
         .select({
-          studentId: studentCourses.studentId,
+          userId: users.id,
+          groupId: groupUsers.groupId,
         })
-        .from(studentCourses)
+        .from(users)
+        .leftJoin(studentCourses, eq(users.id, studentCourses.studentId))
+        .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
         .where(
           and(
             eq(studentCourses.courseId, courseId),
-            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
             inArray(
               studentCourses.studentId,
               groupUsersList.map((gu) => gu.userId),
@@ -1245,7 +1301,7 @@ export class CourseService {
           ),
         );
 
-      existingStudentIds = existingEnrollments.map((e) => e.studentId);
+      existingStudentIds = existingEnrollments.map((e) => e.userId);
       newStudentIds = groupUsersList
         .filter(
           ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
@@ -1253,44 +1309,48 @@ export class CourseService {
         .map((gu) => gu.userId);
     }
 
+    const userIdToGroupId = new Map<string, string>();
+    for (const groupId of groupIds) {
+      const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
+      usersInGroup.forEach((gu) => {
+        userIdToGroupId.set(gu.userId, groupId);
+      });
+    }
+
     await this.db.transaction(async (trx) => {
-      if (newGroupIds.length > 0) {
-        const groupCoursesValues = newGroupIds.map((groupId) => ({
+      const groupCoursesValues = groupIds.map((groupId) => {
+        const settings = groupsToEnroll.find((g) => g.id === groupId)?.settings;
+        const normalizedSettings =
+          settings && settings.isMandatory === false
+            ? { ...settings, dueDate: null }
+            : settings || {};
+        return {
           groupId,
           courseId,
-          enrolledBy: adminId || null,
-        }));
+          enrolledBy: userId || null,
+          settings: settingsToJSONBuildObject(normalizedSettings),
+        };
+      });
 
-        await trx.insert(groupCourses).values(groupCoursesValues);
-      }
+      await trx
+        .insert(groupCourses)
+        .values(groupCoursesValues)
+        .onConflictDoUpdate({
+          target: [groupCourses.groupId, groupCourses.courseId],
+          set: {
+            settings: sql`EXCLUDED.settings`,
+            enrolledBy: sql`EXCLUDED.enrolled_by`,
+          },
+        });
 
-      if (newStudentIds.length > 0 && newGroupIds.length > 0) {
-        const userIdToGroupId = new Map<string, string>();
-
-        for (const groupId of newGroupIds) {
-          const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
-
-          usersInGroup.forEach((gu) => {
-            if (newStudentIds.includes(gu.userId)) {
-              userIdToGroupId.set(gu.userId, groupId);
-            }
-          });
-        }
-
+      if (newStudentIds.length > 0) {
         const studentCoursesValues = newStudentIds.map((studentId) => ({
           studentId,
           courseId,
           enrolledByGroupId: userIdToGroupId.get(studentId) || null,
-          status: COURSE_ENROLLMENT.ENROLLED,
         }));
 
-        await trx
-          .insert(studentCourses)
-          .values(studentCoursesValues)
-          .onConflictDoUpdate({
-            target: [studentCourses.courseId, studentCourses.studentId],
-            set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
-          });
+        await trx.insert(studentCourses).values(studentCoursesValues).onConflictDoNothing();
 
         await Promise.all(
           newStudentIds.map(async (studentId) => {
@@ -1300,7 +1360,7 @@ export class CourseService {
       }
     });
 
-    return null;
+    this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds: newStudentIds, courseId }));
   }
 
   async createStudentCourse(
@@ -1600,6 +1660,9 @@ export class CourseService {
           WHERE ${chapters.courseId} = ${courses.id}
             AND ${chapters.isFreemium} = TRUE
         )`,
+      dueDate: sql<
+        string | null
+      >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
     };
   }
 
@@ -1668,6 +1731,10 @@ export class CourseService {
     authorId?: UUIDType,
     excludeCourseId?: UUIDType,
   ) {
+    if (!currentUserId) {
+      return [];
+    }
+
     const conditions = [];
 
     if (authorId) {
@@ -1684,9 +1751,7 @@ export class CourseService {
       WHERE ${conditions.length ? and(...conditions) : true} AND ${courses.id} NOT IN (
         SELECT DISTINCT ${studentCourses.courseId}
         FROM ${studentCourses}
-        WHERE ${studentCourses.studentId} = ${currentUserId} AND ${studentCourses.status} = ${
-          COURSE_ENROLLMENT.ENROLLED
-        }
+        WHERE ${studentCourses.studentId} = ${currentUserId}
       )
     `);
 
@@ -2150,5 +2215,144 @@ export class CourseService {
       .where(eq(chapters.id, chapterId));
 
     return chapterName;
+  }
+
+  async getStudentsDueDatesForCourse(
+    courseId: UUIDType,
+    studentIds: UUIDType[],
+  ): Promise<Record<string, string | null>> {
+    if (!studentIds.length) return {};
+
+    const rows = await this.db
+      .select({
+        studentId: studentCourses.studentId,
+        dueDate: sql<string | null>`
+          CASE
+            WHEN NULLIF(${groupCourses.settings}->>'dueDate', '') IS NOT NULL
+            THEN TO_CHAR((${groupCourses.settings}->>'dueDate')::timestamptz, 'DD.MM.YYYY')
+            ELSE NULL
+          END
+        `,
+      })
+      .from(studentCourses)
+      .leftJoin(
+        groupCourses,
+        and(
+          eq(groupCourses.courseId, studentCourses.courseId),
+          eq(groupCourses.groupId, studentCourses.enrolledByGroupId),
+        ),
+      )
+      .where(
+        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
+      );
+
+    return rows.reduce(
+      (acc, row) => {
+        acc[row.studentId] = row.dueDate;
+        return acc;
+      },
+      {} as Record<string, string | null>,
+    );
+  }
+
+  async sendOverdueCoursesEmails() {
+    const overdueStudents = await this.db
+      .select({
+        courseId: courses.id,
+        courseTitle: courses.title,
+        studentId: users.id,
+        studentName: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
+        studentEmail: users.email,
+        groupId: groups.id,
+        groupName: groups.name,
+        dueDate: sql<string>`(${groupCourses.settings}->>'dueDate')::text`,
+      })
+      .from(groupCourses)
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .innerJoin(groups, eq(groups.id, groupCourses.groupId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, courses.id),
+          eq(studentCourses.enrolledByGroupId, groups.id),
+        ),
+      )
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(
+        and(
+          sql`NULLIF(${groupCourses.settings}->>'dueDate', '') IS NOT NULL`,
+          sql`(${groupCourses.settings}->>'dueDate')::timestamptz < NOW()`,
+          eq(users.role, USER_ROLES.STUDENT),
+          isNull(users.deletedAt),
+          isNull(studentCourses.completedAt),
+        ),
+      );
+
+    if (overdueStudents.length === 0) return;
+
+    const groupedByCourse = overdueStudents.reduce(
+      (acc, row) => {
+        const courseTitle = row.courseTitle;
+        if (!acc[courseTitle]) acc[courseTitle] = [];
+        acc[courseTitle].push(row);
+        return acc;
+      },
+      {} as Record<string, typeof overdueStudents>,
+    );
+
+    const adminsToNotify = await this.userService.getAdminsToNotifyAboutOverdueCourse();
+
+    if (adminsToNotify.length === 0) return;
+
+    const indent = "\u00A0\u00A0\u00A0\u00A0";
+
+    await Promise.all(
+      adminsToNotify.map(async ({ id: adminId, email: adminEmail }) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(adminId);
+
+        const lines: string[] = [];
+        for (const [courseKey, rows] of Object.entries(groupedByCourse)) {
+          lines.push(`Course: ${courseKey}`);
+          lines.push("");
+
+          rows.forEach((r) => {
+            lines.push(`${indent}- ${r.studentName} (${r.studentEmail})`);
+            lines.push("");
+          });
+
+          const uniqueDueDates = Array.from(new Set(rows.map((r) => r.dueDate).filter(Boolean)));
+          lines.push(
+            `${indent}Due date: ${uniqueDueDates.length ? uniqueDueDates.join(", ") : "-"}`,
+          );
+          lines.push("");
+        }
+
+        const heading =
+          defaultEmailSettings.language === "pl"
+            ? "Zaległe kursy studentów"
+            : "Students with overdue courses";
+        const introParagraph =
+          defaultEmailSettings.language === "pl"
+            ? "Niektórzy studenci nie ukończyli kursów w wymaganym terminie:"
+            : "Some students did not finish their courses on time:";
+        const buttonText =
+          defaultEmailSettings.language === "pl" ? "PRZEJDŹ DO KURSÓW" : "VIEW COURSES";
+
+        const { text, html } = new BaseEmailTemplate({
+          heading,
+          paragraphs: [introParagraph, "", ...lines],
+          buttonText,
+          buttonLink: `${process.env.CORS_ORIGIN}/admin/courses`,
+          ...defaultEmailSettings,
+        });
+
+        return this.emailService.sendEmailWithLogo({
+          to: adminEmail,
+          subject: "Overdue courses notification",
+          text,
+          html,
+        });
+      }),
+    );
   }
 }

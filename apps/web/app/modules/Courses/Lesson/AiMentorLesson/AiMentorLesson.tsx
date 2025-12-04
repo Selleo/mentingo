@@ -136,7 +136,7 @@ const AiMentorLesson = ({
           messages.map((messages, idx) => (
             <ChatMessage
               key={idx}
-              aiName={lesson.aiMentor?.name}
+              aiName={lesson.aiMentor?.name || ""}
               avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
               {...messages}
             />
@@ -145,7 +145,7 @@ const AiMentorLesson = ({
         {isSubmitted ||
           (isJudgePending && (
             <ChatLoader
-              aiName={lesson.aiMentor?.name}
+              aiName={lesson.aiMentor?.name || ""}
               avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
             />
           ))}

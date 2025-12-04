@@ -328,6 +328,18 @@ export interface UpdateAdminFinishedCourseNotificationResponse {
   };
 }
 
+export interface UpdateAdminOverdueCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
+  };
+}
+
 export interface UpdateColorSchemaBody {
   /** @pattern ^#(?:[0-9a-fA-F]{3}){1,2}$ */
   primaryColor: string;
@@ -861,6 +873,10 @@ export interface UpdateGroupResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    settings?: {
+      isMandatory: boolean;
+      dueDate: string | null;
+    };
   };
 }
 
@@ -894,6 +910,10 @@ export interface GetGroupsByCourseResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    settings?: {
+      isMandatory: boolean;
+      dueDate: string | null;
+    };
   }[];
 }
 
@@ -952,6 +972,7 @@ export interface GetStudentCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1001,6 +1022,7 @@ export interface GetAvailableCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1034,6 +1056,7 @@ export interface GetContentCreatorCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
 }
 
@@ -1099,6 +1122,7 @@ export interface GetCourseResponse {
     title: string;
     stripeProductId: string | null;
     stripePriceId: string | null;
+    dueDate: string | null;
   };
 }
 
@@ -1284,9 +1308,14 @@ export interface EnrollCoursesResponse {
   };
 }
 
-export interface EnrollGroupsToCourseBody {
-  groupIds: string[];
-}
+export type EnrollGroupsToCourseBody = {
+  /** @format uuid */
+  id: string;
+  settings: {
+    isMandatory: boolean;
+    dueDate: string;
+  };
+}[];
 
 export interface EnrollGroupsToCourseResponse {
   data: {
@@ -1335,10 +1364,12 @@ export interface GetCourseStudentsProgressResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
-    groups: {
-      id: string;
-      name: string;
-    }[];
+    groups:
+      | {
+          id: string;
+          name: string;
+        }[]
+      | null;
     completedLessonsCount: number;
     lastActivity: string | null;
   }[];
@@ -1716,7 +1747,7 @@ export interface GetLessonByIdResponse {
       requiredScore: number | null;
     } | null;
     aiMentor?: {
-      name: string;
+      name: string | null;
       avatarReferenceUrl?: string;
     } | null;
   };
@@ -3177,6 +3208,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerUpdateAdminFinishedCourseNotification: (params: RequestParams = {}) =>
       this.request<UpdateAdminFinishedCourseNotificationResponse, any>({
         path: `/api/settings/admin/finished-course-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAdminOverdueCourseNotification
+     * @request PATCH:/api/settings/admin/overdue-course-notification
+     */
+    settingsControllerUpdateAdminOverdueCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminOverdueCourseNotificationResponse, any>({
+        path: `/api/settings/admin/overdue-course-notification`,
         method: "PATCH",
         format: "json",
         ...params,
