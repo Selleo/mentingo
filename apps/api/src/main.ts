@@ -13,6 +13,7 @@ import { startInstrumentation } from "./langfuse/instrumentation";
 import { environmentValidation } from "./utils/environment-validation";
 import { exportSchemaToFile } from "./utils/save-swagger-to-file";
 import { setupValidation } from "./utils/setup-validation";
+import { RedisIoAdapter } from "./websocket/websocket.adapter";
 
 patchNestJsSwagger();
 applyFormats();
@@ -52,6 +53,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
   exportSchemaToFile(document);
+
+  const redisUrl = process.env.REDIS_URL;
+  if (redisUrl) {
+    const redisIoAdapter = new RedisIoAdapter(app, redisUrl);
+    await redisIoAdapter.connectToRedis();
+    app.useWebSocketAdapter(redisIoAdapter);
+  }
 
   await app.listen(3000);
 }

@@ -35,9 +35,11 @@ import { FileModule } from "./file/files.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
+import { LearningTimeModule } from "./learning-time/learning-time.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { QuestionsModule } from "./questions/question.module";
+import { QueueModule } from "./queue/queue.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
@@ -48,6 +50,7 @@ import { StripeModule } from "./stripe/stripe.module";
 import { StudentLessonProgressModule } from "./studentLessonProgress/studentLessonProgress.module";
 import { TestConfigModule } from "./test-config/test-config.module";
 import { UserModule } from "./user/user.module";
+import { WebSocketModule } from "./websocket/websocket.module";
 
 @Module({
   imports: [
@@ -115,11 +118,14 @@ import { UserModule } from "./user/user.module";
     StatisticsModule,
     ScormModule,
     CacheModule,
+    QueueModule,
+    WebSocketModule,
     AiModule,
     SettingsModule,
     CertificatesModule,
     AnnouncementsModule,
     IngestionModule,
+    LearningTimeModule,
     EnvModule,
     LocalizationModule,
   ],
