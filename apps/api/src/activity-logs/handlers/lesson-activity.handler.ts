@@ -10,6 +10,7 @@ import {
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
+import { buildActivityLogMetadata } from "../utils/build-activity-log-metadata";
 
 type LessonEventType =
   | LessonCompletedEvent
@@ -51,26 +52,60 @@ export class LessonActivityHandler implements IEventHandler<LessonEventType> {
   private async handleCreateLesson(event: CreateLessonEvent) {
     const { lessonCreationData } = event;
 
+    const context: Record<string, string> = {
+      lessonType: lessonCreationData.createdLesson.type,
+    };
+
+    const metadata = buildActivityLogMetadata({
+      previous: {},
+      updated: lessonCreationData.createdLesson,
+      schema: "create",
+      context,
+    });
+
     await this.activityLogsService.recordActivity({
       actorId: lessonCreationData.createdById,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LESSON,
       resourceId: lessonCreationData.lessonId,
+      after: metadata.after,
+      context: metadata.context ?? null,
     });
   }
 
   private async handleUpdateLesson(event: UpdateLessonEvent) {
     const { lessonUpdateData } = event;
 
+    const lessonType =
+      lessonUpdateData.updatedLessonData?.type ?? lessonUpdateData.previousLessonData?.type ?? "";
+
+    const context: Record<string, string> = {
+      lessonType,
+    };
+
+    const quizSummary =
+      lessonUpdateData.updatedLessonData?.quizSummary ??
+      lessonUpdateData.previousLessonData?.quizSummary;
+
+    if (quizSummary?.length) {
+      context.quizSummary = quizSummary.join(" | ");
+    }
+
+    const metadata = buildActivityLogMetadata({
+      previous: lessonUpdateData.previousLessonData,
+      updated: lessonUpdateData.updatedLessonData,
+      context,
+    });
+
     await this.activityLogsService.recordActivity({
       actorId: lessonUpdateData.updatedById,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LESSON,
       resourceId: lessonUpdateData.lessonId,
-      changedFields: lessonUpdateData.metadata.changedFields,
-      before: lessonUpdateData.metadata.before,
-      after: lessonUpdateData.metadata.after,
-      context: lessonUpdateData.metadata.context ?? null,
+      changedFields: metadata.changedFields,
+      before: metadata.before,
+      after: metadata.after,
+      context: metadata.context ?? null,
     });
   }
 

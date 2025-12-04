@@ -5,12 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { FileService } from "src/file/file.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
@@ -35,7 +37,9 @@ import type {
   CreateEmbedLessonBody,
   UpdateEmbedLessonBody,
 } from "../lesson.schema";
+import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
+import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { UserRole } from "src/user/schemas/userRoles";
 
@@ -49,6 +53,7 @@ export class AdminLessonService {
     private documentService: DocumentService,
     private fileService: FileService,
     private localizationService: LocalizationService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async createLessonForChapter(
@@ -89,6 +94,16 @@ export class AdminLessonService {
 
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
 
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        createdById: currentUserId,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
+
     return lesson.id;
   }
 
@@ -98,6 +113,11 @@ export class AdminLessonService {
     currentUserRole: UserRole,
   ) {
     await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
@@ -115,7 +135,19 @@ export class AdminLessonService {
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
-    return lesson?.id;
+    if (!lesson) throw new BadRequestException("Failed to create AI mentor lesson");
+
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        createdById: currentUserId,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
+
+    return lesson.id;
   }
 
   async createQuizLesson(
@@ -150,7 +182,19 @@ export class AdminLessonService {
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
-    return lesson?.id;
+    if (!lesson) throw new BadRequestException("Failed to create quiz lesson");
+
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        createdById: authorId,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
+
+    return lesson.id;
   }
   async updateAiMentorLesson(
     id: UUIDType,
@@ -183,7 +227,22 @@ export class AdminLessonService {
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
 
-    return await this.updateAiMentorLessonWithTransaction(id, data, currentUserId);
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    const updatedLesson = await this.updateAiMentorLessonWithTransaction(id, data, currentUserId);
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: id,
+        updatedById: currentUserId,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
+    );
+
+    return updatedLesson?.id ?? id;
   }
 
   async updateQuizLesson(
@@ -216,7 +275,26 @@ export class AdminLessonService {
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
-    return this.updateQuizLessonWithQuestionsAndOptions(id, data, currentUserId);
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    const updatedLessonId = await this.updateQuizLessonWithQuestionsAndOptions(
+      id,
+      data,
+      currentUserId,
+    );
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: id,
+        updatedById: currentUserId,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
+    );
+
+    return updatedLessonId;
   }
 
   async updateLesson(
@@ -255,7 +333,21 @@ export class AdminLessonService {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
 
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
     const updatedLesson = await this.adminLessonRepository.updateLesson(id, data);
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: id,
+        updatedById: currentUserId,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
+    );
+
     return updatedLesson.id;
   }
 
@@ -274,6 +366,14 @@ export class AdminLessonService {
       await this.adminLessonRepository.updateLessonDisplayOrderAfterRemove(lesson.chapterId, trx);
       await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, trx);
     });
+
+    await this.eventBus.publish(
+      new DeleteLessonEvent({
+        lessonId: lesson.id,
+        deletedById: currentUserId,
+        lessonName: lesson.title,
+      }),
+    );
   }
 
   async updateLessonDisplayOrder(lessonObject: {
@@ -296,11 +396,35 @@ export class AdminLessonService {
       throw new NotFoundException("Lesson not found");
     }
 
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      lessonObject.lessonId,
+    );
+
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(
+      lessonObject.lessonId,
+      language,
+    );
+
     await this.adminLessonRepository.updateLessonDisplayOrder(
       lessonToUpdate.chapterId,
       lessonToUpdate.id,
       lessonObject.displayOrder,
       oldDisplayOrder,
+    );
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(
+      lessonObject.lessonId,
+      language,
+    );
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: lessonObject.lessonId,
+        updatedById: lessonObject.currentUserId,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
     );
   }
 
@@ -353,7 +477,7 @@ export class AdminLessonService {
         throw new BadRequestException("This course does not support this language");
       }
 
-      const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
+      const [updatedLesson] = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
 
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
         throw new BadRequestException("Instructions and conditions required");
@@ -590,6 +714,16 @@ export class AdminLessonService {
       await this.adminLessonRepository.createLessonResources(resourcesToInsert);
     }
 
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        createdById: currentUserId,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
+
     return lesson;
   }
 
@@ -621,36 +755,48 @@ export class AdminLessonService {
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
+
     const updatedLesson = await this.adminLessonRepository.updateLesson(lessonId, data);
 
     if (data.resources && data.resources.length === 0) {
       await this.adminLessonRepository.deleteLessonResources(lessonId);
-      return updatedLesson.id;
+    } else if (data.resources) {
+      const existingResourcesIds = (
+        await this.adminLessonRepository.getLessonResourcesForLesson(lessonId)
+      ).map((r) => r.id);
+
+      const resourceIdsToDelete = existingResourcesIds.filter(
+        (existingId) =>
+          !data.resources
+            .map((res) => res.id)
+            .filter((id): id is UUIDType => id !== undefined)
+            .includes(existingId),
+      );
+
+      if (resourceIdsToDelete.length > 0)
+        await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
+
+      const resourcesToUpdate = data.resources.map((resource: LessonResource, index) => ({
+        ...resource,
+        lessonId,
+        displayOrder: index + 1,
+      }));
+
+      if (resourcesToUpdate.length > 0)
+        await this.adminLessonRepository.upsertLessonResources(resourcesToUpdate);
     }
 
-    const existingResourcesIds = (
-      await this.adminLessonRepository.getLessonResourcesForLesson(lessonId)
-    ).map((r) => r.id);
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
 
-    const resourceIdsToDelete = existingResourcesIds.filter(
-      (existingId) =>
-        !data.resources
-          .map((res) => res.id)
-          .filter((id): id is UUIDType => id !== undefined)
-          .includes(existingId),
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId,
+        updatedById: currentUserId,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
     );
-
-    if (resourceIdsToDelete.length > 0)
-      await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
-
-    const resourcesToUpdate = data.resources.map((resource: LessonResource, index) => ({
-      ...resource,
-      lessonId,
-      displayOrder: index + 1,
-    }));
-
-    if (resourcesToUpdate.length > 0)
-      await this.adminLessonRepository.upsertLessonResources(resourcesToUpdate);
 
     return updatedLesson.id;
   }
@@ -706,6 +852,72 @@ export class AdminLessonService {
     const { fileKey } = await this.fileService.uploadFile(file, "lessons/ai-mentor-avatars");
 
     await this.adminLessonRepository.updateAiMentorAvatar(lessonId, fileKey);
+  }
+
+  private async buildLessonActivitySnapshot(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<LessonActivityLogSnapshot> {
+    const [lesson] = await this.adminLessonRepository.getLesson(lessonId, language);
+
+    if (!lesson) throw new NotFoundException("Lesson not found");
+
+    const lessonResources = await this.adminLessonRepository.getLessonResourcesForLesson(lessonId);
+
+    const questions =
+      lesson.type === LESSON_TYPES.QUIZ
+        ? await this.adminLessonRepository.getQuestionsWithOptions(lessonId, language)
+        : [];
+
+    return {
+      id: lesson.id,
+      title: lesson.title,
+      description: lesson.description,
+      type: lesson.type as LessonTypes,
+      fileS3Key: lesson.fileS3Key,
+      fileType: lesson.fileType,
+      isExternal: lesson.isExternal ?? false,
+      chapterId: lesson.chapterId,
+      displayOrder: lesson.displayOrder,
+      thresholdScore: lesson.thresholdScore,
+      attemptsLimit: lesson.attemptsLimit,
+      quizCooldownInHours: lesson.quizCooldownInHours,
+      lessonResources: lessonResources.map((resource) => ({
+        id: resource.id,
+        source: resource.source,
+        type: resource.type,
+        isExternal: resource.isExternal,
+        allowFullscreen: resource.allowFullscreen,
+        displayOrder: resource.displayOrder,
+      })),
+      questions: questions.map((question) => ({
+        id: question.id,
+        title: question.title,
+        description: question.description,
+        solutionExplanation: question.solutionExplanation,
+        type: question.type,
+        photoS3Key: question.photoS3Key,
+        displayOrder: question.displayOrder,
+        options: question.options?.map((option) => ({
+          id: option.id,
+          optionText: option.optionText,
+          isCorrect: option.isCorrect,
+          displayOrder: option.displayOrder,
+          matchedWord: option.matchedWord,
+          scaleAnswer: option.scaleAnswer,
+        })),
+      })),
+      aiMentor:
+        lesson.type === LESSON_TYPES.AI_MENTOR
+          ? {
+              aiMentorInstructions: lesson.aiMentorInstructions,
+              completionConditions: lesson.aiMentorCompletionConditions,
+              name: lesson.aiMentorName,
+              avatarReference: lesson.aiMentorAvatarReference,
+              type: lesson.aiMentorType,
+            }
+          : undefined,
+    };
   }
 
   async validateAccess(

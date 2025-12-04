@@ -1,10 +1,11 @@
-import type { ActivityLogUpdateMetadata } from "src/activity-logs/types";
+import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 
 type LessonUpdateData = {
   lessonId: UUIDType;
   updatedById: UUIDType;
-  metadata: ActivityLogUpdateMetadata;
+  previousLessonData: LessonActivityLogSnapshot | null;
+  updatedLessonData: LessonActivityLogSnapshot | null;
 };
 
 export class UpdateLessonEvent {
