@@ -3,9 +3,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip
 
 interface CourseAdminStatisticsCardProps {
   title: string;
-  statistic: number;
+  statistic: number | string;
   tooltipText: string;
-  type?: "number" | "percentage";
+  type?: "number" | "percentage" | "text";
 }
 
 export function CourseAdminStatisticsCard({
@@ -14,6 +14,13 @@ export function CourseAdminStatisticsCard({
   tooltipText,
   type,
 }: CourseAdminStatisticsCardProps) {
+  const formatStatistic = () => {
+    if (type === "percentage") return `${statistic}%`;
+    if (type === "text") return statistic;
+
+    return statistic;
+  };
+
   return (
     <div className="rounded-sm p-6 outline outline-1 outline-neutral-200 flex flex-col justify-center">
       <div className="flex items-center gap-2">
@@ -27,7 +34,7 @@ export function CourseAdminStatisticsCard({
           </TooltipContent>
         </Tooltip>
       </div>
-      <p className="h5">{type === "percentage" ? `${statistic}%` : statistic}</p>
+      <p className="h5">{formatStatistic()}</p>
     </div>
   );
 }

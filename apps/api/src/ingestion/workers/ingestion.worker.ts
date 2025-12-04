@@ -1,33 +1,30 @@
 import { Injectable, type OnModuleDestroy } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { Worker } from "bullmq";
 
-import { buildRedisConnection } from "src/common/configuration/redis";
 import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
 import { DocumentRepository } from "src/ingestion/repositories/document.repository";
 import { ChunkService } from "src/ingestion/services/chunk.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { EmbeddingService } from "src/ingestion/services/embedding.service";
+import { QUEUE_NAMES, QueueService } from "src/queue";
 
 import type { Job } from "bullmq";
-import type { RedisConfigSchema } from "src/common/configuration/redis";
 
 @Injectable()
 export class IngestionWorker implements OnModuleDestroy {
   private worker: Worker;
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly queueService: QueueService,
     private readonly chunkService: ChunkService,
     private readonly documentRepository: DocumentRepository,
     private readonly documentService: DocumentService,
     private readonly embeddingService: EmbeddingService,
   ) {
-    const redisCfg = this.configService.get("redis") as RedisConfigSchema;
-    const connection = redisCfg && buildRedisConnection(redisCfg);
+    const connection = this.queueService.getConnection();
 
     this.worker = new Worker(
-      "document-ingestion",
+      QUEUE_NAMES.DOCUMENT_INGESTION,
       async (job: Job) => {
         try {
           const newFile = {

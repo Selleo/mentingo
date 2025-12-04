@@ -435,6 +435,13 @@
       "when": 1764757719707,
       "tag": "0061_added_locales_to_courses",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1764868486886,
+      "tag": "0062_create_lesson_learning_time_table",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,7 @@ import { forwardRef, Module } from "@nestjs/common";
 
 import { ChapterModule } from "src/chapter/chapter.module";
 import { FileModule } from "src/file/files.module";
+import { LearningTimeModule } from "src/learning-time/learning-time.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
@@ -19,6 +20,7 @@ import { CourseService } from "./course.service";
     StatisticsModule,
     ChapterModule,
     LessonModule,
+    LearningTimeModule,
     SettingsModule,
     LocalizationModule,
     forwardRef(() => StripeModule),
