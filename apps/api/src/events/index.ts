@@ -15,3 +15,5 @@ export * from "./user/user-course-finished.event";
 export * from "./user/user-assigned-to-course.event";
 export * from "./course/update-course.event";
 export * from "./course/create-course.event";
+export * from "./announcement/create-announcement.event";
+export * from "./announcement/view-announcement.event";

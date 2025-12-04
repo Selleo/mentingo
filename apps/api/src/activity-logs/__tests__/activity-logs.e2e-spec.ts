@@ -1,18 +1,19 @@
 import { eq } from "drizzle-orm";
 
+import { AnnouncementsService } from "src/announcements/announcements.service";
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { CourseService } from "src/courses/course.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { activityLogs } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
-import { createE2ETest } from "test/create-e2e-test";
-import { createCategoryFactory } from "test/factory/category.factory";
-import { createCourseFactory } from "test/factory/course.factory";
-import { createSettingsFactory } from "test/factory/settings.factory";
-import { createUserFactory } from "test/factory/user.factory";
-import { truncateAllTables } from "test/helpers/test-helpers";
 
+import { createE2ETest } from "../../../test/create-e2e-test";
+import { createCategoryFactory } from "../../../test/factory/category.factory";
+import { createCourseFactory } from "../../../test/factory/course.factory";
+import { createSettingsFactory } from "../../../test/factory/settings.factory";
+import { createUserFactory } from "../../../test/factory/user.factory";
+import { truncateAllTables } from "../../../test/helpers/test-helpers";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 
 import type { INestApplication } from "@nestjs/common";
@@ -25,10 +26,11 @@ import type { CreateLessonBody, UpdateLessonBody } from "src/lesson/lesson.schem
 describe("Activity Logs E2E", () => {
   let app: INestApplication;
 
-  let db: DatabasePg;
   let adminChapterService: AdminChapterService;
+  let announcementsService: AnnouncementsService;
   let adminLessonService: AdminLessonService;
   let courseService: CourseService;
+  let db: DatabasePg;
 
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
@@ -43,6 +45,7 @@ describe("Activity Logs E2E", () => {
 
     db = app.get("DB");
     adminChapterService = app.get(AdminChapterService);
+    announcementsService = app.get(AnnouncementsService);
     adminLessonService = app.get(AdminLessonService);
     courseService = app.get(CourseService);
 
@@ -63,7 +66,7 @@ describe("Activity Logs E2E", () => {
     await settingsFactory.create();
 
     const adminUser = await userFactory.withAdminRole().create();
-    adminUserId = adminUser.id as UUIDType;
+    adminUserId = adminUser.id;
   });
 
   const getLogsForResource = async (resourceId: UUIDType) =>
@@ -105,7 +108,7 @@ describe("Activity Logs E2E", () => {
       const course = await courseFactory.create({ authorId: adminUserId });
 
       const createBody: CreateChapterBody = {
-        courseId: course.id as UUIDType,
+        courseId: course.id,
         title: "Initial Chapter",
         isFreemium: false,
       };
@@ -116,7 +119,7 @@ describe("Activity Logs E2E", () => {
         USER_ROLES.ADMIN,
       );
 
-      return chapterId as UUIDType;
+      return chapterId;
     };
 
     it("should record CREATE activity log when chapter is created", async () => {
@@ -177,7 +180,7 @@ describe("Activity Logs E2E", () => {
 
       const { id: chapterId } = await adminChapterService.createChapterForCourse(
         {
-          courseId: course.id as UUIDType,
+          courseId: course.id,
           title: "Lesson Chapter",
           isFreemium: false,
         },
@@ -187,7 +190,7 @@ describe("Activity Logs E2E", () => {
 
       const lessonId = await adminLessonService.createLessonForChapter(
         {
-          chapterId: chapterId as UUIDType,
+          chapterId: chapterId,
           title: "Initial Lesson",
           type: LESSON_TYPES.TEXT,
           description: "Lesson description",
@@ -196,7 +199,7 @@ describe("Activity Logs E2E", () => {
         USER_ROLES.ADMIN,
       );
 
-      return lessonId as UUIDType;
+      return lessonId;
     };
 
     it("should record CREATE activity log when lesson is created", async () => {
@@ -259,7 +262,7 @@ describe("Activity Logs E2E", () => {
         title: "Initial Course",
         description: "Course description",
         status: "draft",
-        categoryId: category.id as UUIDType,
+        categoryId: category.id,
         language: "en",
         hasCertificate: false,
       };
@@ -270,7 +273,7 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when course is created", async () => {
       const course = await createCourse();
 
-      const [createLog] = await waitForLogs(course.id as UUIDType);
+      const [createLog] = await waitForLogs(course.id);
       const createMetadata = parseMetadata(createLog.metadata);
 
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
@@ -287,15 +290,9 @@ describe("Activity Logs E2E", () => {
         language: "en",
       } satisfies UpdateCourseBody & { hasCertificate: boolean };
 
-      await courseService.updateCourse(
-        course.id as UUIDType,
-        updateBody,
-        adminUserId,
-        USER_ROLES.ADMIN,
-        true,
-      );
+      await courseService.updateCourse(course.id, updateBody, adminUserId, USER_ROLES.ADMIN, true);
 
-      const logsAfterUpdate = await waitForLogs(course.id as UUIDType, 2);
+      const logsAfterUpdate = await waitForLogs(course.id, 2);
       const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
       const updateMetadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(updateMetadata);
@@ -305,6 +302,51 @@ describe("Activity Logs E2E", () => {
       expect(changedFields).toEqual(expect.arrayContaining(["title", "hasCertificate"]));
       expect(updateMetadata.after?.title).toBe("Updated Course");
       expect(updateMetadata.after?.hasCertificate).toBe("true");
+    });
+  });
+
+  describe("Announcement activity logs", () => {
+    it("should record CREATE activity log when announcement is created", async () => {
+      const announcement = await announcementsService.createAnnouncement(
+        {
+          title: "Initial Announcement",
+          content: "Announcement content",
+          groupId: null,
+        },
+        adminUserId,
+      );
+
+      const [createLog] = await waitForLogs(announcement.id);
+      const createMetadata = parseMetadata(createLog.metadata);
+
+      expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
+      expect(createLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.ANNOUNCEMENT);
+      expect(createMetadata.after.title).toBe("Initial Announcement");
+    });
+
+    it("should record VIEW_ANNOUNCEMENT activity log when announcement is read", async () => {
+      const student = await userFactory.create();
+
+      const announcement = await announcementsService.createAnnouncement(
+        {
+          title: "Initial Announcement",
+          content: "Announcement content",
+          groupId: null,
+        },
+        adminUserId,
+      );
+
+      await announcementsService.markAnnouncementAsRead(announcement.id, student.id);
+
+      const logsAfterRead = await waitForLogs(announcement.id, 2);
+      const viewLog = logsAfterRead[logsAfterRead.length - 1];
+      const viewMetadata = parseMetadata(viewLog.metadata);
+
+      expect(viewLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.VIEW_ANNOUNCEMENT);
+      expect(viewLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.ANNOUNCEMENT);
+      expect(viewLog.actorId).toBe(student.id);
+      expect(viewLog.resourceId).toBe(announcement.id);
+      expect(viewMetadata.context?.audience).toBe("everyone");
     });
   });
 });

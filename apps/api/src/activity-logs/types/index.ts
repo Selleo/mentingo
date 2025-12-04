@@ -143,3 +143,12 @@ export type ChapterActivityLogSnapshot = {
   isFreemium?: boolean;
   lessonCount?: number | null;
 };
+
+export type AnnouncementActivityLogSnapshot = {
+  id: UUIDType;
+  title?: string | null;
+  content?: string | null;
+  authorId?: UUIDType | null;
+  isEveryone?: boolean;
+  groupId?: UUIDType | null;
+};
