@@ -1378,7 +1378,11 @@
         "completedBy_one": "Completed by {{count}} student",
         "completedBy_other": "Completed by {{count}} students",
         "courseStatusDistribution": "Course status distribution",
-        "courseStatusDistributionTooltip": "Shows how many users have completed, started, or not started the course."
+        "courseStatusDistributionTooltip": "Shows how many users have completed, started, or not started the course.",
+        "totalLearningTime": "Total learning time",
+        "totalLearningTimeTooltip": "Total time spent by all users on this course.",
+        "activeStudents": "Active students",
+        "activeStudentsTooltip": "Number of students who have engaged with the course."
       },
       "empty": {
         "noUsers": "No users",
