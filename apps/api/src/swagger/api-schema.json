@@ -8954,8 +8954,7 @@
               "id",
               "name",
               "createdAt",
-              "updatedAt",
-              "settings"
+              "updatedAt"
             ]
           }
         },
@@ -9085,8 +9084,7 @@
                 "id",
                 "name",
                 "createdAt",
-                "updatedAt",
-                "settings"
+                "updatedAt"
               ]
             }
           }
