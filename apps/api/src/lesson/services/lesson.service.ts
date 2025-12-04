@@ -121,8 +121,8 @@ export class LessonService {
 
       let avatarUrl = undefined;
 
-      if (lesson.aiMentor?.avatarReference) {
-        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+      if (lesson.aiMentor?.avatarReferenceUrl) {
+        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReferenceUrl);
       }
 
       return {
@@ -392,8 +392,8 @@ export class LessonService {
 
     const tags = $("a").toArray();
 
-    const tagsWithImages = tags.filter((tag) =>
-      $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
+    const tagsWithImages = tags.filter(
+      (tag) => $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
     );
 
     tagsWithImages.forEach((tag) => {
