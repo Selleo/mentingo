@@ -15,7 +15,7 @@ import {
 import { DOCUMENT_STATUS } from "src/ingestion/ingestion.constants";
 import { IngestionRepository } from "src/ingestion/repositories/ingestion.repository";
 import { DocumentService } from "src/ingestion/services/document.service";
-import { QueueService } from "src/ingestion/services/queue.service";
+import { IngestionQueueService } from "src/ingestion/services/queue.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { Job } from "bullmq";
@@ -28,7 +28,7 @@ export class IngestionService {
     @Inject("DB") private readonly db: DatabasePg,
     private readonly ingestionRepository: IngestionRepository,
     private readonly documentService: DocumentService,
-    private readonly queueService: QueueService,
+    private readonly queueService: IngestionQueueService,
   ) {}
 
   async ingest(
