@@ -395,9 +395,9 @@ export class StatisticsRepository {
       FROM next_lesson nl
       JOIN courses ON nl.course_id = courses.id
       JOIN chapters ON nl.chapter_id = chapters.id
-      JOIN student_courses sc ON sc.course_id = c.id AND sc.student_id = ${studentId}
+      JOIN student_courses sc ON sc.course_id = courses.id AND sc.student_id = ${studentId}
       LEFT JOIN student_chapter_progress scp ON chapters.id = scp.chapter_id 
-        AND scp.student_id = ${studentId};
+        AND scp.student_id = ${studentId}
       WHERE sc.status = ${COURSE_ENROLLMENT.ENROLLED};
     `)) as unknown as NextLesson[];
 
