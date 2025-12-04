@@ -42,6 +42,7 @@ export const allCoursesQueryOptions = (
       ...(searchParams?.state && { status: searchParams.state }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
       ...(searchParams?.archived && { archived: searchParams.archived }),
+      language: "en",
       page: 1,
       perPage: 100,
     });

@@ -3,6 +3,7 @@
 // @ts-nocheck
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -182,7 +183,12 @@ export const useQuizLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateQuizLesson({
-          data: { ...values, questions: updatedQuestions, type: LessonType.QUIZ },
+          data: {
+            ...values,
+            questions: updatedQuestions,
+            type: LessonType.QUIZ,
+            language: SUPPORTED_LANGUAGES.EN,
+          },
           lessonId: lessonToEdit.id,
         });
       } else {
@@ -192,6 +198,7 @@ export const useQuizLessonForm = ({
             questions: updatedQuestions,
             type: LessonType.QUIZ,
             chapterId: chapterToEdit.id,
+            language: SUPPORTED_LANGUAGES.EN,
           },
         });
       }

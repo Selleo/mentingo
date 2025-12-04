@@ -16,12 +16,12 @@ import {
   PasswordRecoveryEmail,
   WelcomeEmail,
 } from "@repo/email-templates";
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
 import { and, eq, isNull, lt, lte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 
-import { type Languages, SUPPORTED_LANGUAGES, type SupportedLanguages } from "src/ai/utils/ai.type";
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
@@ -133,7 +133,7 @@ export class AuthService {
 
     await this.emailService.sendEmailWithLogo({
       to: email,
-      subject: getEmailSubject("welcomeEmail", createdSettings.language as Languages),
+      subject: getEmailSubject("welcomeEmail", createdSettings.language as SupportedLanguages),
       text: emailTemplate.text,
       html: emailTemplate.html,
     });

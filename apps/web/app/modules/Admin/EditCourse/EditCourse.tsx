@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -39,7 +40,13 @@ const EditCourse = () => {
   const navigate = useNavigate();
 
   if (!id) throw new Error("Course ID not found");
-  const { data: course, isLoading, dataUpdatedAt, error } = useBetaCourseById(id);
+
+  const {
+    data: course,
+    isLoading,
+    dataUpdatedAt,
+    error,
+  } = useBetaCourseById(id, SUPPORTED_LANGUAGES.EN);
 
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
 
@@ -80,7 +87,7 @@ const EditCourse = () => {
       >
         <div className="flex w-full flex-col gap-y-4 rounded-lg border border-gray-200 bg-white px-8 py-6 shadow-md">
           <div className="flex items-center justify-between">
-            <h4 className="h4 flex items-center text-neutral-950 break-all">
+            <h4 className="h4 flex items-center text-neutral-950 mr-2 break-all">
               {course?.title || ""}
 
               {course?.status === "published" && (
@@ -115,14 +122,15 @@ const EditCourse = () => {
             </h4>
             <Button
               asChild
-              className="flex justify-end border border-neutral-200 bg-transparent text-accent-foreground"
+              className="border border-neutral-200 bg-transparent text-accent-foreground"
             >
               <Link to={`/course/${course?.id}`}>
                 <Icon name="Eye" className="mr-2" />
-                {t("adminCourseView.common.preview")}{" "}
+                {t("adminCourseView.common.preview")}
               </Link>
             </Button>
           </div>
+
           <TabsList className="w-min">
             {courseTabs.map(({ label, value }) => (
               <TabsTrigger key={value} value={value} onClick={() => handleTabChange(value)}>

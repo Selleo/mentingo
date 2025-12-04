@@ -31,18 +31,19 @@ import { isEmpty } from "lodash";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { EnvService } from "src/env/services/env.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
+import { LocalizationService } from "src/localization/localization.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
-import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
@@ -102,6 +103,7 @@ import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment"
 import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { BaseResponse, Pagination, UUIDType } from "src/common";
 import type {
@@ -124,6 +126,7 @@ export class CourseService {
     private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
     private readonly envService: EnvService,
+    private readonly localizationService: LocalizationService,
     private readonly eventBus: EventBus,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
@@ -139,6 +142,7 @@ export class CourseService {
       sort = CourseSortFields.title,
       currentUserId,
       currentUserRole,
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -152,8 +156,8 @@ export class CourseService {
     const queryDB = this.db
       .select({
         id: courses.id,
-        title: courses.title,
-        description: sql<string>`${courses.description}`,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        description: this.localizationService.getLocalizedSqlField(courses.description, language),
         thumbnailUrl: courses.thumbnailS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorAvatarUrl: sql<string>`${users.avatarReference}`,
@@ -187,6 +191,8 @@ export class CourseService {
         coursesSummaryStats.freePurchasedCount,
         coursesSummaryStats.paidPurchasedCount,
         courses.createdAt,
+        courses.availableLocales,
+        courses.baseLanguage,
       )
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -238,6 +244,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       filters = {},
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -252,7 +259,7 @@ export class CourseService {
       conditions.push(...this.getFiltersConditions(filters, false));
 
       const queryDB = trx
-        .select(this.getSelectField())
+        .select(this.getSelectField(language))
         .from(studentCourses)
         .innerJoin(courses, eq(studentCourses.courseId, courses.id))
         .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -274,6 +281,8 @@ export class CourseService {
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
           studentCourses.finishedChapterCount,
+          courses.availableLocales,
+          courses.baseLanguage,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -398,6 +407,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       filters = {},
+      language,
     } = query;
     const { sortOrder, sortedField } = getSortOptions(sort);
 
@@ -419,8 +429,8 @@ export class CourseService {
       const queryDB = trx
         .select({
           id: courses.id,
-          description: sql<string>`${courses.description}`,
-          title: courses.title,
+          title: this.localizationService.getLocalizedSqlField(courses.title, language),
+          description: this.localizationService.getLocalizedSqlField(courses.description, language),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
           authorId: sql<string>`${courses.authorId}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -460,6 +470,8 @@ export class CourseService {
           categories.title,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
+          courses.availableLocales,
+          courses.baseLanguage,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -505,7 +517,11 @@ export class CourseService {
     });
   }
 
-  async getCourse(id: UUIDType, userId: UUIDType): Promise<CommonShowCourse> {
+  async getCourse(
+    id: UUIDType,
+    userId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<CommonShowCourse> {
     //TODO: to remove
     const testDeployment = "test";
 
@@ -514,10 +530,10 @@ export class CourseService {
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: courses.title,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
         category: sql<string>`${categories.title}`,
-        description: sql<string>`${courses.description}`,
+        description: this.localizationService.getLocalizedSqlField(courses.description, language),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
@@ -555,7 +571,7 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: chapters.title,
+        title: this.localizationService.getLocalizedSqlField(chapters.title, language),
         isSubmitted: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -597,13 +613,22 @@ export class CourseService {
               FROM (
                 SELECT
                   ${lessons.id} AS id,
-                  ${lessons.title} AS title,
+                  ${this.localizationService.getLocalizedSqlField(
+                    lessons.title,
+                    language,
+                  )} AS title,
                   ${lessons.type} AS type,
                   ${lessons.displayOrder} AS "displayOrder",
                   ${lessons.isExternal} AS "isExternal",
                   CASE
-                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${PROGRESS_STATUSES.BLOCKED}
-                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${studentLessonProgress.isQuizPassed} IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${PROGRESS_STATUSES.COMPLETED}
+                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${
+                      PROGRESS_STATUSES.BLOCKED
+                    }
+                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${
+                      studentLessonProgress.isQuizPassed
+                    } IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${
+                      PROGRESS_STATUSES.COMPLETED
+                    }
                     WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
@@ -612,9 +637,12 @@ export class CourseService {
                     ELSE NULL
                   END AS "quizQuestionCount"
                 FROM ${lessons}
-                LEFT JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
+                LEFT JOIN ${studentLessonProgress} ON ${lessons.id} = ${
+                  studentLessonProgress.lessonId
+                }
                   AND ${studentLessonProgress.studentId} = ${userId}
                 LEFT JOIN ${questions} ON ${lessons.id} = ${questions.lessonId}
+                LEFT JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
                 WHERE ${lessons.chapterId} = ${chapters.id}
                 GROUP BY
                   ${lessons.id},
@@ -625,7 +653,9 @@ export class CourseService {
                   ${studentLessonProgress.completedQuestionCount},
                   ${studentLessonProgress.isStarted},
                   ${chapters.isFreemium},
-                  ${studentLessonProgress.isQuizPassed}
+                  ${studentLessonProgress.isQuizPassed},
+                  ${courses.availableLocales},
+                  ${courses.baseLanguage}
                 ORDER BY ${lessons.displayOrder}
               ) AS lesson_data
             ),
@@ -645,6 +675,7 @@ export class CourseService {
         studentCourses,
         and(eq(studentCourses.courseId, course.id), eq(studentCourses.studentId, userId)),
       )
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
@@ -657,15 +688,20 @@ export class CourseService {
     };
   }
 
-  async getBetaCourseById(id: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
+  async getBetaCourseById(
+    id: UUIDType,
+    language: SupportedLanguages,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: courses.title,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailS3Key: sql<string>`COALESCE(${courses.thumbnailS3Key}, '')`,
         category: categories.title,
         categoryId: categories.id,
-        description: sql<string>`${courses.description}`,
+        description: this.localizationService.getLocalizedSqlField(courses.description, language),
         courseChapterCount: courses.chapterCount,
         status: courses.status,
         priceInCents: courses.priceInCents,
@@ -686,7 +722,7 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: chapters.title,
+        title: this.localizationService.getLocalizedSqlField(chapters.title, language),
         displayOrder: sql<number>`${chapters.displayOrder}`,
         lessonCount: chapters.lessonCount,
         updatedAt: chapters.updatedAt,
@@ -703,6 +739,7 @@ export class CourseService {
         `,
       })
       .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
@@ -713,7 +750,7 @@ export class CourseService {
     const updatedCourseLessonList = await Promise.all(
       courseChapterList?.map(async (chapter) => {
         const lessons: AdminLessonWithContentSchema[] =
-          await this.adminChapterRepository.getBetaChapterLessons(chapter.id);
+          await this.adminChapterRepository.getBetaChapterLessons(chapter.id, language);
 
         const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(lessons);
 
@@ -739,6 +776,7 @@ export class CourseService {
     title,
     description,
     searchQuery,
+    language,
   }: {
     currentUserId: UUIDType;
     authorId: UUIDType;
@@ -747,6 +785,7 @@ export class CourseService {
     title?: string;
     description?: string;
     searchQuery?: string;
+    language: SupportedLanguages;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
@@ -773,18 +812,31 @@ export class CourseService {
     }
 
     if (title) {
-      conditions.push(ilike(courses.title, `%${title}%`));
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${title}%`})`,
+      );
     }
 
     if (description) {
-      conditions.push(ilike(courses.description, `%${description}%`));
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${description}%`})`,
+      );
     }
 
     if (searchQuery) {
       const searchCondition = or(
-        ilike(courses.title, `%${searchQuery}%`),
-        ilike(courses.description, `%${searchQuery}%`),
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
       );
+
       if (searchCondition) {
         conditions.push(searchCondition);
       }
@@ -793,8 +845,8 @@ export class CourseService {
     const contentCreatorCourses = await this.db
       .select({
         id: courses.id,
-        description: sql<string>`${courses.description}`,
-        title: courses.title,
+        description: this.localizationService.getLocalizedSqlField(courses.description, language),
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailUrl: courses.thumbnailS3Key,
         authorId: sql<string>`${courses.authorId}`,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -835,6 +887,8 @@ export class CourseService {
         users.avatarReference,
         studentCourses.studentId,
         categories.title,
+        courses.availableLocales,
+        courses.baseLanguage,
         studentCourses.status,
       )
       .orderBy(
@@ -955,8 +1009,8 @@ export class CourseService {
       const [newCourse] = await trx
         .insert(courses)
         .values({
-          title: createCourseBody.title,
-          description: createCourseBody.description,
+          title: buildJsonbField(createCourseBody.language, createCourseBody.title),
+          description: buildJsonbField(createCourseBody.language, createCourseBody.description),
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
           status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
@@ -1024,10 +1078,12 @@ export class CourseService {
         }
       }
 
-      const { priceInCents, currency, ...rest } = updateCourseBody;
+      const { priceInCents, currency, title, description, ...rest } = updateCourseBody;
 
       const updateData = {
         ...rest,
+        title: buildJsonbField(rest.language, title),
+        description: buildJsonbField(rest.language, description),
         ...(isStripeConfigured ? { priceInCents, currency } : {}),
         ...(imageKey && { imageUrl: imageKey.fileUrl }),
       };
@@ -1046,8 +1102,10 @@ export class CourseService {
         // --- create stripe product if it doesn't exist yet ---
         if (!updatedCourse.stripeProductId) {
           const { productId, priceId } = await this.stripeService.createProduct({
-            name: updatedCourse.title,
-            description: updatedCourse.description ?? "",
+            name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
+            description:
+              (updatedCourse.description as Record<string, string>)[updatedCourse.baseLanguage] ??
+              "",
             amountInCents: updatedCourse.priceInCents ?? 0,
             currency: updatedCourse.currency ?? "usd",
           });
@@ -1061,12 +1119,14 @@ export class CourseService {
             .where(eq(courses.id, id));
         } else {
           // --- stripe product update ---
-          const productUpdatePayload = {
-            ...(updateCourseBody.title && { name: updateCourseBody.title }),
-            ...(updateCourseBody.description && { description: updateCourseBody.description }),
-          };
+          if (updateCourseBody.language === updatedCourse.baseLanguage) {
+            const productUpdatePayload = {
+              name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
+              description: (updatedCourse.description as Record<string, string>)[
+                updatedCourse.baseLanguage
+              ],
+            };
 
-          if (hasDataToUpdate(productUpdatePayload)) {
             await this.stripeService.updateProduct(
               updatedCourse.stripeProductId,
               productUpdatePayload,
@@ -1576,11 +1636,11 @@ export class CourseService {
     );
   }
 
-  private getSelectField() {
+  private getSelectField(language: SupportedLanguages) {
     return {
       id: courses.id,
-      description: sql<string>`${courses.description}`,
-      title: courses.title,
+      title: this.localizationService.getLocalizedSqlField(courses.title, language),
+      description: this.localizationService.getLocalizedSqlField(courses.description, language),
       thumbnailUrl: courses.thumbnailS3Key,
       authorId: sql<string>`${courses.authorId}`,
       author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -1605,21 +1665,33 @@ export class CourseService {
 
   private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
     const conditions = [];
+
     if (filters.title) {
-      conditions.push(ilike(courses.title, `%${filters.title.toLowerCase()}%`));
-    }
-    if (filters.description) {
-      conditions.push(ilike(courses.description, `%${filters.description}%`));
-    }
-    if (filters.searchQuery) {
-      const searchCondition = or(
-        ilike(courses.title, `%${filters.searchQuery}%`),
-        ilike(courses.description, `%${filters.searchQuery}%`),
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.title}%`})`,
       );
-      if (searchCondition) {
-        conditions.push(searchCondition);
-      }
     }
+
+    if (filters.description) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
+      );
+    }
+
+    if (filters.searchQuery) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
+      );
+    }
+
     if (filters.category) {
       conditions.push(like(categories.title, `%${filters.category}%`));
     }
@@ -1756,7 +1828,10 @@ export class CourseService {
     return courseStats;
   }
 
-  async getAverageQuizScoreForCourse(courseId: UUIDType): Promise<CourseAverageQuizScoresResponse> {
+  async getAverageQuizScoreForCourse(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<CourseAverageQuizScoresResponse> {
     const [averageScorePerQuiz] = await this.db
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
@@ -1765,7 +1840,10 @@ export class CourseService {
             FROM (
               SELECT
                 l.id AS quiz_id,
-                l.title AS quiz_name,
+                ${this.localizationService.getLocalizedSqlField(
+                  lessons.title,
+                  language,
+                )} AS quiz_name,
                 l.display_order AS lesson_order,
                 ROUND(AVG(slp.quiz_score), 0) AS average_score,
                 COUNT(DISTINCT slp.student_id) AS finished_count
@@ -1773,9 +1851,11 @@ export class CourseService {
               JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
               JOIN ${chapters} c ON l.chapter_id = c.id
               JOIN ${studentCourses} sc ON slp.student_id = sc.student_id AND sc.course_id = c.course_id
-              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
-              GROUP BY l.id, l.title, l.display_order
-              ORDER BY l.display_order
+              JOIN ${courses} co ON co.id = c.course_id
+              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${
+                COURSE_ENROLLMENT.ENROLLED
+              }
+              GROUP BY l.id, l.title, l.display_order, co.available_locales, co.base_language
             ) AS subquery
           ),
           '[]'::jsonb
@@ -1796,9 +1876,17 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       searchQuery = "",
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
+
+    const {
+      studentNameExpression,
+      lastActivityExpression,
+      completedLessonsCountExpression,
+      groupNameExpression,
+    } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
@@ -1809,13 +1897,6 @@ export class CourseService {
       ),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
     ];
-
-    const {
-      studentNameExpression,
-      lastActivityExpression,
-      completedLessonsCountExpression,
-      groupNameExpression,
-    } = this.getStudentCourseStatisticsExpressions(courseId);
 
     const studentsProgress = await this.db
       .select({
@@ -1836,9 +1917,10 @@ export class CourseService {
       .groupBy(users.id)
       .orderBy(
         sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
+          await this.getCourseStatisticsColumnToSortBy(
             sortedField as CourseStudentProgressionSortField,
             courseId,
+            language,
           ),
         ),
       );
@@ -1877,6 +1959,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       quizId = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
+      language,
     } = query;
 
     const conditions = [
@@ -1892,7 +1975,15 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
-      this.getStudentCourseStatisticsExpressions(courseId);
+      await this.getStudentCourseStatisticsExpressions(courseId, language);
+
+    const order = sortOrder(
+      await this.getCourseStatisticsColumnToSortBy(
+        sortedField as CourseStudentQuizResultsSortField,
+        courseId,
+        language,
+      ),
+    );
 
     const quizResults = await this.db
       .select({
@@ -1910,15 +2001,7 @@ export class CourseService {
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
-      .where(and(...conditions))
-      .orderBy(
-        sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentQuizResultsSortField,
-            courseId,
-          ),
-        ),
-      )
+      .orderBy(order)
       .limit(perPage)
       .offset((page - 1) * perPage);
 
@@ -1956,6 +2039,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       lessonId = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
+      language,
     } = query;
 
     const conditions = [
@@ -1970,7 +2054,18 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const { studentNameExpression } = this.getStudentCourseStatisticsExpressions(courseId);
+    const { studentNameExpression } = await this.getStudentCourseStatisticsExpressions(
+      courseId,
+      language,
+    );
+
+    const order = sortOrder(
+      await this.getCourseStatisticsColumnToSortBy(
+        sortedField as CourseStudentAiMentorResultsSortField,
+        courseId,
+        language,
+      ),
+    );
 
     const quizResults = await this.db
       .select({
@@ -1978,11 +2073,12 @@ export class CourseService {
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
         lessonId: sql<UUIDType>`${lessons.id}`,
-        lessonName: sql<string>`${lessons.title}`,
+        lessonName: this.localizationService.getLocalizedSqlField(lessons.title, language),
         score: sql<number>`${aiMentorStudentLessonProgress.percentage}`,
         lastSession: sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(
@@ -1991,17 +2087,10 @@ export class CourseService {
       )
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(and(...conditions))
-      .orderBy(
-        sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentAiMentorResultsSortField,
-            courseId,
-          ),
-        ),
-      )
+      .orderBy(order)
       .limit(perPage)
-      .offset((page - 1) * perPage);
+      .offset((page - 1) * perPage)
+      .where(and(...conditions));
 
     const [{ totalCount }] = await this.db
       .select({ totalCount: count() })
@@ -2034,12 +2123,13 @@ export class CourseService {
     };
   }
 
-  private getCourseStatisticsColumnToSortBy(
+  private async getCourseStatisticsColumnToSortBy(
     sort:
       | CourseStudentProgressionSortField
       | CourseStudentQuizResultsSortField
       | CourseStudentAiMentorResultsSortField,
     courseId: UUIDType,
+    language: SupportedLanguages,
   ) {
     const {
       lastAttemptExpression,
@@ -2048,7 +2138,7 @@ export class CourseService {
       groupNameExpression,
       lastActivityExpression,
       completedLessonsCountExpression,
-    } = this.getStudentCourseStatisticsExpressions(courseId);
+    } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     switch (sort) {
       case CourseStudentProgressionSortFields.studentName:
@@ -2068,7 +2158,7 @@ export class CourseService {
       case CourseStudentQuizResultsSortFields.quizScore:
         return studentLessonProgress.quizScore;
       case CourseStudentAiMentorResultsSortFields.lessonName:
-        return lessons.title;
+        return this.localizationService.getLocalizedSqlField(lessons.title, language);
       case CourseStudentAiMentorResultsSortFields.score:
         return aiMentorStudentLessonProgress.percentage;
       case CourseStudentAiMentorResultsSortFields.lastSession:
@@ -2078,7 +2168,10 @@ export class CourseService {
     }
   }
 
-  private getStudentCourseStatisticsExpressions(courseId: UUIDType) {
+  private async getStudentCourseStatisticsExpressions(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+  ) {
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -2118,8 +2211,10 @@ export class CourseService {
         )`;
 
     const quizNameExpression = sql<string>`(
-          SELECT l.title
+          SELECT ${this.localizationService.getLocalizedSqlField(lessons.title, language)}
           FROM ${lessons} l
+          JOIN ${chapters} ch ON ch.id = l.chapter_id
+          JOIN ${courses} c ON c.id = ch.course_id
           WHERE l.id = ${studentLessonProgress.lessonId}
             AND l.type = 'quiz'
         )`;
@@ -2134,19 +2229,25 @@ export class CourseService {
     };
   }
 
-  async getCourseEmailData(courseId: UUIDType) {
+  async getCourseEmailData(courseId: UUIDType, language?: SupportedLanguages) {
     const [courseData] = await this.db
-      .select({ courseName: courses.title, hasCertificate: courses.hasCertificate })
+      .select({
+        courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
+        hasCertificate: courses.hasCertificate,
+      })
       .from(courses)
       .where(eq(courses.id, courseId));
 
     return courseData;
   }
 
-  async getChapterName(chapterId: UUIDType) {
+  async getChapterName(chapterId: UUIDType, language?: SupportedLanguages) {
     const [{ chapterName }] = await this.db
-      .select({ chapterName: chapters.title })
+      .select({
+        chapterName: this.localizationService.getLocalizedSqlField(chapters.title, language),
+      })
       .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.id, chapterId));
 
     return chapterName;

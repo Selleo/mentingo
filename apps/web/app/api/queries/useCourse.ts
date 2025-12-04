@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
@@ -12,6 +13,7 @@ export const courseQueryOptions = (id: string) =>
     queryFn: async () => {
       const response = await ApiClient.api.courseControllerGetCourse({
         id: id ?? "",
+        language: SUPPORTED_LANGUAGES.EN,
       });
       return response.data;
     },

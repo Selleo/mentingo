@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -107,6 +108,8 @@ export const studentAiMentorResultSchema = Type.Object({
   lastSession: Type.String(),
 });
 
+export const supportedLanguagesSchema = Type.Enum(SUPPORTED_LANGUAGES, { default: "en" });
+
 export const allStudentCourseProgressionSchema = Type.Array(studentCourseProgressionSchema);
 export const allStudentQuizResultsSchema = Type.Array(studentQuizResultSchema);
 export const allStudentAiMentorResultsSchema = Type.Array(studentAiMentorResultSchema);
@@ -127,3 +130,4 @@ export type CourseAverageQuizScoresResponse = Static<typeof courseAverageQuizSco
 export type AllStudentCourseProgressionResponse = Static<typeof allStudentCourseProgressionSchema>;
 export type AllStudentQuizResultsResponse = Static<typeof allStudentQuizResultsSchema>;
 export type AllStudentAiMentorResultsResponse = Static<typeof allStudentAiMentorResultsSchema>;
+export type SupportedLanguagesBody = Static<typeof supportedLanguagesSchema>;

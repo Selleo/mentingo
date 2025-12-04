@@ -1,6 +1,8 @@
 import { faker } from "@faker-js/faker";
+import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { chapters, users } from "src/storage/schema";
 
 import { createCourseFactory } from "./course.factory";
@@ -46,10 +48,14 @@ export const createChapterFactory = (db: DatabasePg) => {
         .insert(chapters)
         .values({
           ...chapter,
+          title: buildJsonbField("en", chapter.title as string),
           courseId,
           authorId,
         })
-        .returning();
+        .returning({
+          ...getTableColumns(chapters),
+          title: sql`chapters.title->>'en'`,
+        });
 
       return inserted;
     });

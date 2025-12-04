@@ -28,7 +28,7 @@ export interface LessonResource {
 }
 export interface Lesson {
   updatedAt: string;
-  type: string;
+  type: LessonType;
   displayOrder: number;
   id: string;
   title: string;

@@ -407,6 +407,34 @@
       "when": 1764674932236,
       "tag": "0057_added_name_and_avatar_reference_to_ai_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1764757616433,
+      "tag": "0058_create_json_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1764757640886,
+      "tag": "0059_transfer_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1764757673422,
+      "tag": "0060_drop_and_rename_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1764757719707,
+      "tag": "0061_added_locales_to_courses",
+      "breakpoints": true
     }
   ]
 }

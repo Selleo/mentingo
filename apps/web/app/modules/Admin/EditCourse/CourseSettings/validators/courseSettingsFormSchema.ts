@@ -11,6 +11,7 @@ export const courseSettingsFormSchema = (t: typeof i18next.t) =>
     description: z.string().min(2, t("adminCourseView.settings.validation.descriptionMinLength")),
     categoryId: z.string().min(1, t("adminCourseView.settings.validation.categoryRequired")),
     thumbnailS3Key: z.string().optional(),
+    language: z.string(),
   });
 
 export type CourseSettingsFormValues = z.infer<ReturnType<typeof courseSettingsFormSchema>>;

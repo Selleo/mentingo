@@ -91,8 +91,8 @@ export async function createNiceCourses(
       .insert(courses)
       .values({
         id: crypto.randomUUID(),
-        title: courseData.title,
-        description: courseData.description,
+        title: sql`json_build_object('en', ${courseData.title}::text)`,
+        description: sql`json_build_object('en', ${courseData.description}::text)`,
         thumbnailS3Key: courseData.thumbnailS3Key,
         status: courseData.status,
         priceInCents: courseData.priceInCents,
@@ -112,7 +112,7 @@ export async function createNiceCourses(
         .insert(chapters)
         .values({
           id: crypto.randomUUID(),
-          title: chapterData.title,
+          title: sql`json_build_object('en', ${chapterData.title}::text)`,
           authorId: creatorUserId,
           courseId: course.id,
           isFreemium: chapterData.isFreemium,
@@ -128,8 +128,8 @@ export async function createNiceCourses(
           .insert(lessons)
           .values({
             id: crypto.randomUUID(),
-            title: lessonData.title,
-            description: lessonData.description,
+            title: sql`json_build_object('en', ${lessonData.title}::text)`,
+            description: sql`json_build_object('en', ${lessonData.description ?? ""}::text)`,
             type: lessonData.type,
             displayOrder: index + 1,
             fileS3Key: getFileUrl(lessonData.type),
@@ -168,14 +168,18 @@ export async function createNiceCourses(
               .values({
                 id: questionId,
                 type: questionData.type,
-                title: questionData.title,
-                description: questionData.description ?? null,
+                title: sql`json_build_object('en', ${questionData.title}::text)`,
+                description: sql`json_build_object('en', ${
+                  questionData.description ?? null
+                }::text)`,
                 lessonId: lesson.id,
                 authorId: creatorUserId,
                 createdAt: createdAt,
                 updatedAt: createdAt,
                 displayOrder: index + 1,
-                solutionExplanation: questionData.solutionExplanation ?? null,
+                solutionExplanation: sql`json_build_object('en', ${
+                  questionData.solutionExplanation ?? null
+                }::text)`,
                 photoS3Key: questionData.photoS3Key ?? null,
               })
               .returning();
@@ -187,10 +191,14 @@ export async function createNiceCourses(
                   createdAt: createdAt,
                   updatedAt: createdAt,
                   questionId,
-                  optionText: questionAnswerOption.optionText,
+                  optionText: sql`json_build_object('en', ${
+                    questionAnswerOption.optionText
+                  }::text)`,
                   isCorrect: questionAnswerOption.isCorrect || false,
                   displayOrder: index + 1,
-                  matchedWord: questionAnswerOption.matchedWord || null,
+                  matchedWord: sql`json_build_object('en', ${
+                    questionAnswerOption.matchedWord || null
+                  }::text)`,
                   scaleAnswer: questionAnswerOption.scaleAnswer || null,
                 }),
               );

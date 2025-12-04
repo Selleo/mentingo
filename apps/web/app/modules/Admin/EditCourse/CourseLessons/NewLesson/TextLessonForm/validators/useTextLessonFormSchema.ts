@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
+
 import type i18next from "i18next";
 
 export const textLessonFormSchema = (t: typeof i18next.t) =>
@@ -17,7 +19,7 @@ export const textLessonFormSchema = (t: typeof i18next.t) =>
       .refine((val) => val !== "<p></p>" && val.trim() !== "", {
         message: t("adminCourseView.curriculum.lesson.validation.descriptionRequired"),
       }),
-    type: z.string(),
+    type: z.nativeEnum(LessonType),
   });
 
 export type TextLessonFormValues = z.infer<ReturnType<typeof textLessonFormSchema>>;

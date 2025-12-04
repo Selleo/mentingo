@@ -31,7 +31,7 @@ describe("UsersController (e2e)", () => {
     db = app.get("DB");
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
-  }, 10000);
+  });
 
   afterAll(async () => {
     await app.close();
@@ -185,10 +185,11 @@ describe("UsersController (e2e)", () => {
     });
   });
 
-  describe("DELETE /user/user?id=:id", () => {
+  describe("DELETE /user", () => {
     it("should fail to delete itself", async () => {
       await request(app.getHttpServer())
-        .delete(`/api/user/user?id=${testUser.id}`)
+        .delete(`/api/user`)
+        .send({ userIds: [testUser.id] })
         .set("Cookie", testCookies)
         .expect(400);
     });
@@ -203,7 +204,8 @@ describe("UsersController (e2e)", () => {
       });
 
       await request(app.getHttpServer())
-        .delete(`/api/user/user?id=${anotherUser.id}`)
+        .delete(`/api/user`)
+        .send({ userIds: [anotherUser.id] })
         .set("Cookie", testCookies)
         .expect(200);
 

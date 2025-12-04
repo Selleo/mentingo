@@ -37,7 +37,7 @@ describe("SettingsController - Company Information (e2e)", () => {
     db = app.get("DB");
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
-  }, 10000);
+  });
 
   afterAll(async () => {
     await app.close();

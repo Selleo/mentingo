@@ -15,6 +15,7 @@ import { CourseCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { LocalizationService } from "src/localization/localization.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
@@ -44,6 +45,7 @@ export class StudentLessonProgressService {
     private readonly statisticsRepository: StatisticsRepository,
     private readonly certificatesService: CertificatesService,
     private readonly eventBus: EventBus,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async markLessonAsCompleted({
@@ -512,7 +514,9 @@ export class StudentLessonProgressService {
     const [courseCompletionDetails] = await this.db
       .select({
         userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        courseTitle: sql<string>`${courses.title}`,
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+        groupName: sql<string>`${groups.name}`,
+        completedAt: sql<string>`${studentCourses.completedAt}`,
       })
       .from(studentCourses)
       .leftJoin(users, eq(studentCourses.studentId, users.id))

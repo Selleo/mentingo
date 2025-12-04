@@ -15,6 +15,8 @@ import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { QuizCompletedEvent } from "src/events";
 import { FileService } from "src/file/file.service";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
@@ -32,8 +34,8 @@ import type {
   QuestionBody,
   QuestionDetails,
 } from "../lesson.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Response } from "express";
-import type { SupportedLanguages } from "src/ai/utils/ai.type";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -47,21 +49,28 @@ export class LessonService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly aiService: AiService,
     private readonly eventBus: EventBus,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async getLessonById(
     id: UUIDType,
     userId: UUIDType,
     userRole: UserRole,
-    userLanguage?: SupportedLanguages,
+    language?: SupportedLanguages,
   ): Promise<LessonShow> {
     const isStudent = userRole === USER_ROLES.STUDENT;
+
+    const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      id,
+      language,
+    );
 
     const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
 
     if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
 
-    const lesson = await this.lessonRepository.getLessonDetails(id, userId);
+    const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 
@@ -106,7 +115,7 @@ export class LessonService {
       const { data: thread } = await this.aiService.getThreadWithSetup({
         lessonId: id,
         status: THREAD_STATUS.ACTIVE,
-        userLanguage: userLanguage ?? "en",
+        userLanguage: actualLanguage,
         userId,
       });
 
@@ -138,6 +147,7 @@ export class LessonService {
       lesson.id,
       lesson.lessonCompleted,
       userId,
+      actualLanguage,
     );
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
@@ -351,7 +361,7 @@ export class LessonService {
   async getLessonImage(res: Response, userId: UUIDType, role: UserRole, resourceId: UUIDType) {
     const isStudent = role === USER_ROLES.STUDENT;
 
-    const lessonResource = await this.lessonRepository.getLessonResource(resourceId);
+    const [lessonResource] = await this.lessonRepository.getLessonResources(resourceId);
 
     const [lesson] = await this.lessonRepository.checkLessonAssignment(
       lessonResource.lessonId,
@@ -372,8 +382,9 @@ export class LessonService {
   async getEnrolledLessons(
     userId: UUIDType,
     filters: EnrolledLessonsFilters,
+    language: SupportedLanguages,
   ): Promise<EnrolledLesson[]> {
-    return await this.lessonRepository.getEnrolledLessons(userId, filters);
+    return await this.lessonRepository.getEnrolledLessons(userId, filters, language);
   }
 
   async convertUrlsToImages(content: string) {

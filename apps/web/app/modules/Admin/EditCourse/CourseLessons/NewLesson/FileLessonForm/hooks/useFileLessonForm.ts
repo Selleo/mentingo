@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
@@ -59,8 +60,10 @@ export const useFileLessonForm = ({
 
     try {
       if (lessonToEdit) {
-        await updateFileItem({ data: { ...values }, fileLessonId: lessonToEdit.id });
-        await queryClient.invalidateQueries({ queryKey: ["lesson", lessonToEdit.id] });
+        await updateFileItem({
+          data: { ...values, language: SUPPORTED_LANGUAGES.EN },
+          fileLessonId: lessonToEdit.id,
+        });
       } else {
         await createFile({
           data: { ...values, chapterId: chapterToEdit.id },

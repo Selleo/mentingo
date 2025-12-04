@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -64,12 +65,19 @@ export const useTextLessonForm = ({
 
     try {
       if (lessonToEdit) {
-        // @ts-expect-error - Need to be refactored
-        await updateTextBlockItem({ data: { ...values }, lessonId: lessonToEdit.id });
+        await updateTextBlockItem({
+          data: {
+            ...values,
+            language: SUPPORTED_LANGUAGES.EN,
+          },
+          lessonId: lessonToEdit.id,
+        });
       } else {
         await createTextBlock({
-          // @ts-expect-error - Need to be refactored
-          data: { ...values, chapterId: chapterToEdit.id },
+          data: {
+            ...values,
+            chapterId: chapterToEdit.id,
+          },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }

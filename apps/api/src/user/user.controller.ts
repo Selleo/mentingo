@@ -33,6 +33,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { groupsFilterSchema } from "src/group/group.schema";
 import { GroupsFilterSchema } from "src/group/group.types";
 import {
@@ -269,26 +270,14 @@ export class UserController {
     return null;
   }
 
-  @Delete("user")
-  @Roles(USER_ROLES.ADMIN)
-  @Validate({
-    response: nullResponse(),
-    request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
-  })
-  async deleteUser(
-    @Query("id") id: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<null> {
-    await this.usersService.deleteUser(currentUserId, id);
-
-    return null;
-  }
-
   @Delete()
   @Roles(USER_ROLES.ADMIN)
   @Validate({
     response: nullResponse(),
-    request: [{ type: "body", schema: deleteUsersSchema }],
+    request: [
+      { type: "body", schema: deleteUsersSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
   })
   async deleteBulkUsers(
     @Body() data: DeleteUsersSchema,

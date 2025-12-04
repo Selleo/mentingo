@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useForm } from "react-hook-form";
 
 import { useCreateCourse } from "~/api/mutations/useCreateCourse";
@@ -31,7 +32,7 @@ export const useAddCourseForm = () => {
     if (description.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH) return;
 
     createCourse({
-      data: { ...rest, description },
+      data: { ...rest, description, language: SUPPORTED_LANGUAGES.EN },
     }).then(({ data }) => {
       queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
       navigate(`/admin/beta-courses/${data.id}`);

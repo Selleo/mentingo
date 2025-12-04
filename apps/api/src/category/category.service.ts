@@ -5,11 +5,12 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
-import { and, count, eq, ilike, like, inArray } from "drizzle-orm";
+import { and, count, eq, ilike, inArray, like } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { LocalizationService } from "src/localization/localization.service";
 import { categories, courses } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -27,7 +28,10 @@ import type { Pagination, UUIDType } from "src/common";
 
 @Injectable()
 export class CategoryService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   public async getCategories(
     query: CategoryQuery,
@@ -146,7 +150,10 @@ export class CategoryService {
       }
 
       const coursesWithCategory = await this.db
-        .select({ id: courses.id, title: courses.title })
+        .select({
+          id: courses.id,
+          title: this.localizationService.getLocalizedSqlField(courses.title),
+        })
         .from(courses)
         .where(eq(courses.categoryId, id));
 
@@ -178,7 +185,7 @@ export class CategoryService {
       const categoriesWithCourses = await tx
         .select({
           categoryId: courses.categoryId,
-          courseTitle: courses.title,
+          courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
         })
         .from(courses)
         .where(

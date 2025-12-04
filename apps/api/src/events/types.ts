@@ -1,6 +1,6 @@
-import type { Languages } from "src/ai/utils/ai.type";
+import type { SupportedLanguages } from "@repo/shared";
 
 export type DefaultEmailSettings = {
   primaryColor: string;
-  language: Languages;
+  language: SupportedLanguages;
 };

@@ -282,7 +282,8 @@ describe("CourseController (e2e)", () => {
           expect(
             response.body.data.every(
               (course: CourseTest) =>
-                course.title.includes("Python") || course.description?.includes("Python"),
+                (course.title as string)?.includes("Python") ||
+                (course.description as string)?.includes("Python"),
             ),
           ).toBe(true);
         });
@@ -626,7 +627,8 @@ describe("CourseController (e2e)", () => {
         expect(
           response.body.data.every(
             (course: CourseTest) =>
-              course.title.includes("Python") || course.description?.includes("Python"),
+              (course.title as string)?.includes("Python") ||
+              (course.description as string)?.includes("Python"),
           ),
         ).toBe(true);
       });
@@ -1227,7 +1229,8 @@ describe("CourseController (e2e)", () => {
         expect(
           response.body.data.every(
             (course: CourseTest) =>
-              course.title.includes("Python") || course.description?.includes("Python"),
+              (course.title as string)?.includes("Python") ||
+              (course.description as string)?.includes("Python"),
           ),
         ).toBe(true);
       });

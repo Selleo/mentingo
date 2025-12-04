@@ -7,6 +7,7 @@ import { useDeleteChapter } from "~/api/mutations/admin/useDeleteChapter";
 import { useUpdateChapter } from "~/api/mutations/admin/useUpdateChapter";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { type Chapter, ContentTypes } from "../../../EditCourse.types";
 import { newChapterFormSchema } from "../validators/newChapterFormSchema";
@@ -28,6 +29,8 @@ export const useNewChapterForm = ({
   const { mutateAsync: updateChapter } = useUpdateChapter();
   const { mutateAsync: deleteChapter } = useDeleteChapter();
 
+  const { language } = useLanguageStore();
+
   const form = useForm<NewChapterFormValues>({
     resolver: zodResolver(newChapterFormSchema),
     defaultValues: {
@@ -46,7 +49,7 @@ export const useNewChapterForm = ({
   const onSubmit = async (data: NewChapterFormValues) => {
     try {
       if (chapter) {
-        await updateChapter({ data, chapterId: chapter.id });
+        await updateChapter({ data: { ...data, language }, chapterId: chapter.id });
         queryClient.invalidateQueries({
           queryKey: [COURSE_QUERY_KEY, { id: courseId }],
         });
