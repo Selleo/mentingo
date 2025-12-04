@@ -15,6 +15,7 @@ import {
   aiMentorThreadMessages,
   aiMentorThreads,
   chapters,
+  courses,
   groups,
   groupUsers,
   lessons,
@@ -112,14 +113,7 @@ export class AiRepository {
     return tokens.total;
   }
 
-  async findMessageHistory(
-    threadId: UUIDType,
-    archived?: boolean,
-    role?: MessageRole,
-    userId?: UUIDType,
-  ) {
-    const userCondition = userId ? eq(aiMentorThreads.userId, userId) : undefined;
-
+  async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
     const messageHistory = await this.db
       .select({
         id: aiMentorThreadMessages.id,
@@ -139,7 +133,6 @@ export class AiRepository {
           ),
           not(inArray(aiMentorThreadMessages.role, [MESSAGE_ROLE.SYSTEM, MESSAGE_ROLE.SUMMARY])),
           eq(aiMentorThreadMessages.role, role ? role : aiMentorThreadMessages.role),
-          userCondition,
         ),
       )
       .orderBy(asc(aiMentorThreadMessages.createdAt));
@@ -293,5 +286,16 @@ export class AiRepository {
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
       .where(eq(lessons.id, id));
+  }
+
+  async getCourseAuthorByLesson(lessonId: string) {
+    const [{ author }] = await this.db
+      .select({ author: courses.authorId })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(lessons.id, lessonId));
+
+    return author;
   }
 }

@@ -46,7 +46,6 @@ const AiMentorLessonPreview = ({ onClose, lesson }: AiMentorPreviewProps) => {
     return modal;
   }
 
-  // portal is used to avoid z-index issues
   return createPortal(modal, document.body);
 };
 

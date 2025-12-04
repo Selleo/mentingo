@@ -1335,10 +1335,12 @@ export interface GetCourseStudentsProgressResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
-    groups: {
-      id: string;
-      name: string;
-    }[];
+    groups:
+      | {
+          id: string;
+          name: string;
+        }[]
+      | null;
     completedLessonsCount: number;
     lastActivity: string | null;
   }[];
@@ -1716,7 +1718,7 @@ export interface GetLessonByIdResponse {
       requiredScore: number | null;
     } | null;
     aiMentor?: {
-      name: string;
+      name: string | null;
       avatarReferenceUrl?: string;
     } | null;
   };
@@ -5139,10 +5141,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/ai/thread/messages
      */
     aiControllerGetThreadMessages: (
-      query: {
+      query?: {
         /** @format uuid */
         thread?: string;
-        studentId: string;
       },
       params: RequestParams = {},
     ) =>

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "~/components/Icon";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
-const ChatLoader = ({ aiName, avatarUrl }: { aiName?: string; avatarUrl?: string }) => {
+const ChatLoader = ({ aiName, avatarUrl }: { aiName?: string | null; avatarUrl?: string }) => {
   const { t } = useTranslation();
   const displayName = aiName ?? t("studentCourseView.lesson.aiMentorLesson.aiMentorName");
 
