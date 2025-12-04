@@ -77,6 +77,11 @@ export const NavigationGlobalSearchWrapper = ({
     }
   }, [isGlobalSearchDialogOpen]);
 
+  const handleSelect = () => {
+    setSearchParams("");
+    setIsGlobalSearchDialogOpen(false);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -159,7 +164,7 @@ export const NavigationGlobalSearchWrapper = ({
             {debouncedSearch.length >= 3 && (
               <ResultsComponent
                 debouncedSearch={debouncedSearch}
-                onSelect={() => setSearchParams("")}
+                onSelect={handleSelect}
                 activeIndex={activeIndex}
                 setTotalItems={(count) => {
                   totalItemsRef.current = count;
