@@ -30,13 +30,15 @@ describe("LearningTimeService (unit)", () => {
 
   beforeAll(async () => {
     testContext = await createUnitTest();
+    await testContext.module.init();
+
     service = testContext.module.get(LearningTimeService);
     repository = testContext.module.get(LearningTimeRepository);
     db = testContext.db;
 
     learningTimeFactory = createLearningTimeFactory(db);
     userFactory = createUserFactory(db);
-  }, 30000);
+  }, 60000);
 
   afterAll(async () => {
     await truncateTables(db, [

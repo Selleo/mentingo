@@ -17,6 +17,8 @@ describe("LearningTimeWorker (integration with real Redis)", () => {
 
   beforeAll(async () => {
     testContext = await createUnitTest();
+    await testContext.module.init();
+
     repository = testContext.module.get(LearningTimeRepository);
     queueService = testContext.module.get(QueueService);
     db = testContext.db;
