@@ -1,11 +1,11 @@
 DO $$ BEGIN
- CREATE TYPE "public"."activity_log_action_type" AS ENUM('create', 'read', 'update', 'delete', 'login', 'logout', 'enroll_course', 'unenroll_course', 'complete_lesson', 'complete_course', 'complete_chapter', 'view_announcement');
+ CREATE TYPE "public"."activity_log_action_type" AS ENUM('create', 'update', 'delete', 'login', 'logout', 'enroll_course', 'unenroll_course', 'start_course', 'group_assignment', 'complete_lesson', 'complete_course', 'complete_chapter', 'view_announcement');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- CREATE TYPE "public"."activity_log_resource_type" AS ENUM('user', 'course', 'chapter', 'lesson', 'announcement', 'group', 'settings', 'integration');
+ CREATE TYPE "public"."activity_log_resource_type" AS ENUM('user', 'course', 'chapter', 'lesson', 'announcement', 'group', 'settings', 'integration', 'category');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

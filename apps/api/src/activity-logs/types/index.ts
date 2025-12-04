@@ -12,6 +12,7 @@ export const ACTIVITY_LOG_ACTION_TYPES = {
   ENROLL_COURSE: "enroll_course",
   UNENROLL_COURSE: "unenroll_course",
   START_COURSE: "start_course",
+  GROUP_ASSIGNMENT: "group_assignment",
   COMPLETE_LESSON: "complete_lesson",
   COMPLETE_COURSE: "complete_course",
   COMPLETE_CHAPTER: "complete_chapter",
@@ -151,4 +152,11 @@ export type AnnouncementActivityLogSnapshot = {
   authorId?: UUIDType | null;
   isEveryone?: boolean;
   groupId?: UUIDType | null;
+};
+
+export type GroupActivityLogSnapshot = {
+  id: UUIDType;
+  name?: string | null;
+  characteristic?: string | null;
+  userCount?: number | null;
 };

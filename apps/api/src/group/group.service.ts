@@ -6,6 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
@@ -18,16 +19,24 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import { isEqual } from "lodash";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CourseService } from "src/courses/course.service";
+import {
+  CreateGroupEvent,
+  DeleteGroupEvent,
+  EnrollUserToGroupEvent,
+  UpdateGroupEvent,
+} from "src/events";
 import { GroupSortFields } from "src/group/group.schema";
 import { groups, groupUsers, users, groupCourses, studentCourses } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SQL } from "drizzle-orm";
+import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
 import type { PaginatedResponse, Pagination, UUIDType } from "src/common";
 import type { GroupSortField, GroupKeywordFilterBody } from "src/group/group.schema";
 import type {
@@ -43,6 +52,7 @@ export class GroupService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
+    private readonly eventBus: EventBus,
   ) {}
 
   public async getAllGroups(
@@ -171,20 +181,36 @@ export class GroupService {
     });
   }
 
-  public async createGroup(createGroupBody: UpsertGroupBody) {
+  public async createGroup(createGroupBody: UpsertGroupBody, createdById?: UUIDType) {
     const [createdGroup] = await this.db.insert(groups).values(createGroupBody).returning();
 
     if (!createdGroup) throw new ConflictException("Unable to create group");
 
+    if (createdById) {
+      this.eventBus.publish(
+        new CreateGroupEvent({
+          groupId: createdGroup.id,
+          createdById,
+          group: this.buildGroupSnapshot(createdGroup),
+        }),
+      );
+    }
+
     return createdGroup;
   }
 
-  public async updateGroup(groupId: UUIDType, updateGroupBody: UpsertGroupBody) {
+  public async updateGroup(
+    groupId: UUIDType,
+    updateGroupBody: UpsertGroupBody,
+    updatedById?: UUIDType,
+  ) {
     const [existingGroup] = await this.db.select().from(groups).where(eq(groups.id, groupId));
 
     if (!existingGroup) {
       throw new NotFoundException("Group not found");
     }
+
+    const previousSnapshot = this.buildGroupSnapshot(existingGroup);
 
     const [updatedGroup] = await this.db
       .update(groups)
@@ -192,14 +218,37 @@ export class GroupService {
       .where(eq(groups.id, groupId))
       .returning();
 
+    const updatedSnapshot = this.buildGroupSnapshot(updatedGroup);
+
+    if (updatedById && !isEqual(previousSnapshot, updatedSnapshot)) {
+      this.eventBus.publish(
+        new UpdateGroupEvent({
+          groupId,
+          updatedById,
+          previousGroupData: previousSnapshot,
+          updatedGroupData: updatedSnapshot,
+        }),
+      );
+    }
+
     return updatedGroup;
   }
 
-  public async deleteGroup(groupId: UUIDType) {
+  public async deleteGroup(groupId: UUIDType, deletedById?: UUIDType) {
     const [deletedGroup] = await this.db.delete(groups).where(eq(groups.id, groupId)).returning();
 
     if (!deletedGroup) {
       throw new NotFoundException("Group not found");
+    }
+
+    if (deletedById) {
+      this.eventBus.publish(
+        new DeleteGroupEvent({
+          groupId: deletedGroup.id,
+          deletedById,
+          groupName: deletedGroup.name,
+        }),
+      );
     }
   }
 
@@ -211,8 +260,15 @@ export class GroupService {
     await this.db.delete(groups).where(inArray(groups.id, groupIds)).returning();
   }
 
-  async setUserGroups(groupIds: UUIDType[], userId: UUIDType, db: DatabasePg = this.db) {
-    return db.transaction(async (trx) => {
+  async setUserGroups(
+    groupIds: UUIDType[],
+    userId: UUIDType,
+    options: { actorId?: UUIDType; db?: DatabasePg } = {},
+  ) {
+    const actorId = options.actorId ?? userId;
+    const db = options.db ?? this.db;
+
+    await db.transaction(async (trx) => {
       const [user] = await trx
         .select()
         .from(users)
@@ -237,18 +293,28 @@ export class GroupService {
       if (existingGroups.length > 0) {
         const groupsToAssign = existingGroups.map((group) => ({ userId, groupId: group.id }));
 
-        await trx.insert(groupUsers).values(groupsToAssign).returning();
+        await trx.insert(groupUsers).values(groupsToAssign);
 
         if (user.role === USER_ROLES.STUDENT) {
           await Promise.all(
-            groupsToAssign.map(({ userId, groupId }) =>
+            groupsToAssign.map(({ groupId }) =>
               this.enrollUserToCoursesInGroup(groupId, userId, trx),
             ),
           );
+
+          if (actorId) {
+            groupsToAssign.forEach(({ groupId }) =>
+              this.eventBus.publish(
+                new EnrollUserToGroupEvent({
+                  groupId,
+                  userId,
+                  enrolledById: actorId,
+                }),
+              ),
+            );
+          }
         }
       }
-
-      return;
     });
   }
 
@@ -349,5 +415,17 @@ export class GroupService {
       .map(({ courseId }) => courseId);
 
     if (idsToInsert) await this.enrollUserToGroupCourses(userId, groupId, idsToInsert, trx);
+  }
+
+  private buildGroupSnapshot(group: {
+    id: UUIDType;
+    name?: string | null;
+    characteristic?: string | null;
+  }): GroupActivityLogSnapshot {
+    return {
+      id: group.id,
+      name: group.name,
+      characteristic: group.characteristic,
+    };
   }
 }

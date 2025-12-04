@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { AnnouncementsService } from "src/announcements/announcements.service";
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { CourseService } from "src/courses/course.service";
+import { GroupService } from "src/group/group.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { activityLogs } from "src/storage/schema";
@@ -21,6 +22,7 @@ import type { CreateChapterBody } from "src/chapter/schemas/chapter.schema";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CreateCourseBody } from "src/courses/schemas/createCourse.schema";
 import type { UpdateCourseBody } from "src/courses/schemas/updateCourse.schema";
+import type { UpsertGroupBody } from "src/group/group.types";
 import type { CreateLessonBody, UpdateLessonBody } from "src/lesson/lesson.schema";
 
 describe("Activity Logs E2E", () => {
@@ -30,6 +32,7 @@ describe("Activity Logs E2E", () => {
   let announcementsService: AnnouncementsService;
   let adminLessonService: AdminLessonService;
   let courseService: CourseService;
+  let groupService: GroupService;
   let db: DatabasePg;
 
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -48,6 +51,7 @@ describe("Activity Logs E2E", () => {
     announcementsService = app.get(AnnouncementsService);
     adminLessonService = app.get(AdminLessonService);
     courseService = app.get(CourseService);
+    groupService = app.get(GroupService);
 
     courseFactory = createCourseFactory(db);
     categoryFactory = createCategoryFactory(db);
@@ -347,6 +351,80 @@ describe("Activity Logs E2E", () => {
       expect(viewLog.actorId).toBe(student.id);
       expect(viewLog.resourceId).toBe(announcement.id);
       expect(viewMetadata.context?.audience).toBe("everyone");
+    });
+  });
+
+  describe("Group activity logs", () => {
+    const createGroup = async (body?: Partial<UpsertGroupBody>) =>
+      groupService.createGroup(
+        {
+          name: "Initial Group",
+          characteristic: "Test",
+          ...(body ?? {}),
+        },
+        adminUserId,
+      );
+
+    it("should record CREATE activity log when group is created", async () => {
+      const group = await createGroup();
+
+      const [createLog] = await waitForLogs(group.id);
+      const metadata = parseMetadata(createLog.metadata);
+
+      expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
+      expect(createLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.GROUP);
+      expect(metadata.after?.name).toBe("Initial Group");
+    });
+
+    it("should record UPDATE activity log when group is updated", async () => {
+      const group = await createGroup();
+
+      await groupService.updateGroup(group.id, { name: "Updated Group" }, adminUserId);
+
+      const logsAfterUpdate = await waitForLogs(group.id, 2);
+      const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
+      const metadata = parseMetadata(updateLog.metadata);
+      const changedFields = getChangedFields(metadata);
+
+      expect(updateLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.UPDATE);
+      expect(updateLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.GROUP);
+      expect(changedFields).toEqual(expect.arrayContaining(["name"]));
+      expect(metadata.after?.name).toBe("Updated Group");
+    });
+
+    it("should record DELETE activity log when group is deleted", async () => {
+      const group = await createGroup();
+
+      await groupService.deleteGroup(group.id, adminUserId);
+
+      const logsAfterDelete = await waitForLogs(group.id, 2);
+      const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
+      const metadata = parseMetadata(deleteLog.metadata);
+
+      expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
+      expect(deleteLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.GROUP);
+      expect(metadata.context?.groupName).toBe("Initial Group");
+    });
+
+    it("should record GROUP_ASSIGNMENT activity log when user assigned to group", async () => {
+      const admin = await userFactory.withAdminRole().create();
+      const student = await userFactory.create();
+      const group = await groupService.createGroup(
+        { name: "Factory Group", characteristic: "Test" },
+        admin.id,
+      );
+
+      await groupService.setUserGroups([group.id], student.id, {
+        actorId: admin.id,
+      });
+
+      const logs = await waitForLogs(group.id, 2);
+      const enrollLog = logs[logs.length - 1];
+      const metadata = parseMetadata(enrollLog.metadata);
+
+      expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.GROUP_ASSIGNMENT);
+      expect(enrollLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.GROUP);
+      expect(metadata.context?.userId).toBe(student.id);
     });
   });
 });

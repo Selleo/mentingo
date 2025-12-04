@@ -34,7 +34,7 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { EnvService } from "src/env/services/env.service";
-import { CreateCourseEvent, UpdateCourseEvent } from "src/events";
+import { CreateCourseEvent, UpdateCourseEvent, EnrollGroupToCourseEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -1462,6 +1462,18 @@ export class CourseService {
         );
       }
     });
+
+    if (adminId && newGroupIds.length > 0) {
+      newGroupIds.forEach((groupId) =>
+        this.eventBus.publish(
+          new EnrollGroupToCourseEvent({
+            courseId,
+            groupId,
+            enrolledById: adminId,
+          }),
+        ),
+      );
+    }
 
     return null;
   }

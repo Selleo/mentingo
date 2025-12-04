@@ -17,3 +17,8 @@ export * from "./course/update-course.event";
 export * from "./course/create-course.event";
 export * from "./announcement/create-announcement.event";
 export * from "./announcement/view-announcement.event";
+export * from "./group/create-group.event";
+export * from "./group/update-group.event";
+export * from "./group/delete-group.event";
+export * from "./group/enroll-user-to-group.event";
+export * from "./group/enroll-group-to-course.event";

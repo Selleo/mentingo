@@ -1,5 +1,5 @@
 {
-  "id": "150e709c-d530-495e-9054-c0a2abf251bd",
+  "id": "92788fba-a83f-4b81-943c-cd9e3f245885",
   "prevId": "064b7e0e-16af-48a9-8f5c-02f159808343",
   "version": "7",
   "dialect": "postgresql",
@@ -3655,13 +3655,14 @@
       "schema": "public",
       "values": [
         "create",
-        "read",
         "update",
         "delete",
         "login",
         "logout",
         "enroll_course",
         "unenroll_course",
+        "start_course",
+        "group_assignment",
         "complete_lesson",
         "complete_course",
         "complete_chapter",
@@ -3679,7 +3680,8 @@
         "announcement",
         "group",
         "settings",
-        "integration"
+        "integration",
+        "category"
       ]
     },
     "public.status": {

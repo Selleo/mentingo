@@ -251,7 +251,7 @@ export class UserService {
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
       if (groups !== undefined) {
-        await this.groupService.setUserGroups(groups ?? [], id);
+        await this.groupService.setUserGroups(groups ?? [], id, { actorId: id, db: trx });
       }
 
       const newGroups = await this.groupService.getUserGroups({}, id);
@@ -586,7 +586,12 @@ export class UserService {
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
     await this.db.transaction(async (trx) => {
       await Promise.all(
-        data.map((user) => this.groupService.setUserGroups(user.groups, user.userId, trx)),
+        data.map((user) =>
+          this.groupService.setUserGroups(user.groups, user.userId, {
+            db: trx,
+            actorId: user.userId,
+          }),
+        ),
       );
     });
   }
@@ -652,7 +657,10 @@ export class UserService {
         await this.groupService.setUserGroups(
           existingGroups.map((group) => group.id),
           createdUser.id,
-          trx,
+          {
+            db: trx,
+            actorId: creatorId,
+          },
         );
       });
     }

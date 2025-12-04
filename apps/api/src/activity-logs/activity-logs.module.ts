@@ -5,6 +5,7 @@ import { ActivityLogsService } from "./activity-logs.service";
 import { AnnouncementActivityHandler } from "./handlers/announcement-activity.handler";
 import { ChapterActivityHandler } from "./handlers/chapter-activity.handler";
 import { CourseActivityHandler } from "./handlers/course-activity.handler";
+import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
 
 @Global()
@@ -16,6 +17,7 @@ import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
     LessonActivityHandler,
     CourseActivityHandler,
     AnnouncementActivityHandler,
+    GroupActivityHandler,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })
