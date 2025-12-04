@@ -34,8 +34,6 @@ export async function createUnitTest(customProviders: Provider[] = []): Promise<
     .useClass(EmailTestingAdapter)
     .compile();
 
-  await module.init();
-
   const teardown = async () => {
     await module.close();
     await Promise.all([pgContainer?.stop(), redisContainer?.stop()]);
