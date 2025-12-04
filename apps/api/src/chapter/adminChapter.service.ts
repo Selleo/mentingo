@@ -1,8 +1,10 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { EventBus } from "@nestjs/cqrs";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 
-import { DatabasePg } from "src/common";
+import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { CreateChapterEvent, DeleteChapterEvent, UpdateChapterEvent } from "src/events";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
@@ -12,7 +14,6 @@ import { chapters } from "src/storage/schema";
 import { AdminChapterRepository } from "./repositories/adminChapter.repository";
 
 import type { CreateChapterBody, UpdateChapterBody } from "./schemas/chapter.schema";
-import type { UUIDType } from "src/common";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -22,10 +23,11 @@ export class AdminChapterService {
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonService: AdminLessonService,
     private readonly localizationService: LocalizationService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async createChapterForCourse(body: CreateChapterBody, authorId: UUIDType, role: UserRole) {
-    return await this.db.transaction(async (trx) => {
+    const chapter = await this.db.transaction(async (trx) => {
       await this.adminLessonService.validateAccess("course", role, authorId, body.courseId);
 
       const [maxDisplayOrder] = await trx
@@ -53,14 +55,29 @@ export class AdminChapterService {
           title: buildJsonbField(language, body.title),
           displayOrder: maxDisplayOrder.displayOrder + 1,
         })
-        .returning();
+        .returning({
+          ...getTableColumns(chapters),
+          title: sql<string>`${chapters.title}->>${language}::text`,
+        });
 
       if (!chapter) throw new NotFoundException("Chapter not found");
 
       await this.adminChapterRepository.updateChapterCountForCourse(chapter.courseId, trx);
 
-      return { id: chapter.id };
+      return chapter;
     });
+
+    if (!chapter) throw new BadRequestException("Chapter creation failed");
+
+    await this.eventBus.publish(
+      new CreateChapterEvent({
+        chapterId: chapter.id,
+        createdById: authorId,
+        createdChapter: chapter,
+      }),
+    );
+
+    return { id: chapter.id };
   }
 
   async updateFreemiumStatus(
@@ -110,11 +127,21 @@ export class AdminChapterService {
 
     const newDisplayOrder = chapterObject.displayOrder;
 
-    await this.adminChapterRepository.changeChapterDisplayOrder(
+    const updatedChapters = await this.adminChapterRepository.changeChapterDisplayOrder(
       chapterToUpdate.courseId,
       chapterToUpdate.id,
       oldDisplayOrder,
       newDisplayOrder,
+      language,
+    );
+
+    this.eventBus.publish(
+      new UpdateChapterEvent({
+        chapterId: chapterToUpdate.id,
+        updatedById: chapterObject.currentUserId,
+        previousChapterData: chapterToUpdate,
+        updatedChapterData: updatedChapters.find((ch) => ch.id === chapterToUpdate.id)!,
+      }),
     );
   }
 
@@ -125,6 +152,10 @@ export class AdminChapterService {
     currentUserRole: UserRole,
   ) {
     await this.adminLessonService.validateAccess("chapter", currentUserRole, currentUserId, id);
+
+    const [previousChapter] = await this.adminChapterRepository.getChapterById(id);
+
+    if (!previousChapter) throw new NotFoundException("Chapter not found");
 
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -145,6 +176,15 @@ export class AdminChapterService {
     const [chapter] = await this.adminChapterRepository.updateChapter(id, body);
 
     if (!chapter) throw new NotFoundException("Chapter not found");
+
+    this.eventBus.publish(
+      new UpdateChapterEvent({
+        chapterId: chapter.id,
+        updatedById: currentUserId,
+        previousChapterData: previousChapter,
+        updatedChapterData: chapter,
+      }),
+    );
   }
 
   async removeChapter(chapterId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
@@ -163,6 +203,14 @@ export class AdminChapterService {
       await this.adminChapterRepository.removeChapter(chapterId, trx);
       await this.adminChapterRepository.updateChapterDisplayOrder(chapter.courseId, trx);
       await this.adminChapterRepository.updateChapterCountForCourse(chapter.courseId, trx);
+
+      this.eventBus.publish(
+        new DeleteChapterEvent({
+          chapterId: chapter.id,
+          deletedById: currentUserId,
+          chapterName: chapter.title,
+        }),
+      );
     });
   }
 }
