@@ -2,29 +2,25 @@ import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
 import { Icon } from "~/components/Icon";
-import Viewer from "~/components/RichText/Viever";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Switch } from "~/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { Video } from "~/components/VideoPlayer/Video";
+import { useVideoPlayer } from "~/components/VideoPlayer/VideoPlayerContext";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
-import { Quiz } from "~/modules/Courses/Lesson/Quiz";
+import { useVideoPreferencesStore } from "~/modules/common/store/useVideoPreferencesStore";
 
-import Presentation from "../../../components/Presentation/Presentation";
-
-import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
-import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
+import { LessonContentRenderer } from "./LessonContentRenderer";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
-import type { GetLessonByIdResponse, GetCourseResponse } from "~/api/generated-api";
+import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
 
 type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
@@ -54,6 +50,8 @@ export const LessonContent = ({
   const { t } = useTranslation();
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
+  const { clearVideo } = useVideoPlayer();
+  const { autoplay, setAutoplay } = useVideoPreferencesStore();
   const [isNextDisabled, setIsNextDisabled] = useState(false);
 
   const { data: user } = useCurrentUser();
@@ -73,6 +71,20 @@ export const LessonContent = ({
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const totalLessons = currentChapter.lessons.length;
   const queryClient = useQueryClient();
+
+  const handleVideoEnded = useCallback(() => {
+    setIsNextDisabled(false);
+
+    if (isStudent) markLessonAsCompleted({ lessonId: lesson.id });
+
+    if (autoplay) handleNext();
+  }, [isStudent, markLessonAsCompleted, lesson.id, handleNext, autoplay]);
+
+  useEffect(() => {
+    if (lesson.type !== "video") {
+      clearVideo();
+    }
+  }, [lesson.type, clearVideo]);
 
   const canAccessLesson = useCallback(
     (courseData: GetCourseResponse["data"], targetLessonId: string) => {
@@ -107,6 +119,7 @@ export const LessonContent = ({
     const nextLessonId =
       currentChapter?.lessons?.[nextLessonIndex]?.id ?? nextChapter?.lessons?.[0]?.id;
     const cannotEnterNextLesson = nextLessonId ? !canAccessLesson(course, nextLessonId) : false;
+
     setIsNextDisabled(
       isNextBlocked(
         currentLessonIndex,
@@ -116,6 +129,7 @@ export const LessonContent = ({
         cannotEnterNextLesson,
       ),
     );
+
     setIsPreviousDisabled(
       isPreviousBlocked(
         currentLessonIndex,
@@ -123,6 +137,7 @@ export const LessonContent = ({
         course.enrolled ?? false,
       ),
     );
+
     queryClient.invalidateQueries({ queryKey: ["course", { id: course.id }] });
   }, [
     isAdminLike,
@@ -142,43 +157,6 @@ export const LessonContent = ({
     canAccessLesson,
     course,
   ]);
-
-  const Content = () =>
-    match(lesson.type)
-      .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
-      .with("quiz", () => (
-        <Quiz
-          lesson={lesson}
-          userId={user?.id || ""}
-          isPreviewMode={isPreviewMode}
-          previewLessonId={lesson.id}
-        />
-      ))
-      .with("video", () => (
-        <Video
-          url={lesson.fileUrl}
-          onVideoEnded={() => {
-            setIsNextDisabled(false);
-            isStudent && markLessonAsCompleted({ lessonId: lesson.id });
-          }}
-          isExternalUrl={lesson.isExternal}
-        />
-      ))
-      .with("presentation", () => (
-        <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
-      ))
-      .with("ai_mentor", () => (
-        <AiMentorLesson
-          lesson={lesson}
-          lessonLoading={lessonLoading}
-          isPreviewMode={isPreviewMode}
-          userId={previewUserId ?? user?.id}
-        />
-      ))
-      .with("embed", () => (
-        <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
-      ))
-      .otherwise(() => null);
 
   useEffect(() => {
     if (isPreviewMode) return;
@@ -248,31 +226,46 @@ export const LessonContent = ({
                 </div>
                 <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
               </div>
-              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
-                <Button
-                  variant="outline"
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  disabled={isPreviousDisabled || isFirstLesson}
-                  onClick={handlePrevious}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                </Button>
-                <Button
-                  data-testid="next-lesson-button"
-                  variant="outline"
-                  disabled={isNextDisabled}
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  onClick={handleNext}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4" />
-                </Button>
+              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
+                {lesson.type === "video" && (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-sm text-neutral-600">
+                      {t("studentLessonView.button.autoplay")}
+                    </span>
+                    <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+                  </label>
+                )}
+                <div className="flex flex-row gap-x-4">
+                  <Button
+                    variant="outline"
+                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                    disabled={isPreviousDisabled || isFirstLesson}
+                    onClick={handlePrevious}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                  </Button>
+                  <Button
+                    data-testid="next-lesson-button"
+                    variant="outline"
+                    disabled={isNextDisabled}
+                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                    onClick={handleNext}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
 
-          <div>
-            <Content />
-          </div>
+          <LessonContentRenderer
+            lesson={lesson}
+            user={user}
+            isPreviewMode={isPreviewMode}
+            previewUserId={previewUserId}
+            lessonLoading={lessonLoading}
+            handleVideoEnded={handleVideoEnded}
+          />
         </div>
       </div>
     </TooltipProvider>

@@ -2891,7 +2891,7 @@ export class HttpClient<SecurityDataType = unknown> {
       ...requestParams,
       headers: {
         ...(requestParams.headers || {}),
-        ...(type ? { "Content-Type": type } : {}),
+        ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
       },
       params: query,
       responseType: responseFormat,

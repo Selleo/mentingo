@@ -25,7 +25,7 @@
 packages/email-templates/**/index.ts
 apps/api/src/storage/migrations/**
 apps/web/e2e/**/*.json
-
+apps/web/app/components/ui
 
 # Cache
 **/.turbo
