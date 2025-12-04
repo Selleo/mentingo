@@ -530,7 +530,7 @@ export class CourseService {
           studentCourses,
           and(
             eq(studentCourses.courseId, courses.id),
-            eq(studentCourses.studentId, currentUserId || ""),
+            currentUserId ? eq(studentCourses.studentId, currentUserId) : sql`FALSE`,
           ),
         )
         .leftJoin(
@@ -2182,6 +2182,10 @@ export class CourseService {
     authorId?: UUIDType,
     excludeCourseId?: UUIDType,
   ) {
+    if (!currentUserId) {
+      return [];
+    }
+
     const conditions = [];
 
     if (authorId) {
@@ -2198,9 +2202,7 @@ export class CourseService {
       WHERE ${conditions.length ? and(...conditions) : true} AND ${courses.id} NOT IN (
         SELECT DISTINCT ${studentCourses.courseId}
         FROM ${studentCourses}
-                WHERE ${studentCourses.studentId} = ${currentUserId} AND ${
-                  studentCourses.status
-                } = ${COURSE_ENROLLMENT.ENROLLED}
+        WHERE ${studentCourses.studentId} = ${currentUserId}
       )
     `);
 
