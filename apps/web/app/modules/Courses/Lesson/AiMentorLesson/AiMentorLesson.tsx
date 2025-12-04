@@ -7,7 +7,7 @@ import { useJudgeLesson } from "~/api/mutations/useJudgeLesson";
 import { useRetakeLesson } from "~/api/mutations/useRetakeLesson";
 import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import {
-  getCurrentThreadQueryKey,
+  getCurrentThreadMessagesQueryKey,
   useCurrentThreadMessages,
 } from "~/api/queries/useCurrentThreadMessages";
 import { queryClient } from "~/api/queryClient";
@@ -26,15 +26,9 @@ interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
   lessonLoading: boolean;
   isPreviewMode?: boolean;
-  userId?: string;
 }
 
-const AiMentorLesson = ({
-  lesson,
-  lessonLoading,
-  isPreviewMode = false,
-  userId,
-}: AiMentorLessonProps) => {
+const AiMentorLesson = ({ lesson, lessonLoading, isPreviewMode = false }: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { courseId = "" } = useParams();
 
@@ -45,10 +39,8 @@ const AiMentorLesson = ({
   const { mutateAsync: retakeLesson } = useRetakeLesson(lesson.id, courseId);
 
   const { data: currentThreadMessages } = useCurrentThreadMessages({
-    lessonId: lesson.id,
     isThreadLoading: lessonLoading,
     threadId: lesson.threadId,
-    studentId: userId,
   });
 
   const [showRetakeModal, setShowRetakeModal] = useState(false);
@@ -69,12 +61,14 @@ const AiMentorLesson = ({
           }),
         });
       },
-      onFinish: () => {
-        queryClient.invalidateQueries({
+      onFinish: async () => {
+        if (!lesson.threadId) return;
+
+        await queryClient.invalidateQueries({
           queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY, { id: courseId }],
         });
-        queryClient.invalidateQueries({
-          queryKey: getCurrentThreadQueryKey(lesson.id),
+        await queryClient.invalidateQueries({
+          queryKey: getCurrentThreadMessagesQueryKey(lesson.threadId),
         });
       },
     });

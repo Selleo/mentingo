@@ -6,7 +6,7 @@ import { queryClient } from "~/api/queryClient";
 import { toast } from "~/components/ui/use-toast";
 
 import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "../queries/admin/useCourseStudentsAiMentorResults";
-import { getCurrentThreadQueryKey } from "../queries/useCurrentThreadMessages";
+import { getCurrentThreadMessagesQueryKey } from "../queries/useCurrentThreadMessages";
 
 export const useJudgeLesson = (lessonId: string, courseId: string) => {
   return useMutation({
@@ -26,11 +26,12 @@ export const useJudgeLesson = (lessonId: string, courseId: string) => {
         variant: "destructive",
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (_, { threadId }) => {
       await queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
       await queryClient.invalidateQueries({
-        queryKey: getCurrentThreadQueryKey(lessonId),
+        queryKey: getCurrentThreadMessagesQueryKey(threadId),
       });
+
       await queryClient.invalidateQueries({ queryKey: ["course", { id: courseId }] });
       await queryClient.invalidateQueries({
         queryKey: COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY,

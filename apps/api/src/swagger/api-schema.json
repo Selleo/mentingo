@@ -4259,14 +4259,6 @@
               "format": "uuid",
               "type": "string"
             }
-          },
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
