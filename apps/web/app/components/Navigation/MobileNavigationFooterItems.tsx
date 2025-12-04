@@ -37,7 +37,7 @@ export const MobileNavigationFooterItems = ({
           link: "/provider-information",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
-        isFooter={true}
+        isFooter
       />
 
       <NavigationMenuItem
@@ -48,7 +48,7 @@ export const MobileNavigationFooterItems = ({
           iconName: "User",
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
-        isFooter={true}
+        isFooter
       />
 
       <NavigationMenuItem
@@ -60,7 +60,7 @@ export const MobileNavigationFooterItems = ({
         }}
         setIsMobileNavOpen={setIsMobileNavOpen}
         showBadge={hasConfigurationIssues}
-        isFooter={true}
+        isFooter
       />
 
       <li className="hidden 2xl:block">
