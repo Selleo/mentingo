@@ -8,6 +8,7 @@ import {
   courseAverageScorePerQuizQueryOptions,
   useCourseAverageScorePerQuiz,
 } from "~/api/queries/admin/useCourseAverageScorePerQuiz";
+import { useCourseLearningTimeStatistics } from "~/api/queries/admin/useCourseLearningTimeStatistics";
 import { useCourseStatistics } from "~/api/queries/admin/useCourseStatistics";
 import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
@@ -123,6 +124,16 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     enabled: isAdminLike,
   });
   const { data: averageQuizScores } = useCourseAverageScorePerQuiz({ id, enabled: isAdminLike });
+  const { data: learningTimeStats } = useCourseLearningTimeStatistics({ id, enabled: isAdminLike });
+
+  const formatLearningTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
 
   const filterConfig: FilterConfig[] = [
     {
@@ -174,7 +185,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grid-rows-auto md:grid-rows-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grid-rows-auto md:grid-rows-5">
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.enrolledCount")}
               tooltipText={t("adminCourseView.statistics.overview.enrolledCountTooltip")}
@@ -194,9 +205,20 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
               statistic={courseStatistics?.averageCompletionPercentage ?? 0}
               type="percentage"
             />
+            <CourseAdminStatisticsCard
+              title={t("adminCourseView.statistics.overview.totalLearningTime")}
+              tooltipText={t("adminCourseView.statistics.overview.totalLearningTimeTooltip")}
+              statistic={formatLearningTime(learningTimeStats?.courseTotals?.totalSeconds ?? 0)}
+              type="text"
+            />
+            <CourseAdminStatisticsCard
+              title={t("adminCourseView.statistics.overview.activeStudents")}
+              tooltipText={t("adminCourseView.statistics.overview.activeStudentsTooltip")}
+              statistic={learningTimeStats?.courseTotals?.uniqueUsers ?? 0}
+            />
             <CourseStatusDistributionChart
               courseStatistics={courseStatistics}
-              className="md:row-span-3 md:row-start-1 md:col-start-2"
+              className="md:row-span-5 md:row-start-1 md:col-start-2"
             />
           </div>
           <AverageScorePerQuizChart averageQuizScores={averageQuizScores} />
