@@ -33,6 +33,7 @@ import { DatabasePg } from "src/common";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
@@ -50,6 +51,7 @@ import { getSortOptions } from "../common/helpers/getSortOptions";
 import {
   aiMentorStudentLessonProgress,
   categories,
+  certificates,
   chapters,
   courses,
   coursesSummaryStats,
@@ -926,6 +928,10 @@ export class CourseService {
       .set({ hasCertificate })
       .where(eq(courses.id, courseId))
       .returning();
+
+    if (hasCertificate) {
+      this.eventBus.publish(new UpdateHasCertificateEvent(courseId));
+    }
 
     if (!updatedCourse) {
       throw new ConflictException("Failed to update course");
@@ -2251,5 +2257,25 @@ export class CourseService {
       .where(eq(chapters.id, chapterId));
 
     return chapterName;
+  }
+
+  async getStudentsWithoutCertificate(courseId: UUIDType) {
+    return this.db
+      .select({ ...getTableColumns(studentCourses) })
+      .from(studentCourses)
+      .leftJoin(
+        certificates,
+        and(
+          eq(certificates.courseId, studentCourses.courseId),
+          eq(certificates.userId, studentCourses.studentId),
+        ),
+      )
+      .where(
+        and(
+          isNotNull(studentCourses.completedAt),
+          isNull(certificates.userId),
+          eq(studentCourses.courseId, courseId),
+        ),
+      );
   }
 }

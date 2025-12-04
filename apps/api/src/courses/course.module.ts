@@ -1,6 +1,8 @@
 import { forwardRef, Module } from "@nestjs/common";
 
+import { CertificatesModule } from "src/certificates/certificates.module";
 import { ChapterModule } from "src/chapter/chapter.module";
+import { CourseHandler } from "src/courses/handlers/course.handler";
 import { FileModule } from "src/file/files.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -21,11 +23,12 @@ import { CourseService } from "./course.service";
     LessonModule,
     SettingsModule,
     LocalizationModule,
+    CertificatesModule,
     forwardRef(() => StripeModule),
     forwardRef(() => UserModule),
   ],
   controllers: [CourseController],
-  providers: [CourseService, LocalizationService],
+  providers: [CourseService, CourseHandler, LocalizationService],
   exports: [CourseService],
 })
 export class CourseModule {}
