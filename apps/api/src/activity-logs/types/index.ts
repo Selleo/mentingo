@@ -114,3 +114,22 @@ export type LessonActivityLogSnapshot = {
     type?: string | null;
   };
 };
+
+export type CourseActivityLogSnapshot = {
+  id: UUIDType;
+  title?: string | null;
+  description?: string | null;
+  status?: string | null;
+  priceInCents?: number | null;
+  currency?: string | null;
+  hasCertificate?: boolean;
+  isScorm?: boolean;
+  categoryId?: UUIDType | null;
+  authorId?: UUIDType | null;
+  thumbnailS3Key?: string | null;
+  baseLanguage?: string;
+  availableLocales?: string[];
+  settings?: Record<string, unknown>;
+  stripeProductId?: string | null;
+  stripePriceId?: string | null;
+};
