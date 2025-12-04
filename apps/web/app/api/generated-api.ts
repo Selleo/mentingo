@@ -881,7 +881,7 @@ export interface UpdateGroupResponse {
     updatedAt: string;
     settings?: {
       isMandatory: boolean;
-      dueDate: string;
+      dueDate: string | null;
     };
   };
 }
@@ -918,7 +918,7 @@ export interface GetGroupsByCourseResponse {
     updatedAt: string;
     settings?: {
       isMandatory: boolean;
-      dueDate: string;
+      dueDate: string | null;
     };
   }[];
 }
