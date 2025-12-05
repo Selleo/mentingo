@@ -24,6 +24,7 @@ export * from "./category/create-category.event";
 export * from "./category/update-category.event";
 export * from "./category/delete-category.event";
 export * from "./settings/update-settings.event";
+export * from "./env/update-env.event";
 export * from "./group/create-group.event";
 export * from "./group/update-group.event";
 export * from "./group/delete-group.event";

@@ -6,6 +6,7 @@ import { AnnouncementActivityHandler } from "./handlers/announcement-activity.ha
 import { CategoryActivityHandler } from "./handlers/category-activity.handler";
 import { ChapterActivityHandler } from "./handlers/chapter-activity.handler";
 import { CourseActivityHandler } from "./handlers/course-activity.handler";
+import { EnvActivityHandler } from "./handlers/env-activity.handler";
 import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
@@ -24,6 +25,7 @@ import { UserActivityHandler } from "./handlers/user-activity.handler";
     CategoryActivityHandler,
     SettingsActivityHandler,
     UserActivityHandler,
+    EnvActivityHandler,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })

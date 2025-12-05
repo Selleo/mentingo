@@ -39,8 +39,8 @@ export class EnvController {
   @Validate({
     request: [{ type: "body", name: "bulkUpsertEnvBody", schema: bulkUpsertEnvSchema }],
   })
-  async bulkUpsertEnv(@Body() data: BulkUpsertEnvBody) {
-    await this.envService.bulkUpsertEnv(data);
+  async bulkUpsertEnv(@Body() data: BulkUpsertEnvBody, @CurrentUser("userId") userId: UUIDType) {
+    await this.envService.bulkUpsertEnv(data, userId);
     return new BaseResponse({ message: "Upserted secrets successfully" });
   }
 

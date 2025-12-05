@@ -1,9 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
 import { CategoryService } from "src/category/category.service";
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { CourseService } from "src/courses/course.service";
+import { EnvService } from "src/env/services/env.service";
 import { GroupService } from "src/group/group.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -17,7 +18,11 @@ import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateAllTables } from "../../../test/helpers/test-helpers";
-import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
+import {
+  ACTIVITY_LOG_ACTION_TYPES,
+  ACTIVITY_LOG_RESOURCE_TYPES,
+  type ActivityLogResourceType,
+} from "../types";
 
 import type { INestApplication } from "@nestjs/common";
 import type { CreateChapterBody } from "src/chapter/schemas/chapter.schema";
@@ -36,6 +41,7 @@ describe("Activity Logs E2E", () => {
   let settingsService: SettingsService;
   let categoryService: CategoryService;
   let courseService: CourseService;
+  let envService: EnvService;
   let groupService: GroupService;
   let db: DatabasePg;
 
@@ -58,6 +64,7 @@ describe("Activity Logs E2E", () => {
     settingsService = app.get(SettingsService);
     categoryService = app.get(CategoryService);
     courseService = app.get(CourseService);
+    envService = app.get(EnvService);
     groupService = app.get(GroupService);
 
     courseFactory = createCourseFactory(db);
@@ -81,21 +88,53 @@ describe("Activity Logs E2E", () => {
     adminUserId = adminUser.id;
   });
 
-  const getLogsForResource = async (resourceId: UUIDType) =>
-    db
+  const getLogs = async (
+    {
+      resourceId,
+      resourceType,
+    }: {
+      resourceId?: UUIDType;
+      resourceType?: ActivityLogResourceType | null;
+    },
+    dbInstance: DatabasePg = db,
+  ) => {
+    const conditions = [];
+
+    if (resourceId !== undefined) conditions.push(eq(activityLogs.resourceId, resourceId));
+    if (resourceType !== undefined) {
+      conditions.push(
+        resourceType === null
+          ? isNull(activityLogs.resourceType)
+          : eq(activityLogs.resourceType, resourceType as ActivityLogResourceType),
+      );
+    }
+
+    if (!conditions.length) return [];
+
+    const [firstCondition, ...rest] = conditions;
+
+    return dbInstance
       .select()
       .from(activityLogs)
-      .where(eq(activityLogs.resourceId, resourceId))
+      .where(rest.reduce((acc, condition) => and(acc, condition), firstCondition))
       .orderBy(activityLogs.createdAt);
+  };
 
-  const waitForLogs = async (resourceId: UUIDType, expectedCount = 1, timeoutMs = 5000) => {
+  const waitForLogs = async (
+    filters: {
+      resourceId?: UUIDType;
+      resourceType?: ActivityLogResourceType | null;
+    },
+    expectedCount = 1,
+    timeoutMs = 5000,
+  ) => {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
-      const logs = await getLogsForResource(resourceId);
+      const logs = await getLogs(filters);
       if (logs.length >= expectedCount) return logs;
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
-    throw new Error(`Timed out waiting for activity logs for resource ${resourceId}`);
+    throw new Error(`Timed out waiting for activity logs`);
   };
 
   const parseMetadata = (metadata: any) =>
@@ -137,7 +176,7 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when chapter is created", async () => {
       const chapterId = await createChapter();
 
-      const [createLog] = await waitForLogs(chapterId);
+      const [createLog] = await waitForLogs({ resourceId: chapterId });
       const createMetadata = parseMetadata(createLog.metadata);
 
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
@@ -159,7 +198,7 @@ describe("Activity Logs E2E", () => {
         USER_ROLES.ADMIN,
       );
 
-      const logsAfterUpdate = await waitForLogs(chapterId, 2);
+      const logsAfterUpdate = await waitForLogs({ resourceId: chapterId }, 2);
       const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
       const updateMetadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(updateMetadata);
@@ -176,7 +215,7 @@ describe("Activity Logs E2E", () => {
 
       await adminChapterService.removeChapter(chapterId, adminUserId, USER_ROLES.ADMIN);
 
-      const logsAfterDelete = await waitForLogs(chapterId, 2);
+      const logsAfterDelete = await waitForLogs({ resourceId: chapterId }, 2);
       const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
       const deleteMetadata = parseMetadata(deleteLog.metadata);
 
@@ -217,7 +256,7 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when lesson is created", async () => {
       const lessonId = await createLesson();
 
-      const [createLog] = await waitForLogs(lessonId);
+      const [createLog] = await waitForLogs({ resourceId: lessonId });
       const createMetadata = parseMetadata(createLog.metadata);
 
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
@@ -240,7 +279,7 @@ describe("Activity Logs E2E", () => {
         USER_ROLES.ADMIN,
       );
 
-      const logsAfterUpdate = await waitForLogs(lessonId, 2);
+      const logsAfterUpdate = await waitForLogs({ resourceId: lessonId }, 2);
       const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
       const updateMetadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(updateMetadata);
@@ -256,7 +295,7 @@ describe("Activity Logs E2E", () => {
 
       await adminLessonService.removeLesson(lessonId, adminUserId, USER_ROLES.ADMIN);
 
-      const logsAfterDelete = await waitForLogs(lessonId, 2);
+      const logsAfterDelete = await waitForLogs({ resourceId: lessonId }, 2);
       const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
       const deleteMetadata = parseMetadata(deleteLog.metadata);
 
@@ -285,7 +324,7 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when course is created", async () => {
       const course = await createCourse();
 
-      const [createLog] = await waitForLogs(course.id);
+      const [createLog] = await waitForLogs({ resourceId: course.id });
       const createMetadata = parseMetadata(createLog.metadata);
 
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
@@ -304,7 +343,7 @@ describe("Activity Logs E2E", () => {
 
       await courseService.updateCourse(course.id, updateBody, adminUserId, USER_ROLES.ADMIN, true);
 
-      const logsAfterUpdate = await waitForLogs(course.id, 2);
+      const logsAfterUpdate = await waitForLogs({ resourceId: course.id }, 2);
       const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
       const updateMetadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(updateMetadata);
@@ -328,7 +367,7 @@ describe("Activity Logs E2E", () => {
         adminUserId,
       );
 
-      const [createLog] = await waitForLogs(announcement.id);
+      const [createLog] = await waitForLogs({ resourceId: announcement.id });
       const createMetadata = parseMetadata(createLog.metadata);
 
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
@@ -350,7 +389,7 @@ describe("Activity Logs E2E", () => {
 
       await announcementsService.markAnnouncementAsRead(announcement.id, student.id);
 
-      const logsAfterRead = await waitForLogs(announcement.id, 2);
+      const logsAfterRead = await waitForLogs({ resourceId: announcement.id }, 2);
       const viewLog = logsAfterRead[logsAfterRead.length - 1];
       const viewMetadata = parseMetadata(viewLog.metadata);
 
@@ -376,7 +415,7 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when group is created", async () => {
       const group = await createGroup();
 
-      const [createLog] = await waitForLogs(group.id);
+      const [createLog] = await waitForLogs({ resourceId: group.id });
       const metadata = parseMetadata(createLog.metadata);
 
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
@@ -389,7 +428,7 @@ describe("Activity Logs E2E", () => {
 
       await groupService.updateGroup(group.id, { name: "Updated Group" }, adminUserId);
 
-      const logsAfterUpdate = await waitForLogs(group.id, 2);
+      const logsAfterUpdate = await waitForLogs({ resourceId: group.id }, 2);
       const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
       const metadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(metadata);
@@ -405,7 +444,7 @@ describe("Activity Logs E2E", () => {
 
       await groupService.deleteGroup(group.id, adminUserId);
 
-      const logsAfterDelete = await waitForLogs(group.id, 2);
+      const logsAfterDelete = await waitForLogs({ resourceId: group.id }, 2);
       const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
       const metadata = parseMetadata(deleteLog.metadata);
 
@@ -426,7 +465,7 @@ describe("Activity Logs E2E", () => {
         actorId: admin.id,
       });
 
-      const logs = await waitForLogs(group.id, 2);
+      const logs = await waitForLogs({ resourceId: group.id }, 2);
       const enrollLog = logs[logs.length - 1];
       const metadata = parseMetadata(enrollLog.metadata);
 
@@ -443,7 +482,7 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when category is created", async () => {
       const category = await createCategory();
 
-      const [createLog] = await waitForLogs(category.id);
+      const [createLog] = await waitForLogs({ resourceId: category.id });
       const createMetadata = parseMetadata(createLog.metadata);
 
       expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
@@ -456,7 +495,7 @@ describe("Activity Logs E2E", () => {
 
       await categoryService.updateCategory(category.id, { title: "Updated Category" }, adminUserId);
 
-      const logsAfterUpdate = await waitForLogs(category.id, 2);
+      const logsAfterUpdate = await waitForLogs({ resourceId: category.id }, 2);
       const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
       const updateMetadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(updateMetadata);
@@ -472,7 +511,7 @@ describe("Activity Logs E2E", () => {
 
       await categoryService.deleteCategory(category.id, adminUserId);
 
-      const logsAfterDelete = await waitForLogs(category.id, 2);
+      const logsAfterDelete = await waitForLogs({ resourceId: category.id }, 2);
       const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
       const deleteMetadata = parseMetadata(deleteLog.metadata);
 
@@ -486,7 +525,7 @@ describe("Activity Logs E2E", () => {
     it("should record UPDATE activity log when global accessibility is toggled", async () => {
       await settingsService.updateGlobalUnregisteredUserCoursesAccessibility(adminUserId);
 
-      const [updateLog] = await waitForLogs(globalSettingsId);
+      const [updateLog] = await waitForLogs({ resourceId: globalSettingsId });
       const updateMetadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(updateMetadata);
 
@@ -501,7 +540,7 @@ describe("Activity Logs E2E", () => {
     it("should record UPDATE activity log when default course currency changes", async () => {
       await settingsService.updateDefaultCourseCurrency("eur", adminUserId);
 
-      const [updateLog] = await waitForLogs(globalSettingsId);
+      const [updateLog] = await waitForLogs({ resourceId: globalSettingsId });
       const updateMetadata = parseMetadata(updateLog.metadata);
       const changedFields = getChangedFields(updateMetadata);
 
@@ -510,6 +549,27 @@ describe("Activity Logs E2E", () => {
       expect(updateLog.resourceId).toBe(globalSettingsId);
       expect(changedFields).toEqual(expect.arrayContaining(["defaultCourseCurrency"]));
       expect(updateMetadata.after?.defaultCourseCurrency).toBe("eur");
+    });
+  });
+
+  describe("Env activity logs", () => {
+    it("should record UPDATE activity log when env vars are upserted", async () => {
+      const envKeys = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"];
+
+      await envService.bulkUpsertEnv(
+        envKeys.map((key) => ({ name: key, value: "test_value" })),
+        adminUserId,
+      );
+
+      const [log] = await waitForLogs({ resourceType: ACTIVITY_LOG_RESOURCE_TYPES.INTEGRATION });
+      const metadata = parseMetadata(log.metadata);
+      const changedFields = getChangedFields(metadata);
+
+      expect(log.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.UPDATE);
+      expect(log.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.INTEGRATION);
+      expect(log.resourceId).toBeNull();
+      expect(log.actorId).toBe(adminUserId);
+      expect(changedFields).toEqual(expect.arrayContaining(envKeys));
     });
   });
 });
