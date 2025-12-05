@@ -160,3 +160,9 @@ export type GroupActivityLogSnapshot = {
   characteristic?: string | null;
   userCount?: number | null;
 };
+
+export type CategoryActivityLogSnapshot = {
+  id: UUIDType;
+  title?: string | null;
+  archived?: boolean | null;
+};

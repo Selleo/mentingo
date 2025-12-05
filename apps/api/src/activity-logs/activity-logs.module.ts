@@ -3,6 +3,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 
 import { ActivityLogsService } from "./activity-logs.service";
 import { AnnouncementActivityHandler } from "./handlers/announcement-activity.handler";
+import { CategoryActivityHandler } from "./handlers/category-activity.handler";
 import { ChapterActivityHandler } from "./handlers/chapter-activity.handler";
 import { CourseActivityHandler } from "./handlers/course-activity.handler";
 import { GroupActivityHandler } from "./handlers/group-activity.handler";
@@ -18,6 +19,7 @@ import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
     CourseActivityHandler,
     AnnouncementActivityHandler,
     GroupActivityHandler,
+    CategoryActivityHandler,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })

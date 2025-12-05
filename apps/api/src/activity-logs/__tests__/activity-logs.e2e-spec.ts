@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
+import { CategoryService } from "src/category/category.service";
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { CourseService } from "src/courses/course.service";
 import { GroupService } from "src/group/group.service";
@@ -31,6 +32,7 @@ describe("Activity Logs E2E", () => {
   let adminChapterService: AdminChapterService;
   let announcementsService: AnnouncementsService;
   let adminLessonService: AdminLessonService;
+  let categoryService: CategoryService;
   let courseService: CourseService;
   let groupService: GroupService;
   let db: DatabasePg;
@@ -50,6 +52,7 @@ describe("Activity Logs E2E", () => {
     adminChapterService = app.get(AdminChapterService);
     announcementsService = app.get(AnnouncementsService);
     adminLessonService = app.get(AdminLessonService);
+    categoryService = app.get(CategoryService);
     courseService = app.get(CourseService);
     groupService = app.get(GroupService);
 
@@ -425,6 +428,52 @@ describe("Activity Logs E2E", () => {
       expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.GROUP_ASSIGNMENT);
       expect(enrollLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.GROUP);
       expect(metadata.context?.userId).toBe(student.id);
+    });
+  });
+
+  describe("Category activity logs", () => {
+    const createCategory = async () =>
+      categoryService.createCategory({ title: "Initial Category" }, adminUserId);
+
+    it("should record CREATE activity log when category is created", async () => {
+      const category = await createCategory();
+
+      const [createLog] = await waitForLogs(category.id);
+      const createMetadata = parseMetadata(createLog.metadata);
+
+      expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
+      expect(createLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY);
+      expect(createMetadata.after?.title).toBe("Initial Category");
+    });
+
+    it("should record UPDATE activity log when category is updated", async () => {
+      const category = await createCategory();
+
+      await categoryService.updateCategory(category.id, { title: "Updated Category" }, adminUserId);
+
+      const logsAfterUpdate = await waitForLogs(category.id, 2);
+      const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
+      const updateMetadata = parseMetadata(updateLog.metadata);
+      const changedFields = getChangedFields(updateMetadata);
+
+      expect(updateLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.UPDATE);
+      expect(updateLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY);
+      expect(changedFields).toEqual(expect.arrayContaining(["title"]));
+      expect(updateMetadata.after?.title).toBe("Updated Category");
+    });
+
+    it("should record DELETE activity log when category is deleted", async () => {
+      const category = await createCategory();
+
+      await categoryService.deleteCategory(category.id, adminUserId);
+
+      const logsAfterDelete = await waitForLogs(category.id, 2);
+      const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
+      const deleteMetadata = parseMetadata(deleteLog.metadata);
+
+      expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
+      expect(deleteLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY);
+      expect(deleteMetadata.context?.categoryName).toBe("Initial Category");
     });
   });
 });
