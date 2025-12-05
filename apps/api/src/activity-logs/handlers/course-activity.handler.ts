@@ -18,7 +18,6 @@ type CourseEventType =
   | UserCourseFinishedEvent
   | CreateCourseEvent
   | UpdateCourseEvent
-  | UserCourseFinishedEvent
   | EnrollCourseEvent;
 
 const CourseActivityEvents = [
@@ -26,7 +25,6 @@ const CourseActivityEvents = [
   UserCourseFinishedEvent,
   CreateCourseEvent,
   UpdateCourseEvent,
-  UserCourseFinishedEvent,
   EnrollCourseEvent,
 ] as const;
 
