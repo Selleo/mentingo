@@ -1,6 +1,8 @@
 import { eq, and, isNull } from "drizzle-orm";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
+import { AuthController } from "src/auth/auth.controller";
+import { AuthService } from "src/auth/auth.service";
 import { CategoryService } from "src/category/category.service";
 import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { CourseService } from "src/courses/course.service";
@@ -25,6 +27,7 @@ import {
 } from "../types";
 
 import type { INestApplication } from "@nestjs/common";
+import type { Response } from "express";
 import type { CreateChapterBody } from "src/chapter/schemas/chapter.schema";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CreateCourseBody } from "src/courses/schemas/createCourse.schema";
@@ -43,6 +46,8 @@ describe("Activity Logs E2E", () => {
   let courseService: CourseService;
   let envService: EnvService;
   let groupService: GroupService;
+  let authService: AuthService;
+  let authController: AuthController;
   let db: DatabasePg;
 
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -66,6 +71,8 @@ describe("Activity Logs E2E", () => {
     courseService = app.get(CourseService);
     envService = app.get(EnvService);
     groupService = app.get(GroupService);
+    authService = app.get(AuthService);
+    authController = app.get(AuthController);
 
     courseFactory = createCourseFactory(db);
     categoryFactory = createCategoryFactory(db);
@@ -570,6 +577,73 @@ describe("Activity Logs E2E", () => {
       expect(log.resourceId).toBeNull();
       expect(log.actorId).toBe(adminUserId);
       expect(changedFields).toEqual(expect.arrayContaining(envKeys));
+    });
+  });
+
+  describe("Auth activity logs", () => {
+    const createUserWithPassword = async () => {
+      const password = "Password123!";
+
+      const user = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+
+      return { user, password };
+    };
+
+    it("should record LOGIN activity log when user logs in with password", async () => {
+      const { user, password } = await createUserWithPassword();
+      const { MFAEnforcedRoles } = await settingsService.getGlobalSettings();
+
+      await authService.login({ email: user.email, password }, MFAEnforcedRoles);
+
+      const [loginLog] = await waitForLogs(
+        { resourceId: user.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER },
+        1,
+      );
+      const metadata = parseMetadata(loginLog.metadata);
+
+      expect(loginLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.LOGIN);
+      expect(loginLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.USER);
+      expect(metadata.context?.method).toBe("password");
+    });
+
+    it("should record LOGIN activity log when tokens are refreshed", async () => {
+      const { user, password } = await createUserWithPassword();
+      const { MFAEnforcedRoles } = await settingsService.getGlobalSettings();
+
+      const { refreshToken } = await authService.login(
+        { email: user.email, password },
+        MFAEnforcedRoles,
+      );
+
+      await authService.refreshTokens(refreshToken);
+
+      const logs = await waitForLogs(
+        { resourceId: user.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER },
+        2,
+      );
+      const refreshLog = logs[logs.length - 1];
+      const metadata = parseMetadata(refreshLog.metadata);
+
+      expect(refreshLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.LOGIN);
+      expect(metadata.context?.method).toBe("refresh_token");
+    });
+
+    it("should record LOGOUT activity log when user logs out", async () => {
+      const { user } = await createUserWithPassword();
+      const responseMock = {
+        clearCookie: jest.fn(),
+      } as unknown as Response;
+
+      await authController.logout(responseMock, user.id);
+
+      const [logoutLog] = await waitForLogs(
+        { resourceId: user.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER },
+        1,
+      );
+
+      expect(logoutLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.LOGOUT);
+      expect(logoutLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.USER);
+      expect(logoutLog.actorId).toBe(user.id);
     });
   });
 });

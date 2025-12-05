@@ -27,6 +27,7 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import hashPassword from "src/common/helpers/hashPassword";
+import { UserLoginEvent } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
 import { UserRegisteredEvent } from "src/events/user/user-registered.event";
 import { SettingsService } from "src/settings/settings.service";
@@ -161,6 +162,8 @@ export class AuthService {
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
 
+    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "password" }));
+
     if (
       MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
       userSettings.isMFAEnabled
@@ -217,6 +220,9 @@ export class AuthService {
       }
 
       const tokens = await this.getTokens(user);
+
+      this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "refresh_token" }));
+
       return tokens;
     } catch (error) {
       throw new ForbiddenException("Invalid refresh token");
@@ -482,6 +488,8 @@ export class AuthService {
 
     const userSettings = await this.settingsService.getUserSettings(user.id);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
+
+    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "provider" }));
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
       return {

@@ -21,7 +21,7 @@ import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
-import { UserActivityEvent } from "src/events";
+import { UserActivityEvent, UserLogoutEvent } from "src/events";
 import { SettingsService } from "src/settings/settings.service";
 import { baseUserResponseSchema, currentUserResponseSchema } from "src/user/schemas/user.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -118,8 +118,13 @@ export class AuthController {
   @Validate({
     response: nullResponse(),
   })
-  async logout(@Res({ passthrough: true }) response: Response): Promise<null> {
+  async logout(
+    @Res({ passthrough: true }) response: Response,
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<null> {
     this.tokenService.clearTokenCookies(response);
+
+    this.eventBus.publish(new UserLogoutEvent({ userId: currentUserId }));
 
     return null;
   }
