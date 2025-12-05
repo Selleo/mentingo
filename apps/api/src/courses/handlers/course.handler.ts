@@ -25,8 +25,8 @@ export class CourseHandler implements IEventHandler {
     const students = await this.courseService.getStudentsWithoutCertificate(courseId);
 
     await Promise.all(
-      students.map((student) =>
-        this.certificateService.createCertificate(student.studentId, courseId),
+      students.map(({ studentId }) =>
+        this.certificateService.createCertificate(studentId, courseId),
       ),
     );
   }
