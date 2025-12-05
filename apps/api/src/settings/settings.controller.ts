@@ -106,10 +106,11 @@ export class SettingsController {
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
-  async updateUnregisteredUserCoursesAccessibility(): Promise<
-    BaseResponse<GlobalSettingsJSONContentSchema>
-  > {
-    const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
+  async updateUnregisteredUserCoursesAccessibility(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result =
+      await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility(userId);
     return new BaseResponse(result);
   }
 
@@ -118,8 +119,10 @@ export class SettingsController {
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
-  async updateEnforceSSO(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
-    const result = await this.settingsService.updateGlobalEnforceSSO();
+  async updateEnforceSSO(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalEnforceSSO(userId);
     return new BaseResponse(result);
   }
 
@@ -143,10 +146,12 @@ export class SettingsController {
   })
   async updateColorSchema(
     @Body() body: UpdateGlobalColorSchemaBody,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateGlobalColorSchema(
       body.primaryColor,
       body.contrastColor,
+      userId,
     );
     return new BaseResponse(result);
   }
@@ -183,8 +188,11 @@ export class SettingsController {
       },
     },
   })
-  async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File | null): Promise<void> {
-    await this.settingsService.uploadPlatformLogo(logo);
+  async updatePlatformLogo(
+    @UploadedFile() logo: Express.Multer.File | null,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<void> {
+    await this.settingsService.uploadPlatformLogo(logo, userId);
   }
 
   @Get("platform-simple-logo")
@@ -219,8 +227,11 @@ export class SettingsController {
       },
     },
   })
-  async updatePlatformSimpleLogo(@UploadedFile() logo: Express.Multer.File | null): Promise<void> {
-    await this.settingsService.uploadPlatformSimpleLogo(logo);
+  async updatePlatformSimpleLogo(
+    @UploadedFile() logo: Express.Multer.File | null,
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<void> {
+    await this.settingsService.uploadPlatformSimpleLogo(logo, userId);
   }
 
   @Get("login-background")
@@ -257,8 +268,9 @@ export class SettingsController {
   })
   async updateLoginBackground(
     @UploadedFile() loginBackground: Express.Multer.File | null,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<void> {
-    await this.settingsService.uploadLoginBackgroundImage(loginBackground);
+    await this.settingsService.uploadLoginBackgroundImage(loginBackground, userId);
   }
 
   @Get("company-information")
@@ -277,8 +289,13 @@ export class SettingsController {
     request: [{ type: "body", schema: companyInformationJSONSchema }],
     response: baseResponse(companyInformationJSONSchema),
   })
-  async updateCompanyInformation(@Body() companyInfo: CompanyInformaitonJSONSchema) {
-    return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
+  async updateCompanyInformation(
+    @Body() companyInfo: CompanyInformaitonJSONSchema,
+    @CurrentUser("userId") userId: UUIDType,
+  ) {
+    return new BaseResponse(
+      await this.settingsService.updateCompanyInformation(companyInfo, userId),
+    );
   }
 
   @Patch("admin/mfa-enforced-roles")
@@ -288,8 +305,9 @@ export class SettingsController {
   })
   async updateMFAEnforcedRoles(
     @Body() rolesRequest: UpdateMFAEnforcedRolesRequest,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<GlobalSettingsJSONContentSchema> {
-    return await this.settingsService.updateMFAEnforcedRoles(rolesRequest);
+    return await this.settingsService.updateMFAEnforcedRoles(rolesRequest, userId);
   }
 
   @Patch("certificate-background")
@@ -309,9 +327,10 @@ export class SettingsController {
   })
   async updateCertificateBackground(
     @UploadedFile() certificateBackground: Express.Multer.File,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(
-      await this.settingsService.updateCertificateBackground(certificateBackground),
+      await this.settingsService.updateCertificateBackground(certificateBackground, userId),
     );
   }
 
@@ -322,9 +341,11 @@ export class SettingsController {
   })
   async updateDefaultCourseCurrency(
     @Body() newSettings: UpdateDefaultCourseCurrencyBody,
+    @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const updatedGlobalSettings = await this.settingsService.updateDefaultCourseCurrency(
       newSettings.defaultCourseCurrency,
+      userId,
     );
 
     return new BaseResponse(updatedGlobalSettings);
@@ -332,8 +353,8 @@ export class SettingsController {
 
   @Patch("admin/invite-only-registration")
   @Roles(USER_ROLES.ADMIN)
-  async updateInviteOnlyRegistration() {
-    return new BaseResponse(await this.settingsService.updateGlobalInviteOnlyRegistration());
+  async updateInviteOnlyRegistration(@CurrentUser("userId") userId: UUIDType) {
+    return new BaseResponse(await this.settingsService.updateGlobalInviteOnlyRegistration(userId));
   }
 
   @Patch("admin/user-email-triggers/:triggerKey")
@@ -341,8 +362,11 @@ export class SettingsController {
     request: [{ type: "param", name: "triggerKey", schema: Type.String() }],
   })
   @Roles(USER_ROLES.ADMIN)
-  async updateUserEmailTriggers(@Param("triggerKey") triggerKey: string) {
-    return new BaseResponse(await this.settingsService.updateUserEmailTriggers(triggerKey));
+  async updateUserEmailTriggers(
+    @Param("triggerKey") triggerKey: string,
+    @CurrentUser("userId") userId: UUIDType,
+  ) {
+    return new BaseResponse(await this.settingsService.updateUserEmailTriggers(triggerKey, userId));
   }
 
   @Patch("admin/config-warning-dismissed")

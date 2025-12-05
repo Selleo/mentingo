@@ -8,6 +8,7 @@ import { ChapterActivityHandler } from "./handlers/chapter-activity.handler";
 import { CourseActivityHandler } from "./handlers/course-activity.handler";
 import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
+import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
 
 @Global()
 @Module({
@@ -20,6 +21,7 @@ import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
     AnnouncementActivityHandler,
     GroupActivityHandler,
     CategoryActivityHandler,
+    SettingsActivityHandler,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })

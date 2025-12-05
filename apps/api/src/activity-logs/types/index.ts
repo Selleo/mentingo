@@ -166,3 +166,23 @@ export type CategoryActivityLogSnapshot = {
   title?: string | null;
   archived?: boolean | null;
 };
+
+export type SettingsActivityLogSnapshot = {
+  id: UUIDType;
+  unregisteredUserCoursesAccessibility?: boolean;
+  enforceSSO?: boolean;
+  primaryColor?: string | null;
+  contrastColor?: string | null;
+  companyInformation?: Record<string, unknown> | null;
+  platformLogoS3Key?: string | null;
+  platformSimpleLogoS3Key?: string | null;
+  loginBackgroundImageS3Key?: string | null;
+  certificateBackgroundImage?: string | null;
+  MFAEnforcedRoles?: string[] | null;
+  defaultCourseCurrency?: string | null;
+  inviteOnlyRegistration?: boolean;
+  userEmailTriggers?: Record<string, boolean> | null;
+  adminNewUserNotification?: boolean;
+  adminFinishedCourseNotification?: boolean;
+  configWarningDismissed?: boolean;
+};

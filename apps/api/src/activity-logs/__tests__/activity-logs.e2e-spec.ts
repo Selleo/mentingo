@@ -7,6 +7,7 @@ import { CourseService } from "src/courses/course.service";
 import { GroupService } from "src/group/group.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
+import { SettingsService } from "src/settings/settings.service";
 import { activityLogs } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -32,6 +33,7 @@ describe("Activity Logs E2E", () => {
   let adminChapterService: AdminChapterService;
   let announcementsService: AnnouncementsService;
   let adminLessonService: AdminLessonService;
+  let settingsService: SettingsService;
   let categoryService: CategoryService;
   let courseService: CourseService;
   let groupService: GroupService;
@@ -43,6 +45,7 @@ describe("Activity Logs E2E", () => {
   let userFactory: ReturnType<typeof createUserFactory>;
 
   let adminUserId: UUIDType;
+  let globalSettingsId: UUIDType;
 
   beforeAll(async () => {
     const { app: testAppInstance } = await createE2ETest();
@@ -52,6 +55,7 @@ describe("Activity Logs E2E", () => {
     adminChapterService = app.get(AdminChapterService);
     announcementsService = app.get(AnnouncementsService);
     adminLessonService = app.get(AdminLessonService);
+    settingsService = app.get(SettingsService);
     categoryService = app.get(CategoryService);
     courseService = app.get(CourseService);
     groupService = app.get(GroupService);
@@ -70,7 +74,8 @@ describe("Activity Logs E2E", () => {
   beforeEach(async () => {
     await truncateAllTables(db);
 
-    await settingsFactory.create();
+    const globalSettings = await settingsFactory.create();
+    globalSettingsId = globalSettings.id;
 
     const adminUser = await userFactory.withAdminRole().create();
     adminUserId = adminUser.id;
@@ -474,6 +479,37 @@ describe("Activity Logs E2E", () => {
       expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
       expect(deleteLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY);
       expect(deleteMetadata.context?.categoryName).toBe("Initial Category");
+    });
+  });
+
+  describe("Settings activity logs", () => {
+    it("should record UPDATE activity log when global accessibility is toggled", async () => {
+      await settingsService.updateGlobalUnregisteredUserCoursesAccessibility(adminUserId);
+
+      const [updateLog] = await waitForLogs(globalSettingsId);
+      const updateMetadata = parseMetadata(updateLog.metadata);
+      const changedFields = getChangedFields(updateMetadata);
+
+      expect(updateLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.UPDATE);
+      expect(updateLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.SETTINGS);
+      expect(updateLog.resourceId).toBe(globalSettingsId);
+      expect(changedFields).toEqual(
+        expect.arrayContaining(["unregisteredUserCoursesAccessibility"]),
+      );
+    });
+
+    it("should record UPDATE activity log when default course currency changes", async () => {
+      await settingsService.updateDefaultCourseCurrency("eur", adminUserId);
+
+      const [updateLog] = await waitForLogs(globalSettingsId);
+      const updateMetadata = parseMetadata(updateLog.metadata);
+      const changedFields = getChangedFields(updateMetadata);
+
+      expect(updateLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.UPDATE);
+      expect(updateLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.SETTINGS);
+      expect(updateLog.resourceId).toBe(globalSettingsId);
+      expect(changedFields).toEqual(expect.arrayContaining(["defaultCourseCurrency"]));
+      expect(updateMetadata.after?.defaultCourseCurrency).toBe("eur");
     });
   });
 });
