@@ -2,6 +2,7 @@ import type { UUIDType } from "src/common";
 import type { LessonResourceType } from "src/lesson/lesson.schema";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type { QuestionType } from "src/questions/schema/question.types";
+import type { UserRole } from "src/user/schemas/userRoles";
 
 export const ACTIVITY_LOG_ACTION_TYPES = {
   CREATE: "create",
@@ -165,6 +166,16 @@ export type CategoryActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
   archived?: boolean | null;
+};
+
+export type UserActivityLogSnapshot = {
+  id: UUIDType;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  role?: UserRole | null;
+  archived?: boolean | null;
+  groups?: Array<{ id: UUIDType; name?: string | null }>;
 };
 
 export type SettingsActivityLogSnapshot = {

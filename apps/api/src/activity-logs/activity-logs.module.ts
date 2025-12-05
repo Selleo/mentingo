@@ -9,6 +9,7 @@ import { CourseActivityHandler } from "./handlers/course-activity.handler";
 import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
+import { UserActivityHandler } from "./handlers/user-activity.handler";
 
 @Global()
 @Module({
@@ -22,6 +23,7 @@ import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
     GroupActivityHandler,
     CategoryActivityHandler,
     SettingsActivityHandler,
+    UserActivityHandler,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })
