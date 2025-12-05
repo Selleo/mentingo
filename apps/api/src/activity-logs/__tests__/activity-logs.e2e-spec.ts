@@ -361,6 +361,44 @@ describe("Activity Logs E2E", () => {
       expect(updateMetadata.after?.title).toBe("Updated Course");
       expect(updateMetadata.after?.hasCertificate).toBe("true");
     });
+
+    it("should record ENROLL_COURSE activity log when student self-enrolls", async () => {
+      const student = await userFactory.withUserSettings(db).create();
+      const course = await createCourse();
+
+      await courseService.enrollCourse(course.id, student.id);
+
+      const logs = await waitForLogs(
+        { resourceId: course.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE },
+        2,
+      );
+      const enrollLog = logs[logs.length - 1];
+      const metadata = parseMetadata(enrollLog.metadata);
+
+      expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.ENROLL_COURSE);
+      expect(enrollLog.actorId).toBe(student.id);
+      expect(enrollLog.resourceId).toBe(course.id);
+      expect(metadata.context).toBeNull();
+    });
+
+    it("should record ENROLL_COURSE activity log when admin enrolls a student", async () => {
+      const student = await userFactory.withUserSettings(db).create();
+      const course = await createCourse();
+
+      await courseService.enrollCourses(course.id, { studentIds: [student.id] }, adminUserId);
+
+      const logs = await waitForLogs(
+        { resourceId: course.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE },
+        2,
+      );
+      const enrollLog = logs[logs.length - 1];
+      const metadata = parseMetadata(enrollLog.metadata);
+
+      expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.ENROLL_COURSE);
+      expect(enrollLog.actorId).toBe(adminUserId);
+      expect(enrollLog.resourceId).toBe(course.id);
+      expect(metadata.context?.enrolledUserId).toBe(student.id);
+    });
   });
 
   describe("Announcement activity logs", () => {

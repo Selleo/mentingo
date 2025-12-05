@@ -267,6 +267,7 @@ export class GroupService {
   ) {
     const actorId = options.actorId ?? userId;
     const db = options.db ?? this.db;
+    let assignedGroupIds: UUIDType[] = [];
 
     await db.transaction(async (trx) => {
       const [user] = await trx
@@ -294,6 +295,7 @@ export class GroupService {
         const groupsToAssign = existingGroups.map((group) => ({ userId, groupId: group.id }));
 
         await trx.insert(groupUsers).values(groupsToAssign);
+        assignedGroupIds = groupsToAssign.map(({ groupId }) => groupId);
 
         if (user.role === USER_ROLES.STUDENT) {
           await Promise.all(
@@ -301,21 +303,21 @@ export class GroupService {
               this.enrollUserToCoursesInGroup(groupId, userId, trx),
             ),
           );
-
-          if (actorId) {
-            groupsToAssign.forEach(({ groupId }) =>
-              this.eventBus.publish(
-                new EnrollUserToGroupEvent({
-                  groupId,
-                  userId,
-                  enrolledById: actorId,
-                }),
-              ),
-            );
-          }
         }
       }
     });
+
+    if (actorId && assignedGroupIds.length) {
+      assignedGroupIds.forEach((groupId) =>
+        this.eventBus.publish(
+          new EnrollUserToGroupEvent({
+            groupId,
+            userId,
+            enrolledById: actorId,
+          }),
+        ),
+      );
+    }
   }
 
   private getFiltersConditions(filters: GroupKeywordFilterBody) {

@@ -6,6 +6,7 @@ import {
   CourseStartedEvent,
   CreateCourseEvent,
   UpdateCourseEvent,
+  EnrollCourseEvent,
 } from "src/events";
 
 import { ActivityLogsService } from "../activity-logs.service";
@@ -17,7 +18,8 @@ type CourseEventType =
   | UserCourseFinishedEvent
   | CreateCourseEvent
   | UpdateCourseEvent
-  | UserCourseFinishedEvent;
+  | UserCourseFinishedEvent
+  | EnrollCourseEvent;
 
 const CourseActivityEvents = [
   CourseStartedEvent,
@@ -25,6 +27,7 @@ const CourseActivityEvents = [
   CreateCourseEvent,
   UpdateCourseEvent,
   UserCourseFinishedEvent,
+  EnrollCourseEvent,
 ] as const;
 
 @Injectable()
@@ -40,6 +43,8 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
     if (event instanceof CreateCourseEvent) return await this.handleCreateCourse(event);
 
     if (event instanceof UpdateCourseEvent) return await this.handleUpdateCourse(event);
+
+    if (event instanceof EnrollCourseEvent) return await this.handleEnrollCourse(event);
   }
 
   private async handleCreateCourse(event: CreateCourseEvent) {
@@ -107,6 +112,19 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_COURSE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
       resourceId: event.courseFinishedData.courseId,
+    });
+  }
+
+  private async handleEnrollCourse(event: EnrollCourseEvent) {
+    await this.activityLogsService.recordActivity({
+      actorId: event.enrollmentData.enrolledById ?? event.enrollmentData.userId,
+      operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_COURSE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+      resourceId: event.enrollmentData.courseId,
+      context:
+        event.enrollmentData.userId !== event.enrollmentData.enrolledById
+          ? { enrolledUserId: event.enrollmentData.userId }
+          : null,
     });
   }
 }

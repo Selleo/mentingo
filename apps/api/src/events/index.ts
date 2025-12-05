@@ -32,3 +32,4 @@ export * from "./group/update-group.event";
 export * from "./group/delete-group.event";
 export * from "./group/enroll-user-to-group.event";
 export * from "./group/enroll-group-to-course.event";
+export * from "./course/enroll-course.event";

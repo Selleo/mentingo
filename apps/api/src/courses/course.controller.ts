@@ -458,8 +458,9 @@ export class CourseController {
   async enrollCourses(
     @Param("courseId") courseId: UUIDType,
     @Body() body: CreateCoursesEnrollment,
+    @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollCourses(courseId, body);
+    await this.courseService.enrollCourses(courseId, body, currentUserId);
 
     return new BaseResponse({ message: "Courses enrolled successfully" });
   }

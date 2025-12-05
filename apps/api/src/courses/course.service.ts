@@ -34,7 +34,12 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { EnvService } from "src/env/services/env.service";
-import { CreateCourseEvent, UpdateCourseEvent, EnrollGroupToCourseEvent } from "src/events";
+import {
+  CreateCourseEvent,
+  UpdateCourseEvent,
+  EnrollGroupToCourseEvent,
+  EnrollCourseEvent,
+} from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -1295,9 +1300,17 @@ export class CourseService {
       await this.createStudentCourse(id, studentId, paymentId, null);
       await this.createCourseDependencies(id, studentId, paymentId, trx);
     });
+
+    this.eventBus.publish(
+      new EnrollCourseEvent({
+        courseId: id,
+        userId: studentId,
+        enrolledById: studentId,
+      }),
+    );
   }
 
-  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment) {
+  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment, adminId?: UUIDType) {
     const { studentIds } = body;
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
@@ -1357,14 +1370,23 @@ export class CourseService {
           set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
         });
 
-      this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
-
       await Promise.all(
         studentIds.map(async (studentId) => {
           await this.createCourseDependencies(courseId, studentId, null, trx);
         }),
       );
     });
+
+    this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
+    studentIds.forEach((studentId) =>
+      this.eventBus.publish(
+        new EnrollCourseEvent({
+          courseId,
+          userId: studentId,
+          enrolledById: adminId ?? null,
+        }),
+      ),
+    );
   }
 
   async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], adminId?: UUIDType) {
