@@ -379,8 +379,9 @@ export class CourseController {
   async updateHasCertificate(
     @Param("id") id: UUIDType,
     @Body() body: { hasCertificate: boolean },
+    @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateHasCertificate(id, body.hasCertificate);
+    await this.courseService.updateHasCertificate(id, body.hasCertificate, currentUserId);
 
     return new BaseResponse({ message: "Course with certificate updated successfully" });
   }
@@ -397,8 +398,13 @@ export class CourseController {
   async updateLessonSequenceEnabled(
     @Param("courseId") courseId: UUIDType,
     @Body() body: { lessonSequenceEnabled: boolean },
+    @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateLessonSequenceEnabled(courseId, body.lessonSequenceEnabled);
+    await this.courseService.updateLessonSequenceEnabled(
+      courseId,
+      body.lessonSequenceEnabled,
+      currentUserId,
+    );
 
     return new BaseResponse({ message: "Course lesson sequence updated successfully" });
   }
@@ -452,8 +458,9 @@ export class CourseController {
   async enrollCourses(
     @Param("courseId") courseId: UUIDType,
     @Body() body: CreateCoursesEnrollment,
+    @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollCourses(courseId, body);
+    await this.courseService.enrollCourses(courseId, body, currentUserId);
 
     return new BaseResponse({ message: "Courses enrolled successfully" });
   }

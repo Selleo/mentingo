@@ -48,9 +48,10 @@ export class AdminChapterRepository {
     chapterId: UUIDType,
     oldDisplayOrder: number,
     newDisplayOrder: number,
+    language: SupportedLanguages,
   ) {
-    await this.db.transaction(async (trx) => {
-      await trx
+    return await this.db.transaction(async (trx) => {
+      return await trx
         .update(chapters)
         .set({
           displayOrder: sql`CASE
@@ -68,7 +69,11 @@ export class AdminChapterRepository {
           END
           `,
         })
-        .where(eq(chapters.courseId, courseId));
+        .where(eq(chapters.courseId, courseId))
+        .returning({
+          ...getTableColumns(chapters),
+          title: sql<string>`${chapters.title}->>${language}::text`,
+        });
     });
   }
 
@@ -205,7 +210,10 @@ export class AdminChapterRepository {
         title: setJsonbField(chapters.title, body.language, body.title),
       })
       .where(eq(chapters.id, id))
-      .returning();
+      .returning({
+        ...getTableColumns(chapters),
+        title: sql<string>`${chapters.title}->>${body.language}::text`,
+      });
   }
 
   async updateChapterCountForCourse(courseId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {

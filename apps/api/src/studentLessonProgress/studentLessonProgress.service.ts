@@ -11,7 +11,7 @@ import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
-import { CourseCompletedEvent } from "src/events";
+import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -56,6 +56,7 @@ export class StudentLessonProgressService {
     completedQuestionCount = 0,
     dbInstance = this.db,
     aiMentorLessonData,
+    isQuizPassed = false,
   }: {
     id: UUIDType;
     studentId: UUIDType;
@@ -64,6 +65,7 @@ export class StudentLessonProgressService {
     completedQuestionCount?: number;
     dbInstance?: PostgresJsDatabase<typeof schema>;
     aiMentorLessonData?: ResponseAiJudgeJudgementBody;
+    isQuizPassed?: boolean;
   }) {
     if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
 
@@ -131,21 +133,26 @@ export class StudentLessonProgressService {
         )[0]
       : lessonProgress;
 
-    const updateConditions =
+    const shouldUpdate =
       (!lessonProgress?.completedAt && lesson.type !== LESSON_TYPES.AI_MENTOR) ||
       (LESSON_TYPES.AI_MENTOR && !!aiMentorLessonData?.passed);
 
-    if (updateConditions) {
-      await dbInstance
+    let lessonCompleted = false;
+
+    if (shouldUpdate) {
+      const updated = await dbInstance
         .update(studentLessonProgress)
         .set({ completedAt: sql`now()`, completedQuestionCount })
         .where(
           and(
             eq(studentLessonProgress.lessonId, lesson.id),
             eq(studentLessonProgress.studentId, studentId),
+            isNull(studentLessonProgress.completedAt),
           ),
         )
         .returning();
+
+      lessonCompleted = updated.length > 0;
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
@@ -171,6 +178,10 @@ export class StudentLessonProgressService {
 
     const isCompletedAsFreemium =
       !accessCourseLessonWithDetails.isAssigned && accessCourseLessonWithDetails.isFreemium;
+
+    if (lessonCompleted || isQuizPassed) {
+      this.eventBus.publish(new LessonCompletedEvent(studentId, lesson.courseId, lesson.id));
+    }
 
     await this.updateChapterProgress(
       lesson.courseId,

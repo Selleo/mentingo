@@ -268,6 +268,7 @@ export class LessonService {
           completedQuestionCount:
             evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
           dbInstance: trx,
+          isQuizPassed,
         });
 
         this.eventBus.publish(

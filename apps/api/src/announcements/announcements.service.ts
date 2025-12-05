@@ -1,4 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
+
+import { CreateAnnouncementEvent, ViewAnnouncementEvent } from "src/events";
 
 import { AnnouncementsRepository } from "./announcements.repository";
 
@@ -7,7 +10,10 @@ import type { UUIDType } from "src/common";
 
 @Injectable()
 export class AnnouncementsService {
-  constructor(private readonly announcementsRepository: AnnouncementsRepository) {}
+  constructor(
+    private readonly announcementsRepository: AnnouncementsRepository,
+    private readonly eventBus: EventBus,
+  ) {}
 
   async getAllAnnouncements() {
     return await this.announcementsRepository.getAllAnnouncements();
@@ -24,14 +30,26 @@ export class AnnouncementsService {
   }
 
   async markAnnouncementAsRead(announcementId: UUIDType, userId: UUIDType) {
+    const [announcement] = await this.announcementsRepository.getAnnouncementById(announcementId);
+
+    if (!announcement) throw new BadRequestException("Announcement not found");
+
     const [readAnnouncements] = await this.announcementsRepository.markAnnouncementAsRead(
       announcementId,
       userId,
     );
 
-    if (!readAnnouncements) {
-      throw new BadRequestException("announcements.toast.markAsReadFailed");
-    }
+    if (!readAnnouncements) throw new BadRequestException("announcements.toast.markAsReadFailed");
+
+    const audience = announcement.isEveryone ? "everyone" : "group";
+
+    this.eventBus.publish(
+      new ViewAnnouncementEvent({
+        announcementId,
+        readById: userId,
+        context: { audience },
+      }),
+    );
 
     return readAnnouncements;
   }
@@ -41,15 +59,21 @@ export class AnnouncementsService {
   }
 
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, authorId: UUIDType) {
-    const createAnnouncement = await this.announcementsRepository.createAnnouncement(
+    const createdAnnouncement = await this.announcementsRepository.createAnnouncement(
       createAnnouncementData,
       authorId,
     );
 
-    if (!createAnnouncement) {
-      throw new BadRequestException("announcements.toast.createFailed");
-    }
+    if (!createdAnnouncement) throw new BadRequestException("announcements.toast.createFailed");
 
-    return createAnnouncement;
+    this.eventBus.publish(
+      new CreateAnnouncementEvent({
+        announcementId: createdAnnouncement.id,
+        createdById: authorId,
+        announcement: createdAnnouncement,
+      }),
+    );
+
+    return createdAnnouncement;
   }
 }

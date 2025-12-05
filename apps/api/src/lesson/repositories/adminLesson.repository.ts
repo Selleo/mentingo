@@ -29,6 +29,8 @@ import type {
 } from "../lesson.schema";
 import type { AiMentorType, SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { LessonActivityLogOption, LessonActivityLogQuestion } from "src/activity-logs/types";
+import type { QuestionType } from "src/questions/schema/question.types";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
@@ -44,10 +46,16 @@ export class AdminLessonRepository {
         ...getTableColumns(lessons),
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+        aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
+        aiMentorCompletionConditions: aiMentorLessons.completionConditions,
+        aiMentorName: aiMentorLessons.name,
+        aiMentorAvatarReference: aiMentorLessons.avatarReference,
+        aiMentorType: aiMentorLessons.type,
       })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(aiMentorLessons, eq(aiMentorLessons.lessonId, lessons.id))
       .where(eq(lessons.id, id));
   }
 
@@ -83,6 +91,83 @@ export class AdminLessonRepository {
       });
 
     return updatedLesson;
+  }
+
+  async getQuestionsWithOptions(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ): Promise<
+    Array<
+      LessonActivityLogQuestion & {
+        options?: LessonActivityLogOption[];
+      }
+    >
+  > {
+    const questionsList = await dbInstance
+      .select({
+        id: questions.id,
+        type: sql<QuestionType>`${questions.type}`,
+        title: this.localizationService.getLocalizedSqlField(questions.title, language),
+        description: this.localizationService.getLocalizedSqlField(questions.description, language),
+        solutionExplanation: this.localizationService.getLocalizedSqlField(
+          questions.solutionExplanation,
+          language,
+        ),
+        displayOrder: questions.displayOrder,
+        photoS3Key: questions.photoS3Key,
+      })
+      .from(questions)
+      .innerJoin(lessons, eq(questions.lessonId, lessons.id))
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(questions.lessonId, lessonId))
+      .orderBy(questions.displayOrder);
+
+    if (questionsList.length === 0) return [];
+
+    const options = await dbInstance
+      .select({
+        id: questionAnswerOptions.id,
+        questionId: questionAnswerOptions.questionId,
+        optionText: this.localizationService.getLocalizedSqlField(
+          questionAnswerOptions.optionText,
+          language,
+        ),
+        isCorrect: questionAnswerOptions.isCorrect,
+        displayOrder: questionAnswerOptions.displayOrder,
+        matchedWord: this.localizationService.getLocalizedSqlField(
+          questionAnswerOptions.matchedWord,
+          language,
+        ),
+        scaleAnswer: questionAnswerOptions.scaleAnswer,
+      })
+      .from(questionAnswerOptions)
+      .innerJoin(questions, eq(questionAnswerOptions.questionId, questions.id))
+      .innerJoin(lessons, eq(questions.lessonId, lessons.id))
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(
+        inArray(
+          questionAnswerOptions.questionId,
+          questionsList.map((question) => question.id),
+        ),
+      )
+      .orderBy(questionAnswerOptions.displayOrder);
+
+    type QuestionOption = (typeof options)[number];
+
+    const optionsByQuestion = options.reduce<Record<UUIDType, QuestionOption[]>>((acc, option) => {
+      acc[option.questionId] = [...(acc[option.questionId] ?? []), option];
+      return acc;
+    }, {});
+
+    return questionsList.map((question) => ({
+      ...question,
+      options: (optionsByQuestion[question.id] ?? []).map(
+        ({ questionId: _questionId, ...rest }) => rest,
+      ),
+    }));
   }
 
   async updateQuizLessonWithQuestionsAndOptions(

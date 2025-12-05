@@ -240,9 +240,10 @@ export class UserController {
   async adminUpdateUser(
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
+    @CurrentUser("userId") adminId: UUIDType,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
-      await this.usersService.updateUser(id, data);
+      await this.usersService.updateUser(id, data, adminId);
       const updatedUser = await this.usersService.getUserById(id);
 
       return new BaseResponse(updatedUser);

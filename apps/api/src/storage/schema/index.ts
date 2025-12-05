@@ -16,11 +16,13 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
+import { ACTIVITY_LOG_RESOURCE_TYPES, ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, id, timestamps } from "./utils";
 
+import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { CourseSettings } from "src/courses/types/settings";
 
@@ -657,5 +659,38 @@ export const userOnboarding = pgTable(
   },
   (table) => ({
     unq: unique().on(table.userId),
+  }),
+);
+
+export const activityLogsActionTypeEnum = pgEnum(
+  "activity_log_action_type",
+  Object.values(ACTIVITY_LOG_ACTION_TYPES) as [string, ...string[]],
+);
+
+export const activityLogsResourceTypeEnum = pgEnum(
+  "activity_log_resource_type",
+  Object.values(ACTIVITY_LOG_RESOURCE_TYPES) as [string, ...string[]],
+);
+
+export const activityLogs = pgTable(
+  "activity_logs",
+  {
+    ...id,
+    ...timestamps,
+    actorId: uuid("actor_id")
+      .references(() => users.id, { onDelete: "restrict" })
+      .notNull(),
+    actorEmail: text("actor_email").notNull(),
+    actorRole: text("actor_role").notNull(),
+    actionType: activityLogsActionTypeEnum("action_type").notNull(),
+    resourceType: activityLogsResourceTypeEnum("resource_type"),
+    resourceId: uuid("resource_id"),
+    metadata: jsonb("metadata").$type<ActivityLogMetadata>().notNull(),
+  },
+  (table) => ({
+    actorIdx: index("activity_logs_actor_idx").on(table.actorId, table.createdAt),
+    actionIdx: index("activity_logs_action_idx").on(table.actionType, table.createdAt),
+    timeframeIdx: index("activity_logs_timeframe_idx").on(table.createdAt),
+    resourceIdx: index("activity_logs_resource_idx").on(table.resourceType, table.resourceId),
   }),
 );

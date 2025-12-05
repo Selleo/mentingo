@@ -5,11 +5,14 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import { eq, isNull, sql } from "drizzle-orm";
+import { isEqual } from "lodash";
 import sharp from "sharp";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
+import { UpdateSettingsEvent } from "src/events";
 import { FileService } from "src/file/file.service";
 import { settings } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -36,6 +39,7 @@ import type {
 } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 import type { UserRole } from "src/user/schemas/userRoles";
@@ -45,6 +49,7 @@ export class SettingsService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly fileService: FileService,
+    private readonly eventBus: EventBus,
   ) {}
 
   public async getGlobalSettings(): Promise<GlobalSettingsJSONContentSchema> {
@@ -175,18 +180,12 @@ export class SettingsService {
     return newUserSettings;
   }
 
-  public async updateGlobalUnregisteredUserCoursesAccessibility(): Promise<GlobalSettingsJSONContentSchema> {
-    const [globalSetting] = await this.db
-      .select({
-        unregisteredUserCoursesAccessibility: sql`settings.settings->>'unregisteredUserCoursesAccessibility'`,
-      })
-      .from(settings)
-      .where(isNull(settings.userId));
+  public async updateGlobalUnregisteredUserCoursesAccessibility(
+    actorId?: UUIDType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
 
-    if (!globalSetting) {
-      throw new NotFoundException("Global settings not found");
-    }
-    const current = globalSetting.unregisteredUserCoursesAccessibility === "true";
+    const current = previousRecord.settings.unregisteredUserCoursesAccessibility;
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -202,6 +201,14 @@ export class SettingsService {
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
 
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
@@ -242,18 +249,9 @@ export class SettingsService {
   public async updateGlobalColorSchema(
     primaryColor: string,
     contrastColor: string,
+    actorId?: UUIDType,
   ): Promise<GlobalSettingsJSONContentSchema> {
-    const [globalSettings] = await this.db
-      .select({
-        primaryColor: sql`settings.settings->>'primaryColor'`,
-        contrastColor: sql`settings.settings->>'contrastColor'`,
-      })
-      .from(settings)
-      .where(isNull(settings.userId));
-
-    if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
-    }
+    const previousRecord = await this.getGlobalSettingsRecord();
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -265,20 +263,23 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
-  public async updateGlobalEnforceSSO(): Promise<GlobalSettingsJSONContentSchema> {
-    const [globalSettings] = await this.db
-      .select({
-        enforceSSO: sql<boolean>`(settings.settings->>'enforceSSO')::boolean`,
-      })
-      .from(settings)
-      .where(isNull(settings.userId));
+  public async updateGlobalEnforceSSO(
+    actorId?: UUIDType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
 
-    if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
-    }
+    const enforceSSO = previousRecord.settings.enforceSSO;
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -287,7 +288,7 @@ export class SettingsService {
           jsonb_set(
             settings.settings,
             '{enforceSSO}',
-            to_jsonb(${!globalSettings.enforceSSO}::boolean),
+            to_jsonb(${!enforceSSO}::boolean),
             true
           )
         `,
@@ -295,10 +296,23 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
-  public async uploadPlatformLogo(file: Express.Multer.File | null | undefined): Promise<void> {
+  public async uploadPlatformLogo(
+    file: Express.Multer.File | null | undefined,
+    actorId?: UUIDType,
+  ): Promise<void> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
     let newValue: string | null = null;
     if (file) {
       const resource = "platform-logos";
@@ -319,6 +333,14 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId));
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
   }
 
   public async getPlatformLogoUrl(): Promise<string | null> {
@@ -345,7 +367,10 @@ export class SettingsService {
 
   public async uploadPlatformSimpleLogo(
     file: Express.Multer.File | null | undefined,
+    actorId?: UUIDType,
   ): Promise<void> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
     let newValue: string | null = null;
     if (file) {
       const resource = "platform-simple-logos";
@@ -366,6 +391,14 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId));
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
   }
 
   public async getPlatformSimpleLogoUrl(): Promise<string | null> {
@@ -431,7 +464,10 @@ export class SettingsService {
 
   public async uploadLoginBackgroundImage(
     file: Express.Multer.File | null | undefined,
+    actorId?: UUIDType,
   ): Promise<void> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
     let newValue: string | null = null;
     if (file) {
       const resource = "login-backgrounds";
@@ -452,6 +488,14 @@ export class SettingsService {
         `,
       })
       .where(isNull(settings.userId));
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
   }
 
   public async getLoginBackgroundImageUrl(): Promise<LoginBackgroundResponseBody> {
@@ -473,21 +517,18 @@ export class SettingsService {
 
   public async updateCompanyInformation(
     companyInfo: CompanyInformaitonJSONSchema,
+    actorId?: UUIDType,
   ): Promise<CompanyInformaitonJSONSchema> {
-    const [existingGlobal] = await this.db
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
-      .from(settings)
-      .where(isNull(settings.userId));
+    const previousRecord = await this.getGlobalSettingsRecord();
 
-    if (!existingGlobal) {
+    if (!previousRecord) {
       throw new NotFoundException("Company information not found");
     }
 
-    const currentSettings = existingGlobal.settings || {};
-    const currentCompanyInfo = currentSettings.companyInformation || {};
+    const currentCompanyInfo = previousRecord.settings.companyInformation;
 
     const updatedSettings = {
-      ...currentSettings,
+      ...previousRecord.settings,
       companyInformation: {
         ...currentCompanyInfo,
         ...companyInfo,
@@ -505,20 +546,22 @@ export class SettingsService {
         companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
       });
 
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
     return updated.companyInformation;
   }
 
   async updateMFAEnforcedRoles(
     rolesRequest: UpdateMFAEnforcedRolesRequest,
+    actorId?: UUIDType,
   ): Promise<GlobalSettingsJSONContentSchema> {
-    const [existingGlobalSettings] = await this.db
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
-      .from(settings)
-      .where(isNull(settings.userId));
-
-    if (!existingGlobalSettings) {
-      throw new NotFoundException("Global settings not found");
-    }
+    const previousRecord = await this.getGlobalSettingsRecord();
 
     const enforcedRoles: UserRole[] = [];
 
@@ -539,12 +582,23 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
     return updatedSettings;
   }
 
   async updateCertificateBackground(
     certificateBackground: Express.Multer.File,
+    actorId?: UUIDType,
   ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
     let certificateBackgroundValue: string | null = null;
 
     if (certificateBackground) {
@@ -573,6 +627,14 @@ export class SettingsService {
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
 
     return updatedSettings;
   }
@@ -611,15 +673,9 @@ export class SettingsService {
 
   async updateDefaultCourseCurrency(
     currency: AllowedCurrency,
+    actorId?: UUIDType,
   ): Promise<GlobalSettingsJSONContentSchema> {
-    const [existingGlobalSettings] = await this.db
-      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
-      .from(settings)
-      .where(isNull(settings.userId));
-
-    if (!existingGlobalSettings) {
-      throw new NotFoundException("settings.toast.error.globalNotFound");
-    }
+    const previousRecord = await this.getGlobalSettingsRecord();
 
     const [{ settings: updatedSettings }] = await this.db
       .update(settings)
@@ -634,20 +690,21 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
+
     return updatedSettings;
   }
 
-  async updateGlobalInviteOnlyRegistration() {
-    const [globalSettings] = await this.db
-      .select({
-        inviteOnlyRegistration: sql<boolean>`(settings.settings->>'inviteOnlyRegistration')::boolean`,
-      })
-      .from(settings)
-      .where(isNull(settings.userId));
+  async updateGlobalInviteOnlyRegistration(actorId?: UUIDType) {
+    const previousRecord = await this.getGlobalSettingsRecord();
 
-    if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
-    }
+    const globalSettings = previousRecord.settings as GlobalSettingsJSONContentSchema;
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -664,26 +721,29 @@ export class SettingsService {
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
 
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
+
     return updatedGlobalSettings;
   }
 
-  async updateUserEmailTriggers(triggerKey: string) {
+  async updateUserEmailTriggers(triggerKey: string, actorId?: UUIDType) {
     if (!Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers).includes(triggerKey)) {
       throw new BadRequestException("Invalid trigger key");
     }
 
-    const [globalSettings] = await this.db
-      .select({
-        triggerToUpdate: sql<boolean>`(settings.settings->'userEmailTriggers'->>${sql.raw(
-          `'${triggerKey}'`,
-        )})::boolean`,
-      })
-      .from(settings)
-      .where(isNull(settings.userId));
+    const previousRecord = await this.getGlobalSettingsRecord();
 
-    if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
-    }
+    const previousTriggers =
+      (previousRecord.settings as GlobalSettingsJSONContentSchema).userEmailTriggers ||
+      DEFAULT_GLOBAL_SETTINGS.userEmailTriggers;
+
+    const triggerToUpdate = previousTriggers[triggerKey as keyof typeof previousTriggers];
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -692,13 +752,21 @@ export class SettingsService {
           jsonb_set(
             settings.settings,
             '{userEmailTriggers,${sql.raw(triggerKey)}}',
-            to_jsonb(${!globalSettings.triggerToUpdate}::boolean),
+            to_jsonb(${!triggerToUpdate}::boolean),
             true
           )
         `,
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actorId,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
 
     return updatedGlobalSettings;
   }
@@ -745,14 +813,12 @@ export class SettingsService {
     userId: UUIDType,
     dismissed: boolean,
   ): Promise<AdminSettingsJSONContentSchema> {
-    const [currentUserSettings] = await this.db
+    const [existingSettings] = await this.db
       .select({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
 
-    if (!currentUserSettings) {
-      throw new NotFoundException("User settings not found");
-    }
+    if (!existingSettings) throw new NotFoundException("User settings not found");
 
     const [{ settings: updatedUserSettings }] = await this.db
       .update(settings)
@@ -770,6 +836,54 @@ export class SettingsService {
       .returning({ settings: sql<AdminSettingsJSONContentSchema>`${settings.settings}` });
 
     return updatedUserSettings;
+  }
+
+  private async getGlobalSettingsRecord(): Promise<{
+    id: UUIDType;
+    settings: GlobalSettingsJSONContentSchema;
+  }> {
+    const [record] = await this.db
+      .select({
+        id: settings.id,
+        settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    return record;
+  }
+
+  private buildSettingsSnapshot(record: {
+    id: UUIDType;
+    settings: GlobalSettingsJSONContentSchema;
+  }): SettingsActivityLogSnapshot {
+    const settingsData = this.parseGlobalSettings(record.settings);
+
+    return {
+      id: record.id,
+      ...settingsData,
+    };
+  }
+
+  private async recordSettingsUpdate(params: {
+    actorId?: UUIDType;
+    previousSnapshot: SettingsActivityLogSnapshot | null;
+    updatedSnapshot: SettingsActivityLogSnapshot | null;
+    context?: Record<string, string>;
+  }) {
+    const { actorId, previousSnapshot, updatedSnapshot, context } = params;
+    if (!actorId || !previousSnapshot || !updatedSnapshot) return;
+    if (isEqual(previousSnapshot, updatedSnapshot)) return;
+
+    this.eventBus.publish(
+      new UpdateSettingsEvent({
+        settingsId: updatedSnapshot.id,
+        actorId,
+        previousSettingsData: previousSnapshot,
+        updatedSettingsData: updatedSnapshot,
+        context,
+      }),
+    );
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {
