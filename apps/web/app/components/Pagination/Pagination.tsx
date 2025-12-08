@@ -1,8 +1,7 @@
 import { useTranslation } from "react-i18next";
 
-import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
-
+import { cn } from "../../lib/utils";
+import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 import { PaginationButton } from "./PaginationButton";
@@ -11,10 +10,14 @@ interface PaginationProps {
   className?: string;
   emptyDataClassName?: string;
   totalItems?: number;
-  itemsPerPage?: (typeof ITEMS_PER_PAGE_OPTIONS)[number];
+  itemsPerPage?: number;
   currentPage?: number;
+  canChangeItemsPerPage?: boolean;
+  overrideTotalPages?: number;
+  startItemOverride?: number;
+  endItemOverride?: number;
   onPageChange: (page: number) => void;
-  onItemsPerPageChange: (itemsPerPage: string) => void;
+  onItemsPerPageChange?: (itemsPerPage: string) => void;
 }
 
 export const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100] as const;
@@ -25,14 +28,18 @@ export const Pagination = ({
   totalItems = 0,
   itemsPerPage = 10,
   currentPage = 1,
+  canChangeItemsPerPage = true,
+  overrideTotalPages,
+  startItemOverride,
+  endItemOverride,
   onPageChange,
   onItemsPerPageChange,
 }: PaginationProps) => {
   const { t } = useTranslation();
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const totalPages = overrideTotalPages ?? Math.ceil(totalItems / itemsPerPage);
+  const startItem = startItemOverride ?? (currentPage - 1) * itemsPerPage + 1;
+  const endItem = endItemOverride ?? Math.min(currentPage * itemsPerPage, totalItems);
 
   const handlePrevious = () => {
     if (currentPage > 1) onPageChange(currentPage - 1);
@@ -43,7 +50,7 @@ export const Pagination = ({
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: string) =>
-    onItemsPerPageChange(newItemsPerPage);
+    onItemsPerPageChange?.(newItemsPerPage);
 
   const renderPageButtons = () => {
     const buttons: JSX.Element[] = [];
@@ -121,18 +128,20 @@ export const Pagination = ({
         <div className="body-sm text-neutral-800">
           {t("pagination.showing", { startItem, endItem, totalItems })}
         </div>
-        <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
-          <SelectTrigger className="w-fit">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {ITEMS_PER_PAGE_OPTIONS.map((option) => (
-              <SelectItem key={option} value={String(option)}>
-                {option}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {canChangeItemsPerPage && (
+          <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
+            <SelectTrigger className="w-fit">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                <SelectItem key={option} value={String(option)}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
       <div className="flex items-center space-x-2">
         <Button variant="ghost" size="sm" onClick={handlePrevious} disabled={currentPage <= 1}>

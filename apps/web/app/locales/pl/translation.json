@@ -145,6 +145,7 @@
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
+    "news": "Aktualności",
     "providerInformation": "Informacje",
     "announcements": "Ogłoszenia",
     "promotionCodes": "Kody promocyjne",
@@ -152,6 +153,9 @@
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     }
+  },
+  "newsView": {
+    "header": "Aktualności"
   },
   "globalSearch": {
     "notFound": "Niestety nic nie znaleziono",
@@ -737,7 +741,8 @@
       "dashboard": "Panel główny",
       "users": "Użytkownicy",
       "createNew": "Utwórz nowego użytkownika",
-      "back": "Wstecz"
+      "back": "Wstecz",
+      "news": "Aktualności"
     }
   },
   "adminUserView": {
