@@ -39,7 +39,7 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
             </Button>
           </div>
         )}
-        <div className="align-center flex flex-col gap-6 lg:p-8 2xl:flex-row">
+        <div className="align-center flex flex-col gap-6 px-4 lg:p-8 2xl:flex-row">
           <div className="relative aspect-video w-full self-start lg:max-w-[320px]">
             <img
               src={imageUrl}
