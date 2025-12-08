@@ -430,10 +430,10 @@ export class CourseController {
   })
   async enrollCourse(
     @Query("id") id: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @Headers("x-test-key") testKey: string,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollCourse(id, currentUserId, testKey);
+    await this.courseService.enrollCourse(id, currentUser.userId, testKey, undefined, currentUser);
 
     return new BaseResponse({ message: "Course enrolled successfully" });
   }
