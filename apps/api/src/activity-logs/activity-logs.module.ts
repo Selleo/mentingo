@@ -1,6 +1,7 @@
 import { Global, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
+import { ActivityLogsQueueService } from "./activity-logs.queue.service";
 import { ActivityLogsService } from "./activity-logs.service";
 import { AnnouncementActivityHandler } from "./handlers/announcement-activity.handler";
 import { AuthActivityHandler } from "./handlers/auth-activity.handler";
@@ -12,6 +13,7 @@ import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
 import { UserActivityHandler } from "./handlers/user-activity.handler";
+import { ActivityLogsWorker } from "./workers/activity-logs.worker";
 
 @Global()
 @Module({
@@ -28,6 +30,8 @@ import { UserActivityHandler } from "./handlers/user-activity.handler";
     UserActivityHandler,
     EnvActivityHandler,
     AuthActivityHandler,
+    ActivityLogsQueueService,
+    ActivityLogsWorker,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })

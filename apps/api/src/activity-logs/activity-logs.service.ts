@@ -5,6 +5,8 @@ import { DatabasePg, type UUIDType } from "src/common";
 import { activityLogs, users } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
+import { ActivityLogsQueueService } from "./activity-logs.queue.service";
+
 import type { ActivityLogActionType, ActivityLogMetadata, ActivityLogResourceType } from "./types";
 
 export type RecordActivityLogInput = {
@@ -20,9 +22,16 @@ export type RecordActivityLogInput = {
 
 @Injectable()
 export class ActivityLogsService {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly activityLogsQueueService: ActivityLogsQueueService,
+  ) {}
 
   async recordActivity(payload: RecordActivityLogInput): Promise<void> {
+    await this.activityLogsQueueService.enqueueActivityLog(payload);
+  }
+
+  async persistActivityLog(payload: RecordActivityLogInput): Promise<void> {
     const metadata: ActivityLogMetadata = {
       operation: payload.operation,
       changedFields: payload.changedFields,
