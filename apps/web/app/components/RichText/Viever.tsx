@@ -14,7 +14,9 @@ type ViewerProps = {
 
 const Viewer = ({ content, style, className, variant = "default" }: ViewerProps) => {
   const classNames = cn(
-    { "prose-mt-0 prose max-w-none dark:prose-invert": style === "prose" },
+    {
+      "prose max-w-none dark:prose-invert prose": style === "prose",
+    },
     className,
   );
 
@@ -30,7 +32,7 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
       : [];
 
   const editorClasses = cn(
-    "h-full",
+    "h-full flex ",
     defaultClasses.ul,
     defaultClasses.ol,
     defaultClasses.taskList,
