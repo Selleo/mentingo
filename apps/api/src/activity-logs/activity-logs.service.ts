@@ -39,6 +39,13 @@ export class ActivityLogsService {
   ) {}
 
   async recordActivity(payload: RecordActivityLogParams): Promise<void> {
+    if (process.env.NODE_ENV === "test") {
+      return this.persistActivityLog({
+        ...payload,
+        actor: this.getActorFromPayload(payload.actor),
+      });
+    }
+
     await this.activityLogsQueueService.enqueueActivityLog({
       ...payload,
       actor: this.getActorFromPayload(payload.actor),
