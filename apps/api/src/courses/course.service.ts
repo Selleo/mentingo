@@ -44,6 +44,7 @@ import { StatisticsRepository } from "src/statistics/repositories/statistics.rep
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
@@ -1020,7 +1021,7 @@ export class CourseService {
           categoryId: createCourseBody.categoryId,
           stripeProductId: productId,
           stripePriceId: priceId,
-          settings,
+          settings: settingsToJSONBuildObject(settings),
         })
         .returning();
 
