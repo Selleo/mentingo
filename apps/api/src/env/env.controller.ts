@@ -7,6 +7,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import {
   BulkUpsertEnvBody,
   bulkUpsertEnvSchema,
@@ -39,8 +40,11 @@ export class EnvController {
   @Validate({
     request: [{ type: "body", name: "bulkUpsertEnvBody", schema: bulkUpsertEnvSchema }],
   })
-  async bulkUpsertEnv(@Body() data: BulkUpsertEnvBody, @CurrentUser("userId") userId: UUIDType) {
-    await this.envService.bulkUpsertEnv(data, userId);
+  async bulkUpsertEnv(
+    @Body() data: BulkUpsertEnvBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    await this.envService.bulkUpsertEnv(data, currentUser);
     return new BaseResponse({ message: "Upserted secrets successfully" });
   }
 

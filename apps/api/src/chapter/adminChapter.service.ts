@@ -17,6 +17,7 @@ import { AdminChapterRepository } from "./repositories/adminChapter.repository";
 import type { CreateChapterBody, UpdateChapterBody } from "./schemas/chapter.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { ChapterActivityLogSnapshot } from "src/activity-logs/types";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -29,9 +30,14 @@ export class AdminChapterService {
     private readonly eventBus: EventBus,
   ) {}
 
-  async createChapterForCourse(body: CreateChapterBody, authorId: UUIDType, role: UserRole) {
+  async createChapterForCourse(body: CreateChapterBody, currentUser: CurrentUser) {
     const chapter = await this.db.transaction(async (trx) => {
-      await this.adminLessonService.validateAccess("course", role, authorId, body.courseId);
+      await this.adminLessonService.validateAccess(
+        "course",
+        currentUser.role,
+        currentUser.userId,
+        body.courseId,
+      );
 
       const [maxDisplayOrder] = await trx
         .select({ displayOrder: sql<number>`COALESCE(MAX(${chapters.displayOrder}), 0)` })
@@ -54,7 +60,7 @@ export class AdminChapterService {
         .insert(chapters)
         .values({
           ...body,
-          authorId,
+          authorId: currentUser.userId,
           title: buildJsonbField(language, body.title),
           displayOrder: maxDisplayOrder.displayOrder + 1,
         })
@@ -77,7 +83,7 @@ export class AdminChapterService {
     await this.eventBus.publish(
       new CreateChapterEvent({
         chapterId: chapter.id,
-        createdById: authorId,
+        actor: currentUser,
         createdChapter: createdChapterSnapshot,
       }),
     );
@@ -104,13 +110,12 @@ export class AdminChapterService {
   async updateChapterDisplayOrder(chapterObject: {
     chapterId: UUIDType;
     displayOrder: number;
-    currentUserId: UUIDType;
-    currentUserRole: UserRole;
+    currentUser: CurrentUser;
   }): Promise<void> {
     await this.adminLessonService.validateAccess(
       "chapter",
-      chapterObject.currentUserRole,
-      chapterObject.currentUserId,
+      chapterObject.currentUser.role,
+      chapterObject.currentUser.userId,
       chapterObject.chapterId,
     );
 
@@ -155,20 +160,20 @@ export class AdminChapterService {
     this.eventBus.publish(
       new UpdateChapterEvent({
         chapterId: chapterToUpdate.id,
-        updatedById: chapterObject.currentUserId,
+        actor: chapterObject.currentUser,
         previousChapterData: previousSnapshot,
         updatedChapterData: updatedSnapshot,
       }),
     );
   }
 
-  async updateChapter(
-    id: UUIDType,
-    body: UpdateChapterBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.adminLessonService.validateAccess("chapter", currentUserRole, currentUserId, id);
+  async updateChapter(id: UUIDType, body: UpdateChapterBody, currentUser: CurrentUser) {
+    await this.adminLessonService.validateAccess(
+      "chapter",
+      currentUser.role,
+      currentUser.userId,
+      id,
+    );
 
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -197,18 +202,18 @@ export class AdminChapterService {
     this.eventBus.publish(
       new UpdateChapterEvent({
         chapterId: chapter.id,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousChapterData: previousSnapshot,
         updatedChapterData: updatedSnapshot,
       }),
     );
   }
 
-  async removeChapter(chapterId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
+  async removeChapter(chapterId: UUIDType, currentUser: CurrentUser) {
     await this.adminLessonService.validateAccess(
       "chapter",
-      currentUserRole,
-      currentUserId,
+      currentUser.role,
+      currentUser.userId,
       chapterId,
     );
 
@@ -224,7 +229,7 @@ export class AdminChapterService {
       this.eventBus.publish(
         new DeleteChapterEvent({
           chapterId: chapter.id,
-          deletedById: currentUserId,
+          actor: currentUser,
           chapterName: chapter.title,
         }),
       );

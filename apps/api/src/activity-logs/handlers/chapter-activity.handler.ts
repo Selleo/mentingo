@@ -43,7 +43,7 @@ export class ChapterActivityHandler implements IEventHandler<ChapterEventType> {
 
   private async handleUserChapterFinished(event: UserChapterFinishedEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.chapterFinishedData.userId,
+      actor: event.chapterFinishedData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_CHAPTER,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.CHAPTER,
       resourceId: event.chapterFinishedData.chapterId,
@@ -60,7 +60,7 @@ export class ChapterActivityHandler implements IEventHandler<ChapterEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: chapterCreationData.createdById,
+      actor: chapterCreationData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.CHAPTER,
       resourceId: chapterCreationData.chapterId,
@@ -78,7 +78,7 @@ export class ChapterActivityHandler implements IEventHandler<ChapterEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: chapterUpdateData.updatedById,
+      actor: chapterUpdateData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.CHAPTER,
       resourceId: chapterUpdateData.chapterId,
@@ -93,7 +93,7 @@ export class ChapterActivityHandler implements IEventHandler<ChapterEventType> {
     const { deleteChapterData } = event;
 
     await this.activityLogsService.recordActivity({
-      actorId: deleteChapterData.deletedById,
+      actor: deleteChapterData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.CHAPTER,
       resourceId: deleteChapterData.chapterId,

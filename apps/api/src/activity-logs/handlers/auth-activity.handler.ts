@@ -22,7 +22,7 @@ export class AuthActivityHandler implements IEventHandler<AuthEventType> {
     const context = event.loginData.method ? { method: event.loginData.method } : null;
 
     await this.activityLogsService.recordActivity({
-      actorId: event.loginData.userId,
+      actor: event.loginData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.LOGIN,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
       resourceId: event.loginData.userId,
@@ -32,7 +32,7 @@ export class AuthActivityHandler implements IEventHandler<AuthEventType> {
 
   private async handleLogout(event: UserLogoutEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.logoutData.userId,
+      actor: event.logoutData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.LOGOUT,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
       resourceId: event.logoutData.userId,

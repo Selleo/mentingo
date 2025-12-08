@@ -114,6 +114,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { BaseResponse, Pagination, UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -922,7 +923,11 @@ export class CourseService {
     );
   }
 
-  async updateHasCertificate(courseId: UUIDType, hasCertificate: boolean, currentUserId: UUIDType) {
+  async updateHasCertificate(
+    courseId: UUIDType,
+    hasCertificate: boolean,
+    currentUser: CurrentUser,
+  ) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
@@ -953,7 +958,7 @@ export class CourseService {
     this.eventBus.publish(
       new UpdateCourseEvent({
         courseId,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousCourseData: previousSnapshot,
         updatedCourseData: updatedSnapshot,
       }),
@@ -965,7 +970,7 @@ export class CourseService {
   async updateLessonSequenceEnabled(
     courseId: UUIDType,
     lessonSequenceEnabled: boolean,
-    currentUserId: UUIDType,
+    currentUser: CurrentUser,
   ) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
@@ -1006,7 +1011,7 @@ export class CourseService {
     this.eventBus.publish(
       new UpdateCourseEvent({
         courseId,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousCourseData: previousSnapshot,
         updatedCourseData: updatedSnapshot,
       }),
@@ -1024,7 +1029,7 @@ export class CourseService {
 
   async createCourse(
     createCourseBody: CreateCourseBody,
-    authorId: UUIDType,
+    currentUser: CurrentUser,
     isPlaywrightTest: boolean,
   ) {
     const newCourse = await this.db.transaction(async (trx) => {
@@ -1075,7 +1080,7 @@ export class CourseService {
           priceInCents: createCourseBody.priceInCents,
           currency: finalCurrency,
           isScorm: createCourseBody.isScorm,
-          authorId,
+          authorId: currentUser.userId,
           categoryId: createCourseBody.categoryId,
           stripeProductId: productId,
           stripePriceId: priceId,
@@ -1087,7 +1092,9 @@ export class CourseService {
         throw new ConflictException("Failed to create course");
       }
 
-      await trx.insert(coursesSummaryStats).values({ courseId: newCourse.id, authorId });
+      await trx
+        .insert(coursesSummaryStats)
+        .values({ courseId: newCourse.id, authorId: currentUser.userId });
 
       return newCourse;
     });
@@ -1100,7 +1107,7 @@ export class CourseService {
     this.eventBus.publish(
       new CreateCourseEvent({
         courseId: newCourse.id,
-        createdById: authorId,
+        actor: currentUser,
         createdCourse: createdCourseSnapshot,
       }),
     );
@@ -1111,11 +1118,12 @@ export class CourseService {
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
     isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
+    const { userId: currentUserId, role: currentUserRole } = currentUser;
+
     const { updatedCourse, previousCourseSnapshot, updatedCourseSnapshot } =
       await this.db.transaction(async (trx) => {
         const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
@@ -1263,7 +1271,7 @@ export class CourseService {
     this.eventBus.publish(
       new UpdateCourseEvent({
         courseId: id,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousCourseData: previousCourseSnapshot,
         updatedCourseData: updatedCourseSnapshot,
       }),
@@ -1272,7 +1280,13 @@ export class CourseService {
     return updatedCourse;
   }
 
-  async enrollCourse(id: UUIDType, studentId: UUIDType, testKey?: string, paymentId?: string) {
+  async enrollCourse(
+    id: UUIDType,
+    studentId: UUIDType,
+    testKey?: string,
+    paymentId?: string,
+    currentUser?: CurrentUser,
+  ) {
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -1301,16 +1315,18 @@ export class CourseService {
       await this.createCourseDependencies(id, studentId, paymentId, trx);
     });
 
-    this.eventBus.publish(
-      new EnrollCourseEvent({
-        courseId: id,
-        userId: studentId,
-        enrolledById: studentId,
-      }),
-    );
+    if (currentUser) {
+      this.eventBus.publish(
+        new EnrollCourseEvent({
+          courseId: id,
+          userId: studentId,
+          actor: currentUser,
+        }),
+      );
+    }
   }
 
-  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment, adminId?: UUIDType) {
+  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment, currentUser: CurrentUser) {
     const { studentIds } = body;
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
@@ -1383,13 +1399,13 @@ export class CourseService {
         new EnrollCourseEvent({
           courseId,
           userId: studentId,
-          enrolledById: adminId ?? null,
+          actor: currentUser,
         }),
       ),
     );
   }
 
-  async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], adminId?: UUIDType) {
+  async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], currentUser?: CurrentUser) {
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
     if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
 
@@ -1443,7 +1459,7 @@ export class CourseService {
         const groupCoursesValues = newGroupIds.map((groupId) => ({
           groupId,
           courseId,
-          enrolledBy: adminId || null,
+          enrolledBy: currentUser?.userId || null,
         }));
 
         await trx.insert(groupCourses).values(groupCoursesValues);
@@ -1485,13 +1501,13 @@ export class CourseService {
       }
     });
 
-    if (adminId && newGroupIds.length > 0) {
+    if (currentUser && newGroupIds.length > 0) {
       newGroupIds.forEach((groupId) =>
         this.eventBus.publish(
           new EnrollGroupToCourseEvent({
             courseId,
             groupId,
-            enrolledById: adminId,
+            actor: currentUser,
           }),
         ),
       );

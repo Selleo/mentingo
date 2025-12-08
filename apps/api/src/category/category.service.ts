@@ -29,6 +29,7 @@ import type { CategoryInsert } from "./schemas/createCategorySchema";
 import type { CategoryUpdateBody } from "./schemas/updateCategorySchema";
 import type { CategoryActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class CategoryService {
@@ -99,7 +100,7 @@ export class CategoryService {
     return category;
   }
 
-  public async createCategory(createCategoryBody: CategoryInsert, createdById: UUIDType) {
+  public async createCategory(createCategoryBody: CategoryInsert, currentUser: CurrentUser) {
     const category = await this.db.query.categories.findFirst({
       where: ({ title }) => eq(title, createCategoryBody.title),
     });
@@ -115,7 +116,7 @@ export class CategoryService {
     this.eventBus.publish(
       new CreateCategoryEvent({
         categoryId: newCategory.id,
-        createdById,
+        actor: currentUser,
         category: this.buildCategorySnapshot(newCategory),
       }),
     );
@@ -126,7 +127,7 @@ export class CategoryService {
   public async updateCategory(
     id: UUIDType,
     updateCategoryBody: CategoryUpdateBody,
-    updatedById: UUIDType,
+    currentUser: CurrentUser,
   ) {
     const [existingCategory] = await this.db.select().from(categories).where(eq(categories.id, id));
 
@@ -149,7 +150,7 @@ export class CategoryService {
         this.eventBus.publish(
           new UpdateCategoryEvent({
             categoryId: id,
-            updatedById,
+            actor: currentUser,
             previousCategoryData: previousSnapshot,
             updatedCategoryData: updatedSnapshot,
           }),
@@ -175,7 +176,7 @@ export class CategoryService {
     }
   }
 
-  async deleteCategory(id: UUIDType, deletedById: UUIDType) {
+  async deleteCategory(id: UUIDType, currentUser: CurrentUser) {
     try {
       const [category] = await this.db.select().from(categories).where(eq(categories.id, id));
 
@@ -203,7 +204,7 @@ export class CategoryService {
       this.eventBus.publish(
         new DeleteCategoryEvent({
           categoryId: category.id,
-          deletedById,
+          actor: currentUser,
           categoryTitle: category.title,
         }),
       );
@@ -213,7 +214,7 @@ export class CategoryService {
     }
   }
 
-  async deleteManyCategories(categoryIds: string[], deletedById: UUIDType): Promise<string> {
+  async deleteManyCategories(categoryIds: string[], currentUser: CurrentUser): Promise<string> {
     let deletedCategories: { id: UUIDType; title: string }[] = [];
 
     const message = await this.db.transaction(async (tx) => {
@@ -263,7 +264,7 @@ export class CategoryService {
       this.eventBus.publish(
         new DeleteCategoryEvent({
           categoryId: id,
-          deletedById,
+          actor: currentUser,
           categoryTitle: title,
         }),
       ),

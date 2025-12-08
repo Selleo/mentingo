@@ -37,7 +37,7 @@ export class AnnouncementActivityHandler implements IEventHandler<AnnouncementEv
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: announcementData.createdById,
+      actor: announcementData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ANNOUNCEMENT,
       resourceId: announcementData.announcementId,
@@ -50,7 +50,7 @@ export class AnnouncementActivityHandler implements IEventHandler<AnnouncementEv
     const { announcementReadData } = event;
 
     await this.activityLogsService.recordActivity({
-      actorId: announcementReadData.readById,
+      actor: announcementReadData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.VIEW_ANNOUNCEMENT,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ANNOUNCEMENT,
       resourceId: announcementReadData.announcementId,

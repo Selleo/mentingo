@@ -38,6 +38,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 import type { SQL } from "drizzle-orm";
 import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
 import type { PaginatedResponse, Pagination, UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { GroupSortField, GroupKeywordFilterBody } from "src/group/group.schema";
 import type {
   AllGroupsResponse,
@@ -181,16 +182,16 @@ export class GroupService {
     });
   }
 
-  public async createGroup(createGroupBody: UpsertGroupBody, createdById?: UUIDType) {
+  public async createGroup(createGroupBody: UpsertGroupBody, currentUser?: CurrentUser) {
     const [createdGroup] = await this.db.insert(groups).values(createGroupBody).returning();
 
     if (!createdGroup) throw new ConflictException("Unable to create group");
 
-    if (createdById) {
+    if (currentUser) {
       this.eventBus.publish(
         new CreateGroupEvent({
           groupId: createdGroup.id,
-          createdById,
+          actor: currentUser,
           group: this.buildGroupSnapshot(createdGroup),
         }),
       );
@@ -202,7 +203,7 @@ export class GroupService {
   public async updateGroup(
     groupId: UUIDType,
     updateGroupBody: UpsertGroupBody,
-    updatedById?: UUIDType,
+    currentUser?: CurrentUser,
   ) {
     const [existingGroup] = await this.db.select().from(groups).where(eq(groups.id, groupId));
 
@@ -220,11 +221,11 @@ export class GroupService {
 
     const updatedSnapshot = this.buildGroupSnapshot(updatedGroup);
 
-    if (updatedById && !isEqual(previousSnapshot, updatedSnapshot)) {
+    if (currentUser && !isEqual(previousSnapshot, updatedSnapshot)) {
       this.eventBus.publish(
         new UpdateGroupEvent({
           groupId,
-          updatedById,
+          actor: currentUser,
           previousGroupData: previousSnapshot,
           updatedGroupData: updatedSnapshot,
         }),
@@ -234,18 +235,18 @@ export class GroupService {
     return updatedGroup;
   }
 
-  public async deleteGroup(groupId: UUIDType, deletedById?: UUIDType) {
+  public async deleteGroup(groupId: UUIDType, currentUser?: CurrentUser) {
     const [deletedGroup] = await this.db.delete(groups).where(eq(groups.id, groupId)).returning();
 
     if (!deletedGroup) {
       throw new NotFoundException("Group not found");
     }
 
-    if (deletedById) {
+    if (currentUser) {
       this.eventBus.publish(
         new DeleteGroupEvent({
           groupId: deletedGroup.id,
-          deletedById,
+          actor: currentUser,
           groupName: deletedGroup.name,
         }),
       );
@@ -263,9 +264,9 @@ export class GroupService {
   async setUserGroups(
     groupIds: UUIDType[],
     userId: UUIDType,
-    options: { actorId?: UUIDType; db?: DatabasePg } = {},
+    options: { actor?: CurrentUser; db?: DatabasePg } = {},
   ) {
-    const actorId = options.actorId ?? userId;
+    const actor = options.actor;
     const db = options.db ?? this.db;
     let assignedGroupIds: UUIDType[] = [];
 
@@ -307,13 +308,13 @@ export class GroupService {
       }
     });
 
-    if (actorId && assignedGroupIds.length) {
+    if (actor && assignedGroupIds.length) {
       assignedGroupIds.forEach((groupId) =>
         this.eventBus.publish(
           new EnrollUserToGroupEvent({
             groupId,
             userId,
-            enrolledById: actorId,
+            actor,
           }),
         ),
       );

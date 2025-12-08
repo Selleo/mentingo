@@ -43,6 +43,7 @@ import { TokenService } from "./token.service";
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
 import type { Response } from "express";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserResponse } from "src/user/schemas/user.schema";
 import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.type";
 
@@ -162,7 +163,8 @@ export class AuthService {
 
     const onboardingStatus = await this.userService.getAllOnboardingStatus(user.id);
 
-    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "password" }));
+    const actor: CurrentUser = { userId: user.id, email: user.email, role: user.role as UserRole };
+    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "password", actor }));
 
     if (
       MFAEnforcedRoles.includes(userWithoutAvatar.role as UserRole) ||
@@ -220,8 +222,15 @@ export class AuthService {
       }
 
       const tokens = await this.getTokens(user);
+      const actor: CurrentUser = {
+        userId: user.id,
+        email: user.email,
+        role: user.role as UserRole,
+      };
 
-      this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "refresh_token" }));
+      this.eventBus.publish(
+        new UserLoginEvent({ userId: user.id, method: "refresh_token", actor }),
+      );
 
       return tokens;
     } catch (error) {
@@ -489,7 +498,8 @@ export class AuthService {
     const userSettings = await this.settingsService.getUserSettings(user.id);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
 
-    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "provider" }));
+    const actor: CurrentUser = { userId: user.id, email: user.email, role: user.role as UserRole };
+    this.eventBus.publish(new UserLoginEvent({ userId: user.id, method: "provider", actor }));
 
     if (MFAEnforcedRoles.includes(user.role as UserRole) || userSettings.isMFAEnabled) {
       return {

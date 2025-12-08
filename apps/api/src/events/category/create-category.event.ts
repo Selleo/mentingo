@@ -1,9 +1,10 @@
 import type { CategoryActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 type CategoryCreationData = {
   categoryId: UUIDType;
-  createdById: UUIDType;
+  actor: CurrentUser;
   category: CategoryActivityLogSnapshot;
 };
 

@@ -25,6 +25,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import { CategoryService } from "./category.service";
@@ -95,9 +96,9 @@ export class CategoryController {
   })
   async createCategory(
     @Body() createCategoryBody: CategoryInsert,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.categoryService.createCategory(createCategoryBody, currentUserId);
+    const { id } = await this.categoryService.createCategory(createCategoryBody, currentUser);
 
     return new BaseResponse({ id, message: "Category created" });
   }
@@ -114,18 +115,13 @@ export class CategoryController {
   async updateCategory(
     @Param("id") id: UUIDType,
     @Body() updateCategoryBody: CategoryUpdateBody,
-    @CurrentUser("role") currentUserRole: UserRole,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<CategorySchema>> {
-    if (currentUserRole !== USER_ROLES.ADMIN) {
+    if (currentUser.role !== USER_ROLES.ADMIN) {
       throw new UnauthorizedException("You don't have permission to update category");
     }
 
-    const category = await this.categoryService.updateCategory(
-      id,
-      updateCategoryBody,
-      currentUserId,
-    );
+    const category = await this.categoryService.updateCategory(id, updateCategoryBody, currentUser);
 
     return new BaseResponse(category);
   }
@@ -138,9 +134,9 @@ export class CategoryController {
   })
   async deleteCategory(
     @Param("id") id: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.categoryService.deleteCategory(id, currentUserId);
+    await this.categoryService.deleteCategory(id, currentUser);
 
     return new BaseResponse({ message: "Category deleted successfully" });
   }
@@ -153,9 +149,9 @@ export class CategoryController {
   })
   async deleteManyCategories(
     @Body() deleteCategoriesIds: string[],
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.categoryService.deleteManyCategories(deleteCategoriesIds, currentUserId);
+    await this.categoryService.deleteManyCategories(deleteCategoriesIds, currentUser);
 
     return new BaseResponse({ message: "Categories deleted successfully" });
   }

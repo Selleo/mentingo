@@ -41,6 +41,7 @@ import type * as schema from "../storage/schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 
@@ -181,7 +182,7 @@ export class SettingsService {
   }
 
   public async updateGlobalUnregisteredUserCoursesAccessibility(
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -205,7 +206,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
@@ -249,7 +250,7 @@ export class SettingsService {
   public async updateGlobalColorSchema(
     primaryColor: string,
     contrastColor: string,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -266,7 +267,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
@@ -275,7 +276,7 @@ export class SettingsService {
   }
 
   public async updateGlobalEnforceSSO(
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -299,7 +300,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
@@ -309,7 +310,7 @@ export class SettingsService {
 
   public async uploadPlatformLogo(
     file: Express.Multer.File | null | undefined,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<void> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -337,7 +338,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
     });
@@ -367,7 +368,7 @@ export class SettingsService {
 
   public async uploadPlatformSimpleLogo(
     file: Express.Multer.File | null | undefined,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<void> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -395,7 +396,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
     });
@@ -464,7 +465,7 @@ export class SettingsService {
 
   public async uploadLoginBackgroundImage(
     file: Express.Multer.File | null | undefined,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<void> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -492,7 +493,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
     });
@@ -517,7 +518,7 @@ export class SettingsService {
 
   public async updateCompanyInformation(
     companyInfo: CompanyInformaitonJSONSchema,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<CompanyInformaitonJSONSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -549,7 +550,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
@@ -559,7 +560,7 @@ export class SettingsService {
 
   async updateMFAEnforcedRoles(
     rolesRequest: UpdateMFAEnforcedRolesRequest,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -585,7 +586,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
@@ -595,7 +596,7 @@ export class SettingsService {
 
   async updateCertificateBackground(
     certificateBackground: Express.Multer.File,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -631,7 +632,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
@@ -673,7 +674,7 @@ export class SettingsService {
 
   async updateDefaultCourseCurrency(
     currency: AllowedCurrency,
-    actorId?: UUIDType,
+    actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
 
@@ -693,7 +694,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
     });
@@ -701,7 +702,7 @@ export class SettingsService {
     return updatedSettings;
   }
 
-  async updateGlobalInviteOnlyRegistration(actorId?: UUIDType) {
+  async updateGlobalInviteOnlyRegistration(actor?: CurrentUser) {
     const previousRecord = await this.getGlobalSettingsRecord();
 
     const globalSettings = previousRecord.settings as GlobalSettingsJSONContentSchema;
@@ -724,7 +725,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
     });
@@ -732,7 +733,7 @@ export class SettingsService {
     return updatedGlobalSettings;
   }
 
-  async updateUserEmailTriggers(triggerKey: string, actorId?: UUIDType) {
+  async updateUserEmailTriggers(triggerKey: string, actor?: CurrentUser) {
     if (!Object.keys(DEFAULT_GLOBAL_SETTINGS.userEmailTriggers).includes(triggerKey)) {
       throw new BadRequestException("Invalid trigger key");
     }
@@ -763,7 +764,7 @@ export class SettingsService {
     const updatedRecord = await this.getGlobalSettingsRecord();
 
     await this.recordSettingsUpdate({
-      actorId,
+      actor,
       previousSnapshot: this.buildSettingsSnapshot(previousRecord),
       updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
     });
@@ -866,19 +867,19 @@ export class SettingsService {
   }
 
   private async recordSettingsUpdate(params: {
-    actorId?: UUIDType;
+    actor?: CurrentUser;
     previousSnapshot: SettingsActivityLogSnapshot | null;
     updatedSnapshot: SettingsActivityLogSnapshot | null;
     context?: Record<string, string>;
   }) {
-    const { actorId, previousSnapshot, updatedSnapshot, context } = params;
-    if (!actorId || !previousSnapshot || !updatedSnapshot) return;
+    const { actor, previousSnapshot, updatedSnapshot, context } = params;
+    if (!actor || !previousSnapshot || !updatedSnapshot) return;
     if (isEqual(previousSnapshot, updatedSnapshot)) return;
 
     this.eventBus.publish(
       new UpdateSettingsEvent({
         settingsId: updatedSnapshot.id,
-        actorId,
+        actor,
         previousSettingsData: previousSnapshot,
         updatedSettingsData: updatedSnapshot,
         context,

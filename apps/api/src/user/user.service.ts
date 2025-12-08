@@ -82,6 +82,7 @@ import type {
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 
@@ -242,7 +243,7 @@ export class UserService {
     };
   }
 
-  public async updateUser(id: UUIDType, data: UpdateUserBody, updatedById?: UUIDType) {
+  public async updateUser(id: UUIDType, data: UpdateUserBody, actor?: CurrentUser) {
     const [existingUser] = await this.db
       .select()
       .from(users)
@@ -255,7 +256,7 @@ export class UserService {
     }
 
     return this.db.transaction(async (trx) => {
-      const previousSnapshot = updatedById ? await this.buildUserActivitySnapshot(id, trx) : null;
+      const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
 
       const { groups, ...userData } = data;
 
@@ -269,24 +270,21 @@ export class UserService {
 
       if (groups !== undefined) {
         await this.groupService.setUserGroups(groups ?? [], id, {
-          actorId: updatedById ?? id,
+          actor,
           db: trx,
         });
       }
 
-      const updatedSnapshot = updatedById ? await this.buildUserActivitySnapshot(id, trx) : null;
+      const updatedSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
 
       const shouldPublishEvent =
-        updatedById &&
-        previousSnapshot &&
-        updatedSnapshot &&
-        !isEqual(previousSnapshot, updatedSnapshot);
+        actor && previousSnapshot && updatedSnapshot && !isEqual(previousSnapshot, updatedSnapshot);
 
       if (shouldPublishEvent) {
         this.eventBus.publish(
           new UpdateUserEvent({
             userId: id,
-            updatedById,
+            actor,
             previousUserData: previousSnapshot,
             updatedUserData: updatedSnapshot,
           }),
@@ -422,8 +420,8 @@ export class UserService {
       .where(eq(credentials.userId, id));
   }
 
-  public async deleteUser(currentUserId: UUIDType, id: UUIDType) {
-    if (id === currentUserId) {
+  public async deleteUser(actor: CurrentUser, id: UUIDType) {
+    if (id === actor.userId) {
       throw new BadRequestException("You cannot delete your own account");
     }
 
@@ -456,7 +454,7 @@ export class UserService {
         this.eventBus.publish(
           new DeleteUserEvent({
             userId: id,
-            deletedById: currentUserId,
+            actor,
             deletedUserData: userSnapshot,
           }),
         );
@@ -466,8 +464,8 @@ export class UserService {
     });
   }
 
-  public async deleteBulkUsers(currentUserId: UUIDType, ids: UUIDType[]) {
-    if (ids.includes(currentUserId)) {
+  public async deleteBulkUsers(actor: CurrentUser, ids: UUIDType[]) {
+    if (ids.includes(actor.userId)) {
       throw new BadRequestException("You cannot delete yourself");
     }
 
@@ -511,7 +509,7 @@ export class UserService {
         this.eventBus.publish(
           new DeleteUserEvent({
             userId,
-            deletedById: currentUserId,
+            actor,
             deletedUserData: snapshot,
           }),
         );
@@ -519,7 +517,7 @@ export class UserService {
     });
   }
 
-  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, creatorId?: UUIDType) {
+  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, creator?: CurrentUser) {
     const db = dbInstance ?? this.db;
 
     const [existingUser] = await db
@@ -535,8 +533,10 @@ export class UserService {
       const [createdUser] = await trx.insert(users).values(data).returning();
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
-      if (creatorId) {
-        const { language: adminsLanguage } = await this.settingsService.getUserSettings(creatorId);
+      if (creator) {
+        const { language: adminsLanguage } = await this.settingsService.getUserSettings(
+          creator.userId,
+        );
 
         const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
           data.language as SupportedLanguages,
@@ -586,13 +586,13 @@ export class UserService {
       throw new Error("Failed to create user");
     }
 
-    if (creatorId) {
+    if (creator) {
       const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
 
       this.eventBus.publish(
         new CreateUserEvent({
           userId: createdUser.id,
-          createdById: creatorId,
+          actor: creator,
           createdUserData: snapshot,
         }),
       );
@@ -600,7 +600,7 @@ export class UserService {
 
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
 
-    if (!creatorId) {
+    if (!creator) {
       const createPasswordEmail = new CreatePasswordReminderEmail({
         createPasswordLink: `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
         ...defaultEmailSettings,
@@ -617,7 +617,7 @@ export class UserService {
     }
 
     const userInviteDetails: UserInvite = {
-      creatorId: creatorId,
+      creatorId: creator.userId,
       email: createdUser.email,
       token,
       userId: createdUser.id,
@@ -662,13 +662,13 @@ export class UserService {
       .where(and(eq(users.role, USER_ROLES.STUDENT), inArray(users.id, studentIds)));
   }
 
-  async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
+  async bulkAssignUsersToGroup(data: BulkAssignUserGroups, actor?: CurrentUser) {
     await this.db.transaction(async (trx) => {
       await Promise.all(
         data.map((user) =>
           this.groupService.setUserGroups(user.groups, user.userId, {
             db: trx,
-            actorId: user.userId,
+            actor,
           }),
         ),
       );
@@ -688,7 +688,7 @@ export class UserService {
     return adminsWithSettings;
   }
 
-  async importUsers(usersDataFile: Express.Multer.File, creatorId: UUIDType) {
+  async importUsers(usersDataFile: Express.Multer.File, creator: CurrentUser) {
     const importStats: ImportUserResponse = {
       importedUsersAmount: 0,
       skippedUsersAmount: 0,
@@ -719,7 +719,7 @@ export class UserService {
       await this.db.transaction(async (trx) => {
         const { groups: groupNames, ...userInfo } = userData;
 
-        const createdUser = await this.createUser({ ...userInfo }, trx, creatorId);
+        const createdUser = await this.createUser({ ...userInfo }, trx, creator);
 
         importStats.importedUsersAmount++;
         importStats.importedUsersList.push(userData.email);
@@ -738,7 +738,7 @@ export class UserService {
           createdUser.id,
           {
             db: trx,
-            actorId: creatorId,
+            actor: creator,
           },
         );
       });

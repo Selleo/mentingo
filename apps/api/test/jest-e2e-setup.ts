@@ -11,10 +11,10 @@ const filteredLog = (...args: any[]) => {
   if (
     args.some(
       (arg) =>
-        typeof arg === "object" &&
-        arg !== null &&
-        (arg.severity_local === "NOTICE" || arg.severity === "NOTICE") &&
-        (arg.message?.includes("truncate") || arg.message?.includes("cascade")),
+        (typeof arg === "object" &&
+          arg !== null &&
+          (arg.severity_local === "WARNING" || arg.severity === "NOTICE")) ||
+        (arg.message && arg.message.includes("Migration")),
     )
   ) {
     return;

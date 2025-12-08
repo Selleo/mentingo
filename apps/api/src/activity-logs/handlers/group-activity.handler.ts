@@ -50,7 +50,7 @@ export class GroupActivityHandler implements IEventHandler<GroupEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.groupData.createdById,
+      actor: event.groupData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.GROUP,
       resourceId: event.groupData.groupId,
@@ -66,7 +66,7 @@ export class GroupActivityHandler implements IEventHandler<GroupEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.groupUpdateData.updatedById,
+      actor: event.groupUpdateData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.GROUP,
       resourceId: event.groupUpdateData.groupId,
@@ -79,7 +79,7 @@ export class GroupActivityHandler implements IEventHandler<GroupEventType> {
 
   private async handleDelete(event: DeleteGroupEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.deleteGroupData.deletedById,
+      actor: event.deleteGroupData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.GROUP,
       resourceId: event.deleteGroupData.groupId,
@@ -91,7 +91,7 @@ export class GroupActivityHandler implements IEventHandler<GroupEventType> {
 
   private async handleEnrollUser(event: EnrollUserToGroupEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.enrollmentData.enrolledById,
+      actor: event.enrollmentData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.GROUP_ASSIGNMENT,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.GROUP,
       resourceId: event.enrollmentData.groupId,
@@ -101,7 +101,7 @@ export class GroupActivityHandler implements IEventHandler<GroupEventType> {
 
   private async handleEnrollGroupToCourse(event: EnrollGroupToCourseEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.enrollmentData.enrolledById,
+      actor: event.enrollmentData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_COURSE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.GROUP,
       resourceId: event.enrollmentData.groupId,

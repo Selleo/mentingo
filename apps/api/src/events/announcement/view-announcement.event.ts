@@ -1,8 +1,9 @@
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 type ViewAnnouncementData = {
   announcementId: UUIDType;
-  readById: UUIDType;
+  actor: CurrentUser;
   context?: Record<string, string>;
 };
 

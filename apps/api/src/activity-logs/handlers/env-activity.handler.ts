@@ -21,7 +21,7 @@ export class EnvActivityHandler implements IEventHandler<EnvEventType> {
     const envKeys = event.updateEnvData.updatedEnvKeys ?? [];
 
     await this.activityLogsService.recordActivity({
-      actorId: event.updateEnvData.actorId,
+      actor: event.updateEnvData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.INTEGRATION,
       resourceId: null,

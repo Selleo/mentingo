@@ -23,6 +23,7 @@ import {
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import {
   allGroupsSchema,
   baseGroupSchema,
@@ -116,9 +117,9 @@ export class GroupController {
   })
   async createGroup(
     @Body() createGroupBody: UpsertGroupBody,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.groupService.createGroup(createGroupBody, currentUserId);
+    const { id } = await this.groupService.createGroup(createGroupBody, currentUser);
 
     return new BaseResponse({ id, message: "Group created successfully" });
   }
@@ -135,13 +136,9 @@ export class GroupController {
   async updateGroup(
     @Query("groupId") groupId: UUIDType,
     @Body() updateGroupBody: UpsertGroupBody,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GroupResponse>> {
-    const updatedGroup = await this.groupService.updateGroup(
-      groupId,
-      updateGroupBody,
-      currentUserId,
-    );
+    const updatedGroup = await this.groupService.updateGroup(groupId, updateGroupBody, currentUser);
 
     return new BaseResponse(updatedGroup);
   }
@@ -154,9 +151,9 @@ export class GroupController {
   })
   async deleteGroup(
     @Query("groupId") groupId: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.groupService.deleteGroup(groupId, currentUserId);
+    await this.groupService.deleteGroup(groupId, currentUser);
 
     return new BaseResponse({
       message: "Group deleted successfully",
@@ -189,9 +186,9 @@ export class GroupController {
   async setUserGroups(
     @Query("userId") userId: UUIDType,
     @Body() groupIds: UUIDType[],
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.groupService.setUserGroups(groupIds, userId, { actorId: currentUserId });
+    await this.groupService.setUserGroups(groupIds, userId, { actor: currentUser });
 
     return new BaseResponse({ message: "User assigned successfully" });
   }

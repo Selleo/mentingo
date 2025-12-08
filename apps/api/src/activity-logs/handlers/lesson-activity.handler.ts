@@ -42,10 +42,10 @@ export class LessonActivityHandler implements IEventHandler<LessonEventType> {
 
   private async handleLessonCompleted(event: LessonCompletedEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.userId,
+      actor: event.lessonCompletionData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_LESSON,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LESSON,
-      resourceId: event.lessonId,
+      resourceId: event.lessonCompletionData.lessonId,
     });
   }
 
@@ -64,7 +64,7 @@ export class LessonActivityHandler implements IEventHandler<LessonEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: lessonCreationData.createdById,
+      actor: lessonCreationData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LESSON,
       resourceId: lessonCreationData.lessonId,
@@ -98,7 +98,7 @@ export class LessonActivityHandler implements IEventHandler<LessonEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: lessonUpdateData.updatedById,
+      actor: lessonUpdateData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LESSON,
       resourceId: lessonUpdateData.lessonId,
@@ -113,7 +113,7 @@ export class LessonActivityHandler implements IEventHandler<LessonEventType> {
     const { deleteLessonData } = event;
 
     await this.activityLogsService.recordActivity({
-      actorId: deleteLessonData.deletedById,
+      actor: deleteLessonData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LESSON,
       resourceId: deleteLessonData.lessonId,

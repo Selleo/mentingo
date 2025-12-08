@@ -28,7 +28,7 @@ export class UserActivityHandler implements IEventHandler<UserEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.userCreationData.createdById,
+      actor: event.userCreationData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
       resourceId: event.userCreationData.userId,
@@ -44,7 +44,7 @@ export class UserActivityHandler implements IEventHandler<UserEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.userUpdateData.updatedById,
+      actor: event.userUpdateData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
       resourceId: event.userUpdateData.userId,
@@ -70,7 +70,7 @@ export class UserActivityHandler implements IEventHandler<UserEventType> {
       );
 
     await this.activityLogsService.recordActivity({
-      actorId: event.deleteUserData.deletedById,
+      actor: event.deleteUserData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
       resourceId: event.deleteUserData.userId,

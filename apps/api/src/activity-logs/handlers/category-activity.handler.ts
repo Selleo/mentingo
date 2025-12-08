@@ -34,7 +34,7 @@ export class CategoryActivityHandler implements IEventHandler<CategoryEventType>
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.categoryData.createdById,
+      actor: event.categoryData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY,
       resourceId: event.categoryData.categoryId,
@@ -50,7 +50,7 @@ export class CategoryActivityHandler implements IEventHandler<CategoryEventType>
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.categoryUpdateData.updatedById,
+      actor: event.categoryUpdateData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY,
       resourceId: event.categoryUpdateData.categoryId,
@@ -63,7 +63,7 @@ export class CategoryActivityHandler implements IEventHandler<CategoryEventType>
 
   private async handleDelete(event: DeleteCategoryEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.deleteCategoryData.deletedById,
+      actor: event.deleteCategoryData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.CATEGORY,
       resourceId: event.deleteCategoryData.categoryId,

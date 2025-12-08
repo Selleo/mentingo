@@ -1,8 +1,9 @@
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 type DeleteGroupData = {
   groupId: UUIDType;
-  deletedById: UUIDType;
+  actor: CurrentUser;
   groupName?: string | null;
 };
 

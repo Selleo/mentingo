@@ -1,9 +1,10 @@
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 type EnrollCourseData = {
   courseId: UUIDType;
   userId: UUIDType;
-  enrolledById?: UUIDType | null;
+  actor: CurrentUser;
 };
 
 export class EnrollCourseEvent {

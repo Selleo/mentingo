@@ -28,7 +28,7 @@ export class SettingsActivityHandler implements IEventHandler<SettingsEventType>
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.settingsUpdateData.actorId,
+      actor: event.settingsUpdateData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SETTINGS,
       resourceId: event.settingsUpdateData.settingsId,

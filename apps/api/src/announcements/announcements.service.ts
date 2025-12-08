@@ -7,6 +7,7 @@ import { AnnouncementsRepository } from "./announcements.repository";
 
 import type { CreateAnnouncement, AnnouncementFilters } from "./types/announcement.types";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class AnnouncementsService {
@@ -29,14 +30,14 @@ export class AnnouncementsService {
     return unreadCount;
   }
 
-  async markAnnouncementAsRead(announcementId: UUIDType, userId: UUIDType) {
+  async markAnnouncementAsRead(announcementId: UUIDType, currentUser: CurrentUser) {
     const [announcement] = await this.announcementsRepository.getAnnouncementById(announcementId);
 
     if (!announcement) throw new BadRequestException("Announcement not found");
 
     const [readAnnouncements] = await this.announcementsRepository.markAnnouncementAsRead(
       announcementId,
-      userId,
+      currentUser.userId,
     );
 
     if (!readAnnouncements) throw new BadRequestException("announcements.toast.markAsReadFailed");
@@ -46,7 +47,7 @@ export class AnnouncementsService {
     this.eventBus.publish(
       new ViewAnnouncementEvent({
         announcementId,
-        readById: userId,
+        actor: currentUser,
         context: { audience },
       }),
     );
@@ -58,10 +59,10 @@ export class AnnouncementsService {
     return await this.announcementsRepository.getAnnouncementsForUser(userId, filters);
   }
 
-  async createAnnouncement(createAnnouncementData: CreateAnnouncement, authorId: UUIDType) {
+  async createAnnouncement(createAnnouncementData: CreateAnnouncement, author: CurrentUser) {
     const createdAnnouncement = await this.announcementsRepository.createAnnouncement(
       createAnnouncementData,
-      authorId,
+      author.userId,
     );
 
     if (!createdAnnouncement) throw new BadRequestException("announcements.toast.createFailed");
@@ -69,7 +70,7 @@ export class AnnouncementsService {
     this.eventBus.publish(
       new CreateAnnouncementEvent({
         announcementId: createdAnnouncement.id,
-        createdById: authorId,
+        actor: author,
         announcement: createdAnnouncement,
       }),
     );

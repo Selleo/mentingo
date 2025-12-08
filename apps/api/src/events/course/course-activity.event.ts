@@ -1,4 +1,5 @@
-import { UUIDType } from "src/common";
+import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 type CourseCompletedDetails = {
   courseId: UUIDType;
@@ -6,11 +7,14 @@ type CourseCompletedDetails = {
   courseTitle: string;
 };
 
+type CourseStartedData = {
+  userId: UUIDType;
+  courseId: UUIDType;
+  actor: CurrentUser;
+};
+
 export class CourseStartedEvent {
-  constructor(
-    public readonly userId: UUIDType,
-    public readonly courseId: UUIDType,
-  ) {}
+  constructor(public readonly courseStartedData: CourseStartedData) {}
 }
 
 export class CourseCompletedEvent {

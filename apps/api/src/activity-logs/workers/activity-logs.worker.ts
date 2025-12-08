@@ -26,7 +26,8 @@ export class ActivityLogsWorker implements OnModuleDestroy {
         this.activityLogsService.persistActivityLog(job.data),
       {
         connection,
-        concurrency: Number(process.env.WORKER_CONCURRENCY || 10),
+        concurrency:
+          process.env.NODE_ENV === "test" ? 1 : Number(process.env.WORKER_CONCURRENCY || 10),
       },
     );
   }

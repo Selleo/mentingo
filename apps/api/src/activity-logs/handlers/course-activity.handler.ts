@@ -58,7 +58,7 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: event.courseCreationData.createdById,
+      actor: event.courseCreationData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
       resourceId: event.courseCreationData.courseId,
@@ -84,7 +84,7 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
     });
 
     await this.activityLogsService.recordActivity({
-      actorId: courseUpdateData.updatedById,
+      actor: courseUpdateData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
       resourceId: courseUpdateData.courseId,
@@ -97,16 +97,16 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
 
   private async handleCourseStarted(event: CourseStartedEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.userId,
+      actor: event.courseStartedData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.START_COURSE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
-      resourceId: event.courseId,
+      resourceId: event.courseStartedData.courseId,
     });
   }
 
   private async handleUserCourseFinished(event: UserCourseFinishedEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.courseFinishedData.userId,
+      actor: event.courseFinishedData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_COURSE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
       resourceId: event.courseFinishedData.courseId,
@@ -115,12 +115,12 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
 
   private async handleEnrollCourse(event: EnrollCourseEvent) {
     await this.activityLogsService.recordActivity({
-      actorId: event.enrollmentData.enrolledById ?? event.enrollmentData.userId,
+      actor: event.enrollmentData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_COURSE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
       resourceId: event.enrollmentData.courseId,
       context:
-        event.enrollmentData.userId !== event.enrollmentData.enrolledById
+        event.enrollmentData.userId !== event.enrollmentData.actor.userId
           ? { enrolledUserId: event.enrollmentData.userId }
           : null,
     });

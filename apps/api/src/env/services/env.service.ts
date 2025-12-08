@@ -8,7 +8,7 @@ import { ALLOWED_SECRETS, ENCRYPTION_ALG, SERVICE_GROUPS } from "src/env/env.con
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { UpdateEnvEvent } from "src/events";
 
-import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { BulkUpsertEnvBody, EncryptedEnvBody } from "src/env/env.schema";
 
 @Injectable()
@@ -22,7 +22,7 @@ export class EnvService {
     this.KEY_ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
   }
 
-  async bulkUpsertEnv(data: BulkUpsertEnvBody, actorId?: UUIDType) {
+  async bulkUpsertEnv(data: BulkUpsertEnvBody, actor?: CurrentUser) {
     const processedEnvs: EncryptedEnvBody[] = [];
     for (const env of data) {
       if (!ALLOWED_SECRETS.includes(env.name)) {
@@ -57,11 +57,11 @@ export class EnvService {
 
     await this.envRepository.bulkUpsertEnv(processedEnvs);
 
-    if (actorId && this.eventBus) {
+    if (actor && this.eventBus) {
       const updatedEnvKeys = data.map((env) => env.name);
       this.eventBus.publish(
         new UpdateEnvEvent({
-          actorId,
+          actor,
           updatedEnvKeys,
         }),
       );

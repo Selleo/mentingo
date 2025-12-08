@@ -41,6 +41,7 @@ import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -56,12 +57,8 @@ export class AdminLessonService {
     private readonly eventBus: EventBus,
   ) {}
 
-  async createLessonForChapter(
-    data: CreateLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+  async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     if (
       (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
@@ -99,7 +96,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
-        createdById: currentUserId,
+        actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
     );
@@ -107,12 +104,8 @@ export class AdminLessonService {
     return lesson.id;
   }
 
-  async createAiMentorLesson(
-    data: CreateAiMentorLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+  async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
@@ -142,7 +135,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
-        createdById: currentUserId,
+        actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
     );
@@ -150,12 +143,8 @@ export class AdminLessonService {
     return lesson.id;
   }
 
-  async createQuizLesson(
-    data: CreateQuizLessonBody,
-    authorId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, authorId, data.chapterId);
+  async createQuizLesson(data: CreateQuizLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
@@ -175,7 +164,7 @@ export class AdminLessonService {
 
     const lesson = await this.createQuizLessonWithQuestionsAndOptions(
       data,
-      authorId,
+      currentUser.userId,
       language,
       maxDisplayOrder + 1,
     );
@@ -189,7 +178,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
-        createdById: authorId,
+        actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
     );
@@ -199,10 +188,9 @@ export class AdminLessonService {
   async updateAiMentorLesson(
     id: UUIDType,
     data: UpdateAiMentorLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
   ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -229,14 +217,18 @@ export class AdminLessonService {
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
-    const updatedLesson = await this.updateAiMentorLessonWithTransaction(id, data, currentUserId);
+    const updatedLesson = await this.updateAiMentorLessonWithTransaction(
+      id,
+      data,
+      currentUser.userId,
+    );
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
     await this.eventBus.publish(
       new UpdateLessonEvent({
         lessonId: id,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousLessonData: previousLessonSnapshot,
         updatedLessonData: updatedLessonSnapshot,
       }),
@@ -245,13 +237,8 @@ export class AdminLessonService {
     return updatedLesson?.id ?? id;
   }
 
-  async updateQuizLesson(
-    id: UUIDType,
-    data: UpdateQuizLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+  async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -280,7 +267,7 @@ export class AdminLessonService {
     const updatedLessonId = await this.updateQuizLessonWithQuestionsAndOptions(
       id,
       data,
-      currentUserId,
+      currentUser.userId,
     );
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
@@ -288,7 +275,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new UpdateLessonEvent({
         lessonId: id,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousLessonData: previousLessonSnapshot,
         updatedLessonData: updatedLessonSnapshot,
       }),
@@ -297,13 +284,8 @@ export class AdminLessonService {
     return updatedLessonId;
   }
 
-  async updateLesson(
-    id: UUIDType,
-    data: UpdateLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+  async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -342,7 +324,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new UpdateLessonEvent({
         lessonId: id,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousLessonData: previousLessonSnapshot,
         updatedLessonData: updatedLessonSnapshot,
       }),
@@ -351,8 +333,8 @@ export class AdminLessonService {
     return updatedLesson.id;
   }
 
-  async removeLesson(lessonId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+  async removeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
@@ -370,7 +352,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new DeleteLessonEvent({
         lessonId: lesson.id,
-        deletedById: currentUserId,
+        actor: currentUser,
         lessonName: lesson.title,
       }),
     );
@@ -379,13 +361,12 @@ export class AdminLessonService {
   async updateLessonDisplayOrder(lessonObject: {
     lessonId: UUIDType;
     displayOrder: number;
-    currentUserId: UUIDType;
-    currentUserRole: UserRole;
+    currentUser: CurrentUser;
   }): Promise<void> {
     await this.validateAccess(
       "lesson",
-      lessonObject.currentUserRole,
-      lessonObject.currentUserId,
+      lessonObject.currentUser.role,
+      lessonObject.currentUser.userId,
       lessonObject.lessonId,
     );
 
@@ -421,7 +402,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new UpdateLessonEvent({
         lessonId: lessonObject.lessonId,
-        updatedById: lessonObject.currentUserId,
+        actor: lessonObject.currentUser,
         previousLessonData: previousLessonSnapshot,
         updatedLessonData: updatedLessonSnapshot,
       }),
@@ -668,12 +649,8 @@ export class AdminLessonService {
     });
   }
 
-  async createEmbedLesson(
-    data: CreateEmbedLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+  async createEmbedLesson(data: CreateEmbedLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -719,7 +696,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
-        createdById: currentUserId,
+        actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
     );
@@ -729,11 +706,10 @@ export class AdminLessonService {
 
   async updateEmbedLesson(
     lessonId: UUIDType,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
     data: UpdateEmbedLessonBody,
   ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -792,7 +768,7 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new UpdateLessonEvent({
         lessonId,
-        updatedById: currentUserId,
+        actor: currentUser,
         previousLessonData: previousLessonSnapshot,
         updatedLessonData: updatedLessonSnapshot,
       }),

@@ -35,6 +35,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type * as schema from "src/storage/schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
@@ -52,6 +53,7 @@ export class StudentLessonProgressService {
     id,
     studentId,
     userRole,
+    actor,
     quizCompleted = false,
     completedQuestionCount = 0,
     dbInstance = this.db,
@@ -61,6 +63,7 @@ export class StudentLessonProgressService {
     id: UUIDType;
     studentId: UUIDType;
     userRole?: UserRole;
+    actor?: CurrentUser;
     quizCompleted?: boolean;
     completedQuestionCount?: number;
     dbInstance?: PostgresJsDatabase<typeof schema>;
@@ -179,8 +182,17 @@ export class StudentLessonProgressService {
     const isCompletedAsFreemium =
       !accessCourseLessonWithDetails.isAssigned && accessCourseLessonWithDetails.isFreemium;
 
+    const resolvedActor = await this.resolveActor(studentId, actor, dbInstance);
+
     if (lessonCompleted || isQuizPassed) {
-      this.eventBus.publish(new LessonCompletedEvent(studentId, lesson.courseId, lesson.id));
+      this.eventBus.publish(
+        new LessonCompletedEvent({
+          userId: studentId,
+          courseId: lesson.courseId,
+          lessonId: lesson.id,
+          actor: resolvedActor,
+        }),
+      );
     }
 
     await this.updateChapterProgress(
@@ -189,11 +201,12 @@ export class StudentLessonProgressService {
       studentId,
       lesson.chapterLessonCount,
       isCompletedAsFreemium,
+      resolvedActor,
       dbInstance,
     );
 
     if (isCompletedAsFreemium) return;
-    await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, dbInstance);
+    await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, resolvedActor, dbInstance);
   }
 
   async markLessonAsStarted(
@@ -296,6 +309,7 @@ export class StudentLessonProgressService {
     studentId: UUIDType,
     lessonCount: number,
     completedAsFreemium = false,
+    actor: CurrentUser,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const dbInstance = trx ?? this.db;
@@ -312,7 +326,7 @@ export class StudentLessonProgressService {
 
     if (completedLessonCount.count === lessonCount) {
       this.eventBus.publish(
-        new UserChapterFinishedEvent({ chapterId, courseId, userId: studentId }),
+        new UserChapterFinishedEvent({ chapterId, courseId, userId: studentId, actor }),
       );
 
       return dbInstance
@@ -363,6 +377,7 @@ export class StudentLessonProgressService {
   private async checkCourseIsCompletedForUser(
     courseId: UUIDType,
     studentId: UUIDType,
+    actor: CurrentUser,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const courseFinishedChapterCount = await this.getCourseFinishedChapterCount(
@@ -383,6 +398,7 @@ export class StudentLessonProgressService {
         courseId,
         PROGRESS_STATUSES.COMPLETED,
         courseFinishedChapterCount,
+        actor,
         trx,
       );
 
@@ -406,6 +422,7 @@ export class StudentLessonProgressService {
       courseId,
       PROGRESS_STATUSES.IN_PROGRESS,
       courseFinishedChapterCount,
+      actor,
       trx,
     );
   }
@@ -457,6 +474,7 @@ export class StudentLessonProgressService {
     courseId: UUIDType,
     progress: ProgressStatus,
     finishedChapterCount: number,
+    actor: CurrentUser,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     if (progress === PROGRESS_STATUSES.COMPLETED) {
@@ -478,7 +496,7 @@ export class StudentLessonProgressService {
       );
 
       this.eventBus.publish(new CourseCompletedEvent(courseCompletionDetails));
-      this.eventBus.publish(new UserCourseFinishedEvent({ userId: studentId, courseId }));
+      this.eventBus.publish(new UserCourseFinishedEvent({ userId: studentId, courseId, actor }));
 
       return studentCourse;
     }
@@ -546,6 +564,29 @@ export class StudentLessonProgressService {
     return {
       ...courseCompletionDetails,
       courseId,
+    };
+  }
+
+  private async resolveActor(
+    userId: UUIDType,
+    actor: CurrentUser | undefined,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ): Promise<CurrentUser> {
+    if (actor) return actor;
+
+    const [user] = await dbInstance
+      .select({ userId: users.id, email: users.email, role: users.role })
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    return {
+      userId: user.userId,
+      email: user.email,
+      role: user.role as UserRole,
     };
   }
 }
