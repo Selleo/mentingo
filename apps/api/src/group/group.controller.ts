@@ -134,7 +134,7 @@ export class GroupController {
     response: baseResponse(baseGroupSchema),
   })
   async updateGroup(
-    @Query("groupId") groupId: UUIDType,
+    @Param("groupId") groupId: UUIDType,
     @Body() updateGroupBody: UpsertGroupBody,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GroupResponse>> {
@@ -150,7 +150,7 @@ export class GroupController {
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async deleteGroup(
-    @Query("groupId") groupId: UUIDType,
+    @Param("groupId") groupId: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.groupService.deleteGroup(groupId, currentUser);
