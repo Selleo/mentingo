@@ -19,8 +19,8 @@ import { SCORM } from "../constants/scorm.consts";
 import { ScormRepository } from "../repositories/scorm.repository";
 
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { LessonTypes } from "src/lesson/lesson.type";
-import type { UserRole } from "src/user/schemas/userRoles";
 
 type ScormChapter = {
   title: string;
@@ -80,8 +80,7 @@ export class ScormService {
   async processScormPackage(
     file: Express.Multer.File,
     courseId: UUIDType,
-    userId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
   ) {
     return await this.db.transaction(async (tx) => {
       try {
@@ -129,8 +128,7 @@ export class ScormService {
               courseId,
               isFreemium: false,
             },
-            userId,
-            currentUserRole,
+            currentUser,
           );
 
           // Create lessons
@@ -144,8 +142,7 @@ export class ScormService {
                 fileS3Key: lesson.href ? `${s3BaseKey}/${lesson.href}` : undefined,
                 fileType: this.getContentType(lesson.href),
               },
-              userId,
-              currentUserRole,
+              currentUser,
             );
           }
         }

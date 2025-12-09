@@ -7,6 +7,7 @@ import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/commo
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
@@ -68,13 +69,11 @@ export class ChapterController {
   })
   async betaCreateChapter(
     @Body() createChapterBody: CreateChapterBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const { id } = await this.adminChapterService.createChapterForCourse(
       createChapterBody,
-      userId,
-      role,
+      currentUser,
     );
 
     return new BaseResponse({ id, message: "Chapter created successfully" });
@@ -99,10 +98,9 @@ export class ChapterController {
   async updateChapter(
     @Query("id") id: UUIDType,
     @Body() updateChapterBody: UpdateChapterBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.updateChapter(id, updateChapterBody, userId, role);
+    await this.adminChapterService.updateChapter(id, updateChapterBody, currentUser);
 
     return new BaseResponse({ message: "Chapter updated successfully" });
   }
@@ -128,13 +126,11 @@ export class ChapterController {
       chapterId: UUIDType;
       displayOrder: number;
     },
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.adminChapterService.updateChapterDisplayOrder({
       ...body,
-      currentUserRole: role,
-      currentUserId: userId,
+      currentUser,
     });
 
     return new BaseResponse({
@@ -150,10 +146,9 @@ export class ChapterController {
   })
   async removeChapter(
     @Query("chapterId") chapterId: UUIDType,
-    @CurrentUser("role") role: UserRole,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminChapterService.removeChapter(chapterId, userId, role);
+    await this.adminChapterService.removeChapter(chapterId, currentUser);
     return new BaseResponse({
       message: "Lesson removed from course successfully",
     });

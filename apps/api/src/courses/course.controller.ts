@@ -32,6 +32,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { CourseService } from "src/courses/course.service";
 import {
   allCoursesForContentCreatorSchema,
@@ -322,14 +323,14 @@ export class CourseController {
   })
   async createCourse(
     @Body() createCourseBody: CreateCourseBody,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @Req() request: Request,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const isPlaywrightTest = request.headers["x-playwright-test"];
 
     const { id } = await this.courseService.createCourse(
       createCourseBody,
-      currentUserId,
+      currentUser,
       !!isPlaywrightTest,
     );
     return new BaseResponse({ id, message: "Course created successfully" });
@@ -349,8 +350,7 @@ export class CourseController {
     @Param("id") id: UUIDType,
     @Body() updateCourseBody: UpdateCourseBody,
     @UploadedFile() image: Express.Multer.File,
-    @CurrentUser("userId") currentUserId: UUIDType,
-    @CurrentUser("role") currentUserRole: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
     @Req() request: Request,
   ): Promise<BaseResponse<{ message: string }>> {
     const isPlaywrightTest = request.headers["x-playwright-test"];
@@ -358,8 +358,7 @@ export class CourseController {
     await this.courseService.updateCourse(
       id,
       updateCourseBody,
-      currentUserId,
-      currentUserRole,
+      currentUser,
       !!isPlaywrightTest,
       image,
     );
@@ -379,8 +378,9 @@ export class CourseController {
   async updateHasCertificate(
     @Param("id") id: UUIDType,
     @Body() body: { hasCertificate: boolean },
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateHasCertificate(id, body.hasCertificate);
+    await this.courseService.updateHasCertificate(id, body.hasCertificate, currentUser);
 
     return new BaseResponse({ message: "Course with certificate updated successfully" });
   }
@@ -397,8 +397,13 @@ export class CourseController {
   async updateLessonSequenceEnabled(
     @Param("courseId") courseId: UUIDType,
     @Body() body: { lessonSequenceEnabled: boolean },
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateLessonSequenceEnabled(courseId, body.lessonSequenceEnabled);
+    await this.courseService.updateLessonSequenceEnabled(
+      courseId,
+      body.lessonSequenceEnabled,
+      currentUser,
+    );
 
     return new BaseResponse({ message: "Course lesson sequence updated successfully" });
   }
@@ -425,10 +430,10 @@ export class CourseController {
   })
   async enrollCourse(
     @Query("id") id: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @Headers("x-test-key") testKey: string,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollCourse(id, currentUserId, testKey);
+    await this.courseService.enrollCourse(id, currentUser.userId, testKey, undefined, currentUser);
 
     return new BaseResponse({ message: "Course enrolled successfully" });
   }
@@ -452,8 +457,9 @@ export class CourseController {
   async enrollCourses(
     @Param("courseId") courseId: UUIDType,
     @Body() body: CreateCoursesEnrollment,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollCourses(courseId, body);
+    await this.courseService.enrollCourses(courseId, body, currentUser);
 
     return new BaseResponse({ message: "Courses enrolled successfully" });
   }
@@ -477,9 +483,9 @@ export class CourseController {
   async enrollGroupsToCourse(
     @Param("courseId") courseId: UUIDType,
     @Body() body: { groupIds: UUIDType[] } = { groupIds: [] },
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollGroupsToCourse(courseId, body.groupIds, currentUserId);
+    await this.courseService.enrollGroupsToCourse(courseId, body.groupIds, currentUser);
 
     return new BaseResponse({ message: "Pomyślnie zapisano grupy na kurs" });
   }

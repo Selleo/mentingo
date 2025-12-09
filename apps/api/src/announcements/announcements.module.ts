@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
 
 import { UserModule } from "src/user/user.module";
 
@@ -7,7 +8,7 @@ import { AnnouncementsRepository } from "./announcements.repository";
 import { AnnouncementsService } from "./announcements.service";
 
 @Module({
-  imports: [UserModule],
+  imports: [CqrsModule, UserModule],
   controllers: [AnnouncementsController],
   providers: [AnnouncementsService, AnnouncementsRepository],
 })

@@ -5,11 +5,14 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import { and, count, eq, ilike, inArray, like } from "drizzle-orm";
+import { isEqual } from "lodash";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
 import { LocalizationService } from "src/localization/localization.service";
 import { categories, courses } from "src/storage/schema";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
@@ -24,13 +27,16 @@ import type { AllCategoriesResponse } from "./schemas/category.schema";
 import type { CategoryQuery } from "./schemas/category.types";
 import type { CategoryInsert } from "./schemas/createCategorySchema";
 import type { CategoryUpdateBody } from "./schemas/updateCategorySchema";
+import type { CategoryActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class CategoryService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
+    private readonly eventBus: EventBus,
   ) {}
 
   public async getCategories(
@@ -94,7 +100,7 @@ export class CategoryService {
     return category;
   }
 
-  public async createCategory(createCategoryBody: CategoryInsert) {
+  public async createCategory(createCategoryBody: CategoryInsert, currentUser: CurrentUser) {
     const category = await this.db.query.categories.findFirst({
       where: ({ title }) => eq(title, createCategoryBody.title),
     });
@@ -107,21 +113,50 @@ export class CategoryService {
 
     if (!newCategory) throw new UnprocessableEntityException("Category not created");
 
+    this.eventBus.publish(
+      new CreateCategoryEvent({
+        categoryId: newCategory.id,
+        actor: currentUser,
+        category: this.buildCategorySnapshot(newCategory),
+      }),
+    );
+
     return newCategory;
   }
 
-  public async updateCategory(id: UUIDType, updateCategoryBody: CategoryUpdateBody) {
+  public async updateCategory(
+    id: UUIDType,
+    updateCategoryBody: CategoryUpdateBody,
+    currentUser: CurrentUser,
+  ) {
     const [existingCategory] = await this.db.select().from(categories).where(eq(categories.id, id));
 
     if (!existingCategory) {
       throw new NotFoundException("Category not found");
     }
 
+    const previousSnapshot = this.buildCategorySnapshot(existingCategory);
+
     const [updatedCategory] = await this.db
       .update(categories)
       .set(updateCategoryBody)
       .where(eq(categories.id, id))
       .returning();
+
+    if (updatedCategory) {
+      const updatedSnapshot = this.buildCategorySnapshot(updatedCategory);
+
+      if (!isEqual(previousSnapshot, updatedSnapshot)) {
+        this.eventBus.publish(
+          new UpdateCategoryEvent({
+            categoryId: id,
+            actor: currentUser,
+            previousCategoryData: previousSnapshot,
+            updatedCategoryData: updatedSnapshot,
+          }),
+        );
+      }
+    }
 
     return updatedCategory;
   }
@@ -141,7 +176,7 @@ export class CategoryService {
     }
   }
 
-  async deleteCategory(id: UUIDType) {
+  async deleteCategory(id: UUIDType, currentUser: CurrentUser) {
     try {
       const [category] = await this.db.select().from(categories).where(eq(categories.id, id));
 
@@ -165,14 +200,24 @@ export class CategoryService {
         );
       }
       await this.db.delete(categories).where(eq(categories.id, id));
+
+      this.eventBus.publish(
+        new DeleteCategoryEvent({
+          categoryId: category.id,
+          actor: currentUser,
+          categoryTitle: category.title,
+        }),
+      );
     } catch (error) {
       console.error(error);
       throw new NotFoundException("Category not found");
     }
   }
 
-  async deleteManyCategories(categoryIds: string[]): Promise<string> {
-    return this.db.transaction(async (tx) => {
+  async deleteManyCategories(categoryIds: string[], currentUser: CurrentUser): Promise<string> {
+    let deletedCategories: { id: UUIDType; title: string }[] = [];
+
+    const message = await this.db.transaction(async (tx) => {
       const existingCategories = await tx
         .select({ id: categories.id, title: categories.title })
         .from(categories)
@@ -209,9 +254,35 @@ export class CategoryService {
         ),
       );
 
+      deletedCategories = existingCategories.map((cat) => ({ id: cat.id, title: cat.title }));
+
       const deletedTitles = existingCategories.map((cat) => cat.title);
       return `Successfully deleted categories: ${deletedTitles.join(", ")}`;
     });
+
+    deletedCategories.forEach(({ id, title }) =>
+      this.eventBus.publish(
+        new DeleteCategoryEvent({
+          categoryId: id,
+          actor: currentUser,
+          categoryTitle: title,
+        }),
+      ),
+    );
+
+    return message;
+  }
+
+  private buildCategorySnapshot(category: {
+    id: UUIDType;
+    title?: string | null;
+    archived?: boolean | null;
+  }): CategoryActivityLogSnapshot {
+    return {
+      id: category.id,
+      title: category.title,
+      archived: category.archived,
+    };
   }
 
   private serializeCategories = (data: AllCategoriesResponse, isAdmin: boolean) =>

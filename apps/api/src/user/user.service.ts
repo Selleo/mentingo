@@ -11,7 +11,20 @@ import { EventBus } from "@nestjs/cqrs";
 import { CreatePasswordReminderEmail } from "@repo/email-templates";
 import { OnboardingPages, type SupportedLanguages, SUPPORTED_LANGUAGES } from "@repo/shared";
 import * as bcrypt from "bcryptjs";
-import { and, count, eq, getTableColumns, ilike, inArray, isNull, not, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  eq,
+  getTableColumns,
+  ilike,
+  inArray,
+  isNull,
+  not,
+  or,
+  sql,
+} from "drizzle-orm";
+import { isEqual } from "lodash";
 import { nanoid } from "nanoid";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
@@ -22,6 +35,7 @@ import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterCondi
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import hashPassword from "src/common/helpers/hashPassword";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
@@ -66,7 +80,9 @@ import type {
   UpdateUserBody,
 } from "./schemas/updateUser.schema";
 import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/user.schema";
+import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserInvite } from "src/events/user/user-invite.event";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
 
@@ -227,7 +243,7 @@ export class UserService {
     };
   }
 
-  public async updateUser(id: UUIDType, data: UpdateUserBody) {
+  public async updateUser(id: UUIDType, data: UpdateUserBody, actor?: CurrentUser) {
     const [existingUser] = await this.db
       .select()
       .from(users)
@@ -240,6 +256,8 @@ export class UserService {
     }
 
     return this.db.transaction(async (trx) => {
+      const previousSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
+
       const { groups, ...userData } = data;
 
       const hasUserDataToUpdate = Object.keys(userData).length > 0;
@@ -251,15 +269,35 @@ export class UserService {
       const usersProfilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
       if (groups !== undefined) {
-        await this.groupService.setUserGroups(groups ?? [], id);
+        await this.groupService.setUserGroups(groups ?? [], id, {
+          actor,
+          db: trx,
+        });
       }
 
-      const newGroups = await this.groupService.getUserGroups({}, id);
+      const updatedSnapshot = actor ? await this.buildUserActivitySnapshot(id, trx) : null;
+
+      const shouldPublishEvent =
+        actor && previousSnapshot && updatedSnapshot && !isEqual(previousSnapshot, updatedSnapshot);
+
+      if (shouldPublishEvent) {
+        this.eventBus.publish(
+          new UpdateUserEvent({
+            userId: id,
+            actor,
+            previousUserData: previousSnapshot,
+            updatedUserData: updatedSnapshot,
+          }),
+        );
+      }
+
+      const updatedGroups =
+        updatedSnapshot?.groups ?? (await this.getUserGroupsForSnapshot(id, trx));
 
       return {
         ...userWithoutAvatar,
         profilePictureUrl: usersProfilePictureUrl,
-        groups: newGroups.data.map((group) => ({ id: group.id, name: group.name })),
+        groups: updatedGroups,
       };
     });
   }
@@ -382,8 +420,8 @@ export class UserService {
       .where(eq(credentials.userId, id));
   }
 
-  public async deleteUser(currentUserId: UUIDType, id: UUIDType) {
-    if (id === currentUserId) {
+  public async deleteUser(actor: CurrentUser, id: UUIDType) {
+    if (id === actor.userId) {
       throw new BadRequestException("You cannot delete your own account");
     }
 
@@ -393,6 +431,8 @@ export class UserService {
       .where(and(eq(users.id, id), isNull(users.deletedAt), eq(users.role, USER_ROLES.STUDENT)));
 
     if (!userToDelete) throw new BadRequestException("You can only delete students");
+
+    const userSnapshot = await this.buildUserActivitySnapshot(id);
 
     return this.db.transaction(async (trx) => {
       await this.deflateStatisticsForCourseDeletedUser(userToDelete.id, trx);
@@ -410,12 +450,22 @@ export class UserService {
         .where(eq(users.id, id))
         .returning();
 
+      if (userSnapshot) {
+        this.eventBus.publish(
+          new DeleteUserEvent({
+            userId: id,
+            actor,
+            deletedUserData: userSnapshot,
+          }),
+        );
+      }
+
       return deletedUser;
     });
   }
 
-  public async deleteBulkUsers(currentUserId: UUIDType, ids: UUIDType[]) {
-    if (ids.includes(currentUserId)) {
+  public async deleteBulkUsers(actor: CurrentUser, ids: UUIDType[]) {
+    if (ids.includes(actor.userId)) {
       throw new BadRequestException("You cannot delete yourself");
     }
 
@@ -428,6 +478,8 @@ export class UserService {
 
     if (usersToDelete.length !== ids.length)
       throw new BadRequestException("You can only delete students");
+
+    const usersSnapshots = await Promise.all(ids.map((id) => this.buildUserActivitySnapshot(id)));
 
     return this.db.transaction(async (trx) => {
       await Promise.all(
@@ -449,10 +501,23 @@ export class UserService {
             .where(eq(users.id, id)),
         ),
       );
+
+      usersSnapshots.forEach((snapshot, index) => {
+        const userId = ids[index];
+        if (!snapshot) return;
+
+        this.eventBus.publish(
+          new DeleteUserEvent({
+            userId,
+            actor,
+            deletedUserData: snapshot,
+          }),
+        );
+      });
     });
   }
 
-  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, creatorId?: UUIDType) {
+  public async createUser(data: CreateUserBody, dbInstance?: DatabasePg, creator?: CurrentUser) {
     const db = dbInstance ?? this.db;
 
     const [existingUser] = await db
@@ -468,8 +533,10 @@ export class UserService {
       const [createdUser] = await trx.insert(users).values(data).returning();
       await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
-      if (creatorId) {
-        const { language: adminsLanguage } = await this.settingsService.getUserSettings(creatorId);
+      if (creator) {
+        const { language: adminsLanguage } = await this.settingsService.getUserSettings(
+          creator.userId,
+        );
 
         const finalLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
           data.language as SupportedLanguages,
@@ -519,9 +586,21 @@ export class UserService {
       throw new Error("Failed to create user");
     }
 
+    if (creator) {
+      const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
+
+      this.eventBus.publish(
+        new CreateUserEvent({
+          userId: createdUser.id,
+          actor: creator,
+          createdUserData: snapshot,
+        }),
+      );
+    }
+
     const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(createdUser.id);
 
-    if (!creatorId) {
+    if (!creator) {
       const createPasswordEmail = new CreatePasswordReminderEmail({
         createPasswordLink: `${process.env.CORS_ORIGIN}/auth/create-new-password?createToken=${token}&email=${createdUser.email}`,
         ...defaultEmailSettings,
@@ -538,7 +617,7 @@ export class UserService {
     }
 
     const userInviteDetails: UserInvite = {
-      creatorId: creatorId,
+      creatorId: creator.userId,
       email: createdUser.email,
       token,
       userId: createdUser.id,
@@ -583,10 +662,15 @@ export class UserService {
       .where(and(eq(users.role, USER_ROLES.STUDENT), inArray(users.id, studentIds)));
   }
 
-  async bulkAssignUsersToGroup(data: BulkAssignUserGroups) {
+  async bulkAssignUsersToGroup(data: BulkAssignUserGroups, actor?: CurrentUser) {
     await this.db.transaction(async (trx) => {
       await Promise.all(
-        data.map((user) => this.groupService.setUserGroups(user.groups, user.userId, trx)),
+        data.map((user) =>
+          this.groupService.setUserGroups(user.groups, user.userId, {
+            db: trx,
+            actor,
+          }),
+        ),
       );
     });
   }
@@ -604,7 +688,7 @@ export class UserService {
     return adminsWithSettings;
   }
 
-  async importUsers(usersDataFile: Express.Multer.File, creatorId: UUIDType) {
+  async importUsers(usersDataFile: Express.Multer.File, creator: CurrentUser) {
     const importStats: ImportUserResponse = {
       importedUsersAmount: 0,
       skippedUsersAmount: 0,
@@ -635,7 +719,7 @@ export class UserService {
       await this.db.transaction(async (trx) => {
         const { groups: groupNames, ...userInfo } = userData;
 
-        const createdUser = await this.createUser({ ...userInfo }, trx, creatorId);
+        const createdUser = await this.createUser({ ...userInfo }, trx, creator);
 
         importStats.importedUsersAmount++;
         importStats.importedUsersList.push(userData.email);
@@ -652,7 +736,10 @@ export class UserService {
         await this.groupService.setUserGroups(
           existingGroups.map((group) => group.id),
           createdUser.id,
-          trx,
+          {
+            db: trx,
+            actor: creator,
+          },
         );
       });
     }
@@ -680,6 +767,45 @@ export class UserService {
       archivedUsersCount: archivedUsers.length,
       usersAlreadyArchivedCount: userIds.length - usersToArchive.length,
     };
+  }
+
+  private async buildUserActivitySnapshot(
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<UserActivityLogSnapshot | null> {
+    const [user] = await dbInstance
+      .select({
+        ...getTableColumns(users),
+      })
+      .from(users)
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+
+    if (!user) return null;
+
+    const userGroups = await this.getUserGroupsForSnapshot(userId, dbInstance);
+
+    return {
+      ...user,
+      role: user.role as UserRole,
+      groups: userGroups,
+    };
+  }
+
+  private async getUserGroupsForSnapshot(
+    userId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<Array<{ id: UUIDType; name: string | null }>> {
+    const userGroups = await dbInstance
+      .select({
+        id: groups.id,
+        name: groups.name,
+      })
+      .from(groupUsers)
+      .innerJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(eq(groupUsers.userId, userId))
+      .orderBy(asc(groups.name));
+
+    return userGroups.map(({ id, name }) => ({ id, name }));
   }
 
   private getFiltersConditions(filters: UsersFilterSchema) {

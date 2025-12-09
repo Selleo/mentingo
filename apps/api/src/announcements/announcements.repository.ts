@@ -130,6 +130,17 @@ export class AnnouncementsRepository {
     return announcement;
   }
 
+  async getAnnouncementById(announcementId: UUIDType) {
+    return await this.db
+      .select({
+        ...getTableColumns(announcements),
+        groupId: groupAnnouncements.groupId,
+      })
+      .from(announcements)
+      .leftJoin(groupAnnouncements, eq(groupAnnouncements.announcementId, announcements.id))
+      .where(eq(announcements.id, announcementId));
+  }
+
   async markAnnouncementAsRead(announcementId: string, userId: UUIDType) {
     return await this.db
       .update(userAnnouncements)

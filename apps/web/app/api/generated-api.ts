@@ -661,8 +661,6 @@ export interface ChangePasswordBody {
 
 export type ChangePasswordResponse = null;
 
-export type DeleteUserResponse = null;
-
 export interface DeleteBulkUsersBody {
   userIds: string[];
 }
@@ -3673,18 +3671,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UserControllerDeleteBulkUsers
      * @request DELETE:/api/user
      */
-    userControllerDeleteBulkUsers: (
-      data: DeleteBulkUsersBody,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl";
-      },
-      params: RequestParams = {},
-    ) =>
+    userControllerDeleteBulkUsers: (data: DeleteBulkUsersBody, params: RequestParams = {}) =>
       this.request<DeleteBulkUsersResponse, any>({
         path: `/api/user`,
         method: "DELETE",
-        query: query,
         body: data,
         type: ContentType.Json,
         format: "json",
@@ -3811,29 +3801,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         query: query,
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UserControllerDeleteUser
-     * @request DELETE:/api/user/user
-     */
-    userControllerDeleteUser: (
-      query: {
-        /** @default "en" */
-        language?: "en" | "pl";
-        /** @format uuid */
-        id: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<DeleteUserResponse, any>({
-        path: `/api/user/user`,
-        method: "DELETE",
-        query: query,
         format: "json",
         ...params,
       }),

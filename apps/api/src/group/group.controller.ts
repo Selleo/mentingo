@@ -21,7 +21,9 @@ import {
   type UUIDType,
 } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
+import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import {
   allGroupsSchema,
   baseGroupSchema,
@@ -115,8 +117,9 @@ export class GroupController {
   })
   async createGroup(
     @Body() createGroupBody: UpsertGroupBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.groupService.createGroup(createGroupBody);
+    const { id } = await this.groupService.createGroup(createGroupBody, currentUser);
 
     return new BaseResponse({ id, message: "Group created successfully" });
   }
@@ -131,10 +134,11 @@ export class GroupController {
     response: baseResponse(baseGroupSchema),
   })
   async updateGroup(
-    @Query("groupId") groupId: UUIDType,
+    @Param("groupId") groupId: UUIDType,
     @Body() updateGroupBody: UpsertGroupBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GroupResponse>> {
-    const updatedGroup = await this.groupService.updateGroup(groupId, updateGroupBody);
+    const updatedGroup = await this.groupService.updateGroup(groupId, updateGroupBody, currentUser);
 
     return new BaseResponse(updatedGroup);
   }
@@ -146,9 +150,10 @@ export class GroupController {
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async deleteGroup(
-    @Query("groupId") groupId: UUIDType,
+    @Param("groupId") groupId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.groupService.deleteGroup(groupId);
+    await this.groupService.deleteGroup(groupId, currentUser);
 
     return new BaseResponse({
       message: "Group deleted successfully",
@@ -181,8 +186,9 @@ export class GroupController {
   async setUserGroups(
     @Query("userId") userId: UUIDType,
     @Body() groupIds: UUIDType[],
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.groupService.setUserGroups(groupIds, userId);
+    await this.groupService.setUserGroups(groupIds, userId, { actor: currentUser });
 
     return new BaseResponse({ message: "User assigned successfully" });
   }

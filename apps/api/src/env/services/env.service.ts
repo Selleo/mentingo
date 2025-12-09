@@ -2,10 +2,13 @@ import crypto from "crypto";
 
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { EventBus } from "@nestjs/cqrs";
 
 import { ALLOWED_SECRETS, ENCRYPTION_ALG, SERVICE_GROUPS } from "src/env/env.config";
 import { EnvRepository } from "src/env/repositories/env.repository";
+import { UpdateEnvEvent } from "src/events";
 
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { BulkUpsertEnvBody, EncryptedEnvBody } from "src/env/env.schema";
 
 @Injectable()
@@ -14,11 +17,12 @@ export class EnvService {
   constructor(
     private readonly envRepository: EnvRepository,
     private readonly configService: ConfigService,
+    private readonly eventBus?: EventBus,
   ) {
     this.KEY_ENCRYPTION_KEY = Buffer.from(process.env.MASTER_KEY!, "base64");
   }
 
-  async bulkUpsertEnv(data: BulkUpsertEnvBody) {
+  async bulkUpsertEnv(data: BulkUpsertEnvBody, actor?: CurrentUser) {
     const processedEnvs: EncryptedEnvBody[] = [];
     for (const env of data) {
       if (!ALLOWED_SECRETS.includes(env.name)) {
@@ -52,6 +56,16 @@ export class EnvService {
     }
 
     await this.envRepository.bulkUpsertEnv(processedEnvs);
+
+    if (actor && this.eventBus) {
+      const updatedEnvKeys = data.map((env) => env.name);
+      this.eventBus.publish(
+        new UpdateEnvEvent({
+          actor,
+          updatedEnvKeys,
+        }),
+      );
+    }
   }
 
   async getEnv(envName: string) {
