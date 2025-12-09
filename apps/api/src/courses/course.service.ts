@@ -1592,7 +1592,7 @@ export class CourseService {
           await Promise.all(
             studentsWithOtherGroups.map((studentId) => {
               const newGroupId = studentsEnrolledInOtherGroups.find(
-                (s) => s.studentId === studentId,
+                (student) => student.studentId === studentId,
               )?.groupId;
 
               return trx
