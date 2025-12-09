@@ -137,8 +137,10 @@ export class StudentLessonProgressService {
       : lessonProgress;
 
     const shouldUpdate =
-      (!lessonProgress?.completedAt && lesson.type !== LESSON_TYPES.AI_MENTOR) ||
-      (LESSON_TYPES.AI_MENTOR && !!aiMentorLessonData?.passed);
+      !lessonProgress?.completedAt &&
+      (lesson.type !== LESSON_TYPES.AI_MENTOR
+        ? lesson.type !== LESSON_TYPES.QUIZ || isQuizPassed
+        : !!aiMentorLessonData?.passed);
 
     let lessonCompleted = false;
 

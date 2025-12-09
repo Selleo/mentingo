@@ -264,7 +264,7 @@ export class LessonService {
         await this.studentLessonProgressService.markLessonAsCompleted({
           id: studentQuizAnswers.lessonId,
           studentId: userId,
-          quizCompleted: isQuizPassed,
+          quizCompleted: true,
           completedQuestionCount:
             evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
           dbInstance: trx,
