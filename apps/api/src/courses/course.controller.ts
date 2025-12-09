@@ -484,6 +484,31 @@ export class CourseController {
     return new BaseResponse({ message: "Pomyślnie zapisano grupy na kurs" });
   }
 
+  @Delete("/:courseId/unenroll-groups-from-course")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "courseId",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: Type.Object({ groupIds: Type.Array(UUIDSchema) }),
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async unenrollGroupsFromCourse(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: { groupIds: UUIDType[] } = { groupIds: [] },
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.unenrollGroupsFromCourse(courseId, body.groupIds);
+
+    return new BaseResponse({ message: "Pomyślnie wypisano grupy z kursu" });
+  }
+
   @Delete("deleteCourse/:id")
   @Roles(USER_ROLES.ADMIN)
   @Validate({

@@ -1278,6 +1278,7 @@
       "enroll": "Enroll",
       "enrollSelected": "Enroll selected",
       "unenrollSelected": "Unenroll selected",
+      "unenrollGroups": "Unenroll groups",
       "table": {
         "name": "Name",
         "surname": "Surname",
@@ -1287,6 +1288,8 @@
       },
       "statuses": {
         "enrolled": "Enrolled",
+        "enrolledByGroup": "Enrolled by group",
+        "individuallyEnrolled": "Individually enrolled",
         "notEnrolled": "Not enrolled"
       },
       "confirmation": {
@@ -1305,7 +1308,11 @@
         "description": "Are you sure you want to unenroll the selected students from this course? This action cannot be undone."
       },
       "toast": {
-        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled."
+        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled.",
+        "studentsEnrolledByGroup": "You cannot unenroll these students because {{count}} of them are enrolled via a group.",
+        "alreadyEnrolledByGroup": {
+          "title": "Some users are already enrolled by group"
+        }
       },
       "successResponse": "Students have been assigned to the course."
     },

@@ -20,6 +20,7 @@ export const enrolledStudentSchema = Type.Object({
     }),
   ),
   id: UUIDSchema,
+  isEnrolledByGroup: Type.Boolean(),
 });
 
 export type EnrolledStudent = Static<typeof enrolledStudentSchema>;

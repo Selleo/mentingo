@@ -1,7 +1,8 @@
-import { t } from "i18next";
-import { useMemo, useState } from "react";
+import { Minus } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { useBulkGroupCourseEnroll } from "~/api/mutations/admin/useBulkGroupCourseEnroll";
+import { useUnenrollGroupsFromCourse } from "~/api/mutations/admin/useUnenrollGroupsFromCourse";
 import { Icon } from "~/components/Icon";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -18,49 +19,41 @@ import {
 } from "~/components/ui/dialog";
 
 import type { FormEvent } from "react";
-import type { GetAllGroupsResponse, GetGroupsByCourseResponse } from "~/api/generated-api";
+import type { GetGroupsByCourseResponse } from "~/api/generated-api";
 
 type Props = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   courseId: string;
-  groups: GetAllGroupsResponse["data"];
   enrolledGroups?: GetGroupsByCourseResponse["data"];
   renderTrigger?: boolean;
 };
 
-export const GroupEnrollModal = ({
+export const GroupUnenrollModal = ({
   isOpen,
   onOpenChange,
   courseId,
-  groups,
   enrolledGroups,
   renderTrigger = true,
 }: Props) => {
-  const { mutate: bulkGroupEnroll } = useBulkGroupCourseEnroll(courseId);
-
+  const { t } = useTranslation();
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
 
-  const enrolledIds = useMemo(
-    () => new Set(enrolledGroups?.map((g) => g.id) ?? []),
-    [enrolledGroups],
-  );
+  const { mutate: unenrollGroups, isPending } = useUnenrollGroupsFromCourse(courseId);
 
-  const toggleGroupEnrollment = (groupId: string, isChecked: boolean, disabled?: boolean) => {
-    if (disabled) return;
-
+  const toggleGroupSelection = (groupId: string, isChecked: boolean) => {
     setSelectedGroupIds((prev) =>
       isChecked ? [...prev, groupId] : prev.filter((id) => id !== groupId),
     );
   };
 
-  const handleGroupFormSubmit = (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
     const groupIds = selectedGroupIds.filter(Boolean);
 
     if (groupIds.length > 0) {
-      bulkGroupEnroll({ groupIds });
+      unenrollGroups({ groupIds });
     }
 
     setSelectedGroupIds([]);
@@ -70,22 +63,28 @@ export const GroupEnrollModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       {renderTrigger && (
-        <DialogTrigger>
-          <Button variant="primary">{t("adminCourseView.enrolled.enrollGroups")}</Button>
+        <DialogTrigger asChild>
+          <Button
+            variant="outline"
+            disabled={!enrolledGroups?.length}
+            className="gap-2 text-error-700 hover:text-error-700"
+          >
+            <Minus className="size-4 text-error-700" />
+            {t("adminCourseView.enrolled.unenrollGroups")}
+          </Button>
         </DialogTrigger>
       )}
       <DialogPortal>
         <DialogOverlay />
         <DialogContent className="max-w-2xl">
-          <DialogTitle>{t("adminCourseView.enrolled.enrollGroupsModal.title")}</DialogTitle>
+          <DialogTitle>{t("adminCourseView.enrolled.unenrollConfirmation.title")}</DialogTitle>
           <DialogDescription>
-            {t("adminCourseView.enrolled.enrollGroupsModal.description")}
+            {t("adminCourseView.enrolled.unenrollConfirmation.description")}
           </DialogDescription>
 
           <div className="mt-4 grid gap-3">
-            {(groups || []).map((group) => {
-              const isGroupEnrolled = enrolledIds.has(group.id);
-              const isChecked = isGroupEnrolled || selectedGroupIds.includes(group.id);
+            {(enrolledGroups || []).map((group) => {
+              const isChecked = selectedGroupIds.includes(group.id);
 
               return (
                 <div
@@ -95,9 +94,8 @@ export const GroupEnrollModal = ({
                   <div className="flex items-center gap-4">
                     <Checkbox
                       checked={isChecked}
-                      disabled={isGroupEnrolled}
                       onCheckedChange={(currentValue) =>
-                        toggleGroupEnrollment(group.id, !!currentValue, isGroupEnrolled)
+                        toggleGroupSelection(group.id, !!currentValue)
                       }
                       aria-label={`select-group-${group.id}`}
                     />
@@ -107,34 +105,38 @@ export const GroupEnrollModal = ({
                       </div>
                       <div className="flex flex-col">
                         <div className="text-sm font-medium text-neutral-900">{group.name}</div>
-                        <div className="text-xs text-neutral-500">
-                          {t("adminCourseView.enrolled.members", {
-                            count: group.users?.length ?? 0,
-                          })}
-                        </div>
+                        {group.characteristic && (
+                          <div className="text-xs text-neutral-500">{group.characteristic}</div>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {isGroupEnrolled && (
-                      <Badge className="bg-primary-50 text-primary-700" fontWeight="normal">
-                        {t("adminCourseView.enrolled.alreadyEnrolled")}
-                      </Badge>
-                    )}
-                  </div>
+                  <Badge className="bg-primary-50 text-primary-700" fontWeight="normal">
+                    {t("adminCourseView.enrolled.statuses.enrolled")}
+                  </Badge>
                 </div>
               );
             })}
+
+            {!enrolledGroups?.length && (
+              <div className="rounded-lg border border-dashed bg-neutral-50 px-4 py-3 text-sm text-neutral-500">
+                {t("adminCourseView.statistics.empty.noGroups")}
+              </div>
+            )}
           </div>
-          <form onSubmit={handleGroupFormSubmit}>
-            <div className="flex justify-end gap-4 mt-6">
+          <form onSubmit={handleSubmit}>
+            <div className="mt-6 flex justify-end gap-4">
               <DialogClose>
                 <Button type="reset" variant="ghost">
                   {t("common.button.cancel")}
                 </Button>
               </DialogClose>
-              <Button type="submit" variant="primary" disabled={!selectedGroupIds.length}>
-                {t("adminCourseView.enrolled.enrollGroups")}
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={!selectedGroupIds.length || isPending}
+              >
+                {t("adminCourseView.enrolled.unenrollSelected")}
               </Button>
             </div>
           </form>

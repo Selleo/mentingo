@@ -661,8 +661,6 @@ export interface ChangePasswordBody {
 
 export type ChangePasswordResponse = null;
 
-export type DeleteUserResponse = null;
-
 export interface DeleteBulkUsersBody {
   userIds: string[];
 }
@@ -974,6 +972,7 @@ export interface GetStudentsWithEnrollmentDateResponse {
     }[];
     /** @format uuid */
     id: string;
+    isEnrolledByGroup: boolean;
   }[];
 }
 
@@ -1297,6 +1296,16 @@ export interface EnrollGroupsToCourseBody {
 }
 
 export interface EnrollGroupsToCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UnenrollGroupsFromCourseBody {
+  groupIds: string[];
+}
+
+export interface UnenrollGroupsFromCourseResponse {
   data: {
     message: string;
   };
@@ -3818,29 +3827,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UserControllerDeleteUser
-     * @request DELETE:/api/user/user
-     */
-    userControllerDeleteUser: (
-      query: {
-        /** @default "en" */
-        language?: "en" | "pl";
-        /** @format uuid */
-        id: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<DeleteUserResponse, any>({
-        path: `/api/user/user`,
-        method: "DELETE",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name UserControllerBulkAssignUsersToGroup
      * @request PATCH:/api/user/bulk/groups
      */
@@ -4466,6 +4452,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<EnrollGroupsToCourseResponse, any>({
         path: `/api/course/${courseId}/enroll-groups-to-course`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUnenrollGroupsFromCourse
+     * @request DELETE:/api/course/{courseId}/unenroll-groups-from-course
+     */
+    courseControllerUnenrollGroupsFromCourse: (
+      courseId: string,
+      data: UnenrollGroupsFromCourseBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnenrollGroupsFromCourseResponse, any>({
+        path: `/api/course/${courseId}/unenroll-groups-from-course`,
+        method: "DELETE",
         body: data,
         type: ContentType.Json,
         format: "json",

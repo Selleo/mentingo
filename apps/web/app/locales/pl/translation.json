@@ -1150,7 +1150,6 @@
         "other": {
           "lessonNumber": "Liczba lekcji",
           "chooseType": "Wybierz typ",
-
           "text": "Tekst",
           "video": "Wideo",
           "quiz": "Quiz",
@@ -1278,6 +1277,7 @@
       "members_many": "{{count}} członków",
       "members_other": "{{count}} członków",
       "unenrollSelected": "Wypisz wybranych z kursu",
+      "unenrollGroups": "Wypisz grupy",
       "table": {
         "name": "Imię",
         "surname": "Nazwisko",
@@ -1286,10 +1286,16 @@
         "enrollmentDate": "Data zapisania na kurs"
       },
       "toast": {
-        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled."
+        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled.",
+        "studentsEnrolledByGroup": "Nie można wypisać tych studentów, ponieważ {{count}} z nich zostało zapisanych przez grupę.",
+        "alreadyEnrolledByGroup": {
+          "title": "Niektórzy użytkownicy są już zapisani przez grupę"
+        }
       },
       "statuses": {
         "enrolled": "Zapisany",
+        "enrolledByGroup": "Zapisany przez grupę",
+        "individuallyEnrolled": "Zapisany indywidualnie",
         "notEnrolled": "Niezapisany"
       },
       "confirmation": {
