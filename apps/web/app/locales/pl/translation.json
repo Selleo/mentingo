@@ -157,7 +157,10 @@
     "qa": "Q&A"
   },
   "newsView": {
-    "header": "Aktualności"
+    "header": "Aktualności",
+    "notFound": "Nie znaleziono aktualności.",
+    "previousArticle": "Poprzedni artykuł",
+    "nextArticle": "Następny artykuł"
   },
   "globalSearch": {
     "notFound": "Niestety nic nie znaleziono",
