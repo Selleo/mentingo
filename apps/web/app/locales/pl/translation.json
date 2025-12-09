@@ -1288,6 +1288,7 @@
       "toast": {
         "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled.",
         "studentsEnrolledByGroup": "Nie można wypisać tych studentów, ponieważ {{count}} z nich zostało zapisanych przez grupę.",
+        "groupsUnenrolledSuccessfully": "Pomyślnie wypisano grupy z kursu",
         "alreadyEnrolledByGroup": {
           "title": "Niektórzy użytkownicy są już zapisani przez grupę"
         }

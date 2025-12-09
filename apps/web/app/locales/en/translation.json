@@ -1310,6 +1310,7 @@
       "toast": {
         "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled.",
         "studentsEnrolledByGroup": "You cannot unenroll these students because {{count}} of them are enrolled via a group.",
+        "groupsUnenrolledSuccessfully": "Groups unenrolled successfully",
         "alreadyEnrolledByGroup": {
           "title": "Some users are already enrolled by group"
         }

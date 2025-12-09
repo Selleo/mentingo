@@ -367,7 +367,7 @@ export class CourseService {
         >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
           "groups",
         ),
-        isEnrolledByGroup: sql<boolean>`CASE WHEN ${studentCourses.enrolledByGroupId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        isEnrolledByGroup: sql<boolean>`${studentCourses.enrolledByGroupId} IS NOT NULL`,
       })
       .from(users)
       .leftJoin(
@@ -1601,9 +1601,10 @@ export class CourseService {
         and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, userIds)),
       );
 
-    const enrolledStudentIds = studentEnrollments
-      .filter((e) => e.status === COURSE_ENROLLMENT.ENROLLED)
-      .map((e) => e.studentId);
+    const enrolledStudentIds = studentEnrollments.reduce<string[]>((studentIds, enrollment) => {
+      if (enrollment.status === COURSE_ENROLLMENT.ENROLLED) studentIds.push(enrollment.studentId);
+      return studentIds;
+    }, []);
 
     const missingOrUnenrolledCount = userIds.length - enrolledStudentIds.length;
 

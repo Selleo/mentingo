@@ -506,7 +506,9 @@ export class CourseController {
   ): Promise<BaseResponse<{ message: string }>> {
     await this.courseService.unenrollGroupsFromCourse(courseId, body.groupIds);
 
-    return new BaseResponse({ message: "Pomyślnie wypisano grupy z kursu" });
+    return new BaseResponse({
+      message: "adminCourseView.enrolled.toast.groupsUnenrolledSuccessfully",
+    });
   }
 
   @Delete("deleteCourse/:id")
