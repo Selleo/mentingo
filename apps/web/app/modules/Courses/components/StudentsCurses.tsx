@@ -5,10 +5,16 @@ import { useStudentCourses } from "~/api/queries/useStudentCourses";
 import { Icon } from "~/components/Icon";
 import Loader from "~/modules/common/Loader/Loader";
 import { CoursesCarousel } from "~/modules/Courses/components/CoursesCarousel";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 export const StudentsCurses = () => {
   const { t } = useTranslation();
-  const { data: studentCourses, isLoading: isStudentCoursesLoading } = useStudentCourses();
+
+  const { language } = useLanguageStore();
+
+  const { data: studentCourses, isLoading: isStudentCoursesLoading } = useStudentCourses({
+    language,
+  });
 
   return (
     <div id="your-list" className="flex flex-col gap-y-6">

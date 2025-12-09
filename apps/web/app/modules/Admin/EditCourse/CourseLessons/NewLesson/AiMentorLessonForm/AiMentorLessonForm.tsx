@@ -40,6 +40,7 @@ import {
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 import { MultiFileUploadForm } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/MultiFileUploadForm";
 import AiMentorLessonPreview from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/hooks/AiMentorLessonPreview";
 import { SuggestionExamples } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
@@ -51,12 +52,14 @@ import { useAiMentorLessonForm } from "./hooks/useAiMentorLessonForm";
 import UpdateAiAvatarModal from "./UpdateAiAvatarModal";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
+import type { SupportedLanguages } from "@repo/shared";
 
 type AiMentorLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
+  language: SupportedLanguages;
 };
 
 const AiMentorLessonForm = ({
@@ -64,6 +67,7 @@ const AiMentorLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setSelectedLesson,
+  language,
 }: AiMentorLessonProps) => {
   const {
     form,
@@ -78,6 +82,7 @@ const AiMentorLessonForm = ({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
+    language,
   });
 
   const { t } = useTranslation();
@@ -173,6 +178,7 @@ const AiMentorLessonForm = ({
       )}
       <TooltipProvider delayDuration={0}>
         <div className="relative flex flex-col gap-y-6 rounded-lg bg-white p-8">
+          {lessonToEdit && !lessonToEdit.title.trim() && <MissingTranslationsAlert />}
           <div className="flex flex-col gap-y-1">
             {!lessonToEdit && (
               <Breadcrumb

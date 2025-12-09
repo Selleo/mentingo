@@ -7,16 +7,17 @@ import { useDeleteChapter } from "~/api/mutations/admin/useDeleteChapter";
 import { useUpdateChapter } from "~/api/mutations/admin/useUpdateChapter";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
-import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { type Chapter, ContentTypes } from "../../../EditCourse.types";
 import { newChapterFormSchema } from "../validators/newChapterFormSchema";
 
 import type { NewChapterFormValues } from "../validators/newChapterFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 
 type UseNewChapterFormProps = {
   courseId: string;
   chapter: Chapter | null;
+  language: SupportedLanguages;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
 };
 
@@ -24,12 +25,11 @@ export const useNewChapterForm = ({
   courseId,
   chapter,
   setContentTypeToDisplay,
+  language,
 }: UseNewChapterFormProps) => {
   const { mutateAsync: createChapter } = useBetaCreateChapter();
   const { mutateAsync: updateChapter } = useUpdateChapter();
   const { mutateAsync: deleteChapter } = useDeleteChapter();
-
-  const { language } = useLanguageStore();
 
   const form = useForm<NewChapterFormValues>({
     resolver: zodResolver(newChapterFormSchema),

@@ -7,19 +7,22 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "~/component
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 
 import { ContentTypes, DeleteContentType } from "../../EditCourse.types";
 
 import { useNewChapterForm } from "./hooks/useNewChapterForm";
 
 import type { Chapter } from "../../EditCourse.types";
+import type { SupportedLanguages } from "@repo/shared";
 
 type NewChapterProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapter: Chapter | null;
+  language: SupportedLanguages;
 };
 
-const NewChapter = ({ setContentTypeToDisplay, chapter }: NewChapterProps) => {
+const NewChapter = ({ setContentTypeToDisplay, chapter, language }: NewChapterProps) => {
   const { id: courseId } = useParams<{ id: string }>();
   const { t } = useTranslation();
 
@@ -31,6 +34,7 @@ const NewChapter = ({ setContentTypeToDisplay, chapter }: NewChapterProps) => {
     courseId: courseId ?? "",
     chapter,
     setContentTypeToDisplay,
+    language,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,6 +51,7 @@ const NewChapter = ({ setContentTypeToDisplay, chapter }: NewChapterProps) => {
 
   return (
     <div className="flex h-min w-full flex-col gap-y-6 rounded-lg bg-white p-8">
+      {chapter && !chapter?.title.trim() && <MissingTranslationsAlert />}
       <hgroup className="flex w-full flex-col-reverse gap-y-1">
         <div className="h5 text-neutral-950">
           {chapter ? (

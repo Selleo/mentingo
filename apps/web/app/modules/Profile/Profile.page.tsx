@@ -15,6 +15,7 @@ import { useUserDetails } from "~/api/queries/useUserDetails";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { copyToClipboard } from "~/utils/copyToClipboard";
 import { filterChangedData } from "~/utils/filterChangedData";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -51,6 +52,8 @@ export default function ProfilePage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
 
+  const { language } = useLanguageStore();
+
   const { isStudent } = useUserRole();
   const { data: userDetails, error } = useUserDetails(id);
   const { data: currentUser } = useCurrentUser();
@@ -76,7 +79,7 @@ export default function ProfilePage() {
     page: OnboardingPages.PROFILE,
   });
 
-  const { data: contentCreatorCourses } = useContentCreatorCourses(id, undefined, hasPermission);
+  const { data: contentCreatorCourses } = useContentCreatorCourses(id, { language }, hasPermission);
 
   const toggleEditing = () => setIsEditing((prev) => !prev);
 

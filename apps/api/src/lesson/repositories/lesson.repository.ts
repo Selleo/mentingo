@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
-import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
@@ -98,7 +98,7 @@ export class LessonRepository {
     return hasCompletedAllLessons && hasCompletedAllChapterLessons;
   }
 
-  async getLessonDetails(id: UUIDType, userId: UUIDType, language: SupportedLanguages) {
+  async getLessonDetails(id: UUIDType, userId: UUIDType, language?: SupportedLanguages) {
     const [lesson] = await this.db
       .select({
         id: lessons.id,
@@ -334,6 +334,15 @@ export class LessonRepository {
       .orderBy(lessonResources.displayOrder);
   }
 
+  async getResource(resourceId: UUIDType) {
+    const [resource] = await this.db
+      .select()
+      .from(lessonResources)
+      .where(eq(lessonResources.id, resourceId));
+
+    return resource;
+  }
+
   async getEnrolledLessons(
     userId: UUIDType,
     filters: EnrolledLessonsFilters,
@@ -405,5 +414,23 @@ export class LessonRepository {
       )
       .where(and(...conditions))
       .orderBy(chapters.displayOrder, lessons.displayOrder);
+  }
+
+  async getLessonProgress(lessonId: UUIDType, userId: UUIDType, conditions?: SQL[]) {
+    const [progress] = await this.db
+      .select({
+        ...getTableColumns(studentLessonProgress),
+        languageAnswered: sql<SupportedLanguages>`${studentLessonProgress.languageAnswered}`,
+      })
+      .from(studentLessonProgress)
+      .where(
+        and(
+          eq(studentLessonProgress.lessonId, lessonId),
+          eq(studentLessonProgress.studentId, userId),
+          ...(conditions ?? []),
+        ),
+      );
+
+    return progress;
   }
 }

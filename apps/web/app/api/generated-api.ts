@@ -1098,6 +1098,8 @@ export interface GetCourseResponse {
     title: string;
     stripeProductId: string | null;
     stripePriceId: string | null;
+    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl";
   };
 }
 
@@ -1200,6 +1202,8 @@ export interface GetBetaCourseByIdResponse {
     thumbnailS3Key?: string;
     thumbnailS3SingedUrl?: string | null;
     title: string;
+    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl";
   };
 }
 
@@ -2191,6 +2195,7 @@ export interface EvaluationQuizBody {
         }
     )[];
   }[];
+  language: "en" | "pl";
 }
 
 export interface EvaluationQuizResponse {
@@ -4663,6 +4668,48 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerCreateLanguage
+     * @request POST:/api/course/beta-create-language/{courseId}
+     */
+    courseControllerCreateLanguage: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/beta-create-language/${courseId}`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteLanguage
+     * @request DELETE:/api/course/language/{courseId}
+     */
+    courseControllerDeleteLanguage: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/language/${courseId}`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ChapterControllerGetChapterWithLesson
      * @request GET:/api/chapter
      */
@@ -5145,6 +5192,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>

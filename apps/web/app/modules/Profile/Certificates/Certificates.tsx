@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useCertificates } from "~/api/queries/useCertificates";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { cn } from "~/lib/utils";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { default as CertificateComponent } from "./Certificate";
 
@@ -17,14 +18,16 @@ interface CertificatesProps {
 }
 
 const containerClasses =
-  "justify-beween flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow";
+  "justify-between flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow";
 const textClasses = "body-sm-md";
 
 const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
   const { id = "" } = useParams();
   const { t } = useTranslation();
 
-  const { data: certificates, isLoading, error } = useCertificates({ userId: id });
+  const { language } = useLanguageStore();
+
+  const { data: certificates, isLoading, error } = useCertificates({ userId: id, language });
   const { data: globalSettings } = useGlobalSettings();
 
   if (isLoading) {

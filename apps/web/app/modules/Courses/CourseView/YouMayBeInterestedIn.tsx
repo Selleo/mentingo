@@ -5,6 +5,7 @@ import { useAvailableCourses } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import Loader from "~/modules/common/Loader/Loader";
 import { CoursesCarousel } from "~/modules/Dashboard/Courses/CoursesCarousel";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 type YouMayBeInterestedInProps = {
   category?: string;
@@ -12,9 +13,12 @@ type YouMayBeInterestedInProps = {
 };
 
 export const YouMayBeInterestedIn = ({ category, courseId }: YouMayBeInterestedInProps) => {
+  const { language } = useLanguageStore();
+
   const { data: relatedCourses, isLoading } = useAvailableCourses({
     category,
     excludeCourseId: courseId,
+    language,
   });
   const { t } = useTranslation();
 

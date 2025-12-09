@@ -11,6 +11,7 @@ import { Label } from "~/components/ui/label";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import LeaveConfirmationModal from "~/modules/Admin/components/LeaveConfirmationModal";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm/QuizLessonForm.types";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
@@ -30,6 +31,7 @@ import { useQuizLessonForm } from "./hooks/useQuizLessonForm";
 import type { Question, QuestionOption } from "./QuizLessonForm.types";
 import type { QuizLessonFormValues } from "./validators/quizLessonFormSchema";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UseFormReturn } from "react-hook-form";
 
 type QuizLessonProps = {
@@ -37,6 +39,8 @@ type QuizLessonProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setSelectedLesson: (lesson: Lesson | null) => void;
+  language: SupportedLanguages;
+  baseLanguage: SupportedLanguages;
 };
 
 const QuizLessonForm = ({
@@ -44,6 +48,8 @@ const QuizLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setSelectedLesson,
+  language,
+  baseLanguage,
 }: QuizLessonProps) => {
   const [isAttemptsLimitEnabled, setIsAttemptsLimitEnabled] = useState(
     lessonToEdit ? lessonToEdit.attemptsLimit !== null : false,
@@ -54,6 +60,7 @@ const QuizLessonForm = ({
     chapterToEdit,
     lessonToEdit,
     isAttemptsLimitEnabled,
+    language,
   });
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -66,6 +73,9 @@ const QuizLessonForm = ({
     openLeaveModal,
     setIsLeavingContent,
   } = useLeaveModal();
+
+  const isStructureLocked = Boolean(lessonToEdit && language !== baseLanguage);
+
   const [isCanceling, setIsCanceling] = useState(false);
 
   const [isValidated, setIsValidated] = useState(false);
@@ -144,6 +154,8 @@ const QuizLessonForm = ({
 
   const addQuestion = useCallback(
     (questionType: QuestionType) => {
+      if (isStructureLocked) return;
+
       const questions = form.getValues("questions") || [];
 
       const getOptionsForQuestionType = (type: QuestionType): QuestionOption[] => {
@@ -199,7 +211,7 @@ const QuizLessonForm = ({
 
       setOpenQuestionIndexes((prev) => new Set(prev).add(newQuestion.sortableId));
     },
-    [form],
+    [form, isStructureLocked],
   );
 
   const handleToggleQuestion = (sortableId: string) => {
@@ -230,13 +242,22 @@ const QuizLessonForm = ({
           item={question}
           isOpen={openQuestionIndexes.has(question.sortableId)}
           handleToggle={() => handleToggleQuestion(question.sortableId)}
+          isStructureLocked={isStructureLocked}
         >
           {match(question.type)
             .with(QuestionType.SINGLE_CHOICE, QuestionType.MULTIPLE_CHOICE, () => (
-              <AnswerSelectQuestion questionIndex={questionIndex} form={form} />
+              <AnswerSelectQuestion
+                questionIndex={questionIndex}
+                form={form}
+                isStructureLocked={isStructureLocked}
+              />
             ))
             .with(QuestionType.TRUE_OR_FALSE, () => (
-              <TrueOrFalseQuestion questionIndex={questionIndex} form={form} />
+              <TrueOrFalseQuestion
+                questionIndex={questionIndex}
+                form={form}
+                isStructureLocked={isStructureLocked}
+              />
             ))
             .with(
               QuestionType.PHOTO_QUESTION_SINGLE_CHOICE,
@@ -246,32 +267,69 @@ const QuizLessonForm = ({
                   questionIndex={questionIndex}
                   form={form}
                   lessonToEdit={lessonToEdit}
+                  isStructureLocked={isStructureLocked}
                 />
               ),
             )
             .with(QuestionType.MATCH_WORDS, () => (
-              <MatchWordsQuestion questionIndex={questionIndex} form={form} />
+              <MatchWordsQuestion
+                questionIndex={questionIndex}
+                form={form}
+                isStructureLocked={isStructureLocked}
+              />
             ))
             .with(QuestionType.FILL_IN_THE_BLANKS_TEXT, QuestionType.FILL_IN_THE_BLANKS_DND, () => (
               <FillInTheBlanksQuestion
                 questionIndex={questionIndex}
                 questionType={question.type}
                 form={form}
+                isStructureLocked={isStructureLocked}
               />
             ))
             .with(QuestionType.SCALE_1_5, () => (
-              <ScaleQuestion questionIndex={questionIndex} form={form} />
+              <ScaleQuestion
+                questionIndex={questionIndex}
+                form={form}
+                isStructureLocked={isStructureLocked}
+              />
             ))
             .otherwise(() => null)}
         </QuestionWrapper>
       );
     },
-    [lessonToEdit, openQuestionIndexes],
+    [lessonToEdit, openQuestionIndexes, isStructureLocked],
   );
 
   useEffect(() => {
     setIsAttemptsLimitEnabled(lessonToEdit ? lessonToEdit.attemptsLimit !== null : false);
   }, [lessonToEdit]);
+
+  const hasMissingTranslations = (() => {
+    if (!lessonToEdit) return false;
+
+    if (!lessonToEdit.title?.trim()) return true;
+
+    return (
+      lessonToEdit.questions?.some((question) => {
+        const questionTitleMissing = !question.title?.trim();
+
+        const descriptionRequired =
+          question.type === QuestionType.FILL_IN_THE_BLANKS_DND ||
+          question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT;
+        const descriptionMissing =
+          descriptionRequired && (!question.description || !question.description.trim());
+
+        const optionsMissing =
+          question.options?.some((option) => !option.optionText?.trim()) ?? false;
+
+        const matchedWordsMissing =
+          question.type === QuestionType.MATCH_WORDS &&
+          (question.options?.some((option) => !option.matchedWord?.trim()) ?? false);
+
+        return questionTitleMissing || descriptionMissing || optionsMissing || matchedWordsMissing;
+      }) ?? false
+    );
+  })();
 
   const onSwitchChange = (checked: boolean) => {
     setIsAttemptsLimitEnabled(checked);
@@ -285,6 +343,7 @@ const QuizLessonForm = ({
   return (
     <div className="w-full max-w-full">
       <div className="w-full max-w-full rounded-lg bg-white p-8 shadow-lg">
+        {hasMissingTranslations && <MissingTranslationsAlert />}
         {!lessonToEdit && (
           <Breadcrumb
             lessonLabel="Quiz"
@@ -343,27 +402,27 @@ const QuizLessonForm = ({
               <SortableList
                 items={questions}
                 onChange={(updatedItems) => {
+                  if (isStructureLocked) return;
                   form.setValue(`questions`, updatedItems, { shouldDirty: true });
                 }}
                 className="grid grid-cols-1"
                 renderItem={(item, index: number) => {
+                  const dragTrigger = !isStructureLocked ? (
+                    <SortableList.DragHandle>
+                      <Icon name="DragAndDropIcon" className="cursor-move" />
+                    </SortableList.DragHandle>
+                  ) : undefined;
+
                   return (
                     <SortableList.Item id={item.sortableId}>
-                      {renderQuestion(
-                        item,
-                        index,
-                        form,
-                        <SortableList.DragHandle>
-                          <Icon name="DragAndDropIcon" className="cursor-move" />
-                        </SortableList.DragHandle>,
-                      )}
+                      {renderQuestion(item, index, form, dragTrigger)}
                     </SortableList.Item>
                   );
                 }}
               />
             )}
 
-            <QuestionSelector addQuestion={addQuestion} />
+            <QuestionSelector addQuestion={addQuestion} disabled={isStructureLocked} />
             <div className="mt-4 flex space-x-4">
               <Button type="submit">{t("common.button.save")}</Button>
               {lessonToEdit ? (

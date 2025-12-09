@@ -249,7 +249,7 @@ export class AdminLessonService {
       });
     }
 
-    const { availableLocales } = await this.localizationService.getBaseLanguage(
+    const { availableLocales, baseLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       id,
     );
@@ -270,6 +270,8 @@ export class AdminLessonService {
       id,
       data,
       currentUser.userId,
+      data.language,
+      baseLanguage,
     );
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
@@ -547,6 +549,8 @@ export class AdminLessonService {
     id: UUIDType,
     data: UpdateQuizLessonBody,
     currentUserId: UUIDType,
+    language: SupportedLanguages,
+    baseLanguage: SupportedLanguages,
   ) {
     return await this.db.transaction(async (trx) => {
       const { availableLocales } = await this.localizationService.getBaseLanguage(
@@ -562,21 +566,55 @@ export class AdminLessonService {
 
       const existingQuestions = await this.adminLessonRepository.getExistingQuestions(id, trx);
       const existingQuestionIds = existingQuestions.map((question) => question.id);
+
       const inputQuestionIds = data.questions
         ? data.questions.map((question) => question.id).filter(Boolean)
         : [];
+
+      const isTranslating = language !== baseLanguage;
+
+      if (existingQuestionIds.length !== inputQuestionIds.length && isTranslating) {
+        throw new BadRequestException(
+          "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+        );
+      }
 
       const questionsToDelete = existingQuestionIds.filter(
         (existingId) => !inputQuestionIds.includes(existingId),
       );
 
       if (questionsToDelete.length > 0) {
+        if (isTranslating) {
+          throw new BadRequestException(
+            "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+          );
+        }
         await this.adminLessonRepository.deleteQuestions(questionsToDelete, trx);
         await this.adminLessonRepository.deleteQuestionOptions(questionsToDelete, trx);
       }
 
       if (data.questions) {
         for (const question of data.questions) {
+          if (isTranslating) {
+            if (!question.id || !existingQuestionIds.includes(question.id)) {
+              throw new BadRequestException(
+                "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+              );
+            }
+
+            const existingQuestion = existingQuestions.find((q) => q.id === question.id);
+
+            if (
+              !existingQuestion ||
+              existingQuestion.type !== question.type ||
+              existingQuestion.displayOrder !== question.displayOrder
+            ) {
+              throw new BadRequestException(
+                "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+              );
+            }
+          }
+
           const questionData = {
             type: question.type,
             description: question.description || null,
@@ -608,10 +646,55 @@ export class AdminLessonService {
             );
 
             if (optionsToDelete.length > 0) {
+              if (isTranslating) {
+                throw new BadRequestException(
+                  "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                );
+              }
               await this.adminLessonRepository.deleteOptions(optionsToDelete, trx);
             }
 
             for (const option of question.options) {
+              if (isTranslating) {
+                if (!option.id || !existingOptionIds.includes(option.id)) {
+                  throw new BadRequestException(
+                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                  );
+                }
+
+                const existingOption = existingOptions.find(
+                  (existing) => existing.id === option.id,
+                );
+
+                if (!existingOption) {
+                  throw new BadRequestException(
+                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                  );
+                }
+
+                const incomingIsCorrect =
+                  option.isCorrect === undefined ? existingOption.isCorrect : option.isCorrect;
+
+                const isTrueOrFalseQuestion = question.type === "true_or_false";
+                const isFillInTheBlank =
+                  question.type === "fill_in_the_blanks_text" ||
+                  question.type === "fill_in_the_blanks_dnd";
+                const isCorrectChanged =
+                  !isFillInTheBlank &&
+                  incomingIsCorrect !== existingOption.isCorrect &&
+                  (isTrueOrFalseQuestion || option.isCorrect !== undefined);
+
+                const scaleChanged =
+                  option.scaleAnswer !== undefined &&
+                  existingOption.scaleAnswer !== option.scaleAnswer;
+
+                if (isCorrectChanged || scaleChanged) {
+                  throw new BadRequestException(
+                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                  );
+                }
+              }
+
               const optionData = {
                 optionText: option.optionText,
                 isCorrect: option.isCorrect,

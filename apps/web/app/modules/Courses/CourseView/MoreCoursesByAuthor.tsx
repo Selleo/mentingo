@@ -6,6 +6,7 @@ import { useUserDetails } from "~/api/queries/useUserDetails";
 import { Icon } from "~/components/Icon";
 import Loader from "~/modules/common/Loader/Loader";
 import { CoursesCarousel } from "~/modules/Dashboard/Courses/CoursesCarousel";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 type MoreCoursesByAuthorProps = {
   courseId: string;
@@ -13,11 +14,14 @@ type MoreCoursesByAuthorProps = {
 };
 
 export const MoreCoursesByAuthor = ({ courseId, contentCreatorId }: MoreCoursesByAuthorProps) => {
+  const { language } = useLanguageStore();
+
   const { data: contentCreatorCourses, isLoading } = useContentCreatorCourses(
     contentCreatorId,
     {
       scope: "available",
       excludeCourseId: courseId,
+      language,
     },
     true,
   );

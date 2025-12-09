@@ -46,7 +46,7 @@ export default function LessonPage() {
     isFetching: lessonLoading,
     isError: lessonError,
   } = useLesson(lessonId, language);
-  const { data: course } = useCourse(courseId);
+  const { data: course } = useCourse(courseId, language);
 
   useEffect(() => {
     if (lessonError) {

@@ -918,7 +918,9 @@
       "preview": "Podgląd",
       "generateMissingTranslations": "Wygeneruj brakujące tłumaczenia",
       "enrolledStudents": "Zapisani studenci",
-      "testAiMentor": "Przetestuj AI Mentora"
+      "testAiMentor": "Przetestuj AI Mentora",
+      "notAddedLanguages": "Niedodane",
+      "baseLanguage": "Domyślny"
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
@@ -929,7 +931,12 @@
       "maxTitleLengthExceeded_few": "Tytuł nie może mieć więcej niż {{count}} znaki",
       "maxTitleLengthExceeded_many": "Tytuł nie może mieć więcej niż {{count}} znaków",
       "maxTitleLengthExceeded_other": "Tytuł nie może mieć więcej niż {{count}} znaków",
-      "aiMentorAvatarIncorrectType": "Nieprawidłowy typ pliku. Prześlij obraz w formacie JPG, JPEG, PNG lub SVG."
+      "aiMentorAvatarIncorrectType": "Nieprawidłowy typ pliku. Prześlij obraz w formacie JPG, JPEG, PNG lub SVG.",
+      "languageNotSupported": "Ten kurs nie obsługuje tego języka.",
+      "updateCourseMissingLanguage": "Nie podano języka do tłumaczenia",
+      "successfullyDeletedLanguage": "Język został pomyślnie usunięty z kursu",
+      "invalidLanguageToDelete": "Nie możesz usunąć tego języka",
+      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż domyślny."
     },
     "settings": {
       "breadcrumbs": {
@@ -962,7 +969,8 @@
         "title": "Tytuł kursu",
         "category": "Kategoria",
         "description": "Opis",
-        "thumbnail": "Miniatura"
+        "thumbnail": "Miniatura",
+        "baseLanguage": "Język podstawowy"
       },
       "placeholder": {
         "title": "Wprowadź tytuł",
@@ -974,7 +982,9 @@
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
         "enforceLessonSequence": "Wymuś sekwencję lekcji",
-        "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności"
+        "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
+        "fallbackLanguageWarning": "Ostrzeżenie: Niektóre pola są puste. Zamiast nich zostaną użyte tłumaczenia z języka bazowego.",
+        "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
       },
       "validation": {
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
@@ -1013,7 +1023,8 @@
       },
       "chapter": {
         "button": {
-          "addChapter": "Dodaj rozdział"
+          "addChapter": "Dodaj rozdział",
+          "addChapterDisabledTooltip": "Aby dodać rozdział, musisz być w języku bazowym."
         },
         "toast": {
           "chapterCreatedSuccessfully": "Rozdział utworzony pomyślnie",
@@ -1039,7 +1050,8 @@
           "addWords": "Dodaj słowa",
           "saveLesson": "Zapisz lekcje",
           "addResource": "Dodaj zasób",
-          "removeResource": "Usuń zasób"
+          "removeResource": "Usuń zasób",
+          "addLessonDisabledTooltip": "Aby utworzyć lekcję, musisz być w języku bazowym."
         },
         "breadcrumbs": {
           "back": "Wstecz"
@@ -1190,7 +1202,7 @@
           "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
           "aiMentorInstructionsTooltip": "Opisz, jak AI Mentor powinien zachowywać się podczas lekcji. Uwzględnij kontekst, rolę lub scenariusz, który AI powinien realizować. To określa, jak AI będzie prowadzić rozmowę.",
           "aiMentorTypeTooltip": "Zachowuje się jak postać w scenariuszu, ale w trakcie sceny zadaje pytania i pomaga wyciągać wnioski.\n Przykład: „Co zrobiłbyś teraz w roli menadżera?”",
-          "aiTeacherTypeTooltip": "Tłumaczy, uczy i zadaje pytania — jak nauczyciel.\n Przykład: „W tej sytuacji klient zgłasza obiekcję cenową. Co powinieneś odpowiedzieć i dlaczego?”",
+          "aiTeacherTypeTooltip": "Tłumaczy, uczy i zadaje pytania - jak nauczyciel.\n Przykład: „W tej sytuacji klient zgłasza obiekcję cenową. Co powinieneś odpowiedzieć i dlaczego?”",
           "aiRoleplayTypeTooltip": " Symuluje realistyczną postać i sytuację – bez wychodzenia z roli.\n Przykład: „To już drugi raz, kiedy wasza usługa zawiodła. Co zamierzacie z tym zrobić?”",
           "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
           "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
@@ -1218,8 +1230,8 @@
             "conditions": {
               "scenarioSimulation": "<ul><li>Student pyta o budżet klienta.</li><li>Student pyta o harmonogram.</li><li>Student używa sprzedaży SPIN lub innej techniki sprzedażowej.</li><li>Student identyfikuje kluczowe problemy klienta.</li><li>Student składa propozycję, która odpowiada ograniczeniom klienta.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
               "problemSolving": "<ul><li>Student uznaje wkład pracownika.</li><li>Student uczciwie wyjaśnia sytuację budżetową.</li><li>Student proponuje alternatywę niefinansową (np. dodatkowe korzyści, możliwość rozwoju).</li><li>Student zgadza się wrócić do tematu w późniejszym terminie.</li><li>Student utrzymuje szanujący, wspierający ton.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
-              "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki muszą być spełnione.)</em>",
-              "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
+              "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu - wszystkie warunki muszą być spełnione.)</em>",
+              "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu - wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
             }
           },
           "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
@@ -1361,6 +1373,17 @@
         "enrolled": "użytkowników",
         "noGroups": "Brak grup"
       }
+    },
+    "createLanguage": {
+      "title": "Utwórz nowy język",
+      "description": "Czy na pewno chcesz utworzyć nowy język dla tego kursu?",
+      "success": "Język został utworzony pomyślnie",
+      "alreadyExists": "Ten język już istnieje.",
+      "editConstraints": "W językach innych niż {{baseLanguage}} nie możesz tworzyć nowych lekcji, rozdziałów ani dodawać nowych pytań do quizów."
+    },
+    "deleteLanguage": {
+      "title": "Usuń język",
+      "description": "Czy na pewno chcesz usunąć ten język?"
     }
   },
   "registerView": {

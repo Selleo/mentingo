@@ -27,12 +27,14 @@ type FillInTheBlankQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
   questionType: QuestionType;
+  isStructureLocked?: boolean;
 };
 
 const FillInTheBlanksQuestion = ({
   form,
   questionIndex,
   questionType,
+  isStructureLocked = false,
 }: FillInTheBlankQuestionProps) => {
   const [newWord, setNewWord] = useState("");
   const [isAddingWord, setIsAddingWord] = useState(false);
@@ -74,6 +76,8 @@ const FillInTheBlanksQuestion = ({
   }
 
   const handleRemoveWord = (index: number) => {
+    if (isStructureLocked) return;
+
     const wordToRemove = currentOptions[index]?.optionText;
 
     const updatedOptions = currentOptions.filter((_, i) => i !== index);
@@ -145,6 +149,8 @@ const FillInTheBlanksQuestion = ({
     });
   };
   const handleAddWord = () => {
+    if (isStructureLocked) return;
+
     const trimmedWord = newWord.trim();
 
     if (trimmedWord !== "" && !currentOptions.some((option) => option.optionText === trimmedWord)) {
@@ -167,6 +173,8 @@ const FillInTheBlanksQuestion = ({
   };
 
   const handleRemoveQuestion = () => {
+    if (isStructureLocked) return;
+
     const currentQuestions = form.getValues("questions") || [];
     const updatedQuestions = currentQuestions.filter((_, index) => index !== questionIndex);
     form.setValue("questions", updatedQuestions, { shouldDirty: true });
@@ -235,6 +243,35 @@ const FillInTheBlanksQuestion = ({
       : "adminCourseView.curriculum.lesson.other.gapFillDescription";
   }, [questionType]);
 
+  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const handleUpdateWord = (index: number, value: string) => {
+    const options = [...currentOptions];
+    const previousWord = options[index]?.optionText ?? "";
+    options[index] = {
+      ...options[index],
+      optionText: value,
+    };
+    form.setValue(`questions.${questionIndex}.options`, options, { shouldDirty: true });
+
+    const description = form.getValues(`questions.${questionIndex}.description`) as string;
+    if (!description || !previousWord || !editor) return;
+
+    const wordPattern = escapeRegExp(previousWord);
+    const updatedDescription = description.replace(
+      new RegExp(
+        `<button([^>]*?)data-word="${wordPattern}"([^>]*)><span>[^<]*<\\/span>(<span[^>]*>[\\s\\S]*?<\\/span>)?<\\/button>`,
+        "g",
+      ),
+      `<button$1data-word="${value}"$2><span>${value}</span>$3</button>`,
+    );
+
+    editor.commands.setContent(updatedDescription);
+    form.setValue(`questions.${questionIndex}.description`, updatedDescription, {
+      shouldDirty: true,
+    });
+  };
+
   return (
     <Accordion.Root key={questionIndex} type="single" collapsible>
       <Accordion.Item value={`item-${questionIndex}`}>
@@ -279,42 +316,64 @@ const FillInTheBlanksQuestion = ({
               </Label>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {currentOptions.map((option, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "flex items-center justify-between gap-x-1 rounded-lg border border-primary-500 pr-3",
-                    option.isCorrect ? "bg-success-100" : "bg-primary-100",
+              {currentOptions.map((option, index) => {
+                const isDraggable = !containsButtonWithWord(option.optionText);
+
+                return (
+                  <div
+                    key={index}
+                    className={cn(
+                      "flex items-center justify-between gap-x-1 rounded-lg border border-primary-500 pr-3",
+                      option.isCorrect ? "bg-success-100" : "bg-primary-100",
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <button
+                        type="button"
+                        className="pl-1.5 pr-1"
+                        draggable={isDraggable}
+                        onDragStart={(e) => handleDragStart(option.optionText, e)}
+                        aria-label={t("adminCourseView.curriculum.lesson.other.dragWord")}
+                      >
+                        <Icon name="DragAndDropIcon" className="cursor-move" />
+                      </button>
+                      {option.isCorrect && <Icon name="Success" />}
+                      <Input
+                        value={option.optionText}
+                        draggable={false}
+                        onChange={(e) => handleUpdateWord(index, e.target.value)}
+                        className="mr-1.5 w-auto min-w-[80px] border-none bg-transparent px-0 text-primary-500 focus-visible:ring-0 focus-visible:outline-none"
+                        onDrop={(event) => event.preventDefault()}
+                      />
+                    </div>
+                    {!isStructureLocked && (
+                      <Button
+                        onClick={() => handleRemoveWord(index)}
+                        type="button"
+                        className="rounded-full bg-transparent p-0 text-primary-500"
+                      >
+                        <Icon name="X" className="size-2.5" />
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+              {!isStructureLocked && (
+                <div className="flex items-center">
+                  {!isAddingWord && (
+                    <Button
+                      onClick={() => setIsAddingWord(true)}
+                      type="button"
+                      className="mb-4 mt-4 flex items-center gap-2"
+                    >
+                      <Icon name="Plus" />
+                      {t("adminCourseView.curriculum.lesson.button.addWords")}
+                    </Button>
                   )}
-                  draggable={!containsButtonWithWord(option.optionText)}
-                  onDragStart={(e) => handleDragStart(option.optionText, e)}
-                >
-                  <Icon name="DragAndDropIcon" className="pl-1.5" />
-                  {option.isCorrect && <Icon name="Success" />}
-                  <span className="mr-1.5 text-primary-500">{option.optionText}</span>
-                  <Button
-                    onClick={() => handleRemoveWord(index)}
-                    type="button"
-                    className="rounded-full bg-transparent p-0 text-primary-500"
-                  >
-                    <Icon name="X" className="size-2.5" />
-                  </Button>
                 </div>
-              ))}
-              <div className="flex items-center">
-                {!isAddingWord && (
-                  <Button
-                    onClick={() => setIsAddingWord(true)}
-                    type="button"
-                    className="mb-4 mt-4 flex items-center gap-2"
-                  >
-                    <Icon name="Plus" />
-                    {t("adminCourseView.curriculum.lesson.button.addWords")}
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
-            {isAddingWord && (
+            {isAddingWord && !isStructureLocked && (
               <div
                 className={cn(
                   "flex items-center gap-2",
@@ -328,6 +387,7 @@ const FillInTheBlanksQuestion = ({
                   onChange={(e) => setNewWord(e.target.value)}
                   placeholder={t("adminCourseView.curriculum.lesson.placeholder.enterWord")}
                   className="grow"
+                  disabled={isStructureLocked}
                 />
                 <Button onClick={handleAddWord} data-testid="add-word" type="button">
                   {t("common.button.add")}
@@ -346,13 +406,15 @@ const FillInTheBlanksQuestion = ({
                 {errors?.questions?.[questionIndex]?.options?.message}
               </p>
             )}
-            <Button
-              type="button"
-              className="bg-color-white mb-4 mt-4 border border-neutral-300 text-error-700"
-              onClick={() => setIsDeleteModalOpen(true)}
-            >
-              {t("adminCourseView.curriculum.lesson.button.deleteQuestion")}
-            </Button>
+            {!isStructureLocked && (
+              <Button
+                type="button"
+                className="bg-color-white mb-4 mt-4 border border-neutral-300 text-error-700"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                {t("adminCourseView.curriculum.lesson.button.deleteQuestion")}
+              </Button>
+            )}
           </div>
           <DeleteConfirmationModal
             open={isDeleteModalOpen}

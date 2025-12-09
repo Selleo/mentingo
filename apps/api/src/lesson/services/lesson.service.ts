@@ -8,6 +8,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import * as cheerio from "cheerio";
+import { isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
@@ -19,6 +20,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
+import { studentLessonProgress } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
@@ -60,17 +62,22 @@ export class LessonService {
   ): Promise<LessonShow> {
     const isStudent = userRole === USER_ROLES.STUDENT;
 
+    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
+
+    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
+
     const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
       id,
       language,
     );
 
-    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
+    const basicInfo = await this.lessonRepository.getLessonProgress(id, userId, [
+      isNotNull(studentLessonProgress.isQuizPassed),
+      isNotNull(studentLessonProgress.completedAt),
+    ]);
 
-    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
-
-    const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
+    const lesson = await this.lessonRepository.getLessonDetails(id, userId);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 
@@ -140,14 +147,14 @@ export class LessonService {
     if (lesson.type === LESSON_TYPES.EMBED) {
       const lessonResources = await this.lessonRepository.getLessonResources(lesson.id);
 
-      return { ...lesson, lessonResources: lessonResources };
+      return { ...lesson, lessonResources };
     }
 
     const questionList = await this.questionRepository.getQuestionsForLesson(
       lesson.id,
       lesson.lessonCompleted,
       userId,
-      actualLanguage,
+      basicInfo?.languageAnswered ?? actualLanguage,
     );
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
@@ -218,7 +225,10 @@ export class LessonService {
     const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
 
     const correctAnswersForQuizQuestions =
-      await this.questionRepository.getQuizQuestionsToEvaluation(studentQuizAnswers.lessonId);
+      await this.questionRepository.getQuizQuestionsToEvaluation(
+        studentQuizAnswers.lessonId,
+        studentQuizAnswers.language,
+      );
 
     if (correctAnswersForQuizQuestions.length !== studentQuizAnswers.questionsAnswers.length) {
       throw new ConflictException("Quiz is not completed");
@@ -259,6 +269,7 @@ export class LessonService {
           isQuizPassed,
           true,
           trx,
+          studentQuizAnswers.language,
         );
 
         if (isQuizPassed) {
@@ -270,6 +281,7 @@ export class LessonService {
               evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
             dbInstance: trx,
             isQuizPassed,
+            language: studentQuizAnswers.language,
           });
         }
 
@@ -354,6 +366,7 @@ export class LessonService {
           false,
           false,
           trx,
+          null,
         );
       } catch (error) {
         throw new ConflictException(`Failed to delete student quiz answers: ${error.message}`);
@@ -364,7 +377,7 @@ export class LessonService {
   async getLessonImage(res: Response, userId: UUIDType, role: UserRole, resourceId: UUIDType) {
     const isStudent = role === USER_ROLES.STUDENT;
 
-    const [lessonResource] = await this.lessonRepository.getLessonResources(resourceId);
+    const lessonResource = await this.lessonRepository.getResource(resourceId);
 
     const [lesson] = await this.lessonRepository.checkLessonAssignment(
       lessonResource.lessonId,

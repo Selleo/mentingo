@@ -714,4 +714,38 @@ export class CourseController {
 
     return new PaginatedResponse(studentQuizResults);
   }
+
+  @Post("beta-create-language/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "param", name: "courseId", schema: UUIDSchema },
+    ],
+  })
+  async createLanguage(
+    @Query("language") language: SupportedLanguages,
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") userId: UUIDType,
+  ) {
+    await this.courseService.createLanguage(courseId, language, userId, role);
+  }
+
+  @Delete("language/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+  })
+  async deleteLanguage(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") userId: UUIDType,
+  ) {
+    return this.courseService.deleteLanguage(courseId, language, role, userId);
+  }
 }

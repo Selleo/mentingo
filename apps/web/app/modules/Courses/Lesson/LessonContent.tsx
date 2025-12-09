@@ -17,6 +17,7 @@ import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { Quiz } from "~/modules/Courses/Lesson/Quiz";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import Presentation from "../../../components/Presentation/Presentation";
 
@@ -55,6 +56,8 @@ export const LessonContent = ({
 
   const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
+
+  const { language } = useLanguageStore();
 
   const { data: user } = useCurrentUser();
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
@@ -159,7 +162,7 @@ export const LessonContent = ({
           url={lesson.fileUrl}
           onVideoEnded={() => {
             setIsNextDisabled(false);
-            isStudent && markLessonAsCompleted({ lessonId: lesson.id });
+            isStudent && markLessonAsCompleted({ lessonId: lesson.id, language });
           }}
           isExternalUrl={lesson.isExternal}
         />
@@ -187,7 +190,7 @@ export const LessonContent = ({
       lesson.type === LessonType.PRESENTATION ||
       lesson.type === LessonType.EMBED
     ) {
-      markLessonAsCompleted({ lessonId: lesson.id });
+      markLessonAsCompleted({ lessonId: lesson.id, language });
     }
 
     if (currentLessonIndex === totalLessons - 1) {
@@ -212,6 +215,7 @@ export const LessonContent = ({
     lesson.id,
     lesson.type,
     markLessonAsCompleted,
+    language,
   ]);
 
   return (

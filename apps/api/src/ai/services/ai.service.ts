@@ -31,6 +31,7 @@ import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type {
   CreateThreadBody,
   ResponseAiJudgeJudgementBody,
@@ -184,7 +185,16 @@ export class AiService {
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(data.threadId);
 
-    await this.markAsCompletedIfJudge(lessonId, data.userId, userRole, judged.data, true);
+    const thread = await this.aiRepository.findThread([eq(aiMentorThreads.id, data.threadId)]);
+
+    await this.markAsCompletedIfJudge(
+      lessonId,
+      data.userId,
+      userRole,
+      judged.data,
+      thread.userLanguage,
+      true,
+    );
 
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
 
@@ -215,6 +225,7 @@ export class AiService {
     studentId: UUIDType,
     userRole: UserRole,
     message: string | ResponseAiJudgeJudgementBody,
+    language: SupportedLanguages,
     isJudge?: boolean,
   ) {
     if (!isJudge) return;
@@ -227,6 +238,7 @@ export class AiService {
       studentId,
       userRole,
       aiMentorLessonData,
+      language,
     });
   }
 

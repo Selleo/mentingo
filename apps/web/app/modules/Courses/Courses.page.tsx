@@ -19,6 +19,7 @@ import {
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { CourseList } from "~/modules/Courses/components/CourseList";
 import { StudentsCurses } from "~/modules/Courses/components/StudentsCurses";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { DashboardIcon, HamburgerIcon } from "~/modules/icons/icons";
 import { createSortOptions, type SortOption } from "~/types/sorting";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -71,10 +72,13 @@ export default function CoursesPage() {
 
   const [state, dispatch] = useReducer(reducer, DEFAULT_STATE as State);
 
+  const { language } = useLanguageStore();
+
   const { data: userAvailableCourses, isLoading: isAvailableCoursesLoading } = useAvailableCourses({
     title: state.searchTitle,
     category: state.category,
     sort: state.sort,
+    language,
   });
 
   const { data: categories, isLoading: isCategoriesLoading } = useCategories();

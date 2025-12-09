@@ -17,6 +17,7 @@ import {
 } from "~/components/ui/tooltip";
 import { toast } from "~/components/ui/use-toast";
 import { useUserRole } from "~/hooks/useUserRole";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
@@ -41,6 +42,8 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
   const { lessonId = "" } = useParams();
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
+
+  const { language } = useLanguageStore();
 
   const questions = lesson.quizDetails?.questions;
   const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted);
@@ -77,7 +80,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
   if (!questions?.length) return null;
 
   const handleOnSubmit = async (data: QuizForm) => {
-    submitQuiz.mutate({ lessonId, questionsAnswers: parseQuizFormData(data) });
+    submitQuiz.mutate({ lessonId, questionsAnswers: parseQuizFormData(data), language });
   };
 
   const handleRetake = () => {

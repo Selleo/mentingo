@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -19,12 +18,14 @@ import {
 import { textLessonFormSchema } from "../validators/useTextLessonFormSchema";
 
 import type { TextLessonFormValues } from "../validators/useTextLessonFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 
 type TextLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setOpenChapter?: (chapterId: string) => void;
+  language: SupportedLanguages;
 };
 
 export const useTextLessonForm = ({
@@ -32,6 +33,7 @@ export const useTextLessonForm = ({
   lessonToEdit,
   setContentTypeToDisplay,
   setOpenChapter,
+  language,
 }: TextLessonFormProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: createTextBlock } = useCreateBetaTextLesson();
@@ -68,7 +70,7 @@ export const useTextLessonForm = ({
         await updateTextBlockItem({
           data: {
             ...values,
-            language: SUPPORTED_LANGUAGES.EN,
+            language,
           },
           lessonId: lessonToEdit.id,
         });

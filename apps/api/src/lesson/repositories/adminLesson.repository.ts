@@ -365,12 +365,25 @@ export class AdminLessonRepository {
   }
 
   async getExistingQuestions(lessonId: UUIDType, trx: PostgresJsDatabase<typeof schema>) {
-    return trx.select({ id: questions.id }).from(questions).where(eq(questions.lessonId, lessonId));
+    return trx
+      .select({
+        id: questions.id,
+        type: questions.type,
+        displayOrder: questions.displayOrder,
+      })
+      .from(questions)
+      .where(eq(questions.lessonId, lessonId));
   }
 
   async getExistingOptions(questionId: UUIDType, trx: PostgresJsDatabase<typeof schema>) {
     const existingOptions = await trx
-      .select({ id: questionAnswerOptions.id })
+      .select({
+        id: questionAnswerOptions.id,
+        displayOrder: questionAnswerOptions.displayOrder,
+        isCorrect: questionAnswerOptions.isCorrect,
+        matchedWord: questionAnswerOptions.matchedWord,
+        scaleAnswer: questionAnswerOptions.scaleAnswer,
+      })
       .from(questionAnswerOptions)
       .where(eq(questionAnswerOptions.questionId, questionId));
 

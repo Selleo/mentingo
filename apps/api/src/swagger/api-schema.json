@@ -3279,6 +3279,84 @@
         }
       }
     },
+    "/api/course/beta-create-language/{courseId}": {
+      "post": {
+        "operationId": "CourseController_createLanguage",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/course/language/{courseId}": {
+      "delete": {
+        "operationId": "CourseController_deleteLanguage",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -4077,6 +4155,24 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -10247,6 +10343,33 @@
                     "type": "null"
                   }
                 ]
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
@@ -10260,7 +10383,9 @@
               "priceInCents",
               "title",
               "stripeProductId",
-              "stripePriceId"
+              "stripePriceId",
+              "availableLocales",
+              "baseLanguage"
             ]
           }
         },
@@ -10756,6 +10881,33 @@
               },
               "title": {
                 "type": "string"
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
@@ -10767,7 +10919,9 @@
               "id",
               "status",
               "priceInCents",
-              "title"
+              "title",
+              "availableLocales",
+              "baseLanguage"
             ]
           }
         },
@@ -15577,11 +15731,24 @@
                 "answers"
               ]
             }
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
           "lessonId",
-          "questionsAnswers"
+          "questionsAnswers",
+          "language"
         ]
       },
       "EvaluationQuizResponse": {

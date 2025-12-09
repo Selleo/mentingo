@@ -22,6 +22,7 @@ interface QuestionTitleProps {
   dragTrigger?: React.ReactNode;
   item: Question;
   isOpenQuestion: boolean;
+  isStructureLocked?: boolean;
 }
 
 const QuestionTitle = ({
@@ -33,6 +34,7 @@ const QuestionTitle = ({
   dragTrigger,
   item,
   isOpenQuestion,
+  isStructureLocked = false,
 }: QuestionTitleProps) => {
   const questionTypeToIconMap: Record<QuestionType, QuestionIcons> = {
     [QuestionType.MULTIPLE_CHOICE]: QuestionIcons.MultiSelect,
@@ -55,10 +57,12 @@ const QuestionTitle = ({
   const { t } = useTranslation();
 
   const handleRemoveQuestion = useCallback(() => {
+    if (isStructureLocked) return;
+
     const currentQuestions = form.getValues("questions") || [];
     const updatedQuestions = currentQuestions.filter((_, index) => index !== questionIndex);
     form.setValue("questions", updatedQuestions, { shouldDirty: true });
-  }, [form, questionIndex]);
+  }, [form, questionIndex, isStructureLocked]);
 
   const handleOptionChange = useCallback(
     (value: string) => {
@@ -97,7 +101,7 @@ const QuestionTitle = ({
         required
         className="flex-1"
       />
-      {isOpenQuestion && (
+      {isOpenQuestion && !isStructureLocked && (
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>

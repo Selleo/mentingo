@@ -6,6 +6,7 @@ import { useCurrentUser } from "~/api/queries";
 import { useUserStatistics } from "~/api/queries/useUserStatistics";
 import { PageWrapper } from "~/components/PageWrapper";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { useTourSetup } from "~/modules/Onboarding/hooks/useTourSetup";
 import { studentDashboardSteps } from "~/modules/Onboarding/routes/student";
 import { parseRatesChartData } from "~/modules/Statistics/utils";
@@ -25,7 +26,10 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 
 export default function ClientStatistics() {
   const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { data: userStatistics, isLoading } = useUserStatistics();
+
+  const { language } = useLanguageStore();
+
+  const { data: userStatistics, isLoading } = useUserStatistics(language);
   const { t } = useTranslation();
 
   const steps = useMemo(() => studentDashboardSteps(t), [t]);

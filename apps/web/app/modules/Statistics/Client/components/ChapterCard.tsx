@@ -77,7 +77,7 @@ export const ChapterCard = (
               decoding="async"
               className="aspect-video w-full rounded-lg object-cover object-center drop-shadow-sm"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = CardPlaceholder;
+                e.currentTarget.src = CardPlaceholder;
               }}
             />
             {chapterDetails.chapterProgress && (

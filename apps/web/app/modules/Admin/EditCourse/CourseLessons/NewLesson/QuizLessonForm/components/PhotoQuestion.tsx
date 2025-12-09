@@ -32,9 +32,15 @@ type PhotoQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
   lessonToEdit: Lesson | null;
+  isStructureLocked?: boolean;
 };
 
-const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps) => {
+const PhotoQuestion = ({
+  form,
+  questionIndex,
+  lessonToEdit,
+  isStructureLocked = false,
+}: PhotoQuestionProps) => {
   const questionType = form.watch(`questions.${questionIndex}.type`);
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
@@ -53,6 +59,8 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
     form.getValues(`questions.${questionIndex}.options`)?.length === 0;
 
   const handleAddOption = useCallback(() => {
+    if (isStructureLocked) return;
+
     const currentOptions: QuestionOption[] =
       form.getValues(`questions.${questionIndex}.options`) || [];
 
@@ -66,10 +74,12 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
       shouldDirty: true,
       shouldValidate: true,
     });
-  }, [form, questionIndex]);
+  }, [form, questionIndex, isStructureLocked]);
 
   const handleRemoveOption = useCallback(
     (optionIndex: number) => {
+      if (isStructureLocked) return;
+
       const currentOptions: QuestionOption[] =
         form.getValues(`questions.${questionIndex}.options`) || [];
       const updatedOptions = currentOptions.filter((_, index) => index !== optionIndex);
@@ -78,17 +88,21 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
         shouldValidate: true,
       });
     },
-    [form, questionIndex],
+    [form, questionIndex, isStructureLocked],
   );
 
   const handleRemoveQuestion = useCallback(() => {
+    if (isStructureLocked) return;
+
     const currentQuestions = form.getValues("questions") || [];
     const updatedQuestions = currentQuestions.filter((_, index) => index !== questionIndex);
     form.setValue("questions", updatedQuestions, { shouldDirty: true, shouldValidate: true });
-  }, [form, questionIndex]);
+  }, [form, questionIndex, isStructureLocked]);
 
   const handleOptionChange = useCallback(
     (optionIndex: number, field: "optionText" | "isCorrect", value: string | boolean) => {
+      if (isStructureLocked && field === "isCorrect") return;
+
       const currentOptions: QuestionOption[] =
         form.getValues(`questions.${questionIndex}.options`) || [];
       const updatedOptions = [...currentOptions];
@@ -110,11 +124,13 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
         shouldValidate: true,
       });
     },
-    [form, questionIndex, questionType],
+    [form, questionIndex, questionType, isStructureLocked],
   );
 
   const handleImageUpload = useCallback(
     async (file: File) => {
+      if (isStructureLocked) return;
+
       setIsUploading(true);
       try {
         const result = await uploadFile({ file, resource: "lesson" });
@@ -129,7 +145,7 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
         setIsUploading(false);
       }
     },
-    [form, uploadFile, questionIndex],
+    [form, uploadFile, questionIndex, isStructureLocked],
   );
 
   const onDeleteQuestion = () => {
@@ -233,6 +249,7 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
               <SortableList
                 items={watchedOptions}
                 onChange={(updatedItems) => {
+                  if (isStructureLocked) return;
                   form.setValue(`questions.${questionIndex}.options`, updatedItems, {
                     shouldDirty: true,
                   });
@@ -246,9 +263,11 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
                     <SortableList.Item id={item.sortableId}>
                       <div className="mt-2">
                         <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
-                          <SortableList.DragHandle>
-                            <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
-                          </SortableList.DragHandle>
+                          {!isStructureLocked && (
+                            <SortableList.DragHandle>
+                              <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
+                            </SortableList.DragHandle>
+                          )}
                           <Input
                             name={`questions.${questionIndex}.options.${index}.optionText`}
                             type="text"
@@ -270,6 +289,7 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
                                 onChange={() =>
                                   handleOptionChange(index, "isCorrect", !item.isCorrect)
                                 }
+                                disabled={isStructureLocked}
                               />
                             ) : (
                               <div className="cursor-pointer">
@@ -281,6 +301,7 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
                                   onCheckedChange={() =>
                                     handleOptionChange(index, "isCorrect", !item.isCorrect)
                                   }
+                                  disabled={isStructureLocked}
                                 />
                               </div>
                             )}
@@ -295,15 +316,17 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
                             </Label>
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="group">
-                                    <Icon
-                                      name="TrashIcon"
-                                      className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
-                                      onClick={() => handleRemoveOption(index)}
-                                    />
-                                  </div>
-                                </TooltipTrigger>
+                                {!isStructureLocked && (
+                                  <TooltipTrigger asChild>
+                                    <div className="group">
+                                      <Icon
+                                        name="TrashIcon"
+                                        className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                        onClick={() => handleRemoveOption(index)}
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                )}
                                 <TooltipContent
                                   side="top"
                                   align="center"
@@ -330,23 +353,25 @@ const PhotoQuestion = ({ form, questionIndex, lessonToEdit }: PhotoQuestionProps
               {errors?.questions?.[questionIndex]?.options?.message}
             </p>
           )}
-          <div className="mb-4 ml-14 mt-4 flex gap-2">
-            <Button
-              className="bg-primary-700"
-              data-testid={`add-options-button-${questionIndex}`}
-              type="button"
-              onClick={handleAddOption}
-            >
-              {t("adminCourseView.curriculum.lesson.button.addOption")}
-            </Button>
-            <Button
-              type="button"
-              className="bg-color-white border border-neutral-300 text-error-700"
-              onClick={() => setIsDeleteModalOpen(true)}
-            >
-              {t("adminCourseView.curriculum.lesson.button.deleteQuestion")}
-            </Button>
-          </div>
+          {!isStructureLocked && (
+            <div className="mb-4 ml-14 mt-4 flex gap-2">
+              <Button
+                className="bg-primary-700"
+                data-testid={`add-options-button-${questionIndex}`}
+                type="button"
+                onClick={handleAddOption}
+              >
+                {t("adminCourseView.curriculum.lesson.button.addOption")}
+              </Button>
+              <Button
+                type="button"
+                className="bg-color-white border border-neutral-300 text-error-700"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                {t("adminCourseView.curriculum.lesson.button.deleteQuestion")}
+              </Button>
+            </div>
+          )}
           <DeleteConfirmationModal
             open={isDeleteModalOpen}
             onClose={() => setIsDeleteModalOpen(false)}

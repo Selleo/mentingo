@@ -3,6 +3,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetStudentCoursesResponse } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 import type { SortOption } from "~/types/sorting";
 
 type CourseParams = {
@@ -15,6 +16,7 @@ type CourseParams = {
   category?: string;
   sort?: SortOption;
   userId?: string;
+  language?: SupportedLanguages;
 };
 
 type QueryOptions = {
@@ -36,6 +38,7 @@ export const studentCoursesQueryOptions = (
       ...(searchParams?.category && { category: searchParams.category }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
       ...(searchParams?.userId && { userId: searchParams.userId }),
+      ...(searchParams?.language && { language: searchParams.language }),
     });
     return response.data;
   },

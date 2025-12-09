@@ -16,18 +16,20 @@ import { QuestionIcons, QuestionType } from "../QuizLessonForm.types";
 
 type QuestionSelectorProps = {
   addQuestion: (questionType: QuestionType) => void;
+  disabled?: boolean;
 };
 
-const QuestionSelector = ({ addQuestion }: QuestionSelectorProps) => {
+const QuestionSelector = ({ addQuestion, disabled = false }: QuestionSelectorProps) => {
   const [showOptions, setShowOptions] = useState(false);
   const { t } = useTranslation();
 
   const onTypeChoose = useCallback(
     (type: QuestionType) => {
+      if (disabled) return;
       setShowOptions(false);
       addQuestion(type);
     },
-    [addQuestion],
+    [addQuestion, disabled],
   );
 
   const questionTypes = [
@@ -83,10 +85,12 @@ const QuestionSelector = ({ addQuestion }: QuestionSelectorProps) => {
     },
   ];
 
+  if (disabled) return null;
+
   return (
-    <DropdownMenu onOpenChange={(open) => setShowOptions(open)}>
+    <DropdownMenu onOpenChange={(open) => !disabled && setShowOptions(open)}>
       <DropdownMenuTrigger asChild>
-        <Button type="button" className="mb-4 mt-3 bg-primary-700">
+        <Button type="button" className="mb-4 mt-3 bg-primary-700" disabled={disabled}>
           {t("adminCourseView.curriculum.lesson.button.addQuestion")}{" "}
           <Icon name={showOptions ? "ArrowUp" : "ArrowDown"} className="text-color-white ml-2" />
         </Button>

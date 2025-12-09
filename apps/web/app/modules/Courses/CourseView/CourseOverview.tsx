@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { Icon } from "~/components/Icon";
 import Viewer from "~/components/RichText/Viever";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useUserRole } from "~/hooks/useUserRole";
+import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/LanguageSelector";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -55,6 +57,14 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
           <div className="flex w-full flex-col gap-y-2">
             <div className="flex justify-between items-center">
               <CategoryChip category={course?.category} className="bg-primary-50" />
+
+              <Badge variant="default" className="flex gap-2">
+                {courseLanguages
+                  .filter((item) => course.availableLocales.includes(item.key))
+                  .map((item) => (
+                    <Icon key={item.key} name={item.iconName} className="size-4" />
+                  ))}
+              </Badge>
             </div>
             <h5 className="h5">{title}</h5>
             <Viewer

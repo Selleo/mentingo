@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetContentCreatorCoursesResponse } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 
 type SearchParams = {
   scope?: "all" | "enrolled" | "available";
@@ -13,6 +14,8 @@ type SearchParams = {
   description?: string;
   /** Search across both title AND description fields simultaneously */
   searchQuery?: string;
+
+  language?: SupportedLanguages;
 };
 
 type QueryOptions = {
@@ -27,7 +30,7 @@ export const contentCreatorCoursesOptions = (
 ) => {
   return {
     enabled: !!authorId && isContentCreator,
-    queryKey: ["content-creator-courses", authorId],
+    queryKey: ["content-creator-courses", authorId, { language: searchParams?.language }],
     queryFn: async () => {
       if (!authorId) {
         throw new Error("Author ID is required");
@@ -44,6 +47,7 @@ export const contentCreatorCoursesOptions = (
         ...(searchParams?.title && { title: searchParams.title }),
         ...(searchParams?.description && { description: searchParams.description }),
         ...(searchParams?.searchQuery && { searchQuery: searchParams.searchQuery }),
+        ...(searchParams?.language && { language: searchParams.language }),
       });
 
       return response.data;
