@@ -23,6 +23,7 @@ import {
   isNull,
   like,
   ne,
+  not,
   or,
   sql,
 } from "drizzle-orm";
@@ -1563,19 +1564,67 @@ export class CourseService {
         .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
 
       if (!!studentIdsToUnenroll.length) {
-        await trx
-          .update(studentCourses)
-          .set({
-            status: COURSE_ENROLLMENT.NOT_ENROLLED,
-            enrolledAt: null,
-            enrolledByGroupId: null,
+        const studentsEnrolledInOtherGroups = await trx
+          .select({
+            studentId: groupUsers.userId,
+            groupId: groupCourses.groupId,
           })
+          .from(groupUsers)
+          .innerJoin(groupCourses, eq(groupUsers.groupId, groupCourses.groupId))
           .where(
             and(
-              eq(studentCourses.courseId, courseId),
-              inArray(studentCourses.studentId, studentIdsToUnenroll),
+              inArray(groupUsers.userId, studentIdsToUnenroll),
+              eq(groupCourses.courseId, courseId),
+              not(inArray(groupCourses.groupId, groupIds)),
             ),
+          )
+          .orderBy(groupUsers.createdAt);
+
+        const studentsWithOtherGroups = [
+          ...new Set(studentsEnrolledInOtherGroups.map(({ studentId }) => studentId)),
+        ];
+
+        const studentsToCompletelyUnenroll = studentIdsToUnenroll.filter(
+          (studentId) => !studentsWithOtherGroups.includes(studentId),
+        );
+
+        if (studentsWithOtherGroups.length) {
+          await Promise.all(
+            studentsWithOtherGroups.map((studentId) => {
+              const newGroupId = studentsEnrolledInOtherGroups.find(
+                (student) => student.studentId === studentId,
+              )?.groupId;
+
+              return trx
+                .update(studentCourses)
+                .set({
+                  enrolledByGroupId: newGroupId,
+                })
+                .where(
+                  and(
+                    eq(studentCourses.courseId, courseId),
+                    eq(studentCourses.studentId, studentId),
+                  ),
+                );
+            }),
           );
+        }
+
+        if (studentsToCompletelyUnenroll.length) {
+          await trx
+            .update(studentCourses)
+            .set({
+              status: COURSE_ENROLLMENT.NOT_ENROLLED,
+              enrolledAt: null,
+              enrolledByGroupId: null,
+            })
+            .where(
+              and(
+                eq(studentCourses.courseId, courseId),
+                inArray(studentCourses.studentId, studentsToCompletelyUnenroll),
+              ),
+            );
+        }
       }
     });
   }
