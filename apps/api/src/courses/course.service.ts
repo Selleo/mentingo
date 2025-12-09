@@ -379,6 +379,7 @@ export class CourseService {
         >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
           "groups",
         ),
+        isEnrolledByGroup: sql<boolean>`${studentCourses.enrolledByGroupId} IS NOT NULL`,
       })
       .from(users)
       .leftJoin(
@@ -388,7 +389,12 @@ export class CourseService {
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
-      .groupBy(users.id, studentCourses.enrolledAt, studentCourses.status)
+      .groupBy(
+        users.id,
+        studentCourses.enrolledAt,
+        studentCourses.status,
+        studentCourses.enrolledByGroupId,
+      )
       .orderBy(sortOrder(studentCourses.enrolledAt));
 
     return {
@@ -1344,6 +1350,7 @@ export class CourseService {
     const existingStudentsEnrollments = await this.db
       .select({
         studentId: studentCourses.studentId,
+        enrolledByGroupId: studentCourses.enrolledByGroupId,
       })
       .from(studentCourses)
       .where(
@@ -1497,7 +1504,11 @@ export class CourseService {
           .values(studentCoursesValues)
           .onConflictDoUpdate({
             target: [studentCourses.courseId, studentCourses.studentId],
-            set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+            set: {
+              enrolledAt: sql`EXCLUDED.enrolled_at`,
+              status: sql`EXCLUDED.status`,
+              enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
+            },
           });
 
         await Promise.all(
@@ -1521,6 +1532,52 @@ export class CourseService {
     }
 
     return null;
+  }
+
+  async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
+    const groupEnrollments = await this.db
+      .select({ groupId: groupCourses.groupId })
+      .from(groupCourses)
+      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
+
+    if (!groupEnrollments.length)
+      throw new NotFoundException("No group enrollments found for the specified course and groups");
+
+    const studentsToUnenroll = await this.db
+      .select({ id: studentCourses.studentId })
+      .from(studentCourses)
+      .innerJoin(users, eq(studentCourses.studentId, users.id))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          inArray(studentCourses.enrolledByGroupId, groupIds),
+          eq(users.role, USER_ROLES.STUDENT),
+        ),
+      );
+
+    const studentIdsToUnenroll = studentsToUnenroll.map((s) => s.id);
+
+    await this.db.transaction(async (trx) => {
+      await trx
+        .delete(groupCourses)
+        .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
+
+      if (!!studentIdsToUnenroll.length) {
+        await trx
+          .update(studentCourses)
+          .set({
+            status: COURSE_ENROLLMENT.NOT_ENROLLED,
+            enrolledAt: null,
+            enrolledByGroupId: null,
+          })
+          .where(
+            and(
+              eq(studentCourses.courseId, courseId),
+              inArray(studentCourses.studentId, studentIdsToUnenroll),
+            ),
+          );
+      }
+    });
   }
 
   async createStudentCourse(
@@ -1695,34 +1752,93 @@ export class CourseService {
   async unenrollCourse(courseId: UUIDType, userIds: UUIDType[]) {
     const studentEnrollments = await this.db
       .select({
-        id: studentCourses.id,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
+        studentId: studentCourses.studentId,
+        status: studentCourses.status,
+        enrolledByGroupId: studentCourses.enrolledByGroupId,
       })
-      .from(courses)
-      .leftJoin(studentCourses, eq(courses.id, studentCourses.courseId))
-      .where(and(eq(courses.id, courseId), inArray(studentCourses.studentId, userIds)));
+      .from(studentCourses)
+      .where(
+        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, userIds)),
+      );
 
-    const unenrolledStudents = studentEnrollments.filter(
-      (enrollment) => !enrollment.enrolled,
-    ).length;
+    const enrolledStudentIds = studentEnrollments.reduce<string[]>((studentIds, enrollment) => {
+      if (enrollment.status === COURSE_ENROLLMENT.ENROLLED) studentIds.push(enrollment.studentId);
+      return studentIds;
+    }, []);
 
-    if (unenrolledStudents > 0) {
+    const missingOrUnenrolledCount = userIds.length - enrolledStudentIds.length;
+
+    if (missingOrUnenrolledCount > 0) {
       throw new BadRequestException({
         message: "adminCourseView.enrolled.toast.someStudentsUnenrolled",
-        count: unenrolledStudents,
+        count: missingOrUnenrolledCount,
       });
     }
 
+    const studentsEnrolledByGroup = studentEnrollments.filter(
+      (enrollment) => enrollment.enrolledByGroupId,
+    );
+
+    if (studentsEnrolledByGroup.length > 0) {
+      throw new BadRequestException({
+        message: "adminCourseView.enrolled.toast.studentsEnrolledByGroup",
+        count: studentsEnrolledByGroup.length,
+      });
+    }
+
+    const studentsWithGroupEnrollment = await this.db
+      .select({
+        studentId: groupUsers.userId,
+        groupId: groupCourses.groupId,
+      })
+      .from(groupUsers)
+      .innerJoin(groupCourses, eq(groupUsers.groupId, groupCourses.groupId))
+      .where(and(inArray(groupUsers.userId, userIds), eq(groupCourses.courseId, courseId)))
+      .orderBy(groupUsers.createdAt);
+
+    const studentGroupMap = new Map<string, string>();
+
+    studentsWithGroupEnrollment.forEach(({ studentId, groupId }) => {
+      if (!studentGroupMap.has(studentId)) {
+        studentGroupMap.set(studentId, groupId);
+      }
+    });
+
+    const studentsToUpdate = Array.from(studentGroupMap.keys());
+    const studentsToUnenroll = userIds.filter((id) => !studentGroupMap.has(id));
+
     await this.db.transaction(async (trx) => {
-      await trx
-        .update(studentCourses)
-        .set({
-          enrolledAt: null,
-          status: COURSE_ENROLLMENT.NOT_ENROLLED,
-        })
-        .where(
-          and(inArray(studentCourses.studentId, userIds), eq(studentCourses.courseId, courseId)),
+      // Update students enrolled by groups to add group association
+      if (studentsToUpdate.length > 0) {
+        await Promise.all(
+          Array.from(studentGroupMap.entries()).map(([studentId, groupId]) =>
+            trx
+              .update(studentCourses)
+              .set({
+                enrolledByGroupId: groupId,
+              })
+              .where(
+                and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)),
+              ),
+          ),
         );
+      }
+
+      if (studentsToUnenroll.length > 0) {
+        await trx
+          .update(studentCourses)
+          .set({
+            enrolledAt: null,
+            status: COURSE_ENROLLMENT.NOT_ENROLLED,
+            enrolledByGroupId: null,
+          })
+          .where(
+            and(
+              inArray(studentCourses.studentId, studentsToUnenroll),
+              eq(studentCourses.courseId, courseId),
+            ),
+          );
+      }
     });
   }
 

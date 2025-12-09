@@ -2748,6 +2748,43 @@
         }
       }
     },
+    "/api/course/{courseId}/unenroll-groups-from-course": {
+      "delete": {
+        "operationId": "CourseController_unenrollGroupsFromCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnenrollGroupsFromCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnenrollGroupsFromCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/deleteCourse/{id}": {
       "delete": {
         "operationId": "CourseController_deleteCourse",
@@ -9606,6 +9643,9 @@
                 "id": {
                   "format": "uuid",
                   "type": "string"
+                },
+                "isEnrolledByGroup": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -9614,7 +9654,8 @@
                 "email",
                 "enrolledAt",
                 "groups",
-                "id"
+                "id",
+                "isEnrolledByGroup"
               ]
             }
           }
@@ -11078,6 +11119,40 @@
         ]
       },
       "EnrollGroupsToCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UnenrollGroupsFromCourseBody": {
+        "type": "object",
+        "properties": {
+          "groupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "groupIds"
+        ]
+      },
+      "UnenrollGroupsFromCourseResponse": {
         "type": "object",
         "properties": {
           "data": {

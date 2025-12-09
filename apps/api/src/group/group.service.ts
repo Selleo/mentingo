@@ -280,7 +280,31 @@ export class GroupService {
         throw new NotFoundException("User not found");
       }
 
+      const currentUserGroups = await trx
+        .select({ groupId: groupUsers.groupId })
+        .from(groupUsers)
+        .where(eq(groupUsers.userId, userId));
+
+      const currentGroupIds = currentUserGroups.map(({ groupId }) => groupId);
+      const removedGroupIds = currentGroupIds.filter((groupId) => !groupIds.includes(groupId));
+
       await trx.delete(groupUsers).where(eq(groupUsers.userId, userId));
+
+      if (removedGroupIds.length && user.role === USER_ROLES.STUDENT) {
+        await trx
+          .update(studentCourses)
+          .set({
+            status: COURSE_ENROLLMENT.NOT_ENROLLED,
+            enrolledAt: null,
+            enrolledByGroupId: null,
+          })
+          .where(
+            and(
+              eq(studentCourses.studentId, userId),
+              inArray(studentCourses.enrolledByGroupId, removedGroupIds),
+            ),
+          );
+      }
 
       if (groupIds.length === 0) return;
 
@@ -376,7 +400,11 @@ export class GroupService {
       .values(valuesToInsert)
       .onConflictDoUpdate({
         target: [studentCourses.courseId, studentCourses.studentId],
-        set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+        set: {
+          enrolledAt: sql`EXCLUDED.enrolled_at`,
+          status: sql`EXCLUDED.status`,
+          enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
+        },
       })
       .returning({
         courseId: studentCourses.courseId,

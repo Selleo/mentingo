@@ -1,4 +1,5 @@
 import { useParams } from "@remix-run/react";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   useReactTable,
   flexRender,
@@ -6,9 +7,10 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Minus } from "lucide-react";
+import { Minus, User, Users } from "lucide-react";
 import { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { useUnenrollCourse } from "~/api/mutations";
 import { useBulkCourseEnroll } from "~/api/mutations/admin/useBulkCourseEnroll";
@@ -44,11 +46,13 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { useToast } from "~/components/ui/use-toast";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 
 import { GroupEnrollModal } from "./GroupEnrollModal";
+import { GroupUnenrollModal } from "./GroupUnenrollModal";
 
 import type { Row, SortingState, RowSelectionState, ColumnDef } from "@tanstack/react-table";
 import type { ReactElement, FormEvent } from "react";
@@ -61,6 +65,7 @@ type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];
 export const CourseEnrolled = (): ReactElement => {
   const { t } = useTranslation();
   const { id: courseId } = useParams();
+  const { toast } = useToast();
   const { mutate: bulkEnroll } = useBulkCourseEnroll(courseId);
   const { mutateAsync: unenrollCourse } = useUnenrollCourse();
 
@@ -72,8 +77,10 @@ export const CourseEnrolled = (): ReactElement => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const [isGroupEnrollDialogOpen, setIsGroupEnrollDialogOpen] = useState<boolean>(false);
+  const [isGroupUnenrollDialogOpen, setIsGroupUnenrollDialogOpen] = useState<boolean>(false);
 
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [openGroupDropdown, setOpenGroupDropdown] = useState(false);
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [isUnenrollDialogOpen, setIsUnenrollDialogOpen] = useState<boolean>(false);
@@ -171,19 +178,38 @@ export const CourseEnrolled = (): ReactElement => {
       },
     },
     {
-      accessorKey: "enrolledAt",
+      accessorKey: "isEnrolledByGroup",
       header: ({ column }) => (
         <SortButton<EnrolledStudent> column={column}>
           {t("adminCourseView.enrolled.table.status")}
         </SortButton>
       ),
-      cell: ({ row }) => (
-        <Badge variant="secondary" className="w-max" data-testid={row.original.email}>
-          {row.original.enrolledAt
-            ? t("adminCourseView.enrolled.statuses.enrolled")
-            : t("adminCourseView.enrolled.statuses.notEnrolled")}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        const enrollmentStatus = row.original.isEnrolledByGroup
+          ? COURSE_ENROLLMENT.GROUP_ENROLLED
+          : row.original.enrolledAt
+            ? COURSE_ENROLLMENT.ENROLLED
+            : COURSE_ENROLLMENT.NOT_ENROLLED;
+
+        const isEnrolled = enrollmentStatus !== COURSE_ENROLLMENT.NOT_ENROLLED;
+
+        return (
+          <Badge
+            variant={isEnrolled ? "secondary" : "default"}
+            className="w-max"
+            data-testid={row.original.email}
+          >
+            {match(enrollmentStatus)
+              .with(COURSE_ENROLLMENT.GROUP_ENROLLED, () =>
+                t("adminCourseView.enrolled.statuses.enrolledByGroup"),
+              )
+              .with(COURSE_ENROLLMENT.ENROLLED, () =>
+                t("adminCourseView.enrolled.statuses.individuallyEnrolled"),
+              )
+              .otherwise(() => t("adminCourseView.enrolled.statuses.notEnrolled"))}
+          </Badge>
+        );
+      },
     },
     {
       accessorKey: "enrolledAt",
@@ -250,7 +276,16 @@ export const CourseEnrolled = (): ReactElement => {
       studentIds: Object.keys(rowSelection).filter((id) =>
         usersData.some((user) => user.id === id && !user.enrolledAt),
       ),
+      studentsEnrolledByGroup: Object.keys(rowSelection).filter((id) =>
+        usersData.some((user) => user.id === id && user.enrolledAt && user.isEnrolledByGroup),
+      ),
     };
+
+    if (mutationData.studentsEnrolledByGroup.length)
+      toast({
+        title: t("adminCourseView.enrolled.toast.alreadyEnrolledByGroup.title"),
+        variant: "destructive",
+      });
 
     if (mutationData.studentIds.length > 0) {
       bulkEnroll(mutationData);
@@ -277,6 +312,8 @@ export const CourseEnrolled = (): ReactElement => {
 
   const handleOpenUnenroll = () => setIsUnenrollDialogOpen(true);
   const handleOpenEnroll = () => setIsDialogOpen(true);
+  const handleOpenGroupEnroll = () => setIsGroupEnrollDialogOpen(true);
+  const handleOpenGroupUnenroll = () => setIsGroupUnenrollDialogOpen(true);
 
   return (
     <div className="flex flex-col">
@@ -294,11 +331,21 @@ export const CourseEnrolled = (): ReactElement => {
           courseId={courseId ?? ""}
           groups={groupData}
           enrolledGroups={enrolledGroups}
+          renderTrigger={false}
+        />
+
+        <GroupUnenrollModal
+          isOpen={isGroupUnenrollDialogOpen}
+          onOpenChange={setIsGroupUnenrollDialogOpen}
+          courseId={courseId ?? ""}
+          enrolledGroups={enrolledGroups}
+          renderTrigger={false}
         />
 
         <DropdownMenu onOpenChange={(open) => setOpenDropdown(open)}>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex gap-2">
+              <User className="size-4" />
               {t("adminCourseView.enrolled.enroll")}
               <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
             </Button>
@@ -324,6 +371,42 @@ export const CourseEnrolled = (): ReactElement => {
               >
                 <Minus className="size-4 text-errir-700" />
                 {t("adminCourseView.enrolled.unenrollSelected")}
+              </Button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu onOpenChange={(open) => setOpenGroupDropdown(open)}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="flex gap-2">
+              <Users className="size-4" />
+              {t("adminCourseView.enrolled.enrollGroups")}
+              <Icon
+                className="size-4 text-black"
+                name={openGroupDropdown ? "ArrowUp" : "ArrowDown"}
+              />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
+            <DropdownMenuItem>
+              <Button
+                className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
+                variant="ghost"
+                onClick={handleOpenGroupEnroll}
+              >
+                <Icon name="Plus" className="size-4 text-accent-foreground" />
+                {t("adminCourseView.enrolled.enrollGroups")}
+              </Button>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Button
+                onClick={handleOpenGroupUnenroll}
+                variant="ghost"
+                className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
+                disabled={!enrolledGroups?.length}
+              >
+                <Minus className="size-4 text-error-700" />
+                {t("adminCourseView.enrolled.unenrollGroups")}
               </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>

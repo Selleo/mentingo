@@ -852,6 +852,7 @@ describe("CourseController (e2e)", () => {
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
                 groups: [],
+                isEnrolledByGroup: false,
               },
               {
                 firstName: students[1].firstName,
@@ -860,6 +861,7 @@ describe("CourseController (e2e)", () => {
                 id: students[1].id,
                 enrolledAt: null,
                 groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -907,6 +909,7 @@ describe("CourseController (e2e)", () => {
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
                 groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -954,6 +957,7 @@ describe("CourseController (e2e)", () => {
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
                 groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -1001,6 +1005,7 @@ describe("CourseController (e2e)", () => {
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
                 groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -1048,6 +1053,7 @@ describe("CourseController (e2e)", () => {
                 id: students[1].id,
                 enrolledAt: null,
                 groups: [],
+                isEnrolledByGroup: false,
               },
               {
                 firstName: students[0].firstName,
@@ -1056,6 +1062,7 @@ describe("CourseController (e2e)", () => {
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
                 groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });

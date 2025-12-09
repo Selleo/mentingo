@@ -22,6 +22,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
+    "incremental": true,
     "paths": {
       "~/*": ["./app/*"]
     },
