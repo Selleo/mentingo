@@ -1250,7 +1250,8 @@
               "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined - all conditions recommended, but not mandatory for passing.)</em>"
             }
           },
-          "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
+          "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
+          "dragWord": "Drag word into sentence"
         }
       }
     },

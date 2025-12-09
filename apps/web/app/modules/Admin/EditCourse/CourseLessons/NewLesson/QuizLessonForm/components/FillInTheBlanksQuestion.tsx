@@ -330,6 +330,7 @@ const FillInTheBlanksQuestion = ({
                     <div className="flex items-center">
                       <button
                         type="button"
+                        data-testid={`drag-${option.optionText}`}
                         className="pl-1.5 pr-1"
                         draggable={isDraggable}
                         onDragStart={(e) => handleDragStart(option.optionText, e)}
@@ -340,7 +341,8 @@ const FillInTheBlanksQuestion = ({
                       {option.isCorrect && <Icon name="Success" />}
                       <Input
                         value={option.optionText}
-                        draggable={false}
+                        draggable={isDraggable}
+                        onDragStart={(e) => handleDragStart(option.optionText, e)}
                         onChange={(e) => handleUpdateWord(index, e.target.value)}
                         className="mr-1.5 w-auto min-w-[80px] border-none bg-transparent px-0 text-primary-500 focus-visible:ring-0 focus-visible:outline-none"
                         onDrop={(event) => event.preventDefault()}
