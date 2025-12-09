@@ -77,11 +77,7 @@ export class StudentLessonProgressService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
-    if (
-      accessCourseLessonWithDetails.lessonIsCompleted ||
-      accessCourseLessonWithDetails.attempts > 1
-    )
-      return;
+    if (accessCourseLessonWithDetails.lessonIsCompleted) return;
 
     const [lesson] = await this.db
       .select({
@@ -137,8 +133,10 @@ export class StudentLessonProgressService {
       : lessonProgress;
 
     const shouldUpdate =
-      (!lessonProgress?.completedAt && lesson.type !== LESSON_TYPES.AI_MENTOR) ||
-      (LESSON_TYPES.AI_MENTOR && !!aiMentorLessonData?.passed);
+      !lessonProgress?.completedAt &&
+      (lesson.type !== LESSON_TYPES.AI_MENTOR
+        ? lesson.type !== LESSON_TYPES.QUIZ || isQuizPassed
+        : !!aiMentorLessonData?.passed);
 
     let lessonCompleted = false;
 
@@ -193,20 +191,26 @@ export class StudentLessonProgressService {
           actor: resolvedActor,
         }),
       );
+
+      await this.updateChapterProgress(
+        lesson.courseId,
+        lesson.chapterId,
+        studentId,
+        lesson.chapterLessonCount,
+        isCompletedAsFreemium,
+        resolvedActor,
+        dbInstance,
+      );
+
+      if (isCompletedAsFreemium) return;
+
+      await this.checkCourseIsCompletedForUser(
+        lesson.courseId,
+        studentId,
+        resolvedActor,
+        dbInstance,
+      );
     }
-
-    await this.updateChapterProgress(
-      lesson.courseId,
-      lesson.chapterId,
-      studentId,
-      lesson.chapterLessonCount,
-      isCompletedAsFreemium,
-      resolvedActor,
-      dbInstance,
-    );
-
-    if (isCompletedAsFreemium) return;
-    await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, resolvedActor, dbInstance);
   }
 
   async markLessonAsStarted(

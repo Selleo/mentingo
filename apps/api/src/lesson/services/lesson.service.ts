@@ -261,15 +261,17 @@ export class LessonService {
           trx,
         );
 
-        await this.studentLessonProgressService.markLessonAsCompleted({
-          id: studentQuizAnswers.lessonId,
-          studentId: userId,
-          quizCompleted: isQuizPassed,
-          completedQuestionCount:
-            evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
-          dbInstance: trx,
-          isQuizPassed,
-        });
+        if (isQuizPassed) {
+          await this.studentLessonProgressService.markLessonAsCompleted({
+            id: studentQuizAnswers.lessonId,
+            studentId: userId,
+            quizCompleted: true,
+            completedQuestionCount:
+              evaluationResult.correctAnswerCount + evaluationResult.wrongAnswerCount,
+            dbInstance: trx,
+            isQuizPassed,
+          });
+        }
 
         this.eventBus.publish(
           new QuizCompletedEvent(
