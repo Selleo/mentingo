@@ -172,7 +172,6 @@ export const LessonContent = ({
           lesson={lesson}
           lessonLoading={lessonLoading}
           isPreviewMode={isPreviewMode}
-          userId={previewUserId ?? user?.id}
         />
       ))
       .with("embed", () => (

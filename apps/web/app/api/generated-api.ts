@@ -5254,10 +5254,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/ai/thread/messages
      */
     aiControllerGetThreadMessages: (
-      query: {
+      query?: {
         /** @format uuid */
         thread?: string;
-        studentId: string;
       },
       params: RequestParams = {},
     ) =>

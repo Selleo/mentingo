@@ -124,6 +124,8 @@ export class AdminLessonService {
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
 
+    if (!data.name?.trim().length) data.name = "AI Mentor";
+
     const lesson = await this.createAiMentorLessonWithTransaction(data, maxDisplayOrder + 1);
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
@@ -901,6 +903,7 @@ export class AdminLessonService {
     currentUserRole: UserRole,
     currentUserId: UUIDType,
     id: UUIDType,
+    throwOnNoAccess: boolean = true,
   ) {
     let course;
 
@@ -918,8 +921,12 @@ export class AdminLessonService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {
+    const hasAccess = currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId;
+
+    if (throwOnNoAccess && !hasAccess) {
       throw new ForbiddenException({ message: "common.toast.noAccess" });
     }
+
+    return hasAccess;
   }
 }
