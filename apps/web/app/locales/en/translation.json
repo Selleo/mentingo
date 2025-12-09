@@ -154,7 +154,10 @@
     }
   },
   "newsView": {
-    "header": "News"
+    "header": "News",
+    "notFound": "News not found.",
+    "previousArticle": "Previous article",
+    "nextArticle": "Next article"
   },
   "globalSearch": {
     "notFound": "Unfortunately nothing was found",
