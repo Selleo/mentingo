@@ -160,7 +160,30 @@
     "header": "Aktualności",
     "notFound": "Nie znaleziono aktualności.",
     "previousArticle": "Poprzedni artykuł",
-    "nextArticle": "Następny artykuł"
+    "nextArticle": "Następny artykuł",
+    "prompt": {
+      "photoUrl": "Adres URL zdjęcia",
+      "photoCaption": "Podpis do zdjęcia (opcjonalnie)",
+      "videoUrl": "Adres URL wideo (mp4 itp.)",
+      "videoCaption": "Podpis do wideo (opcjonalnie)"
+    },
+    "field": {
+      "title": "Tytuł",
+      "intro": "Wprowadzenie",
+      "content": "Treść",
+      "image": "Obraz"
+    },
+    "placeholder": {
+      "title": "Wpisz tytuł aktualności",
+      "intro": "Dodaj krótkie wprowadzenie"
+    },
+    "createOrEdit": "Dodaj/edytuj aktualność",
+    "edit": "Edytuj",
+    "button": {
+      "save": "Zapisz aktualność",
+      "edit": "Edytuj aktualność",
+      "delete": "Usuń"
+    }
   },
   "globalSearch": {
     "notFound": "Niestety nic nie znaleziono",
