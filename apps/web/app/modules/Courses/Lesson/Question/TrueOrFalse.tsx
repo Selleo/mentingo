@@ -18,7 +18,6 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
   const { register } = useFormContext<QuizForm>();
   const { t } = useTranslation();
 
-  console.log(question);
   return (
     <QuestionCard
       title={question.title ?? ""}

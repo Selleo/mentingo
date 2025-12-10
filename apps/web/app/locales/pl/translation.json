@@ -920,7 +920,8 @@
       "enrolledStudents": "Zapisani studenci",
       "testAiMentor": "Przetestuj AI Mentora",
       "notAddedLanguages": "Niedodane",
-      "baseLanguage": "Domyślny"
+      "baseLanguage": "Domyślny",
+      "generateMissingTranslationsDescription": "Czy na pewno chcesz wygenerować brakujące tłumaczenia? Ta akcja może zająć kilka chwil."
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
@@ -936,7 +937,7 @@
       "updateCourseMissingLanguage": "Nie podano języka do tłumaczenia",
       "successfullyDeletedLanguage": "Język został pomyślnie usunięty z kursu",
       "invalidLanguageToDelete": "Nie możesz usunąć tego języka",
-      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż domyślny."
+      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy."
     },
     "settings": {
       "breadcrumbs": {

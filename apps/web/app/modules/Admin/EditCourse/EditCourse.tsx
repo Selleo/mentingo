@@ -165,19 +165,12 @@ const EditCourse = () => {
                   open={openGenerateTranslationModal}
                   onOpenChange={setOpenGenerateTranslationModal}
                 >
-                  {/*<DialogTrigger asChild>*/}
-                  {/*  <Button variant="outline" className="gap-2">*/}
-                  {/*    <Icon name="AiMentor" className="size-4" />*/}
-                  {/*    {t("adminCourseView.common.generateMissingTranslations")}*/}
-                  {/*  </Button>*/}
-                  {/*</DialogTrigger>*/}
                   <DialogContent>
                     <DialogTitle>
                       {t("adminCourseView.common.generateMissingTranslations")}
                     </DialogTitle>
                     <DialogDescription>
-                      Are you sure you want to generate missing translations? This action may take a
-                      few moments.
+                      {t("adminCourseView.common.generateMissingTranslationsDescription")}
                     </DialogDescription>
                     <DialogFooter>
                       <DialogTrigger asChild>

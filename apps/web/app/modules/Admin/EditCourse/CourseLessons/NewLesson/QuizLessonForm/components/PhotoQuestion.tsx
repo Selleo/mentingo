@@ -354,7 +354,7 @@ const PhotoQuestion = ({
             </p>
           )}
           {!isStructureLocked && (
-            <div className="mb-4 ml-14 mt-4 flex gap-2">
+            <div className="my-4 ml-14 flex gap-2">
               <Button
                 className="bg-primary-700"
                 data-testid={`add-options-button-${questionIndex}`}

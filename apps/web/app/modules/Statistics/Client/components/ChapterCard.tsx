@@ -76,8 +76,8 @@ export const ChapterCard = (
               loading="eager"
               decoding="async"
               className="aspect-video w-full rounded-lg object-cover object-center drop-shadow-sm"
-              onError={(e) => {
-                e.currentTarget.src = CardPlaceholder;
+              onError={(event) => {
+                event.currentTarget.src = CardPlaceholder;
               }}
             />
             {chapterDetails.chapterProgress && (

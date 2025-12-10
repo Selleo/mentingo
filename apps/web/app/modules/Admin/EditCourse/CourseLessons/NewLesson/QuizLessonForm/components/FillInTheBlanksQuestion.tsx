@@ -30,6 +30,8 @@ type FillInTheBlankQuestionProps = {
   isStructureLocked?: boolean;
 };
 
+const SPECIAL_SYMBOLS = /[.*+?^${}()|[\]\\]/g;
+
 const FillInTheBlanksQuestion = ({
   form,
   questionIndex,
@@ -243,7 +245,7 @@ const FillInTheBlanksQuestion = ({
       : "adminCourseView.curriculum.lesson.other.gapFillDescription";
   }, [questionType]);
 
-  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapeRegExp = (value: string) => value.replace(SPECIAL_SYMBOLS, "\\$&");
 
   const handleUpdateWord = (index: number, value: string) => {
     const options = [...currentOptions];
@@ -333,7 +335,7 @@ const FillInTheBlanksQuestion = ({
                         data-testid={`drag-${option.optionText}`}
                         className="pl-1.5 pr-1"
                         draggable={isDraggable}
-                        onDragStart={(e) => handleDragStart(option.optionText, e)}
+                        onDragStart={(event) => handleDragStart(option.optionText, event)}
                         aria-label={t("adminCourseView.curriculum.lesson.other.dragWord")}
                       >
                         <Icon name="DragAndDropIcon" className="cursor-move" />
@@ -342,8 +344,8 @@ const FillInTheBlanksQuestion = ({
                       <Input
                         value={option.optionText}
                         draggable={isDraggable}
-                        onDragStart={(e) => handleDragStart(option.optionText, e)}
-                        onChange={(e) => handleUpdateWord(index, e.target.value)}
+                        onDragStart={(event) => handleDragStart(option.optionText, event)}
+                        onChange={(event) => handleUpdateWord(index, event.target.value)}
                         className="mr-1.5 w-auto min-w-[80px] border-none bg-transparent px-0 text-primary-500 focus-visible:ring-0 focus-visible:outline-none"
                         onDrop={(event) => event.preventDefault()}
                       />
@@ -366,7 +368,7 @@ const FillInTheBlanksQuestion = ({
                     <Button
                       onClick={() => setIsAddingWord(true)}
                       type="button"
-                      className="mb-4 mt-4 flex items-center gap-2"
+                      className="my-4 flex items-center gap-2"
                     >
                       <Icon name="Plus" />
                       {t("adminCourseView.curriculum.lesson.button.addWords")}
@@ -386,7 +388,7 @@ const FillInTheBlanksQuestion = ({
                   data-testid="new-word-input"
                   type="text"
                   value={newWord}
-                  onChange={(e) => setNewWord(e.target.value)}
+                  onChange={(event) => setNewWord(event.target.value)}
                   placeholder={t("adminCourseView.curriculum.lesson.placeholder.enterWord")}
                   className="grow"
                   disabled={isStructureLocked}
@@ -411,7 +413,7 @@ const FillInTheBlanksQuestion = ({
             {!isStructureLocked && (
               <Button
                 type="button"
-                className="bg-color-white mb-4 mt-4 border border-neutral-300 text-error-700"
+                className="bg-color-white my-4 border border-neutral-300 text-error-700"
                 onClick={() => setIsDeleteModalOpen(true)}
               >
                 {t("adminCourseView.curriculum.lesson.button.deleteQuestion")}

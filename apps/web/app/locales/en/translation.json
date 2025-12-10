@@ -940,7 +940,8 @@
       "enrolledStudents": "Enrolled students",
       "testAiMentor": "Test AI Mentor",
       "notAddedLanguages": "Not added",
-      "baseLanguage": "Default"
+      "baseLanguage": "Default",
+      "generateMissingTranslationsDescription": "Are you sure you want to generate missing translations? This action may take a few moments."
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
