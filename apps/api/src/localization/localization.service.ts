@@ -1,13 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { eq, sql } from "drizzle-orm";
-import { alias, type AnyPgColumn, type AnyPgTable } from "drizzle-orm/pg-core";
+import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
-import { chapters, courses, lessons } from "src/storage/schema";
+import { chapters, courses, lessons, questionsAndAnswers } from "src/storage/schema";
 
-import { ENTITY_TYPE } from "./localization.types";
+import { type BaseTable, ENTITY_TYPE, type EntityType } from "./localization.types";
 
-import type { EntityType } from "./localization.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
@@ -48,6 +47,15 @@ export class LocalizationService {
           .innerJoin(courses, eq(courses.id, chapters.courseId))
           .where(eq(lessons.id, entityId));
         break;
+      case ENTITY_TYPE.QA:
+        query = this.db
+          .select({
+            baseLanguage: sql<SupportedLanguages>`${questionsAndAnswers.baseLanguage}`,
+            availableLocales: sql<SupportedLanguages>`${questionsAndAnswers.availableLocales}`,
+          })
+          .from(questionsAndAnswers)
+          .where(eq(questionsAndAnswers.id, entityId));
+        break;
       default:
         throw new Error("Invalid entity type");
     }
@@ -69,19 +77,13 @@ export class LocalizationService {
   /**
    * Note: callers must join `baseTable` so `baseTable.baseLanguage` and `baseTable.availableLocales` are available.
    */
-  getLocalizedSqlField<
-    T extends AnyPgTable & { baseLanguage: AnyPgColumn; availableLocales: AnyPgColumn },
-  >(
+  getLocalizedSqlField(
     fieldColumn: AnyPgColumn,
     language?: SupportedLanguages,
-    additionalData: {
-      joinedAliasName?: string;
-      baseTable: T;
-    } = { baseTable: courses as unknown as T },
+    baseTable: BaseTable = courses,
+    joinedAliasName?: string,
   ) {
-    const aliased = additionalData.joinedAliasName
-      ? alias(additionalData.baseTable, additionalData.joinedAliasName)
-      : additionalData.baseTable;
+    const aliased = joinedAliasName ? alias(baseTable, joinedAliasName) : baseTable;
 
     const langExpr = language ? sql`${language}` : aliased.baseLanguage;
 

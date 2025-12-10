@@ -6,10 +6,10 @@ import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
+import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { EnvModule } from "src/env/env.module";
 import { QAModule } from "src/qa/qa.module";
 
-import { ActivityLogsModule } from "./activity-logs/activity-logs.module";
 import { AiModule } from "./ai/ai.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { AuthModule } from "./auth/auth.module";
@@ -50,7 +50,6 @@ import { StripeModule } from "./stripe/stripe.module";
 import { StudentLessonProgressModule } from "./studentLessonProgress/studentLessonProgress.module";
 import { TestConfigModule } from "./test-config/test-config.module";
 import { UserModule } from "./user/user.module";
-import { ActivityLogsModule, ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 
 @Module({
   imports: [

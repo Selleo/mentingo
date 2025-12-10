@@ -1,15 +1,15 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { getTableColumns } from "drizzle-orm";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LocalizationService } from "src/localization/localization.service";
 import { questionsAndAnswers } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { CreateQABody } from "src/qa/schemas/qa.schema";
+import type { CreateQABody, QAUpdateBody } from "src/qa/schemas/qa.schema";
 
 @Injectable()
 export class QARepository {
@@ -42,16 +42,88 @@ export class QARepository {
   }
 
   async getQA(qaId: UUIDType, language?: SupportedLanguages) {
-    return this.db.select({
-      ...getTableColumns(questionsAndAnswers),
-      title: this.localizationService.getLocalizedSqlField(questionsAndAnswers.title, language, {
-        baseTable: questionsAndAnswers,
-      }),
-      description: this.localizationService.getLocalizedSqlField(
-        questionsAndAnswers.description,
-        language,
-        { baseTable: questionsAndAnswers },
-      ),
-    });
+    const [qa] = await this.db
+      .select({
+        ...getTableColumns(questionsAndAnswers),
+        title: this.localizationService.getLocalizedSqlField(
+          questionsAndAnswers.title,
+          language,
+          questionsAndAnswers,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          questionsAndAnswers.description,
+          language,
+          questionsAndAnswers,
+        ),
+        baseLanguage: sql<SupportedLanguages>`${questionsAndAnswers.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
+      })
+      .from(questionsAndAnswers)
+      .where(eq(questionsAndAnswers.id, qaId));
+
+    return qa;
+  }
+
+  async getAllQA(language?: SupportedLanguages) {
+    return this.db
+      .select({
+        ...getTableColumns(questionsAndAnswers),
+        title: this.localizationService.getLocalizedSqlField(
+          questionsAndAnswers.title,
+          language,
+          questionsAndAnswers,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          questionsAndAnswers.description,
+          language,
+          questionsAndAnswers,
+        ),
+        baseLanguage: sql<SupportedLanguages>`${questionsAndAnswers.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
+      })
+      .from(questionsAndAnswers);
+  }
+
+  async createLanguage(qaId: UUIDType, languages: string[]) {
+    return this.db
+      .update(questionsAndAnswers)
+      .set({ availableLocales: languages })
+      .where(eq(questionsAndAnswers.id, qaId))
+      .returning();
+  }
+
+  async updateQA(data: QAUpdateBody, language: SupportedLanguages, qaId: UUIDType) {
+    return this.db
+      .update(questionsAndAnswers)
+      .set({
+        ...(data.title
+          ? { title: setJsonbField(questionsAndAnswers.title, language, data.title) }
+          : {}),
+        ...(data.description
+          ? {
+              description: setJsonbField(
+                questionsAndAnswers.description,
+                language,
+                data.description,
+              ),
+            }
+          : {}),
+      })
+      .where(eq(questionsAndAnswers.id, qaId));
+  }
+
+  async deleteQA(qaId: UUIDType) {
+    return this.db.delete(questionsAndAnswers).where(eq(questionsAndAnswers.id, qaId));
+  }
+
+  async deleteLanguage(qaId: UUIDType, language: SupportedLanguages) {
+    return this.db
+      .update(questionsAndAnswers)
+      .set({
+        title: deleteJsonbField(questionsAndAnswers.title, language),
+        description: deleteJsonbField(questionsAndAnswers.description, language),
+        availableLocales: sql`ARRAY_REMOVE(${questionsAndAnswers.availableLocales}, ${language})`,
+      })
+      .where(eq(questionsAndAnswers.id, qaId));
   }
 }
