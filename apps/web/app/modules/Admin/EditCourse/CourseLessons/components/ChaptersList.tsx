@@ -32,6 +32,7 @@ import { LessonCardList } from "~/modules/Admin/EditCourse/CourseLessons/compone
 import { ContentTypes } from "../../EditCourse.types";
 
 import type { Chapter, Lesson } from "../../EditCourse.types";
+import type { SupportedLanguages } from "@repo/shared";
 import type React from "react";
 
 interface ChapterCardProps {
@@ -45,6 +46,8 @@ interface ChapterCardProps {
   dragTrigger: React.ReactNode;
   openItem: string | undefined;
   setOpenItem: (value: string | undefined) => void;
+  language: SupportedLanguages;
+  baseLanguage: SupportedLanguages;
 }
 
 const ChapterCard = ({
@@ -58,6 +61,8 @@ const ChapterCard = ({
   dragTrigger,
   openItem,
   setOpenItem,
+  language,
+  baseLanguage,
 }: ChapterCardProps) => {
   const { mutateAsync: updateFreemiumStatus } = useUpdateLessonFreemiumStatus();
   const { id: courseId } = useParams();
@@ -65,6 +70,8 @@ const ChapterCard = ({
   const [isNewLesson, setIsNewLesson] = useState(false);
   const [pendingChapter, setPendingChapter] = useState<Chapter | null>(null);
   const { t } = useTranslation();
+
+  const isBaseLanguage = language === baseLanguage;
 
   const addLessonLogic = useCallback(() => {
     setSelectedLesson(null);
@@ -74,15 +81,19 @@ const ChapterCard = ({
 
   const handleAddLessonClick = useCallback(
     (event: React.MouseEvent) => {
+      event.stopPropagation();
+
+      if (!isBaseLanguage) return;
+
       if (isCurrentFormDirty) {
         setIsNewLesson(true);
         openLeaveModal();
         return;
       }
-      event.stopPropagation();
+
       addLessonLogic();
     },
-    [openLeaveModal, addLessonLogic, isCurrentFormDirty],
+    [openLeaveModal, addLessonLogic, isCurrentFormDirty, isBaseLanguage],
   );
 
   const onClickChapterCard = useCallback(() => {
@@ -145,14 +156,14 @@ const ChapterCard = ({
         console.error("Failed to update chapter premium status:", error);
       } finally {
         await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
-        await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId!) });
+        await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId!, language) });
         await queryClient.invalidateQueries({ queryKey: ["available-courses"] });
         setTimeout(() => {
           setOpenItem(currentOpenState);
         }, 0);
       }
     },
-    [chapter, updateFreemiumStatus, courseId, openItem, setOpenItem],
+    [chapter, updateFreemiumStatus, courseId, openItem, setOpenItem, language],
   );
 
   const sortableLessons: Sortable<Lesson>[] = useMemo(
@@ -201,11 +212,39 @@ const ChapterCard = ({
                   "ml-9": !isOpen || chapter.lessons.length === 0,
                 })}
               >
-                <Button variant="outline" onClick={handleAddLessonClick}>
-                  <Icon name="Plus" className="mr-2 text-primary-800" />
-                  {t("adminCourseView.curriculum.lesson.button.addLesson")}
-                </Button>
+                {!isBaseLanguage ? (
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Button variant="outline" onClick={handleAddLessonClick} disabled>
+                            <Icon name="Plus" className="mr-2 text-primary-800" />
+                            {t("adminCourseView.curriculum.lesson.button.addLesson")}
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {t("adminCourseView.curriculum.lesson.button.addLessonDisabledTooltip")}
+                        <TooltipArrow className="fill-black" />
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={handleAddLessonClick}
+                    disabled={!isBaseLanguage}
+                  >
+                    <Icon name="Plus" className="mr-2 text-primary-800" />
+                    {t("adminCourseView.curriculum.lesson.button.addLesson")}
+                  </Button>
+                )}
               </div>
+
               <div className="flex items-center gap-x-2">
                 <Switch.Root
                   data-testid={`Freemium - ${chapter.id}`}
@@ -262,6 +301,8 @@ type ChaptersListProps = {
   selectedLesson: Lesson | null;
   canRefetchChapterList: boolean;
   isLeaveModalOpen?: boolean;
+  language: SupportedLanguages;
+  baseLanguage: SupportedLanguages;
 };
 
 function getChapterWithLatestLesson(chapters: Chapter[]): string | null {
@@ -296,6 +337,8 @@ const ChaptersList = ({
   selectedChapter,
   selectedLesson,
   canRefetchChapterList,
+  baseLanguage,
+  language,
 }: ChaptersListProps) => {
   const { id: courseId } = useParams();
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
@@ -364,6 +407,8 @@ const ChaptersList = ({
               selectedChapter={selectedChapter}
               setOpenItem={setOpenItem}
               openItem={openItem}
+              language={language}
+              baseLanguage={baseLanguage}
               dragTrigger={
                 <SortableList.DragHandle>
                   <Icon name="DragAndDropIcon" className="cursor-move" />

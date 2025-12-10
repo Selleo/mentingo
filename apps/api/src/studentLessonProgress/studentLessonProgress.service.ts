@@ -11,11 +11,13 @@ import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   aiMentorStudentLessonProgress,
@@ -32,6 +34,7 @@ import {
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
@@ -58,6 +61,7 @@ export class StudentLessonProgressService {
     completedQuestionCount = 0,
     dbInstance = this.db,
     aiMentorLessonData,
+    language,
     isQuizPassed = false,
   }: {
     id: UUIDType;
@@ -68,6 +72,7 @@ export class StudentLessonProgressService {
     completedQuestionCount?: number;
     dbInstance?: PostgresJsDatabase<typeof schema>;
     aiMentorLessonData?: ResponseAiJudgeJudgementBody;
+    language: SupportedLanguages;
     isQuizPassed?: boolean;
   }) {
     if (userRole === USER_ROLES.CONTENT_CREATOR || userRole === USER_ROLES.ADMIN) return;
@@ -77,7 +82,19 @@ export class StudentLessonProgressService {
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
 
+    if (
+      accessCourseLessonWithDetails.lessonIsCompleted ||
+      accessCourseLessonWithDetails.attempts > 1
+    )
+      return;
+
     if (accessCourseLessonWithDetails.lessonIsCompleted) return;
+
+    const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      id,
+      language,
+    );
 
     const [lesson] = await this.db
       .select({
@@ -95,8 +112,9 @@ export class StudentLessonProgressService {
       throw new NotFoundException(`Lesson with id ${id} not found`);
     }
 
-    if (lesson.type === LESSON_TYPES.QUIZ && !quizCompleted)
+    if (lesson.type === LESSON_TYPES.QUIZ && !quizCompleted) {
       throw new BadRequestException("Quiz not completed");
+    }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR && !aiMentorLessonData)
       throw new BadRequestException("No AI Mentor Lesson Data given");
@@ -143,7 +161,11 @@ export class StudentLessonProgressService {
     if (shouldUpdate) {
       const updated = await dbInstance
         .update(studentLessonProgress)
-        .set({ completedAt: sql`now()`, completedQuestionCount })
+        .set({
+          completedAt: sql`now
+          ()`,
+          completedQuestionCount,
+        })
         .where(
           and(
             eq(studentLessonProgress.lessonId, lesson.id),
@@ -209,6 +231,7 @@ export class StudentLessonProgressService {
         studentId,
         resolvedActor,
         dbInstance,
+        actualLanguage,
       );
     }
   }
@@ -277,8 +300,17 @@ export class StudentLessonProgressService {
     attempts: number,
     isQuizPassed: boolean,
     isCompleted: boolean,
-    trx: PostgresJsDatabase<typeof schema>,
+    trx: PostgresJsDatabase<typeof schema> = this.db,
+    languageAnswered?: SupportedLanguages | null,
   ) {
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      lessonId,
+      languageAnswered || undefined,
+    );
+
+    const lang = languageAnswered === null ? languageAnswered : language;
+
     return trx
       .insert(studentLessonProgress)
       .values({
@@ -290,6 +322,7 @@ export class StudentLessonProgressService {
         completedAt: sql`now()`,
         completedQuestionCount,
         quizScore,
+        languageAnswered: lang,
       })
       .onConflictDoUpdate({
         target: [
@@ -302,6 +335,7 @@ export class StudentLessonProgressService {
           isQuizPassed,
           completedQuestionCount,
           quizScore,
+          languageAnswered: lang,
           completedAt: isCompleted ? sql`now()` : null,
         },
       });
@@ -383,6 +417,7 @@ export class StudentLessonProgressService {
     studentId: UUIDType,
     actor: CurrentUser,
     trx?: PostgresJsDatabase<typeof schema>,
+    language?: SupportedLanguages,
   ) {
     const courseFinishedChapterCount = await this.getCourseFinishedChapterCount(
       courseId,
@@ -404,6 +439,7 @@ export class StudentLessonProgressService {
         courseFinishedChapterCount,
         actor,
         trx,
+        language,
       );
 
       const dbInstance = trx ?? this.db;
@@ -428,6 +464,7 @@ export class StudentLessonProgressService {
       courseFinishedChapterCount,
       actor,
       trx,
+      language,
     );
   }
 
@@ -480,11 +517,21 @@ export class StudentLessonProgressService {
     finishedChapterCount: number,
     actor: CurrentUser,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+    language?: SupportedLanguages,
   ) {
     if (progress === PROGRESS_STATUSES.COMPLETED) {
       const [studentCourse] = await dbInstance
         .update(studentCourses)
-        .set({ progress, completedAt: sql`NOW()`, finishedChapterCount })
+        .set({
+          progress,
+          completedAt: sql`NOW()`,
+          finishedChapterCount,
+          courseCompletionMetadata: setJsonbField(
+            studentCourses.courseCompletionMetadata,
+            "completed_language",
+            language,
+          ),
+        })
         .where(
           and(
             eq(studentCourses.studentId, studentId),

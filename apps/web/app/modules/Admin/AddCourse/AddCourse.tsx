@@ -19,6 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/LanguageSelector";
 import { setPageTitle } from "~/utils/setPageTitle";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
@@ -154,6 +162,57 @@ const AddCourse = () => {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="language"
+              render={({ field }) => (
+                <FormItem>
+                  <Label className="flex gap-4 items-center mt-5">
+                    <div>
+                      <span className="text-red-500">*</span>{" "}
+                      {t("adminCourseView.settings.field.baseLanguage")}
+                    </div>
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Icon
+                              name="Info"
+                              className="h-auto w-5 cursor-default text-neutral-400"
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          align="center"
+                          className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                        >
+                          {t("adminCourseView.settings.other.baseLanguageTooltip")}
+                          <TooltipArrow className="fill-black" />
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courseLanguages.map((item) => (
+                        <SelectItem value={item.key} key={item.key} className="w-full">
+                          <div className="flex w-full items-center gap-2">
+                            <Icon name={item.iconName} className="size-4" />
+                            <span className="font-semibold">{t(item.translationKey)}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            ></FormField>
+
             <FormField
               control={form.control}
               name="description"

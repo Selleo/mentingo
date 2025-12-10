@@ -3,7 +3,6 @@
 // @ts-nocheck
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -24,6 +23,7 @@ import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
 
 import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type QuizLessonFormProps = {
@@ -31,6 +31,7 @@ type QuizLessonFormProps = {
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   isAttemptsLimitEnabled: boolean;
+  language: SupportedLanguages;
 };
 
 export const useQuizLessonForm = ({
@@ -38,6 +39,7 @@ export const useQuizLessonForm = ({
   lessonToEdit,
   setContentTypeToDisplay,
   isAttemptsLimitEnabled,
+  language,
 }: QuizLessonFormProps) => {
   const { mutateAsync: createQuizLesson } = useCreateQuizLesson();
   const { mutateAsync: updateQuizLesson } = useUpdateQuizLesson();
@@ -187,7 +189,7 @@ export const useQuizLessonForm = ({
             ...values,
             questions: updatedQuestions,
             type: LessonType.QUIZ,
-            language: SUPPORTED_LANGUAGES.EN,
+            language,
           },
           lessonId: lessonToEdit.id,
         });
@@ -198,7 +200,7 @@ export const useQuizLessonForm = ({
             questions: updatedQuestions,
             type: LessonType.QUIZ,
             chapterId: chapterToEdit.id,
-            language: SUPPORTED_LANGUAGES.EN,
+            language,
           },
         });
       }

@@ -11,6 +11,7 @@ import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
 import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSidebar/CourseViewSidebar";
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
 import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { CoursesAccessGuard } from "../Courses.layout";
 
@@ -22,7 +23,9 @@ export default function CourseViewPage() {
   const { t } = useTranslation();
   const { id = "" } = useParams();
 
-  const { data: course } = useCourse(id);
+  const { language } = useLanguageStore();
+
+  const { data: course } = useCourse(id, language);
   const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
 

@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm";
 
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
+
 export function setJsonbField(
   field: any,
   key?: string | null,
@@ -12,7 +14,7 @@ export function setJsonbField(
 
   return sql`
     jsonb_set(
-      ${field},
+      COALESCE(${field}, '{}'::jsonb),
       ARRAY[${key}]::text[],
       to_jsonb(${value}::text),
       ${createMissing}
@@ -26,4 +28,8 @@ export function buildJsonbField(key?: string | null, value?: string | null) {
   }
 
   return sql`json_build_object(${key}::text, ${value}::text)`;
+}
+
+export function deleteJsonbField(field: AnyPgColumn, key: string) {
+  return sql`${field} - ${key}::text`;
 }

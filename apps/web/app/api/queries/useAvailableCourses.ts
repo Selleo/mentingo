@@ -3,6 +3,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetAvailableCoursesResponse } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UserRole } from "~/config/userRoles";
 import type { SortOption } from "~/types/sorting";
 
@@ -18,6 +19,7 @@ type CourseParams = {
   userId?: string;
   excludeCourseId?: string;
   userRole?: UserRole;
+  language: SupportedLanguages;
 };
 
 type QueryOptions = {
@@ -40,6 +42,7 @@ export const availableCoursesQueryOptions = (
       ...(searchParams?.sort && { sort: searchParams.sort }),
       ...(searchParams?.userId && { userId: searchParams.userId }),
       ...(searchParams?.excludeCourseId && { excludeCourseId: searchParams.excludeCourseId }),
+      language: searchParams?.language,
     });
     return response.data;
   },

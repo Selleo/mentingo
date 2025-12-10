@@ -3,12 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetStatsResponse } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 
-export const statistics = () => {
+export const statistics = (language: SupportedLanguages) => {
   return {
-    queryKey: ["statistics/stats"],
+    queryKey: ["statistics/stats", { language }],
     queryFn: async () => {
-      const response = await ApiClient.api.statisticsControllerGetStats();
+      const response = await ApiClient.api.statisticsControllerGetStats({ language });
 
       return response.data;
     },
@@ -16,6 +17,6 @@ export const statistics = () => {
   };
 };
 
-export function useStatistics() {
-  return useQuery(statistics());
+export function useStatistics(language: SupportedLanguages) {
+  return useQuery(statistics(language));
 }

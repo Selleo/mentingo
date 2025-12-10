@@ -1,6 +1,3 @@
-// TODO: Need to be fixed
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -11,15 +8,17 @@ import { useCourseStatusFlags } from "../hooks/useCourseStatusFlags";
 import CourseStatusCard from "./CourseStatusCard";
 import { useCourseStatusForm } from "./hooks/useCourseStatusForm";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { CourseStatus } from "~/api/queries/useCourses";
 
 type CoursePublishStatusProps = {
   courseId: string;
   status: CourseStatus;
+  language: SupportedLanguages;
 };
 
-const CoursePublishStatus = ({ courseId, status }: CoursePublishStatusProps) => {
-  const { form, onSubmit } = useCourseStatusForm({ courseId, status });
+const CoursePublishStatus = ({ courseId, status, language }: CoursePublishStatusProps) => {
+  const { form, onSubmit } = useCourseStatusForm({ courseId, status, language });
   const { t } = useTranslation();
 
   const currentStatus = form.watch("status");

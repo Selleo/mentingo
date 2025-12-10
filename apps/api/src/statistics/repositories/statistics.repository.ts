@@ -150,10 +150,9 @@ export class StatisticsRepository {
   }
 
   async getFiveMostPopularCourses(userId?: UUIDType, language?: SupportedLanguages) {
-    const languageJsonPath = language ? `${language}` : courses.baseLanguage;
     return this.db
       .select({
-        courseName: sql<string>`courses.title->>${languageJsonPath}`,
+        courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
         studentCount: sql<number>`${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}`,
       })
       .from(coursesSummaryStats)

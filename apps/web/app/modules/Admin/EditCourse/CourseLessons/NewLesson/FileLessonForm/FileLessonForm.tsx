@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 import { getFileTypeFromName } from "~/utils/getFileTypeFromName";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
@@ -25,6 +26,7 @@ import Breadcrumb from "../components/Breadcrumb";
 import { useFileLessonForm } from "./hooks/useFileLessonForm";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
+import type { SupportedLanguages } from "@repo/shared";
 
 type FileLessonProps = {
   contentTypeToDisplay: string;
@@ -32,6 +34,7 @@ type FileLessonProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
+  language: SupportedLanguages;
 };
 
 type SourceType = "upload" | "external";
@@ -42,11 +45,13 @@ const FileLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setSelectedLesson,
+  language,
 }: FileLessonProps) => {
   const { form, onSubmit, onDelete } = useFileLessonForm({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
+    language,
   });
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
@@ -135,8 +140,11 @@ const FileLessonForm = ({
       ? t("video").toLowerCase()
       : t("presentation").toLowerCase();
 
+  const missingTranslations = lessonToEdit && !lessonToEdit.title.trim();
+
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
+      {missingTranslations && <MissingTranslationsAlert />}
       <div className="flex flex-col gap-y-1">
         <Breadcrumb
           lessonLabel={

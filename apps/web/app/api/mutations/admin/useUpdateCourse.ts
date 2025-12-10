@@ -1,14 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
-import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
+import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
 
 import type { UpdateCourseBody } from "../../generated-api";
+import type { AxiosError } from "axios";
 
 type UpdateCourseOptions = {
   data: UpdateCourseBody;
@@ -26,24 +26,19 @@ export function useUpdateCourse() {
         options.data,
       );
 
-      await queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
+      await queryClient.invalidateQueries({
+        queryKey: [COURSE_QUERY_KEY, { id: options.courseId }],
+      });
 
       return response.data;
     },
     onSuccess: () => {
       toast({ description: t("adminCourseView.toast.courseUpdatedSuccessfully") });
     },
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          description: error.response?.data.message,
-          variant: "destructive",
-        });
-      }
-      toast({
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: AxiosError) => {
+      const { message } = error.response?.data as { message: string };
+
+      toast({ description: t(message), variant: "destructive" });
     },
   });
 }

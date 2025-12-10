@@ -108,9 +108,9 @@ export class AdminChapterRepository {
       .select({
         updatedAt: sql<string>`${lessons.updatedAt}`,
         id: lessons.id,
-        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        title: this.localizationService.getFieldByLanguage(lessons.title, language),
         type: sql<LessonTypes>`${lessons.type}`,
-        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+        description: this.localizationService.getFieldByLanguage(lessons.description, language),
         fileS3Key: sql<string>`${lessons.fileS3Key}`,
         fileType: sql<string>`${lessons.fileType}`,
         displayOrder: sql<number>`${lessons.displayOrder}`,
@@ -123,9 +123,9 @@ export class AdminChapterRepository {
           SELECT ARRAY(
             SELECT json_build_object(
               'id', ${questions.id},
-              'title', ${this.localizationService.getLocalizedSqlField(questions.title, language)},
+              'title', ${this.localizationService.getFieldByLanguage(questions.title, language)},
               'type', ${questions.type},
-              'description', ${this.localizationService.getLocalizedSqlField(
+              'description', ${this.localizationService.getFieldByLanguage(
                 questions.description,
                 language,
               )},
@@ -135,13 +135,13 @@ export class AdminChapterRepository {
                 SELECT ARRAY(
                   SELECT json_build_object(
                     'id', ${questionAnswerOptions.id},
-                    'optionText', ${this.localizationService.getLocalizedSqlField(
+                    'optionText', ${this.localizationService.getFieldByLanguage(
                       questionAnswerOptions.optionText,
                       language,
                     )},
                     'isCorrect', ${questionAnswerOptions.isCorrect},
                     'displayOrder', ${questionAnswerOptions.displayOrder},
-                    'matchedWord', ${this.localizationService.getLocalizedSqlField(
+                    'matchedWord', ${this.localizationService.getFieldByLanguage(
                       questionAnswerOptions.matchedWord,
                       language,
                     )},

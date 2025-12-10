@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
   bigint,
@@ -301,6 +302,7 @@ export const studentCourses = pgTable(
       withTimezone: true,
       precision: 3,
     }),
+    courseCompletionMetadata: jsonb("course_completion_metadata"),
     enrolledAt: timestamp("enrolled_at", {
       mode: "string",
       withTimezone: true,
@@ -339,6 +341,7 @@ export const studentLessonProgress = pgTable(
       withTimezone: true,
       precision: 3,
     }),
+    languageAnswered: text("language_answered").default(SUPPORTED_LANGUAGES.EN),
   },
   (table) => ({
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),

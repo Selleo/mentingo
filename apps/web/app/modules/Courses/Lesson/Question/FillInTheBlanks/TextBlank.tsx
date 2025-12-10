@@ -56,6 +56,16 @@ export const TextBlank = ({
       className={textBlankClasses}
       {...(studentAnswer?.studentAnswer && { defaultValue: studentAnswer.studentAnswer })}
       disabled={!!isDisabled}
+      draggable={false}
+      onDragStart={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      onDragOver={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
       {...register(`fillInTheBlanksText.${questionId}.${formFieldId}`)}
     />
   );

@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
@@ -15,18 +14,21 @@ import { fileLessonFormSchema } from "../validators/fileLessonFormSchema";
 
 import type { LessonTypes } from "../../../CourseLessons.types";
 import type { FileLessonFormValues } from "../validators/fileLessonFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type FileLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit?: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
+  language: SupportedLanguages;
 };
 
 export const useFileLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setContentTypeToDisplay,
+  language,
 }: FileLessonFormProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: createFile } = useBetaCreateFileItem();
@@ -61,7 +63,7 @@ export const useFileLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateFileItem({
-          data: { ...values, language: SUPPORTED_LANGUAGES.EN },
+          data: { ...values, language },
           fileLessonId: lessonToEdit.id,
         });
       } else {

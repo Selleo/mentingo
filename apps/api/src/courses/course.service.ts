@@ -32,7 +32,7 @@ import { isEmpty, isEqual } from "lodash";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
@@ -46,6 +46,7 @@ import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-cou
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
+import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { SettingsService } from "src/settings/settings.service";
@@ -68,6 +69,7 @@ import {
   groups,
   groupUsers,
   lessons,
+  questionAnswerOptions,
   questions,
   quizAttempts,
   studentChapterProgress,
@@ -141,6 +143,7 @@ export class CourseService {
     private readonly envService: EnvService,
     private readonly localizationService: LocalizationService,
     private readonly eventBus: EventBus,
+    private readonly adminLessonService: AdminLessonService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
@@ -543,7 +546,6 @@ export class CourseService {
   ): Promise<CommonShowCourse> {
     //TODO: to remove
     const testDeployment = "test";
-
     testDeployment;
 
     const [course] = await this.db
@@ -571,6 +573,8 @@ export class CourseService {
           )`,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -716,17 +720,19 @@ export class CourseService {
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        title: this.localizationService.getFieldByLanguage(courses.title, language),
         thumbnailS3Key: sql<string>`COALESCE(${courses.thumbnailS3Key}, '')`,
         category: categories.title,
         categoryId: categories.id,
-        description: this.localizationService.getLocalizedSqlField(courses.description, language),
+        description: this.localizationService.getFieldByLanguage(courses.description, language),
         courseChapterCount: courses.chapterCount,
         status: courses.status,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
         hasCertificate: courses.hasCertificate,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -741,7 +747,7 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: this.localizationService.getLocalizedSqlField(chapters.title, language),
+        title: this.localizationService.getFieldByLanguage(chapters.title, language),
         displayOrder: sql<number>`${chapters.displayOrder}`,
         lessonCount: chapters.lessonCount,
         updatedAt: chapters.updatedAt,
@@ -1003,11 +1009,11 @@ export class CourseService {
       .update(courses)
       .set({
         settings: sql`
-        jsonb_set(
-          courses.settings,
-          '{lessonSequenceEnabled}',
-          to_jsonb(${lessonSequenceEnabled}),
-          true
+          jsonb_set(
+            COALESCE(${courses.settings}, '{}'::jsonb),
+        '{lessonSequenceEnabled}',
+        to_jsonb(${lessonSequenceEnabled}::boolean),
+        true
         )
       `,
       })
@@ -1080,15 +1086,15 @@ export class CourseService {
         }
       }
 
-      const settings = {
-        lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
-      };
+      const settings = sql`json_build_object('lessonSequenceEnabled', ${LESSON_SEQUENCE_ENABLED}::boolean)`;
 
       const [newCourse] = await trx
         .insert(courses)
         .values({
           title: buildJsonbField(createCourseBody.language, createCourseBody.title),
           description: buildJsonbField(createCourseBody.language, createCourseBody.description),
+          baseLanguage: createCourseBody.language,
+          availableLocales: [createCourseBody.language],
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
           status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
@@ -1144,6 +1150,14 @@ export class CourseService {
 
         const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
 
+        if (!updateCourseBody.language) {
+          throw new BadRequestException("adminCourseView.toast.updateCourseMissingLanguage");
+        }
+
+        if (!existingCourse.availableLocales.includes(updateCourseBody.language)) {
+          throw new BadRequestException("adminCourseView.toast.languageNotSupported");
+        }
+
         if (!existingCourse) {
           throw new NotFoundException("Course not found");
         }
@@ -1152,13 +1166,11 @@ export class CourseService {
           throw new ForbiddenException("You don't have permission to update course");
         }
 
-        const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
-          ENTITY_TYPE.COURSE,
+        const previousSnapshot = await this.buildCourseActivitySnapshot(
           id,
           updateCourseBody.language,
+          trx,
         );
-
-        const previousSnapshot = await this.buildCourseActivitySnapshot(id, resolvedLanguage, trx);
 
         if (updateCourseBody.categoryId) {
           const [category] = await trx
@@ -1184,12 +1196,11 @@ export class CourseService {
         }
 
         const { priceInCents, currency, title, description, language, ...rest } = updateCourseBody;
-        const languageToUse = language ?? resolvedLanguage;
 
         const updateData = {
           ...rest,
-          title: buildJsonbField(languageToUse, title),
-          description: buildJsonbField(languageToUse, description),
+          title: setJsonbField(courses.title, language, title),
+          description: setJsonbField(courses.description, language, description),
           ...(isStripeConfigured ? { priceInCents, currency } : {}),
           ...(imageKey && { imageUrl: imageKey.fileUrl }),
         };
@@ -1269,7 +1280,7 @@ export class CourseService {
           }
         }
 
-        const updatedSnapshot = await this.buildCourseActivitySnapshot(id, resolvedLanguage, trx);
+        const updatedSnapshot = await this.buildCourseActivitySnapshot(id, language, trx);
 
         return {
           updatedCourse,
@@ -2164,23 +2175,24 @@ export class CourseService {
             SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
             FROM (
               SELECT
-                l.id AS quiz_id,
+                lessons.id AS quiz_id,
                 ${this.localizationService.getLocalizedSqlField(
                   lessons.title,
                   language,
+                  "co",
                 )} AS quiz_name,
-                l.display_order AS lesson_order,
+                lessons.display_order AS lesson_order,
                 ROUND(AVG(slp.quiz_score), 0) AS average_score,
                 COUNT(DISTINCT slp.student_id) AS finished_count
-              FROM ${lessons} l
-              JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
-              JOIN ${chapters} c ON l.chapter_id = c.id
+              FROM ${lessons}
+              JOIN ${studentLessonProgress} slp ON lessons.id = slp.lesson_id
+              JOIN ${chapters} c ON lessons.chapter_id = c.id
               JOIN ${studentCourses} sc ON slp.student_id = sc.student_id AND sc.course_id = c.course_id
               JOIN ${courses} co ON co.id = c.course_id
-              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${
+              WHERE c.course_id = ${courseId} AND lessons.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${
                 COURSE_ENROLLMENT.ENROLLED
               }
-              GROUP BY l.id, l.title, l.display_order, co.available_locales, co.base_language
+              GROUP BY lessons.id, lessons.title, lessons.display_order, co.available_locales, co.base_language
             ) AS subquery
           ),
           '[]'::jsonb
@@ -2326,6 +2338,7 @@ export class CourseService {
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .where(and(...conditions))
       .orderBy(order)
       .limit(perPage)
       .offset((page - 1) * perPage);
@@ -2536,12 +2549,12 @@ export class CourseService {
         )`;
 
     const quizNameExpression = sql<string>`(
-          SELECT ${this.localizationService.getLocalizedSqlField(lessons.title, language)}
-          FROM ${lessons} l
-          JOIN ${chapters} ch ON ch.id = l.chapter_id
+          SELECT ${this.localizationService.getLocalizedSqlField(lessons.title, language, "c")}
+          FROM ${lessons}
+          JOIN ${chapters} ch ON ch.id = lessons.chapter_id
           JOIN ${courses} c ON c.id = ch.course_id
-          WHERE l.id = ${studentLessonProgress.lessonId}
-            AND l.type = 'quiz'
+          WHERE lessons.id = ${studentLessonProgress.lessonId}
+            AND lessons.type = 'quiz'
         )`;
 
     return {
@@ -2639,5 +2652,108 @@ export class CourseService {
           eq(studentCourses.courseId, courseId),
         ),
       );
+  }
+
+  async createLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    userId: UUIDType,
+    role: UserRole,
+  ) {
+    await this.adminLessonService.validateAccess("course", role, userId, courseId);
+
+    const [{ availableLocales }] = await this.db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (availableLocales.includes(language)) {
+      throw new BadRequestException("adminCourseView.createLanguage.alreadyExists");
+    }
+
+    const newLanguages = [...availableLocales, language];
+
+    await this.db
+      .update(courses)
+      .set({ availableLocales: newLanguages })
+      .where(eq(courses.id, courseId));
+  }
+
+  async deleteLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    role: UserRole,
+    userId: UUIDType,
+  ) {
+    const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.COURSE,
+      courseId,
+    );
+
+    if (!availableLocales.includes(language) || baseLanguage === language) {
+      throw new BadRequestException({ message: "adminCourseView.toast.invalidLanguageToDelete" });
+    }
+
+    const data = await this.getBetaCourseById(courseId, language, userId, role);
+
+    return this.db.transaction(async (trx) => {
+      const chapterIds = data.chapters.map(({ id }) => id);
+      const lessonIds: UUIDType[] = [];
+      const questionIds: UUIDType[] = [];
+
+      for (const chapter of data.chapters) {
+        for (const lesson of chapter.lessons ?? []) {
+          lessonIds.push(lesson.id);
+          if (lesson.type === LESSON_TYPES.QUIZ && lesson.questions) {
+            for (const q of lesson.questions) if (q.id) questionIds.push(q.id);
+          }
+        }
+      }
+
+      if (chapterIds.length) {
+        await trx
+          .update(chapters)
+          .set({ title: deleteJsonbField(chapters.title, language) })
+          .where(inArray(chapters.id, chapterIds));
+      }
+
+      if (lessonIds.length) {
+        await trx
+          .update(lessons)
+          .set({
+            title: deleteJsonbField(lessons.title, language),
+            description: deleteJsonbField(lessons.description, language),
+          })
+          .where(inArray(lessons.id, lessonIds));
+      }
+
+      if (questionIds.length) {
+        await trx
+          .update(questions)
+          .set({
+            title: deleteJsonbField(questions.title, language),
+            description: deleteJsonbField(questions.description, language),
+            solutionExplanation: deleteJsonbField(questions.solutionExplanation, language),
+          })
+          .where(inArray(questions.id, questionIds));
+
+        await trx
+          .update(questionAnswerOptions)
+          .set({
+            optionText: deleteJsonbField(questionAnswerOptions.optionText, language),
+            matchedWord: deleteJsonbField(questionAnswerOptions.matchedWord, language),
+          })
+          .where(inArray(questionAnswerOptions.questionId, questionIds));
+      }
+
+      await trx
+        .update(courses)
+        .set({
+          title: deleteJsonbField(courses.title, language),
+          description: deleteJsonbField(courses.description, language),
+          availableLocales: sql`ARRAY_REMOVE(${courses.availableLocales}, ${language})`,
+        })
+        .where(eq(courses.id, courseId));
+    });
   }
 }

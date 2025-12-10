@@ -260,6 +260,7 @@ export const studentQuestionAnswersSchema = Type.Object({
 export const answerQuestionsForLessonBody = Type.Object({
   lessonId: UUIDSchema,
   questionsAnswers: Type.Array(studentQuestionAnswersSchema),
+  language: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
 export const nextLessonSchema = Type.Union([

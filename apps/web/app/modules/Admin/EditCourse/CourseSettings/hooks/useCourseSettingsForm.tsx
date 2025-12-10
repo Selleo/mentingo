@@ -8,7 +8,6 @@ import { queryClient } from "~/api/queryClient";
 import { courseSettingsFormSchema } from "~/modules/Admin/EditCourse/CourseSettings/validators/courseSettingsFormSchema";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { UpdateCourseBody } from "~/api/generated-api";
 import type { CourseSettingsFormValues } from "~/modules/Admin/EditCourse/CourseSettings/validators/courseSettingsFormSchema";
 
 type CourseSettingsProps = {
@@ -43,18 +42,13 @@ export const useCourseSettingsForm = ({
   });
 
   const onSubmit: SubmitHandler<CourseSettingsFormValues> = async (data) => {
-    const payload: UpdateCourseBody = {
-      ...data,
-      language: data.language as SupportedLanguages,
-    };
-
     await updateCourse({
-      data: payload,
+      data,
       courseId,
     });
 
     await queryClient.invalidateQueries(courseQueryOptions(courseId));
   };
 
-  return { form, onSubmit };
+  return { form, onSubmit, reset: form.reset };
 };

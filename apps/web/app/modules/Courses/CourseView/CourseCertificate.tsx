@@ -10,12 +10,15 @@ import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { useUserRole } from "~/hooks/useUserRole";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
 const CourseCertificate = () => {
   const { t } = useTranslation();
   const { id = "" } = useParams();
-  const { data: course } = useCourse(id);
+  const { language } = useLanguageStore();
+
+  const { data: course } = useCourse(id, language);
   const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
@@ -25,6 +28,7 @@ const CourseCertificate = () => {
   const { data: certificate } = useCertificate({
     userId: currentUser?.id,
     courseId: id,
+    language,
   });
 
   const hasFinishedCourse = useMemo(() => {
