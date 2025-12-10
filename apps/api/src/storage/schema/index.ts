@@ -17,7 +17,7 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
-import { ACTIVITY_LOG_RESOURCE_TYPES, ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
+import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "src/activity-logs/types";
 import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -697,3 +697,16 @@ export const activityLogs = pgTable(
     resourceIdx: index("activity_logs_resource_idx").on(table.resourceType, table.resourceId),
   }),
 );
+
+export const questionsAndAnswers = pgTable("questions_and_answers", {
+  ...id,
+  ...timestamps,
+  title: jsonb("title").default({}).notNull(),
+  description: jsonb("description").default({}).notNull(),
+  metadata: jsonb("metadata").default({}),
+  baseLanguage: text("base_language").notNull().default("en"),
+  availableLocales: text("available_locales")
+    .array()
+    .notNull()
+    .default(sql`ARRAY['en']::text[]`),
+});

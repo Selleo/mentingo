@@ -93,6 +93,7 @@ export const routeAccessConfig = createRouteConfig({
   //Client and public
   "course/:id": ALL_ROLES,
   courses: ALL_ROLES,
+  qa: ALL_ROLES,
 
   // Admin part
   "admin/courses": ADMIN_AND_CONTENT_CREATOR,

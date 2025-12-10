@@ -1,5 +1,5 @@
 import { useNavigate } from "@remix-run/react";
-import { OnboardingPages } from "@repo/shared";
+import { ACCESS_GUARD, OnboardingPages } from "@repo/shared";
 import { isEmpty } from "lodash-es";
 import { useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { useAvailableCourses } from "~/api/queries/useAvailableCourses";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
 import {
@@ -26,8 +27,6 @@ import { setPageTitle } from "~/utils/setPageTitle";
 
 import { useTourSetup } from "../Onboarding/hooks/useTourSetup";
 import { studentCoursesSteps } from "../Onboarding/routes/student";
-
-import { CoursesAccessGuard } from "./Courses.layout";
 
 import type { MetaFunction } from "@remix-run/react";
 
@@ -134,7 +133,7 @@ export default function CoursesPage() {
   };
 
   return (
-    <CoursesAccessGuard>
+    <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <PageWrapper
         breadcrumbs={[
           {
@@ -218,6 +217,6 @@ export default function CoursesPage() {
           </div>
         </div>
       </PageWrapper>
-    </CoursesAccessGuard>
+    </ContentAccessGuard>
   );
 }

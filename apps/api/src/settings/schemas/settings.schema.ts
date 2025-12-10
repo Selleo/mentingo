@@ -38,6 +38,8 @@ export const globalSettingsJSONSchema = Type.Object({
   userEmailTriggers: userEmailTriggersJSONSchema,
   primaryColor: Type.Union([Type.String(), Type.Null()]),
   contrastColor: Type.Union([Type.String(), Type.Null()]),
+  unregisteredUserQAAccessibility: Type.Boolean(),
+  QAEnabled: Type.Boolean(),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

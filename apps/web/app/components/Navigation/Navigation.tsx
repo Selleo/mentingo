@@ -21,6 +21,7 @@ import { useMobileNavigation } from "./useMobileNavigation";
 
 import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
 import type { UserRole } from "~/utils/userRoles";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 
 type DashboardNavigationProps = { menuItems?: NavigationGroups[] };
 
@@ -31,6 +32,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
   const { data: isStripeConfigured } = useStripeConfigured();
+
+  const { data: globalSettings } = useGlobalSettings();
 
   const { data: user } = useCurrentUser();
 
@@ -55,7 +58,9 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   }, []);
 
   if (!menuItems) {
-    menuItems = mapNavigationItems(getNavigationConfig(t, isStripeConfigured?.enabled));
+    menuItems = mapNavigationItems(
+      getNavigationConfig(t, globalSettings?.QAEnabled, isStripeConfigured?.enabled),
+    );
   }
 
   if (!role) return null;

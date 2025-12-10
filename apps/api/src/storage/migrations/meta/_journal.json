@@ -439,8 +439,15 @@
     {
       "idx": 62,
       "version": "7",
-      "when": 1764886686343,
-      "tag": "0062_add_activity_logs_table",
+      "when": 1765277525875,
+      "tag": "0062_added_qa_global_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1765292073743,
+      "tag": "0063_added_qa_table",
       "breakpoints": true
     },
     {

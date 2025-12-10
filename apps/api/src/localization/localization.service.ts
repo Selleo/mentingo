@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { eq, sql } from "drizzle-orm";
-import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { alias, type AnyPgColumn, type AnyPgTable } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
 import { chapters, courses, lessons } from "src/storage/schema";
@@ -67,14 +67,21 @@ export class LocalizationService {
   }
 
   /**
-   * Note: callers must join `courses` so `courses.baseLanguage` and `courses.availableLocales` are available.
+   * Note: callers must join `baseTable` so `baseTable.baseLanguage` and `baseTable.availableLocales` are available.
    */
-  getLocalizedSqlField(
+  getLocalizedSqlField<
+    T extends AnyPgTable & { baseLanguage: AnyPgColumn; availableLocales: AnyPgColumn },
+  >(
     fieldColumn: AnyPgColumn,
     language?: SupportedLanguages,
-    aliasName: string = "courses",
+    additionalData: {
+      joinedAliasName?: string;
+      baseTable: T;
+    } = { baseTable: courses as unknown as T },
   ) {
-    const aliased = alias(courses, aliasName);
+    const aliased = additionalData.joinedAliasName
+      ? alias(additionalData.baseTable, additionalData.joinedAliasName)
+      : additionalData.baseTable;
 
     const langExpr = language ? sql`${language}` : aliased.baseLanguage;
 
@@ -82,13 +89,13 @@ export class LocalizationService {
       COALESCE(
         CASE
           WHEN ${aliased.availableLocales} @> ARRAY[${langExpr}]::text[]
-            THEN COALESCE(
-              ${fieldColumn}::jsonb ->> ${langExpr}::text,
-              ${fieldColumn}::jsonb ->> ${aliased.baseLanguage}::text
-            )
-          ELSE ${fieldColumn}::jsonb ->> ${aliased.baseLanguage}::text
-        END,
-        ''
+      THEN COALESCE(
+      ${fieldColumn}::jsonb ->> ${langExpr}::text,
+      ${fieldColumn}::jsonb ->> ${aliased.baseLanguage}::text
+      )
+      ELSE ${fieldColumn}::jsonb ->> ${aliased.baseLanguage}::text
+      END,
+      ''
       )
     `;
   }

@@ -1,5 +1,14 @@
+import { useTranslation } from "react-i18next";
+
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
+import {
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  Tooltip,
+} from "~/components/ui/tooltip";
 
 import type { ReactNode } from "react";
 
@@ -10,6 +19,8 @@ interface SettingItemProps {
   checked: boolean;
   onCheckedChange: () => void;
   icon?: ReactNode;
+  disabled?: boolean;
+  tooltipTranslationKey?: string;
 }
 export function SettingItem({
   id,
@@ -18,7 +29,11 @@ export function SettingItem({
   checked,
   onCheckedChange,
   icon,
+  tooltipTranslationKey = "",
+  disabled = false,
 }: SettingItemProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
       <div className="flex items-center gap-3">
@@ -34,7 +49,25 @@ export function SettingItem({
           <p className="body-sm-md text-muted-foreground">{description}</p>
         </div>
       </div>
-      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+      {disabled ? (
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger>
+              <Switch disabled />
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              align="center"
+              className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+            >
+              {t(tooltipTranslationKey)}
+              <TooltipArrow className="fill-black" />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : (
+        <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+      )}
     </div>
   );
 }

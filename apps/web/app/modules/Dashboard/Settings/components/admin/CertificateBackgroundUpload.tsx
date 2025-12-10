@@ -84,6 +84,7 @@ export function CertificateBackgroundUpload({
                 isUploading={isUploading}
                 imageUrl={certificateBackgroundImage}
                 fileInputRef={fileInputRef}
+                variant="video"
               />
               {isUploading && <p>{t("certificateBackgroundUpload.other.uploading")}</p>}
             </div>

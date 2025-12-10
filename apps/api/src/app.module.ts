@@ -7,6 +7,7 @@ import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
 import { EnvModule } from "src/env/env.module";
+import { QAModule } from "src/qa/qa.module";
 
 import { ActivityLogsModule } from "./activity-logs/activity-logs.module";
 import { AiModule } from "./ai/ai.module";
@@ -49,6 +50,7 @@ import { StripeModule } from "./stripe/stripe.module";
 import { StudentLessonProgressModule } from "./studentLessonProgress/studentLessonProgress.module";
 import { TestConfigModule } from "./test-config/test-config.module";
 import { UserModule } from "./user/user.module";
+import { ActivityLogsModule, ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 
 @Module({
   imports: [
@@ -124,6 +126,7 @@ import { UserModule } from "./user/user.module";
     EnvModule,
     LocalizationModule,
     ActivityLogsModule,
+    QAModule,
   ],
   controllers: [],
   providers: [

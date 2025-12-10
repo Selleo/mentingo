@@ -180,6 +180,8 @@ export interface GetPublicGlobalSettingsResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -280,6 +282,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -313,6 +317,8 @@ export interface UpdateEnforceSSOResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -365,6 +371,8 @@ export interface UpdateColorSchemaResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -3510,6 +3518,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateQaSetting
+     * @request PATCH:/api/settings/admin/qa/{setting}
+     */
+    settingsControllerUpdateQaSetting: (
+      setting: "QAEnabled" | "unregisteredUserQAAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/qa/${setting}`,
+        method: "PATCH",
         ...params,
       }),
 

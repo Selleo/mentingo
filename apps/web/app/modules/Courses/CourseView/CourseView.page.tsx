@@ -1,10 +1,12 @@
 import { useParams } from "@remix-run/react";
+import { ACCESS_GUARD } from "@repo/shared";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCourse, useCurrentUser } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
@@ -12,8 +14,6 @@ import { CourseViewSidebar } from "~/modules/Courses/CourseView/CourseViewSideba
 import { MoreCoursesByAuthor } from "~/modules/Courses/CourseView/MoreCoursesByAuthor";
 import { YouMayBeInterestedIn } from "~/modules/Courses/CourseView/YouMayBeInterestedIn";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-
-import { CoursesAccessGuard } from "../Courses.layout";
 
 import { ChapterListOverview } from "./components/ChapterListOverview";
 import { CourseAdminStatistics } from "./CourseAdminStatistics/CourseAdminStatistics";
@@ -77,7 +77,7 @@ export default function CourseViewPage() {
   };
 
   return (
-    <CoursesAccessGuard>
+    <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <PageWrapper breadcrumbs={breadcrumbs}>
         <div className="flex w-full max-w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_480px]">
           <div className="flex flex-col gap-y-6 overflow-hidden">
@@ -130,6 +130,6 @@ export default function CourseViewPage() {
           <CourseViewSidebar course={course} />
         </div>
       </PageWrapper>
-    </CoursesAccessGuard>
+    </ContentAccessGuard>
   );
 }

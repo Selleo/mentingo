@@ -20,7 +20,7 @@ export default function UserEmailTriggers({ userEmailTriggers }: UserEmailTrigge
         <CardTitle className="h5">{t("userEmailTriggers.header")}</CardTitle>
         <CardDescription>{t("userEmailTriggers.subHeader")}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-4">
         {Object.keys(userEmailTriggers).map((emailTrigger, idx) => (
           <SettingItem
             key={idx}
