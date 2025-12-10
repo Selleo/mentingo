@@ -1,6 +1,10 @@
-import { useSearchParams } from "@remix-run/react";
+import { useNavigate, useSearchParams } from "@remix-run/react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+
+import { Icon } from "~/components/Icon";
+import { Button } from "~/components/ui/button";
+import { useUserRole } from "~/hooks/useUserRole";
 
 import { PageWrapper } from "../../components/PageWrapper";
 import { Pagination } from "../../components/Pagination/Pagination";
@@ -20,7 +24,10 @@ const mockedNews = Array.from({ length: 20 }).map((_, idx) => ({
 
 function NewsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { isAdminLike } = useUserRole();
 
   const parsePageParam = useCallback(() => {
     const pageParam = Number(searchParams.get("page"));
@@ -51,7 +58,20 @@ function NewsPage() {
 
       return (
         <>
-          <h1 className="h1">{t("newsView.header")}</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="h1">{t("newsView.header")}</h1>
+            {isAdminLike && (
+              <Button
+                className="flex items-center justify-center rounded-full w-12 h-12"
+                variant="outline"
+                onClick={() => {
+                  navigate("/news/add");
+                }}
+              >
+                <Icon name="Plus" className="size-4" />
+              </Button>
+            )}
+          </div>
 
           <NewsItem {...firstNews} isBig />
 

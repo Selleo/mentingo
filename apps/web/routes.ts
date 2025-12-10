@@ -26,6 +26,12 @@ export const routes: (
           route("announcements", "modules/Announcements/Announcements.page.tsx");
           route("news", "modules/News/News.page.tsx");
           route("news/:newsId", "modules/News/NewsDetails.page.tsx");
+          route("news/:newsId/edit", "modules/News/NewsForm.page.tsx", {
+            id: "edit-news",
+          });
+          route("news/add", "modules/News/NewsForm.page.tsx", {
+            id: "add-news",
+          });
           route("profile/:id", "modules/Profile/Profile.page.tsx");
         });
         route("course/:courseId/lesson", "modules/Courses/Lesson/Lesson.layout.tsx", () => {

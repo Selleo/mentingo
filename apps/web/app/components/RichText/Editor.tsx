@@ -3,11 +3,10 @@ import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/r
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
-import { useToast } from "~/components/ui/use-toast";
-import { cn } from "~/lib/utils";
-import { LessonTypes } from "~/modules/Courses/CourseView/lessonTypes";
-import { baseUrl } from "~/utils/baseUrl";
+import { useLessonFileUpload } from "../../api/mutations/admin/useLessonFileUpload";
+import { cn } from "../../lib/utils";
+import { baseUrl } from "../../utils/baseUrl";
+import { useToast } from "../ui/use-toast";
 
 import { plugins } from "./plugins";
 import { defaultClasses } from "./styles";
@@ -20,8 +19,9 @@ type EditorProps = {
   id?: string;
   className?: string;
   parentClassName?: string;
-  lessonType?: string;
   lessonId?: string;
+  allowFiles?: boolean;
+  acceptedFileTypes?: string[];
 };
 
 const Editor = ({
@@ -31,13 +31,14 @@ const Editor = ({
   id,
   className,
   parentClassName,
-  lessonType,
   lessonId,
+  allowFiles = false,
+  acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
 }: EditorProps) => {
-  const { mutateAsync: uploadFile } = useLessonFileUpload();
-
-  const { toast } = useToast();
   const { t } = useTranslation();
+  const { toast } = useToast();
+
+  const { mutateAsync: uploadFile } = useLessonFileUpload();
 
   const handleFileInsert = async (
     e: DragEvent | ClipboardEvent,
@@ -48,11 +49,12 @@ const Editor = ({
 
     e.preventDefault();
 
-    if (lessonType != LessonTypes.text) {
+    if (!allowFiles) {
+      console.log({ allowFiles });
       return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
     }
 
-    if (ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type)) {
+    if (acceptedFileTypes.includes(file.type)) {
       const uploaded = await uploadFile({ file, lessonId });
 
       const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
@@ -107,15 +109,17 @@ const Editor = ({
     >
       <EditorToolbar
         editor={editor}
-        allowFiles={lessonType === LessonTypes.text}
+        allowFiles={allowFiles}
         lessonId={lessonId}
+        acceptedFileTypes={acceptedFileTypes}
       />
       <div
         className={cn(
-          "relative h-[200px] max-h-[600px] min-h-[200px] resize-y overflow-auto [&_.ProseMirror]:h-full [&_.ProseMirror]:max-h-full [&_.ProseMirror]:min-h-full",
+          "relative min-h-[30vh] w-full overflow-auto [&_.ProseMirror]:min-h-[240px] [&_.ProseMirror]:h-auto [&_.ProseMirror]:w-full",
           className,
         )}
       >
+        {/* TODO: has to strech in height when content is too long */}
         <EditorContent
           id={id}
           editor={editor}

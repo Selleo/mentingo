@@ -1,7 +1,10 @@
-import { useParams } from "@remix-run/react";
+import { useNavigate, useParams } from "@remix-run/react";
 import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
+
+import { Button } from "~/components/ui/button";
+import { useUserRole } from "~/hooks/useUserRole";
 
 import { Icon } from "../../components/Icon";
 import { PageWrapper } from "../../components/PageWrapper";
@@ -147,7 +150,10 @@ const mockNews: NewsEntry[] = [
 
 export default function NewsDetailsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { newsId } = useParams();
+
+  const { isAdminLike } = useUserRole();
 
   const news = mockNews.find((item) => item.id === newsId);
 
@@ -169,6 +175,36 @@ export default function NewsDetailsPage() {
       className="flex flex-col gap-6"
     >
       <div className="flex flex-col gap-8">
+        {isAdminLike && (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              className="w-28 gap-2"
+              onClick={() => {
+                navigate(`edit`);
+              }}
+            >
+              <Icon name="Edit" className="size-4" />
+              <span className="text-sm font-semibold leading-5 text-neutral-800">
+                {t("newsView.edit")}
+              </span>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-28 gap-2"
+              onClick={() => {
+                // TODO: delete news
+                navigate("/news");
+              }}
+            >
+              <Icon name="TrashIcon" className="size-4" />
+              <span className="text-sm font-semibold leading-5 text-neutral-800">
+                {t("newsView.button.delete")}
+              </span>
+            </Button>
+          </div>
+        )}
+
         <img src={news.headerImage} alt={news.title} className="w-full h-[500px] rounded-lg" />
 
         <div className="flex flex-col gap-4 border-b-[1px] border-primary-100 pb-3">
