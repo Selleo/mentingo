@@ -107,17 +107,18 @@ import type {
   CourseStudentProgressionSortField,
   CourseStudentQuizResultsQuery,
   CourseStudentQuizResultsSortField,
-  EnrolledStudentFilterSchema,
+  EnrolledStudentSortField,
+  EnrolledStudentsQuery,
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
-import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
+import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
-import type { BaseResponse, Pagination, UUIDType } from "src/common";
+import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 import type {
   AdminLessonWithContentSchema,
@@ -338,33 +339,35 @@ export class CourseService {
     });
   }
 
-  async getStudentsWithEnrollmentDate(
-    courseId: UUIDType,
-    filters: EnrolledStudentFilterSchema,
-  ): Promise<BaseResponse<EnrolledStudent[]>> {
+  async getStudentsWithEnrollmentDate(query: EnrolledStudentsQuery) {
+    const { courseId, filters = {}, page = 1, perPage = DEFAULT_PAGE_SIZE } = query;
     const { keyword, sort = EnrolledStudentSortFields.enrolledAt } = filters;
 
-    const { sortOrder } = getSortOptions(sort);
+    const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const conditions = [];
+    const conditions = [
+      eq(users.role, USER_ROLES.STUDENT),
+      eq(users.archived, false),
+      isNull(users.deletedAt),
+    ];
 
     if (keyword) {
       const searchKeyword = keyword.toLowerCase();
 
-      conditions.push(
-        or(
-          ilike(users.firstName, `%${searchKeyword}%`),
-          ilike(users.lastName, `%${searchKeyword}%`),
-          ilike(users.email, `%${searchKeyword}%`),
-        ),
+      const keywordCondition = or(
+        ilike(users.firstName, `%${searchKeyword}%`),
+        ilike(users.lastName, `%${searchKeyword}%`),
+        ilike(users.email, `%${searchKeyword}%`),
       );
+
+      if (keywordCondition) {
+        conditions.push(keywordCondition);
+      }
     }
 
     if (filters.groups?.length) {
       conditions.push(getGroupFilterConditions(filters.groups));
     }
-
-    conditions.push(isNull(users.deletedAt));
 
     const data = await this.db
       .select({
@@ -389,18 +392,54 @@ export class CourseService {
       )
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
+      .where(and(...conditions))
       .groupBy(
         users.id,
         studentCourses.enrolledAt,
         studentCourses.status,
         studentCourses.enrolledByGroupId,
       )
-      .orderBy(sortOrder(studentCourses.enrolledAt));
+      .orderBy(
+        sortOrder(this.getEnrolledStudentsColumnToSortBy(sortedField as EnrolledStudentSortField)),
+      )
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: countDistinct(users.id) })
+      .from(users)
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
+      )
+      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
+      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
+      .where(and(...conditions));
 
     return {
       data: data ?? [],
+      pagination: {
+        totalItems: totalItems || 0,
+        page,
+        perPage,
+      },
     };
+  }
+
+  private getEnrolledStudentsColumnToSortBy(field: EnrolledStudentSortField) {
+    switch (field) {
+      case EnrolledStudentSortFields.firstName:
+        return users.firstName;
+      case EnrolledStudentSortFields.lastName:
+        return users.lastName;
+      case EnrolledStudentSortFields.email:
+        return users.email;
+      case EnrolledStudentSortFields.isEnrolledByGroup:
+        return sql`CASE WHEN ${studentCourses.enrolledByGroupId} IS NULL THEN 0 ELSE 1 END`;
+      case EnrolledStudentSortFields.enrolledAt:
+      default:
+        return studentCourses.enrolledAt;
+    }
   }
 
   async getCourseSequenceEnabled(courseId: UUIDType): Promise<LessonSequenceEnabledResponse> {

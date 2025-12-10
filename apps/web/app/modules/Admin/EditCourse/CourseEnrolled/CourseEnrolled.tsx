@@ -1,14 +1,9 @@
 import { useParams } from "@remix-run/react";
 import { COURSE_ENROLLMENT } from "@repo/shared";
-import {
-  useReactTable,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-} from "@tanstack/react-table";
+import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Minus, User, Users } from "lucide-react";
-import { startTransition, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -18,6 +13,7 @@ import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
 import { useGroupsByCourseQuery } from "~/api/queries/admin/useGroupsByCourse";
 import { useAllUsersEnrolledSuspense } from "~/api/queries/admin/useUsersEnrolled";
 import { Icon } from "~/components/Icon";
+import { Pagination, ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 import SortButton from "~/components/TableSortButton/TableSortButton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -50,14 +46,22 @@ import { useToast } from "~/components/ui/use-toast";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
+import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { GroupEnrollModal } from "./GroupEnrollModal";
 import { GroupUnenrollModal } from "./GroupUnenrollModal";
 
-import type { Row, SortingState, RowSelectionState, ColumnDef } from "@tanstack/react-table";
+import type {
+  Row,
+  SortingState,
+  RowSelectionState,
+  ColumnDef,
+  OnChangeFn,
+} from "@tanstack/react-table";
 import type { ReactElement, FormEvent } from "react";
 import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
 import type { UsersEnrolledSearchParams } from "~/api/queries/admin/useUsersEnrolled";
+import type { ItemsPerPageOption } from "~/components/Pagination/Pagination";
 import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/SearchFilter";
 
 type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];
@@ -72,8 +76,12 @@ export const CourseEnrolled = (): ReactElement => {
   const { data: groupData } = useGroupsQuerySuspense();
   const { data: enrolledGroups } = useGroupsByCourseQuery(courseId ?? "");
 
-  const [searchParams, setSearchParams] = useState<UsersEnrolledSearchParams>({});
-  const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: true }]);
+  const [searchParams, setSearchParams] = useState<UsersEnrolledSearchParams>({
+    page: 1,
+    perPage: ITEMS_PER_PAGE_OPTIONS[0],
+  });
+
+  const [sorting, setSorting] = useState<SortingState>([{ id: "enrolledAt", desc: false }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const [isGroupEnrollDialogOpen, setIsGroupEnrollDialogOpen] = useState<boolean>(false);
@@ -85,7 +93,14 @@ export const CourseEnrolled = (): ReactElement => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [isUnenrollDialogOpen, setIsUnenrollDialogOpen] = useState<boolean>(false);
 
-  const { data: usersData } = useAllUsersEnrolledSuspense(courseId, searchParams);
+  const queryParams = useMemo(() => {
+    const sort = tanstackSortingToParam(sorting) as UsersEnrolledSearchParams["sort"];
+    return { ...searchParams, sort };
+  }, [searchParams, sorting]);
+
+  const { data: usersResponse } = useAllUsersEnrolledSuspense(courseId, queryParams);
+  const usersData = usersResponse?.data ?? [];
+  const pagination = usersResponse?.pagination;
 
   const columns: ColumnDef<EnrolledStudent>[] = [
     {
@@ -141,6 +156,7 @@ export const CourseEnrolled = (): ReactElement => {
     {
       accessorKey: "groups",
       header: t("adminUsersView.field.group"),
+      enableSorting: false,
       cell: ({ row }) => {
         const groups = row.original.groups;
         const visibleGroups = groups.slice(0, 1);
@@ -224,20 +240,6 @@ export const CourseEnrolled = (): ReactElement => {
     },
   ];
 
-  const table = useReactTable({
-    getRowId: (row) => row.id,
-    data: usersData,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      rowSelection,
-    },
-  });
-
   const filterConfig: FilterConfig[] = [
     {
       type: "text",
@@ -261,9 +263,37 @@ export const CourseEnrolled = (): ReactElement => {
       setSearchParams((prev) => ({
         ...prev,
         [name]: value,
+        page: 1,
       }));
     });
   };
+
+  const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
+    setSorting((prevSorting) => {
+      const nextSorting = typeof updater === "function" ? updater(prevSorting) : updater;
+
+      startTransition(() => {
+        setSearchParams((prev) => ({ ...prev, page: 1 }));
+      });
+
+      return nextSorting;
+    });
+  };
+
+  const table = useReactTable({
+    getRowId: (row) => row.id,
+    data: usersData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    onSortingChange: handleSortingChange,
+    onRowSelectionChange: setRowSelection,
+    manualSorting: true,
+    enableMultiSort: false,
+    state: {
+      sorting,
+      rowSelection,
+    },
+  });
 
   const handleRowClick = (row: Row<EnrolledStudent>) => () => {
     row.toggleSelected(!row.getIsSelected());
@@ -315,12 +345,39 @@ export const CourseEnrolled = (): ReactElement => {
   const handleOpenGroupEnroll = () => setIsGroupEnrollDialogOpen(true);
   const handleOpenGroupUnenroll = () => setIsGroupUnenrollDialogOpen(true);
 
+  const page = pagination?.page ?? searchParams.page ?? 1;
+  const perPage = pagination?.perPage ?? searchParams.perPage ?? ITEMS_PER_PAGE_OPTIONS[0];
+  const totalItems = pagination?.totalItems ?? usersData.length;
+
+  const handlePageChange = (page: number) =>
+    startTransition(() => setSearchParams((prev) => ({ ...prev, page })));
+
+  const handleItemsPerPageChange = (itemsPerPageValue: string) => {
+    const parsedPerPage = Number(itemsPerPageValue);
+
+    startTransition(() =>
+      setSearchParams((prev) => ({
+        ...prev,
+        perPage: Number.isNaN(parsedPerPage) ? ITEMS_PER_PAGE_OPTIONS[0] : parsedPerPage,
+        page: 1,
+      })),
+    );
+  };
+
+  useEffect(() => {
+    setRowSelection({});
+  }, [page, perPage, searchParams.keyword, searchParams.groups]);
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between gap-2">
         <SearchFilter
           filters={filterConfig}
-          values={searchParams}
+          values={{
+            ...searchParams,
+            page: String(searchParams.page),
+            perPage: String(searchParams.perPage),
+          }}
           onChange={handleFilterChange}
           isLoading={false}
         />
@@ -486,6 +543,15 @@ export const CourseEnrolled = (): ReactElement => {
           ))}
         </TableBody>
       </Table>
+      <Pagination
+        className="border-b border-x bg-neutral-50 rounded-b-lg"
+        emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
+        totalItems={totalItems}
+        currentPage={page}
+        itemsPerPage={perPage as ItemsPerPageOption}
+        onPageChange={handlePageChange}
+        onItemsPerPageChange={handleItemsPerPageChange}
+      />
     </div>
   );
 };

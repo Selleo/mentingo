@@ -99,28 +99,45 @@ export type CourseEnrollmentScope =
 
 // enrolledStudent query
 
-export const enrolledStudentSortFields = ["enrolledAt"] as const;
+export const enrolledStudentSortFields = [
+  "enrolledAt",
+  "firstName",
+  "lastName",
+  "email",
+  "isEnrolledByGroup",
+] as const;
 
 export const EnrolledStudentSortFields: Record<string, string> = {
   enrolledAt: "enrolledAt",
+  firstName: "firstName",
+  lastName: "lastName",
+  email: "email",
+  isEnrolledByGroup: "isEnrolledByGroup",
 };
 
 export type EnrolledStudentSortField = (typeof enrolledStudentSortFields)[number];
 
 export const sortEnrolledStudentsOptions = Type.Union([
-  Type.Literal("enrolledAt"),
-  Type.Literal("-enrolledAt"),
+  ...enrolledStudentSortFields.map((field) => Type.Literal(field)),
+  ...enrolledStudentSortFields.map((field) => Type.Literal(`-${field}`)),
 ]);
 
 export type SortEnrolledStudentsOptions = Static<typeof sortEnrolledStudentsOptions>;
 
 export const enrolledStudentFilterSchema = Type.Object({
-  keyword: Type.String(),
-  sort: sortEnrolledStudentsOptions,
+  keyword: Type.Optional(Type.String()),
+  sort: Type.Optional(sortEnrolledStudentsOptions),
   groups: Type.Optional(groupsFilterSchema),
 });
 
 export type EnrolledStudentFilterSchema = Static<typeof enrolledStudentFilterSchema>;
+
+export type EnrolledStudentsQuery = {
+  courseId: UUIDType;
+  page?: number;
+  perPage?: number;
+  filters?: EnrolledStudentFilterSchema;
+};
 
 // Course student progression query options
 

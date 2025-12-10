@@ -7,8 +7,20 @@ import type { Option } from "~/components/ui/multiselect";
 
 export type UsersEnrolledSearchParams = {
   keyword?: string;
-  sort?: "enrolledAt" | "-enrolledAt" | undefined;
+  sort?:
+    | "enrolledAt"
+    | "-enrolledAt"
+    | "firstName"
+    | "-firstName"
+    | "lastName"
+    | "-lastName"
+    | "email"
+    | "-email"
+    | "isEnrolledByGroup"
+    | "-isEnrolledByGroup";
   groups?: Option[];
+  page?: number;
+  perPage?: number;
 };
 
 export const ENROLLED_USERS_QUERY_KEY = "users-enrollments";
@@ -23,10 +35,12 @@ export const useUsersEnrolledQuery = (
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
       ...(searchParams?.groups && { groups: searchParams.groups.map(({ value }) => value) }),
+      ...(searchParams?.page && { page: searchParams.page }),
+      ...(searchParams?.perPage && { perPage: searchParams.perPage }),
     });
     return data;
   },
-  select: ({ data }: GetStudentsWithEnrollmentDateResponse) => data,
+  select: (response: GetStudentsWithEnrollmentDateResponse) => response,
 });
 
 export function useAllUsersEnrolledSuspense(

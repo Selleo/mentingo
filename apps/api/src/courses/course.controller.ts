@@ -191,13 +191,19 @@ export class CourseController {
     @Query("keyword") keyword: string,
     @Query("sort") sort: SortEnrolledStudentsOptions,
     @Query("groups") groups: GroupsFilterSchema,
-  ): Promise<BaseResponse<EnrolledStudent[]>> {
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+  ): Promise<PaginatedResponse<EnrolledStudent[]>> {
     const filters: EnrolledStudentFilterSchema = {
       keyword,
       sort,
       groups,
     };
-    return await this.courseService.getStudentsWithEnrollmentDate(courseId, filters);
+    const query = { courseId, filters, page, perPage };
+
+    const enrolledStudents = await this.courseService.getStudentsWithEnrollmentDate(query);
+
+    return new PaginatedResponse(enrolledStudents);
   }
 
   @Get("available-courses")
