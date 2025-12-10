@@ -81,7 +81,7 @@ export class StudentLessonProgressService {
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
       throw new UnauthorizedException("You don't have assignment to this lesson");
-    
+
     if (
       accessCourseLessonWithDetails.lessonIsCompleted ||
       accessCourseLessonWithDetails.attempts > 1
@@ -161,7 +161,11 @@ export class StudentLessonProgressService {
     if (shouldUpdate) {
       const updated = await dbInstance
         .update(studentLessonProgress)
-        .set({ completedAt: sql`now()`, completedQuestionCount })
+        .set({
+          completedAt: sql`now
+          ()`,
+          completedQuestionCount,
+        })
         .where(
           and(
             eq(studentLessonProgress.lessonId, lesson.id),
@@ -220,15 +224,15 @@ export class StudentLessonProgressService {
         dbInstance,
       );
 
-    if (isCompletedAsFreemium) return;
+      if (isCompletedAsFreemium) return;
 
-    await this.checkCourseIsCompletedForUser(
-      lesson.courseId,
-      studentId,
-      resolvedActor,
-      dbInstance,
-      actualLanguage,
-    );
+      await this.checkCourseIsCompletedForUser(
+        lesson.courseId,
+        studentId,
+        resolvedActor,
+        dbInstance,
+        actualLanguage,
+      );
     }
   }
 

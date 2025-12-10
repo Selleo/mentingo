@@ -1166,7 +1166,11 @@ export class CourseService {
           throw new ForbiddenException("You don't have permission to update course");
         }
 
-        const previousSnapshot = await this.buildCourseActivitySnapshot(id, updateCourseBody.language, trx);
+        const previousSnapshot = await this.buildCourseActivitySnapshot(
+          id,
+          updateCourseBody.language,
+          trx,
+        );
 
         if (updateCourseBody.categoryId) {
           const [category] = await trx
@@ -1276,7 +1280,7 @@ export class CourseService {
           }
         }
 
-        const updatedSnapshot = await this.buildCourseActivitySnapshot(id, resolvedLanguage, trx);
+        const updatedSnapshot = await this.buildCourseActivitySnapshot(id, language, trx);
 
         return {
           updatedCourse,
@@ -2175,7 +2179,7 @@ export class CourseService {
                 ${this.localizationService.getLocalizedSqlField(
                   lessons.title,
                   language,
-                  {jsdlfk}
+                  "co",
                 )} AS quiz_name,
                 lessons.display_order AS lesson_order,
                 ROUND(AVG(slp.quiz_score), 0) AS average_score,

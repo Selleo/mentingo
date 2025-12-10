@@ -1,1 +1,0 @@
-ALTER TABLE "student_courses" ADD COLUMN "course_completion_metadata" jsonb;

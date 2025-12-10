@@ -442,6 +442,20 @@
       "when": 1764886686343,
       "tag": "0062_add_activity_logs_table",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1765362755221,
+      "tag": "0063_added_multi_language_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1765362782624,
+      "tag": "0064_added_course_completion_metadata",
+      "breakpoints": true
     }
   ]
 }
