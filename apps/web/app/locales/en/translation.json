@@ -2075,6 +2075,21 @@
       "languageNotSupported": "This language is not supported",
       "languageAlreadyExists": "This language already exists",
       "notFound": "Q&A not found"
+    },
+    "aria": {
+      "editQuestion": "Edit question"
+    },
+    "edit": {
+      "header": "Edit Q&A",
+      "subheader": "Edit the Q&A details below"
+    },
+    "fields": {
+      "title": "Question",
+      "description": "Answer"
+    },
+    "create": {
+      "header": "Create Q&A",
+      "subheader": "Add a question and answer for learners."
     }
   }
 }

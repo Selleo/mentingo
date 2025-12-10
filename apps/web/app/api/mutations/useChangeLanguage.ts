@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
+import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { QA_QUERY_KEY } from "~/api/queries/useQA";
 import { useToast } from "~/components/ui/use-toast";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
@@ -25,6 +27,9 @@ export function useChangeLanguage() {
       queryClient.invalidateQueries({
         queryKey: userSettingsQueryOptions.queryKey,
       });
+
+      queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [QA_QUERY_KEY] });
 
       if (data && "language" in data && data.language) {
         setLanguage(data.language as Language);

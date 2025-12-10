@@ -1,9 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@remix-run/react";
+import { Link, useNavigate, useParams } from "@remix-run/react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import useCreateQA from "~/api/mutations/admin/useCreateQA";
+import useUpdateQA from "~/api/mutations/admin/useUpdateQA";
+import useDeleteQA from "~/api/mutations/admin/useDeleteQA";
+import useQA from "~/api/queries/useQA";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
@@ -13,29 +16,59 @@ import { Textarea } from "~/components/ui/textarea";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { qaFormSchema, type QAFormValues } from "~/modules/QA/qa.types";
 import { setPageTitle } from "~/utils/setPageTitle";
+import DeleteQADialog from "~/modules/QA/components/DeleteQADialog";
 
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.qa");
 
-export default function CreateQAPage() {
+export default function EditQAPage() {
   const { t } = useTranslation();
+  const { id: qaId } = useParams();
   const navigate = useNavigate();
+
   const { language } = useLanguageStore();
-  const { mutateAsync: createQA, isPending } = useCreateQA();
+
+  const { data: qa, isLoading } = useQA(qaId ?? "", language);
+  const { mutateAsync: updateQA, isPending: isUpdating } = useUpdateQA();
+  const { mutateAsync: deleteQA, isPending: isDeleting } = useDeleteQA();
 
   const {
     handleSubmit,
     register,
+    reset,
     formState: { errors, isValid },
   } = useForm<QAFormValues>({
     resolver: zodResolver(qaFormSchema),
-    defaultValues: { title: "", description: "", language },
+    defaultValues: {
+      title: qa?.title,
+      description: qa?.description,
+      language,
+    },
     mode: "onChange",
   });
 
+  useEffect(() => {
+    if (qa) {
+      reset({
+        title: qa.title ?? "",
+        description: qa.description ?? "",
+        language,
+      });
+    }
+  }, [qa, language, reset]);
+
+  if (!(qa || isLoading)) throw new Error(t("qaView.toast.notFound"));
+
   const onSubmit = async (values: QAFormValues) => {
-    await createQA(values).then(() => navigate("/qa"));
+    if (!qaId) return;
+    await updateQA({ qaId, ...values, language }).then(() => navigate("/qa"));
+  };
+
+  const onDelete = async () => {
+    if (!qaId) return;
+    await deleteQA(qaId);
+    navigate("/qa");
   };
 
   return (
@@ -43,34 +76,37 @@ export default function CreateQAPage() {
       breadcrumbs={[
         { title: t("announcements.breadcrumbs.dashboard"), href: "/" },
         { title: t("navigationSideBar.qa"), href: "/qa" },
-        { title: t("qaView.button.createNew"), href: "/qa/new" },
+        { title: qa?.title ?? "", href: `/qa/${qaId}` },
       ]}
     >
       <div className="mt-8 flex justify-center">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-[720px] flex-col gap-6">
-          <input type="hidden" value={language} {...register("language")} />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex w-full max-w-[720px] flex-col gap-6"
+        >
           <div className="flex flex-wrap items-start justify-between gap-4 px-1">
             <div className="space-y-2">
-              <h1 className="h5 md:h3">{t("qaView.create.header")}</h1>
+              <h1 className="h5 md:h3">{t("qaView.edit.header")}</h1>
             </div>
-            <div className="flex items-center gap-3">
-              <Link to="/qa">
-                <Button variant="outline">{t("common.button.cancel")}</Button>
-              </Link>
-              <Button type="submit" disabled={!isValid || isPending}>
-                {t("qaView.button.createNew")}
-              </Button>
+            <div className="flex w-full items-center gap-3 md:w-auto">
+              <div className="ml-auto flex items-center gap-3">
+                <Link to="/qa">
+                  <Button variant="outline">{t("common.button.cancel")}</Button>
+                </Link>
+                <Button type="submit" disabled={!isValid || isUpdating || isLoading}>
+                  {t("common.button.save")}
+                </Button>
+              </div>
             </div>
           </div>
 
           <Card>
-            <CardHeader className="pb-2">
-              <h2 className="text-xl font-semibold">
-                {t("qaView.create.header") ?? t("qaView.create.header")}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {t("qaView.create.subheader")}
-              </p>
+            <CardHeader className="pb-4 flex flex-row items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">{t("qaView.edit.header")}</h2>
+                <p className="text-sm text-muted-foreground">{t("qaView.edit.subheader")}</p>
+              </div>
+              <DeleteQADialog onConfirm={onDelete} loading={isDeleting || isLoading} />
             </CardHeader>
             <CardContent className="space-y-8">
               <div className="space-y-2">

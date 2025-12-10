@@ -2089,7 +2089,22 @@
       "cannotDeleteLanguage": "Nie można usunąć tego języka",
       "languageNotSupported": "Ten język nie jest obsługiwany",
       "languageAlreadyExists": "Ten język już istnieje",
-      "notFound": "Q&A nie znalezione"
+      "notFound": "Nie znaleziono Q&A"
+    },
+    "aria": {
+      "editQuestion": "Edytuj pytanie"
+    },
+    "edit": {
+      "header": "Edytuj Q&A",
+      "subheader": "Edytuj szczegóły Q&A poniżej"
+    },
+    "fields": {
+      "title": "Pytanie",
+      "description": "Odpowiedź"
+    },
+    "create": {
+      "header": "Utwórz Q&A",
+      "subheader": "Dodaj pytanie i odpowiedź dla uczących się."
     }
   }
 }

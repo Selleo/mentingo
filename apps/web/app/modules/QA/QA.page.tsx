@@ -7,12 +7,12 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { Accordion } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
+import { useUserRole } from "~/hooks/useUserRole";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import QAItem from "~/modules/QA/components/QAItem";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
-import { useUserRole } from "~/hooks/useUserRole";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.qa");
 
@@ -53,9 +53,10 @@ export default function QAPage() {
                 {QA?.map((item) => (
                   <QAItem
                     key={item.id}
-                    value={item.id}
+                    id={item.id}
                     title={item.title}
                     description={item.description}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </Accordion>
