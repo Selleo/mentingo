@@ -26,11 +26,11 @@ export function useDeleteCourseLanguage() {
 
       return response.data;
     },
-    onSuccess: async (_, variables) => {
+    onSuccess: async () => {
       toast({ description: t("adminCourseView.toast.successfullyDeletedLanguage") });
 
       await queryClient.invalidateQueries({
-        queryKey: [COURSE_QUERY_KEY, { id: variables.courseId }],
+        queryKey: [COURSE_QUERY_KEY],
       });
     },
     onError: (error: AxiosError) => {

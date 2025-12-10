@@ -77,7 +77,7 @@ export class LessonService {
       isNotNull(studentLessonProgress.completedAt),
     ]);
 
-    const lesson = await this.lessonRepository.getLessonDetails(id, userId);
+    const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 
