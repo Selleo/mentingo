@@ -2079,6 +2079,17 @@
   "qaView": {
     "button": {
       "createNew": "Utwórz nowe Q&A"
+    },
+    "toast": {
+      "qaCreatedSuccessfully": "Q&A zostało pomyślnie utworzone",
+      "qaUpdatedSuccessfully": "Q&A zostało pomyślnie zaktualizowane",
+      "languageCreatedSuccessfully": "Język został pomyślnie utworzony",
+      "languageDeletedSuccessfully": "Język został pomyślnie usunięty",
+      "qaDeletedSuccessfully": "Q&A zostało pomyślnie usunięte",
+      "cannotDeleteLanguage": "Nie można usunąć tego języka",
+      "languageNotSupported": "Ten język nie jest obsługiwany",
+      "languageAlreadyExists": "Ten język już istnieje",
+      "notFound": "Q&A nie znalezione"
     }
   }
 }

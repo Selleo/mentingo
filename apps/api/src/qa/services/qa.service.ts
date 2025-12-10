@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 
 import { QARepository } from "src/qa/repositories/qa.repository";
 import { SettingsService } from "src/settings/settings.service";
@@ -31,13 +31,15 @@ export class QAService {
   }
 
   async createLanguage(qaId: UUIDType, language: SupportedLanguages) {
-    const { availableLocales } = await this.qaRepository.getQA(qaId);
+    const qa = await this.qaRepository.getQA(qaId);
 
-    if (availableLocales.includes(language)) {
+    if (!qa) throw new NotFoundException({ message: "qaView.toast.notFound" });
+
+    if (qa.availableLocales.includes(language)) {
       throw new BadRequestException({ message: "qaView.toast.languageAlreadyExists" });
     }
 
-    const newLanguages = [...availableLocales, language];
+    const newLanguages = [...qa.availableLocales, language];
 
     await this.qaRepository.createLanguage(qaId, newLanguages);
   }
@@ -57,9 +59,11 @@ export class QAService {
   }
 
   async deleteLanguage(qaId: UUIDType, language: SupportedLanguages) {
-    const { availableLocales, baseLanguage } = await this.qaRepository.getQA(qaId, language);
+    const qa = await this.qaRepository.getQA(qaId);
 
-    if (!availableLocales.includes(language) || language === baseLanguage) {
+    if (!qa) throw new BadRequestException({ message: "qaView.toast.notFound" });
+
+    if (!qa.availableLocales.includes(language) || language === qa.baseLanguage) {
       throw new BadRequestException({ message: "qaView.toast.cannotDeleteLanguage" });
     }
 
