@@ -4,6 +4,9 @@ export class FileUploadResponse {
   @ApiProperty()
   fileKey: string;
 
-  @ApiProperty()
-  fileUrl: string;
+  @ApiProperty({ required: false })
+  fileUrl?: string;
+
+  @ApiProperty({ required: false })
+  status?: string;
 }

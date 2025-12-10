@@ -15,8 +15,10 @@ import {
   ALLOWED_EXCEL_MIME_TYPES,
   ALLOWED_EXCEL_MIME_TYPES_MAP,
   ALLOWED_MIME_TYPES,
+  MAX_VIDEO_SIZE,
 } from "./file.constants";
 import { FileGuard } from "./guards/file.guard";
+import { VideoUploadQueueService } from "./video-upload-queue.service";
 
 import type { FileValidationOptions } from "./guards/file.guard";
 import type { ExcelHyperlinkCell } from "./types/excel";
@@ -27,6 +29,7 @@ export class FileService {
   constructor(
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
+    private readonly videoUploadQueueService: VideoUploadQueueService,
   ) {}
 
   async getFileUrl(fileKey: string): Promise<string> {
@@ -71,18 +74,22 @@ export class FileService {
       throw new BadRequestException("File upload failed - invalid file data");
     }
 
+    const isVideo = file.mimetype.startsWith("video/");
+
     const { type } = await FileGuard.validateFile(
       file,
-      options ?? { allowedTypes: ALLOWED_MIME_TYPES, maxSize: MAX_FILE_SIZE },
+      options ?? { allowedTypes: ALLOWED_MIME_TYPES, maxSize: isVideo ? MAX_VIDEO_SIZE : MAX_FILE_SIZE },
     );
 
     try {
-      if (file.mimetype.startsWith("video/")) {
-        const result = await this.bunnyStreamService.upload(file);
+      if (isVideo) {
+        // Enqueue video upload for background processing
+        await this.videoUploadQueueService.enqueueVideoUpload(file, resource);
 
+        // Return temporary response - video is being processed
         return {
-          fileKey: result.fileKey,
-          fileUrl: result.fileUrl,
+          fileKey: `processing-${resource}-${Date.now()}`,
+          status: "processing",
         };
       }
 

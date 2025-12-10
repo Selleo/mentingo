@@ -7005,11 +7005,13 @@
           },
           "fileUrl": {
             "type": "string"
+          },
+          "status": {
+            "type": "string"
           }
         },
         "required": [
-          "fileKey",
-          "fileUrl"
+          "fileKey"
         ]
       },
       "GetUserStatisticsResponse": {
