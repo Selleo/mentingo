@@ -1,7 +1,7 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { Validate } from "nestjs-typebox";
 
-import { baseResponse, BaseResponse } from "src/common";
+import { baseResponse, BaseResponse, UUIDSchema } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -11,6 +11,7 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 import { NewsService } from "./news.service";
 import { CreateNews, createNewsSchema } from "./schemas/createNews.schema";
 import { createNewsResponseSchema } from "./schemas/selectNews.schema";
+import { UpdateNews, updateNewsSchema } from "./schemas/updateNews.schema";
 
 @Controller("news")
 @UseGuards(RolesGuard)
@@ -30,5 +31,20 @@ export class NewsController {
     const createdNews = await this.newsService.createNews(createNewsBody, currentUser);
 
     return new BaseResponse(createdNews);
+  }
+
+  @Patch(":id")
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: updateNewsSchema },
+    ],
+    response: baseResponse(createNewsResponseSchema),
+  })
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  async updateNews(@Param("id") id: string, @Body() updateNewsBody: UpdateNews) {
+    const updatedNews = await this.newsService.updateNews(id, updateNewsBody);
+
+    return new BaseResponse(updatedNews);
   }
 }

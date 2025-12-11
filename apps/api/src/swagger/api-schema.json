@@ -5549,6 +5549,43 @@
           }
         }
       }
+    },
+    "/api/news/{id}": {
+      "patch": {
+        "operationId": "NewsController_updateNews",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNewsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateNewsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -18145,6 +18182,77 @@
         ]
       },
       "CreateNewsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateNewsBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
+          },
+          "title": {
+            "minLength": 1,
+            "maxLength": 200,
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "draft",
+                "type": "string"
+              },
+              {
+                "const": "published",
+                "type": "string"
+              }
+            ]
+          },
+          "isPublic": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "language"
+        ]
+      },
+      "UpdateNewsResponse": {
         "type": "object",
         "properties": {
           "data": {

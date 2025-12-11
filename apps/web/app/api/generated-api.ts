@@ -6011,5 +6011,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         format: "json",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerUpdateNews
+     * @request PATCH:/api/news/{id}
+     */
+    newsControllerUpdateNews: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/news/${id}`,
+        method: "PATCH",
+        ...params,
+      }),
   };
 }
