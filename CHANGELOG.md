@@ -1,6 +1,10 @@
+<a name="v3.23.0"></a>
+
+## [v3.23.0] - 01.01.0001
+
 <a name="v3.22.0"></a>
 
-## [v3.22.0] - 28.11.2025
+## [v3.22.0] - 01.12.2025
 
 ### Features:
 
@@ -77,6 +81,8 @@
 - certificates components ([#950](https://github.com/Selleo/mentingo/issues/950))
 
 ### Documentation:
+
+- update changelog for version v3.22.0
 
 - update documentation to clarify contributing to project ([#937](https://github.com/Selleo/mentingo/issues/937))
 
@@ -2068,7 +2074,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.22.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.23.0...HEAD
+[v3.23.0]: https://github.com/Selleo/mentingo/compare/v3.22.0...v3.23.0
 [v3.22.0]: https://github.com/Selleo/mentingo/compare/v3.21.0...v3.22.0
 [v3.21.0]: https://github.com/Selleo/mentingo/compare/v3.20.0...v3.21.0
 [v3.20.0]: https://github.com/Selleo/mentingo/compare/v3.19.1...v3.20.0
