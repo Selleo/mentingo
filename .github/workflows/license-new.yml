@@ -27,13 +27,9 @@ jobs:
           pnpm install --frozen-lockfile
 
       - name: Check licenses
-        timeout-minutes: 2
+        timeout-minutes: 5
         run: |
           set -euo pipefail
-
-          # Load allowed licenses from repository config (licenses.config.json)
-          export ALLOWED_LICENSES_JSON="$(jq -c '.allowedLicenses' licenses.config.json)"
-          export ALLOWED_PACKAGES_JSON="$(jq -c '.allowedPackages' licenses.config.json)"
 
           # 1) Generate JSON grouped by license
           pnpm licenses list --json > /tmp/licenses.json
@@ -43,4 +39,4 @@ jobs:
           echo
 
           # 2) Find disallowed license expressions (supports AND/OR combos)
-          node scripts/check-licenses.js
+          bun run scripts/check-licenses.bun.ts
