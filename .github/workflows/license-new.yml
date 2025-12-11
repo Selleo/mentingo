@@ -1,0 +1,167 @@
+name: licenses
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+    
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.15.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+
+      - name: Check licenses
+        run: |
+          set -euo pipefail
+
+          # Load allowed licenses from repository config (licenses.config.json)
+          export ALLOWED_LICENSES_JSON="$(jq -c '.allowedLicenses' licenses.config.json)"
+          export ALLOWED_PACKAGES_JSON="$(jq -c '.allowedPackages' licenses.config.json)"
+
+          # 1) Generate JSON grouped by license
+          pnpm licenses list --json > /tmp/licenses.json
+
+          echo "All used licenses (groupBy=license):"
+          jq -r 'keys[]' /tmp/licenses.json | sort -u
+          echo
+
+          # 2) Find disallowed license expressions (supports AND/OR combos)
+          node <<'NODE'
+          const fs = require('fs');
+
+          const allowedArr = JSON.parse(process.env.ALLOWED_LICENSES_JSON || '[]');
+          if (!Array.isArray(allowedArr) || allowedArr.length === 0) {
+            console.error('::error::No allowed licenses loaded from licenses.config.json');
+            process.exit(1);
+          }
+          const allowed = new Set(allowedArr);
+          const allowedPackagesArr = JSON.parse(process.env.ALLOWED_PACKAGES_JSON || '[]');
+          const allowedPackages = new Map();
+          for (const entry of allowedPackagesArr) {
+            if (typeof entry !== 'string') continue;
+            const at = entry.lastIndexOf('@');
+            if (at <= 0 || at === entry.length - 1) continue;
+            const name = entry.slice(0, at);
+            const version = entry.slice(at + 1);
+            if (!allowedPackages.has(name)) allowedPackages.set(name, new Set());
+            allowedPackages.get(name).add(version);
+          }
+
+          const isPackageAllowed = (name, version) =>
+            allowedPackages.get(name)?.has(version) === true;
+          const licenses = JSON.parse(fs.readFileSync('/tmp/licenses.json', 'utf8'));
+
+          // Simple SPDX-expression parser for AND/OR + parentheses
+          function tokenize(expr) {
+            // Keep license text intact; only split on parens and connectors
+            return expr
+              .split(/(\(|\)|\bAND\b|\bOR\b)/)
+              .map((p) => p.trim())
+              .filter(Boolean);
+          }
+
+          function parseExpression(tokens) {
+            let pos = 0;
+
+            function parseFactor() {
+              const token = tokens[pos++];
+              if (token === '(') {
+                const node = parseOr();
+                if (tokens[pos++] !== ')') throw new Error('Unexpected token, expected )');
+                return node;
+              }
+              if (!token) throw new Error('Unexpected end of expression');
+              return { type: 'license', id: token };
+            }
+
+            function parseAnd() {
+              let left = parseFactor();
+              while (tokens[pos] === 'AND') {
+                pos++;
+                left = { type: 'and', left, right: parseFactor() };
+              }
+              return left;
+            }
+
+            function parseOr() {
+              let left = parseAnd();
+              while (tokens[pos] === 'OR') {
+                pos++;
+                left = { type: 'or', left, right: parseAnd() };
+              }
+              return left;
+            }
+
+            const tree = parseOr();
+            if (pos !== tokens.length) throw new Error('Unexpected trailing tokens');
+            return tree;
+          }
+
+          function evalTree(node) {
+            switch (node.type) {
+              case 'license':
+                return allowed.has(node.id);
+              case 'and':
+                return evalTree(node.left) && evalTree(node.right);
+              case 'or':
+                return evalTree(node.left) || evalTree(node.right);
+              default:
+                return false;
+            }
+          }
+
+          function isAllowed(expr) {
+            try {
+              const tokens = tokenize(expr);
+              if (tokens.length === 0) return false;
+              const tree = parseExpression(tokens);
+              return evalTree(tree);
+            } catch {
+              // Fallback: treat unknown/invalid expressions as disallowed
+              return false;
+            }
+          }
+
+          const disallowedExpressions = new Set();
+          const disallowedPackages = [];
+          for (const [expr, packages] of Object.entries(licenses)) {
+            const exprAllowed = isAllowed(expr);
+            for (const pkg of packages) {
+              const versions = pkg.versions ?? ['*'];
+              const violatingVersions = versions.filter(
+                (ver) => !(exprAllowed || isPackageAllowed(pkg.name, ver))
+              );
+              if (violatingVersions.length === 0) continue;
+              disallowedExpressions.add(expr);
+              violatingVersions.forEach((ver) =>
+                disallowedPackages.push(` - ${pkg.name}@${ver}: ${expr}`)
+              );
+            }
+          }
+
+          if (disallowedPackages.length) {
+            console.log('::error::Disallowed or unknown licenses detected:');
+            Array.from(disallowedExpressions)
+              .sort((a, b) => a.localeCompare(b))
+              .forEach((expr) => console.log(expr));
+            console.log();
+
+            console.log('Dependencies using disallowed licenses:');
+            disallowedPackages.sort((a, b) => a.localeCompare(b)).forEach((line) => console.log(line));
+            process.exit(1);
+          } else {
+            console.log('✅ All licenses are allowed.');
+          }
+          NODE

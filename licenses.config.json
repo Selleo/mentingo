@@ -1,0 +1,33 @@
+{
+  "allowedLicenses": [
+    "MIT",
+    "MIT-0",
+    "MIT/X11",
+    "ISC",
+    "Apache",
+    "Apache-2.0",
+    "Apache License 2.0",
+    "BlueOak-1.0.0",
+    "BSD",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "Unlicense",
+    "0BSD",
+    "Python-2.0",
+
+    "CC-BY-3.0",
+    "CC-BY-4.0",
+    "Zlib",
+    "CC0-1.0"
+  ],
+  "allowedPackages": [
+    "thirty-two@1.0.2",
+    "require-like@0.1.2",
+    "react-universal-interface@0.6.2",
+    "pause@0.0.1",
+    "fast-shallow-equal@1.0.0",
+    "css-value@0.0.1",
+    "buffers@0.1.1",
+    "@browserbasehq/sdk@2.6.0"
+  ]
+}
