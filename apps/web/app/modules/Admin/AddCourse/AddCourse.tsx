@@ -222,11 +222,7 @@ const AddCourse = () => {
                     <span className="text-red-500">*</span>{" "}
                     {t("adminCourseView.settings.field.description")}
                   </Label>
-                  <Editor
-                    id="description"
-                    {...field}
-                    className="h-[200px] [&_.ProseMirror]:h-full"
-                  />
+                  <Editor id="description" {...field} />
                   <FormMessage />
                 </FormItem>
               )}

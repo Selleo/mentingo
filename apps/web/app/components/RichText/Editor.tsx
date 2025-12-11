@@ -17,7 +17,6 @@ type EditorProps = {
   onChange: (value: string) => void;
   placeholder?: string;
   id?: string;
-  className?: string;
   parentClassName?: string;
   lessonId?: string;
   allowFiles?: boolean;
@@ -29,7 +28,6 @@ const Editor = ({
   placeholder,
   onChange,
   id,
-  className,
   parentClassName,
   lessonId,
   allowFiles = false,
@@ -97,7 +95,12 @@ const Editor = ({
 
   if (!editor) return <></>;
 
-  const editorClasses = cn("h-full", defaultClasses.ul, defaultClasses.ol, defaultClasses.taskList);
+  const editorClasses = cn(
+    "h-full min-h-[200px]",
+    defaultClasses.ul,
+    defaultClasses.ol,
+    defaultClasses.taskList,
+  );
 
   return (
     <div
@@ -112,20 +115,7 @@ const Editor = ({
         lessonId={lessonId}
         acceptedFileTypes={acceptedFileTypes}
       />
-      <div
-        className={cn(
-          "relative min-h-[30vh] w-full overflow-auto [&_.ProseMirror]:min-h-[240px] [&_.ProseMirror]:h-auto [&_.ProseMirror]:w-full",
-          className,
-        )}
-      >
-        {/* TODO: has to strech in height when content is too long */}
-        <EditorContent
-          id={id}
-          editor={editor}
-          placeholder={placeholder}
-          className={editorClasses}
-        />
-      </div>
+      <EditorContent id={id} editor={editor} placeholder={placeholder} className={editorClasses} />
     </div>
   );
 };
