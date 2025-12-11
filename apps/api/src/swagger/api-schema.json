@@ -5637,6 +5637,31 @@
             }
           }
         }
+      },
+      "delete": {
+        "operationId": "NewsController_deleteNews",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteNewsResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/news": {
@@ -5711,6 +5736,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateNewsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/news/{id}/language": {
+      "delete": {
+        "operationId": "NewsController_deleteNewsLanguage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteNewsLanguageResponse"
                 }
               }
             }
@@ -18642,6 +18712,53 @@
             "required": [
               "id",
               "title"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteNewsLanguageResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "availableLocales"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteNewsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
             ]
           }
         },

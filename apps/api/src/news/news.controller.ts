@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -16,7 +17,7 @@ import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { BaseResponse, PaginatedResponse, UUIDSchema, baseResponse } from "src/common";
+import { BaseResponse, PaginatedResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -28,6 +29,8 @@ import { NewsService } from "./news.service";
 import { CreateNews, createNewsSchema } from "./schemas/createNews.schema";
 import {
   createNewsResponseSchema,
+  deleteNewsLanguageResponseSchema,
+  deleteNewsResponseSchema,
   getNewsResponseSchema,
   paginatedNewsListResponseSchema,
   uploadNewsFileResponseSchema,
@@ -120,6 +123,36 @@ export class NewsController {
     const createdLanguage = await this.newsService.createNewsLanguage(id, createLanguageBody);
 
     return new BaseResponse(createdLanguage);
+  }
+
+  @Delete(":id/language")
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(deleteNewsLanguageResponseSchema),
+  })
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  async deleteNewsLanguage(
+    @Param("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
+  ) {
+    const updatedNews = await this.newsService.deleteNewsLanguage(id, language);
+
+    return new BaseResponse(updatedNews);
+  }
+
+  @Delete(":id")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: baseResponse(deleteNewsResponseSchema),
+  })
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  async deleteNews(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
+    const deletedNews = await this.newsService.deleteNews(id, currentUser);
+
+    return new BaseResponse(deletedNews);
   }
 
   @Post(":id/upload")

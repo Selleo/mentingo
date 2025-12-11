@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 import { and, count, eq, getTableColumns, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import {
   ENTITY_TYPES,
@@ -109,6 +109,53 @@ export class NewsService {
     };
   }
 
+  async deleteNewsLanguage(newsId: UUIDType, language: SupportedLanguages) {
+    const existingNews = await this.validateNewsExists(newsId, language);
+
+    if (existingNews.baseLanguage === language)
+      throw new BadRequestException("adminNewsView.toast.baseLanguageDeleteError");
+
+    if (existingNews.availableLocales.length <= 1)
+      throw new BadRequestException("adminNewsView.toast.minimumLanguageError");
+
+    const updatedLocales = existingNews.availableLocales.filter((locale) => locale !== language);
+
+    const [updatedNews] = await this.db
+      .update(news)
+      .set({
+        availableLocales: updatedLocales,
+        title: deleteJsonbField(news.title, language),
+        content: deleteJsonbField(news.content, language),
+        summary: deleteJsonbField(news.summary, language),
+      })
+      .where(eq(news.id, newsId))
+      .returning({ id: news.id, availableLocales: news.availableLocales });
+
+    if (!updatedNews) throw new BadRequestException("adminNewsView.toast.removeLanguageError");
+
+    return updatedNews;
+  }
+
+  async deleteNews(newsId: UUIDType, currentUser?: CurrentUser) {
+    const existingNews = await this.validateNewsExists(newsId, undefined, false);
+
+    if (existingNews.archived) return { id: existingNews.id };
+
+    const [deletedNews] = await this.db
+      .update(news)
+      .set({
+        archived: true,
+        isPublic: false,
+        updatedBy: currentUser?.userId ?? null,
+      })
+      .where(eq(news.id, newsId))
+      .returning({ id: news.id });
+
+    if (!deletedNews) throw new BadRequestException("adminNewsView.toast.deleteError");
+
+    return deletedNews;
+  }
+
   async getNews(newsId: UUIDType, requestedLanguage: SupportedLanguages) {
     const [existingNews] = await this.db
       .select({
@@ -188,14 +235,14 @@ export class NewsService {
 
   private async validateNewsExists(
     newsId: UUIDType,
-    language: SupportedLanguages,
+    language?: SupportedLanguages,
     shouldIncludeLanguage = true,
   ) {
     const [existingNews] = await this.db.select().from(news).where(eq(news.id, newsId));
 
     if (!existingNews) throw new NotFoundException("adminNewsView.toast.notFoundError");
 
-    if (!shouldIncludeLanguage) return existingNews;
+    if (!shouldIncludeLanguage || !language) return existingNews;
 
     if (!existingNews.availableLocales.includes(language))
       throw new BadRequestException("adminNewsView.toast.invalidLanguageError");

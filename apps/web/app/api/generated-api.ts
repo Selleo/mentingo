@@ -2841,6 +2841,21 @@ export interface AddNewLanguageResponse {
   };
 }
 
+export interface DeleteNewsLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    availableLocales: string[];
+  };
+}
+
+export interface DeleteNewsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
 export interface UploadFileToNewsResponse {
   data: {
     /** @format uuid */
@@ -6133,6 +6148,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name NewsControllerDeleteNews
+     * @request DELETE:/api/news/{id}
+     */
+    newsControllerDeleteNews: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name NewsControllerGetNewsList
      * @request GET:/api/news
      */
@@ -6167,6 +6196,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerDeleteNewsLanguage
+     * @request DELETE:/api/news/{id}/language
+     */
+    newsControllerDeleteNewsLanguage: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteNewsLanguageResponse, any>({
+        path: `/api/news/${id}/language`,
+        method: "DELETE",
+        query: query,
         format: "json",
         ...params,
       }),

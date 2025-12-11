@@ -43,8 +43,19 @@ export const uploadNewsFileResponseSchema = Type.Object({
 export const newsListResponseSchema = Type.Array(getNewsResponseSchema);
 export const paginatedNewsListResponseSchema = paginatedResponse(newsListResponseSchema);
 
+export const deleteNewsLanguageResponseSchema = Type.Object({
+  id: UUIDSchema,
+  availableLocales: Type.Array(Type.String()),
+});
+
+export const deleteNewsResponseSchema = Type.Object({
+  id: UUIDSchema,
+});
+
 export type SelectNews = Static<typeof selectNewsSchema>;
 export type CreateNewsResponse = Static<typeof createNewsResponseSchema>;
 export type GetNewsResponse = Static<typeof getNewsResponseSchema>;
 export type UploadNewsFileResponse = Static<typeof uploadNewsFileResponseSchema>;
 export type NewsListResponse = Static<typeof paginatedNewsListResponseSchema>;
+export type DeleteNewsLanguageResponse = Static<typeof deleteNewsLanguageResponseSchema>;
+export type DeleteNewsResponse = Static<typeof deleteNewsResponseSchema>;
