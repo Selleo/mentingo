@@ -30,16 +30,17 @@ export default function DeleteQADialog({ onConfirm, loading = false }: DeleteQAD
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           type="button"
+          onClick={(event) => event.stopPropagation()}
           disabled={loading}
-          className="gap-2 border-destructive text-destructive hover:bg-destructive/10"
+          className="gap-2 size-8 border-destructive text-destructive hover:bg-red-100 hover:border-destructive hover:text-destructive"
         >
-          <Icon name="TrashIcon" className="h-4 w-4" />
+          <Icon name="TrashIcon" className="size-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent onClick={(event) => event.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>{t("qaView.delete.title")}</DialogTitle>
         </DialogHeader>
@@ -48,12 +49,7 @@ export default function DeleteQADialog({ onConfirm, loading = false }: DeleteQAD
           <Button variant="outline" onClick={() => setOpen(false)} type="button">
             {t("common.button.cancel")}
           </Button>
-          <Button
-            variant="destructive"
-            onClick={handleConfirm}
-            disabled={loading}
-            type="button"
-          >
+          <Button variant="destructive" onClick={handleConfirm} disabled={loading} type="button">
             {t("common.button.delete")}
           </Button>
         </DialogFooter>

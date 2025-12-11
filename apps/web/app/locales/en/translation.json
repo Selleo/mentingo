@@ -2074,14 +2074,16 @@
       "cannotDeleteLanguage": "This language cannot be deleted",
       "languageNotSupported": "This language is not supported",
       "languageAlreadyExists": "This language already exists",
-      "notFound": "Q&A not found"
+      "notFound": "Q&A not found",
+      "noDataToUpdate": "No data to update"
     },
     "aria": {
       "editQuestion": "Edit question"
     },
     "edit": {
       "header": "Edit Q&A",
-      "subheader": "Edit the Q&A details below"
+      "subheader": "Edit the Q&A details below",
+      "language": "Language"
     },
     "fields": {
       "title": "Question",
@@ -2089,7 +2091,12 @@
     },
     "create": {
       "header": "Create Q&A",
-      "subheader": "Add a question and answer for learners."
+      "subheader": "Add a question and answer for learners.",
+      "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the Q&A."
+    },
+    "delete": {
+      "title": "Delete Q&A",
+      "confirm": "Are you sure you want to delete Q&A?"
     }
   }
 }

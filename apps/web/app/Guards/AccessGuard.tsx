@@ -19,7 +19,6 @@ import Loader from "~/modules/common/Loader/Loader";
 
 import type { AccessGuard } from "@repo/shared";
 import type React from "react";
-import type { GlobalSettings } from "~/modules/Dashboard/Settings/types";
 
 const prefetchQueriesForUser = async (userRole: string | undefined) => {
   await queryClient.prefetchQuery(categoriesQueryOptions());

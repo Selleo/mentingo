@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -21,7 +22,6 @@ import { useMobileNavigation } from "./useMobileNavigation";
 
 import type { LeafMenuItem, NavigationGroups } from "~/config/navigationConfig";
 import type { UserRole } from "~/utils/userRoles";
-import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 
 type DashboardNavigationProps = { menuItems?: NavigationGroups[] };
 

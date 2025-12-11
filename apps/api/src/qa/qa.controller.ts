@@ -17,6 +17,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import {
   type AllQAResponseBody,
@@ -36,7 +37,6 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 export class QAController {
   constructor(private readonly qaService: QAService) {}
 
-  @Public()
   @Get(":qaId")
   @Validate({
     request: [
@@ -45,12 +45,12 @@ export class QAController {
     ],
     response: QAResponseSchema,
   })
+  @Roles(USER_ROLES.ADMIN)
   async getQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
-    @CurrentUser("userId") userId?: UUIDType,
   ): Promise<QAResponseBody> {
-    return this.qaService.getQA(qaId, language, userId);
+    return this.qaService.getQA(qaId, language);
   }
 
   @Public()
@@ -71,8 +71,8 @@ export class QAController {
     request: [{ type: "body", schema: createQASchema }],
   })
   @Roles(USER_ROLES.ADMIN)
-  async createQA(@Body() data: CreateQABody, @CurrentUser("userId") userId: UUIDType) {
-    return this.qaService.createQA(data, userId);
+  async createQA(@Body() data: CreateQABody, @CurrentUser() currentUser: CurrentUserType) {
+    return this.qaService.createQA(data, currentUser);
   }
 
   @Post("create-language/:qaId")
@@ -86,8 +86,9 @@ export class QAController {
   async createLanguage(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    return this.qaService.createLanguage(qaId, language);
+    return this.qaService.createLanguage(qaId, language, currentUser);
   }
 
   @Patch(":qaId")
@@ -103,8 +104,9 @@ export class QAController {
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
     @Body() data: QAUpdateBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    return this.qaService.updateQA(data, qaId, language);
+    return this.qaService.updateQA(data, qaId, language, currentUser);
   }
 
   @Delete(":qaId")
@@ -112,8 +114,8 @@ export class QAController {
     request: [{ type: "param", name: "qaId", schema: UUIDSchema }],
   })
   @Roles(USER_ROLES.ADMIN)
-  async deleteQA(@Param("qaId") qaId: UUIDType) {
-    return this.qaService.deleteQA(qaId);
+  async deleteQA(@Param("qaId") qaId: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
+    return this.qaService.deleteQA(qaId, currentUser);
   }
 
   @Delete("language/:qaId")
@@ -127,7 +129,8 @@ export class QAController {
   async deleteLanguage(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    return this.qaService.deleteLanguage(qaId, language);
+    return this.qaService.deleteLanguage(qaId, language, currentUser);
   }
 }

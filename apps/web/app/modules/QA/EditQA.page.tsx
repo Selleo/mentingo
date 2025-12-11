@@ -1,11 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate, useParams } from "@remix-run/react";
-import { useEffect } from "react";
+import { isAxiosError } from "axios";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import useUpdateQA from "~/api/mutations/admin/useUpdateQA";
-import useDeleteQA from "~/api/mutations/admin/useDeleteQA";
 import useQA from "~/api/queries/useQA";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
@@ -14,11 +14,12 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { QALanguageSelector } from "~/modules/QA/components/QALanguageSelector";
 import { qaFormSchema, type QAFormValues } from "~/modules/QA/qa.types";
 import { setPageTitle } from "~/utils/setPageTitle";
-import DeleteQADialog from "~/modules/QA/components/DeleteQADialog";
 
 import type { MetaFunction } from "@remix-run/react";
+import type { SupportedLanguages } from "@repo/shared";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.qa");
 
@@ -29,46 +30,49 @@ export default function EditQAPage() {
 
   const { language } = useLanguageStore();
 
-  const { data: qa, isLoading } = useQA(qaId ?? "", language);
-  const { mutateAsync: updateQA, isPending: isUpdating } = useUpdateQA();
-  const { mutateAsync: deleteQA, isPending: isDeleting } = useDeleteQA();
+  const [qaLanguage, setQALanguage] = useState<SupportedLanguages>(language);
 
-  const {
-    handleSubmit,
-    register,
-    reset,
-    formState: { errors, isValid },
-  } = useForm<QAFormValues>({
+  const { data: qa, isLoading, isFetching, isError, error } = useQA(qaId ?? "", qaLanguage);
+
+  const { mutateAsync: updateQA, isPending: isUpdating } = useUpdateQA();
+
+  const { handleSubmit, register, reset, formState } = useForm<QAFormValues>({
     resolver: zodResolver(qaFormSchema),
     defaultValues: {
-      title: qa?.title,
-      description: qa?.description,
-      language,
+      title: "",
+      description: "",
+      language: qaLanguage,
     },
     mode: "onChange",
   });
+
+  const { errors, isValid } = formState;
+
+  useEffect(() => {
+    if (!isFetching && qa && !qa.availableLocales?.includes(qaLanguage)) {
+      setQALanguage(qa.baseLanguage ?? language);
+    }
+  }, [language, qaLanguage, qa, isFetching]);
 
   useEffect(() => {
     if (qa) {
       reset({
         title: qa.title ?? "",
         description: qa.description ?? "",
-        language,
+        language: qaLanguage,
       });
     }
-  }, [qa, language, reset]);
+  }, [qa, qaLanguage, reset]);
+
+  if (isError && isAxiosError(error)) {
+    throw new Error(t(error.response?.data.message));
+  }
 
   if (!(qa || isLoading)) throw new Error(t("qaView.toast.notFound"));
 
   const onSubmit = async (values: QAFormValues) => {
     if (!qaId) return;
-    await updateQA({ qaId, ...values, language }).then(() => navigate("/qa"));
-  };
-
-  const onDelete = async () => {
-    if (!qaId) return;
-    await deleteQA(qaId);
-    navigate("/qa");
+    await updateQA({ qaId, ...values, language: qaLanguage }).then(() => navigate("/qa"));
   };
 
   return (
@@ -103,12 +107,17 @@ export default function EditQAPage() {
           <Card>
             <CardHeader className="pb-4 flex flex-row items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">{t("qaView.edit.header")}</h2>
-                <p className="text-sm text-muted-foreground">{t("qaView.edit.subheader")}</p>
+                <h2 className="h5 md:h4">{t("qaView.edit.header")}</h2>
+                <p className="body-sm-md md:body-base-md text-neutral-800">
+                  {t("qaView.edit.subheader")}
+                </p>
               </div>
-              <DeleteQADialog onConfirm={onDelete} loading={isDeleting || isLoading} />
             </CardHeader>
             <CardContent className="space-y-8">
+              <div className="space-y-2">
+                <Label>{t("qaView.edit.language")}</Label>
+                <QALanguageSelector qaLanguage={qaLanguage} qa={qa} onChange={setQALanguage} />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="title">
                   <span className="mr-1 text-error-600">*</span>

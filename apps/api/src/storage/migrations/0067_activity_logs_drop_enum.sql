@@ -1,0 +1,1 @@
+ALTER TABLE "activity_logs" ALTER COLUMN "resource_type" SET DATA TYPE text;

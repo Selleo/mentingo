@@ -2179,6 +2179,7 @@ export class CourseService {
                 ${this.localizationService.getLocalizedSqlField(
                   lessons.title,
                   language,
+                  courses,
                   "co",
                 )} AS quiz_name,
                 lessons.display_order AS lesson_order,
@@ -2549,7 +2550,12 @@ export class CourseService {
         )`;
 
     const quizNameExpression = sql<string>`(
-          SELECT ${this.localizationService.getLocalizedSqlField(lessons.title, language, "c")}
+          SELECT ${this.localizationService.getLocalizedSqlField(
+            lessons.title,
+            language,
+            courses,
+            "c",
+          )}
           FROM ${lessons}
           JOIN ${chapters} ch ON ch.id = lessons.chapter_id
           JOIN ${courses} c ON c.id = ch.course_id

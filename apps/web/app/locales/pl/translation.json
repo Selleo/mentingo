@@ -2089,14 +2089,16 @@
       "cannotDeleteLanguage": "Nie można usunąć tego języka",
       "languageNotSupported": "Ten język nie jest obsługiwany",
       "languageAlreadyExists": "Ten język już istnieje",
-      "notFound": "Nie znaleziono Q&A"
+      "notFound": "Nie znaleziono Q&A",
+      "noDataToUpdate": "Brak danych do aktualizacji"
     },
     "aria": {
       "editQuestion": "Edytuj pytanie"
     },
     "edit": {
       "header": "Edytuj Q&A",
-      "subheader": "Edytuj szczegóły Q&A poniżej"
+      "subheader": "Edytuj szczegóły Q&A poniżej",
+      "language": "Język"
     },
     "fields": {
       "title": "Pytanie",
@@ -2104,7 +2106,12 @@
     },
     "create": {
       "header": "Utwórz Q&A",
-      "subheader": "Dodaj pytanie i odpowiedź dla uczących się."
+      "subheader": "Dodaj pytanie i odpowiedź dla uczących się.",
+      "baseLanguageTooltip": "Nie możesz zmienić ani usunąć tego języka. Jest domyślny i zawsze będzie częścią sekcji Q&A."
+    },
+    "delete": {
+      "title": "Usuń Q&A",
+      "confirm": "Czy na pewno chcesz usunąć Q&A?"
     }
   }
 }

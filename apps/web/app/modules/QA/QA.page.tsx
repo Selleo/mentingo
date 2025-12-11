@@ -48,19 +48,22 @@ export default function QAPage() {
                 </Link>
               )}
             </div>
-            <div className="rounded-2xl bg-white border-border border overflow-hidden">
-              <Accordion type="single" collapsible className="w-full">
-                {QA?.map((item) => (
-                  <QAItem
-                    key={item.id}
-                    id={item.id}
-                    title={item.title}
-                    description={item.description}
-                    isAdmin={isAdmin}
-                  />
-                ))}
-              </Accordion>
-            </div>
+            {QA && QA.length > 0 && (
+              <div className="rounded-2xl bg-white border-border border overflow-hidden">
+                <Accordion type="single" collapsible className="w-full">
+                  {QA?.map((item) => (
+                    <QAItem
+                      key={item.id}
+                      id={item.id}
+                      title={item.title}
+                      description={item.description}
+                      isAdmin={isAdmin}
+                      availableLocales={item.availableLocales}
+                    />
+                  ))}
+                </Accordion>
+              </div>
+            )}
           </div>
         </div>
       </PageWrapper>

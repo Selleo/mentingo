@@ -17,7 +17,7 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
-import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "src/activity-logs/types";
+import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -670,11 +670,6 @@ export const activityLogsActionTypeEnum = pgEnum(
   Object.values(ACTIVITY_LOG_ACTION_TYPES) as [string, ...string[]],
 );
 
-export const activityLogsResourceTypeEnum = pgEnum(
-  "activity_log_resource_type",
-  Object.values(ACTIVITY_LOG_RESOURCE_TYPES) as [string, ...string[]],
-);
-
 export const activityLogs = pgTable(
   "activity_logs",
   {
@@ -686,7 +681,7 @@ export const activityLogs = pgTable(
     actorEmail: text("actor_email").notNull(),
     actorRole: text("actor_role").notNull(),
     actionType: activityLogsActionTypeEnum("action_type").notNull(),
-    resourceType: activityLogsResourceTypeEnum("resource_type"),
+    resourceType: text("resource_type"),
     resourceId: uuid("resource_id"),
     metadata: jsonb("metadata").$type<ActivityLogMetadata>().notNull(),
   },

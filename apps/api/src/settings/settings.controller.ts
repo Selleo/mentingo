@@ -398,6 +398,6 @@ export class SettingsController {
   })
   @Roles(USER_ROLES.ADMIN)
   async updateQaSetting(@Param("setting") setting: AllowedQASettings) {
-    return new BaseResponse(await this.settingsService.updateQASetting(setting))
+    return new BaseResponse(await this.settingsService.updateQASetting(setting));
   }
 }

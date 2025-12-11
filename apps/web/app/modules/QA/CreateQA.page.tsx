@@ -4,12 +4,29 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import useCreateQA from "~/api/mutations/admin/useCreateQA";
+import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import { FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/LanguageSelector";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { qaFormSchema, type QAFormValues } from "~/modules/QA/qa.types";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -27,6 +44,7 @@ export default function CreateQAPage() {
   const {
     handleSubmit,
     register,
+    control,
     formState: { errors, isValid },
   } = useForm<QAFormValues>({
     resolver: zodResolver(qaFormSchema),
@@ -47,12 +65,12 @@ export default function CreateQAPage() {
       ]}
     >
       <div className="mt-8 flex justify-center">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex w-full max-w-[720px] flex-col gap-6">
-          <input type="hidden" value={language} {...register("language")} />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex w-full max-w-[720px] flex-col gap-6"
+        >
           <div className="flex flex-wrap items-start justify-between gap-4 px-1">
-            <div className="space-y-2">
-              <h1 className="h5 md:h3">{t("qaView.create.header")}</h1>
-            </div>
+            <h1 className="h5 md:h3">{t("qaView.create.header")}</h1>
             <div className="flex items-center gap-3">
               <Link to="/qa">
                 <Button variant="outline">{t("common.button.cancel")}</Button>
@@ -64,15 +82,65 @@ export default function CreateQAPage() {
           </div>
 
           <Card>
-            <CardHeader className="pb-2">
-              <h2 className="text-xl font-semibold">
-                {t("qaView.create.header") ?? t("qaView.create.header")}
-              </h2>
-              <p className="text-sm text-muted-foreground">
+            <CardHeader className="pb-4">
+              <h2 className="h5 md:h4">{t("qaView.create.header")}</h2>
+              <p className="body-sm-md md:body-base-md text-neutral-800">
                 {t("qaView.create.subheader")}
               </p>
             </CardHeader>
             <CardContent className="space-y-8">
+              <div className="space-y-2">
+                <FormField
+                  render={({ field }) => (
+                    <FormItem>
+                      <Label className="flex gap-4 items-center mt-5">
+                        <div>
+                          <span className="text-red-500">*</span>{" "}
+                          {t("adminCourseView.settings.field.baseLanguage")}
+                        </div>
+                        <TooltipProvider delayDuration={0}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Icon
+                                  name="Info"
+                                  className="h-auto w-5 cursor-default text-neutral-400"
+                                />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              align="center"
+                              className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                            >
+                              {t("qaView.create.baseLanguageTooltip")}
+                              <TooltipArrow className="fill-black" />
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </Label>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {courseLanguages.map((item) => (
+                            <SelectItem value={item.key} key={item.key} className="w-full">
+                              <div className="flex w-full items-center gap-2">
+                                <Icon name={item.iconName} className="size-4" />
+                                <span className="font-semibold">{t(item.translationKey)}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                  name="language"
+                  control={control}
+                ></FormField>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="title">
                   <span className="mr-1 text-error-600">*</span>

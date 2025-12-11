@@ -18,6 +18,17 @@ export class QARepository {
     private readonly localizationService: LocalizationService,
   ) {}
 
+  private updatedReturning(language: SupportedLanguages) {
+    return {
+      ...getTableColumns(questionsAndAnswers),
+      title: this.localizationService.getFieldByLanguage(questionsAndAnswers.title, language),
+      description: this.localizationService.getFieldByLanguage(
+        questionsAndAnswers.description,
+        language,
+      ),
+    };
+  }
+
   async createQA(data: CreateQABody, metadata: object) {
     return this.db
       .insert(questionsAndAnswers)
@@ -28,32 +39,17 @@ export class QARepository {
         availableLocales: [data.language],
         metadata: settingsToJSONBuildObject(metadata),
       })
-      .returning({
-        ...getTableColumns(questionsAndAnswers),
-        title: this.localizationService.getFieldByLanguage(
-          questionsAndAnswers.title,
-          data.language,
-        ),
-        description: this.localizationService.getFieldByLanguage(
-          questionsAndAnswers.description,
-          data.language,
-        ),
-      });
+      .returning(this.updatedReturning(data.language));
   }
 
-  async getQA(qaId: UUIDType, language?: SupportedLanguages) {
+  async getQA(qaId: UUIDType, language: SupportedLanguages) {
     const [qa] = await this.db
       .select({
         ...getTableColumns(questionsAndAnswers),
-        title: this.localizationService.getLocalizedSqlField(
-          questionsAndAnswers.title,
-          language,
-          questionsAndAnswers,
-        ),
-        description: this.localizationService.getLocalizedSqlField(
+        title: this.localizationService.getFieldByLanguage(questionsAndAnswers.title, language),
+        description: this.localizationService.getFieldByLanguage(
           questionsAndAnswers.description,
           language,
-          questionsAndAnswers,
         ),
         baseLanguage: sql<SupportedLanguages>`${questionsAndAnswers.baseLanguage}`,
         availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
@@ -84,12 +80,12 @@ export class QARepository {
       .from(questionsAndAnswers);
   }
 
-  async createLanguage(qaId: UUIDType, languages: string[]) {
+  async createLanguage(qaId: UUIDType, languages: string[], language: SupportedLanguages) {
     return this.db
       .update(questionsAndAnswers)
       .set({ availableLocales: languages })
       .where(eq(questionsAndAnswers.id, qaId))
-      .returning();
+      .returning(this.updatedReturning(language));
   }
 
   async updateQA(data: QAUpdateBody, language: SupportedLanguages, qaId: UUIDType) {
@@ -109,7 +105,8 @@ export class QARepository {
             }
           : {}),
       })
-      .where(eq(questionsAndAnswers.id, qaId));
+      .where(eq(questionsAndAnswers.id, qaId))
+      .returning(this.updatedReturning(language));
   }
 
   async deleteQA(qaId: UUIDType) {
@@ -124,6 +121,7 @@ export class QARepository {
         description: deleteJsonbField(questionsAndAnswers.description, language),
         availableLocales: sql`ARRAY_REMOVE(${questionsAndAnswers.availableLocales}, ${language})`,
       })
-      .where(eq(questionsAndAnswers.id, qaId));
+      .where(eq(questionsAndAnswers.id, qaId))
+      .returning(this.updatedReturning(language));
   }
 }

@@ -14,8 +14,8 @@ export const createQASchema = Type.Object({
 
 export const QAResponseSchema = Type.Object({
   id: UUIDSchema,
-  title: Type.String(),
-  description: Type.String(),
+  title: Type.Union([Type.String(), Type.Null()]),
+  description: Type.Union([Type.String(), Type.Null()]),
   baseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
   availableLocales: Type.Array(Type.Enum(SUPPORTED_LANGUAGES)),
 });
