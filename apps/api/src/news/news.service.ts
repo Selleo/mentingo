@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, eq, getTableColumns, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LocalizationService } from "src/localization/localization.service";
-import { news } from "src/storage/schema";
+import { news, users } from "src/storage/schema";
 
 import { baseNewsTitle } from "./constants";
 
@@ -62,6 +62,48 @@ export class NewsService {
     if (!updatedNews) throw new BadRequestException("adminNewsView.toast.updateError");
 
     return updatedNews;
+  }
+
+  async getNewsList(requestedLanguage: SupportedLanguages) {
+    const newsList = await this.db
+      .select({
+        ...getTableColumns(news),
+        title: this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
+        content: this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
+        summary: this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
+        authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+      })
+      .from(news)
+      .leftJoin(users, eq(users.id, news.authorId))
+      .where(
+        and(
+          ne(news.archived, true),
+          eq(news.isPublic, true),
+          sql`${requestedLanguage} = ANY(${news.availableLocales})`,
+        ),
+      )
+      .orderBy(sql`${news.publishedAt} DESC`);
+
+    return newsList;
+  }
+
+  async getNews(newsId: UUIDType, requestedLanguage: SupportedLanguages) {
+    const [existingNews] = await this.db
+      .select({
+        ...getTableColumns(news),
+        authorName: users.firstName,
+        title: this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
+        content: this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
+        summary: this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
+        baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
+      })
+      .from(news)
+      .leftJoin(users, eq(users.id, news.authorId))
+      .where(eq(news.id, newsId));
+
+    if (!existingNews) throw new NotFoundException("adminNewsView.toast.notFoundError");
+
+    return existingNews;
   }
 
   async createNewsLanguage(newsId: UUIDType, createNewsBody: CreateNews) {

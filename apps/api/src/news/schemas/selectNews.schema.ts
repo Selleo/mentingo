@@ -22,5 +22,17 @@ export const createNewsResponseSchema = Type.Object({
   title: Type.String(),
 });
 
+export const getNewsResponseSchema = Type.Object({
+  id: Type.String(),
+  title: Type.String(),
+  content: Type.String(),
+  summary: Type.String(),
+  status: Type.String(),
+  isPublic: Type.Boolean(),
+  publishedAt: Type.Union([Type.String(), Type.Null()]),
+  authorName: Type.String(),
+});
+
 export type SelectNews = Static<typeof selectNewsSchema>;
 export type CreateNewsResponse = Static<typeof createNewsResponseSchema>;
+export type GetNewsResponse = Static<typeof getNewsResponseSchema>;

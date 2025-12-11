@@ -5523,34 +5523,50 @@
         }
       }
     },
-    "/api/news": {
-      "post": {
-        "operationId": "NewsController_createNews",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNewsBody"
-              }
+    "/api/news/{id}": {
+      "get": {
+        "operationId": "NewsController_getNews",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateNewsResponse"
+                  "$ref": "#/components/schemas/GetNewsResponse"
                 }
               }
             }
           }
         }
-      }
-    },
-    "/api/news/{id}": {
+      },
       "patch": {
         "operationId": "NewsController_updateNews",
         "parameters": [
@@ -5616,6 +5632,67 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AddNewLanguageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/news": {
+      "get": {
+        "operationId": "NewsController_getNewsList",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNewsListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "NewsController_createNews",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNewsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateNewsResponse"
                 }
               }
             }
@@ -18190,6 +18267,117 @@
               "hasIssues",
               "isWarningDismissed"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNewsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "isPublic": {
+                "type": "boolean"
+              },
+              "publishedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "authorName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "content",
+              "summary",
+              "status",
+              "isPublic",
+              "publishedAt",
+              "authorName"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetNewsListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "isPublic": {
+                  "type": "boolean"
+                },
+                "publishedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "authorName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "content",
+                "summary",
+                "status",
+                "isPublic",
+                "publishedAt",
+                "authorName"
+              ]
+            }
           }
         },
         "required": [
