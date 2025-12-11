@@ -7,7 +7,7 @@ import { chapters, courses, lessons } from "src/storage/schema";
 
 import { ENTITY_TYPE } from "./localization.types";
 
-import type { EntityType } from "./localization.types";
+import type { BaseTable, EntityType } from "./localization.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
@@ -67,14 +67,15 @@ export class LocalizationService {
   }
 
   /**
-   * Note: callers must join `courses` so `courses.baseLanguage` and `courses.availableLocales` are available.
+   * Note: callers must join `baseTable` so `baseTable.baseLanguage` and `baseTable.availableLocales` are available.
    */
   getLocalizedSqlField(
     fieldColumn: AnyPgColumn,
     language?: SupportedLanguages,
-    aliasName: string = "courses",
+    baseTable: BaseTable = courses,
+    joinedAliasName?: string,
   ) {
-    const aliased = alias(courses, aliasName);
+    const aliased = joinedAliasName ? alias(baseTable, joinedAliasName) : baseTable;
 
     const langExpr = language ? sql`${language}` : aliased.baseLanguage;
 

@@ -2763,6 +2763,18 @@ export interface GetIsConfigSetupResponse {
   };
 }
 
+export interface CreateNewsBody {
+  /** @default "en" */
+  language: "en" | "pl";
+}
+
+export interface CreateNewsResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -5980,6 +5992,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetIsConfigSetupResponse, any>({
         path: `/api/env/config/setup`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerCreateNews
+     * @request POST:/api/news
+     */
+    newsControllerCreateNews: (data: CreateNewsBody, params: RequestParams = {}) =>
+      this.request<CreateNewsResponse, any>({
+        path: `/api/news`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
