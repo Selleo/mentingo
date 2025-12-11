@@ -101,13 +101,11 @@ const TextLessonForm = ({
                   {t("adminCourseView.curriculum.lesson.field.description")}
                 </Label>
                 <FormControl>
-                  {/* TODO: check if submit form works */}
                   <Editor
                     id="description"
                     content={field.value}
-                    className="h-32 w-full"
                     lessonId={lessonToEdit?.id}
-                    allowFiles
+                    allowFiles={!!lessonToEdit?.id}
                     {...field}
                   />
                 </FormControl>
