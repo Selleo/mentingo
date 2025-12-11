@@ -1,5 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { load as loadHtml } from "cheerio";
 import { and, count, eq, getTableColumns, ne, sql } from "drizzle-orm";
+import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
@@ -16,6 +18,7 @@ import { news, users } from "src/storage/schema";
 import { baseNewsTitle } from "./constants";
 
 import type { CreateNews } from "./schemas/createNews.schema";
+import type { NewsResource, NewsResources } from "./schemas/selectNews.schema";
 import type { UpdateNews } from "./schemas/updateNews.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
@@ -112,11 +115,11 @@ export class NewsService {
   async deleteNewsLanguage(newsId: UUIDType, language: SupportedLanguages) {
     const existingNews = await this.validateNewsExists(newsId, language);
 
-    if (existingNews.baseLanguage === language)
-      throw new BadRequestException("adminNewsView.toast.baseLanguageDeleteError");
-
     if (existingNews.availableLocales.length <= 1)
       throw new BadRequestException("adminNewsView.toast.minimumLanguageError");
+
+    if (existingNews.baseLanguage === language)
+      throw new BadRequestException("adminNewsView.toast.cannotRemoveBaseLanguage");
 
     const updatedLocales = existingNews.availableLocales.filter((locale) => locale !== language);
 
@@ -129,7 +132,10 @@ export class NewsService {
         summary: deleteJsonbField(news.summary, language),
       })
       .where(eq(news.id, newsId))
-      .returning({ id: news.id, availableLocales: news.availableLocales });
+      .returning({
+        id: news.id,
+        availableLocales: news.availableLocales,
+      });
 
     if (!updatedNews) throw new BadRequestException("adminNewsView.toast.removeLanguageError");
 
@@ -172,7 +178,17 @@ export class NewsService {
 
     if (!existingNews) throw new NotFoundException("adminNewsView.toast.notFoundError");
 
-    return existingNews;
+    const resources = await this.getNewsResources(newsId, requestedLanguage);
+    const contentWithResources = this.injectResourcesIntoContent(
+      existingNews.content,
+      resources.flatList,
+    );
+
+    return {
+      ...existingNews,
+      content: contentWithResources,
+      resources: resources.grouped,
+    };
   }
 
   async createNewsLanguage(newsId: UUIDType, createNewsBody: CreateNews) {
@@ -231,6 +247,107 @@ export class NewsService {
     );
 
     return fileData;
+  }
+
+  private async getNewsResources(newsId: UUIDType, language: SupportedLanguages) {
+    const resources = await this.fileService.getResourcesForEntity(
+      newsId,
+      ENTITY_TYPES.NEWS,
+      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      language,
+    );
+
+    const groupedResources: NewsResources = {
+      images: [],
+      videos: [],
+      attachments: [],
+    };
+
+    const flatList: NewsResource[] = [];
+
+    resources.forEach((resource) => {
+      const metadata =
+        (resource as { metadata?: Record<string, unknown> }).metadata ??
+        ({} as Record<string, unknown>);
+      const fileUrl = resource.fileUrl;
+      const baseResource: NewsResource = {
+        id: resource.id,
+        fileUrl,
+        downloadUrl: fileUrl,
+        contentType: resource.contentType,
+        title: typeof resource.title === "string" ? resource.title : undefined,
+        description: typeof resource.description === "string" ? resource.description : undefined,
+        fileName:
+          typeof metadata === "object" && metadata && "originalFilename" in metadata
+            ? ((metadata as { originalFilename?: string }).originalFilename ?? undefined)
+            : undefined,
+      };
+
+      flatList.push(baseResource);
+
+      match(resource.contentType ?? "")
+        .when(
+          (type) => type.startsWith("image/"),
+          () => groupedResources.images.push(baseResource),
+        )
+        .when(
+          (type) => type.startsWith("video/"),
+          () => groupedResources.videos.push(baseResource),
+        )
+        .otherwise(() => groupedResources.attachments.push(baseResource));
+    });
+
+    return { grouped: groupedResources, flatList };
+  }
+
+  private injectResourcesIntoContent(content: string | null, resources: NewsResource[]) {
+    if (!content) return content;
+    if (!resources.length) return content;
+
+    const $ = loadHtml(content);
+    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
+
+    $("a").each((_, element) => {
+      const anchor = $(element);
+      const href = anchor.attr("href") || "";
+      const dataResourceId = anchor.attr("data-resource-id");
+
+      const matchingResource =
+        (dataResourceId && resourceMap.get(dataResourceId as UUIDType)) ||
+        resources.find((resource) => href.includes(String(resource.id)));
+
+      if (!matchingResource) return;
+
+      match(matchingResource.contentType ?? "")
+        .when(
+          (type) => type.startsWith("image/"),
+          () => {
+            anchor.replaceWith(
+              `<img src="${matchingResource.fileUrl}" alt="${matchingResource.title ?? ""}" />`,
+            );
+          },
+        )
+        .when(
+          (type) => type.startsWith("video/"),
+          () => {
+            anchor.replaceWith(
+              `<iframe controls src="${matchingResource.fileUrl}" title="${
+                matchingResource.title ?? ""
+              }"></iframe>`,
+            );
+          },
+        )
+        .otherwise(() => {
+          anchor.attr("href", matchingResource.downloadUrl);
+          anchor.attr("download", matchingResource.fileName ?? "");
+          anchor.attr("target", "_blank");
+          anchor.attr("rel", "noopener noreferrer");
+          anchor.text(matchingResource.title || matchingResource.fileName || anchor.text());
+        });
+    });
+
+    const bodyChildren = $("body").children();
+    return $.html(bodyChildren.length ? bodyChildren : $.root().children());
   }
 
   private async validateNewsExists(

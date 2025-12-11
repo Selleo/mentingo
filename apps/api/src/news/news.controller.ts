@@ -28,9 +28,11 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 import { NewsService } from "./news.service";
 import { CreateNews, createNewsSchema } from "./schemas/createNews.schema";
 import {
-  createNewsResponseSchema,
   deleteNewsLanguageResponseSchema,
   deleteNewsResponseSchema,
+} from "./schemas/deleteNews.schema";
+import {
+  createNewsResponseSchema,
   getNewsResponseSchema,
   paginatedNewsListResponseSchema,
   uploadNewsFileResponseSchema,

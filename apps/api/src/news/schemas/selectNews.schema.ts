@@ -23,6 +23,22 @@ export const createNewsResponseSchema = Type.Object({
   title: Type.String(),
 });
 
+export const newsResourceSchema = Type.Object({
+  id: UUIDSchema,
+  fileUrl: Type.String(),
+  downloadUrl: Type.String(),
+  contentType: Type.String(),
+  title: Type.Optional(Type.String()),
+  description: Type.Optional(Type.String()),
+  fileName: Type.Optional(Type.String()),
+});
+
+export const newsResourcesSchema = Type.Object({
+  images: Type.Array(newsResourceSchema),
+  videos: Type.Array(newsResourceSchema),
+  attachments: Type.Array(newsResourceSchema),
+});
+
 export const getNewsResponseSchema = Type.Object({
   id: Type.String(),
   title: Type.String(),
@@ -32,6 +48,7 @@ export const getNewsResponseSchema = Type.Object({
   isPublic: Type.Boolean(),
   publishedAt: Type.Union([Type.String(), Type.Null()]),
   authorName: Type.String(),
+  resources: Type.Optional(newsResourcesSchema),
 });
 
 export const uploadNewsFileResponseSchema = Type.Object({
@@ -43,19 +60,10 @@ export const uploadNewsFileResponseSchema = Type.Object({
 export const newsListResponseSchema = Type.Array(getNewsResponseSchema);
 export const paginatedNewsListResponseSchema = paginatedResponse(newsListResponseSchema);
 
-export const deleteNewsLanguageResponseSchema = Type.Object({
-  id: UUIDSchema,
-  availableLocales: Type.Array(Type.String()),
-});
-
-export const deleteNewsResponseSchema = Type.Object({
-  id: UUIDSchema,
-});
-
 export type SelectNews = Static<typeof selectNewsSchema>;
 export type CreateNewsResponse = Static<typeof createNewsResponseSchema>;
 export type GetNewsResponse = Static<typeof getNewsResponseSchema>;
 export type UploadNewsFileResponse = Static<typeof uploadNewsFileResponseSchema>;
 export type NewsListResponse = Static<typeof paginatedNewsListResponseSchema>;
-export type DeleteNewsLanguageResponse = Static<typeof deleteNewsLanguageResponseSchema>;
-export type DeleteNewsResponse = Static<typeof deleteNewsResponseSchema>;
+export type NewsResource = Static<typeof newsResourceSchema>;
+export type NewsResources = Static<typeof newsResourcesSchema>;

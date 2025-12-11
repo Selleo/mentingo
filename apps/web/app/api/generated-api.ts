@@ -2773,6 +2773,38 @@ export interface GetNewsResponse {
     isPublic: boolean;
     publishedAt: string | null;
     authorName: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+    };
   };
 }
 
@@ -2786,6 +2818,38 @@ export interface GetNewsListResponse {
     isPublic: boolean;
     publishedAt: string | null;
     authorName: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+    };
   }[];
   pagination: {
     totalItems: number;
@@ -2846,6 +2910,7 @@ export interface DeleteNewsLanguageResponse {
     /** @format uuid */
     id: string;
     availableLocales: string[];
+    baseLanguage: string;
   };
 }
 

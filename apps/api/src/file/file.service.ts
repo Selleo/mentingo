@@ -3,7 +3,7 @@ import { Readable } from "stream";
 
 import { BadRequestException, ConflictException, Inject, Injectable } from "@nestjs/common";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
-import { and, eq, getTableColumns } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import Excel from "exceljs";
 import { isEmpty } from "lodash";
 import sharp from "sharp";
@@ -277,16 +277,30 @@ export class FileService {
    * @param relationshipType - Filter by relationship type (optional)
    * @returns Array of resources with file URLs
    */
-  async getResourcesForEntity(entityId: UUIDType, entityType: string, relationshipType?: string) {
+  async getResourcesForEntity(
+    entityId: UUIDType,
+    entityType: string,
+    relationshipType?: string,
+    language?: SupportedLanguages,
+  ) {
     const conditions = [
       eq(resourceEntity.entityId, entityId),
       eq(resourceEntity.entityType, entityType),
+      eq(resources.archived, false),
       relationshipType ? eq(resourceEntity.relationshipType, relationshipType) : null,
     ].filter((condition): condition is ReturnType<typeof eq> => Boolean(condition));
 
+    const resourceSelect = language
+      ? {
+          ...getTableColumns(resources),
+          title: sql`COALESCE(${resources.title}->>${language}::text,'')`,
+          description: sql`COALESCE(${resources.description}->>${language}::text,'')`,
+        }
+      : getTableColumns(resources);
+
     const results = await this.db
       .select({
-        ...getTableColumns(resources),
+        ...resourceSelect,
       })
       .from(resources)
       .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))

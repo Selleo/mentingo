@@ -18459,6 +18459,124 @@
               },
               "authorName": {
                 "type": "string"
+              },
+              "resources": {
+                "type": "object",
+                "properties": {
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fileUrl": {
+                          "type": "string"
+                        },
+                        "downloadUrl": {
+                          "type": "string"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fileUrl",
+                        "downloadUrl",
+                        "contentType"
+                      ]
+                    }
+                  },
+                  "videos": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fileUrl": {
+                          "type": "string"
+                        },
+                        "downloadUrl": {
+                          "type": "string"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fileUrl",
+                        "downloadUrl",
+                        "contentType"
+                      ]
+                    }
+                  },
+                  "attachments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fileUrl": {
+                          "type": "string"
+                        },
+                        "downloadUrl": {
+                          "type": "string"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fileUrl",
+                        "downloadUrl",
+                        "contentType"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "images",
+                  "videos",
+                  "attachments"
+                ]
               }
             },
             "required": [
@@ -18515,6 +18633,124 @@
                 },
                 "authorName": {
                   "type": "string"
+                },
+                "resources": {
+                  "type": "object",
+                  "properties": {
+                    "images": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          },
+                          "downloadUrl": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "fileUrl",
+                          "downloadUrl",
+                          "contentType"
+                        ]
+                      }
+                    },
+                    "videos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          },
+                          "downloadUrl": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "fileUrl",
+                          "downloadUrl",
+                          "contentType"
+                        ]
+                      }
+                    },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          },
+                          "downloadUrl": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "fileUrl",
+                          "downloadUrl",
+                          "contentType"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "images",
+                    "videos",
+                    "attachments"
+                  ]
                 }
               },
               "required": [
@@ -18734,11 +18970,15 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "baseLanguage": {
+                "type": "string"
               }
             },
             "required": [
               "id",
-              "availableLocales"
+              "availableLocales",
+              "baseLanguage"
             ]
           }
         },
