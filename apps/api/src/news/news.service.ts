@@ -64,10 +64,37 @@ export class NewsService {
     return updatedNews;
   }
 
-  private async validateNewsExists(newsId: UUIDType, language: SupportedLanguages) {
+  async createNewsLanguage(newsId: UUIDType, createNewsBody: CreateNews) {
+    const { language } = createNewsBody;
+
+    const existingNews = await this.validateNewsExists(newsId, language, false);
+
+    const [createdLanguage] = await this.db
+      .update(news)
+      .set({
+        availableLocales: [...existingNews.availableLocales, language],
+      })
+      .where(eq(news.id, newsId))
+      .returning({
+        id: news.id,
+        title: this.localizationService.getFieldByLanguage(news.title, language),
+      });
+
+    if (!createdLanguage) throw new BadRequestException("adminNewsView.toast.createLanguageError");
+
+    return createdLanguage;
+  }
+
+  private async validateNewsExists(
+    newsId: UUIDType,
+    language: SupportedLanguages,
+    shouldIncludeLanguage = true,
+  ) {
     const [existingNews] = await this.db.select().from(news).where(eq(news.id, newsId));
 
     if (!existingNews) throw new NotFoundException("adminNewsView.toast.notFoundError");
+
+    if (!shouldIncludeLanguage) return existingNews;
 
     if (!existingNews.availableLocales.includes(language))
       throw new BadRequestException("adminNewsView.toast.invalidLanguageError");

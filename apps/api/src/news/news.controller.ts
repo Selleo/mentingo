@@ -1,4 +1,5 @@
 import { Body, Controller, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { ApiOperation } from "@nestjs/swagger";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema } from "src/common";
@@ -46,5 +47,21 @@ export class NewsController {
     const updatedNews = await this.newsService.updateNews(id, updateNewsBody);
 
     return new BaseResponse(updatedNews);
+  }
+
+  @ApiOperation({ summary: "Add a new language to a news item" })
+  @Post(":id")
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "body", schema: createNewsSchema },
+    ],
+    response: baseResponse(createNewsResponseSchema),
+  })
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  async addNewLanguage(@Param("id") id: string, @Body() createLanguageBody: CreateNews) {
+    const createdLanguage = await this.newsService.createNewsLanguage(id, createLanguageBody);
+
+    return new BaseResponse(createdLanguage);
   }
 }

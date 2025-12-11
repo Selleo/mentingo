@@ -5585,6 +5585,42 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "NewsController_addNewLanguage",
+        "summary": "Add a new language to a news item",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddNewLanguageBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNewLanguageResponse"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -18253,6 +18289,50 @@
         ]
       },
       "UpdateNewsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "AddNewLanguageBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "language"
+        ]
+      },
+      "AddNewLanguageResponse": {
         "type": "object",
         "properties": {
           "data": {

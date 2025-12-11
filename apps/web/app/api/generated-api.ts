@@ -2775,6 +2775,40 @@ export interface CreateNewsResponse {
   };
 }
 
+export interface UpdateNewsBody {
+  /** @default "en" */
+  language: "en" | "pl";
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title?: string;
+  /** @maxLength 500 */
+  summary?: string;
+  content?: string;
+  status?: "draft" | "published";
+  isPublic?: boolean;
+}
+
+export interface UpdateNewsResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface AddNewLanguageBody {
+  /** @default "en" */
+  language: "en" | "pl";
+}
+
+export interface AddNewLanguageResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -6018,10 +6052,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name NewsControllerUpdateNews
      * @request PATCH:/api/news/{id}
      */
-    newsControllerUpdateNews: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
+    newsControllerUpdateNews: (id: string, data: UpdateNewsBody, params: RequestParams = {}) =>
+      this.request<UpdateNewsResponse, any>({
         path: `/api/news/${id}`,
         method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerAddNewLanguage
+     * @summary Add a new language to a news item
+     * @request POST:/api/news/{id}
+     */
+    newsControllerAddNewLanguage: (
+      id: string,
+      data: AddNewLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AddNewLanguageResponse, any>({
+        path: `/api/news/${id}`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
   };
