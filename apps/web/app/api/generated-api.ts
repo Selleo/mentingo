@@ -2763,6 +2763,32 @@ export interface GetIsConfigSetupResponse {
   };
 }
 
+export interface GetNewsResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    publishedAt: string | null;
+    authorName: string;
+  };
+}
+
+export interface GetNewsListResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    publishedAt: string | null;
+    authorName: string;
+  }[];
+}
+
 export interface CreateNewsBody {
   /** @default "en" */
   language: "en" | "pl";
@@ -2806,6 +2832,15 @@ export interface AddNewLanguageResponse {
   data: {
     id: string;
     title: string;
+  };
+}
+
+export interface UploadFileToNewsResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    fileKey: string;
+    fileUrl: string;
   };
 }
 
@@ -6033,15 +6068,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name NewsControllerCreateNews
-     * @request POST:/api/news
+     * @name NewsControllerGetNews
+     * @request GET:/api/news/{id}
      */
-    newsControllerCreateNews: (data: CreateNewsBody, params: RequestParams = {}) =>
-      this.request<CreateNewsResponse, any>({
-        path: `/api/news`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
+    newsControllerGetNews: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -6079,6 +6120,69 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetNewsList
+     * @request GET:/api/news
+     */
+    newsControllerGetNewsList: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetNewsListResponse, any>({
+        path: `/api/news`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerCreateNews
+     * @request POST:/api/news
+     */
+    newsControllerCreateNews: (data: CreateNewsBody, params: RequestParams = {}) =>
+      this.request<CreateNewsResponse, any>({
+        path: `/api/news`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerUploadFileToNews
+     * @request POST:/api/news/{id}/upload
+     */
+    newsControllerUploadFileToNews: (
+      id: string,
+      data: {
+        /** @format binary */
+        file: File;
+        language: "en" | "pl";
+        title: string;
+        description: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadFileToNewsResponse, any>({
+        path: `/api/news/${id}/upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),

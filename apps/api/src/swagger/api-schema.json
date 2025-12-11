@@ -5699,6 +5699,68 @@
           }
         }
       }
+    },
+    "/api/news/{id}/upload": {
+      "post": {
+        "operationId": "NewsController_uploadFileToNews",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "pl"
+                    ]
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file",
+                  "language",
+                  "title",
+                  "description"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileToNewsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -18536,6 +18598,34 @@
             "required": [
               "id",
               "title"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UploadFileToNewsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "resourceId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "fileKey": {
+                "type": "string"
+              },
+              "fileUrl": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "resourceId",
+              "fileKey",
+              "fileUrl"
             ]
           }
         },

@@ -3,6 +3,12 @@ import { and, eq, getTableColumns, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  ENTITY_TYPES,
+  RESOURCE_RELATIONSHIP_TYPES,
+  RESOURCE_CATEGORIES,
+} from "src/file/file.constants";
+import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { news, users } from "src/storage/schema";
 
@@ -20,6 +26,7 @@ export class NewsService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
+    private readonly fileService: FileService,
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUser) {
@@ -125,6 +132,40 @@ export class NewsService {
     if (!createdLanguage) throw new BadRequestException("adminNewsView.toast.createLanguageError");
 
     return createdLanguage;
+  }
+
+  async uploadFileToNews(
+    newsId: UUIDType,
+    file: Express.Multer.File,
+    language: SupportedLanguages,
+    title: string,
+    description: string,
+    currentUser?: CurrentUser,
+  ) {
+    const fileTitle = {
+      [language]: title,
+    };
+
+    const fileDescription = {
+      [language]: description,
+    };
+
+    const dateNow = new Date();
+    const filePath = `${dateNow.getFullYear()}/${dateNow.getMonth() + 1}`;
+
+    const fileData = await this.fileService.uploadResource(
+      file,
+      filePath,
+      RESOURCE_CATEGORIES.NEWS,
+      newsId,
+      ENTITY_TYPES.NEWS,
+      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      fileTitle,
+      fileDescription,
+      currentUser,
+    );
+
+    return fileData;
   }
 
   private async validateNewsExists(

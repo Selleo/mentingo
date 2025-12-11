@@ -1,6 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { createSelectSchema } from "drizzle-typebox";
 
+import { UUIDSchema } from "src/common";
 import { news } from "src/storage/schema";
 
 import type { Static } from "@sinclair/typebox";
@@ -33,6 +34,13 @@ export const getNewsResponseSchema = Type.Object({
   authorName: Type.String(),
 });
 
+export const uploadNewsFileResponseSchema = Type.Object({
+  resourceId: UUIDSchema,
+  fileKey: Type.String(),
+  fileUrl: Type.String(),
+});
+
 export type SelectNews = Static<typeof selectNewsSchema>;
 export type CreateNewsResponse = Static<typeof createNewsResponseSchema>;
 export type GetNewsResponse = Static<typeof getNewsResponseSchema>;
+export type UploadNewsFileResponse = Static<typeof uploadNewsFileResponseSchema>;
