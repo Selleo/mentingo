@@ -233,7 +233,7 @@ export class FileService {
     description: Partial<Record<SupportedLanguages, string>> = {},
     currentUser?: CurrentUser,
   ) {
-    const { fileKey } = await this.uploadFile(file, `${folder}/${resource}`);
+    const { fileKey } = await this.uploadFile(file, `${resource}/${folder}`);
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
@@ -278,19 +278,19 @@ export class FileService {
    * @returns Array of resources with file URLs
    */
   async getResourcesForEntity(entityId: UUIDType, entityType: string, relationshipType?: string) {
+    const conditions = [
+      eq(resourceEntity.entityId, entityId),
+      eq(resourceEntity.entityType, entityType),
+      relationshipType ? eq(resourceEntity.relationshipType, relationshipType) : null,
+    ].filter((condition): condition is ReturnType<typeof eq> => Boolean(condition));
+
     const results = await this.db
       .select({
         ...getTableColumns(resources),
       })
       .from(resources)
       .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))
-      .where(
-        and(
-          eq(resourceEntity.entityId, entityId),
-          eq(resourceEntity.entityType, entityType),
-          relationshipType ? eq(resourceEntity.relationshipType, relationshipType) : undefined,
-        ),
-      );
+      .where(and(...conditions));
 
     return Promise.all(
       results.map(async (resource) => ({

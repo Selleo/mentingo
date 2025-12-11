@@ -1,8 +1,9 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, eq, getTableColumns, ne, sql } from "drizzle-orm";
+import { and, count, eq, getTableColumns, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import {
   ENTITY_TYPES,
   RESOURCE_RELATIONSHIP_TYPES,
@@ -71,7 +72,13 @@ export class NewsService {
     return updatedNews;
   }
 
-  async getNewsList(requestedLanguage: SupportedLanguages) {
+  async getNewsList(requestedLanguage: SupportedLanguages, page = 1, perPage = DEFAULT_PAGE_SIZE) {
+    const conditions = [
+      ne(news.archived, true),
+      eq(news.isPublic, true),
+      sql`${requestedLanguage} = ANY(${news.availableLocales})`,
+    ];
+
     const newsList = await this.db
       .select({
         ...getTableColumns(news),
@@ -82,16 +89,24 @@ export class NewsService {
       })
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
-      .where(
-        and(
-          ne(news.archived, true),
-          eq(news.isPublic, true),
-          sql`${requestedLanguage} = ANY(${news.availableLocales})`,
-        ),
-      )
-      .orderBy(sql`${news.publishedAt} DESC`);
+      .where(and(...conditions))
+      .orderBy(sql`${news.publishedAt} DESC`)
+      .limit(perPage)
+      .offset((page - 1) * perPage);
 
-    return newsList;
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: count() })
+      .from(news)
+      .where(and(...conditions));
+
+    return {
+      data: newsList,
+      pagination: {
+        totalItems,
+        page,
+        perPage,
+      },
+    };
   }
 
   async getNews(newsId: UUIDType, requestedLanguage: SupportedLanguages) {
@@ -117,6 +132,9 @@ export class NewsService {
     const { language } = createNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language, false);
+
+    if (existingNews.availableLocales.includes(language))
+      throw new BadRequestException("adminNewsView.toast.languageAlreadyExists");
 
     const [createdLanguage] = await this.db
       .update(news)
@@ -203,7 +221,8 @@ export class NewsService {
     };
 
     directFields.forEach((field) => {
-      if (updateNewsData[field]) updateData[field] = updateNewsData[field];
+      if (field in updateNewsData && updateNewsData[field] !== undefined)
+        updateData[field] = updateNewsData[field];
     });
 
     return updateData;

@@ -2787,6 +2787,12 @@ export interface GetNewsListResponse {
     publishedAt: string | null;
     authorName: string;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface CreateNewsBody {
@@ -6134,6 +6140,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
       },
       params: RequestParams = {},
     ) =>

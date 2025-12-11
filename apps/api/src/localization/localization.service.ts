@@ -125,7 +125,7 @@ export class LocalizationService {
     const result: Partial<Record<TField, unknown>> = {};
 
     localizableFields.forEach((field) => {
-      if (updateData[field])
+      if (field in updateData && updateData[field] !== undefined)
         result[field] = setJsonbField(existingEntity[field], language, updateData[field]);
     });
 

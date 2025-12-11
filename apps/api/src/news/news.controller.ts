@@ -16,7 +16,7 @@ import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { baseResponse, BaseResponse, UUIDSchema } from "src/common";
+import { BaseResponse, PaginatedResponse, UUIDSchema, baseResponse } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -29,9 +29,12 @@ import { CreateNews, createNewsSchema } from "./schemas/createNews.schema";
 import {
   createNewsResponseSchema,
   getNewsResponseSchema,
+  paginatedNewsListResponseSchema,
   uploadNewsFileResponseSchema,
 } from "./schemas/selectNews.schema";
 import { UpdateNews, updateNewsSchema } from "./schemas/updateNews.schema";
+
+import type { GetNewsResponse } from "./schemas/selectNews.schema";
 
 @Controller("news")
 @UseGuards(RolesGuard)
@@ -55,14 +58,22 @@ export class NewsController {
 
   @Get()
   @Validate({
-    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
-    response: baseResponse(Type.Array(getNewsResponseSchema)),
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
+      { type: "query", name: "perPage", schema: Type.Number({ minimum: 1 }) },
+    ],
+    response: paginatedNewsListResponseSchema,
   })
   @Roles(...Object.values(USER_ROLES))
-  async getNewsList(@Query("language") language: SupportedLanguages) {
-    const newsList = await this.newsService.getNewsList(language);
+  async getNewsList(
+    @Query("language") language: SupportedLanguages,
+    @Query("page") page?: number,
+    @Query("perPage") perPage?: number,
+  ): Promise<PaginatedResponse<GetNewsResponse[]>> {
+    const newsList = await this.newsService.getNewsList(language, page, perPage);
 
-    return new BaseResponse(newsList);
+    return new PaginatedResponse(newsList);
   }
 
   @Post()
