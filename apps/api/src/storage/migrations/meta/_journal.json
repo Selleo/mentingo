@@ -456,6 +456,20 @@
       "when": 1765362782624,
       "tag": "0064_added_course_completion_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1765445194301,
+      "tag": "0065_add_central_resources_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1765445700798,
+      "tag": "0066_add_news_table",
+      "breakpoints": true
     }
   ]
 }
