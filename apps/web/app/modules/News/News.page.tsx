@@ -75,7 +75,6 @@ function NewsPage() {
 
           <NewsItem {...firstNews} isBig />
 
-          {/* TODO: deleted more news heading, ask if that's okay */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {moreNews.map((news) => (
               <NewsItem key={news.id} {...news} />

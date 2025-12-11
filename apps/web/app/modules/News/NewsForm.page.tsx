@@ -113,7 +113,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                     id="content"
                     lessonId="lessonId"
                     content={field.value}
-                    className="h-48 w-full"
                     allowFiles
                     acceptedFileTypes={[
                       ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
