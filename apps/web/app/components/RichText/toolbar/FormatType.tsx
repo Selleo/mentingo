@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/select";
+} from "../../ui/select";
 
 import type { Editor } from "@tiptap/react";
 
@@ -25,29 +25,46 @@ export function FormatType({ editor }: FormatTypeProps) {
   };
 
   const onChange = (value: string) => {
-    switch (value) {
-      case "paragraph":
-        editor.chain().focus().setParagraph().run();
-        break;
-      case "h1":
-        editor.chain().focus().toggleHeading({ level: 1 }).run();
-        break;
-      case "h2":
-        editor.chain().focus().toggleHeading({ level: 2 }).run();
-        break;
-      case "h3":
-        editor.chain().focus().toggleHeading({ level: 3 }).run();
-        break;
-      case "h4":
-        editor.chain().focus().toggleHeading({ level: 4 }).run();
-        break;
-      case "h5":
-        editor.chain().focus().toggleHeading({ level: 5 }).run();
-        break;
-      case "h6":
-        editor.chain().focus().toggleHeading({ level: 6 }).run();
-        break;
+    const { from, to, empty, $from } = editor.state.selection;
+    const nodeStart = $from.start();
+    const nodeEnd = $from.end();
+    const selectedText = editor.state.doc.textBetween(from, to).trim();
+    const isPartialSelection = from > nodeStart || to < nodeEnd;
+    const hasPartialSelection = !empty && selectedText && isPartialSelection;
+
+    if (hasPartialSelection) {
+      const fullNodeText = editor.state.doc.textBetween(nodeStart, nodeEnd);
+      const beforeContent = fullNodeText.substring(0, from - nodeStart).trim();
+      const afterContent = fullNodeText.substring(to - nodeStart).trim();
+      const level = value.replace("h", "");
+      const middleContent =
+        value === "paragraph" ? `<p>${selectedText}</p>` : `<h${level}>${selectedText}</h${level}>`;
+
+      const newContent = [
+        beforeContent && `<p>${beforeContent}</p>`,
+        middleContent,
+        afterContent && `<p>${afterContent}</p>`,
+      ]
+        .filter(Boolean)
+        .join("");
+
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: nodeStart, to: nodeEnd })
+        .insertContentAt(nodeStart, newContent)
+        .run();
+      return;
     }
+
+    const chain = editor.chain().focus();
+    if (value === "paragraph") return chain.setNode("paragraph").run();
+    if (value === "h1") return chain.setNode("heading", { level: 1 }).run();
+    if (value === "h2") return chain.setNode("heading", { level: 2 }).run();
+    if (value === "h3") return chain.setNode("heading", { level: 3 }).run();
+    if (value === "h4") return chain.setNode("heading", { level: 4 }).run();
+    if (value === "h5") return chain.setNode("heading", { level: 5 }).run();
+    if (value === "h6") return chain.setNode("heading", { level: 6 }).run();
   };
 
   return (
