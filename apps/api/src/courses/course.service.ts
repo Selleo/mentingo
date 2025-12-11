@@ -10,7 +10,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
 import {
   and,
   between,
@@ -93,6 +93,7 @@ import type {
   CourseAverageQuizScoresResponse,
   CourseStatisticsResponse,
   CourseStatusDistribution,
+  EnrolledCourseGroupsPayload,
   LessonSequenceEnabledResponse,
 } from "./schemas/course.schema";
 import type {
@@ -305,7 +306,7 @@ export class CourseService {
           studentCourses.finishedChapterCount,
           courses.availableLocales,
           courses.baseLanguage,
-          groupCourses.settings,
+          groupCourses.dueDate,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -520,7 +521,7 @@ export class CourseService {
           `,
           dueDate: sql<
             string | null
-          >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
+          >`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
         })
         .from(courses)
         .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -556,7 +557,7 @@ export class CourseService {
           coursesSummaryStats.paidPurchasedCount,
           courses.availableLocales,
           courses.baseLanguage,
-          groupCourses.settings,
+          groupCourses.dueDate,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -576,9 +577,8 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarUrl,
-            );
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
             return {
               ...itemWithoutReferences,
@@ -635,9 +635,7 @@ export class CourseService {
         stripePriceId: courses.stripePriceId,
         availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-        dueDate: sql<
-          string | null
-        >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
+        dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -961,9 +959,7 @@ export class CourseService {
           WHERE ${chapters.courseId} = ${courses.id}
             AND ${chapters.isFreemium} = true
         )`,
-        dueDate: sql<
-          string | null
-        >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
+        dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(courses)
       .leftJoin(
@@ -995,7 +991,7 @@ export class CourseService {
         courses.availableLocales,
         courses.baseLanguage,
         studentCourses.status,
-        groupCourses.settings,
+        groupCourses.dueDate,
       )
       .orderBy(
         sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NULL THEN TRUE ELSE FALSE END`,
@@ -1006,9 +1002,8 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-          authorAvatarUrl,
-        );
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
         return {
           ...courseWithoutReferences,
@@ -1515,7 +1510,7 @@ export class CourseService {
 
   async enrollGroupsToCourse(
     courseId: UUIDType,
-    groupsToEnroll: EnrolledCourseGroups,
+    groupsToEnroll: EnrolledCourseGroupsPayload["groups"],
     userId?: UUIDType,
     currentUserRole?: UserRole,
   ) {
@@ -1581,16 +1576,16 @@ export class CourseService {
 
     await this.db.transaction(async (trx) => {
       const groupCoursesValues = groupIds.map((groupId) => {
-        const settings = groupsToEnroll.find((g) => g.id === groupId)?.settings;
-        const normalizedSettings =
-          settings && settings.isMandatory === false
-            ? { ...settings, dueDate: null }
-            : settings || {};
+        const isMandatory =
+          groupsToEnroll.find((group) => group.id === groupId)?.isMandatory ?? false;
+        const dueDateRaw = groupsToEnroll.find((group) => group.id === groupId)?.dueDate;
+        const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
         return {
           groupId,
           courseId,
           enrolledBy: userId || null,
-          settings: settingsToJSONBuildObject(normalizedSettings),
+          isMandatory,
+          dueDate,
         };
       });
 
@@ -1600,8 +1595,9 @@ export class CourseService {
         .onConflictDoUpdate({
           target: [groupCourses.groupId, groupCourses.courseId],
           set: {
-            settings: sql`EXCLUDED.settings`,
+            isMandatory: sql`EXCLUDED.is_mandatory`,
             enrolledBy: sql`EXCLUDED.enrolled_by`,
+            dueDate: sql`EXCLUDED.due_date`,
           },
         });
 
@@ -2099,9 +2095,7 @@ export class CourseService {
           WHERE ${chapters.courseId} = ${courses.id}
             AND ${chapters.isFreemium} = TRUE
         )`,
-      dueDate: sql<
-        string | null
-      >`CASE WHEN ${groupCourses.settings}->>'dueDate'::text = '' THEN NULL ELSE (${groupCourses.settings}->>'dueDate')::text END`,
+      dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
     };
   }
 
@@ -2876,17 +2870,10 @@ export class CourseService {
     studentIds: UUIDType[],
   ): Promise<Record<string, string | null>> {
     if (!studentIds.length) return {};
-
     const rows = await this.db
       .select({
         studentId: studentCourses.studentId,
-        dueDate: sql<string | null>`
-          CASE
-            WHEN NULLIF(${groupCourses.settings}->>'dueDate', '') IS NOT NULL
-            THEN TO_CHAR((${groupCourses.settings}->>'dueDate')::timestamptz, 'DD.MM.YYYY')
-            ELSE NULL
-          END
-        `,
+        dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'DD.MM.YYYY')`,
       })
       .from(studentCourses)
       .leftJoin(
@@ -2913,13 +2900,16 @@ export class CourseService {
     const overdueStudents = await this.db
       .select({
         courseId: courses.id,
-        courseTitle: courses.title,
+        courseTitle: this.localizationService.getLocalizedSqlField(
+          courses.title,
+          SUPPORTED_LANGUAGES.EN,
+        ),
         studentId: users.id,
         studentName: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         studentEmail: users.email,
         groupId: groups.id,
         groupName: groups.name,
-        dueDate: sql<string>`(${groupCourses.settings}->>'dueDate')::text`,
+        dueDate: sql<string>`TO_CHAR(${groupCourses.dueDate}, 'DD.MM.YYYY')`,
       })
       .from(groupCourses)
       .innerJoin(courses, eq(courses.id, groupCourses.courseId))
@@ -2934,8 +2924,8 @@ export class CourseService {
       .innerJoin(users, eq(users.id, studentCourses.studentId))
       .where(
         and(
-          sql`NULLIF(${groupCourses.settings}->>'dueDate', '') IS NOT NULL`,
-          sql`(${groupCourses.settings}->>'dueDate')::timestamptz < NOW()`,
+          isNotNull(groupCourses.dueDate),
+          sql`${groupCourses.dueDate} < NOW()`,
           eq(users.role, USER_ROLES.STUDENT),
           isNull(users.deletedAt),
           isNull(studentCourses.completedAt),
@@ -2947,8 +2937,8 @@ export class CourseService {
     const groupedByCourse = overdueStudents.reduce(
       (acc, row) => {
         const courseTitle = row.courseTitle;
-        if (!acc[courseTitle]) acc[courseTitle] = [];
-        acc[courseTitle].push(row);
+        if (!acc[courseTitle as string]) acc[courseTitle as string] = [];
+        acc[courseTitle as string].push(row);
         return acc;
       },
       {} as Record<string, typeof overdueStudents>,

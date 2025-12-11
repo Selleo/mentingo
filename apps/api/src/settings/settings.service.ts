@@ -674,7 +674,7 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
-  public async updateAdminOverdueCourseNotification(
+  public async updateAdminSetOverdueCourseNotificationForUser(
     userId: UUIDType,
   ): Promise<AdminSettingsJSONContentSchema> {
     const [currentUserSettings] = await this.db

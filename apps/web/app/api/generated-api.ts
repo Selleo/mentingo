@@ -879,10 +879,8 @@ export interface UpdateGroupResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
-    settings?: {
-      isMandatory: boolean;
-      dueDate: string | null;
-    };
+    isMandatory?: boolean;
+    dueDate?: string | null;
   };
 }
 
@@ -916,10 +914,8 @@ export interface GetGroupsByCourseResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
-    settings?: {
-      isMandatory: boolean;
-      dueDate: string | null;
-    };
+    isMandatory?: boolean;
+    dueDate?: string | null;
   }[];
 }
 
@@ -1333,14 +1329,14 @@ export interface EnrollCoursesResponse {
   };
 }
 
-export type EnrollGroupsToCourseBody = {
-  /** @format uuid */
-  id: string;
-  settings: {
+export interface EnrollGroupsToCourseBody {
+  groups: {
+    /** @format uuid */
+    id: string;
     isMandatory: boolean;
-    dueDate: string;
-  };
-}[];
+    dueDate?: string | null;
+  }[];
+}
 
 export interface EnrollGroupsToCourseResponse {
   data: {

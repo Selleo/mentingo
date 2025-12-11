@@ -159,7 +159,7 @@ export class NotifyUsersHandler implements IEventHandler {
 
     const studentContacts = await this.userService.getStudentEmailsByIds(studentIds);
 
-    await Promise.all(
+    await Promise.allSettled(
       studentContacts.map(async ({ id: studentId, email }) => {
         const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(studentId);
 
@@ -170,7 +170,7 @@ export class NotifyUsersHandler implements IEventHandler {
           ...defaultEmailSettings,
         });
 
-        return this.emailService.sendEmailWithLogo({
+        return await this.emailService.sendEmailWithLogo({
           to: email,
           subject: getEmailSubject("userCourseAssignmentEmail", defaultEmailSettings.language, {
             courseName,

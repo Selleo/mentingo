@@ -690,13 +690,13 @@ describe("groupController (e2e)", () => {
       const cookies = await cookieFor(admin, app);
       await request(app.getHttpServer())
         .post(`/api/course/${course1.id}/enroll-groups-to-course`)
-        .send([{ id: group.id, settings: { isMandatory: false, dueDate: "" } }])
+        .send({ groups: [{ id: group.id, isMandatory: false }] })
         .set("Cookie", cookies)
         .expect(201);
 
       await request(app.getHttpServer())
         .post(`/api/course/${course2.id}/enroll-groups-to-course`)
-        .send([{ id: group.id, settings: { isMandatory: false, dueDate: "" } }])
+        .send({ groups: [{ id: group.id, isMandatory: false }] })
         .set("Cookie", cookies)
         .expect(201);
 
@@ -771,7 +771,7 @@ describe("groupController (e2e)", () => {
       const cookies = await cookieFor(admin, app);
       await request(app.getHttpServer())
         .post(`/api/course/${course.id}/enroll-groups-to-course`)
-        .send([{ id: group.id, settings: { isMandatory: false, dueDate: "" } }])
+        .send({ groups: [{ id: group.id, isMandatory: false }] })
         .set("Cookie", cookies)
         .expect(201);
 

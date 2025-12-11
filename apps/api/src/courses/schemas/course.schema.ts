@@ -110,12 +110,15 @@ export const studentAiMentorResultSchema = Type.Object({
 });
 
 export const supportedLanguagesSchema = Type.Enum(SUPPORTED_LANGUAGES, { default: "en" });
-export const enrolledCourseGroups = Type.Array(
-  Type.Object({
-    id: UUIDSchema,
-    settings: Type.Object({ isMandatory: Type.Boolean(), dueDate: Type.String() }),
-  }),
-);
+export const enrolledCourseGroupsPayload = Type.Object({
+  groups: Type.Array(
+    Type.Object({
+      id: UUIDSchema,
+      isMandatory: Type.Boolean(),
+      dueDate: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    }),
+  ),
+});
 
 export const allStudentCourseProgressionSchema = Type.Array(studentCourseProgressionSchema);
 export const allStudentQuizResultsSchema = Type.Array(studentQuizResultSchema);
@@ -138,4 +141,4 @@ export type AllStudentCourseProgressionResponse = Static<typeof allStudentCourse
 export type AllStudentQuizResultsResponse = Static<typeof allStudentQuizResultsSchema>;
 export type AllStudentAiMentorResultsResponse = Static<typeof allStudentAiMentorResultsSchema>;
 export type SupportedLanguagesBody = Static<typeof supportedLanguagesSchema>;
-export type EnrolledCourseGroups = Static<typeof enrolledCourseGroups>;
+export type EnrolledCourseGroupsPayload = Static<typeof enrolledCourseGroupsPayload>;

@@ -105,15 +105,13 @@ export const GroupEnrollModal = ({
     const idsToEnroll = values.groups.filter((g) => g.selected).map((g) => g.id);
 
     if (idsToEnroll.length > 0) {
-      bulkGroupEnroll(
-        values.groups.map((g) => ({
+      bulkGroupEnroll({
+        groups: values.groups.map((g) => ({
           id: g.id,
-          settings: {
-            isMandatory: g.obligatory,
-            dueDate: g.deadline,
-          },
+          isMandatory: g.obligatory,
+          dueDate: g.deadline,
         })),
-      );
+      });
     }
     onOpenChange(false);
   };
@@ -122,8 +120,8 @@ export const GroupEnrollModal = ({
     const list =
       groups?.map((g) => {
         const enrolled = enrolledGroups?.find((eg) => eg.id === g.id);
-        const isMandatory = enrolled?.settings?.isMandatory;
-        const dueDate = enrolled?.settings?.dueDate;
+        const isMandatory = enrolled?.isMandatory;
+        const dueDate = enrolled?.dueDate;
 
         return {
           id: g.id,

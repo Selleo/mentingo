@@ -148,7 +148,8 @@ export class SettingsController {
   async updateAdminOverdueCourseNotification(
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
-    const result = await this.settingsService.updateAdminOverdueCourseNotification(userId);
+    const result =
+      await this.settingsService.updateAdminSetOverdueCourseNotificationForUser(userId);
     return new BaseResponse(result);
   }
 

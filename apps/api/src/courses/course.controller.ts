@@ -40,11 +40,11 @@ import {
   allStudentCourseProgressionSchema,
   allStudentQuizResultsSchema,
   courseAverageQuizScoresSchema,
-  enrolledCourseGroups,
+  enrolledCourseGroupsPayload,
   getCourseStatisticsSchema,
   getLessonSequenceEnabledSchema,
   supportedLanguagesSchema,
-  EnrolledCourseGroups,
+  EnrolledCourseGroupsPayload,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -487,18 +487,23 @@ export class CourseController {
       },
       {
         type: "body",
-        schema: enrolledCourseGroups,
+        schema: enrolledCourseGroupsPayload,
       },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async enrollGroupsToCourse(
     @Param("courseId") courseId: UUIDType,
-    @Body() body: EnrolledCourseGroups,
+    @Body() body: EnrolledCourseGroupsPayload,
     @CurrentUser("userId") currentUserId: UUIDType,
     @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollGroupsToCourse(courseId, body, currentUserId, currentUserRole);
+    await this.courseService.enrollGroupsToCourse(
+      courseId,
+      body.groups,
+      currentUserId,
+      currentUserRole,
+    );
 
     return new BaseResponse({ message: "Pomyślnie zapisano grupy na kurs" });
   }

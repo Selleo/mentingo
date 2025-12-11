@@ -10677,26 +10677,17 @@
               "updatedAt": {
                 "type": "string"
               },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "isMandatory": {
-                    "type": "boolean"
+              "isMandatory": {
+                "type": "boolean"
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
                   },
-                  "dueDate": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
+                  {
+                    "type": "null"
                   }
-                },
-                "required": [
-                  "isMandatory",
-                  "dueDate"
                 ]
               }
             },
@@ -10807,26 +10798,17 @@
                 "updatedAt": {
                   "type": "string"
                 },
-                "settings": {
-                  "type": "object",
-                  "properties": {
-                    "isMandatory": {
-                      "type": "boolean"
+                "isMandatory": {
+                  "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
                     },
-                    "dueDate": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                    {
+                      "type": "null"
                     }
-                  },
-                  "required": [
-                    "isMandatory",
-                    "dueDate"
                   ]
                 }
               },
@@ -12792,35 +12774,41 @@
         ]
       },
       "EnrollGroupsToCourseBody": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "settings": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
               "type": "object",
               "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
                 "isMandatory": {
                   "type": "boolean"
                 },
                 "dueDate": {
-                  "type": "string"
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
-                "isMandatory",
-                "dueDate"
+                "id",
+                "isMandatory"
               ]
             }
-          },
-          "required": [
-            "id",
-            "settings"
-          ]
-        }
+          }
+        },
+        "required": [
+          "groups"
+        ]
       },
       "EnrollGroupsToCourseResponse": {
         "type": "object",

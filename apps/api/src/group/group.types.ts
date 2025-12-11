@@ -25,5 +25,5 @@ export type UpsertGroupBody = Static<typeof upsertGroupSchema>;
 
 export type GroupCourseSettings = {
   isMandatory: boolean;
-  dueDate?: Date;
+  dueDate?: Date | null;
 };

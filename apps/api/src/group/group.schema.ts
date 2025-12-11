@@ -18,12 +18,8 @@ export const baseGroupSchema = Type.Object({
   characteristic: Type.Optional(Type.String()),
   createdAt: Type.String(),
   updatedAt: Type.String(),
-  settings: Type.Optional(
-    Type.Object({
-      isMandatory: Type.Boolean(),
-      dueDate: Type.Union([Type.String(), Type.Null()]),
-    }),
-  ),
+  isMandatory: Type.Optional(Type.Boolean()),
+  dueDate: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 export const upsertGroupSchema = Type.Object({
   name: Type.String(),
