@@ -16,6 +16,8 @@ export const routes: (
         route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
           route("courses", "modules/Courses/Courses.page.tsx");
           route("course/:id", "modules/Courses/CourseView/CourseView.page.tsx");
+          route("news", "modules/News/News.page.tsx");
+          route("news/:newsId", "modules/News/NewsDetails.page.tsx");
         });
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Statistics/Statistics.page.tsx", {
@@ -24,8 +26,6 @@ export const routes: (
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
           route("announcements", "modules/Announcements/Announcements.page.tsx");
-          route("news", "modules/News/News.page.tsx");
-          route("news/:newsId", "modules/News/NewsDetails.page.tsx");
           route("news/:newsId/edit", "modules/News/NewsForm.page.tsx", {
             id: "edit-news",
           });

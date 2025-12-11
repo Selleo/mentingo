@@ -42,6 +42,11 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
               <PlatformLogo variant="full" className="h-10 w-full" alt="Go to homepage" />
             </Link>
             <div className="flex gap-4">
+              <Link to="/news">
+                <Button variant="outline" className="w-full">
+                  {t("navigationSideBar.news")}
+                </Button>
+              </Link>
               <Link to="/auth/login">
                 <Button variant="outline" className="w-full">
                   {t("loginView.button.login")}
