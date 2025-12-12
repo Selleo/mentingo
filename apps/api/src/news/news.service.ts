@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { load as loadHtml } from "cheerio";
 import { and, count, eq, getTableColumns, ne, sql } from "drizzle-orm";
+import { isEmpty } from "lodash";
 import { match } from "ts-pattern";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
-import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import {
   ENTITY_TYPES,
   RESOURCE_RELATIONSHIP_TYPES,
@@ -24,6 +24,10 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+
+// News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
+const FIRST_PAGE_SIZE = 7;
+const SUBSEQUENT_PAGE_SIZE = 9;
 
 @Injectable()
 export class NewsService {
@@ -93,7 +97,22 @@ export class NewsService {
     return updatedNews;
   }
 
-  async getNewsList(requestedLanguage: SupportedLanguages, page = 1, perPage = DEFAULT_PAGE_SIZE) {
+  private getPaginationForNews(page?: number) {
+    const currentPage = Math.max(1, page ?? 1);
+
+    if (currentPage === 1) {
+      return { page: currentPage, perPage: FIRST_PAGE_SIZE, offset: 0 };
+    }
+
+    const perPage = SUBSEQUENT_PAGE_SIZE;
+    const offset = FIRST_PAGE_SIZE + (currentPage - 2) * perPage;
+
+    return { page: currentPage, perPage, offset };
+  }
+
+  async getNewsList(requestedLanguage: SupportedLanguages, page = 1) {
+    const pagination = this.getPaginationForNews(page);
+
     const conditions = [
       ne(news.archived, true),
       eq(news.isPublic, true),
@@ -112,8 +131,8 @@ export class NewsService {
       .leftJoin(users, eq(users.id, news.authorId))
       .where(and(...conditions))
       .orderBy(sql`${news.publishedAt} DESC`)
-      .limit(perPage)
-      .offset((page - 1) * perPage);
+      .limit(pagination.perPage)
+      .offset(pagination.offset);
 
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
@@ -124,8 +143,8 @@ export class NewsService {
       data: newsList,
       pagination: {
         totalItems,
-        page,
-        perPage,
+        page: pagination.page,
+        perPage: pagination.perPage,
       },
     };
   }
@@ -486,6 +505,8 @@ export class NewsService {
     directFields.forEach((field) => {
       if (field in updateNewsData && updateNewsData[field] !== undefined)
         updateData[field] = updateNewsData[field];
+
+      if (field === "status" && !isEmpty(updateData[field])) updateData["publishedAt"] = new Date();
     });
 
     return updateData;

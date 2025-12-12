@@ -66,18 +66,16 @@ export class NewsController {
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
-      { type: "query", name: "perPage", schema: Type.Number({ minimum: 1 }) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
     ],
     response: paginatedNewsListResponseSchema,
   })
   @Roles(...Object.values(USER_ROLES))
   async getNewsList(
     @Query("language") language: SupportedLanguages,
-    @Query("page") page?: number,
-    @Query("perPage") perPage?: number,
+    @Query("page") page = 1,
   ): Promise<PaginatedResponse<GetNewsResponse[]>> {
-    const newsList = await this.newsService.getNewsList(language, page, perPage);
+    const newsList = await this.newsService.getNewsList(language, page);
 
     return new PaginatedResponse(newsList);
   }

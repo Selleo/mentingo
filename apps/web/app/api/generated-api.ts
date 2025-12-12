@@ -6259,8 +6259,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         language?: "en" | "pl";
         /** @min 1 */
         page?: number;
-        /** @min 1 */
-        perPage?: number;
       },
       params: RequestParams = {},
     ) =>

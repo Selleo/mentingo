@@ -5694,15 +5694,6 @@
               "minimum": 1,
               "type": "number"
             }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
           }
         ],
         "responses": {
