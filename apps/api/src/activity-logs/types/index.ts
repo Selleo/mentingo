@@ -33,6 +33,7 @@ export const ACTIVITY_LOG_RESOURCE_TYPES = {
   SETTINGS: "settings",
   INTEGRATION: "integration",
   CATEGORY: "category",
+  QA: "qa",
 } as const;
 
 export type ActivityLogResourceType =
@@ -196,4 +197,13 @@ export type SettingsActivityLogSnapshot = {
   adminNewUserNotification?: boolean;
   adminFinishedCourseNotification?: boolean;
   configWarningDismissed?: boolean;
+};
+
+export type QuestionsAndAnswersActivityLogSnapshot = {
+  id: UUIDType;
+  title?: string | null;
+  description?: string | null;
+  metadata?: unknown | null;
+  baseLanguage?: string | null;
+  availableLocales?: string[] | null;
 };

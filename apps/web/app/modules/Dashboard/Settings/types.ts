@@ -11,6 +11,8 @@ export type GlobalSettings = {
   inviteOnlyRegistration: boolean;
   loginBackgroundImageS3Key: string | null;
   userEmailTriggers: GetPublicGlobalSettingsResponse["data"]["userEmailTriggers"];
+  unregisteredUserQAAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserQAAccessibility"];
+  QAEnabled: GetPublicGlobalSettingsResponse["data"]["QAEnabled"];
 };
 
 export type UserSettings = {

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Separator } from "~/components/ui/separator";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -32,6 +33,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
   const { data: isStripeConfigured } = useStripeConfigured();
 
+  const { data: globalSettings } = useGlobalSettings();
+
   const { data: user } = useCurrentUser();
 
   const { data: configurationState } = useConfigurationState({
@@ -55,7 +58,9 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
   }, []);
 
   if (!menuItems) {
-    menuItems = mapNavigationItems(getNavigationConfig(t, isStripeConfigured?.enabled));
+    menuItems = mapNavigationItems(
+      getNavigationConfig(t, globalSettings?.QAEnabled, isStripeConfigured?.enabled),
+    );
   }
 
   if (!role) return null;

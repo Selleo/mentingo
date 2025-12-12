@@ -6,9 +6,10 @@ import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
+import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { EnvModule } from "src/env/env.module";
+import { QAModule } from "src/qa/qa.module";
 
-import { ActivityLogsModule } from "./activity-logs/activity-logs.module";
 import { AiModule } from "./ai/ai.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { AuthModule } from "./auth/auth.module";
@@ -124,6 +125,7 @@ import { UserModule } from "./user/user.module";
     EnvModule,
     LocalizationModule,
     ActivityLogsModule,
+    QAModule,
   ],
   controllers: [],
   providers: [

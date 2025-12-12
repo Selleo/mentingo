@@ -456,6 +456,27 @@
       "when": 1765362782624,
       "tag": "0064_added_course_completion_metadata",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1765397720146,
+      "tag": "0065_added_qa_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1765397743198,
+      "tag": "0066_added_qa_global_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1765451091424,
+      "tag": "0067_activity_logs_drop_enum",
+      "breakpoints": true
     }
   ]
 }

@@ -19,7 +19,8 @@
       "uploading": "Uploading..."
     },
     "toast": {
-      "noAccess": "You do not have permission to access this resource"
+      "noAccess": "You do not have permission to access this resource",
+      "globalSettingsNotFound": "Global settings not found"
     },
     "tooltip": {
       "soon": "Cooming soon"
@@ -150,7 +151,8 @@
     "manage": "Manage",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
-    }
+    },
+    "qa": "Q&A"
   },
   "globalSearch": {
     "notFound": "Unfortunately nothing was found",
@@ -1691,7 +1693,8 @@
     },
     "tabs": {
       "account": "Account",
-      "organization": "Organization"
+      "organization": "Organization",
+      "platformCustomization": "Platform Customization"
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
@@ -1700,7 +1703,8 @@
     "toast": {
       "error": {
         "globalNotFound": "Global settings not found"
-      }
+      },
+      "qaSettingUpdatedSuccessfully": "QA settings updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -1874,7 +1878,7 @@
     }
   },
   "platformSimpleLogo": {
-    "header": "Platform Simple Logo",
+    "header": "Platform Simple Logo (icon)",
     "subHeader": "Upload a custom logo that will be used as a signet nad favicon. Supported formats: PNG, SVG",
     "field": {
       "uploadLabel": "Logo Image"
@@ -1989,7 +1993,9 @@
     "categoryDetails": "Category Details",
     "categories": "Categories",
     "createNewCourse": "Create New Course",
-    "admin": "Admin"
+    "admin": "Admin",
+    "qa": "Q&A",
+    "createQA": "Create new Q&A"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2030,5 +2036,67 @@
     "previous": "Previous",
     "next": "Next",
     "noData": "No data found"
+  },
+  "QA": {
+    "header": "Frequently Asked Questions",
+    "subHeader": "Find answers to common questions about our platform"
+  },
+  "qaPreferences": {
+    "subHeader": "Configure Q&A settings",
+    "header": "Q&A Settings",
+    "settings": {
+      "qaEnabled": {
+        "label": "Enable Q&A section",
+        "description": "Enable the Q&A section. When disabled, the Q&A section is hidden for all users."
+      },
+      "qaPublic": {
+        "label": "Show Q&A section to unregistered users",
+        "description": "Allow unregistered users to view the Q&A section (can only be toggled, when Q&A section is enabled)"
+      }
+    },
+    "toast": {
+      "QANotEnabled": "The Q&A section is not enabled"
+    },
+    "tooltip": {
+      "disabled": "To toggle this field, please enable the Q&A section first."
+    }
+  },
+  "qaView": {
+    "button": {
+      "createNew": "Create new Q&A"
+    },
+    "toast": {
+      "qaCreatedSuccessfully": "Q&A has been created successfully",
+      "qaUpdatedSuccessfully": "Q&A has been updated successfully",
+      "languageCreatedSuccessfully": "Language has been created successfully",
+      "languageDeletedSuccessfully": "Language has been deleted successfully",
+      "qaDeletedSuccessfully": "Q&A has been successfully deleted",
+      "cannotDeleteLanguage": "This language cannot be deleted",
+      "languageNotSupported": "This language is not supported",
+      "languageAlreadyExists": "This language already exists",
+      "notFound": "Q&A not found",
+      "noDataToUpdate": "No data to update"
+    },
+    "aria": {
+      "editQuestion": "Edit question"
+    },
+    "edit": {
+      "header": "Edit Q&A",
+      "subheader": "Edit the Q&A details below",
+      "language": "Language"
+    },
+    "fields": {
+      "title": "Question",
+      "description": "Answer"
+    },
+    "create": {
+      "header": "Create Q&A",
+      "subheader": "Add a question and answer for learners.",
+      "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the Q&A."
+    },
+    "delete": {
+      "title": "Delete Q&A",
+      "confirm": "Are you sure you want to delete Q&A?"
+    }
   }
 }

@@ -17,6 +17,8 @@ export const DEFAULT_EMAIL_TRIGGERS = {
 };
 
 export const DEFAULT_GLOBAL_SETTINGS = {
+  unregisteredUserQAAccessibility: false,
+  QAEnabled: false,
   unregisteredUserCoursesAccessibility: false,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
   enforceSSO: false,

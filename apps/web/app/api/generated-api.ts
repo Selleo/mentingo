@@ -180,6 +180,8 @@ export interface GetPublicGlobalSettingsResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -280,6 +282,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -313,6 +317,8 @@ export interface UpdateEnforceSSOResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -365,6 +371,8 @@ export interface UpdateColorSchemaResponse {
     };
     primaryColor: string | null;
     contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
   };
 }
 
@@ -2769,6 +2777,35 @@ export interface GetIsConfigSetupResponse {
   };
 }
 
+export interface GetQAResponse {
+  /** @format uuid */
+  id: string;
+  title: string;
+  description: string;
+  baseLanguage: "en" | "pl";
+  availableLocales: ("en" | "pl")[];
+}
+
+export type GetAllQAResponse = {
+  /** @format uuid */
+  id: string;
+  title: string;
+  description: string;
+  baseLanguage: "en" | "pl";
+  availableLocales: ("en" | "pl")[];
+}[];
+
+export interface CreateQABody {
+  title: string;
+  description: string;
+  language: "en" | "pl";
+}
+
+export interface UpdateQABody {
+  title?: string;
+  description?: string;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -3516,6 +3553,22 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateQaSetting
+     * @request PATCH:/api/settings/admin/qa/{setting}
+     */
+    settingsControllerUpdateQaSetting: (
+      setting: "QAEnabled" | "unregisteredUserQAAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/qa/${setting}`,
+        method: "PATCH",
         ...params,
       }),
 
@@ -6000,6 +6053,143 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/env/config/setup`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerGetQa
+     * @request GET:/api/qa/{qaId}
+     */
+    qaControllerGetQa: (
+      qaId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetQAResponse, any>({
+        path: `/api/qa/${qaId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerUpdateQa
+     * @request PATCH:/api/qa/{qaId}
+     */
+    qaControllerUpdateQa: (
+      qaId: string,
+      data: UpdateQABody,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/qa/${qaId}`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerDeleteQa
+     * @request DELETE:/api/qa/{qaId}
+     */
+    qaControllerDeleteQa: (qaId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/qa/${qaId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerGetAllQa
+     * @request GET:/api/qa
+     */
+    qaControllerGetAllQa: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllQAResponse, any>({
+        path: `/api/qa`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerCreateQa
+     * @request POST:/api/qa
+     */
+    qaControllerCreateQa: (data: CreateQABody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/qa`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerCreateLanguage
+     * @request POST:/api/qa/create-language/{qaId}
+     */
+    qaControllerCreateLanguage: (
+      qaId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/qa/create-language/${qaId}`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name QaControllerDeleteLanguage
+     * @request DELETE:/api/qa/language/{qaId}
+     */
+    qaControllerDeleteLanguage: (
+      qaId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/qa/language/${qaId}`,
+        method: "DELETE",
+        query: query,
         ...params,
       }),
   };

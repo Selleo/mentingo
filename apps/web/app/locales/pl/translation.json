@@ -20,7 +20,8 @@
       "uploading": "Wgrywanie..."
     },
     "toast": {
-      "noAccess": "Nie masz uprawnień do tego zasobu"
+      "noAccess": "Nie masz uprawnień do tego zasobu",
+      "globalSettingsNotFound": "Ustawienia globalne nie zostały znalezione"
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
@@ -151,7 +152,8 @@
     "manage": "Zarządzaj",
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
-    }
+    },
+    "qa": "Q&A"
   },
   "globalSearch": {
     "notFound": "Niestety nic nie znaleziono",
@@ -1684,11 +1686,30 @@
     },
     "tabs": {
       "account": "Konto",
-      "organization": "Organizacja"
+      "organization": "Organizacja",
+      "platformCustomization": "Dostosowanie Platformy"
     },
     "breadcrumbs": {
       "dashboard": "Panel główny",
       "settings": "Ustawienia"
+    },
+    "toast": {
+      "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane"
+    }
+  },
+  "platformSimpleLogo": {
+    "header": "Proste logo platformy (ikona)",
+    "subHeader": "Prześlij własne logo, które będzie używane jako sygnet i favicon. Obsługiwane formaty: PNG, SVG",
+    "field": {
+      "uploadLabel": "Obraz logo"
+    },
+    "button": {
+      "removeLogo": "Usuń logo"
+    },
+    "toast": {
+      "logoUploadedSuccessfully": "Proste logo platformy zostało pomyślnie przesłane",
+      "logoRemovedSuccessfully": "Proste logo platformy zostało usunięte",
+      "logoFetchError": "Błąd podczas pobierania prostego logo platformy"
     }
   },
   "certificateBackgroundUpload": {
@@ -1987,7 +2008,9 @@
     "categoryDetails": "Informacje o kategorii",
     "categories": "Kategorie",
     "createNewCourse": "Utwórz nowy kurs",
-    "admin": "Administrator"
+    "admin": "Administrator",
+    "qa": "Q&A",
+    "createQA": "Utwórz nowe Q&A"
   },
   "lessonPreview": {
     "breadcrumbs": {
@@ -2028,5 +2051,67 @@
     "previous": "Poprzedni",
     "next": "Następny",
     "noData": "Nie znaleziono danych"
+  },
+  "QA": {
+    "header": "Najczęściej zadawane pytania",
+    "subHeader": "Znajdź odpowiedzi na najczęściej zadawane pytania dotyczące naszej platformy"
+  },
+  "qaPreferences": {
+    "subHeader": "Skonfiguruj ustawienia Q&A",
+    "header": "Ustawienia Q&A",
+    "settings": {
+      "qaEnabled": {
+        "label": "Włącz sekcję Q&A",
+        "description": "Włącz sekcję Q&A. Gdy jest wyłączona, sekcja Q&A jest ukryta dla wszystkich użytkowników."
+      },
+      "qaPublic": {
+        "label": "Pokaż sekcję Q&A niezarejestrowanym użytkownikom",
+        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję Q&A (można włączyć tylko, gdy sekcja Q&A jest aktywna)"
+      }
+    },
+    "toast": {
+      "QANotEnabled": "Sekcja Q&A nie jest włączona"
+    },
+    "tooltip": {
+      "disabled": "Aby przełączyć to pole, najpierw włącz sekcję Q&A."
+    }
+  },
+  "qaView": {
+    "button": {
+      "createNew": "Utwórz nowe Q&A"
+    },
+    "toast": {
+      "qaCreatedSuccessfully": "Q&A zostało pomyślnie utworzone",
+      "qaUpdatedSuccessfully": "Q&A zostało pomyślnie zaktualizowane",
+      "languageCreatedSuccessfully": "Język został pomyślnie utworzony",
+      "languageDeletedSuccessfully": "Język został pomyślnie usunięty",
+      "qaDeletedSuccessfully": "Q&A zostało pomyślnie usunięte",
+      "cannotDeleteLanguage": "Nie można usunąć tego języka",
+      "languageNotSupported": "Ten język nie jest obsługiwany",
+      "languageAlreadyExists": "Ten język już istnieje",
+      "notFound": "Nie znaleziono Q&A",
+      "noDataToUpdate": "Brak danych do aktualizacji"
+    },
+    "aria": {
+      "editQuestion": "Edytuj pytanie"
+    },
+    "edit": {
+      "header": "Edytuj Q&A",
+      "subheader": "Edytuj szczegóły Q&A poniżej",
+      "language": "Język"
+    },
+    "fields": {
+      "title": "Pytanie",
+      "description": "Odpowiedź"
+    },
+    "create": {
+      "header": "Utwórz Q&A",
+      "subheader": "Dodaj pytanie i odpowiedź dla uczących się.",
+      "baseLanguageTooltip": "Nie możesz zmienić ani usunąć tego języka. Jest domyślny i zawsze będzie częścią sekcji Q&A."
+    },
+    "delete": {
+      "title": "Usuń Q&A",
+      "confirm": "Czy na pewno chcesz usunąć Q&A?"
+    }
   }
 }

@@ -85,6 +85,7 @@ export function OrganizationLoginBackgroundUpload({
                 isUploading={isUploading}
                 imageUrl={backgroundImage}
                 fileInputRef={fileInputRef}
+                variant="video"
               />
               {isUploading && <p>{t("common.button.uploading")}</p>}
             </div>

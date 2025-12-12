@@ -11,6 +11,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
+import { ALLOWED_QA_SETTINGS, type AllowedQASettings } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -389,5 +390,14 @@ export class SettingsController {
       body.dismissed,
     );
     return new BaseResponse(updatedSettings);
+  }
+
+  @Patch("admin/qa/:setting")
+  @Validate({
+    request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_QA_SETTINGS) }],
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async updateQaSetting(@Param("setting") setting: AllowedQASettings) {
+    return new BaseResponse(await this.settingsService.updateQASetting(setting));
   }
 }

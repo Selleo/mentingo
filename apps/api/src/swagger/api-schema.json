@@ -731,6 +731,35 @@
         }
       }
     },
+    "/api/settings/admin/qa/{setting}": {
+      "patch": {
+        "operationId": "SettingsController_updateQaSetting",
+        "parameters": [
+          {
+            "name": "setting",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "QAEnabled",
+                  "type": "string"
+                },
+                {
+                  "const": "unregisteredUserQAAccessibility",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/file": {
       "post": {
         "operationId": "FileController_uploadFile",
@@ -5571,6 +5600,250 @@
           }
         }
       }
+    },
+    "/api/qa/{qaId}": {
+      "get": {
+        "operationId": "QAController_getQA",
+        "parameters": [
+          {
+            "name": "qaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetQAResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "QAController_updateQA",
+        "parameters": [
+          {
+            "name": "qaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQABody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "QAController_deleteQA",
+        "parameters": [
+          {
+            "name": "qaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/qa": {
+      "get": {
+        "operationId": "QAController_getAllQA",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllQAResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "QAController_createQA",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQABody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/qa/create-language/{qaId}": {
+      "post": {
+        "operationId": "QAController_createLanguage",
+        "parameters": [
+          {
+            "name": "qaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/qa/language/{qaId}": {
+      "delete": {
+        "operationId": "QAController_deleteLanguage",
+        "parameters": [
+          {
+            "name": "qaId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -6325,6 +6598,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -6339,7 +6618,9 @@
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
-              "contrastColor"
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled"
             ]
           }
         },
@@ -6782,6 +7063,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -6796,7 +7083,9 @@
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
-              "contrastColor"
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled"
             ]
           }
         },
@@ -6972,6 +7261,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -6986,7 +7281,9 @@
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
-              "contrastColor"
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled"
             ]
           }
         },
@@ -7227,6 +7524,12 @@
                     "type": "null"
                   }
                 ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -7241,7 +7544,9 @@
               "inviteOnlyRegistration",
               "userEmailTriggers",
               "primaryColor",
-              "contrastColor"
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled"
             ]
           }
         },
@@ -18170,6 +18475,174 @@
         "required": [
           "data"
         ]
+      },
+      "GetQAResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "baseLanguage": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
+          },
+          "availableLocales": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "baseLanguage",
+          "availableLocales"
+        ]
+      },
+      "GetAllQAResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baseLanguage": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            },
+            "availableLocales": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "description",
+            "baseLanguage",
+            "availableLocales"
+          ]
+        }
+      },
+      "CreateQABody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "language"
+        ]
+      },
+      "UpdateQABody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
       }
     }
   }

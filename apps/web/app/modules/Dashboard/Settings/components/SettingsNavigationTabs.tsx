@@ -5,11 +5,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "~/components/ui/tabs";
 
 import { SETTINGS_TABS } from "../constants";
 
+import type React from "react";
+
 interface SettingsNavigationTabsProps {
   isAdmin: boolean;
   children?: React.ReactNode;
   accountContent?: React.ReactNode;
   organizationContent?: React.ReactNode;
+  customizePlatformContent?: React.ReactNode;
   hasConfigurationIssues?: boolean;
 }
 
@@ -17,11 +20,18 @@ export function SettingsNavigationTabs({
   isAdmin,
   accountContent,
   organizationContent,
+  customizePlatformContent,
   hasConfigurationIssues,
 }: SettingsNavigationTabsProps) {
   const { t } = useTranslation();
 
-  const adminTabs = [{ value: SETTINGS_TABS.ORGANIZATION, label: t("settings.tabs.organization") }];
+  const adminTabs = [
+    { value: SETTINGS_TABS.ORGANIZATION, label: t("settings.tabs.organization") },
+    {
+      value: SETTINGS_TABS.PLATFORM_CUSTOMIZATION,
+      label: t("settings.tabs.platformCustomization"),
+    },
+  ];
 
   const allTabs = [
     { value: SETTINGS_TABS.ACCOUNT, label: t("settings.tabs.account") },
@@ -65,6 +75,10 @@ export function SettingsNavigationTabs({
 
           <TabsContent value={SETTINGS_TABS.ORGANIZATION} className="space-y-6">
             {organizationContent}
+          </TabsContent>
+
+          <TabsContent value={SETTINGS_TABS.PLATFORM_CUSTOMIZATION} className="space-y-6">
+            {customizePlatformContent}
           </TabsContent>
         </CardContent>
       </Card>

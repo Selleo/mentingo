@@ -32,6 +32,7 @@ export type NavigationGroups = {
 
 export const getNavigationConfig = (
   t: TFunction,
+  isQAEnabled = false,
   isStripeConfigured = false,
 ): NavigationGroups[] => [
   {
@@ -51,11 +52,36 @@ export const getNavigationConfig = (
     ],
   },
   {
+    title: t("navigationSideBar.qa"),
+    isExpandable: false,
+    restrictedRoles: [USER_ROLE.student],
+    items: [
+      ...(isQAEnabled
+        ? ([
+            {
+              label: t("navigationSideBar.qa"),
+              path: "qa",
+              iconName: "Quiz",
+            },
+          ] as NavigationItem[])
+        : []),
+    ],
+  },
+  {
     title: t("navigationSideBar.manage"),
     icon: "Manage",
     isExpandable: true,
     restrictedRoles: [USER_ROLE.admin],
     items: [
+      ...(isQAEnabled
+        ? [
+            {
+              label: t("navigationSideBar.qa"),
+              path: "qa",
+              iconName: "Quiz",
+            } as NavigationItem,
+          ]
+        : []),
       {
         label: t("navigationSideBar.announcements"),
         path: `announcements`,

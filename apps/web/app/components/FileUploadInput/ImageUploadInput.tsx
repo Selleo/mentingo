@@ -10,6 +10,7 @@ interface ImageUploadProps {
   isUploading: boolean;
   imageUrl?: string | null;
   fileInputRef?: React.RefObject<HTMLInputElement>;
+  variant?: "square" | "video";
 }
 
 const ImageUploadInput = ({
@@ -18,12 +19,19 @@ const ImageUploadInput = ({
   isUploading,
   imageUrl,
   fileInputRef,
+  variant = "square",
 }: ImageUploadProps) => {
   const { t } = useTranslation();
 
   return (
     <div className="flex flex-col items-center justify-center gap-y-2">
-      <div className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100">
+      <div
+        className={cn(
+          "relative flex w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-solid border-gray-300 bg-gray-100",
+          { "aspect-video": variant === "video" },
+          { "aspect-square": variant === "square" },
+        )}
+      >
         {imageUrl && (
           <img
             src={imageUrl || field.value}

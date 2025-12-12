@@ -1,5 +1,6 @@
 import { useNavigate } from "@remix-run/react";
-import { useLayoutEffect, type PropsWithChildren } from "react";
+import { ACCESS_GUARD } from "@repo/shared";
+import { useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
 import {
@@ -15,6 +16,9 @@ import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { USER_ROLE } from "~/config/userRoles";
 import Loader from "~/modules/common/Loader/Loader";
+
+import type { AccessGuard } from "@repo/shared";
+import type React from "react";
 
 const prefetchQueriesForUser = async (userRole: string | undefined) => {
   await queryClient.prefetchQuery(categoriesQueryOptions());
@@ -42,20 +46,40 @@ export const clientLoader = async () => {
   return null;
 };
 
-export const CoursesAccessGuard = ({ children }: PropsWithChildren) => {
+type AccessGuardProps = {
+  children: React.ReactElement;
+  type: AccessGuard;
+};
+
+export const ContentAccessGuard = ({ children, type }: AccessGuardProps) => {
   const { data: globalSettings } = useGlobalSettings();
   const { data: currentUser } = useCurrentUser();
   const navigate = useNavigate();
 
   const isLoggedIn = !!currentUser;
-  const hasUnregisteredAccess = globalSettings?.unregisteredUserCoursesAccessibility;
-  const hasAccess = isLoggedIn || hasUnregisteredAccess;
+
+  const hasAccess = match(type)
+    .with(
+      ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS,
+      () => globalSettings?.unregisteredUserCoursesAccessibility || isLoggedIn,
+    )
+    .with(
+      ACCESS_GUARD.UNREGISTERED_QA_ACCESS,
+      () =>
+        globalSettings?.QAEnabled &&
+        (globalSettings?.unregisteredUserQAAccessibility || isLoggedIn),
+    )
+    .exhaustive();
 
   useLayoutEffect(() => {
     if (globalSettings !== undefined && !hasAccess) {
-      navigate("/auth/login");
+      if (!isLoggedIn) {
+        navigate("/auth/login");
+      } else {
+        navigate("/");
+      }
     }
-  }, [hasAccess, navigate, globalSettings]);
+  }, [hasAccess, navigate, globalSettings, isLoggedIn]);
 
   if (globalSettings === undefined) {
     return (

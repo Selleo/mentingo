@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { ALLOWED_QA_SETTINGS } from "@repo/shared";
 import { eq, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 import sharp from "sharp";
@@ -38,6 +39,7 @@ import type {
   UpdateSettingsBody,
 } from "./schemas/update-settings.schema";
 import type * as schema from "../storage/schema";
+import type { AllowedQASettings } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
@@ -885,6 +887,41 @@ export class SettingsService {
         context,
       }),
     );
+  }
+
+  async updateQASetting(setting: AllowedQASettings) {
+    const [globalSettings] = await this.db
+      .select({
+        setting: sql<boolean>`(settings.settings->>(${setting}::text))::boolean`,
+        QAEnabled: sql<boolean>`(settings.settings->>'QAEnabled')::boolean`,
+      })
+      .from(settings)
+      .where(isNull(settings.userId));
+
+    if (!globalSettings.QAEnabled && ALLOWED_QA_SETTINGS.QA_ENABLED !== setting) {
+      throw new BadRequestException("qaPreferences.toast.QANotEnabled");
+    }
+
+    if (!globalSettings) {
+      throw new NotFoundException("Global settings not found");
+    }
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            ARRAY[${setting}]::text[],
+            to_jsonb(${!globalSettings.setting}::boolean),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    return updatedGlobalSettings;
   }
 
   private getDefaultSettingsForRole(role: UserRole): SettingsJSONContentSchema {

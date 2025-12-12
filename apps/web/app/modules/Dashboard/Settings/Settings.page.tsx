@@ -10,6 +10,7 @@ import { PageWrapper } from "~/components/PageWrapper";
 import { USER_ROLE } from "~/config/userRoles";
 import { useUserRole } from "~/hooks/useUserRole";
 import Loader from "~/modules/common/Loader/Loader";
+import CustomizePlatformTabContent from "~/modules/Dashboard/Settings/components/admin/CustomizePlatformTabContent";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { useTourSetup } from "../../Onboarding/hooks/useTourSetup";
@@ -19,7 +20,6 @@ import AccountTabContent from "./components/AccountTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
 
-import type { GlobalSettings } from "./types";
 import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.settings");
@@ -84,11 +84,12 @@ export default function SettingsPage() {
           }
           organizationContent={
             globalSettings && (
-              <OrganizationTabContent
-                isAdmin={isAdmin}
-                userSettings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
-                globalSettings={globalSettings as GlobalSettings}
-              />
+              <OrganizationTabContent isAdmin={isAdmin} globalSettings={globalSettings} />
+            )
+          }
+          customizePlatformContent={
+            globalSettings && (
+              <CustomizePlatformTabContent isAdmin={isAdmin} globalSettings={globalSettings} />
             )
           }
         />
