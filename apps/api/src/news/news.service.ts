@@ -320,7 +320,7 @@ export class NewsService {
       currentUser,
     );
 
-    return fileData.resourceId;
+    return { resourceId: fileData.resourceId };
   }
 
   async uploadCoverImageToNews(
