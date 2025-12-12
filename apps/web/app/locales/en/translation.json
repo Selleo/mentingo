@@ -61,7 +61,7 @@
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG or SVG",
-      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 2GB)",
+      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 5GB)",
       "presentation": "PPT/PPTX (max. to 100MB)"
     },
     "remove": {

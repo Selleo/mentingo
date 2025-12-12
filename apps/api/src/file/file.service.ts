@@ -1,14 +1,17 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { Inject, BadRequestException, ConflictException, Injectable } from "@nestjs/common";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
+import { eq } from "drizzle-orm";
 import Excel from "exceljs";
 import { isEmpty } from "lodash";
 import sharp from "sharp";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
+import { DatabasePg } from "src/common";
 import { S3Service } from "src/s3/s3.service";
+import { lessons } from "src/storage/schema";
 
 import {
   MAX_FILE_SIZE,
@@ -18,10 +21,14 @@ import {
   MAX_VIDEO_SIZE,
 } from "./file.constants";
 import { FileGuard } from "./guards/file.guard";
+import { VideoProcessingStateService } from "./video-processing-state.service";
+import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 import { VideoUploadQueueService } from "./video-upload-queue.service";
 
 import type { FileValidationOptions } from "./guards/file.guard";
+import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
 import type { ExcelHyperlinkCell } from "./types/excel";
+import type { VideoUploadState } from "./video-processing-state.service";
 import type { Static, TSchema } from "@sinclair/typebox";
 
 @Injectable()
@@ -30,6 +37,10 @@ export class FileService {
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
     private readonly videoUploadQueueService: VideoUploadQueueService,
+    private readonly videoProcessingStateService: VideoProcessingStateService,
+    @Inject("DB") private readonly db: DatabasePg,
+    @Inject("CACHE_MANAGER") private readonly cache: any,
+    private readonly notificationGateway: VideoUploadNotificationGateway,
   ) {}
 
   async getFileUrl(fileKey: string): Promise<string> {
@@ -65,38 +76,68 @@ export class FileService {
     }
   }
 
-  async uploadFile(file: Express.Multer.File, resource: string, options?: FileValidationOptions) {
+  async uploadFile(file: Express.Multer.File, resource: string, lessonId?: string, options?: FileValidationOptions) {
     if (!file) {
       throw new BadRequestException("No file uploaded");
     }
 
-    if (!file.originalname || !file.buffer) {
+    if (!file.originalname || !file.buffer || file.buffer.length === 0) {
       throw new BadRequestException("File upload failed - invalid file data");
+    }
+
+    if (file.size === 0) {
+      throw new BadRequestException("File upload failed - empty file");
     }
 
     const isVideo = file.mimetype.startsWith("video/");
 
-    const { type } = await FileGuard.validateFile(
-      file,
-      options ?? { allowedTypes: ALLOWED_MIME_TYPES, maxSize: isVideo ? MAX_VIDEO_SIZE : MAX_FILE_SIZE },
-    );
-
     try {
+      const { type } = await FileGuard.validateFile(
+        file,
+        options ?? { allowedTypes: ALLOWED_MIME_TYPES, maxSize: isVideo ? MAX_VIDEO_SIZE : MAX_FILE_SIZE },
+      );
+
       if (isVideo) {
-        // Enqueue video upload for background processing
-        await this.videoUploadQueueService.enqueueVideoUpload(file, resource);
+        const uploadId = randomUUID();
+        const placeholderKey = `processing-${resource}-${uploadId}`;
+        const fileType = file.originalname?.split(".").pop();
+
+        try {
+          await this.videoProcessingStateService.initializeState(uploadId, placeholderKey, fileType);
+        } catch (cacheError) {
+          console.error("Cache initialization failed:", cacheError);
+          throw new ConflictException("Cache service unavailable");
+        }
+
+        try {
+          await this.videoUploadQueueService.enqueueVideoUpload(
+            file,
+            resource,
+            uploadId,
+            placeholderKey,
+            fileType,
+            lessonId,
+          );
+        } catch (queueError) {
+          throw new ConflictException("Queue service unavailable");
+        }
 
         // Return temporary response - video is being processed
         return {
-          fileKey: `processing-${resource}-${Date.now()}`,
+          fileKey: placeholderKey,
           status: "processing",
+          uploadId,
         };
       }
 
       const fileExtension = file.originalname.split(".").pop();
       const fileKey = `${resource}/${randomUUID()}.${fileExtension}`;
 
-      await this.s3Service.uploadFile(file.buffer, fileKey, type);
+      try {
+        await this.s3Service.uploadFile(file.buffer, fileKey, type);
+      } catch (s3Error) {
+        throw new ConflictException("S3 upload failed");
+      }
 
       const fileUrl = await this.s3Service.getSignedUrl(fileKey);
 
@@ -105,7 +146,6 @@ export class FileService {
         fileUrl,
       };
     } catch (error) {
-      console.error("Upload error:", error);
       throw new ConflictException("Failed to upload file");
     }
   }
@@ -199,5 +239,82 @@ export class FileService {
     });
 
     return parsedCsvData.filter((item) => item !== null);
+  }
+
+  async getVideoUploadStatus(uploadId: string): Promise<VideoUploadState | null> {
+    if (!uploadId) return null;
+    return this.videoProcessingStateService.getState(uploadId);
+  }
+
+  async associateUploadWithLesson(uploadId: string, lessonId: string) {
+    await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
+  }
+
+  async handleBunnyWebhook(payload: BunnyWebhookBody & Record<string, unknown>) {
+    const status = payload.status ?? payload.Status ?? 0;
+
+    console.log("Bunny webhook payload:", payload);
+    const videoId =
+      payload.videoId ||
+      payload.VideoId ||
+      payload.videoGuid ||
+      payload.VideoGuid ||
+      payload.guid ||
+      (payload as Record<string, string>)?.["Guid"];
+
+    if (!videoId) {
+      throw new BadRequestException("Missing video identifier");
+    }
+
+    if (Number(status) !== 3) {
+      return { ignored: true };
+    }
+
+    const fileKey = `bunny-${videoId}`;
+    const fileUrl = await this.bunnyStreamService.getUrl(videoId);
+
+    // Get uploadId from videoId and send notification directly when status = 3
+    const cacheKey = `video-upload:video:${videoId}`;
+    const uploadId = (await this.cache.get(cacheKey)) as string | undefined;
+
+    // Send notification directly when status = 3, if uploadId is found in cache
+    if (uploadId) {
+      await this.notificationGateway.publishNotification({
+        uploadId,
+        status: "processed",
+        fileKey,
+        fileUrl,
+      });
+    } else {
+      throw new BadRequestException("No uploadId found in cache for videoId");
+    }
+
+    const state = await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
+    const lessonKey = state?.placeholderKey || fileKey;
+
+    // If we have a lessonId from the state, update by lessonId (most reliable)
+    if (state?.lessonId) {
+      await this.db
+        .update(lessons)
+        .set({ fileS3Key: fileKey, fileType: state?.fileType ?? null })
+        .where(eq(lessons.id, state.lessonId));
+
+    } else {
+      // Fallback to placeholder key OR by existing bunny video key
+      await this.db
+        .update(lessons)
+        .set({ fileS3Key: fileKey, fileType: state?.fileType ?? null })
+        .where(eq(lessons.fileS3Key, lessonKey));
+
+
+      // Also try updating by bunny video key as fallback (in case lesson was already partially updated)
+      await this.db
+        .update(lessons)
+        .set({ fileS3Key: fileKey, fileType: state?.fileType ?? null })
+        .where(eq(lessons.fileS3Key, fileKey));
+
+    }
+
+    return { success: true };
   }
 }

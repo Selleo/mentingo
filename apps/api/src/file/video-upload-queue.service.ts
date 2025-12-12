@@ -20,10 +20,17 @@ export class VideoUploadQueueService implements OnModuleDestroy {
     this.videoUploadQueueEvents = new QueueEvents("video-upload", { connection });
   }
 
-  async enqueueVideoUpload(file: Express.Multer.File, resource: string) {
+  async enqueueVideoUpload(
+    file: Express.Multer.File,
+    resource: string,
+    uploadId: string,
+    placeholderKey: string,
+    fileType?: string,
+    lessonId?: string,
+  ) {
     return this.videoUploadQueue.add(
       "video-upload",
-      { file, resource },
+      { file, resource, uploadId, placeholderKey, fileType, lessonId },
       { attempts: 3, backoff: { type: "exponential", delay: 1000 } },
     );
   }

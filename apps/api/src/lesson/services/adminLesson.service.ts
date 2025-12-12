@@ -52,9 +52,10 @@ export class AdminLessonService {
   ) {
     await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
 
+    // For video/presentation lessons, require fileS3Key and fileType unless it's a processing placeholder
     if (
       (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
-      (!data.fileS3Key || !data.fileType)
+      (!data.fileS3Key || (!data.fileType && !data.fileS3Key?.startsWith("processing-")))
     ) {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
@@ -202,9 +203,10 @@ export class AdminLessonService {
       throw new NotFoundException("Lesson not found");
     }
 
+    // For video/presentation lessons, require fileS3Key and fileType unless it's a processing placeholder
     if (
       (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
-      (!data.fileS3Key || !data.fileType)
+      (!data.fileS3Key || (!data.fileType && !data.fileS3Key?.startsWith("processing-")))
     ) {
       throw new BadRequestException("File is required for video and presentation lessons");
     }

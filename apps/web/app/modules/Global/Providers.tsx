@@ -4,6 +4,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useCallback, useEffect } from "react";
 import { I18nextProvider } from "react-i18next";
 
+import { useGlobalVideoUploadPolling } from "~/hooks/useGlobalVideoUploadPolling";
+
 import i18n from "../../../i18n";
 import { ApiClient } from "../../api/api-client";
 import { currentUserQueryOptions } from "../../api/queries";
@@ -48,6 +50,9 @@ function TourKeyboardHandler({
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  // Global polling for video uploads
+  useGlobalVideoUploadPolling();
+
   const handleCloseTour = useCallback(
     ({ meta, setIsOpen }: { meta?: string | undefined; setIsOpen: (isOpen: boolean) => void }) => {
       setIsOpen(false);

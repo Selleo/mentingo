@@ -6,6 +6,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { MulterModule } from "@nestjs/platform-express";
 import { ScheduleModule } from "@nestjs/schedule";
 
+
 import { EnvModule } from "src/env/env.module";
 
 import { AiModule } from "./ai/ai.module";
@@ -18,6 +19,7 @@ import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CategoryModule } from "./category/category.module";
 import { CertificatesModule } from "./certificates/certificates.module";
+import { SocketIoAdapter } from "./common/adapters/socket-io.adapter";
 import callbackUrlConfig from "./common/configuration/callbackUrl";
 import database from "./common/configuration/database";
 import emailConfig from "./common/configuration/email";
@@ -91,7 +93,7 @@ import { UserModule } from "./user/user.module";
     }),
     MulterModule.register({
       limits: {
-        fileSize: 10 * 1024 * 1024,
+        fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
       },
     }),
     AuthModule,
@@ -140,4 +142,8 @@ import { UserModule } from "./user/user.module";
     ...(process.env.SLACK_OAUTH_ENABLED === "true" ? [SlackStrategy] : []),
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configureWebSocketAdapter(app: any) {
+    app.useWebSocketAdapter(new SocketIoAdapter(app));
+  }
+}

@@ -11,14 +11,17 @@ import { createCache } from "cache-manager";
     {
       inject: [ConfigService],
       provide: "CACHE_MANAGER",
-      useFactory: (configService: ConfigService) =>
-        createCache({
+      useFactory: (configService: ConfigService) => {
+        const redisUrl = configService.get<string>("REDIS_URL");
+        return createCache({
           stores: [
             new Keyv({
-              store: new KeyvRedis(configService.get<string>("REDIS_URL")),
+              store: new KeyvRedis(redisUrl),
+              ttl: 86400000, // 24 hours in milliseconds
             }),
           ],
-        }),
+        });
+      },
     },
   ],
   exports: ["CACHE_MANAGER"],

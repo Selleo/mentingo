@@ -448,7 +448,9 @@ export interface UpdateConfigWarningDismissedResponse {
 
 export interface FileUploadResponse {
   fileKey: string;
-  fileUrl: string;
+  fileUrl?: string;
+  status?: string;
+  uploadId?: string;
 }
 
 export interface GetUserStatisticsResponse {

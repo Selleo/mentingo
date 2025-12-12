@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+
+import { ApiClient } from "~/api/api-client";
 import { useDeleteFile } from "~/api/mutations/admin/useDeleteFile";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import FileUploadInput from "~/components/FileUploadInput/FileUploadInput";
@@ -16,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useToast } from "~/components/ui/use-toast";
+import { addPendingUpload, removePendingUpload } from "~/hooks/useGlobalVideoUploadPolling";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { getFileTypeFromName } from "~/utils/getFileTypeFromName";
 
@@ -43,16 +47,18 @@ const FileLessonForm = ({
   lessonToEdit,
   setSelectedLesson,
 }: FileLessonProps) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [processingUploadId, setProcessingUploadId] = useState<string | null>(null);
   const { form, onSubmit, onDelete } = useFileLessonForm({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
+    processingUploadId,
   });
-  const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
   const { mutateAsync: deleteFile } = useDeleteFile();
-  const fileType = form.watch("fileType");
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   const isExternalUrl = form.watch("isExternal");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,6 +66,7 @@ const FileLessonForm = ({
 
   useEffect(() => {
     setDisplayFileUrl(lessonToEdit?.fileS3SignedUrl);
+    setProcessingUploadId(null); // Reset processing state when switching lessons
     form.reset({
       ...lessonToEdit,
       type:
@@ -79,12 +86,24 @@ const FileLessonForm = ({
 
   const handleFileUpload = useCallback(
     async (file: File) => {
-      setIsUploading(true);
-
       try {
-        const result = await uploadFile({ file, resource: "lesson" });
-        setDisplayFileUrl(result.fileUrl);
+        const result = await uploadFile({
+          file,
+          resource: "lesson",
+          lessonId: lessonToEdit?.id
+        });
+
+        if (result.fileUrl) {
+          setDisplayFileUrl(result.fileUrl);
+        }
+
         form.setValue("fileS3Key", result.fileKey);
+        if (result?.status === "processing" && result.uploadId) {
+          // Add to global polling instead of local
+          addPendingUpload(result.uploadId);
+          setProcessingUploadId(result.uploadId); // Keep for backward compatibility
+        }
+
         const fileType = getFileTypeFromName(file.name);
 
         if (fileType) {
@@ -92,12 +111,53 @@ const FileLessonForm = ({
         }
       } catch (error) {
         console.error("Error uploading file:", error);
-      } finally {
-        setIsUploading(false);
+        setIsUploading(false); // Reset uploading state on error
       }
     },
     [uploadFile, form],
   );
+
+  useEffect(() => {
+    if (!processingUploadId) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const response = await ApiClient.instance.get("/api/file/status", {
+          params: { uploadId: processingUploadId },
+        });
+        const data = response.data;
+
+        if (data?.status === "processed") {
+          if (data?.fileKey) {
+            form.setValue("fileS3Key", data.fileKey);
+          }
+          if (data?.fileUrl) {
+            setDisplayFileUrl(data.fileUrl);
+          }
+
+          // Remove from global polling and show toast
+          removePendingUpload(processingUploadId);
+          toast({
+            description: t("uploadFile.toast.videoReady", {
+              defaultValue: "Video is ready to use.",
+            }),
+          });
+
+          setProcessingUploadId(null);
+        }
+      } catch (error) {
+        console.error("Error checking video status:", error);
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+      // Remove from global polling when component unmounts
+      if (processingUploadId) {
+        removePendingUpload(processingUploadId);
+      }
+    };
+  }, [processingUploadId, form, toast, t]);
 
   const handleFileDelete = useCallback(async () => {
     const fileKey = form.getValues("fileS3Key");
@@ -127,8 +187,8 @@ const FileLessonForm = ({
       "type",
       contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM ? "video" : "presentation",
     );
-    form.setValue("fileType", fileType);
-  }, [contentTypeToDisplay, form, fileType]);
+    form.setValue("fileType", contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM ? "mp4" : "pptx");
+  }, [contentTypeToDisplay, form]);
 
   const type =
     contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM
@@ -220,6 +280,17 @@ const FileLessonForm = ({
                   isUploading={isUploading}
                   contentTypeToDisplay={contentTypeToDisplay}
                   url={displayFileUrl}
+                  onVideoSelected={() => {
+                    // Show processing toast immediately when video is selected
+                    toast({
+                      description: t("uploadFile.toast.videoProcessingStarted", {
+                        defaultValue: "Video upload started. We'll notify you once it's processed.",
+                      }),
+                    });
+                    // Set placeholder fileS3Key immediately to allow saving lesson
+                    form.setValue("fileS3Key", "processing-video");
+                    form.setValue("fileType", "mp4"); // Default video type
+                  }}
                 />
               </FormControl>
               <FormMessage />

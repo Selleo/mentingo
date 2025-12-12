@@ -9,4 +9,7 @@ export class FileUploadResponse {
 
   @ApiProperty({ required: false })
   status?: string;
+
+  @ApiProperty({ required: false })
+  uploadId?: string;
 }
