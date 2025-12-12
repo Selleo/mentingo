@@ -28,8 +28,9 @@ import {
   or,
   sql,
 } from "drizzle-orm";
-import { isEmpty, isEqual } from "lodash";
+import { camelCase, isEmpty, isEqual } from "lodash";
 
+import { AiService } from "src/ai/services/ai.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
@@ -116,10 +117,12 @@ import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { SupportedLanguages } from "@repo/shared";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
+import type { CourseTranslationType } from "src/courses/types/course.types";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -142,6 +145,7 @@ export class CourseService {
     private readonly envService: EnvService,
     private readonly localizationService: LocalizationService,
     private readonly eventBus: EventBus,
+    private readonly aiService: AiService,
     private readonly adminLessonService: AdminLessonService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
@@ -577,8 +581,9 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              authorAvatarUrl,
+            );
 
             return {
               ...itemWithoutReferences,
@@ -1002,8 +1007,9 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl =
-          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+          authorAvatarUrl,
+        );
 
         return {
           ...courseWithoutReferences,
@@ -3011,5 +3017,198 @@ export class CourseService {
         });
       }),
     );
+  }
+
+  async generateMissingTranslations(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUser,
+  ) {
+    const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.COURSE,
+      courseId,
+    );
+
+    if (!availableLocales.includes(language) || baseLanguage === language) {
+      throw new BadRequestException({ message: "adminCourseView.toast.languageNotSupported" });
+    }
+
+    const courseInRequestedLanguage = await this.getBetaCourseById(
+      courseId,
+      language,
+      currentUser.userId,
+      currentUser.role,
+    );
+
+    const courseInBaseLanguage = await this.getBetaCourseById(
+      courseId,
+      baseLanguage,
+      currentUser.userId,
+      currentUser.role,
+    );
+
+    return this.db.transaction(async (trx) => {
+      const dataToUpdate = this.collectMissingTranslationFields(
+        courseId,
+        courseInRequestedLanguage,
+        courseInBaseLanguage,
+      );
+
+      const translations = await this.aiService.generateMissingTranslations(dataToUpdate, language);
+
+      const flat = translations.flat(1);
+
+      if (dataToUpdate.length !== flat.length) {
+        throw new BadRequestException(
+          `adminCourseView.toast.mismatchContentLength: expected ${dataToUpdate.length}, got ${flat.length}`,
+        );
+      }
+
+      for (let i = 0; i < flat.length; i++) {
+        const translatedValue = flat[i];
+        const currData = dataToUpdate[i];
+
+        await trx
+          .update(currData.field.table)
+          .set({ [camelCase(currData.field.name)]: setJsonbField(currData.field, language, translatedValue) })
+          .where(eq(currData.idColumn, currData.id));
+      }
+    });
+  }
+
+  private collectMissingTranslationFields(
+    courseId: UUIDType,
+    course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
+    baseCourse: Awaited<ReturnType<typeof this.getBetaCourseById>>,
+  ): CourseTranslationType[] {
+    const dataToUpdate: CourseTranslationType[] = [];
+
+    const pushMissing = (
+      id: string | undefined,
+      hasValue: boolean,
+      baseValue: string | null | undefined,
+      field: AnyPgColumn,
+      idColumn: AnyPgColumn,
+    ) => {
+      if (hasValue) return;
+      if (!id) return;
+      const base = typeof baseValue === "string" ? baseValue : undefined;
+      if (!base?.length) return;
+
+      dataToUpdate.push({ id, base, field, idColumn });
+    };
+
+    pushMissing(
+      courseId,
+      Boolean(course.title?.length),
+      baseCourse?.title,
+      courses.title,
+      courses.id,
+    );
+    pushMissing(
+      courseId,
+      Boolean(course.description?.length),
+      baseCourse?.description,
+      courses.description,
+      courses.id,
+    );
+
+    const baseChapterMap = new Map((baseCourse?.chapters ?? []).map((ch) => [ch.id, ch]));
+
+    for (const chapter of course.chapters) {
+      const baseChapter = baseChapterMap.get(chapter.id);
+
+      pushMissing(
+        chapter.id,
+        Boolean(chapter.title?.length),
+        baseChapter?.title,
+        chapters.title,
+        chapters.id,
+      );
+
+      const baseLessonMap = new Map(
+        (baseChapter?.lessons ?? []).map((lesson) => [lesson.id, lesson]),
+      );
+
+      for (const lesson of chapter.lessons) {
+        const baseLesson = baseLessonMap.get(lesson.id);
+
+        pushMissing(
+          lesson.id,
+          Boolean(lesson.title?.length),
+          baseLesson?.title,
+          lessons.title,
+          lessons.id,
+        );
+
+        pushMissing(
+          lesson.id,
+          Boolean(lesson.description?.length),
+          baseLesson?.description,
+          lessons.description,
+          lessons.id,
+        );
+
+        if (lesson.type !== LESSON_TYPES.QUIZ || !lesson.questions?.length) continue;
+
+        const baseQuestionMap = new Map(
+          (baseLesson?.questions ?? []).map((question) => [question.id, question]),
+        );
+
+        for (const question of lesson.questions) {
+          const baseQuestion = baseQuestionMap.get(question.id);
+
+          pushMissing(
+            question.id,
+            Boolean(question.title?.length),
+            baseQuestion?.title,
+            questions.title,
+            questions.id,
+          );
+
+          pushMissing(
+            question.id,
+            Boolean(question.description?.length),
+            baseQuestion?.description,
+            questions.description,
+            questions.id,
+          );
+
+          pushMissing(
+            question.id,
+            Boolean(question.solutionExplanation?.length),
+            baseQuestion?.solutionExplanation,
+            questions.solutionExplanation,
+            questions.id,
+          );
+
+          const baseOptionMap = new Map(
+            (baseQuestion?.options ?? []).map((option) => [option.id, option]),
+          );
+
+          for (const option of question.options ?? []) {
+            const baseOption = baseOptionMap.get(option.id);
+
+            pushMissing(
+              option.id,
+              Boolean(option.optionText?.length),
+              baseOption?.optionText,
+              questionAnswerOptions.optionText,
+              questionAnswerOptions.id,
+            );
+
+            pushMissing(
+              option.id,
+              Boolean(option.matchedWord?.length),
+              baseOption?.matchedWord,
+              questionAnswerOptions.matchedWord,
+              questionAnswerOptions.id,
+            );
+          }
+        }
+      }
+    }
+
+    return dataToUpdate;
   }
 }

@@ -186,6 +186,6 @@ export class PromptService implements OnModuleInit {
   }
 
   async getOpenAI() {
-    return this.ragService.getOpenAI();
+    return this.ragService.getAISdkOpenAI();
   }
 }

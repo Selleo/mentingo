@@ -7,8 +7,10 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
-import { type Message, streamText } from "ai";
+import { generateObject, jsonSchema, type Message, streamText } from "ai";
 import { eq } from "drizzle-orm";
+import _ from "lodash";
+import { Type } from "@sinclair/typebox";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -27,18 +29,22 @@ import {
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { QueueService } from "src/ingestion/services/queue.service";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type {
+import {
   CreateThreadBody,
+  GenerateTranslationBody,
+  generateTranslationSchema,
   ResponseAiJudgeJudgementBody,
   StreamChatBody,
   ThreadOwnershipBody,
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
+import type { CourseTranslationType } from "src/courses/types/course.types";
 
 @Injectable()
 export class AiService {
@@ -252,6 +258,50 @@ export class AiService {
       await this.aiRepository.setThreadsToArchived(lessonId, userId, trx);
       await this.aiRepository.resetStudentProgressForLesson(lessonId, userId, trx);
     });
+  }
+
+  async generateMissingTranslations(
+    data: CourseTranslationType[],
+    language: SupportedLanguages,
+    chunkSize: number = 6,
+  ) {
+    const openai = await this.promptService.getOpenAI();
+    const prompt = await this.promptService.loadPrompt("translationPrompt", { language });
+
+    const translateChunk = async (chunk: CourseTranslationType[]) => {
+      const formatted = chunk.map((c, i) => `${i + 1}. ${c.base}`).join("\n");
+      const schema = jsonSchema(generateTranslationSchema);
+
+      const baseConfig = {
+        model: openai(OPENAI_MODELS.BASIC),
+        schema,
+        system: prompt,
+        temperature: 0,
+        topP: 0.9,
+        topK: 40,
+      };
+
+      const run = async () => {
+        const { object } = await generateObject({
+          ...baseConfig,
+          output: "object",
+          messages: [
+            {
+              role: "user",
+              content: `Return exactly ${chunk.length} translated strings as an array, same order:\n${formatted}`,
+            },
+          ],
+        });
+        return object as GenerateTranslationBody;
+      };
+
+      const { translations } = await run();
+
+      return translations;
+    };
+
+    const chunked = _.chunk(data, chunkSize);
+    return Promise.all(chunked.map(translateChunk));
   }
 
   private mapRole(role: MessageRole) {

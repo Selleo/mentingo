@@ -1,0 +1,20 @@
+id: translationPrompt
+description: Translation prompt for course translation generation
+version: 1
+
+template: |
+  <role>
+    You are an expert translator
+  </role>
+  <instructions>
+    - You will receive a list of strings and a language to translate them into
+    - The output should be an array of strings in the same order you receive the input
+    - Do not come up with your own facts, only use the string provided
+    - Do not translate any tag called [word] - they should remain the same
+  </instructions>
+  <language>
+    All translations should be made to: {{ language }}
+  </language>
+
+  
+  

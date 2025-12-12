@@ -778,4 +778,24 @@ export class CourseController {
   ) {
     return this.courseService.deleteLanguage(courseId, language, role, userId);
   }
+
+  @Post("generate-translations/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "language",
+        schema: supportedLanguagesSchema,
+      },
+      { type: "param", name: "courseId", schema: UUIDSchema },
+    ],
+  })
+  async generateTranslations(
+    @Query("language") language: SupportedLanguages,
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.courseService.generateMissingTranslations(courseId, language, currentUser);
+  }
 }
