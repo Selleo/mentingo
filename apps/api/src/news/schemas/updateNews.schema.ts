@@ -9,8 +9,18 @@ export const updateNewsSchema = Type.Object({
   title: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })),
   summary: Type.Optional(Type.String({ maxLength: 500 })),
   content: Type.Optional(Type.String()),
-  status: Type.Optional(Type.Union([Type.Literal("draft"), Type.Literal("published")])),
-  isPublic: Type.Optional(Type.Boolean()),
+  status: Type.Optional(
+    Type.Union([Type.Literal("draft"), Type.Literal("published"), Type.Literal("")]),
+  ),
+  isPublic: Type.Optional(
+    Type.Union([Type.Boolean(), Type.Literal("true"), Type.Literal("false"), Type.Literal("")]),
+  ),
+  cover: Type.Optional(
+    Type.String({
+      format: "binary",
+      description: "Cover image file",
+    }),
+  ),
 });
 
 export const updateNewsParamsSchema = Type.Object({

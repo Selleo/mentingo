@@ -5583,7 +5583,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateNewsBody"
               }
@@ -18570,6 +18570,39 @@
                         "contentType"
                       ]
                     }
+                  },
+                  "coverImage": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "fileUrl": {
+                        "type": "string"
+                      },
+                      "downloadUrl": {
+                        "type": "string"
+                      },
+                      "contentType": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "fileName": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "fileUrl",
+                      "downloadUrl",
+                      "contentType"
+                    ]
                   }
                 },
                 "required": [
@@ -18744,6 +18777,39 @@
                           "contentType"
                         ]
                       }
+                    },
+                    "coverImage": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fileUrl": {
+                          "type": "string"
+                        },
+                        "downloadUrl": {
+                          "type": "string"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fileUrl",
+                        "downloadUrl",
+                        "contentType"
+                      ]
                     }
                   },
                   "required": [
@@ -18877,11 +18943,36 @@
               {
                 "const": "published",
                 "type": "string"
+              },
+              {
+                "const": "",
+                "type": "string"
               }
             ]
           },
           "isPublic": {
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "const": "true",
+                "type": "string"
+              },
+              {
+                "const": "false",
+                "type": "string"
+              },
+              {
+                "const": "",
+                "type": "string"
+              }
+            ]
+          },
+          "cover": {
+            "format": "binary",
+            "description": "Cover image file",
+            "type": "string"
           }
         },
         "required": [
@@ -19015,18 +19106,10 @@
               "resourceId": {
                 "format": "uuid",
                 "type": "string"
-              },
-              "fileKey": {
-                "type": "string"
-              },
-              "fileUrl": {
-                "type": "string"
               }
             },
             "required": [
-              "resourceId",
-              "fileKey",
-              "fileUrl"
+              "resourceId"
             ]
           }
         },

@@ -3,7 +3,7 @@ import { Readable } from "stream";
 
 import { BadRequestException, ConflictException, Inject, Injectable } from "@nestjs/common";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
-import { and, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import Excel from "exceljs";
 import { isEmpty } from "lodash";
 import sharp from "sharp";
@@ -312,5 +312,14 @@ export class FileService {
         fileUrl: await this.getFileUrl(resource.reference),
       })),
     );
+  }
+
+  async archiveResources(resourceIds: UUIDType[]) {
+    if (!resourceIds.length) return;
+
+    await this.db
+      .update(resources)
+      .set({ archived: true })
+      .where(and(eq(resources.archived, false), inArray(resources.id, resourceIds)));
   }
 }

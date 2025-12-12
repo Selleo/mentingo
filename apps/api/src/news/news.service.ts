@@ -54,16 +54,34 @@ export class NewsService {
     return createdNews;
   }
 
-  async updateNews(newsId: UUIDType, updateNewsBody: UpdateNews) {
+  async updateNews(
+    newsId: UUIDType,
+    updateNewsBody: UpdateNews,
+    currentUser?: CurrentUser,
+    coverFile?: Express.Multer.File,
+  ) {
     const { language, ...updateNewsData } = updateNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language);
 
-    const finalUpdateData = this.buildUpdateData(existingNews, updateNewsData, language);
+    const sanitizedUpdateData = this.sanitizeUpdatePayload(updateNewsData);
+
+    const finalUpdateData = this.buildUpdateData(existingNews, sanitizedUpdateData, language);
+
+    if (coverFile) {
+      await this.uploadCoverImageToNews(
+        newsId,
+        coverFile,
+        language,
+        coverFile.originalname,
+        "",
+        currentUser,
+      );
+    }
 
     const [updatedNews] = await this.db
       .update(news)
-      .set(finalUpdateData)
+      .set({ ...finalUpdateData, updatedBy: currentUser?.userId ?? null })
       .where(eq(news.id, newsId))
       .returning({
         id: news.id,
@@ -249,6 +267,49 @@ export class NewsService {
     return fileData.resourceId;
   }
 
+  async uploadCoverImageToNews(
+    newsId: UUIDType,
+    file: Express.Multer.File,
+    language: SupportedLanguages,
+    title: string,
+    description: string,
+    currentUser?: CurrentUser,
+  ) {
+    if (!file || !file.mimetype.startsWith("image/"))
+      throw new BadRequestException("adminNewsView.toast.invalidCoverType");
+
+    await this.validateNewsExists(newsId, language, false);
+
+    const existingCover = await this.fileService.getResourcesForEntity(
+      newsId,
+      ENTITY_TYPES.NEWS,
+      RESOURCE_RELATIONSHIP_TYPES.COVER,
+      language,
+    );
+
+    if (existingCover.length) {
+      const coverIds = existingCover.map((cover) => cover.id);
+      await this.fileService.archiveResources(coverIds);
+    }
+
+    const dateNow = new Date();
+    const filePath = `${dateNow.getFullYear()}/${dateNow.getMonth() + 1}/covers`;
+
+    const fileData = await this.fileService.uploadResource(
+      file,
+      filePath,
+      RESOURCE_CATEGORIES.NEWS,
+      newsId,
+      ENTITY_TYPES.NEWS,
+      RESOURCE_RELATIONSHIP_TYPES.COVER,
+      { [language]: title },
+      { [language]: description },
+      currentUser,
+    );
+
+    return fileData;
+  }
+
   private async getNewsResources(newsId: UUIDType, language: SupportedLanguages) {
     const resources = await this.fileService.getResourcesForEntity(
       newsId,
@@ -261,6 +322,7 @@ export class NewsService {
       images: [],
       videos: [],
       attachments: [],
+      coverImage: undefined,
     };
 
     const flatList: NewsResource[] = [];
@@ -296,6 +358,31 @@ export class NewsService {
         )
         .otherwise(() => groupedResources.attachments.push(baseResource));
     });
+
+    const [cover] = await this.fileService.getResourcesForEntity(
+      newsId,
+      ENTITY_TYPES.NEWS,
+      RESOURCE_RELATIONSHIP_TYPES.COVER,
+      language,
+    );
+
+    if (cover) {
+      groupedResources.coverImage = {
+        id: cover.id,
+        fileUrl: cover.fileUrl,
+        downloadUrl: cover.fileUrl,
+        contentType: cover.contentType,
+        title: typeof cover.title === "string" ? cover.title : undefined,
+        description: typeof cover.description === "string" ? cover.description : undefined,
+        fileName:
+          typeof cover.metadata === "object" &&
+          cover.metadata &&
+          "originalFilename" in cover.metadata &&
+          typeof cover.metadata.originalFilename === "string"
+            ? cover.metadata.originalFilename
+            : undefined,
+      };
+    }
 
     return { grouped: groupedResources, flatList };
   }
@@ -381,7 +468,7 @@ export class NewsService {
 
   private buildUpdateData(
     existingNews: InferSelectModel<typeof news>,
-    updateNewsData: Omit<UpdateNews, "language">,
+    updateNewsData: Partial<Omit<UpdateNews, "language">>,
     language: string,
   ): Record<string, unknown> {
     const localizableFields = ["title", "content", "summary"] as const;
@@ -402,5 +489,19 @@ export class NewsService {
     });
 
     return updateData;
+  }
+
+  private sanitizeUpdatePayload(updateNewsData: Omit<UpdateNews, "language">) {
+    const payload: Partial<Omit<UpdateNews, "language">> = {};
+
+    if (typeof updateNewsData.title === "string" && updateNewsData.title.trim())
+      payload.title = updateNewsData.title.trim();
+    if (typeof updateNewsData.summary === "string") payload.summary = updateNewsData.summary;
+    if (typeof updateNewsData.content === "string") payload.content = updateNewsData.content;
+    if (updateNewsData.status === "draft" || updateNewsData.status === "published")
+      payload.status = updateNewsData.status;
+    if (typeof updateNewsData.isPublic === "boolean") payload.isPublic = updateNewsData.isPublic;
+
+    return payload;
   }
 }

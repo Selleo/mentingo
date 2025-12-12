@@ -37,6 +37,7 @@ export const newsResourcesSchema = Type.Object({
   images: Type.Array(newsResourceSchema),
   videos: Type.Array(newsResourceSchema),
   attachments: Type.Array(newsResourceSchema),
+  coverImage: Type.Optional(newsResourceSchema),
 });
 
 export const getNewsResponseSchema = Type.Object({

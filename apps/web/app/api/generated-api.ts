@@ -2804,6 +2804,16 @@ export interface GetNewsResponse {
         description?: string;
         fileName?: string;
       }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
     };
   };
 }
@@ -2849,6 +2859,16 @@ export interface GetNewsListResponse {
         description?: string;
         fileName?: string;
       }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        downloadUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
     };
   }[];
   pagination: {
@@ -2882,8 +2902,13 @@ export interface UpdateNewsBody {
   /** @maxLength 500 */
   summary?: string;
   content?: string;
-  status?: "draft" | "published";
-  isPublic?: boolean;
+  status?: "draft" | "published" | "";
+  isPublic?: boolean | "true" | "false" | "";
+  /**
+   * Cover image file
+   * @format binary
+   */
+  cover?: File;
 }
 
 export interface UpdateNewsResponse {
@@ -2925,8 +2950,6 @@ export interface UploadFileToNewsResponse {
   data: {
     /** @format uuid */
     resourceId: string;
-    fileKey: string;
-    fileUrl: string;
   };
 }
 
@@ -6184,7 +6207,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/news/${id}`,
         method: "PATCH",
         body: data,
-        type: ContentType.Json,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),

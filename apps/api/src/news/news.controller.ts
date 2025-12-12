@@ -24,6 +24,7 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import { NewsService } from "./news.service";
 import { CreateNews, createNewsSchema } from "./schemas/createNews.schema";
@@ -97,6 +98,8 @@ export class NewsController {
   }
 
   @Patch(":id")
+  @UseInterceptors(FileInterceptor("cover"))
+  @ApiConsumes("multipart/form-data")
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -105,8 +108,13 @@ export class NewsController {
     response: baseResponse(createNewsResponseSchema),
   })
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
-  async updateNews(@Param("id") id: string, @Body() updateNewsBody: UpdateNews) {
-    const updatedNews = await this.newsService.updateNews(id, updateNewsBody);
+  async updateNews(
+    @Param("id") id: string,
+    @Body(new ValidateMultipartPipe(updateNewsSchema)) updateNewsBody: UpdateNews,
+    @UploadedFile() cover?: Express.Multer.File,
+    @CurrentUser() currentUser?: CurrentUserType,
+  ) {
+    const updatedNews = await this.newsService.updateNews(id, updateNewsBody, currentUser, cover);
 
     return new BaseResponse(updatedNews);
   }
