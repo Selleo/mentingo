@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 
 import { VideoUploadNotificationGateway } from "./video-upload-notification.gateway";
 
@@ -18,10 +18,40 @@ export type VideoUploadState = {
 
 @Injectable()
 export class VideoProcessingStateService {
+  private readonly logger = new Logger(VideoProcessingStateService.name);
+
+  // Retry configuration
+  private readonly MAX_RETRIES = 3;
+  private readonly RETRY_DELAY = 1000; // 1 second
+
   constructor(
     @Inject("CACHE_MANAGER") private readonly cache: any,
     private readonly notificationGateway: VideoUploadNotificationGateway,
   ) {}
+
+  // TTL constants in milliseconds
+  private readonly UPLOAD_STATE_TTL = 4 * 60 * 60 * 1000; // 4 hours for upload states
+  private readonly VIDEO_MAPPING_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days for video mappings
+
+  private async retryOperation<T>(operation: () => Promise<T>, operationName: string): Promise<T> {
+    let lastError: Error = new Error("Unknown error");
+
+    for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        this.logger.warn(`${operationName} failed (attempt ${attempt}/${this.MAX_RETRIES}):`, error);
+
+        if (attempt < this.MAX_RETRIES) {
+          await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY * attempt));
+        }
+      }
+    }
+
+    this.logger.error(`${operationName} failed after ${this.MAX_RETRIES} attempts:`, lastError);
+    throw lastError;
+  }
 
   private uploadKey(uploadId: string) {
     return `video-upload:${uploadId}`;
@@ -39,13 +69,24 @@ export class VideoProcessingStateService {
       fileType,
     };
 
-    await this.cache.set(this.uploadKey(uploadId), state);
+    await this.retryOperation(
+      () => this.cache.set(this.uploadKey(uploadId), state, this.UPLOAD_STATE_TTL),
+      `initializeState for ${uploadId}`
+    );
     return state;
   }
 
   async getState(uploadId: string): Promise<VideoUploadState | null> {
-    const cached = (await this.cache.get(this.uploadKey(uploadId))) as VideoUploadState | undefined;
-    return cached ?? null;
+    try {
+      const cached = await this.retryOperation(
+        () => this.cache.get(this.uploadKey(uploadId)),
+        `getState for ${uploadId}`
+      ) as VideoUploadState | undefined;
+      return cached ?? null;
+    } catch (error) {
+      this.logger.error(`Failed to get state for ${uploadId}:`, error);
+      return null;
+    }
   }
 
   async markUploaded(params: {
@@ -71,16 +112,32 @@ export class VideoProcessingStateService {
       fileType: params.fileType ?? current.fileType,
     };
 
-    await this.cache.set(this.uploadKey(params.uploadId), next);
-    await this.cache.set(this.videoKey(params.bunnyVideoId), params.uploadId);
+    // Use retry for critical cache operations
+    await this.retryOperation(
+      () => this.cache.set(this.uploadKey(params.uploadId), next, this.UPLOAD_STATE_TTL),
+      `markUploaded set upload state for ${params.uploadId}`
+    );
 
-    // Publish real-time notification
-    await this.notificationGateway.publishNotification({
-      uploadId: params.uploadId,
-      status: "uploaded",
-      fileKey: params.fileKey,
-      fileUrl: params.fileUrl,
-    });
+    await this.retryOperation(
+      () => this.cache.set(this.videoKey(params.bunnyVideoId), params.uploadId, this.VIDEO_MAPPING_TTL),
+      `markUploaded set video mapping for ${params.bunnyVideoId}`
+    );
+
+    // Publish real-time notification (also with retry)
+    try {
+      await this.retryOperation(
+        () => this.notificationGateway.publishNotification({
+          uploadId: params.uploadId,
+          status: "uploaded",
+          fileKey: params.fileKey,
+          fileUrl: params.fileUrl,
+        }),
+        `publish upload notification for ${params.uploadId}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to publish upload notification for ${params.uploadId}:`, error);
+      // Don't fail the whole operation if notification fails
+    }
 
     return next;
   }
@@ -106,8 +163,15 @@ export class VideoProcessingStateService {
       fileUrl: fileUrl ?? current.fileUrl,
     };
 
-    await this.cache.set(this.uploadKey(uploadId), next);
-    await this.cache.set(this.videoKey(bunnyVideoId), uploadId);
+    await this.retryOperation(
+      () => this.cache.set(this.uploadKey(uploadId), next, this.UPLOAD_STATE_TTL),
+      `markProcessed set upload state for ${uploadId}`
+    );
+
+    await this.retryOperation(
+      () => this.cache.set(this.videoKey(bunnyVideoId), uploadId, this.VIDEO_MAPPING_TTL),
+      `markProcessed set video mapping for ${bunnyVideoId}`
+    );
 
     return next;
   }
@@ -120,14 +184,25 @@ export class VideoProcessingStateService {
       error: error ?? "Upload failed",
     };
 
-    await this.cache.set(this.uploadKey(uploadId), next);
+    await this.retryOperation(
+      () => this.cache.set(this.uploadKey(uploadId), next, this.UPLOAD_STATE_TTL),
+      `markFailed set upload state for ${uploadId}`
+    );
 
-    // Publish real-time notification
-    await this.notificationGateway.publishNotification({
-      uploadId,
-      status: "failed",
-      error: next.error,
-    });
+    // Publish real-time notification (also with retry)
+    try {
+      await this.retryOperation(
+        () => this.notificationGateway.publishNotification({
+          uploadId,
+          status: "failed",
+          error: next.error,
+        }),
+        `publish failed notification for ${uploadId}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to publish failed notification for ${uploadId}:`, error);
+      // Don't fail the whole operation if notification fails
+    }
 
     return next;
   }
@@ -141,7 +216,10 @@ export class VideoProcessingStateService {
       lessonId,
     };
 
-    await this.cache.set(this.uploadKey(uploadId), next);
+    await this.retryOperation(
+      () => this.cache.set(this.uploadKey(uploadId), next, this.UPLOAD_STATE_TTL),
+      `associateWithLesson set upload state for ${uploadId}`
+    );
     return next;
   }
 }

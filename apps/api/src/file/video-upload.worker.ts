@@ -1,4 +1,4 @@
-import { Inject, Injectable, type OnModuleDestroy } from "@nestjs/common";
+import { Inject, Injectable, Logger, type OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Worker } from "bullmq";
 import { eq } from "drizzle-orm";
@@ -15,6 +15,7 @@ import type { RedisConfigSchema } from "src/common/configuration/redis";
 
 @Injectable()
 export class VideoUploadWorker implements OnModuleDestroy {
+  private readonly logger = new Logger(VideoUploadWorker.name);
   private worker: Worker;
 
   constructor(
@@ -29,14 +30,17 @@ export class VideoUploadWorker implements OnModuleDestroy {
     this.worker = new Worker(
       "video-upload",
       async (job: Job) => {
+        const { uploadId, placeholderKey, fileType, lessonId } = job.data;
+        this.logger.log(`Processing video upload job ${job.id} for uploadId: ${uploadId}`);
+
         try {
-          const { uploadId, placeholderKey, fileType, lessonId } = job.data;
           const newFile = {
             ...job.data.file,
             buffer: Buffer.from(job.data.file.buffer.data),
           };
 
           const result = await this.bunnyStreamService.upload(newFile);
+          this.logger.log(`Video uploaded to Bunny for ${uploadId}, fileKey: ${result.fileKey}`);
 
           await this.videoProcessingStateService.markUploaded({
             uploadId,
@@ -49,36 +53,51 @@ export class VideoUploadWorker implements OnModuleDestroy {
 
           // Update lesson immediately when video is uploaded to Bunny
           // Video should be playable even before full processing
+          let updatedLesson = false;
           if (lessonId) {
             // If we have lessonId from job data, update by ID (for existing lessons being edited)
-            await this.db
+            const updateResult = await this.db
               .update(lessons)
               .set({ fileS3Key: result.fileKey, fileType })
-              .where(eq(lessons.id, lessonId));
+              .where(eq(lessons.id, lessonId))
+              .returning();
+            updatedLesson = updateResult.length > 0;
+            this.logger.log(`Updated lesson ${lessonId} with fileKey: ${result.fileKey}`);
           } else {
             // Check if lessonId was associated later via associateUploadWithLesson
             const state = await this.videoProcessingStateService.getState(uploadId);
             if (state?.lessonId) {
-              await this.db
+              const updateResult = await this.db
                 .update(lessons)
                 .set({ fileS3Key: result.fileKey, fileType })
-                .where(eq(lessons.id, state.lessonId));
+                .where(eq(lessons.id, state.lessonId))
+                .returning();
+              updatedLesson = updateResult.length > 0;
+              this.logger.log(`Updated lesson ${state.lessonId} with fileKey: ${result.fileKey}`);
             } else {
               // Fallback to placeholder key for cases where association hasn't happened yet
-              await this.db
+              const updateResult = await this.db
                 .update(lessons)
                 .set({ fileS3Key: result.fileKey, fileType })
-                .where(eq(lessons.fileS3Key, placeholderKey));
+                .where(eq(lessons.fileS3Key, placeholderKey))
+                .returning();
+              updatedLesson = updateResult.length > 0;
+              this.logger.log(`Updated lesson by placeholder ${placeholderKey} with fileKey: ${result.fileKey}`);
             }
           }
 
+          if (!updatedLesson) {
+            this.logger.warn(`No lesson was updated for uploadId: ${uploadId}`);
+          }
+
+          this.logger.log(`Successfully completed video upload job ${job.id} for uploadId: ${uploadId}`);
           return {
             success: true,
             fileKey: result.fileKey,
             fileUrl: result.fileUrl,
           };
         } catch (error) {
-          console.error("Video upload failed:", error);
+          this.logger.error(`Video upload failed for job ${job.id}, uploadId: ${uploadId}:`, error);
           await this.videoProcessingStateService.markFailed(
             job.data?.uploadId,
             job.data?.placeholderKey,
@@ -98,3 +117,4 @@ export class VideoUploadWorker implements OnModuleDestroy {
     await this.worker?.close();
   }
 }
+
