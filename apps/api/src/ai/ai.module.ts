@@ -12,10 +12,11 @@ import { RagService } from "src/ai/services/rag.service";
 import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
+import { LocalizationModule } from "src/localization/localization.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
 
 @Module({
-  imports: [StudentLessonProgressModule],
+  imports: [StudentLessonProgressModule, LocalizationModule],
   controllers: [AiController],
   providers: [
     ChatService,

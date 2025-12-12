@@ -10,6 +10,7 @@ import {
   type ThreadStatus,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
+import { LocalizationService } from "src/localization/localization.service";
 import {
   aiMentorLessons,
   aiMentorThreadMessages,
@@ -39,7 +40,10 @@ import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class AiRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   async findAiMentorLessonIdFromLesson(id: UUIDType) {
     const [aiMentorLessonId] = await this.db
@@ -194,7 +198,7 @@ export class AiRepository {
   ): Promise<AiMentorLessonBody> {
     const [lesson] = await this.db
       .select({
-        title: sql<string>`lessons.title->>${language}::text`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         instructions: aiMentorLessons.aiMentorInstructions,
         conditions: aiMentorLessons.completionConditions,
         type: sql<AiMentorType>`${aiMentorLessons.type}`,
@@ -203,6 +207,8 @@ export class AiRepository {
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
       .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(aiMentorThreads.id, threadId));
 
     return lesson;
