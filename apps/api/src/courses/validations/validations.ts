@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 
-import { baseResponse, paginatedResponse, UUIDSchema } from "src/common";
+import { paginatedResponse, UUIDSchema } from "src/common";
 import {
   allCoursesSchema,
   allStudentCoursesSchema,
@@ -104,7 +104,7 @@ export const coursesValidation = {
 };
 
 export const studentsWithEnrolmentValidation = {
-  response: baseResponse(Type.Array(enrolledStudentSchema)),
+  response: paginatedResponse(Type.Array(enrolledStudentSchema)),
   request: [
     { type: "param" as const, name: "courseId", schema: UUIDSchema },
     {
@@ -122,5 +122,7 @@ export const studentsWithEnrolmentValidation = {
       name: "groups",
       schema: groupsFilterSchema,
     },
+    { type: "query" as const, name: "page", schema: Type.Number({ minimum: 1 }) },
+    { type: "query" as const, name: "perPage", schema: Type.Number() },
   ],
 };

@@ -2081,7 +2081,39 @@
                   "type": "string"
                 },
                 {
+                  "const": "firstName",
+                  "type": "string"
+                },
+                {
+                  "const": "lastName",
+                  "type": "string"
+                },
+                {
+                  "const": "email",
+                  "type": "string"
+                },
+                {
+                  "const": "isEnrolledByGroup",
+                  "type": "string"
+                },
+                {
                   "const": "-enrolledAt",
+                  "type": "string"
+                },
+                {
+                  "const": "-firstName",
+                  "type": "string"
+                },
+                {
+                  "const": "-lastName",
+                  "type": "string"
+                },
+                {
+                  "const": "-email",
+                  "type": "string"
+                },
+                {
+                  "const": "-isEnrolledByGroup",
                   "type": "string"
                 }
               ]
@@ -2096,6 +2128,23 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -9746,10 +9795,36 @@
                 "isEnrolledByGroup"
               ]
             }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "GetAvailableCoursesResponse": {

@@ -2,6 +2,7 @@ import { faker } from "@faker-js/faker";
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import {
@@ -843,27 +844,30 @@ describe("CourseController (e2e)", () => {
             .set("Cookie", cookies);
 
           expect(response.status).toBe(200);
-          expect(response.body).toEqual({
-            data: [
-              {
-                firstName: students[0].firstName,
-                lastName: students[0].lastName,
-                email: students[0].email,
-                id: students[0].id,
-                enrolledAt: studentCourse[0].createdAt,
-                groups: [],
-                isEnrolledByGroup: false,
-              },
-              {
-                firstName: students[1].firstName,
-                lastName: students[1].lastName,
-                email: students[1].email,
-                id: students[1].id,
-                enrolledAt: null,
-                groups: [],
-                isEnrolledByGroup: false,
-              },
-            ],
+          expect(response.body.data).toEqual([
+            {
+              firstName: students[0].firstName,
+              lastName: students[0].lastName,
+              email: students[0].email,
+              id: students[0].id,
+              enrolledAt: studentCourse[0].enrolledAt,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+            {
+              firstName: students[1].firstName,
+              lastName: students[1].lastName,
+              email: students[1].email,
+              id: students[1].id,
+              enrolledAt: null,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+          ]);
+          expect(response.body.pagination).toEqual({
+            totalItems: 2,
+            page: 1,
+            perPage: DEFAULT_PAGE_SIZE,
           });
         });
 
@@ -900,18 +904,21 @@ describe("CourseController (e2e)", () => {
             .set("Cookie", cookies);
 
           expect(response.status).toBe(200);
-          expect(response.body).toEqual({
-            data: [
-              {
-                firstName: students[0].firstName,
-                lastName: students[0].lastName,
-                email: students[0].email,
-                id: students[0].id,
-                enrolledAt: studentCourse[0].createdAt,
-                groups: [],
-                isEnrolledByGroup: false,
-              },
-            ],
+          expect(response.body.data).toEqual([
+            {
+              firstName: students[0].firstName,
+              lastName: students[0].lastName,
+              email: students[0].email,
+              id: students[0].id,
+              enrolledAt: studentCourse[0].enrolledAt,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+          ]);
+          expect(response.body.pagination).toEqual({
+            totalItems: 1,
+            page: 1,
+            perPage: DEFAULT_PAGE_SIZE,
           });
         });
 
@@ -948,18 +955,21 @@ describe("CourseController (e2e)", () => {
             .set("Cookie", cookies);
 
           expect(response.status).toBe(200);
-          expect(response.body).toEqual({
-            data: [
-              {
-                firstName: students[0].firstName,
-                lastName: students[0].lastName,
-                email: students[0].email,
-                id: students[0].id,
-                enrolledAt: studentCourse[0].createdAt,
-                groups: [],
-                isEnrolledByGroup: false,
-              },
-            ],
+          expect(response.body.data).toEqual([
+            {
+              firstName: students[0].firstName,
+              lastName: students[0].lastName,
+              email: students[0].email,
+              id: students[0].id,
+              enrolledAt: studentCourse[0].enrolledAt,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+          ]);
+          expect(response.body.pagination).toEqual({
+            totalItems: 1,
+            page: 1,
+            perPage: DEFAULT_PAGE_SIZE,
           });
         });
 
@@ -996,18 +1006,21 @@ describe("CourseController (e2e)", () => {
             .set("Cookie", cookies);
 
           expect(response.status).toBe(200);
-          expect(response.body).toEqual({
-            data: [
-              {
-                firstName: students[0].firstName,
-                lastName: students[0].lastName,
-                email: students[0].email,
-                id: students[0].id,
-                enrolledAt: studentCourse[0].createdAt,
-                groups: [],
-                isEnrolledByGroup: false,
-              },
-            ],
+          expect(response.body.data).toEqual([
+            {
+              firstName: students[0].firstName,
+              lastName: students[0].lastName,
+              email: students[0].email,
+              id: students[0].id,
+              enrolledAt: studentCourse[0].enrolledAt,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+          ]);
+          expect(response.body.pagination).toEqual({
+            totalItems: 1,
+            page: 1,
+            perPage: DEFAULT_PAGE_SIZE,
           });
         });
 
@@ -1044,27 +1057,30 @@ describe("CourseController (e2e)", () => {
             .set("Cookie", cookies);
 
           expect(response.status).toBe(200);
-          expect(response.body).toEqual({
-            data: [
-              {
-                firstName: students[1].firstName,
-                lastName: students[1].lastName,
-                email: students[1].email,
-                id: students[1].id,
-                enrolledAt: null,
-                groups: [],
-                isEnrolledByGroup: false,
-              },
-              {
-                firstName: students[0].firstName,
-                lastName: students[0].lastName,
-                email: students[0].email,
-                id: students[0].id,
-                enrolledAt: studentCourse[0].createdAt,
-                groups: [],
-                isEnrolledByGroup: false,
-              },
-            ],
+          expect(response.body.data).toEqual([
+            {
+              firstName: students[1].firstName,
+              lastName: students[1].lastName,
+              email: students[1].email,
+              id: students[1].id,
+              enrolledAt: null,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+            {
+              firstName: students[0].firstName,
+              lastName: students[0].lastName,
+              email: students[0].email,
+              id: students[0].id,
+              enrolledAt: studentCourse[0].enrolledAt,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+          ]);
+          expect(response.body.pagination).toEqual({
+            totalItems: 2,
+            page: 1,
+            perPage: DEFAULT_PAGE_SIZE,
           });
         });
       });

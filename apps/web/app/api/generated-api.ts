@@ -974,6 +974,12 @@ export interface GetStudentsWithEnrollmentDateResponse {
     id: string;
     isEnrolledByGroup: boolean;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetAvailableCoursesResponse {
@@ -4170,8 +4176,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       courseId: string,
       query?: {
         keyword?: string;
-        sort?: "enrolledAt" | "-enrolledAt";
+        sort?:
+          | "enrolledAt"
+          | "firstName"
+          | "lastName"
+          | "email"
+          | "isEnrolledByGroup"
+          | "-enrolledAt"
+          | "-firstName"
+          | "-lastName"
+          | "-email"
+          | "-isEnrolledByGroup";
         groups?: string[];
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
       },
       params: RequestParams = {},
     ) =>
