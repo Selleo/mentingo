@@ -4,18 +4,13 @@ import { formatDate } from "date-fns";
 import { Icon } from "../../components/Icon";
 import { cn } from "../../lib/utils";
 
-interface Props {
-  title: string;
-  introduction: string;
-  author: string;
-  createdAt: string;
-  image: string;
-  content: string;
-  id: number;
-  isBig?: boolean;
-}
+import type { GetNewsListResponse } from "~/api/generated-api";
 
-function NewsItem({ title, introduction, author, createdAt, image, id, isBig = false }: Props) {
+type Props = GetNewsListResponse["data"][number] & {
+  isBig?: boolean;
+};
+
+function NewsItem({ title, authorName, publishedAt, summary, id, isBig = false }: Props) {
   const navigate = useNavigate();
 
   return (
@@ -30,7 +25,7 @@ function NewsItem({ title, introduction, author, createdAt, image, id, isBig = f
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
-        style={{ backgroundImage: `url(${image})` }}
+        // style={{ backgroundImage: `url(${image})` }}
         aria-hidden
       />
       <GradientOverlay />
@@ -38,19 +33,17 @@ function NewsItem({ title, introduction, author, createdAt, image, id, isBig = f
         <h3 className="text-xl font-gothic font-bold leading-6 text-white transition-all duration-300 group-hover:text-primary-500 text-left">
           {title}
         </h3>
-        <p className="text-base font-normal leading-7 text-white opacity-95 text-left">
-          {introduction}
-        </p>
+        <p className="text-base font-normal leading-7 text-white opacity-95 text-left">{summary}</p>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <Icon name="Calendar" />
             <p className="text-sm font-normal leading-5 text-white opacity-80">
-              {formatDate(createdAt, "d MMMM yyyy")}
+              {publishedAt ? formatDate(new Date(publishedAt), "d MMMM yyyy") : "-"}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Icon name="User" className="size-4" />
-            <p className="text-sm font-normal leading-5 text-white opacity-80">{author}</p>
+            <p className="text-sm font-normal leading-5 text-white opacity-80">{authorName}</p>
           </div>
         </div>
       </div>
