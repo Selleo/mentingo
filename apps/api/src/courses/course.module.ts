@@ -20,7 +20,6 @@ import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
 
-
 @Module({
   imports: [
     FileModule,

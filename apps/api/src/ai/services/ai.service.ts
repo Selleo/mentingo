@@ -10,7 +10,6 @@ import { trace } from "@opentelemetry/api";
 import { generateObject, jsonSchema, type Message, streamText } from "ai";
 import { eq } from "drizzle-orm";
 import _ from "lodash";
-import { Type } from "@sinclair/typebox";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
@@ -21,6 +20,7 @@ import { PromptService } from "src/ai/services/prompt.service";
 import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
+import { generateTranslationSchema } from "src/ai/utils/ai.schema";
 import {
   MESSAGE_ROLE,
   type MessageRole,
@@ -29,16 +29,14 @@ import {
   THREAD_STATUS,
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
-import { QueueService } from "src/ingestion/services/queue.service";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
-import {
+import type {
   CreateThreadBody,
   GenerateTranslationBody,
-  generateTranslationSchema,
   ResponseAiJudgeJudgementBody,
   StreamChatBody,
   ThreadOwnershipBody,
@@ -261,47 +259,104 @@ export class AiService {
   }
 
   async generateMissingTranslations(
-    data: CourseTranslationType[],
+    data: Array<{
+      data: CourseTranslationType;
+      metadata: string;
+      context: {
+        courseTitle?: string;
+        chapterTitle?: string;
+        lessonTitle?: string;
+        lessonDescription?: string;
+        questionTitle?: string;
+        questionDescription?: string;
+        questionOptions?: string;
+        optionText?: string;
+      };
+    }>,
     language: SupportedLanguages,
-    chunkSize: number = 6,
+    courseId: string,
+    chunkSize: number = 30,
   ) {
-    const openai = await this.promptService.getOpenAI();
-    const prompt = await this.promptService.loadPrompt("translationPrompt", { language });
+    return observe(
+      async () => {
+        updateActiveTrace({ sessionId: `generate-missing-translations-${courseId}` });
 
-    const translateChunk = async (chunk: CourseTranslationType[]) => {
-      const formatted = chunk.map((c, i) => `${i + 1}. ${c.base}`).join("\n");
-      const schema = jsonSchema(generateTranslationSchema);
+        const openai = await this.promptService.getOpenAI();
+        const prompt = await this.promptService.loadPrompt("translationPrompt", { language });
 
-      const baseConfig = {
-        model: openai(OPENAI_MODELS.BASIC),
-        schema,
-        system: prompt,
-        temperature: 0,
-        topP: 0.9,
-        topK: 40,
-      };
+        const translateChunk = async (
+          chunk: Array<{
+            data: CourseTranslationType;
+            metadata: string;
+            context: Record<string, string | undefined>;
+          }>,
+        ) => {
+          const formatted = chunk
+            .map(({ data: c, metadata, context }, i) => {
+              const ctxLines = [
+                context.courseTitle && `Course: ${context.courseTitle}`,
+                context.chapterTitle && `Chapter: ${context.chapterTitle}`,
+                context.lessonTitle &&
+                  `Lesson: ${context.lessonTitle}${
+                    context.lessonDescription ? ` — ${context.lessonDescription}` : ""
+                  }`,
+                context.questionTitle &&
+                  `Question: ${context.questionTitle}${
+                    context.questionDescription ? ` — ${context.questionDescription}` : ""
+                  }`,
+                context.questionOptions && `Options:\n${context.questionOptions}`,
+                context.optionText && `Option: ${context.optionText}`,
+              ]
+                .filter(Boolean)
+                .join("\n");
 
-      const run = async () => {
-        const { object } = await generateObject({
-          ...baseConfig,
-          output: "object",
-          messages: [
-            {
-              role: "user",
-              content: `Return exactly ${chunk.length} translated strings as an array, same order:\n${formatted}`,
-            },
-          ],
-        });
-        return object as GenerateTranslationBody;
-      };
+              return [
+                `ITEM ${i + 1}`,
+                `METADATA: ${metadata}`,
+                ctxLines ? `CONTEXT:\n${ctxLines}` : undefined,
+                `TEXT TO TRANSLATE:\n${c.base}`,
+              ]
+                .filter(Boolean)
+                .join("\n");
+            })
+            .join("\n\n");
 
-      const { translations } = await run();
+          const schema = jsonSchema(generateTranslationSchema);
 
-      return translations;
-    };
+          const baseConfig = {
+            model: openai(OPENAI_MODELS.BASIC),
+            schema,
+            system: prompt,
+            temperature: 0,
+            topP: 0.9,
+            topK: 10,
+          };
 
-    const chunked = _.chunk(data, chunkSize);
-    return Promise.all(chunked.map(translateChunk));
+          const run = async () => {
+            const { object } = await generateObject({
+              ...baseConfig,
+              experimental_telemetry: { isEnabled: true },
+              output: "object",
+              messages: [
+                {
+                  role: "user",
+                  content: `Return exactly ${chunk.length} translated strings as an array, same order. Each ITEM provides context; only translate the TEXT TO TRANSLATE.\n\n${formatted}`,
+                },
+              ],
+            });
+            return object as GenerateTranslationBody;
+          };
+
+          const { translations } = await run();
+
+          return translations;
+        };
+
+        const chunked = _.chunk(data, chunkSize);
+        return Promise.all(chunked.map(translateChunk));
+      },
+      { name: "translation-generator", asType: "generation" },
+    )();
   }
 
   private mapRole(role: MessageRole) {

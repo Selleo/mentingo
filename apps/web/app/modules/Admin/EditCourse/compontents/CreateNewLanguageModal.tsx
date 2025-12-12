@@ -37,8 +37,7 @@ export const CreateLanguageDialog = ({
     setOpen(false);
 
     await createLanguage({ courseId, language: languageToCreate }).then(() => {
-      // will be changed to true in next PR
-      setOpenGenerateMissingTranslations(false);
+      setOpenGenerateMissingTranslations(true);
       onConfirm(languageToCreate);
     });
   };

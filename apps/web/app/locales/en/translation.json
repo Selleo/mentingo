@@ -1024,7 +1024,10 @@
       "updateCourseMissingLanguage": "No language provided for translation",
       "successfullyDeletedLanguage": "Language deleted from the course successfully",
       "invalidLanguageToDelete": "You cannot delete this language.",
-      "cannotModifyQuestionsInNonBaseLanguage": "You cannot modify questions in a language other than the default."
+      "cannotModifyQuestionsInNonBaseLanguage": "You cannot modify questions in a language other than the default.",
+      "noMissingTranslations": "No missing translations",
+      "mismatchContentLength": "The number of translations does not match the number of generated translations",
+      "translationsGeneratedSuccessfully": "Translations generated successfully"
     },
     "settings": {
       "breadcrumbs": {

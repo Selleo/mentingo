@@ -113,6 +113,8 @@ import type {
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
+import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
+import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
@@ -581,9 +583,8 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarUrl,
-            );
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
             return {
               ...itemWithoutReferences,
@@ -789,7 +790,7 @@ export class CourseService {
     language: SupportedLanguages,
     currentUserId: UUIDType,
     currentUserRole: UserRole,
-  ) {
+  ): Promise<CommonShowBetaCourse> {
     const [course] = await this.db
       .select({
         id: courses.id,
@@ -864,6 +865,38 @@ export class CourseService {
       thumbnailS3SingedUrl,
       chapters: updatedCourseLessonList ?? [],
     };
+  }
+
+  async hasMissingTranslations(
+    id: UUIDType,
+    language: SupportedLanguages,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ): Promise<boolean> {
+    const courseInRequestedLanguage = await this.getBetaCourseById(
+      id,
+      language,
+      currentUserId,
+      currentUserRole,
+    );
+
+    if (language === courseInRequestedLanguage.baseLanguage) return false;
+
+    const courseInBaseLanguage = await this.getBetaCourseById(
+      id,
+      courseInRequestedLanguage.baseLanguage,
+      currentUserId,
+      currentUserRole,
+    );
+
+    return (
+      this.collectMissingTranslationFields(
+        id,
+        courseInRequestedLanguage,
+        courseInBaseLanguage,
+        true,
+      ).length > 0
+    );
   }
 
   async getContentCreatorCourses({
@@ -1007,9 +1040,8 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-          authorAvatarUrl,
-        );
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
         return {
           ...courseWithoutReferences,
@@ -3047,107 +3079,109 @@ export class CourseService {
       currentUser.role,
     );
 
-    return this.db.transaction(async (trx) => {
-      const dataToUpdate = this.collectMissingTranslationFields(
-        courseId,
-        courseInRequestedLanguage,
-        courseInBaseLanguage,
-      );
+    const { flat: missingData, withContext } = this.collectMissingTranslationFieldsWithContext(
+      courseId,
+      courseInRequestedLanguage,
+      courseInBaseLanguage,
+    );
 
-      const translations = await this.aiService.generateMissingTranslations(dataToUpdate, language);
+    if (!missingData.length) {
+      throw new BadRequestException({ message: "adminCourseView.toast.noMissingTranslations" });
+    }
+
+    return this.db.transaction(async (trx) => {
+      const translations = await this.aiService.generateMissingTranslations(
+        withContext,
+        language,
+        courseId,
+      );
 
       const flat = translations.flat(1);
 
-      if (dataToUpdate.length !== flat.length) {
-        throw new BadRequestException(
-          `adminCourseView.toast.mismatchContentLength: expected ${dataToUpdate.length}, got ${flat.length}`,
-        );
+      if (missingData.length !== flat.length) {
+        throw new BadRequestException(`adminCourseView.toast.mismatchContentLength`);
       }
 
       for (let i = 0; i < flat.length; i++) {
         const translatedValue = flat[i];
-        const currData = dataToUpdate[i];
+        const currData = missingData[i];
 
         await trx
           .update(currData.field.table)
-          .set({ [camelCase(currData.field.name)]: setJsonbField(currData.field, language, translatedValue) })
+          .set({
+            [camelCase(currData.field.name)]: setJsonbField(
+              currData.field,
+              language,
+              translatedValue,
+            ),
+          })
           .where(eq(currData.idColumn, currData.id));
       }
     });
   }
 
-  private collectMissingTranslationFields(
+  private *translationCandidates(
     courseId: UUIDType,
     course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-    baseCourse: Awaited<ReturnType<typeof this.getBetaCourseById>>,
-  ): CourseTranslationType[] {
-    const dataToUpdate: CourseTranslationType[] = [];
-
-    const pushMissing = (
-      id: string | undefined,
-      hasValue: boolean,
-      baseValue: string | null | undefined,
-      field: AnyPgColumn,
-      idColumn: AnyPgColumn,
-    ) => {
-      if (hasValue) return;
-      if (!id) return;
-      const base = typeof baseValue === "string" ? baseValue : undefined;
-      if (!base?.length) return;
-
-      dataToUpdate.push({ id, base, field, idColumn });
+    baseCourse?: Awaited<ReturnType<typeof this.getBetaCourseById>>,
+  ): Generator<{
+    id: string | undefined;
+    hasValue: boolean;
+    baseValue: string | null | undefined;
+    field: AnyPgColumn;
+    idColumn: AnyPgColumn;
+  }> {
+    yield {
+      id: courseId,
+      hasValue: Boolean(course.title?.length),
+      baseValue: baseCourse?.title,
+      field: courses.title,
+      idColumn: courses.id,
     };
 
-    pushMissing(
-      courseId,
-      Boolean(course.title?.length),
-      baseCourse?.title,
-      courses.title,
-      courses.id,
-    );
-    pushMissing(
-      courseId,
-      Boolean(course.description?.length),
-      baseCourse?.description,
-      courses.description,
-      courses.id,
-    );
+    yield {
+      id: courseId,
+      hasValue: Boolean(course.description?.length),
+      baseValue: baseCourse?.description,
+      field: courses.description,
+      idColumn: courses.id,
+    };
 
     const baseChapterMap = new Map((baseCourse?.chapters ?? []).map((ch) => [ch.id, ch]));
 
     for (const chapter of course.chapters) {
       const baseChapter = baseChapterMap.get(chapter.id);
 
-      pushMissing(
-        chapter.id,
-        Boolean(chapter.title?.length),
-        baseChapter?.title,
-        chapters.title,
-        chapters.id,
-      );
+      yield {
+        id: chapter.id,
+        hasValue: Boolean(chapter.title?.length),
+        baseValue: baseChapter?.title,
+        field: chapters.title,
+        idColumn: chapters.id,
+      };
 
       const baseLessonMap = new Map(
         (baseChapter?.lessons ?? []).map((lesson) => [lesson.id, lesson]),
       );
 
-      for (const lesson of chapter.lessons) {
+      for (const lesson of chapter.lessons ?? []) {
         const baseLesson = baseLessonMap.get(lesson.id);
 
-        pushMissing(
-          lesson.id,
-          Boolean(lesson.title?.length),
-          baseLesson?.title,
-          lessons.title,
-          lessons.id,
-        );
+        yield {
+          id: lesson.id,
+          hasValue: Boolean(lesson.title?.length),
+          baseValue: baseLesson?.title,
+          field: lessons.title,
+          idColumn: lessons.id,
+        };
 
-        pushMissing(
-          lesson.id,
-          Boolean(lesson.description?.length),
-          baseLesson?.description,
-          lessons.description,
-          lessons.id,
-        );
+        yield {
+          id: lesson.id,
+          hasValue: Boolean(lesson.description?.length),
+          baseValue: baseLesson?.description,
+          field: lessons.description,
+          idColumn: lessons.id,
+        };
 
         if (lesson.type !== LESSON_TYPES.QUIZ || !lesson.questions?.length) continue;
 
@@ -3158,29 +3192,29 @@ export class CourseService {
         for (const question of lesson.questions) {
           const baseQuestion = baseQuestionMap.get(question.id);
 
-          pushMissing(
-            question.id,
-            Boolean(question.title?.length),
-            baseQuestion?.title,
-            questions.title,
-            questions.id,
-          );
+          yield {
+            id: question.id,
+            hasValue: Boolean(question.title?.length),
+            baseValue: baseQuestion?.title,
+            field: questions.title,
+            idColumn: questions.id,
+          };
 
-          pushMissing(
-            question.id,
-            Boolean(question.description?.length),
-            baseQuestion?.description,
-            questions.description,
-            questions.id,
-          );
+          yield {
+            id: question.id,
+            hasValue: Boolean(question.description?.length),
+            baseValue: baseQuestion?.description,
+            field: questions.description,
+            idColumn: questions.id,
+          };
 
-          pushMissing(
-            question.id,
-            Boolean(question.solutionExplanation?.length),
-            baseQuestion?.solutionExplanation,
-            questions.solutionExplanation,
-            questions.id,
-          );
+          yield {
+            id: question.id,
+            hasValue: Boolean(question.solutionExplanation?.length),
+            baseValue: baseQuestion?.solutionExplanation,
+            field: questions.solutionExplanation,
+            idColumn: questions.id,
+          };
 
           const baseOptionMap = new Map(
             (baseQuestion?.options ?? []).map((option) => [option.id, option]),
@@ -3189,26 +3223,382 @@ export class CourseService {
           for (const option of question.options ?? []) {
             const baseOption = baseOptionMap.get(option.id);
 
-            pushMissing(
-              option.id,
-              Boolean(option.optionText?.length),
-              baseOption?.optionText,
-              questionAnswerOptions.optionText,
-              questionAnswerOptions.id,
-            );
+            yield {
+              id: option.id,
+              hasValue: Boolean(option.optionText?.length),
+              baseValue: baseOption?.optionText,
+              field: questionAnswerOptions.optionText,
+              idColumn: questionAnswerOptions.id,
+            };
 
-            pushMissing(
-              option.id,
-              Boolean(option.matchedWord?.length),
-              baseOption?.matchedWord,
-              questionAnswerOptions.matchedWord,
-              questionAnswerOptions.id,
-            );
+            yield {
+              id: option.id,
+              hasValue: Boolean(option.matchedWord?.length),
+              baseValue: baseOption?.matchedWord,
+              field: questionAnswerOptions.matchedWord,
+              idColumn: questionAnswerOptions.id,
+            };
+          }
+        }
+      }
+    }
+  }
+
+  private collectMissingTranslationFields(
+    courseId: UUIDType,
+    course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
+    baseCourse?: Awaited<ReturnType<typeof this.getBetaCourseById>>,
+    earlyReturn = false,
+  ): CourseTranslationType[] {
+    const dataToUpdate: CourseTranslationType[] = [];
+    type Candidate =
+      ReturnType<typeof this.translationCandidates> extends Generator<infer T> ? T : never;
+
+    const pushMissing = ({ id, hasValue, baseValue, field, idColumn }: Candidate) => {
+      if (hasValue || !id) return false;
+      const base = typeof baseValue === "string" ? baseValue : undefined;
+      if (!base?.length) return false;
+
+      dataToUpdate.push({ id, base, field, idColumn });
+      return true;
+    };
+
+    for (const candidate of this.translationCandidates(courseId, course, baseCourse)) {
+      const added = pushMissing(candidate);
+      if (earlyReturn && added) break;
+    }
+
+    return dataToUpdate;
+  }
+
+  private collectMissingTranslationFieldsWithContext(
+    courseId: UUIDType,
+    course: Awaited<ReturnType<typeof this.getBetaCourseById>>,
+    baseCourse?: Awaited<ReturnType<typeof this.getBetaCourseById>>,
+  ): {
+    flat: CourseTranslationType[];
+    grouped: {
+      course: CourseTranslationType[];
+      chapters: Array<{
+        chapterId: UUIDType;
+        chapterTitle?: string;
+        fields: CourseTranslationType[];
+        lessons: Array<{
+          lessonId: UUIDType;
+          lessonTitle?: string;
+          lessonDescription?: string;
+          fields: CourseTranslationType[];
+          questions: Array<{
+            questionId: UUIDType;
+            questionTitle?: string;
+            questionDescription?: string;
+            fields: CourseTranslationType[];
+            options: Array<{
+              optionId: UUIDType;
+              optionText?: string;
+              fields: CourseTranslationType[];
+            }>;
+          }>;
+        }>;
+      }>;
+    };
+    withContext: Array<{
+      data: CourseTranslationType;
+      metadata: string;
+      context: {
+        courseTitle?: string;
+        chapterTitle?: string;
+        lessonTitle?: string;
+        lessonDescription?: string;
+        questionTitle?: string;
+        questionDescription?: string;
+        questionOptions?: string;
+        optionText?: string;
+      };
+    }>;
+  } {
+    const flat = this.collectMissingTranslationFields(courseId, course, baseCourse);
+    const grouped = {
+      course: [] as CourseTranslationType[],
+      chapters: [] as Array<{
+        chapterId: UUIDType;
+        chapterTitle?: string;
+        fields: CourseTranslationType[];
+        lessons: Array<{
+          lessonId: UUIDType;
+          lessonTitle?: string;
+          lessonDescription?: string;
+          fields: CourseTranslationType[];
+          questions: Array<{
+            questionId: UUIDType;
+            questionTitle?: string;
+            questionDescription?: string;
+            fields: CourseTranslationType[];
+            options: Array<{
+              optionId: UUIDType;
+              optionText?: string;
+              fields: CourseTranslationType[];
+            }>;
+          }>;
+        }>;
+      }>,
+    };
+
+    const courseTitle = baseCourse?.title;
+
+    const chapterById = new Map<UUIDType, { chapterId: UUIDType; chapterTitle?: string }>();
+    const lessonById = new Map<
+      UUIDType,
+      {
+        chapterId: UUIDType;
+        lessonId: UUIDType;
+        lessonTitle?: string;
+        lessonDescription?: string;
+      }
+    >();
+    const questionById = new Map<
+      UUIDType,
+      {
+        chapterId: UUIDType;
+        lessonId: UUIDType;
+        questionId: UUIDType;
+        questionTitle?: string;
+        questionDescription?: string;
+        questionOptions?: string;
+      }
+    >();
+    const optionsByQuestionId = new Map<
+      UUIDType,
+      Array<{ optionText?: string; matchedWord?: string | null }>
+    >();
+    const optionById = new Map<
+      UUIDType,
+      {
+        chapterId: UUIDType;
+        lessonId: UUIDType;
+        questionId: UUIDType;
+        optionId: UUIDType;
+        optionText?: string;
+      }
+    >();
+
+    for (const chapter of baseCourse?.chapters ?? []) {
+      chapterById.set(chapter.id, { chapterId: chapter.id, chapterTitle: chapter.title });
+      for (const lesson of chapter.lessons ?? []) {
+        lessonById.set(lesson.id, {
+          chapterId: chapter.id,
+          lessonId: lesson.id,
+          lessonTitle: lesson.title,
+          lessonDescription: lesson.description ?? undefined,
+        });
+
+        for (const question of lesson.questions ?? []) {
+          if (!question.id) continue;
+          const opts = question.options ?? [];
+          optionsByQuestionId.set(
+            question.id,
+            opts.map((o) => ({
+              optionText: o.optionText ?? undefined,
+              matchedWord: o.matchedWord ?? undefined,
+            })),
+          );
+          const questionOptions = opts
+            .map((o) => {
+              const text = o.optionText ?? "";
+              const matched = o.matchedWord ?? "";
+              if (text && matched) return `- ${text} (matchedWord: ${matched})`;
+              if (text) return `- ${text}`;
+              if (matched) return `- (matchedWord: ${matched})`;
+              return "";
+            })
+            .filter(Boolean)
+            .join("\n");
+          questionById.set(question.id, {
+            chapterId: chapter.id,
+            lessonId: lesson.id,
+            questionId: question.id,
+            questionTitle: question.title,
+            questionDescription: question.description ?? undefined,
+            questionOptions: questionOptions || undefined,
+          });
+
+          for (const option of question.options ?? []) {
+            if (!option.id) continue;
+            optionById.set(option.id, {
+              chapterId: chapter.id,
+              lessonId: lesson.id,
+              questionId: question.id,
+              optionId: option.id,
+              optionText: option.optionText ?? undefined,
+            });
           }
         }
       }
     }
 
-    return dataToUpdate;
+    const getOrCreateChapterGroup = (chapterId: UUIDType) => {
+      let ch = grouped.chapters.find((c) => c.chapterId === chapterId);
+      if (!ch) {
+        const base = chapterById.get(chapterId);
+        ch = {
+          chapterId,
+          chapterTitle: base?.chapterTitle,
+          fields: [],
+          lessons: [],
+        };
+        grouped.chapters.push(ch);
+      }
+      return ch;
+    };
+
+    const getOrCreateLessonGroup = (chapterId: UUIDType, lessonId: UUIDType) => {
+      const ch = getOrCreateChapterGroup(chapterId);
+      let ls = ch.lessons.find((l) => l.lessonId === lessonId);
+      if (!ls) {
+        const base = lessonById.get(lessonId);
+        ls = {
+          lessonId,
+          lessonTitle: base?.lessonTitle,
+          lessonDescription: base?.lessonDescription,
+          fields: [],
+          questions: [],
+        };
+        ch.lessons.push(ls);
+      }
+      return ls;
+    };
+
+    const getOrCreateQuestionGroup = (
+      chapterId: UUIDType,
+      lessonId: UUIDType,
+      questionId: UUIDType,
+    ) => {
+      const ls = getOrCreateLessonGroup(chapterId, lessonId);
+      let qg = ls.questions.find((q) => q.questionId === questionId);
+      if (!qg) {
+        const base = questionById.get(questionId);
+        qg = {
+          questionId,
+          questionTitle: base?.questionTitle,
+          questionDescription: base?.questionDescription,
+          fields: [],
+          options: [],
+        };
+        ls.questions.push(qg);
+      }
+      return qg;
+    };
+
+    const getOrCreateOptionGroup = (
+      chapterId: UUIDType,
+      lessonId: UUIDType,
+      questionId: UUIDType,
+      optionId: UUIDType,
+    ) => {
+      const qg = getOrCreateQuestionGroup(chapterId, lessonId, questionId);
+      let og = qg.options.find((o) => o.optionId === optionId);
+      if (!og) {
+        const base = optionById.get(optionId);
+        og = { optionId, optionText: base?.optionText, fields: [] };
+        qg.options.push(og);
+      }
+      return og;
+    };
+
+    const withContext = flat.map((entry) => {
+      const metadata = `${entry.field.name}`;
+
+      if (entry.field.table === courses) {
+        grouped.course.push(entry);
+        return {
+          data: entry,
+          metadata,
+          context: { courseTitle },
+        };
+      }
+
+      if (entry.field.table === chapters) {
+        const base = chapterById.get(entry.id as UUIDType);
+        if (base) getOrCreateChapterGroup(base.chapterId).fields.push(entry);
+        return {
+          data: entry,
+          metadata,
+          context: {
+            courseTitle,
+            chapterTitle: base?.chapterTitle,
+          },
+        };
+      }
+
+      if (entry.field.table === lessons) {
+        const base = lessonById.get(entry.id as UUIDType);
+        if (base) getOrCreateLessonGroup(base.chapterId, base.lessonId).fields.push(entry);
+        return {
+          data: entry,
+          metadata,
+          context: {
+            courseTitle,
+            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
+            lessonTitle: base?.lessonTitle,
+            lessonDescription: base?.lessonDescription,
+          },
+        };
+      }
+
+      if (entry.field.table === questions) {
+        const base = questionById.get(entry.id as UUIDType);
+        if (base)
+          getOrCreateQuestionGroup(base.chapterId, base.lessonId, base.questionId).fields.push(
+            entry,
+          );
+        return {
+          data: entry,
+          metadata,
+          context: {
+            courseTitle,
+            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
+            lessonTitle: base ? lessonById.get(base.lessonId)?.lessonTitle : undefined,
+            lessonDescription: base ? lessonById.get(base.lessonId)?.lessonDescription : undefined,
+            questionTitle: base?.questionTitle,
+            questionDescription: base?.questionDescription,
+            questionOptions: base?.questionOptions,
+          },
+        };
+      }
+
+      if (entry.field.table === questionAnswerOptions) {
+        const base = optionById.get(entry.id as UUIDType);
+        if (base)
+          getOrCreateOptionGroup(
+            base.chapterId,
+            base.lessonId,
+            base.questionId,
+            base.optionId,
+          ).fields.push(entry);
+        const questionBase = base ? questionById.get(base.questionId) : undefined;
+        const lessonBase = base ? lessonById.get(base.lessonId) : undefined;
+        return {
+          data: entry,
+          metadata,
+          context: {
+            courseTitle,
+            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
+            lessonTitle: lessonBase?.lessonTitle,
+            lessonDescription: lessonBase?.lessonDescription,
+            questionTitle: questionBase?.questionTitle,
+            questionDescription: questionBase?.questionDescription,
+            optionText: base?.optionText,
+          },
+        };
+      }
+
+      return {
+        data: entry,
+        metadata,
+        context: { courseTitle },
+      };
+    });
+
+    return { flat, grouped, withContext };
   }
 }

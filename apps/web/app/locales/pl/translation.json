@@ -1008,7 +1008,10 @@
       "updateCourseMissingLanguage": "Nie podano języka do tłumaczenia",
       "successfullyDeletedLanguage": "Język został pomyślnie usunięty z kursu",
       "invalidLanguageToDelete": "Nie możesz usunąć tego języka",
-      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy."
+      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy.",
+      "noMissingTranslations": "Brak brakujących tłumaczeń",
+      "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
+      "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie"
     },
     "settings": {
       "breadcrumbs": {

@@ -2654,6 +2654,51 @@
         }
       }
     },
+    "/api/course/beta-course-missing-translations": {
+      "get": {
+        "operationId": "CourseController_hasMissingTranslations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HasMissingTranslationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -12568,6 +12613,25 @@
               "title",
               "availableLocales",
               "baseLanguage"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HasMissingTranslationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "hasMissingTranslations": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "hasMissingTranslations"
             ]
           }
         },

@@ -5,6 +5,7 @@ import { UUIDSchema } from "src/common";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { coursesStatusOptions } from "./courseQuery";
+import { adminLessonSchema } from "src/lesson/lesson.schema";
 
 export const courseSchema = Type.Object({
   id: UUIDSchema,

@@ -327,6 +327,31 @@ export class CourseController {
     );
   }
 
+  @Get("beta-course-missing-translations")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(Type.Object({ hasMissingTranslations: Type.Boolean() })),
+  })
+  async hasMissingTranslations(
+    @Query("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<BaseResponse<{ hasMissingTranslations: boolean }>> {
+    const hasMissingTranslations = await this.courseService.hasMissingTranslations(
+      id,
+      language,
+      currentUserId,
+      currentUserRole,
+    );
+
+    return new BaseResponse({ hasMissingTranslations });
+  }
+
   @Post()
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
