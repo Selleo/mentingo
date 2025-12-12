@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { load as loadHtml } from "cheerio";
-import { and, count, eq, getTableColumns, ne, sql } from "drizzle-orm";
+import { and, count, eq, getTableColumns, gt, lt, ne, sql } from "drizzle-orm";
 import { isEmpty } from "lodash";
 import { match } from "ts-pattern";
 
@@ -225,6 +225,43 @@ export class NewsService {
       ...existingNews,
       content: contentWithResources,
       resources: resources.grouped,
+      ...(await this.getAdjacentNews(existingNews.id, existingNews.publishedAt, requestedLanguage)),
+    };
+  }
+
+  private async getAdjacentNews(
+    currentNewsId: UUIDType,
+    publishedAt: string | null,
+    language: SupportedLanguages,
+  ) {
+    if (!publishedAt) {
+      return { nextNews: null, previousNews: null };
+    }
+
+    const baseConditions = [
+      ne(news.archived, true),
+      eq(news.isPublic, true),
+      sql`${language} = ANY(${news.availableLocales})`,
+      ne(news.id, currentNewsId),
+    ];
+
+    const [nextNews] = await this.db
+      .select({ id: news.id })
+      .from(news)
+      .where(and(...baseConditions, gt(news.publishedAt, publishedAt)))
+      .orderBy(sql`${news.publishedAt} ASC`)
+      .limit(1);
+
+    const [previousNews] = await this.db
+      .select({ id: news.id })
+      .from(news)
+      .where(and(...baseConditions, lt(news.publishedAt, publishedAt)))
+      .orderBy(sql`${news.publishedAt} DESC`)
+      .limit(1);
+
+    return {
+      nextNews: nextNews?.id ?? null,
+      previousNews: previousNews?.id ?? null,
     };
   }
 

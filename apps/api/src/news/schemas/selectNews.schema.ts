@@ -50,6 +50,8 @@ export const getNewsResponseSchema = Type.Object({
   publishedAt: Type.Union([Type.String(), Type.Null()]),
   authorName: Type.String(),
   resources: Type.Optional(newsResourcesSchema),
+  nextNews: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
+  previousNews: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
 });
 
 export const uploadNewsFileResponseSchema = Type.Object({

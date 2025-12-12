@@ -2815,6 +2815,8 @@ export interface GetNewsResponse {
         fileName?: string;
       };
     };
+    nextNews?: string | null;
+    previousNews?: string | null;
   };
 }
 
@@ -2870,6 +2872,8 @@ export interface GetNewsListResponse {
         fileName?: string;
       };
     };
+    nextNews?: string | null;
+    previousNews?: string | null;
   }[];
   pagination: {
     totalItems: number;
