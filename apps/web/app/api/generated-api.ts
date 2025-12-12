@@ -453,6 +453,17 @@ export interface FileUploadResponse {
   uploadId?: string;
 }
 
+export interface HandleBunnyWebhookBody {
+  status?: number | string;
+  Status?: number | string;
+  videoId?: string;
+  VideoId?: string;
+  videoGuid?: string;
+  VideoGuid?: string;
+  guid?: string;
+  Guid?: string;
+}
+
 export interface GetUserStatisticsResponse {
   data: {
     averageStats: {
@@ -3411,6 +3422,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         file?: File;
         /** Optional resource type */
         resource?: string;
+        /** Optional lesson ID for existing lessons */
+        lessonId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -3440,6 +3453,63 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/file`,
         method: "DELETE",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetStatus
+     * @request GET:/api/file/status
+     */
+    fileControllerGetStatus: (
+      query: {
+        uploadId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file/status`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerHandleBunnyWebhook
+     * @request POST:/api/file/bunny/webhook
+     */
+    fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/bunny/webhook`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerAssociateUploadWithLesson
+     * @request POST:/api/file/associate-upload
+     */
+    fileControllerAssociateUploadWithLesson: (
+      data: {
+        /** Upload ID to associate with lesson */
+        uploadId: string;
+        /** Lesson ID to associate with upload */
+        lessonId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file/associate-upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

@@ -114,7 +114,7 @@ const FileLessonForm = ({
         setIsUploading(false); // Reset uploading state on error
       }
     },
-    [uploadFile, form],
+    [uploadFile, form, lessonToEdit?.id],
   );
 
   useEffect(() => {

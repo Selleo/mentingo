@@ -65,7 +65,7 @@
     "@opentelemetry/sdk-node": "0.206.0",
     "@opentelemetry/sdk-trace-node": "2.1.0",
     "@repo/email-templates": "workspace:*",
-    "socket.io": "^4.8.1",
+    "socket.io": "4.8.1",
     "@repo/prompts": "workspace:*",
     "@repo/shared": "workspace:*",
     "@sentry/integrations": "^7.114.0",

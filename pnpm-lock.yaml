@@ -291,7 +291,7 @@ importers:
         specifier: 0.34.5
         version: 0.34.5
       socket.io:
-        specifier: ^4.8.1
+        specifier: 4.8.1
         version: 4.8.1
       stripe:
         specifier: 18.5.0
