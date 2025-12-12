@@ -246,7 +246,7 @@ export class NewsService {
       currentUser,
     );
 
-    return fileData;
+    return fileData.resourceId;
   }
 
   private async getNewsResources(newsId: UUIDType, language: SupportedLanguages) {
@@ -318,23 +318,35 @@ export class NewsService {
 
       if (!matchingResource) return;
 
+      const parent = anchor.parent();
+
       match(matchingResource.contentType ?? "")
         .when(
           (type) => type.startsWith("image/"),
           () => {
-            anchor.replaceWith(
-              `<img src="${matchingResource.fileUrl}" alt="${matchingResource.title ?? ""}" />`,
-            );
+            const imgTag = `<img src="${matchingResource.fileUrl}" alt="${
+              matchingResource.title ?? ""
+            }" />`;
+            if (parent.is("p")) {
+              anchor.remove();
+              parent.after(imgTag);
+            } else {
+              anchor.replaceWith(imgTag);
+            }
           },
         )
         .when(
           (type) => type.startsWith("video/"),
           () => {
-            anchor.replaceWith(
-              `<iframe controls src="${matchingResource.fileUrl}" title="${
-                matchingResource.title ?? ""
-              }"></iframe>`,
-            );
+            const iframe = `<iframe controls src="${matchingResource.fileUrl}" title="${
+              matchingResource.title ?? ""
+            }"></iframe>`;
+            if (parent.is("p")) {
+              anchor.remove();
+              parent.after(iframe);
+            } else {
+              anchor.replaceWith(iframe);
+            }
           },
         )
         .otherwise(() => {

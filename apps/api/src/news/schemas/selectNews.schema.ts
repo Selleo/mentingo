@@ -53,8 +53,6 @@ export const getNewsResponseSchema = Type.Object({
 
 export const uploadNewsFileResponseSchema = Type.Object({
   resourceId: UUIDSchema,
-  fileKey: Type.String(),
-  fileUrl: Type.String(),
 });
 
 export const newsListResponseSchema = Type.Array(getNewsResponseSchema);
