@@ -30,7 +30,6 @@ export const securityAndRagBlockSchema = Type.Object({
 
 export const translationPromptSchema = Type.Object({
   language: Type.String(),
-  processed_chunks: Type.String(),
 });
 
 export const PROMPT_MAP = {

@@ -113,10 +113,8 @@ import type {
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
-import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
-import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
-import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
+import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
