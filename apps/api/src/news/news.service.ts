@@ -29,6 +29,9 @@ import type { CurrentUser } from "src/common/types/current-user.type";
 const FIRST_PAGE_SIZE = 7;
 const SUBSEQUENT_PAGE_SIZE = 9;
 
+type StoredNewsResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
+type ResourceMetadata = StoredNewsResource["metadata"] & { originalFilename?: unknown };
+
 @Injectable()
 export class NewsService {
   constructor(
@@ -113,11 +116,7 @@ export class NewsService {
   async getNewsList(requestedLanguage: SupportedLanguages, page = 1) {
     const pagination = this.getPaginationForNews(page);
 
-    const conditions = [
-      ne(news.archived, true),
-      eq(news.isPublic, true),
-      sql`${requestedLanguage} = ANY(${news.availableLocales})`,
-    ];
+    const conditions = this.getVisibleNewsConditions(requestedLanguage);
 
     const newsList = await this.db
       .select({
@@ -238,12 +237,7 @@ export class NewsService {
       return { nextNews: null, previousNews: null };
     }
 
-    const baseConditions = [
-      ne(news.archived, true),
-      eq(news.isPublic, true),
-      sql`${language} = ANY(${news.availableLocales})`,
-      ne(news.id, currentNewsId),
-    ];
+    const baseConditions = this.getVisibleNewsConditions(language, currentNewsId);
 
     const [nextNews] = await this.db
       .select({ id: news.id })
@@ -305,8 +299,7 @@ export class NewsService {
       [language]: description,
     };
 
-    const dateNow = new Date();
-    const filePath = `${dateNow.getFullYear()}/${dateNow.getMonth() + 1}`;
+    const filePath = this.getMonthlyFolderPath();
 
     const fileData = await this.fileService.uploadResource(
       file,
@@ -318,6 +311,7 @@ export class NewsService {
       fileTitle,
       fileDescription,
       currentUser,
+      { folderIncludesResource: true },
     );
 
     return { resourceId: fileData.resourceId };
@@ -348,8 +342,7 @@ export class NewsService {
       await this.fileService.archiveResources(coverIds);
     }
 
-    const dateNow = new Date();
-    const filePath = `${dateNow.getFullYear()}/${dateNow.getMonth() + 1}/covers`;
+    const filePath = this.getMonthlyFolderPath("covers");
 
     const fileData = await this.fileService.uploadResource(
       file,
@@ -361,6 +354,7 @@ export class NewsService {
       { [language]: title },
       { [language]: description },
       currentUser,
+      { folderIncludesResource: true },
     );
 
     return fileData;
@@ -384,22 +378,7 @@ export class NewsService {
     const flatList: NewsResource[] = [];
 
     resources.forEach((resource) => {
-      const metadata =
-        (resource as { metadata?: Record<string, unknown> }).metadata ??
-        ({} as Record<string, unknown>);
-      const fileUrl = resource.fileUrl;
-      const baseResource: NewsResource = {
-        id: resource.id,
-        fileUrl,
-        downloadUrl: fileUrl,
-        contentType: resource.contentType,
-        title: typeof resource.title === "string" ? resource.title : undefined,
-        description: typeof resource.description === "string" ? resource.description : undefined,
-        fileName:
-          typeof metadata === "object" && metadata && "originalFilename" in metadata
-            ? ((metadata as { originalFilename?: string }).originalFilename ?? undefined)
-            : undefined,
-      };
+      const baseResource = this.mapResourceToNewsResource(resource);
 
       flatList.push(baseResource);
 
@@ -422,23 +401,7 @@ export class NewsService {
       language,
     );
 
-    if (cover) {
-      groupedResources.coverImage = {
-        id: cover.id,
-        fileUrl: cover.fileUrl,
-        downloadUrl: cover.fileUrl,
-        contentType: cover.contentType,
-        title: typeof cover.title === "string" ? cover.title : undefined,
-        description: typeof cover.description === "string" ? cover.description : undefined,
-        fileName:
-          typeof cover.metadata === "object" &&
-          cover.metadata &&
-          "originalFilename" in cover.metadata &&
-          typeof cover.metadata.originalFilename === "string"
-            ? cover.metadata.originalFilename
-            : undefined,
-      };
-    }
+    if (cover) groupedResources.coverImage = this.mapResourceToNewsResource(cover);
 
     return { grouped: groupedResources, flatList };
   }
@@ -467,9 +430,7 @@ export class NewsService {
         .when(
           (type) => type.startsWith("image/"),
           () => {
-            const imgTag = `<img src="${matchingResource.fileUrl}" alt="${
-              matchingResource.title ?? ""
-            }" />`;
+            const imgTag = this.buildImageTag(matchingResource);
             if (parent.is("p")) {
               anchor.remove();
               parent.after(imgTag);
@@ -481,9 +442,7 @@ export class NewsService {
         .when(
           (type) => type.startsWith("video/"),
           () => {
-            const iframe = `<iframe controls src="${matchingResource.fileUrl}" title="${
-              matchingResource.title ?? ""
-            }"></iframe>`;
+            const iframe = this.buildVideoTag(matchingResource);
             if (parent.is("p")) {
               anchor.remove();
               parent.after(iframe);
@@ -552,14 +511,88 @@ export class NewsService {
   private sanitizeUpdatePayload(updateNewsData: Omit<UpdateNews, "language">) {
     const payload: Partial<Omit<UpdateNews, "language">> = {};
 
-    if (typeof updateNewsData.title === "string" && updateNewsData.title.trim())
-      payload.title = updateNewsData.title.trim();
-    if (typeof updateNewsData.summary === "string") payload.summary = updateNewsData.summary;
-    if (typeof updateNewsData.content === "string") payload.content = updateNewsData.content;
-    if (updateNewsData.status === "draft" || updateNewsData.status === "published")
-      payload.status = updateNewsData.status;
+    const normalizedTitle = this.normalizeNonEmptyString(updateNewsData.title);
+    if (normalizedTitle) payload.title = normalizedTitle;
+
+    const normalizedSummary = this.normalizeString(updateNewsData.summary, { trim: false });
+    if (normalizedSummary !== undefined) payload.summary = normalizedSummary;
+
+    const normalizedContent = this.normalizeString(updateNewsData.content, { trim: false });
+    if (normalizedContent !== undefined) payload.content = normalizedContent;
+
+    if (this.isValidStatus(updateNewsData.status)) payload.status = updateNewsData.status;
     if (typeof updateNewsData.isPublic === "boolean") payload.isPublic = updateNewsData.isPublic;
 
     return payload;
+  }
+
+  private getVisibleNewsConditions(language: SupportedLanguages, excludedId?: UUIDType) {
+    const conditions = [
+      ne(news.archived, true),
+      eq(news.isPublic, true),
+      sql`${language} = ANY(${news.availableLocales})`,
+    ];
+
+    if (excludedId) conditions.push(ne(news.id, excludedId));
+
+    return conditions;
+  }
+
+  private mapResourceToNewsResource(resource: StoredNewsResource): NewsResource {
+    return {
+      id: resource.id,
+      fileUrl: resource.fileUrl,
+      downloadUrl: resource.fileUrl,
+      contentType: resource.contentType,
+      title: typeof resource.title === "string" ? resource.title : undefined,
+      description: typeof resource.description === "string" ? resource.description : undefined,
+      fileName: this.extractOriginalFilename(resource.metadata),
+    };
+  }
+
+  private buildImageTag(resource: NewsResource) {
+    return `<img src="${resource.fileUrl}" alt="${resource.title ?? ""}" />`;
+  }
+
+  private buildVideoTag(resource: NewsResource) {
+    return `<iframe controls src="${resource.fileUrl}" title="${resource.title ?? ""}"></iframe>`;
+  }
+
+  private extractOriginalFilename(metadata: StoredNewsResource["metadata"]) {
+    if (!metadata || typeof metadata !== "object") return undefined;
+
+    const { originalFilename } = metadata as ResourceMetadata;
+
+    return typeof originalFilename === "string" ? originalFilename : undefined;
+  }
+
+  private getMonthlyFolderPath(suffix?: string) {
+    const now = new Date();
+    const segments = [
+      RESOURCE_CATEGORIES.NEWS,
+      now.getFullYear(),
+      now.getMonth() + 1,
+      suffix,
+    ].filter(Boolean);
+
+    return segments.join("/");
+  }
+
+  private normalizeString(
+    value: unknown,
+    options: { trim?: boolean } = { trim: true },
+  ): string | undefined {
+    if (typeof value !== "string") return undefined;
+    const result = options.trim === false ? value : value.trim();
+    return result;
+  }
+
+  private normalizeNonEmptyString(value: unknown) {
+    const normalized = this.normalizeString(value);
+    return normalized ? normalized : undefined;
+  }
+
+  private isValidStatus(status: unknown): status is "draft" | "published" {
+    return status === "draft" || status === "published";
   }
 }

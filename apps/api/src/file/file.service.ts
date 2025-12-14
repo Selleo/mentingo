@@ -232,8 +232,11 @@ export class FileService {
     title: Partial<Record<SupportedLanguages, string>> = {},
     description: Partial<Record<SupportedLanguages, string>> = {},
     currentUser?: CurrentUser,
+    options?: { folderIncludesResource?: boolean },
   ) {
-    const { fileKey } = await this.uploadFile(file, `${resource}/${folder}`);
+    const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
+
+    const { fileKey } = await this.uploadFile(file, resourceFolder);
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
