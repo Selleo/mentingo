@@ -15,7 +15,6 @@ type LessonContentRendererProps = {
   lesson: GetLessonByIdResponse["data"];
   user: CurrentUserResponse["data"] | undefined;
   isPreviewMode: boolean;
-  previewUserId?: string;
   lessonLoading: boolean;
   handleVideoEnded: () => void;
 };
@@ -25,7 +24,6 @@ export const LessonContentRenderer = memo(
     lesson,
     user,
     isPreviewMode,
-    previewUserId,
     lessonLoading,
     handleVideoEnded,
   }: LessonContentRendererProps) => {
@@ -54,7 +52,6 @@ export const LessonContentRenderer = memo(
           lesson={lesson}
           lessonLoading={lessonLoading}
           isPreviewMode={isPreviewMode}
-          userId={previewUserId ?? user?.id}
         />
       ))
       .with("embed", () => (

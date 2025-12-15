@@ -134,7 +134,6 @@ export default function LessonPreviewDialog({
             isFirstLesson={true}
             lessonLoading={isLoadingLesson}
             isPreviewMode={true}
-            previewUserId={user.id}
           />
         </div>
       </DialogContent>

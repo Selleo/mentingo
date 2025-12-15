@@ -33,7 +33,6 @@ type LessonContentProps = {
   isLastLesson: boolean;
   lessonLoading: boolean;
   isPreviewMode?: boolean;
-  previewUserId?: string;
 };
 
 export const LessonContent = ({
@@ -46,7 +45,6 @@ export const LessonContent = ({
   lessonLoading,
   isLastLesson,
   isPreviewMode = false,
-  previewUserId = undefined,
 }: LessonContentProps) => {
   const { t } = useTranslation();
 
@@ -79,7 +77,7 @@ export const LessonContent = ({
     setIsNextDisabled(false);
     if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
     if (autoplay) handleNext();
-  }, [isStudent, markLessonAsCompleted, lesson.id, handleNext, autoplay]);
+  }, [isStudent, markLessonAsCompleted, lesson.id, language, autoplay, handleNext]);
 
   useEffect(() => {
     if (lesson.type !== "video") {
@@ -153,7 +151,6 @@ export const LessonContent = ({
     isPreviewMode,
     queryClient,
     course.id,
-    previewUserId,
     nextLessonIndex,
     canAccessLesson,
     course,
@@ -264,7 +261,6 @@ export const LessonContent = ({
             lesson={lesson}
             user={user}
             isPreviewMode={isPreviewMode}
-            previewUserId={previewUserId}
             lessonLoading={lessonLoading}
             handleVideoEnded={handleVideoEnded}
           />
