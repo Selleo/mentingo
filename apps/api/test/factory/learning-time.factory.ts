@@ -160,7 +160,6 @@ export const createLearningTimeFactory = (db: DatabasePg) => {
       lessonId: null as unknown as string, // Will be replaced by ensureLesson
       courseId: null as unknown as string, // Will be replaced by ensureLesson
       totalSeconds: faker.number.int({ min: 60, max: 3600 }),
-      lastUpdated: new Date().toISOString(),
     };
   });
 };

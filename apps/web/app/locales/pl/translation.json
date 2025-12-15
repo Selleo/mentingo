@@ -1374,7 +1374,7 @@
         "totalLearningTime": "Całkowity czas nauki",
         "totalLearningTimeTooltip": "Całkowity czas spędzony przez wszystkich użytkowników na tym kursie.",
         "activeStudents": "Aktywni studenci",
-        "activeStudentsTooltip": "Liczba studentów, którzy zaangażowali się w kurs."
+        "activeStudentsTooltip": "Liczba studentów, którzy wzięli udział w kursie."
       },
       "empty": {
         "noUsers": "Brak zapisanych",

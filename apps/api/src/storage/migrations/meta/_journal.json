@@ -477,6 +477,13 @@
       "when": 1765451091424,
       "tag": "0067_activity_logs_drop_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1765817185748,
+      "tag": "0068_create_lesson_learning_time_table",
+      "breakpoints": true
     }
   ]
 }

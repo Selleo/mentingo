@@ -443,11 +443,6 @@ export const lessonLearningTime = pgTable(
       .references(() => courses.id, { onDelete: "cascade" })
       .notNull(),
     totalSeconds: integer("total_seconds").notNull().default(0),
-    lastUpdated: timestamp("last_updated", {
-      mode: "string",
-      withTimezone: true,
-      precision: 3,
-    }).defaultNow(),
   },
   (table) => ({
     unq: unique().on(table.userId, table.lessonId),

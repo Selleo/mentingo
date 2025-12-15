@@ -23,7 +23,6 @@ export class LearningTimeRepository {
         target: [lessonLearningTime.userId, lessonLearningTime.lessonId],
         set: {
           totalSeconds: sql`${lessonLearningTime.totalSeconds} + ${seconds}`,
-          lastUpdated: sql`CURRENT_TIMESTAMP`,
         },
       });
   }
@@ -51,7 +50,6 @@ export class LearningTimeRepository {
         userLastName: users.lastName,
         userEmail: users.email,
         totalSeconds: lessonLearningTime.totalSeconds,
-        lastUpdated: lessonLearningTime.lastUpdated,
       })
       .from(lessonLearningTime)
       .innerJoin(users, eq(lessonLearningTime.userId, users.id))

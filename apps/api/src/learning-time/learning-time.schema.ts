@@ -37,7 +37,6 @@ export const detailedLearningTimeSchema = Type.Array(
     userLastName: Type.String(),
     userEmail: Type.String(),
     totalSeconds: Type.Number(),
-    lastUpdated: Type.Union([Type.String(), Type.Null()]),
   }),
 );
 
