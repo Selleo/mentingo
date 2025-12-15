@@ -6,7 +6,6 @@ import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { CourseModule } from "src/courses/course.module";
-import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
 import { S3Module } from "src/s3/s3.module";
@@ -37,7 +36,6 @@ import { UserModule } from "src/user/user.module";
   providers: [
     NotifyAdminsHandler,
     NotifyUsersHandler,
-    FileService,
     S3Service,
     BunnyStreamService,
     StatisticsService,

@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useToast } from "~/components/ui/use-toast";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 import { getFileTypeFromName } from "~/utils/getFileTypeFromName";
@@ -47,17 +48,19 @@ const FileLessonForm = ({
   setSelectedLesson,
   language,
 }: FileLessonProps) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [processingUploadId, setProcessingUploadId] = useState<string | null>(null);
   const { form, onSubmit, onDelete } = useFileLessonForm({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
     language,
+    processingUploadId,
   });
-  const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
   const { mutateAsync: deleteFile } = useDeleteFile();
-  const fileType = form.watch("fileType");
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   const isExternalUrl = form.watch("isExternal");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +68,7 @@ const FileLessonForm = ({
 
   useEffect(() => {
     setDisplayFileUrl(lessonToEdit?.fileS3SignedUrl);
+    setProcessingUploadId(null);
     form.reset({
       ...lessonToEdit,
       type:
@@ -84,12 +88,19 @@ const FileLessonForm = ({
 
   const handleFileUpload = useCallback(
     async (file: File) => {
-      setIsUploading(true);
-
       try {
-        const result = await uploadFile({ file, resource: "lesson" });
-        setDisplayFileUrl(result.fileUrl);
+        const result = await uploadFile({
+          file,
+          resource: "lesson",
+          lessonId: lessonToEdit?.id,
+        });
+
+        if (result.fileUrl) {
+          setDisplayFileUrl(result.fileUrl);
+        }
+
         form.setValue("fileS3Key", result.fileKey);
+
         const fileType = getFileTypeFromName(file.name);
 
         if (fileType) {
@@ -97,11 +108,10 @@ const FileLessonForm = ({
         }
       } catch (error) {
         console.error("Error uploading file:", error);
-      } finally {
         setIsUploading(false);
       }
     },
-    [uploadFile, form],
+    [uploadFile, form, lessonToEdit?.id],
   );
 
   const handleFileDelete = useCallback(async () => {
@@ -132,8 +142,11 @@ const FileLessonForm = ({
       "type",
       contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM ? "video" : "presentation",
     );
-    form.setValue("fileType", fileType);
-  }, [contentTypeToDisplay, form, fileType]);
+    form.setValue(
+      "fileType",
+      contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM ? "mp4" : "pptx",
+    );
+  }, [contentTypeToDisplay, form]);
 
   const type =
     contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM
@@ -228,6 +241,16 @@ const FileLessonForm = ({
                   isUploading={isUploading}
                   contentTypeToDisplay={contentTypeToDisplay}
                   url={displayFileUrl}
+                  onVideoSelected={() => {
+                    toast({
+                      description: t("uploadFile.toast.videoProcessingStarted", {
+                        defaultValue: "Video upload started. We'll notify you once it's processed.",
+                      }),
+                    });
+
+                    form.setValue("fileS3Key", "processing-video");
+                    form.setValue("fileType", "mp4"); // Default video type
+                  }}
                 />
               </FormControl>
               <FormMessage />

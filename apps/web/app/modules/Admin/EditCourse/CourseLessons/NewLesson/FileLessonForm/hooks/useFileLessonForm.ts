@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useBetaCreateFileItem } from "~/api/mutations/admin/useBetaCreateFile";
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
 import { useUpdateFileItem } from "~/api/mutations/admin/useUpdateFileItem";
+import { useAssociateUploadWithLesson } from "~/api/mutations/admin/useUploadFile";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
@@ -14,13 +15,14 @@ import { fileLessonFormSchema } from "../validators/fileLessonFormSchema";
 
 import type { LessonTypes } from "../../../CourseLessons.types";
 import type { FileLessonFormValues } from "../validators/fileLessonFormSchema";
-import type { SupportedLanguages } from "@repo/shared";
+import type {SupportedLanguages} from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type FileLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit?: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
+  processingUploadId?: string | null;
   language: SupportedLanguages;
 };
 
@@ -29,11 +31,13 @@ export const useFileLessonForm = ({
   lessonToEdit,
   setContentTypeToDisplay,
   language,
+  processingUploadId,
 }: FileLessonFormProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: createFile } = useBetaCreateFileItem();
   const { mutateAsync: updateFileItem } = useUpdateFileItem();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
+  const { mutateAsync: associateUploadWithLesson } = useAssociateUploadWithLesson();
 
   const form = useForm<FileLessonFormValues>({
     resolver: zodResolver(fileLessonFormSchema),
@@ -61,15 +65,27 @@ export const useFileLessonForm = ({
     }
 
     try {
+      let newLessonId: string | undefined;
+
       if (lessonToEdit) {
         await updateFileItem({
           data: { ...values, language },
           fileLessonId: lessonToEdit.id,
         });
       } else {
-        await createFile({
+        const result = await createFile({
           data: { ...values, chapterId: chapterToEdit.id },
         });
+        newLessonId = result?.id;
+
+        if (newLessonId && processingUploadId) {
+          try {
+            await associateUploadWithLesson({ uploadId: processingUploadId, lessonId: newLessonId });
+          } catch (associateError) {
+            console.error("Failed to associate upload with lesson:", associateError);
+            // Don't fail the whole operation if association fails
+          }
+        }
       }
 
       setContentTypeToDisplay(ContentTypes.EMPTY);
