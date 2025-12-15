@@ -158,8 +158,8 @@
   "newsView": {
     "header": "News",
     "notFound": "News not found.",
-    "previousArticle": "Previous article",
-    "nextArticle": "Next article",
+    "previousNews": "Previous news",
+    "nextNews": "Next news",
     "prompt": {
       "photoUrl": "Photo URL",
       "photoCaption": "Photo caption (optional)",

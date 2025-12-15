@@ -13,6 +13,7 @@ type PageWrapperProps = HTMLAttributes<HTMLDivElement> & {
   isBarebones?: boolean;
   children: ReactNode;
   className?: string;
+  sideContent?: ReactNode;
 };
 
 type Breadcrumb = { title: string; href: string };
@@ -57,6 +58,7 @@ export const PageWrapper = ({
   breadcrumbs,
   isBarebones,
   children,
+  sideContent,
   ...props
 }: PageWrapperProps) => {
   const hasBreadcrumbs = Boolean(breadcrumbs);
@@ -70,13 +72,17 @@ export const PageWrapper = ({
   );
 
   return (
-    <div className={classes} {...props}>
-      {breadcrumbs && (
-        <div className="breadcrumbs">
-          <Breadcrumbs breadcrumbs={breadcrumbs} />
-        </div>
-      )}
-      {children}
+    <div className="flex justify-between">
+      <div className={classes} {...props}>
+        {breadcrumbs && (
+          <div className="breadcrumbs">
+            <Breadcrumbs breadcrumbs={breadcrumbs} />
+          </div>
+        )}
+        {children}
+      </div>
+
+      {sideContent}
     </div>
   );
 };

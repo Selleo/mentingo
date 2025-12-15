@@ -1,14 +1,24 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { useCreateNews, useUpdateNews, useUploadNewsFile } from "../../api/mutations";
+import { useNews } from "../../api/queries";
 import { FormTextField } from "../../components/Form/FormTextField";
 import Editor from "../../components/RichText/Editor";
+import Viewer from "../../components/RichText/Viever";
 import { Button } from "../../components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "../../components/ui/form";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { baseUrl } from "../../utils/baseUrl";
+import Loader from "../common/Loader/Loader";
+import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
+
+import type { Editor as TipTapEditor } from "@tiptap/react";
 
 type NewsFormValues = {
   title: string;
@@ -26,6 +36,20 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const navigate = useNavigate();
   const { newsId } = useParams();
   const isEdit = Boolean(newsId);
+  const fileRef = useRef<File | null>(null);
+  const persistedNewsIdRef = useRef<string>(newsId ?? "");
+
+  const [tabValue, setTabValue] = useState("editor");
+
+  const { language } = useLanguageStore();
+  const { data: existingNews, isLoading: isLoadingNews } = useNews(
+    persistedNewsIdRef.current,
+    { language },
+    { enabled: isEdit },
+  );
+  const { mutateAsync: createNews } = useCreateNews();
+  const { mutateAsync: updateNews } = useUpdateNews();
+  const { mutateAsync: uploadNewsFile } = useUploadNewsFile();
 
   const form = useForm<NewsFormValues>({
     defaultValues: {
@@ -36,25 +60,104 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     },
   });
 
-  const onSubmit = (values: NewsFormValues) => {
-    // TODO: replace with API call to create/update news
-    console.log("News payload (send to backend here):", {
+  const onSubmit = async (values: NewsFormValues) => {
+    let targetId = persistedNewsIdRef.current || newsId;
+
+    if (!targetId) {
+      const created = await createNews({ language });
+      targetId = created.data.id;
+      persistedNewsIdRef.current = targetId;
+    }
+
+    if (!targetId) return;
+
+    const basePayload = {
+      language,
       title: values.title,
-      intro: values.intro,
-      contentHtml: values.content,
-      imageUrl: values.imageUrl,
-      mode: isEdit ? "edit" : "create",
-      newsId: isEdit ? newsId : undefined,
-    });
+      summary: values.intro,
+      content: values.content,
+      status: "published" as const,
+      isPublic: true,
+    };
+
+    if (fileRef.current) {
+      const formData = new FormData();
+      Object.entries(basePayload).forEach(([key, value]) => {
+        formData.append(key, String(value));
+      });
+      formData.append("cover", fileRef.current);
+
+      await updateNews({
+        id: targetId,
+        data: formData as unknown as typeof basePayload,
+      });
+    } else {
+      await updateNews({
+        id: targetId,
+        data: basePayload,
+      });
+    }
+
+    navigate(`/news/${targetId}`);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileUpload = async (file?: File, editor?: TipTapEditor | null) => {
     if (!file) return;
-    // TODO: upload file to backend, get a public URL, then insert that URL below.
-    const tempUrl = URL.createObjectURL(file);
-    form.setValue("imageUrl", tempUrl, { shouldValidate: true });
+    let targetNewsId = persistedNewsIdRef.current || newsId;
+
+    if (!targetNewsId) {
+      const newNews = await createNews({ language });
+      targetNewsId = newNews.data.id;
+      persistedNewsIdRef.current = targetNewsId;
+    }
+
+    if (!targetNewsId) return;
+
+    await uploadNewsFile(
+      {
+        id: targetNewsId,
+        file,
+        language,
+        title: "content-file-title",
+        description: "content-file-desc",
+      },
+      {
+        onSuccess: (data) => {
+          console.log("data", data);
+          // TODO: key TB change (check if it's proper string)
+          const imageUrl = `${baseUrl}/api/news/news-image/${data.data.resourceId}`;
+          editor
+            ?.chain()
+            .insertContent("<br />")
+            .insertContent(`<a href="${imageUrl}">${imageUrl}</a>`)
+            .run();
+        },
+      },
+    );
   };
+
+  const handleSaveHeaderImage = async (file: File) => {
+    fileRef.current = file;
+  };
+
+  useEffect(() => {
+    if (!existingNews) return;
+
+    form.reset({
+      title: existingNews.title ?? "",
+      intro: existingNews.summary ?? "",
+      content: existingNews.content ?? "",
+      imageUrl: existingNews.resources?.images?.[0]?.fileUrl ?? "",
+    });
+  }, [existingNews, form]);
+
+  if (isEdit && isLoadingNews) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
@@ -84,7 +187,12 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
               id="media-upload"
               type="file"
               accept={[...ALLOWED_LESSON_IMAGE_FILE_TYPES, ...ALLOWED_VIDEO_FILE_TYPES].join(",")}
-              onChange={handleFileUpload}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                handleSaveHeaderImage(file);
+              }}
             />
           </div>
 
@@ -100,6 +208,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
             placeholder={t("newsView.placeholder.intro")}
           />
 
+          {/* TODO: status field TBD */}
           <FormField
             control={form.control}
             name="content"
@@ -108,19 +217,39 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                 <Label htmlFor="content" className="body-base-md mt-6 text-neutral-950">
                   <span className="text-red-500">*</span> {t("newsView.field.content")}
                 </Label>
-                <FormControl>
-                  <Editor
-                    id="content"
-                    lessonId="lessonId"
-                    content={field.value}
-                    allowFiles
-                    acceptedFileTypes={[
-                      ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-                      ...ALLOWED_VIDEO_FILE_TYPES,
-                    ]}
-                    {...field}
-                  />
-                </FormControl>
+                <Tabs value={tabValue} onValueChange={(value) => setTabValue(value)}>
+                  <TabsList className="bg-primary-50">
+                    <TabsTrigger value="editor">Editor</TabsTrigger>
+                    <TabsTrigger value="preview">Preview</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="editor">
+                    <FormControl>
+                      <Editor
+                        id="content"
+                        lessonId="lessonId"
+                        content={field.value}
+                        allowFiles
+                        acceptedFileTypes={[
+                          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+                          ...ALLOWED_VIDEO_FILE_TYPES,
+                        ]}
+                        onUpload={handleFileUpload}
+                        {...field}
+                      />
+                    </FormControl>
+                  </TabsContent>
+
+                  <TabsContent value="preview">
+                    <div className="rounded-lg border border-neutral-200 p-4 text-neutral-900">
+                      <Viewer
+                        content={field.value || ""}
+                        style="prose"
+                        className="prose max-w-none"
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </FormItem>
             )}
           />

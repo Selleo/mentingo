@@ -1,19 +1,18 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useNewsList } from "~/api/queries";
-import { Icon } from "~/components/Icon";
-import { Button } from "~/components/ui/button";
-import { useUserRole } from "~/hooks/useUserRole";
-
+import { useNewsList } from "../../api/queries";
+import { Icon } from "../../components/Icon";
 import { PageWrapper } from "../../components/PageWrapper";
 import { Pagination } from "../../components/Pagination/Pagination";
+import { Button } from "../../components/ui/button";
+import { useUserRole } from "../../hooks/useUserRole";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
 import NewsItem from "./NewsItem";
-import { getPaginationData, ITEMS_ON_FIRST_PAGE, ITEMS_ON_OTHER_PAGES } from "./utils";
+import { ITEMS_ON_FIRST_PAGE, ITEMS_ON_OTHER_PAGES } from "./utils";
 
 function NewsPage() {
   const { t } = useTranslation();
@@ -29,17 +28,29 @@ function NewsPage() {
 
   const { isAdminLike } = useUserRole();
   const { language } = useLanguageStore();
+  const itemsPerPage = currentPage === 1 ? ITEMS_ON_FIRST_PAGE : ITEMS_ON_OTHER_PAGES;
   const { data: newsList, isLoading: isLoadingNewsList } = useNewsList({
     language,
     page: currentPage,
-    perPage: currentPage === 1 ? ITEMS_ON_FIRST_PAGE : ITEMS_ON_OTHER_PAGES,
+    perPage: itemsPerPage,
   });
 
-  const totalItems = newsList?.length ?? 0;
-  const { totalPages, itemsPerPage, startItem, endItem } = useMemo(
-    () => getPaginationData(totalItems, currentPage),
-    [currentPage, totalItems],
-  );
+  const totalItems = newsList?.pagination.totalItems ?? 0;
+  const remainingAfterFirst = Math.max(totalItems - ITEMS_ON_FIRST_PAGE, 0);
+  const extraPages = Math.ceil(remainingAfterFirst / ITEMS_ON_OTHER_PAGES);
+  const totalPages = totalItems > 0 ? 1 + extraPages : 1;
+  const startItem =
+    totalItems > 0
+      ? currentPage === 1
+        ? 1
+        : ITEMS_ON_FIRST_PAGE + (currentPage - 2) * ITEMS_ON_OTHER_PAGES + 1
+      : 0;
+  const endItem =
+    totalItems > 0
+      ? currentPage === 1
+        ? Math.min(ITEMS_ON_FIRST_PAGE, totalItems)
+        : Math.min(ITEMS_ON_FIRST_PAGE + (currentPage - 1) * ITEMS_ON_OTHER_PAGES, totalItems)
+      : 0;
 
   const changePage = (newPage: number) => {
     const clamped = Math.min(Math.max(newPage, 1), totalPages);
@@ -49,16 +60,16 @@ function NewsPage() {
     setCurrentPage(clamped);
   };
 
-  const renderNewsContent = () => {
-    const pageNews = newsList?.slice(startItem - 1, endItem);
+  const renderNewsContent = useCallback(() => {
+    const pageNews = newsList?.data ?? [];
 
     if (currentPage === 1) {
       const [firstNews, ...moreNews] = pageNews ?? [];
 
       return (
         <>
-          <div className="flex items-center justify-between">
-            <h1 className="h1">{t("newsView.header")}</h1>
+          <div className="flex items-center justify-between pb-10">
+            <h1 className="h4">{t("newsView.header")}</h1>
             {isAdminLike && (
               <Button
                 className="flex items-center justify-center rounded-full w-12 h-12"
@@ -74,13 +85,15 @@ function NewsPage() {
 
           {firstNews || moreNews.length ? (
             <>
-              <NewsItem {...firstNews} isBig />
+              <NewsItem {...firstNews} isBig className="mb-6" />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {moreNews.map((news) => (
-                  <NewsItem key={news.id} {...news} />
-                ))}
-              </div>
+              {moreNews.length ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+                  {moreNews.map((news) => (
+                    <NewsItem key={news.id} {...news} />
+                  ))}
+                </div>
+              ) : null}
             </>
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -92,19 +105,11 @@ function NewsPage() {
     }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
         {pageNews?.map((news) => <NewsItem key={news.id} {...news} />)}
       </div>
     );
-  };
-
-  useEffect(() => {
-    const pageFromUrl = parsePageParam();
-    const clamped = Math.min(Math.max(pageFromUrl, 1), totalPages);
-    if (clamped !== currentPage) {
-      setCurrentPage(clamped);
-    }
-  }, [currentPage, totalPages, parsePageParam]);
+  }, [newsList?.data, currentPage, t, isAdminLike, navigate]);
 
   if (isLoadingNewsList) {
     return (
@@ -126,7 +131,7 @@ function NewsPage() {
           href: "/news",
         },
       ]}
-      className="flex flex-col gap-8"
+      className="flex flex-col"
     >
       {renderNewsContent()}
 

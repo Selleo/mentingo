@@ -1,11 +1,27 @@
+import { Heading } from "@tiptap/extension-heading";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
+const HeadingWithId = Heading.extend({
+  addAttributes: () => ({
+    id: {
+      default: null,
+      parseHTML: (element) => element.getAttribute("id"),
+      renderHTML: (attrs) => (attrs.id ? { id: attrs.id } : {}),
+    },
+  }),
+});
+
 export const plugins = [
-  StarterKit,
+  StarterKit.configure({
+    heading: false,
+  }),
+  HeadingWithId.configure({
+    levels: [1, 2, 3, 4, 5, 6],
+  }),
   TaskList.configure({
     HTMLAttributes: {
       class: "list-none",
