@@ -27,6 +27,7 @@ export const routes: (
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
           route("announcements", "modules/Announcements/Announcements.page.tsx");
+          route("news", "modules/News/News.page.tsx");
           route("profile/:id", "modules/Profile/Profile.page.tsx");
         });
         route("course/:courseId/lesson", "modules/Courses/Lesson/Lesson.layout.tsx", () => {
