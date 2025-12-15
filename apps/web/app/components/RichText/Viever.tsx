@@ -1,6 +1,6 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 
-import { cn } from "~/lib/utils";
+import { cn } from "../../lib/utils";
 
 import { plugins } from "./plugins";
 import { defaultClasses, lessonVariantClasses } from "./styles";
@@ -39,16 +39,19 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
     ...variantClasses,
   );
 
-  const editor = useEditor({
-    extensions: [...plugins],
-    content: content,
-    editable: false,
-    editorProps: {
-      attributes: {
-        class: cn({ "prose max-w-none dark:prose-invert": variant === "lesson" }),
+  const editor = useEditor(
+    {
+      extensions: [...plugins],
+      content: content,
+      editable: false,
+      editorProps: {
+        attributes: {
+          class: cn({ "prose max-w-none dark:prose-invert": variant === "lesson" }),
+        },
       },
     },
-  });
+    [content],
+  );
 
   if (!editor) return <></>;
 

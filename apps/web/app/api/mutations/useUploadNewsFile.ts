@@ -17,13 +17,25 @@ export function useUploadNewsFile() {
 
   return useMutation({
     mutationFn: async ({ id, file, language, title, description }: UploadNewsFileOptions) => {
-      const data = {
-        file,
-        language,
-        title,
-        description,
-      };
-      const response = await ApiClient.api.newsControllerUploadFileToNews(id, data);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("language", language);
+      formData.append("title", title);
+      formData.append("description", description);
+
+      const response = await ApiClient.api.newsControllerUploadFileToNews(
+        id,
+        formData as unknown as {
+          file: File;
+          language: "en" | "pl";
+          title: string;
+          description: string;
+        },
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          transformRequest: () => formData,
+        },
+      );
 
       return response.data;
     },

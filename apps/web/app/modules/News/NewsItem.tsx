@@ -8,15 +8,31 @@ import type { GetNewsListResponse } from "~/api/generated-api";
 
 type Props = GetNewsListResponse["data"][number] & {
   isBig?: boolean;
+  className?: string;
 };
 
-function NewsItem({ title, authorName, publishedAt, summary, id, isBig = false }: Props) {
+function NewsItem({
+  title,
+  authorName,
+  publishedAt,
+  summary,
+  id,
+  isBig = false,
+  resources,
+  createdAt,
+  updatedAt,
+  className,
+}: Props) {
   const navigate = useNavigate();
+
+  const imageUrl = resources?.coverImage?.fileUrl;
+  const date = publishedAt ?? updatedAt ?? createdAt;
 
   return (
     <button
       className={cn(
         "relative overflow-hidden rounded-lg py-7 px-6 flex flex-col justify-end min-h-[380px] group",
+        className,
         {
           "px-10 py-11 min-h-[550px]": isBig,
         },
@@ -25,7 +41,7 @@ function NewsItem({ title, authorName, publishedAt, summary, id, isBig = false }
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
-        // style={{ backgroundImage: `url(${image})` }}
+        style={{ backgroundImage: `url(${imageUrl})` }}
         aria-hidden
       />
       <GradientOverlay />
@@ -35,12 +51,14 @@ function NewsItem({ title, authorName, publishedAt, summary, id, isBig = false }
         </h3>
         <p className="text-base font-normal leading-7 text-white opacity-95 text-left">{summary}</p>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Icon name="Calendar" />
-            <p className="text-sm font-normal leading-5 text-white opacity-80">
-              {publishedAt ? formatDate(new Date(publishedAt), "d MMMM yyyy") : "-"}
-            </p>
-          </div>
+          {date ? (
+            <div className="flex items-center gap-2">
+              <Icon name="Calendar" />
+              <p className="text-sm font-normal leading-5 text-white opacity-80">
+                {formatDate(new Date(date), "d MMMM yyyy")}
+              </p>
+            </div>
+          ) : null}
           <div className="flex items-center gap-2">
             <Icon name="User" className="size-4" />
             <p className="text-sm font-normal leading-5 text-white opacity-80">{authorName}</p>

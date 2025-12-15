@@ -2,8 +2,6 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
 
-import type { GetNewsListResponse } from "../generated-api";
-
 export type NewsListParams = {
   language?: "en" | "pl";
   page?: number;
@@ -23,12 +21,11 @@ export const newsListQueryOptions = (
   queryKey: [...NEWS_LIST_QUERY_KEY, params],
   queryFn: async () => {
     const response = await ApiClient.api.newsControllerGetNewsList({
-      language: params?.language,
+      language: params?.language ?? "en",
       page: params?.page,
     });
     return response.data;
   },
-  select: (data: GetNewsListResponse) => data.data,
   ...options,
 });
 
