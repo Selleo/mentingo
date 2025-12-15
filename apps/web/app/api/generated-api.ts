@@ -2806,6 +2806,67 @@ export interface UpdateQABody {
   description?: string;
 }
 
+export interface GetDraftNewsListResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    publishedAt: string | null;
+    authorName: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextNews?: string | null;
+    previousNews?: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetNewsResponse {
   data: {
     id: string;
@@ -2821,7 +2882,6 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
@@ -2831,7 +2891,6 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
@@ -2841,7 +2900,6 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
@@ -2851,13 +2909,14 @@ export interface GetNewsResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
         fileName?: string;
       };
     };
+    createdAt: string;
+    updatedAt: string;
     nextNews?: string | null;
     previousNews?: string | null;
   };
@@ -2878,7 +2937,6 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
@@ -2888,7 +2946,6 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
@@ -2898,7 +2955,6 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
@@ -2908,13 +2964,14 @@ export interface GetNewsListResponse {
         /** @format uuid */
         id: string;
         fileUrl: string;
-        downloadUrl: string;
         contentType: string;
         title?: string;
         description?: string;
         fileName?: string;
       };
     };
+    createdAt: string;
+    updatedAt: string;
     nextNews?: string | null;
     previousNews?: string | null;
   }[];
@@ -6389,6 +6446,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name NewsControllerGetDraftNewsList
+     * @request GET:/api/news/drafts
+     */
+    newsControllerGetDraftNewsList: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+        /** @min 1 */
+        page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDraftNewsListResponse, any>({
+        path: `/api/news/drafts`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name NewsControllerGetNews
      * @request GET:/api/news/{id}
      */
@@ -6397,6 +6477,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        isDraftMode?: boolean;
       },
       params: RequestParams = {},
     ) =>

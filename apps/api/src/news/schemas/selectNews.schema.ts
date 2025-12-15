@@ -26,7 +26,6 @@ export const createNewsResponseSchema = Type.Object({
 export const newsResourceSchema = Type.Object({
   id: UUIDSchema,
   fileUrl: Type.String(),
-  downloadUrl: Type.String(),
   contentType: Type.String(),
   title: Type.Optional(Type.String()),
   description: Type.Optional(Type.String()),
@@ -50,6 +49,8 @@ export const getNewsResponseSchema = Type.Object({
   publishedAt: Type.Union([Type.String(), Type.Null()]),
   authorName: Type.String(),
   resources: Type.Optional(newsResourcesSchema),
+  createdAt: Type.String(),
+  updatedAt: Type.String(),
   nextNews: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   previousNews: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
 });

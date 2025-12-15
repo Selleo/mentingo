@@ -16,6 +16,7 @@ import {
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { news, users } from "src/storage/schema";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { baseNewsTitle } from "./constants";
 
@@ -165,19 +166,67 @@ export class NewsService {
       .limit(pagination.perPage)
       .offset(pagination.offset);
 
+    const newsListWithCoverImage = await this.mapNewsWithCoverImage(newsList, requestedLanguage);
+
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
       .from(news)
       .where(and(...conditions));
 
     return {
-      data: newsList,
+      data: newsListWithCoverImage,
       pagination: {
         totalItems,
         page: pagination.page,
         perPage: pagination.perPage,
       },
     };
+  }
+
+  async getDraftNewsList(requestedLanguage: SupportedLanguages, page = 1) {
+    const pagination = this.getPaginationForNews(page);
+
+    const newsList = await this.db
+      .select({
+        ...getTableColumns(news),
+        title: this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
+        content: this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
+        summary: this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
+        authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+      })
+      .from(news)
+      .leftJoin(users, eq(users.id, news.authorId))
+      .where(and(ne(news.archived, true), sql`${news.publishedAt} IS NULL`))
+      .orderBy(sql`${news.createdAt} DESC`)
+      .limit(pagination.perPage)
+      .offset(pagination.offset);
+
+    const newsListWithCoverImage = await this.mapNewsWithCoverImage(newsList, requestedLanguage);
+
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: count() })
+      .from(news)
+      .where(and(ne(news.archived, true), sql`${news.publishedAt} IS NULL`));
+
+    return {
+      data: newsListWithCoverImage,
+      pagination: {
+        totalItems,
+        page: pagination.page,
+        perPage: pagination.perPage,
+      },
+    };
+  }
+
+  private async getNewsCoverImage(newsId: UUIDType, language: SupportedLanguages) {
+    const [cover] = await this.fileService.getResourcesForEntity(
+      newsId,
+      ENTITY_TYPES.NEWS,
+      RESOURCE_RELATIONSHIP_TYPES.COVER,
+      language,
+    );
+
+    return cover ? this.mapResourceToNewsResource(cover) : undefined;
   }
 
   async deleteNewsLanguage(
@@ -263,11 +312,18 @@ export class NewsService {
     return deletedNews;
   }
 
-  async getNews(newsId: UUIDType, requestedLanguage: SupportedLanguages) {
+  async getNews(
+    newsId: UUIDType,
+    requestedLanguage: SupportedLanguages,
+    isDraftMode = false,
+    currentUser?: CurrentUser,
+  ) {
+    const draftModeConditions = isDraftMode ? [sql`${news.publishedAt} IS NULL`] : [];
+
     const [existingNews] = await this.db
       .select({
         ...getTableColumns(news),
-        authorName: users.firstName,
+        authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         title: this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
         content: this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
         summary: this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
@@ -275,11 +331,18 @@ export class NewsService {
       })
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
-      .where(eq(news.id, newsId));
+      .where(and(eq(news.id, newsId), ne(news.archived, true), ...draftModeConditions));
 
     if (!existingNews) throw new NotFoundException("adminNewsView.toast.notFoundError");
 
+    if (isDraftMode && existingNews.publishedAt !== null)
+      throw new NotFoundException("adminNewsView.toast.notFoundError");
+
+    if (currentUser?.role === USER_ROLES.STUDENT && existingNews.publishedAt === null)
+      throw new NotFoundException("adminNewsView.toast.notFoundError");
+
     const resources = await this.getNewsResources(newsId, requestedLanguage);
+
     const contentWithResources = this.injectResourcesIntoContent(
       existingNews.content,
       resources.flatList,
@@ -287,35 +350,46 @@ export class NewsService {
 
     return {
       ...existingNews,
-      content: contentWithResources,
+      content: contentWithResources ?? "",
       resources: resources.grouped,
-      ...(await this.getAdjacentNews(existingNews.id, existingNews.publishedAt, requestedLanguage)),
+      ...(await this.getAdjacentNews(
+        existingNews.id,
+        isDraftMode ? existingNews.createdAt : existingNews.publishedAt,
+        requestedLanguage,
+        isDraftMode,
+      )),
     };
   }
 
   private async getAdjacentNews(
     currentNewsId: UUIDType,
-    publishedAt: string | null,
+    referenceDate: string | null,
     language: SupportedLanguages,
+    isDraftMode = false,
   ) {
-    if (!publishedAt) {
+    if (!referenceDate) {
       return { nextNews: null, previousNews: null };
     }
 
     const baseConditions = this.getVisibleNewsConditions(language, currentNewsId);
+    const adjacentNewsConditions = isDraftMode
+      ? [...baseConditions, sql`${news.publishedAt} IS NULL`]
+      : [...baseConditions, sql`${news.publishedAt} IS NOT NULL`];
+
+    const sortColumn = isDraftMode ? news.createdAt : news.publishedAt;
 
     const [nextNews] = await this.db
       .select({ id: news.id })
       .from(news)
-      .where(and(...baseConditions, gt(news.publishedAt, publishedAt)))
-      .orderBy(sql`${news.publishedAt} ASC`)
+      .where(and(...adjacentNewsConditions, gt(sortColumn, referenceDate)))
+      .orderBy(sql`${sortColumn} ASC`)
       .limit(1);
 
     const [previousNews] = await this.db
       .select({ id: news.id })
       .from(news)
-      .where(and(...baseConditions, lt(news.publishedAt, publishedAt)))
-      .orderBy(sql`${news.publishedAt} DESC`)
+      .where(and(...adjacentNewsConditions, lt(sortColumn, referenceDate)))
+      .orderBy(sql`${sortColumn} DESC`)
       .limit(1);
 
     return {
@@ -538,7 +612,7 @@ export class NewsService {
           },
         )
         .otherwise(() => {
-          anchor.attr("href", matchingResource.downloadUrl);
+          anchor.attr("href", matchingResource.fileUrl);
           anchor.attr("download", matchingResource.fileName ?? "");
           anchor.attr("target", "_blank");
           anchor.attr("rel", "noopener noreferrer");
@@ -624,6 +698,7 @@ export class NewsService {
       ne(news.archived, true),
       eq(news.isPublic, true),
       sql`${language} = ANY(${news.availableLocales})`,
+      sql`${news.publishedAt} IS NOT NULL`,
     ];
 
     if (excludedId) conditions.push(ne(news.id, excludedId));
@@ -635,7 +710,6 @@ export class NewsService {
     return {
       id: resource.id,
       fileUrl: resource.fileUrl,
-      downloadUrl: resource.fileUrl,
       contentType: resource.contentType,
       title: typeof resource.title === "string" ? resource.title : undefined,
       description: typeof resource.description === "string" ? resource.description : undefined,
@@ -732,6 +806,27 @@ export class NewsService {
         ? snapshot.availableLocales
         : [snapshot.availableLocales],
     };
+  }
+
+  private async mapNewsWithCoverImage<T extends { id: UUIDType }>(
+    newsList: T[],
+    requestedLanguage: SupportedLanguages,
+  ): Promise<Array<T & { resources: NewsResources }>> {
+    return Promise.all(
+      newsList.map(async (newsItem) => {
+        const coverImage = await this.getNewsCoverImage(newsItem.id, requestedLanguage);
+
+        return {
+          ...newsItem,
+          resources: {
+            images: [],
+            videos: [],
+            attachments: [],
+            coverImage,
+          },
+        };
+      }),
+    );
   }
 
   private resolveSnapshotLanguage(

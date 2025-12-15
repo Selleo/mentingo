@@ -5845,6 +5845,51 @@
         }
       }
     },
+    "/api/news/drafts": {
+      "get": {
+        "operationId": "NewsController_getDraftNewsList",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDraftNewsListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/news/{id}": {
       "get": {
         "operationId": "NewsController_getNews",
@@ -5874,6 +5919,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "isDraftMode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -18962,6 +19015,254 @@
           }
         }
       },
+      "GetDraftNewsListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "isPublic": {
+                  "type": "boolean"
+                },
+                "publishedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "authorName": {
+                  "type": "string"
+                },
+                "resources": {
+                  "type": "object",
+                  "properties": {
+                    "images": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "fileUrl",
+                          "contentType"
+                        ]
+                      }
+                    },
+                    "videos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "fileUrl",
+                          "contentType"
+                        ]
+                      }
+                    },
+                    "attachments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          },
+                          "contentType": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "fileUrl",
+                          "contentType"
+                        ]
+                      }
+                    },
+                    "coverImage": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fileUrl": {
+                          "type": "string"
+                        },
+                        "contentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fileUrl",
+                        "contentType"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "images",
+                    "videos",
+                    "attachments"
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                },
+                "nextNews": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "previousNews": {
+                  "anyOf": [
+                    {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "content",
+                "summary",
+                "status",
+                "isPublic",
+                "publishedAt",
+                "authorName",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
       "GetNewsResponse": {
         "type": "object",
         "properties": {
@@ -19014,9 +19315,6 @@
                         "fileUrl": {
                           "type": "string"
                         },
-                        "downloadUrl": {
-                          "type": "string"
-                        },
                         "contentType": {
                           "type": "string"
                         },
@@ -19033,7 +19331,6 @@
                       "required": [
                         "id",
                         "fileUrl",
-                        "downloadUrl",
                         "contentType"
                       ]
                     }
@@ -19050,9 +19347,6 @@
                         "fileUrl": {
                           "type": "string"
                         },
-                        "downloadUrl": {
-                          "type": "string"
-                        },
                         "contentType": {
                           "type": "string"
                         },
@@ -19069,7 +19363,6 @@
                       "required": [
                         "id",
                         "fileUrl",
-                        "downloadUrl",
                         "contentType"
                       ]
                     }
@@ -19086,9 +19379,6 @@
                         "fileUrl": {
                           "type": "string"
                         },
-                        "downloadUrl": {
-                          "type": "string"
-                        },
                         "contentType": {
                           "type": "string"
                         },
@@ -19105,7 +19395,6 @@
                       "required": [
                         "id",
                         "fileUrl",
-                        "downloadUrl",
                         "contentType"
                       ]
                     }
@@ -19118,9 +19407,6 @@
                         "type": "string"
                       },
                       "fileUrl": {
-                        "type": "string"
-                      },
-                      "downloadUrl": {
                         "type": "string"
                       },
                       "contentType": {
@@ -19139,7 +19425,6 @@
                     "required": [
                       "id",
                       "fileUrl",
-                      "downloadUrl",
                       "contentType"
                     ]
                   }
@@ -19149,6 +19434,12 @@
                   "videos",
                   "attachments"
                 ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
               },
               "nextNews": {
                 "anyOf": [
@@ -19181,7 +19472,9 @@
               "status",
               "isPublic",
               "publishedAt",
-              "authorName"
+              "authorName",
+              "createdAt",
+              "updatedAt"
             ]
           }
         },
@@ -19243,9 +19536,6 @@
                           "fileUrl": {
                             "type": "string"
                           },
-                          "downloadUrl": {
-                            "type": "string"
-                          },
                           "contentType": {
                             "type": "string"
                           },
@@ -19262,7 +19552,6 @@
                         "required": [
                           "id",
                           "fileUrl",
-                          "downloadUrl",
                           "contentType"
                         ]
                       }
@@ -19279,9 +19568,6 @@
                           "fileUrl": {
                             "type": "string"
                           },
-                          "downloadUrl": {
-                            "type": "string"
-                          },
                           "contentType": {
                             "type": "string"
                           },
@@ -19298,7 +19584,6 @@
                         "required": [
                           "id",
                           "fileUrl",
-                          "downloadUrl",
                           "contentType"
                         ]
                       }
@@ -19315,9 +19600,6 @@
                           "fileUrl": {
                             "type": "string"
                           },
-                          "downloadUrl": {
-                            "type": "string"
-                          },
                           "contentType": {
                             "type": "string"
                           },
@@ -19334,7 +19616,6 @@
                         "required": [
                           "id",
                           "fileUrl",
-                          "downloadUrl",
                           "contentType"
                         ]
                       }
@@ -19347,9 +19628,6 @@
                           "type": "string"
                         },
                         "fileUrl": {
-                          "type": "string"
-                        },
-                        "downloadUrl": {
                           "type": "string"
                         },
                         "contentType": {
@@ -19368,7 +19646,6 @@
                       "required": [
                         "id",
                         "fileUrl",
-                        "downloadUrl",
                         "contentType"
                       ]
                     }
@@ -19378,6 +19655,12 @@
                     "videos",
                     "attachments"
                   ]
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
                 },
                 "nextNews": {
                   "anyOf": [
@@ -19410,7 +19693,9 @@
                 "status",
                 "isPublic",
                 "publishedAt",
-                "authorName"
+                "authorName",
+                "createdAt",
+                "updatedAt"
               ]
             }
           },

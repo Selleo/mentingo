@@ -47,17 +47,41 @@ import type { GetNewsResponse } from "./schemas/selectNews.schema";
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
+  @Get("drafts")
+  @Validate({
+    request: [
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+    ],
+    response: paginatedNewsListResponseSchema,
+  })
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  async getDraftNewsList(
+    @Query("language") language: SupportedLanguages,
+    @Query("page") page = 1,
+  ): Promise<PaginatedResponse<GetNewsResponse[]>> {
+    const newsList = await this.newsService.getDraftNewsList(language, page);
+
+    return new PaginatedResponse(newsList);
+  }
+
   @Get(":id")
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
+      { type: "query", name: "isDraftMode", schema: Type.Optional(Type.Boolean()) },
     ],
     response: baseResponse(getNewsResponseSchema),
   })
   @Roles(...Object.values(USER_ROLES))
-  async getNews(@Param("id") id: string, @Query("language") language: SupportedLanguages) {
-    const news = await this.newsService.getNews(id, language);
+  async getNews(
+    @Param("id") id: string,
+    @Query("language") language: SupportedLanguages,
+    @Query("isDraftMode") isDraftMode?: boolean,
+    @CurrentUser() currentUser?: CurrentUserType,
+  ): Promise<BaseResponse<GetNewsResponse>> {
+    const news = await this.newsService.getNews(id, language, isDraftMode, currentUser);
 
     return new BaseResponse(news);
   }
