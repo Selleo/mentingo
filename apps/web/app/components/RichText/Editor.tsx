@@ -50,7 +50,6 @@ const Editor = ({
     e.preventDefault();
 
     if (!allowFiles) {
-      console.log({ allowFiles });
       return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
     }
 
