@@ -18,6 +18,7 @@ import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, PaginatedResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -65,6 +66,7 @@ export class NewsController {
     return new PaginatedResponse(newsList);
   }
 
+  @Public()
   @Get(":id")
   @Validate({
     request: [
@@ -74,7 +76,6 @@ export class NewsController {
     ],
     response: baseResponse(getNewsResponseSchema),
   })
-  @Roles(...Object.values(USER_ROLES))
   async getNews(
     @Param("id") id: string,
     @Query("language") language: SupportedLanguages,
@@ -86,6 +87,7 @@ export class NewsController {
     return new BaseResponse(news);
   }
 
+  @Public()
   @Get()
   @Validate({
     request: [
@@ -94,7 +96,6 @@ export class NewsController {
     ],
     response: paginatedNewsListResponseSchema,
   })
-  @Roles(...Object.values(USER_ROLES))
   async getNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,

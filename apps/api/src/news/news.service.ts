@@ -336,7 +336,10 @@ export class NewsService {
     if (isDraftMode && existingNews.publishedAt !== null)
       throw new NotFoundException("adminNewsView.toast.notFoundError");
 
-    if (currentUser?.role === USER_ROLES.STUDENT && existingNews.publishedAt === null)
+    if (
+      (currentUser?.role === USER_ROLES.STUDENT || !currentUser) &&
+      existingNews.publishedAt === null
+    )
       throw new NotFoundException("adminNewsView.toast.notFoundError");
 
     const resources = await this.getNewsResources(newsId, requestedLanguage);
@@ -649,7 +652,7 @@ export class NewsService {
   private buildUpdateData(
     existingNews: InferSelectModel<typeof news>,
     updateNewsData: Partial<Omit<UpdateNews, "language">>,
-    language: string,
+    language: SupportedLanguages,
   ): Record<string, unknown> {
     const localizableFields = ["title", "content", "summary"] as const;
     const directFields: Array<keyof Omit<UpdateNews, "language">> = ["status", "isPublic"];
@@ -718,6 +721,7 @@ export class NewsService {
 
   private getMonthlyFolderPath(suffix?: string) {
     const now = new Date();
+
     const segments = [
       RESOURCE_CATEGORIES.NEWS,
       now.getFullYear(),
@@ -750,15 +754,11 @@ export class NewsService {
 
     const [snapshot] = await this.db
       .select({
-        id: news.id,
+        ...getTableColumns(news),
         title: this.localizationService.getFieldByLanguage(news.title, resolvedLanguage),
         summary: this.localizationService.getFieldByLanguage(news.summary, resolvedLanguage),
-        status: news.status,
-        isPublic: news.isPublic,
         publishedAt: sql<string | null>`${news.publishedAt}`,
-        authorId: news.authorId,
         baseLanguage: sql<string>`${news.baseLanguage}`,
-        availableLocales: news.availableLocales,
       })
       .from(news)
       .where(eq(news.id, newsId));
