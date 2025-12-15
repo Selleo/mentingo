@@ -23,6 +23,7 @@ import { quizLessonFormSchema } from "../validators/quizLessonFormSchema";
 
 import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type QuizLessonFormProps = {
@@ -30,6 +31,7 @@ type QuizLessonFormProps = {
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   isAttemptsLimitEnabled: boolean;
+  language: SupportedLanguages;
 };
 
 export const useQuizLessonForm = ({
@@ -37,6 +39,7 @@ export const useQuizLessonForm = ({
   lessonToEdit,
   setContentTypeToDisplay,
   isAttemptsLimitEnabled,
+  language,
 }: QuizLessonFormProps) => {
   const { mutateAsync: createQuizLesson } = useCreateQuizLesson();
   const { mutateAsync: updateQuizLesson } = useUpdateQuizLesson();
@@ -182,7 +185,12 @@ export const useQuizLessonForm = ({
     try {
       if (lessonToEdit) {
         await updateQuizLesson({
-          data: { ...values, questions: updatedQuestions, type: LessonType.QUIZ },
+          data: {
+            ...values,
+            questions: updatedQuestions,
+            type: LessonType.QUIZ,
+            language,
+          },
           lessonId: lessonToEdit.id,
         });
       } else {
@@ -192,6 +200,7 @@ export const useQuizLessonForm = ({
             questions: updatedQuestions,
             type: LessonType.QUIZ,
             chapterId: chapterToEdit.id,
+            language,
           },
         });
       }

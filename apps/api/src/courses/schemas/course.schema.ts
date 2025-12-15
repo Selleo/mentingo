@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -53,6 +54,10 @@ export const getCourseStatisticsSchema = Type.Object({
   courseStatusDistribution: courseStatusDistributionSchema,
 });
 
+export const getLessonSequenceEnabledSchema = Type.Object({
+  lessonSequenceEnabled: Type.Boolean(),
+});
+
 export const courseAverageQuizScorePerQuizSchema = Type.Object({
   quizId: UUIDSchema,
   name: Type.String(),
@@ -69,7 +74,15 @@ export const studentCourseProgressionSchema = Type.Object({
   studentId: UUIDSchema,
   studentName: Type.String(),
   studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
-  groupName: Type.Union([Type.String(), Type.Null()]),
+  groups: Type.Union([
+    Type.Array(
+      Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+      }),
+    ),
+    Type.Null(),
+  ]),
   completedLessonsCount: Type.Number(),
   lastActivity: Type.Union([Type.String(), Type.Null()]),
 });
@@ -95,6 +108,8 @@ export const studentAiMentorResultSchema = Type.Object({
   lastSession: Type.String(),
 });
 
+export const supportedLanguagesSchema = Type.Enum(SUPPORTED_LANGUAGES, { default: "en" });
+
 export const allStudentCourseProgressionSchema = Type.Array(studentCourseProgressionSchema);
 export const allStudentQuizResultsSchema = Type.Array(studentQuizResultSchema);
 export const allStudentAiMentorResultsSchema = Type.Array(studentAiMentorResultSchema);
@@ -108,9 +123,11 @@ export type AllStudentCoursesResponse = Static<typeof allStudentCoursesSchema>;
 export type AllCoursesForContentCreatorResponse = Static<typeof allCoursesForContentCreatorSchema>;
 
 export type CourseStatisticsResponse = Static<typeof getCourseStatisticsSchema>;
+export type LessonSequenceEnabledResponse = Static<typeof getLessonSequenceEnabledSchema>;
 export type CourseStatusDistribution = Static<typeof courseStatusDistributionSchema>;
 export type CourseAverageQuizScorePerQuiz = Static<typeof courseAverageQuizScorePerQuizSchema>;
 export type CourseAverageQuizScoresResponse = Static<typeof courseAverageQuizScoresSchema>;
 export type AllStudentCourseProgressionResponse = Static<typeof allStudentCourseProgressionSchema>;
 export type AllStudentQuizResultsResponse = Static<typeof allStudentQuizResultsSchema>;
 export type AllStudentAiMentorResultsResponse = Static<typeof allStudentAiMentorResultsSchema>;
+export type SupportedLanguagesBody = Static<typeof supportedLanguagesSchema>;

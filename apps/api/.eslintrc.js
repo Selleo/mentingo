@@ -14,6 +14,7 @@ module.exports = {
   },
   ignorePatterns: [".eslintrc.js"],
   settings: {
+    // Treat "src/**" as internal so external vs internal get an empty line
     "import/internal-regex": "^src/",
     "import/resolver": {
       typescript: true,

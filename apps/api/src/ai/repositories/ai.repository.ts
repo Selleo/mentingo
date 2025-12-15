@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray, not, sql } from "drizzle-orm";
 import { sum } from "drizzle-orm/sql/functions/aggregate";
 
@@ -14,6 +15,7 @@ import {
   aiMentorThreadMessages,
   aiMentorThreads,
   chapters,
+  courses,
   groups,
   groupUsers,
   lessons,
@@ -22,7 +24,7 @@ import {
   users,
 } from "src/storage/schema";
 
-import type { AiMentorType } from "@repo/shared";
+import type { SupportedLanguages, AiMentorType } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type {
@@ -52,6 +54,7 @@ export class AiRepository {
     const [thread] = await this.db
       .select({
         ...getTableColumns(aiMentorThreads),
+        userLanguage: sql<SupportedLanguages>`${aiMentorThreads.userLanguage}`,
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       })
       .from(aiMentorThreads)
@@ -77,6 +80,7 @@ export class AiRepository {
       .values(data)
       .returning({
         ...getTableColumns(aiMentorThreads),
+        userLanguage: sql<SupportedLanguages>`${aiMentorThreads.userLanguage}`,
         status: sql<ThreadStatus>`${aiMentorThreads.status}`,
       });
 
@@ -111,14 +115,7 @@ export class AiRepository {
     return tokens.total;
   }
 
-  async findMessageHistory(
-    threadId: UUIDType,
-    archived?: boolean,
-    role?: MessageRole,
-    userId?: UUIDType,
-  ) {
-    const userCondition = userId ? eq(aiMentorThreads.userId, userId) : undefined;
-
+  async findMessageHistory(threadId: UUIDType, archived?: boolean, role?: MessageRole) {
     const messageHistory = await this.db
       .select({
         id: aiMentorThreadMessages.id,
@@ -138,7 +135,6 @@ export class AiRepository {
           ),
           not(inArray(aiMentorThreadMessages.role, [MESSAGE_ROLE.SYSTEM, MESSAGE_ROLE.SUMMARY])),
           eq(aiMentorThreadMessages.role, role ? role : aiMentorThreadMessages.role),
-          userCondition,
         ),
       )
       .orderBy(asc(aiMentorThreadMessages.createdAt));
@@ -192,13 +188,17 @@ export class AiRepository {
     return this.db.insert(aiMentorThreadMessages).values(data).returning();
   }
 
-  async findMentorLessonByThreadId(threadId: UUIDType): Promise<AiMentorLessonBody> {
+  async findMentorLessonByThreadId(
+    threadId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<AiMentorLessonBody> {
     const [lesson] = await this.db
       .select({
-        title: lessons.title,
+        title: sql<string>`lessons.title->>${language}::text`,
         instructions: aiMentorLessons.aiMentorInstructions,
         conditions: aiMentorLessons.completionConditions,
         type: sql<AiMentorType>`${aiMentorLessons.type}`,
+        name: aiMentorLessons.name,
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
@@ -271,7 +271,7 @@ export class AiRepository {
   async checkLessonAssignment(id: UUIDType, userId: UUIDType) {
     return this.db
       .select({
-        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.id} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        isAssigned: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
         chapterId: sql<string>`${chapters.id}`,
@@ -291,5 +291,16 @@ export class AiRepository {
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
       )
       .where(eq(lessons.id, id));
+  }
+
+  async getCourseAuthorByLesson(lessonId: string) {
+    const [{ author }] = await this.db
+      .select({ author: courses.authorId })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(lessons.id, lessonId));
+
+    return author;
   }
 }

@@ -98,6 +98,13 @@ export const selectCourseAndOpenEnrollmentTab = async (page: Page, course: strin
 };
 
 export const enrollSelected = async (page: Page) => {
+  const dropdown = page.getByRole("button", {
+    name: ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.enroll,
+    exact: true,
+  });
+
+  await dropdown.click();
+
   const enrollButton = await findButton(
     page,
     ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.enrollSelected,

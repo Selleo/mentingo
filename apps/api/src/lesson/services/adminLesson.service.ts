@@ -5,19 +5,25 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { EventBus } from "@nestjs/cqrs";
+import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { FileService } from "src/file/file.service";
 import { DocumentService } from "src/ingestion/services/document.service";
+import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
 import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
-import { MAX_LESSON_TITLE_LENGTH } from "../repositories/lesson.constants";
 import { LessonRepository } from "../repositories/lesson.repository";
 
 import type {
@@ -31,7 +37,11 @@ import type {
   CreateEmbedLessonBody,
   UpdateEmbedLessonBody,
 } from "../lesson.schema";
+import type { LessonTypes } from "../lesson.type";
+import type { SupportedLanguages } from "@repo/shared";
+import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { UserRole } from "src/user/schemas/userRoles";
 
 @Injectable()
@@ -43,14 +53,12 @@ export class AdminLessonService {
     private aiRepository: AiRepository,
     private documentService: DocumentService,
     private fileService: FileService,
+    private localizationService: LocalizationService,
+    private readonly eventBus: EventBus,
   ) {}
 
-  async createLessonForChapter(
-    data: CreateLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+  async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     if (
       (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
@@ -59,6 +67,11 @@ export class AdminLessonService {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
 
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
+
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
         message: `adminCourseView.toast.maxTitleLengthExceeded`,
@@ -68,22 +81,36 @@ export class AdminLessonService {
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
-    const lesson = await this.adminLessonRepository.createLessonForChapter({
-      ...data,
-      displayOrder: maxDisplayOrder + 1,
-    });
+    const lesson = await this.adminLessonRepository.createLessonForChapter(
+      {
+        ...data,
+        displayOrder: maxDisplayOrder + 1,
+      },
+      language,
+    );
 
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
+
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        actor: currentUser,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
 
     return lesson.id;
   }
 
-  async createAiMentorLesson(
-    data: CreateAiMentorLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
+  async createAiMentorLesson(data: CreateAiMentorLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
+
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
@@ -96,20 +123,30 @@ export class AdminLessonService {
 
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
+
+    if (!data.name?.trim().length) data.name = "AI Mentor";
 
     const lesson = await this.createAiMentorLessonWithTransaction(data, maxDisplayOrder + 1);
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
-    return lesson?.id;
+    if (!lesson) throw new BadRequestException("Failed to create AI mentor lesson");
+
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        actor: currentUser,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
+
+    return lesson.id;
   }
 
-  async createQuizLesson(
-    data: CreateQuizLessonBody,
-    authorId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, authorId, data.chapterId);
+  async createQuizLesson(data: CreateQuizLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
@@ -122,25 +159,51 @@ export class AdminLessonService {
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
+
     const lesson = await this.createQuizLessonWithQuestionsAndOptions(
       data,
-      authorId,
+      currentUser.userId,
+      language,
       maxDisplayOrder + 1,
     );
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
-    return lesson?.id;
+    if (!lesson) throw new BadRequestException("Failed to create quiz lesson");
+
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        actor: currentUser,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
+
+    return lesson.id;
   }
   async updateAiMentorLesson(
     id: UUIDType,
     data: UpdateAiMentorLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
   ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
-    const lesson = await this.lessonRepository.getLesson(id);
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      id,
+    );
+
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(id, data.language);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -154,18 +217,30 @@ export class AdminLessonService {
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
 
-    return await this.updateAiMentorLessonWithTransaction(id, data, currentUserId);
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    const updatedLesson = await this.updateAiMentorLessonWithTransaction(
+      id,
+      data,
+      currentUser.userId,
+    );
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: id,
+        actor: currentUser,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
+    );
+
+    return updatedLesson?.id ?? id;
   }
 
-  async updateQuizLesson(
-    id: UUIDType,
-    data: UpdateQuizLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
-
-    const lesson = await this.lessonRepository.getLesson(id);
+  async updateQuizLesson(id: UUIDType, data: UpdateQuizLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -174,22 +249,57 @@ export class AdminLessonService {
       });
     }
 
+    const { availableLocales, baseLanguage } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      id,
+    );
+
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(id, data.language);
+
     if (!lesson) throw new NotFoundException("Lesson not found");
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
-    return this.updateQuizLessonWithQuestionsAndOptions(id, data, currentUserId);
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    const updatedLessonId = await this.updateQuizLessonWithQuestionsAndOptions(
+      id,
+      data,
+      currentUser.userId,
+      data.language,
+      baseLanguage,
+    );
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: id,
+        actor: currentUser,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
+    );
+
+    return updatedLessonId;
   }
 
-  async updateLesson(
-    id: UUIDType,
-    data: UpdateLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, id);
+  async updateLesson(id: UUIDType, data: UpdateLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, id);
 
-    const lesson = await this.lessonRepository.getLesson(id);
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      id,
+    );
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(id, data.language);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -209,12 +319,26 @@ export class AdminLessonService {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
 
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
     const updatedLesson = await this.adminLessonRepository.updateLesson(id, data);
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: id,
+        actor: currentUser,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
+    );
+
     return updatedLesson.id;
   }
 
-  async removeLesson(lessonId: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
+  async removeLesson(lessonId: UUIDType, currentUser: CurrentUser) {
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
@@ -228,18 +352,25 @@ export class AdminLessonService {
       await this.adminLessonRepository.updateLessonDisplayOrderAfterRemove(lesson.chapterId, trx);
       await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, trx);
     });
+
+    await this.eventBus.publish(
+      new DeleteLessonEvent({
+        lessonId: lesson.id,
+        actor: currentUser,
+        lessonName: lesson.title,
+      }),
+    );
   }
 
   async updateLessonDisplayOrder(lessonObject: {
     lessonId: UUIDType;
     displayOrder: number;
-    currentUserId: UUIDType;
-    currentUserRole: UserRole;
+    currentUser: CurrentUser;
   }): Promise<void> {
     await this.validateAccess(
       "lesson",
-      lessonObject.currentUserRole,
-      lessonObject.currentUserId,
+      lessonObject.currentUser.role,
+      lessonObject.currentUser.userId,
       lessonObject.lessonId,
     );
 
@@ -250,11 +381,35 @@ export class AdminLessonService {
       throw new NotFoundException("Lesson not found");
     }
 
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      lessonObject.lessonId,
+    );
+
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(
+      lessonObject.lessonId,
+      language,
+    );
+
     await this.adminLessonRepository.updateLessonDisplayOrder(
       lessonToUpdate.chapterId,
       lessonToUpdate.id,
       lessonObject.displayOrder,
       oldDisplayOrder,
+    );
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(
+      lessonObject.lessonId,
+      language,
+    );
+
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId: lessonObject.lessonId,
+        actor: lessonObject.currentUser,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
     );
   }
 
@@ -263,7 +418,17 @@ export class AdminLessonService {
     displayOrder: number,
   ) {
     return await this.db.transaction(async (trx) => {
-      const lesson = await this.adminLessonRepository.createAiMentorLesson(data, displayOrder, trx);
+      const { language } = await this.localizationService.getBaseLanguage(
+        ENTITY_TYPE.CHAPTER,
+        data.chapterId,
+      );
+
+      const lesson = await this.adminLessonRepository.createAiMentorLesson(
+        data,
+        displayOrder,
+        language,
+        trx,
+      );
 
       await this.adminLessonRepository.createAiMentorLessonData(
         {
@@ -271,6 +436,7 @@ export class AdminLessonService {
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
           type: data.type,
+          name: data?.name,
         },
         trx,
       );
@@ -286,10 +452,24 @@ export class AdminLessonService {
   ) {
     return await this.db.transaction(async (trx) => {
       const { type: _type, ...rest } = data;
-      const updatedLesson = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
+
+      const { availableLocales } = await this.localizationService.getBaseLanguage(
+        ENTITY_TYPE.LESSON,
+        id,
+      );
+
+      if (!availableLocales.includes(data.language)) {
+        throw new BadRequestException("This course does not support this language");
+      }
+
+      const [updatedLesson] = await this.adminLessonRepository.updateAiMentorLesson(id, rest, trx);
 
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
         throw new BadRequestException("Instructions and conditions required");
+
+      if (data.name?.trim().length === 0) {
+        data.name = "AI Mentor";
+      }
 
       await this.adminLessonRepository.updateAiMentorLessonData(
         id,
@@ -297,6 +477,7 @@ export class AdminLessonService {
           aiMentorInstructions: data.aiMentorInstructions,
           completionConditions: data.completionConditions,
           type: data.type,
+          name: data?.name,
         },
         trx,
       );
@@ -310,12 +491,14 @@ export class AdminLessonService {
   private async createQuizLessonWithQuestionsAndOptions(
     data: CreateQuizLessonBody,
     authorId: UUIDType,
+    language: SupportedLanguages,
     displayOrder: number,
   ) {
     return await this.db.transaction(async (trx) => {
       const lesson = await this.adminLessonRepository.createQuizLessonWithQuestionsAndOptions(
         data,
         displayOrder,
+        language,
         trx,
       );
 
@@ -325,23 +508,31 @@ export class AdminLessonService {
         lessonId: lesson.id,
         authorId,
         type: question.type,
-        description: question.description || null,
-        title: question.title,
+        description: buildJsonbField(language, question.description),
+        title: buildJsonbField(language, question.title),
         displayOrder: question.displayOrder,
-        solutionExplanation: question.solutionExplanation,
+        solutionExplanation: buildJsonbField(language, question.solutionExplanation),
         photoS3Key: question.photoS3Key,
       }));
 
-      const insertedQuestions = await trx.insert(questions).values(questionsToInsert).returning();
+      const insertedQuestions = await trx
+        .insert(questions)
+        .values(questionsToInsert)
+        .returning({
+          ...getTableColumns(questions),
+          description: sql<string>`questions.description->>${language}`,
+          title: sql<string>`questions.title->>${language}`,
+          solutionExplanation: sql<string>`questions.solution_explanation->>${language}`,
+        });
 
       const optionsToInsert = insertedQuestions.flatMap(
         (question, index) =>
           data.questions?.[index].options?.map((option) => ({
             questionId: question.id,
-            optionText: option.optionText,
+            optionText: buildJsonbField(language, option.optionText),
             isCorrect: option.isCorrect,
             displayOrder: option.displayOrder,
-            matchedWord: option.matchedWord,
+            matchedWord: buildJsonbField(language, option.matchedWord),
             scaleAnswer: option.scaleAnswer,
           })) || [],
       );
@@ -358,27 +549,72 @@ export class AdminLessonService {
     id: UUIDType,
     data: UpdateQuizLessonBody,
     currentUserId: UUIDType,
+    language: SupportedLanguages,
+    baseLanguage: SupportedLanguages,
   ) {
     return await this.db.transaction(async (trx) => {
+      const { availableLocales } = await this.localizationService.getBaseLanguage(
+        ENTITY_TYPE.LESSON,
+        id,
+      );
+
+      if (!availableLocales.includes(data.language)) {
+        throw new BadRequestException("This course does not support this language");
+      }
+
       await this.adminLessonRepository.updateQuizLessonWithQuestionsAndOptions(id, data);
 
       const existingQuestions = await this.adminLessonRepository.getExistingQuestions(id, trx);
       const existingQuestionIds = existingQuestions.map((question) => question.id);
+
       const inputQuestionIds = data.questions
         ? data.questions.map((question) => question.id).filter(Boolean)
         : [];
+
+      const isTranslating = language !== baseLanguage;
+
+      if (existingQuestionIds.length !== inputQuestionIds.length && isTranslating) {
+        throw new BadRequestException(
+          "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+        );
+      }
 
       const questionsToDelete = existingQuestionIds.filter(
         (existingId) => !inputQuestionIds.includes(existingId),
       );
 
       if (questionsToDelete.length > 0) {
+        if (isTranslating) {
+          throw new BadRequestException(
+            "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+          );
+        }
         await this.adminLessonRepository.deleteQuestions(questionsToDelete, trx);
         await this.adminLessonRepository.deleteQuestionOptions(questionsToDelete, trx);
       }
 
       if (data.questions) {
         for (const question of data.questions) {
+          if (isTranslating) {
+            if (!question.id || !existingQuestionIds.includes(question.id)) {
+              throw new BadRequestException(
+                "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+              );
+            }
+
+            const existingQuestion = existingQuestions.find((q) => q.id === question.id);
+
+            if (
+              !existingQuestion ||
+              existingQuestion.type !== question.type ||
+              existingQuestion.displayOrder !== question.displayOrder
+            ) {
+              throw new BadRequestException(
+                "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+              );
+            }
+          }
+
           const questionData = {
             type: question.type,
             description: question.description || null,
@@ -386,6 +622,7 @@ export class AdminLessonService {
             displayOrder: question.displayOrder,
             solutionExplanation: question.solutionExplanation,
             photoS3Key: question.photoS3Key,
+            language: data.language,
           };
 
           const questionId = await this.adminLessonRepository.upsertQuestion(
@@ -409,16 +646,62 @@ export class AdminLessonService {
             );
 
             if (optionsToDelete.length > 0) {
+              if (isTranslating) {
+                throw new BadRequestException(
+                  "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                );
+              }
               await this.adminLessonRepository.deleteOptions(optionsToDelete, trx);
             }
 
             for (const option of question.options) {
+              if (isTranslating) {
+                if (!option.id || !existingOptionIds.includes(option.id)) {
+                  throw new BadRequestException(
+                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                  );
+                }
+
+                const existingOption = existingOptions.find(
+                  (existing) => existing.id === option.id,
+                );
+
+                if (!existingOption) {
+                  throw new BadRequestException(
+                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                  );
+                }
+
+                const incomingIsCorrect =
+                  option.isCorrect === undefined ? existingOption.isCorrect : option.isCorrect;
+
+                const isTrueOrFalseQuestion = question.type === "true_or_false";
+                const isFillInTheBlank =
+                  question.type === "fill_in_the_blanks_text" ||
+                  question.type === "fill_in_the_blanks_dnd";
+                const isCorrectChanged =
+                  !isFillInTheBlank &&
+                  incomingIsCorrect !== existingOption.isCorrect &&
+                  (isTrueOrFalseQuestion || option.isCorrect !== undefined);
+
+                const scaleChanged =
+                  option.scaleAnswer !== undefined &&
+                  existingOption.scaleAnswer !== option.scaleAnswer;
+
+                if (isCorrectChanged || scaleChanged) {
+                  throw new BadRequestException(
+                    "adminCourseView.toast.cannotModifyQuestionsInNonBaseLanguage",
+                  );
+                }
+              }
+
               const optionData = {
                 optionText: option.optionText,
                 isCorrect: option.isCorrect,
                 displayOrder: option.displayOrder,
                 matchedWord: option.matchedWord,
                 scaleAnswer: option.scaleAnswer,
+                language: data.language,
               };
 
               if (option.id) {
@@ -451,14 +734,8 @@ export class AdminLessonService {
     });
   }
 
-  async createEmbedLesson(
-    data: CreateEmbedLessonBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    await this.validateAccess("chapter", currentUserRole, currentUserId, data.chapterId);
-
-    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
+  async createEmbedLesson(data: CreateEmbedLessonBody, currentUser: CurrentUser) {
+    await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -467,10 +744,20 @@ export class AdminLessonService {
       });
     }
 
-    const lesson = await this.adminLessonRepository.createLessonForChapter({
-      ...data,
-      displayOrder: maxDisplayOrder + 1,
-    });
+    const { language } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.CHAPTER,
+      data.chapterId,
+    );
+
+    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
+
+    const lesson = await this.adminLessonRepository.createLessonForChapter(
+      {
+        ...data,
+        displayOrder: maxDisplayOrder + 1,
+      },
+      language,
+    );
 
     if (!lesson) throw new BadRequestException("Failed to create embed lesson");
 
@@ -489,18 +776,25 @@ export class AdminLessonService {
       await this.adminLessonRepository.createLessonResources(resourcesToInsert);
     }
 
+    const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
+
+    await this.eventBus.publish(
+      new CreateLessonEvent({
+        lessonId: lesson.id,
+        actor: currentUser,
+        createdLesson: createdLessonSnapshot,
+      }),
+    );
+
     return lesson;
   }
 
   async updateEmbedLesson(
     lessonId: UUIDType,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
     data: UpdateEmbedLessonBody,
   ) {
-    await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
-
-    const lesson = await this.lessonRepository.getLesson(lessonId);
+    await this.validateAccess("lesson", currentUser.role, currentUser.userId, lessonId);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -509,38 +803,61 @@ export class AdminLessonService {
       });
     }
 
+    const { availableLocales } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      lessonId,
+    );
+
+    if (!availableLocales.includes(data.language)) {
+      throw new BadRequestException("This course does not support this language");
+    }
+
+    const lesson = await this.lessonRepository.getLesson(lessonId, data.language);
+
     if (!lesson) throw new NotFoundException("Lesson not found");
+
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
 
     const updatedLesson = await this.adminLessonRepository.updateLesson(lessonId, data);
 
     if (data.resources && data.resources.length === 0) {
       await this.adminLessonRepository.deleteLessonResources(lessonId);
-      return updatedLesson.id;
+    } else if (data.resources) {
+      const existingResourcesIds = (
+        await this.adminLessonRepository.getLessonResourcesForLesson(lessonId)
+      ).map((r) => r.id);
+
+      const resourceIdsToDelete = existingResourcesIds.filter(
+        (existingId) =>
+          !data.resources
+            .map((res) => res.id)
+            .filter((id): id is UUIDType => id !== undefined)
+            .includes(existingId),
+      );
+
+      if (resourceIdsToDelete.length > 0)
+        await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
+
+      const resourcesToUpdate = data.resources.map((resource: LessonResource, index) => ({
+        ...resource,
+        lessonId,
+        displayOrder: index + 1,
+      }));
+
+      if (resourcesToUpdate.length > 0)
+        await this.adminLessonRepository.upsertLessonResources(resourcesToUpdate);
     }
 
-    const existingResourcesIds = (
-      await this.adminLessonRepository.getLessonResourcesForLesson(lessonId)
-    ).map((r) => r.id);
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
 
-    const resourceIdsToDelete = existingResourcesIds.filter(
-      (existingId) =>
-        !data.resources
-          .map((res) => res.id)
-          .filter((id): id is UUIDType => id !== undefined)
-          .includes(existingId),
+    await this.eventBus.publish(
+      new UpdateLessonEvent({
+        lessonId,
+        actor: currentUser,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
     );
-
-    if (resourceIdsToDelete.length > 0)
-      await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
-
-    const resourcesToUpdate = data.resources.map((resource: LessonResource, index) => ({
-      ...resource,
-      lessonId,
-      displayOrder: index + 1,
-    }));
-
-    if (resourcesToUpdate.length > 0)
-      await this.adminLessonRepository.upsertLessonResources(resourcesToUpdate);
 
     return updatedLesson.id;
   }
@@ -570,11 +887,106 @@ export class AdminLessonService {
     return resource.id;
   }
 
+  async uploadAvatarToAiMentorLesson(
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+    lessonId: UUIDType,
+    file: Express.Multer.File | null,
+  ) {
+    const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
+
+    if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {
+      throw new ForbiddenException({ message: "common.toast.noAccess" });
+    }
+
+    if (!file) {
+      await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
+      return;
+    }
+
+    if (!ALLOWED_AVATAR_IMAGE_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException({
+        message: "adminCourseView.toast.aiMentorAvatarIncorrectType",
+      });
+    }
+
+    const { fileKey } = await this.fileService.uploadFile(file, "lessons/ai-mentor-avatars");
+
+    await this.adminLessonRepository.updateAiMentorAvatar(lessonId, fileKey);
+  }
+
+  private async buildLessonActivitySnapshot(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<LessonActivityLogSnapshot> {
+    const [lesson] = await this.adminLessonRepository.getLesson(lessonId, language);
+
+    if (!lesson) throw new NotFoundException("Lesson not found");
+
+    const lessonResources = await this.adminLessonRepository.getLessonResourcesForLesson(lessonId);
+
+    const questions =
+      lesson.type === LESSON_TYPES.QUIZ
+        ? await this.adminLessonRepository.getQuestionsWithOptions(lessonId, language)
+        : [];
+
+    return {
+      id: lesson.id,
+      title: lesson.title,
+      description: lesson.description,
+      type: lesson.type as LessonTypes,
+      fileS3Key: lesson.fileS3Key,
+      fileType: lesson.fileType,
+      isExternal: lesson.isExternal ?? false,
+      chapterId: lesson.chapterId,
+      displayOrder: lesson.displayOrder,
+      thresholdScore: lesson.thresholdScore,
+      attemptsLimit: lesson.attemptsLimit,
+      quizCooldownInHours: lesson.quizCooldownInHours,
+      lessonResources: lessonResources.map((resource) => ({
+        id: resource.id,
+        source: resource.source,
+        type: resource.type,
+        isExternal: resource.isExternal,
+        allowFullscreen: resource.allowFullscreen,
+        displayOrder: resource.displayOrder,
+      })),
+      questions: questions.map((question) => ({
+        id: question.id,
+        title: question.title,
+        description: question.description,
+        solutionExplanation: question.solutionExplanation,
+        type: question.type,
+        photoS3Key: question.photoS3Key,
+        displayOrder: question.displayOrder,
+        options: question.options?.map((option) => ({
+          id: option.id,
+          optionText: option.optionText,
+          isCorrect: option.isCorrect,
+          displayOrder: option.displayOrder,
+          matchedWord: option.matchedWord,
+          scaleAnswer: option.scaleAnswer,
+        })),
+      })),
+      aiMentor:
+        lesson.type === LESSON_TYPES.AI_MENTOR
+          ? {
+              aiMentorInstructions: lesson.aiMentorInstructions,
+              completionConditions: lesson.aiMentorCompletionConditions,
+              name: lesson.aiMentorName,
+              avatarReference: lesson.aiMentorAvatarReference,
+              type: lesson.aiMentorType,
+            }
+          : undefined,
+    };
+  }
+
   async validateAccess(
     entity: "chapter" | "lesson" | "course",
     currentUserRole: UserRole,
     currentUserId: UUIDType,
     id: UUIDType,
+    throwOnNoAccess: boolean = true,
   ) {
     let course;
 
@@ -592,8 +1004,12 @@ export class AdminLessonService {
 
     if (!course) throw new NotFoundException("Course not found");
 
-    if (!(currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId)) {
+    const hasAccess = currentUserRole === USER_ROLES.ADMIN || course.authorId === currentUserId;
+
+    if (throwOnNoAccess && !hasAccess) {
       throw new ForbiddenException({ message: "common.toast.noAccess" });
     }
+
+    return hasAccess;
   }
 }

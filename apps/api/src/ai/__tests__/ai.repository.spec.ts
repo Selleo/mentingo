@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 
 import { createAiMentorLessonFactory } from "src/ai/__tests__/createAiMentorLesson";
@@ -135,7 +136,10 @@ describe("AiRepository (unit)", () => {
     });
 
     it("should find aiMentorLesson by threadId", async () => {
-      const lesson = await aiRepository.findMentorLessonByThreadId(thread.id);
+      const lesson = await aiRepository.findMentorLessonByThreadId(
+        thread.id,
+        SUPPORTED_LANGUAGES.EN,
+      );
 
       expect(lesson.instructions).toBe(aiMentorLesson.aiMentorInstructions);
     });

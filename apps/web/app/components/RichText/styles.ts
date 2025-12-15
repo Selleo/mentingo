@@ -4,10 +4,12 @@ export const defaultClasses = {
       [&>div>ul]:pl-5
       [&>div>ul>li>p]:inline
       [&>div>ul>li>p]:text-neutral-900
-
+      
+      [&>div>*]:!my-1
+      
       [&_ul]:list-disc
       [&_[contenteditable='true']>ul>li]:pl-0
-      [&_[contenteditable='true']>ul>li_ul_li]:pl-0
+      [&_[contenteditable='true']>ul>li_ul_li]:pl-4
       [&_[contenteditable='false']>ul>li]:pl-4
       [&_[contenteditable='false']>ul>li_ul_li]:pl-4
       [&_ul>li]:marker:text-neutral-400
@@ -25,7 +27,7 @@ export const defaultClasses = {
 };
 
 export const lessonVariantClasses = {
-  layout: "[&>div]:flex [&>div]:flex-col [&>div]:gap-y-6",
+  layout: "[&>div]:flex [&>div]:flex-col",
   h2: "[&>div>h2]:h6 [&>div>h2]:text-neutral-950",
   p: "[&>div>p]:body-base [&>div>p]:text-neutral-900",
   ul: "[&>div>ul>li>p]:body-base [&>div>ul>li>p]:text-neutral-900 [&>div>ul>li>p>strong]:text-neutral-950",

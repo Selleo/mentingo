@@ -18,6 +18,9 @@
       "edit": "Edit",
       "uploading": "Uploading..."
     },
+    "toast": {
+      "noAccess": "You do not have permission to access this resource"
+    },
     "tooltip": {
       "soon": "Cooming soon"
     },
@@ -51,6 +54,10 @@
     "continueWithGoogle": "Continue with Google",
     "continueWithMicrosoft": "Continue with Microsoft",
     "continueWithSlack": "Continue with Slack"
+  },
+  "lessons": {
+    "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
+    "sequenceUpdateFailed": "Failed to update lesson sequence"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -670,7 +677,7 @@
       "placeholder": {
         "searchByKeyword": "Search by keyword...",
         "roles": "Roles",
-        "groups": "Groups"
+        "groups": "All Groups"
       }
     },
     "field": {
@@ -726,7 +733,7 @@
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
         "archive": "Are you sure you want to archive these accounts?",
-        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groupName, language (en or pl).",
+        "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groups (\"group1,group2\"), language (en or pl).",
         "noUsersImported": "No users were imported.",
         "noUsersSkipped": "No users were skipped."
       },
@@ -765,7 +772,7 @@
       "role": "Role",
       "language": "Language",
       "status": "Status",
-      "groupId": "Group"
+      "groups": "Group"
     },
     "toast": {
       "userCreatedSuccessfully": "User created successfully",
@@ -864,6 +871,10 @@
       "create": "Create new",
       "deleteSelected": "Delete selected"
     },
+    "groupSelect": {
+      "label": "Select groups",
+      "noGroups": "No groups found"
+    },
     "newGroup": {
       "header": "Create New Group",
       "card": {
@@ -925,8 +936,12 @@
       "status": "Status",
       "pricing": "Pricing",
       "preview": "Preview",
+      "generateMissingTranslations": "Generate missing translations",
       "enrolledStudents": "Enrolled students",
-      "testAiMentor": "Test AI Mentor"
+      "testAiMentor": "Test AI Mentor",
+      "notAddedLanguages": "Not added",
+      "baseLanguage": "Default",
+      "generateMissingTranslationsDescription": "Are you sure you want to generate missing translations? This action may take a few moments."
     },
     "toast": {
       "createCourseSuccessfully": "Course created successfully",
@@ -934,7 +949,13 @@
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
       "certificateUpdateError": "Error updating certificate",
       "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
-      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters"
+      "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters",
+      "aiMentorAvatarIncorrectType": "Invalid file type. Please upload a JPG, JPEG, PNG, or SVG image.",
+      "languageNotSupported": "This course does not support this language.",
+      "updateCourseMissingLanguage": "No language provided for translation",
+      "successfullyDeletedLanguage": "Language deleted from the course successfully",
+      "invalidLanguageToDelete": "You cannot delete this language.",
+      "cannotModifyQuestionsInNonBaseLanguage": "You cannot modify questions in a language other than the default."
     },
     "settings": {
       "breadcrumbs": {
@@ -966,7 +987,8 @@
         "title": "Course title",
         "category": "Category",
         "description": "Description",
-        "thumbnail": "Thumbnail"
+        "thumbnail": "Thumbnail",
+        "baseLanguage": "Base language"
       },
       "placeholder": {
         "title": "Enter title",
@@ -977,7 +999,11 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
-        "enableCertificate": "Enable certificate"
+        "enableCertificate": "Enable certificate",
+        "enforceLessonSequence": "Enforce lesson sequence",
+        "requireSequentialLessons": "Require students to complete lessons in order",
+        "fallbackLanguageWarning": "Warning: Some fields are empty. Translations from the base language will be used instead.",
+        "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
       },
       "validation": {
         "titleMinLength": "Title must be at least 2 characters.",
@@ -1016,7 +1042,8 @@
       },
       "chapter": {
         "button": {
-          "addChapter": "Add chapter"
+          "addChapter": "Add chapter",
+          "addChapterDisabledTooltip": "To add a chapter, you must be in the base language."
         },
         "toast": {
           "chapterCreatedSuccessfully": "Chapter created successfully",
@@ -1036,13 +1063,15 @@
       "lesson": {
         "button": {
           "addLesson": "Add lesson",
+
           "addQuestion": "Add question",
           "addOption": "Add option",
           "deleteQuestion": "Delete question",
           "addWords": "Add words",
           "saveLesson": "Save",
           "addResource": "Add resource",
-          "removeResource": "Remove resource"
+          "removeResource": "Remove resource",
+          "addLessonDisabledTooltip": "To create a lesson, you must be in the base language."
         },
         "breadcrumbs": {
           "back": "Back"
@@ -1122,6 +1151,8 @@
           "sourceUrl": "Source URL",
           "aiMentorInstructions": "AI Mentor Instructions",
           "completionConditions": "Completion Conditions",
+          "aiMentor": "AI Mentor",
+          "mentorName": "Mentor Name",
           "passThreshold": "Pass Threshold",
           "additionalContext": "Additional context",
           "aiMentorTypes": "AI Mentor Type",
@@ -1180,14 +1211,19 @@
           "fillInTheBlanksWordTip": "Create and drop the word into sentence.",
           "leaveContentHeader": "Are you sure you want to leave this question editor?",
           "leaveContentBody": "It will delete all unsaved progress",
+          "dropOrClick": "Drop image here or click to upload",
+          "allowedFormats": "PNG, JPG or SVG",
           "leaveContentBodyValidate": "If you want to save the changes, you must first validate the form",
           "aiMentorInstructionsTooltip": "Describe how the AI Mentor should behave during the lesson. Include the context, role, or scenario that the AI should follow. This defines how the AI will guide the conversation.",
+          "updateAiMentorAvatarDescription": "Upload a new image for the AI mentor or remove the current one.",
+          "updateAiMentorAvatar": "Update AI mentor avatar",
           "aiMentorTypesTooltip": "Choose the AI Mentor type: Mentor guides you to answers, Teacher instructs directly, Roleplay simulates real scenarios (e.g. client and salesperson).",
           "aiMentorTypeTooltip": "Acts like a character in a scenario, but asks questions during the scene and helps draw conclusions.\nExample: \"What would you do now in the manager's role?\"",
-          "aiTeacherTypeTooltip": "Explains, teaches, and asks questions — like a teacher.\nExample: \"In this situation, the client raises a price objection. What should you answer and why?\"",
+          "aiTeacherTypeTooltip": "Explains, teaches, and asks questions - like a teacher.\nExample: \"In this situation, the client raises a price objection. What should you answer and why?\"",
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
           "completionConditionsTooltip": "List what the student must achieve to pass this lesson. Provide clear and measurable points. The AI will use this list to check progress. You can also define a pass threshold (e.g. percentage or minimum number of points to cover). If no threshold is provided, all conditions must be met to pass the lesson.",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
+          "aiMentorPersonaTooltip": "This defines the lesson's persona. You can select a name and avatar for the AI Mentor. The persona will identify itself by this name, and the selected avatar will be shown during lessons.",
           "suggestedExamples": "Suggested examples",
           "charactersLeft": "characters left",
           "optional": "optional",
@@ -1211,11 +1247,12 @@
             "conditions": {
               "scenarioSimulation": "<ul><li>The student asks about the client's budget.</li><li>The student asks about the timeline.</li><li>The student uses SPIN selling or another sales technique.</li><li>The student identifies the client's key pain points.</li><li>The student offers a proposal that matches the client's constraints.</li></ul><strong>Threshold:</strong> at least 3 out of 5 conditions must be met.",
               "problemSolving": "<ul><li>The student acknowledges the employee's contribution.</li><li>The student explains the budget situation honestly.</li><li>The student proposes a non-financial alternative (e.g. additional benefits, development opportunity).</li><li>The student agrees to revisit the topic at a later date.</li><li>The student maintains a respectful, supportive tone.</li></ul><strong>Threshold:</strong> at least 3 out of 5 conditions must be met.",
-              "creativeTask": "<ul><li>The student presents an original idea.</li><li>The student explains who the target audience is.</li><li>The student describes how the service could provide value to customers.</li><li>The student identifies potential challenges.</li></ul><em>(No threshold defined — all conditions must be met.)</em>",
-              "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined — all conditions recommended, but not mandatory for passing.)</em>"
+              "creativeTask": "<ul><li>The student presents an original idea.</li><li>The student explains who the target audience is.</li><li>The student describes how the service could provide value to customers.</li><li>The student identifies potential challenges.</li></ul><em>(No threshold defined - all conditions must be met.)</em>",
+              "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined - all conditions recommended, but not mandatory for passing.)</em>"
             }
           },
-          "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk."
+          "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
+          "dragWord": "Drag word into sentence"
         }
       }
     },
@@ -1250,10 +1287,13 @@
       "filters": {
         "placeholder": {
           "searchByKeyword": "Search by keyword...",
-          "groups": "Groups"
+          "groups": "All Groups"
         }
       },
+      "enroll": "Enroll",
       "enrollSelected": "Enroll selected",
+      "unenrollSelected": "Unenroll selected",
+      "unenrollGroups": "Unenroll groups",
       "table": {
         "name": "Name",
         "surname": "Surname",
@@ -1263,20 +1303,34 @@
       },
       "statuses": {
         "enrolled": "Enrolled",
+        "enrolledByGroup": "Enrolled by group",
+        "individuallyEnrolled": "Individually enrolled",
         "notEnrolled": "Not enrolled"
       },
       "confirmation": {
         "title": "Confirm enrollment",
         "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
       },
-      "successResponse": "students have been assigned to the course.",
       "enrollGroups": "Enroll groups",
       "enrollGroupsModal": {
         "title": "Enroll groups to course",
         "description": "Select groups to enroll. All members of selected groups will be automatically enrolled in this course."
       },
       "alreadyEnrolled": "Already Enrolled",
-      "members": "{{count}} members"
+      "members": "{{count}} members",
+      "unenrollConfirmation": {
+        "title": "Unenroll confirmation",
+        "description": "Are you sure you want to unenroll the selected students from this course? This action cannot be undone."
+      },
+      "toast": {
+        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled.",
+        "studentsEnrolledByGroup": "You cannot unenroll these students because {{count}} of them are enrolled via a group.",
+        "groupsUnenrolledSuccessfully": "Groups unenrolled successfully",
+        "alreadyEnrolledByGroup": {
+          "title": "Some users are already enrolled by group"
+        }
+      },
+      "successResponse": "Students have been assigned to the course."
     },
     "breadcrumbs": {
       "dashboard": "Dashboard",
@@ -1326,8 +1380,20 @@
       },
       "empty": {
         "noUsers": "No users",
-        "enrolled": "enrolled"
+        "enrolled": "enrolled",
+        "noGroups": "No groups"
       }
+    },
+    "createLanguage": {
+      "title": "Create new language",
+      "description": "Are you sure you want to create a new language for this course?",
+      "success": "Language created successfully",
+      "alreadyExists": "This language already exists.",
+      "editConstraints": "In languages other than {{baseLanguage}}, you cannot create new lessons, chapters, or add new questions to quizzes."
+    },
+    "deleteLanguage": {
+      "title": "Delete language",
+      "description": "Are you sure you want to delete this language?"
     }
   },
   "registerView": {
@@ -1457,7 +1523,10 @@
   },
   "studentLessonView": {
     "error": {
-      "lessonIdNotFound": "Lesson ID not found"
+      "lessonIdNotFound": "Lesson ID not found",
+      "notAuthorizedTitle": "Not authorized",
+      "notAuthorizedDescription": "You're not authorized to access this lesson.",
+      "goBackToCourse": "Go back to course"
     },
     "other": {
       "lesson": "Lesson",

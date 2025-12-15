@@ -379,6 +379,83 @@
       "when": 1764158826115,
       "tag": "0053_add_enrolled_by_group_id_and_group_courses_table",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1764335280537,
+      "tag": "0054_add_settings_to_courses",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1764583536635,
+      "tag": "0055_removed_unique_constraint_from_group_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1764598312293,
+      "tag": "0056_added_enrollment_status_to_student_courses",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1764674932236,
+      "tag": "0057_added_name_and_avatar_reference_to_ai_mentor",
+      "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1764757616433,
+      "tag": "0058_create_json_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1764757640886,
+      "tag": "0059_transfer_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1764757673422,
+      "tag": "0060_drop_and_rename_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1764757719707,
+      "tag": "0061_added_locales_to_courses",
+      "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1764886686343,
+      "tag": "0062_add_activity_logs_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1765362755221,
+      "tag": "0063_added_multi_language_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1765362782624,
+      "tag": "0064_added_course_completion_metadata",
+      "breakpoints": true
     }
   ]
 }

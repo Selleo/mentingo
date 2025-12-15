@@ -1,9 +1,10 @@
-import { AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { createInsertSchema } from "drizzle-typebox";
 
-import { SUPPORTED_LANGUAGES, THREAD_STATUS } from "src/ai/utils/ai.type";
+import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { UUIDSchema } from "src/common";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { lessonResources } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
@@ -21,6 +22,7 @@ export const adminOptionSchema = Type.Object({
   questionId: Type.Optional(UUIDSchema),
   matchedWord: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   scaleAnswer: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  language: Type.Optional(supportedLanguagesSchema),
 });
 
 export const adminQuestionSchema = Type.Object({
@@ -32,6 +34,7 @@ export const adminQuestionSchema = Type.Object({
   solutionExplanation: Type.Optional(Type.String()),
   photoS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   options: Type.Optional(Type.Array(adminOptionSchema)),
+  language: Type.Optional(supportedLanguagesSchema),
 });
 
 export const optionSchema = Type.Object({
@@ -73,6 +76,7 @@ export const aiMentorLessonSchema = Type.Object({
   aiMentorInstructions: Type.String(),
   completionConditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
+  avatarReference: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const lessonResourceType = Type.Union([Type.Literal("embed", Type.Literal("text"))]);
@@ -112,6 +116,7 @@ export const lessonSchema = Type.Object({
   description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   displayOrder: Type.Number(),
   fileS3Key: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  avatarReferenceUrl: Type.Optional(Type.String()),
   fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
   aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
@@ -126,11 +131,14 @@ export const createAiMentorLessonSchema = Type.Intersect([
     aiMentorInstructions: Type.String(),
     completionConditions: Type.String(),
     type: Type.Enum(AI_MENTOR_TYPE),
+    name: Type.Optional(Type.String()),
   }),
 ]);
-export const updateAiMentorLessonSchema = Type.Omit(createAiMentorLessonSchema, [
-  "chapterId",
-  "displayOrder",
+export const updateAiMentorLessonSchema = Type.Intersect([
+  Type.Omit(createAiMentorLessonSchema, ["chapterId", "displayOrder"]),
+  Type.Object({
+    language: supportedLanguagesSchema,
+  }),
 ]);
 
 export const createLessonSchema = Type.Intersect([
@@ -191,10 +199,31 @@ export const lessonShowSchema = Type.Object({
       Type.Null(),
     ]),
   ),
+  aiMentor: Type.Optional(
+    Type.Union([
+      Type.Object({
+        name: Type.Union([Type.String(), Type.Null()]),
+        avatarReferenceUrl: Type.Optional(Type.String()),
+      }),
+      Type.Null(),
+    ]),
+  ),
 });
 
-export const updateLessonSchema = Type.Partial(createLessonSchema);
-export const updateQuizLessonSchema = Type.Partial(createQuizLessonSchema);
+export const updateLessonSchema = Type.Intersect([
+  Type.Partial(createLessonSchema),
+  Type.Object({
+    language: supportedLanguagesSchema,
+  }),
+]);
+
+export const updateQuizLessonSchema = Type.Intersect([
+  Type.Partial(createQuizLessonSchema),
+  Type.Object({
+    language: supportedLanguagesSchema,
+  }),
+]);
+
 export const lessonForChapterSchema = Type.Array(
   Type.Object({
     id: UUIDSchema,
@@ -231,6 +260,7 @@ export const studentQuestionAnswersSchema = Type.Object({
 export const answerQuestionsForLessonBody = Type.Object({
   lessonId: UUIDSchema,
   questionsAnswers: Type.Array(studentQuestionAnswersSchema),
+  language: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
 export const nextLessonSchema = Type.Union([
@@ -263,6 +293,7 @@ export const updateEmbedLessonSchema = Type.Object({
   type: lessonResourceType,
   resources: Type.Array(Type.Omit(createLessonResourceSchema, ["lessonId"])),
   lessonId: UUIDSchema,
+  language: supportedLanguagesSchema,
 });
 
 export const enrolledLessonsFiltersSchema = Type.Object({

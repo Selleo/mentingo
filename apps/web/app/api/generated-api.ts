@@ -23,7 +23,7 @@ export interface RegisterBody {
    */
   lastName: string;
   password: string;
-  language: "pl" | "en";
+  language: "en" | "pl";
 }
 
 export interface RegisterResponse {
@@ -124,7 +124,7 @@ export interface CreatePasswordBody {
   password: string;
   /** @minLength 1 */
   createToken: string;
-  language: "pl" | "en";
+  language: string;
 }
 
 export interface ResetPasswordBody {
@@ -535,8 +535,11 @@ export interface GetUsersResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
   } & {
-    groupId: string | null;
-    groupName: string | null;
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
   })[];
   pagination: {
     totalItems: number;
@@ -558,8 +561,11 @@ export interface GetUserByIdResponse {
     archived: boolean;
     deletedAt: string | null;
     profilePictureUrl: string | null;
-    groupId: string | null;
-    groupName: string | null;
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
   };
 }
 
@@ -581,7 +587,7 @@ export interface GetUserDetailsResponse {
 export interface UpdateUserBody {
   firstName?: string;
   lastName?: string;
-  groupId?: string | null;
+  groups?: string[] | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -622,7 +628,7 @@ export interface UpsertUserDetailsResponse {
 export interface AdminUpdateUserBody {
   firstName?: string;
   lastName?: string;
-  groupId?: string | null;
+  groups?: string[] | null;
   /** @format email */
   email?: string;
   role?: "admin" | "student" | "content_creator";
@@ -655,19 +661,17 @@ export interface ChangePasswordBody {
 
 export type ChangePasswordResponse = null;
 
-export type DeleteUserResponse = null;
-
 export interface DeleteBulkUsersBody {
   userIds: string[];
 }
 
 export type DeleteBulkUsersResponse = null;
 
-export interface BulkAssignUsersToGroupBody {
-  userIds: string[];
+export type BulkAssignUsersToGroupBody = {
   /** @format uuid */
-  groupId: string;
-}
+  userId: string;
+  groups: string[];
+}[];
 
 export interface ArchiveBulkUsersBody {
   userIds: string[];
@@ -748,6 +752,149 @@ export interface MarkOnboardingCompleteResponse {
   };
 }
 
+export interface GetAllGroupsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+      deletedAt: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetGroupByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+      deletedAt: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  };
+}
+
+export interface GetUserGroupsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic: string | null;
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      archived: boolean;
+      deletedAt: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateGroupBody {
+  name: string;
+  characteristic?: string;
+}
+
+export interface CreateGroupResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export interface UpdateGroupBody {
+  name: string;
+  characteristic?: string;
+}
+
+export interface UpdateGroupResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteGroupResponse {
+  data: {
+    message: string;
+  };
+}
+
+export type BulkDeleteGroupsBody = string[];
+
+export interface BulkDeleteGroupsResponse {
+  data: {
+    message: string;
+  };
+}
+
+export type GroupIds = string[];
+
+export interface SetUserGroupsResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface GetGroupsByCourseResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic?: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}
+
 export interface GetAllCoursesResponse {
   data: {
     /** @format uuid */
@@ -818,10 +965,14 @@ export interface GetStudentsWithEnrollmentDateResponse {
     lastName: string;
     email: string;
     enrolledAt: string | null;
-    groupId: string | null;
-    groupName: string | null;
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
     /** @format uuid */
     id: string;
+    isEnrolledByGroup: boolean;
   }[];
 }
 
@@ -947,6 +1098,8 @@ export interface GetCourseResponse {
     title: string;
     stripeProductId: string | null;
     stripePriceId: string | null;
+    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl";
   };
 }
 
@@ -971,6 +1124,7 @@ export interface GetBetaCourseByIdResponse {
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
+        avatarReferenceUrl?: string;
         fileType?: string | null;
         questions?: {
           /** @format uuid */
@@ -1004,7 +1158,11 @@ export interface GetBetaCourseByIdResponse {
             questionId?: string;
             matchedWord?: string | null;
             scaleAnswer?: number | null;
+            /** @default "en" */
+            language?: "en" | "pl";
           }[];
+          /** @default "en" */
+          language?: "en" | "pl";
         }[];
         aiMentor?: {
           /** @format uuid */
@@ -1014,6 +1172,7 @@ export interface GetBetaCourseByIdResponse {
           aiMentorInstructions: string;
           completionConditions: string;
           type: "mentor" | "teacher" | "roleplay";
+          avatarReference: string | null;
         } | null;
         updatedAt?: string;
       }[];
@@ -1043,6 +1202,8 @@ export interface GetBetaCourseByIdResponse {
     thumbnailS3Key?: string;
     thumbnailS3SingedUrl?: string | null;
     title: string;
+    availableLocales: ("en" | "pl")[];
+    baseLanguage: "en" | "pl";
   };
 }
 
@@ -1057,6 +1218,8 @@ export type CreateCourseBody = {
   categoryId: string;
   isScorm?: boolean;
   hasCertificate?: boolean;
+  /** @default "en" */
+  language: "en" | "pl";
 } & {
   chapters?: string[];
 };
@@ -1080,6 +1243,8 @@ export interface UpdateCourseBody {
   categoryId?: string;
   chapters?: string[];
   archived?: boolean;
+  /** @default "en" */
+  language?: "en" | "pl";
 }
 
 export interface UpdateCourseResponse {
@@ -1095,6 +1260,22 @@ export interface UpdateHasCertificateBody {
 export interface UpdateHasCertificateResponse {
   data: {
     message: string;
+  };
+}
+
+export interface UpdateLessonSequenceEnabledBody {
+  lessonSequenceEnabled: boolean;
+}
+
+export interface UpdateLessonSequenceEnabledResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface GetLessonSequenceEnabledResponse {
+  data: {
+    lessonSequenceEnabled: boolean;
   };
 }
 
@@ -1124,6 +1305,16 @@ export interface EnrollGroupsToCourseResponse {
   };
 }
 
+export interface UnenrollGroupsFromCourseBody {
+  groupIds: string[];
+}
+
+export interface UnenrollGroupsFromCourseResponse {
+  data: {
+    message: string;
+  };
+}
+
 export type DeleteCourseResponse = null;
 
 export interface DeleteManyCoursesBody {
@@ -1132,7 +1323,7 @@ export interface DeleteManyCoursesBody {
 
 export type DeleteManyCoursesResponse = null;
 
-export type UnenrollCourseResponse = null;
+export type UnenrollCoursesResponse = null;
 
 export interface GetCourseStatisticsResponse {
   data: {
@@ -1165,7 +1356,12 @@ export interface GetCourseStudentsProgressResponse {
     studentId: string;
     studentName: string;
     studentAvatarUrl: string | null;
-    groupName: string | null;
+    groups:
+      | {
+          id: string;
+          name: string;
+        }[]
+      | null;
     completedLessonsCount: number;
     lastActivity: string | null;
   }[];
@@ -1269,6 +1465,7 @@ export type BetaCreateChapterBody = {
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
+    avatarReferenceUrl?: string;
     fileType?: string | null;
     questions?: {
       /** @format uuid */
@@ -1302,7 +1499,11 @@ export type BetaCreateChapterBody = {
         questionId?: string;
         matchedWord?: string | null;
         scaleAnswer?: number | null;
+        /** @default "en" */
+        language?: "en" | "pl";
       }[];
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -1312,6 +1513,7 @@ export type BetaCreateChapterBody = {
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      avatarReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -1335,7 +1537,7 @@ export interface BetaCreateChapterResponse {
   };
 }
 
-export type UpdateChapterBody = {
+export type UpdateChapterBody = ({
   title?: string;
   lessons?: {
     /** @format uuid */
@@ -1345,6 +1547,7 @@ export type UpdateChapterBody = {
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
+    avatarReferenceUrl?: string;
     fileType?: string | null;
     questions?: {
       /** @format uuid */
@@ -1378,7 +1581,11 @@ export type UpdateChapterBody = {
         questionId?: string;
         matchedWord?: string | null;
         scaleAnswer?: number | null;
+        /** @default "en" */
+        language?: "en" | "pl";
       }[];
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
     aiMentor?: {
       /** @format uuid */
@@ -1388,6 +1595,7 @@ export type UpdateChapterBody = {
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      avatarReference: string | null;
     } | null;
     updatedAt?: string;
   }[];
@@ -1401,6 +1609,9 @@ export type UpdateChapterBody = {
 } & {
   /** @format uuid */
   courseId?: string;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface UpdateChapterResponse {
@@ -1497,6 +1708,8 @@ export interface GetLessonByIdResponse {
           /** @format uuid */
           questionId?: string;
         }[];
+        /** @default "en" */
+        language?: "en" | "pl";
         passQuestion: boolean | null;
       }[];
       questionCount: number;
@@ -1514,7 +1727,7 @@ export interface GetLessonByIdResponse {
     displayOrder: number;
     isExternal?: boolean;
     nextLessonId: string | null;
-    userLanguage?: "pl" | "en";
+    userLanguage?: "en" | "pl";
     status?: "active" | "completed" | "archived";
     /** @format uuid */
     threadId?: string;
@@ -1538,6 +1751,10 @@ export interface GetLessonByIdResponse {
       percentage: number | null;
       requiredScore: number | null;
     } | null;
+    aiMentor?: {
+      name: string | null;
+      avatarReferenceUrl?: string;
+    } | null;
   };
 }
 
@@ -1546,6 +1763,7 @@ export type BetaCreateLessonBody = {
   type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1579,7 +1797,11 @@ export type BetaCreateLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -1589,6 +1811,7 @@ export type BetaCreateLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -1609,6 +1832,7 @@ export type BetaCreateAiMentorLessonBody = {
   title: string;
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1642,7 +1866,11 @@ export type BetaCreateAiMentorLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -1652,6 +1880,7 @@ export type BetaCreateAiMentorLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
@@ -1661,6 +1890,7 @@ export type BetaCreateAiMentorLessonBody = {
   aiMentorInstructions: string;
   completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
+  name?: string;
 };
 
 export interface BetaCreateAiMentorLessonResponse {
@@ -1671,10 +1901,11 @@ export interface BetaCreateAiMentorLessonResponse {
   };
 }
 
-export type BetaUpdateAiMentorLessonBody = {
+export type BetaUpdateAiMentorLessonBody = ({
   title: string;
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1708,7 +1939,11 @@ export type BetaUpdateAiMentorLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -1718,12 +1953,17 @@ export type BetaUpdateAiMentorLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
   aiMentorInstructions: string;
   completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
+  name?: string;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface BetaUpdateAiMentorLessonResponse {
@@ -1774,7 +2014,11 @@ export type BetaCreateQuizLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
 } & {
   /** @format uuid */
@@ -1790,7 +2034,7 @@ export interface BetaCreateQuizLessonResponse {
   };
 }
 
-export type BetaUpdateQuizLessonBody = {
+export type BetaUpdateQuizLessonBody = ({
   title?: string;
   type?: string;
   description?: string;
@@ -1832,12 +2076,19 @@ export type BetaUpdateQuizLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
 } & {
   /** @format uuid */
   chapterId?: string;
   displayOrder?: number;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface BetaUpdateQuizLessonResponse {
@@ -1846,11 +2097,12 @@ export interface BetaUpdateQuizLessonResponse {
   };
 }
 
-export type BetaUpdateLessonBody = {
+export type BetaUpdateLessonBody = ({
   title?: string;
   type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
+  avatarReferenceUrl?: string;
   fileType?: string | null;
   questions?: {
     /** @format uuid */
@@ -1884,7 +2136,11 @@ export type BetaUpdateLessonBody = {
       questionId?: string;
       matchedWord?: string | null;
       scaleAnswer?: number | null;
+      /** @default "en" */
+      language?: "en" | "pl";
     }[];
+    /** @default "en" */
+    language?: "en" | "pl";
   }[];
   aiMentor?: {
     /** @format uuid */
@@ -1894,12 +2150,16 @@ export type BetaUpdateLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    avatarReference: string | null;
   } | null;
   updatedAt?: string;
 } & {
   /** @format uuid */
   chapterId?: string;
   displayOrder?: number;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl";
 };
 
 export interface BetaUpdateLessonResponse {
@@ -1935,6 +2195,7 @@ export interface EvaluationQuizBody {
         }
     )[];
   }[];
+  language: "en" | "pl";
 }
 
 export interface EvaluationQuizResponse {
@@ -1997,6 +2258,8 @@ export interface UpdateEmbedLessonBody {
   }[];
   /** @format uuid */
   lessonId: string;
+  /** @default "en" */
+  language: "en" | "pl";
 }
 
 export interface UpdateEmbedLessonResponse {
@@ -2070,7 +2333,7 @@ export interface GetThreadResponse {
     aiMentorLessonId: string;
     /** @format uuid */
     userId: string;
-    userLanguage: "pl" | "en";
+    userLanguage: "en" | "pl";
     createdAt: string;
     updatedAt: string;
     status: "active" | "completed" | "archived";
@@ -2330,153 +2593,6 @@ export interface DeleteManyCategoriesResponse {
   data: {
     message: string;
   };
-}
-
-export interface GetAllGroupsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    characteristic: string | null;
-    users?: {
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-      archived: boolean;
-      deletedAt: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    createdAt?: string;
-    updatedAt?: string;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface GetGroupByIdResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    characteristic: string | null;
-    users?: {
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-      archived: boolean;
-      deletedAt: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    createdAt?: string;
-    updatedAt?: string;
-  };
-}
-
-export interface GetUserGroupsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    characteristic: string | null;
-    users?: {
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      role: string;
-      archived: boolean;
-      deletedAt: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    createdAt?: string;
-    updatedAt?: string;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface CreateGroupBody {
-  name: string;
-  characteristic?: string;
-}
-
-export interface CreateGroupResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    message: string;
-  };
-}
-
-export interface UpdateGroupBody {
-  name: string;
-  characteristic?: string;
-}
-
-export interface UpdateGroupResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    characteristic?: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface DeleteGroupResponse {
-  data: {
-    message: string;
-  };
-}
-
-export type BulkDeleteGroupsBody = string[];
-
-export interface BulkDeleteGroupsResponse {
-  data: {
-    message: string;
-  };
-}
-
-export interface AssignUserToGroupResponse {
-  data: {
-    message: string;
-  };
-}
-
-export interface UnassignUserFromGroupResponse {
-  data: {
-    message: string;
-  };
-}
-
-export interface GetGroupsByCourseResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    characteristic?: string;
-    createdAt: string;
-    updatedAt: string;
-  }[];
 }
 
 export interface UploadScormPackageResponse {
@@ -3447,10 +3563,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name StatisticsControllerGetUserStatistics
      * @request GET:/api/statistics/user-stats
      */
-    statisticsControllerGetUserStatistics: (params: RequestParams = {}) =>
+    statisticsControllerGetUserStatistics: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetUserStatisticsResponse, any>({
         path: `/api/statistics/user-stats`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -3461,10 +3584,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name StatisticsControllerGetStats
      * @request GET:/api/statistics/stats
      */
-    statisticsControllerGetStats: (params: RequestParams = {}) =>
+    statisticsControllerGetStats: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetStatsResponse, any>({
         path: `/api/statistics/stats`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -3494,7 +3624,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-email"
           | "-createdAt"
           | "-groupName";
-        groupId?: string;
+        groups?: string[];
       },
       params: RequestParams = {},
     ) =>
@@ -3694,27 +3824,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UserControllerDeleteUser
-     * @request DELETE:/api/user/user
-     */
-    userControllerDeleteUser: (
-      query: {
-        /** @format uuid */
-        id: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<DeleteUserResponse, any>({
-        path: `/api/user/user`,
-        method: "DELETE",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name UserControllerBulkAssignUsersToGroup
      * @request PATCH:/api/user/bulk/groups
      */
@@ -3799,6 +3908,173 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name GroupControllerGetAllGroups
+     * @request GET:/api/group/all
+     */
+    groupControllerGetAllGroups: (
+      query?: {
+        keyword?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAllGroupsResponse, any>({
+        path: `/api/group/all`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetGroupById
+     * @request GET:/api/group/{groupId}
+     */
+    groupControllerGetGroupById: (groupId: string, params: RequestParams = {}) =>
+      this.request<GetGroupByIdResponse, any>({
+        path: `/api/group/${groupId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerUpdateGroup
+     * @request PATCH:/api/group/{groupId}
+     */
+    groupControllerUpdateGroup: (
+      groupId: string,
+      data: UpdateGroupBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateGroupResponse, any>({
+        path: `/api/group/${groupId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerDeleteGroup
+     * @request DELETE:/api/group/{groupId}
+     */
+    groupControllerDeleteGroup: (groupId: string, params: RequestParams = {}) =>
+      this.request<DeleteGroupResponse, any>({
+        path: `/api/group/${groupId}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetUserGroups
+     * @request GET:/api/group/user/{userId}
+     */
+    groupControllerGetUserGroups: (
+      userId: string,
+      query?: {
+        keyword?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetUserGroupsResponse, any>({
+        path: `/api/group/user/${userId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerCreateGroup
+     * @request POST:/api/group
+     */
+    groupControllerCreateGroup: (data: CreateGroupBody, params: RequestParams = {}) =>
+      this.request<CreateGroupResponse, any>({
+        path: `/api/group`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerBulkDeleteGroups
+     * @request DELETE:/api/group
+     */
+    groupControllerBulkDeleteGroups: (data: BulkDeleteGroupsBody, params: RequestParams = {}) =>
+      this.request<BulkDeleteGroupsResponse, any>({
+        path: `/api/group`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerSetUserGroups
+     * @request POST:/api/group/set
+     */
+    groupControllerSetUserGroups: (
+      data: GroupIds,
+      query?: {
+        /** @format uuid */
+        userId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<SetUserGroupsResponse, any>({
+        path: `/api/group/set`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerGetGroupsByCourse
+     * @request GET:/api/group/by-course/{courseId}
+     */
+    groupControllerGetGroupsByCourse: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetGroupsByCourseResponse, any>({
+        path: `/api/group/by-course/${courseId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerGetAllCourses
      * @request GET:/api/course/all
      */
@@ -3827,6 +4103,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         page?: number;
         perPage?: number;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -3869,6 +4147,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-author"
           | "-chapterCount"
           | "-enrolledParticipantsCount";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -3891,8 +4171,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         keyword?: string;
         sort?: "enrolledAt" | "-enrolledAt";
-        /** @format uuid */
-        groupId?: string;
+        groups?: string[];
       },
       params: RequestParams = {},
     ) =>
@@ -3937,6 +4216,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-enrolledParticipantsCount";
         /** @format uuid */
         excludeCourseId?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -3964,6 +4245,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         title?: string;
         description?: string;
         searchQuery?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -3985,6 +4268,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4022,6 +4307,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4069,6 +4356,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUpdateLessonSequenceEnabled
+     * @request PATCH:/api/course/update-lesson-sequence/{courseId}
+     */
+    courseControllerUpdateLessonSequenceEnabled: (
+      courseId: string,
+      data: UpdateLessonSequenceEnabledBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateLessonSequenceEnabledResponse, any>({
+        path: `/api/course/update-lesson-sequence/${courseId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetLessonSequenceEnabled
+     * @request GET:/api/course/lesson-sequence-enabled/{courseId}
+     */
+    courseControllerGetLessonSequenceEnabled: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetLessonSequenceEnabledResponse, any>({
+        path: `/api/course/lesson-sequence-enabled/${courseId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
@@ -4137,6 +4458,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerUnenrollGroupsFromCourse
+     * @request DELETE:/api/course/{courseId}/unenroll-groups-from-course
+     */
+    courseControllerUnenrollGroupsFromCourse: (
+      courseId: string,
+      data: UnenrollGroupsFromCourseBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UnenrollGroupsFromCourseResponse, any>({
+        path: `/api/course/${courseId}/unenroll-groups-from-course`,
+        method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerDeleteCourse
      * @request DELETE:/api/course/deleteCourse/{id}
      */
@@ -4167,17 +4508,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CourseControllerUnenrollCourse
+     * @name CourseControllerUnenrollCourses
      * @request DELETE:/api/course/unenroll-course
      */
-    courseControllerUnenrollCourse: (
+    courseControllerUnenrollCourses: (
       query?: {
         /** @format uuid */
-        id?: string;
+        courseId?: string;
+        userIds?: string[];
       },
       params: RequestParams = {},
     ) =>
-      this.request<UnenrollCourseResponse, any>({
+      this.request<UnenrollCoursesResponse, any>({
         path: `/api/course/unenroll-course`,
         method: "DELETE",
         query: query,
@@ -4205,10 +4547,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CourseControllerGetAverageQuizScores
      * @request GET:/api/course/{courseId}/statistics/average-quiz-score
      */
-    courseControllerGetAverageQuizScores: (courseId: string, params: RequestParams = {}) =>
+    courseControllerGetAverageQuizScores: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetAverageQuizScoresResponse, any>({
         path: `/api/course/${courseId}/statistics/average-quiz-score`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -4227,13 +4577,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         search?: string;
         sort?:
           | "studentName"
-          | "groupName"
           | "completedLessonsCount"
           | "lastActivity"
           | "-studentName"
-          | "-groupName"
           | "-completedLessonsCount"
           | "-lastActivity";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4268,6 +4618,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-quizScore"
           | "-attempts"
           | "-lastAttempt";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4300,6 +4652,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-lessonName"
           | "-score"
           | "-lastSession";
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4314,6 +4668,48 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerCreateLanguage
+     * @request POST:/api/course/beta-create-language/{courseId}
+     */
+    courseControllerCreateLanguage: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/beta-create-language/${courseId}`,
+        method: "POST",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDeleteLanguage
+     * @request DELETE:/api/course/language/{courseId}
+     */
+    courseControllerDeleteLanguage: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/language/${courseId}`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ChapterControllerGetChapterWithLesson
      * @request GET:/api/chapter
      */
@@ -4321,6 +4717,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4448,6 +4846,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         description?: string;
         searchQuery?: string;
         lessonCompleted?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4468,7 +4868,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerGetLessonById: (
       id: string,
       query: {
-        userLanguage: string;
+        /** @default "en" */
+        language?: "en" | "pl";
         studentId: string;
       },
       params: RequestParams = {},
@@ -4741,6 +5142,30 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonControllerUploadAiMentorAvatar
+     * @request POST:/api/lesson/ai-mentor/avatar
+     */
+    lessonControllerUploadAiMentorAvatar: (
+      data: {
+        /** @format uuid */
+        lessonId: string;
+        /** @format binary */
+        file: File | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<string, any>({
+        path: `/api/lesson/ai-mentor/avatar`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LessonControllerUpdateLessonDisplayOrder
      * @request PATCH:/api/lesson/update-lesson-display-order
      */
@@ -4767,6 +5192,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4788,6 +5215,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @format uuid */
         userId?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
         /** @min 1 */
         page?: number;
         perPage?: number;
@@ -4815,6 +5244,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         userId?: string;
         /** @format uuid */
         courseId?: string;
+        /** @default "en" */
+        language?: "en" | "pl";
       },
       params: RequestParams = {},
     ) =>
@@ -4872,10 +5303,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/ai/thread/messages
      */
     aiControllerGetThreadMessages: (
-      query: {
+      query?: {
         /** @format uuid */
         thread?: string;
-        studentId: string;
       },
       params: RequestParams = {},
     ) =>
@@ -5304,195 +5734,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerGetAllGroups
-     * @request GET:/api/group/all
-     */
-    groupControllerGetAllGroups: (
-      query?: {
-        keyword?: string;
-        /** @min 1 */
-        page?: number;
-        perPage?: number;
-        sort?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetAllGroupsResponse, any>({
-        path: `/api/group/all`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerGetGroupById
-     * @request GET:/api/group/{groupId}
-     */
-    groupControllerGetGroupById: (groupId: string, params: RequestParams = {}) =>
-      this.request<GetGroupByIdResponse, any>({
-        path: `/api/group/${groupId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerUpdateGroup
-     * @request PATCH:/api/group/{groupId}
-     */
-    groupControllerUpdateGroup: (
-      groupId: string,
-      data: UpdateGroupBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateGroupResponse, any>({
-        path: `/api/group/${groupId}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerDeleteGroup
-     * @request DELETE:/api/group/{groupId}
-     */
-    groupControllerDeleteGroup: (groupId: string, params: RequestParams = {}) =>
-      this.request<DeleteGroupResponse, any>({
-        path: `/api/group/${groupId}`,
-        method: "DELETE",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerGetUserGroups
-     * @request GET:/api/group/user/{userId}
-     */
-    groupControllerGetUserGroups: (
-      userId: string,
-      query?: {
-        keyword?: string;
-        /** @min 1 */
-        page?: number;
-        perPage?: number;
-        sort?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetUserGroupsResponse, any>({
-        path: `/api/group/user/${userId}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerCreateGroup
-     * @request POST:/api/group
-     */
-    groupControllerCreateGroup: (data: CreateGroupBody, params: RequestParams = {}) =>
-      this.request<CreateGroupResponse, any>({
-        path: `/api/group`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerBulkDeleteGroups
-     * @request DELETE:/api/group
-     */
-    groupControllerBulkDeleteGroups: (data: BulkDeleteGroupsBody, params: RequestParams = {}) =>
-      this.request<BulkDeleteGroupsResponse, any>({
-        path: `/api/group`,
-        method: "DELETE",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerAssignUserToGroup
-     * @request POST:/api/group/assign
-     */
-    groupControllerAssignUserToGroup: (
-      query?: {
-        /** @format uuid */
-        userId?: string;
-        /** @format uuid */
-        groupId?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<AssignUserToGroupResponse, any>({
-        path: `/api/group/assign`,
-        method: "POST",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerUnassignUserFromGroup
-     * @request DELETE:/api/group/unassign
-     */
-    groupControllerUnassignUserFromGroup: (
-      query?: {
-        /** @format uuid */
-        userId?: string;
-        /** @format uuid */
-        groupId?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<UnassignUserFromGroupResponse, any>({
-        path: `/api/group/unassign`,
-        method: "DELETE",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GroupControllerGetGroupsByCourse
-     * @request GET:/api/group/by-course/{courseId}
-     */
-    groupControllerGetGroupsByCourse: (courseId: string, params: RequestParams = {}) =>
-      this.request<GetGroupsByCourseResponse, any>({
-        path: `/api/group/by-course/${courseId}`,
-        method: "GET",
         format: "json",
         ...params,
       }),

@@ -7,6 +7,7 @@ import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { LessonTypes } from "~/modules/Courses/CourseView/lessonTypes";
+import { baseUrl } from "~/utils/baseUrl";
 
 import { plugins } from "./plugins";
 import { defaultClasses } from "./styles";
@@ -43,16 +44,18 @@ const Editor = ({
     file?: File,
     editor?: TiptapEditor | null,
   ) => {
-    if (!file || !lessonId || lessonType != LessonTypes.text) {
+    if (!file || !lessonId) return;
+
+    e.preventDefault();
+
+    if (lessonType != LessonTypes.text) {
       return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
     }
 
     if (ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type)) {
-      e.preventDefault();
-
       const uploaded = await uploadFile({ file, lessonId });
 
-      const imageUrl = `${import.meta.env.VITE_APP_URL}/api/lesson/lesson-image/${uploaded}`;
+      const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
 
       editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
     }

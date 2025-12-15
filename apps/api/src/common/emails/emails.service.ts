@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
-import { LANGUAGES, SUPPORTED_LANGUAGES } from "src/ai/utils/ai.type";
 import { SettingsService } from "src/settings/settings.service";
 
 import { EmailAdapter } from "./adapters/email.adapter";
 
 import type { Attachment, Email } from "./email.interface";
-import type { Languages } from "src/ai/utils/ai.type";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { EmailConfigSchema } from "src/common/configuration/email";
 import type { DefaultEmailSettings } from "src/events/types";
@@ -81,14 +81,16 @@ export class EmailService {
 
     return {
       primaryColor: globalSettings.primaryColor || "#4796FD",
-      language: userId ? await this.getFinalLanguage(userId) : LANGUAGES.EN,
+      language: userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN,
     };
   }
 
-  async getFinalLanguage(userId: UUIDType): Promise<Languages> {
+  async getFinalLanguage(userId: UUIDType): Promise<SupportedLanguages> {
     const userSettings = await this.settingsService.getUserSettings(userId);
-    const language = userSettings.language as Languages;
+    const language = userSettings.language as SupportedLanguages;
 
-    return Object.values(SUPPORTED_LANGUAGES).includes(language) ? language : LANGUAGES.EN;
+    return Object.values(SUPPORTED_LANGUAGES).includes(language)
+      ? language
+      : SUPPORTED_LANGUAGES.EN;
   }
 }

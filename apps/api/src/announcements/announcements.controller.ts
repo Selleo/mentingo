@@ -6,6 +6,7 @@ import { baseResponse, BaseResponse, UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { AnnouncementsService } from "./announcements.service";
@@ -102,11 +103,11 @@ export class AnnouncementsController {
   })
   async createAnnouncement(
     @Body() createAnnouncementData: CreateAnnouncement,
-    @CurrentUser("userId") authorId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     const announcement = await this.announcementsService.createAnnouncement(
       createAnnouncementData,
-      authorId,
+      currentUser,
     );
 
     return new BaseResponse(announcement);
@@ -119,11 +120,11 @@ export class AnnouncementsController {
   })
   async markAnnouncementAsRead(
     @Param("id") announcementId: UUIDType,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     const announcement = await this.announcementsService.markAnnouncementAsRead(
       announcementId,
-      userId,
+      currentUser,
     );
 
     return new BaseResponse(announcement);

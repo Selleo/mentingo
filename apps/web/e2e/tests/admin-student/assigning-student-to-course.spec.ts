@@ -8,7 +8,7 @@ import {
   navigateToPage,
   selectCourseAndOpenEnrollmentTab,
   verifyStudentSeesCourse,
-} from "../../utils/index";
+} from "../../utils";
 
 import { ASSIGNING_STUDENT_TO_GROUP_PAGE_UI } from "./data/assigning-student-data";
 

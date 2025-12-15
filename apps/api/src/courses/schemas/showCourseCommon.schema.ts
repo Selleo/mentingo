@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { chapterSchema, showChapterSchema } from "src/chapter/schemas/chapter.schema";
@@ -26,6 +27,8 @@ export const commonShowCourseSchema = Type.Object({
   title: Type.String(),
   stripeProductId: Type.Union([Type.String(), Type.Null()]),
   stripePriceId: Type.Union([Type.String(), Type.Null()]),
+  availableLocales: Type.Array(Type.Enum(SUPPORTED_LANGUAGES)),
+  baseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
 export const commonShowBetaCourseSchema = Type.Object({
@@ -49,6 +52,8 @@ export const commonShowBetaCourseSchema = Type.Object({
   thumbnailS3Key: Type.Optional(Type.String()),
   thumbnailS3SingedUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   title: Type.String(),
+  availableLocales: Type.Array(Type.Enum(SUPPORTED_LANGUAGES)),
+  baseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
 export type CommonShowCourse = Static<typeof commonShowCourseSchema>;

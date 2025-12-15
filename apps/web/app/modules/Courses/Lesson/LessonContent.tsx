@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { startCase } from "lodash-es";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
@@ -12,10 +12,12 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { Video } from "~/components/VideoPlayer/Video";
+import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { Quiz } from "~/modules/Courses/Lesson/Quiz";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import Presentation from "../../../components/Presentation/Presentation";
 
@@ -50,12 +52,17 @@ export const LessonContent = ({
   isPreviewMode = false,
   previewUserId = undefined,
 }: LessonContentProps) => {
-  const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
-  const { data: user } = useCurrentUser();
-  const [isNextDisabled, setIsNextDisabled] = useState(false);
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { t } = useTranslation();
+
+  const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
+  const [isNextDisabled, setIsNextDisabled] = useState(false);
+
+  const { language } = useLanguageStore();
+
+  const { data: user } = useCurrentUser();
+  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { isAdminLike, isStudent } = useUserRole();
+  const { sequenceEnabled } = useLessonsSequence(course.id);
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
     chapter.lessons.some(({ id }) => id === lesson.id),
@@ -63,13 +70,33 @@ export const LessonContent = ({
   const currentLessonIndex = course.chapters[currentChapterIndex]?.lessons.findIndex(
     ({ id }) => id === lesson.id,
   );
-
+  const nextLessonIndex = currentLessonIndex + 1;
   const currentChapter = course.chapters[currentChapterIndex];
   const nextChapter = course.chapters[currentChapterIndex + 1];
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const totalLessons = currentChapter.lessons.length;
-
   const queryClient = useQueryClient();
+
+  const canAccessLesson = useCallback(
+    (courseData: GetCourseResponse["data"], targetLessonId: string) => {
+      if (!sequenceEnabled) {
+        return true;
+      }
+
+      const allLessons =
+        courseData.chapters.flatMap((c) => c.lessons?.map((l) => ({ ...l })) ?? []) ?? [];
+
+      const targetIndex = allLessons.findIndex((l) => l.id === targetLessonId);
+      if (targetIndex === -1) return true;
+
+      const target = allLessons[targetIndex];
+      if (target.status === "completed") return true;
+
+      const priorLessons = allLessons.slice(0, Math.max(targetIndex, 0));
+      return priorLessons.every((l) => l.status === "completed");
+    },
+    [sequenceEnabled],
+  );
 
   useEffect(() => {
     if (isPreviewMode) return;
@@ -79,12 +106,17 @@ export const LessonContent = ({
       setIsPreviousDisabled(false);
       return;
     }
+
+    const nextLessonId =
+      currentChapter?.lessons?.[nextLessonIndex]?.id ?? nextChapter?.lessons?.[0]?.id;
+    const cannotEnterNextLesson = nextLessonId ? !canAccessLesson(course, nextLessonId) : false;
     setIsNextDisabled(
       isNextBlocked(
         currentLessonIndex,
         totalLessons,
         nextChapter?.isFreemium ?? false,
         course.enrolled ?? false,
+        cannotEnterNextLesson,
       ),
     );
     setIsPreviousDisabled(
@@ -100,6 +132,7 @@ export const LessonContent = ({
     lesson.type,
     lesson.lessonCompleted,
     currentLessonIndex,
+    currentChapter.lessons,
     totalLessons,
     nextChapter,
     prevChapter,
@@ -108,6 +141,9 @@ export const LessonContent = ({
     queryClient,
     course.id,
     previewUserId,
+    nextLessonIndex,
+    canAccessLesson,
+    course,
   ]);
 
   const Content = () =>
@@ -126,7 +162,7 @@ export const LessonContent = ({
           url={lesson.fileUrl}
           onVideoEnded={() => {
             setIsNextDisabled(false);
-            isStudent && markLessonAsCompleted({ lessonId: lesson.id });
+            isStudent && markLessonAsCompleted({ lessonId: lesson.id, language });
           }}
           isExternalUrl={lesson.isExternal}
         />
@@ -139,7 +175,6 @@ export const LessonContent = ({
           lesson={lesson}
           lessonLoading={lessonLoading}
           isPreviewMode={isPreviewMode}
-          userId={previewUserId ?? user?.id}
         />
       ))
       .with("embed", () => (
@@ -155,7 +190,7 @@ export const LessonContent = ({
       lesson.type === LessonType.PRESENTATION ||
       lesson.type === LessonType.EMBED
     ) {
-      markLessonAsCompleted({ lessonId: lesson.id });
+      markLessonAsCompleted({ lessonId: lesson.id, language });
     }
 
     if (currentLessonIndex === totalLessons - 1) {
@@ -180,6 +215,7 @@ export const LessonContent = ({
     lesson.id,
     lesson.type,
     markLessonAsCompleted,
+    language,
   ]);
 
   return (
@@ -216,21 +252,19 @@ export const LessonContent = ({
                 <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
               </div>
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:flex-row sm:gap-x-4">
-                {!isFirstLesson && (
-                  <Button
-                    variant="outline"
-                    className="w-full gap-x-1 sm:w-auto"
-                    disabled={isPreviousDisabled}
-                    onClick={handlePrevious}
-                  >
-                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                  disabled={isPreviousDisabled || isFirstLesson}
+                  onClick={handlePrevious}
+                >
+                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                </Button>
                 <Button
                   data-testid="next-lesson-button"
                   variant="outline"
                   disabled={isNextDisabled}
-                  className="w-full gap-x-1 sm:w-auto"
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
                   onClick={handleNext}
                 >
                   <Icon name="ArrowRight" className="h-auto w-4" />

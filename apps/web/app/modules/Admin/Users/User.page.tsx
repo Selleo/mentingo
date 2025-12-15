@@ -25,7 +25,7 @@ const displayedFields: Array<keyof UpdateUserBody> = [
   "lastName",
   "email",
   "role",
-  "groupId",
+  "groups",
   "archived",
 ];
 

@@ -39,8 +39,9 @@ export class AiController {
   async getThread(
     @Query("thread") threadId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
   ): Promise<BaseResponse<ResponseThreadBody>> {
-    return await this.threadService.findThread(threadId, userId);
+    return await this.threadService.findThread(threadId, userId, userRole);
   }
 
   @Get("thread/messages")
@@ -52,9 +53,9 @@ export class AiController {
   async getThreadMessages(
     @Query("thread") threadId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
-    @Query("studentId") studentId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
   ): Promise<BaseResponse<ResponseThreadMessageBody[]>> {
-    return await this.threadService.findAllMessagesByThread(threadId, studentId || userId);
+    return await this.threadService.findAllMessagesByThread(threadId, userId, userRole);
   }
 
   @Post("chat")

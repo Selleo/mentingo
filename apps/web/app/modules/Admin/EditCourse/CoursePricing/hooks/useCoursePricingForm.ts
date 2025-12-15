@@ -9,17 +9,20 @@ import { queryClient } from "~/api/queryClient";
 import { coursePricingFormSchema } from "../validators/coursePricingFormSchema";
 
 import type { CoursePricingFormValues } from "../validators/coursePricingFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 
 type UseCoursePricingFormProps = {
   courseId: string;
   priceInCents?: number;
   currency?: string;
+  language: SupportedLanguages;
 };
 
 export const useCoursePricingForm = ({
   courseId,
   priceInCents,
   currency,
+  language,
 }: UseCoursePricingFormProps) => {
   const { t } = useTranslation();
   const { mutateAsync: updateCourse } = useUpdateCourse();
@@ -34,7 +37,7 @@ export const useCoursePricingForm = ({
   const onSubmit = async (data: CoursePricingFormValues) => {
     const { isFree: _, ...rest } = data;
     updateCourse({
-      data: { ...rest },
+      data: { ...rest, language },
       courseId,
     }).then(() => {
       queryClient.invalidateQueries(courseQueryOptions(courseId));

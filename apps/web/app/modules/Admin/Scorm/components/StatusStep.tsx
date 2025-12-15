@@ -1,4 +1,5 @@
 import { useNavigate } from "@remix-run/react";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -44,7 +45,8 @@ export function StatusStep({ handleBack, handleNext: _ }: StepComponentProps) {
           title: data.details.title,
           thumbnailS3Key: thumbnailResult?.fileKey,
           isScorm: true,
-          priceInCents: data.pricing.price || 0 * 100,
+          priceInCents: data.pricing.price || 0,
+          language: SUPPORTED_LANGUAGES.EN,
         },
       });
 

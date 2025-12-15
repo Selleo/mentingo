@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 import { LessonTypes } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
@@ -16,12 +17,14 @@ import Breadcrumb from "../components/Breadcrumb";
 import { useTextLessonForm } from "./hooks/useTextLessonForm";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
+import type { SupportedLanguages } from "@repo/shared";
 
 type TextLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
+  language: SupportedLanguages;
 };
 
 const TextLessonForm = ({
@@ -29,11 +32,13 @@ const TextLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setSelectedLesson,
+  language,
 }: TextLessonProps) => {
   const { form, onSubmit, onDelete } = useTextLessonForm({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
+    language,
   });
   const { t } = useTranslation();
 
@@ -47,8 +52,12 @@ const TextLessonForm = ({
     setIsModalOpen(true);
   };
 
+  const missingTranslations =
+    lessonToEdit && !lessonToEdit.title.trim() && !lessonToEdit.description.trim();
+
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
+      {missingTranslations && <MissingTranslationsAlert />}
       <div className="flex flex-col gap-y-1">
         {!lessonToEdit && (
           <Breadcrumb

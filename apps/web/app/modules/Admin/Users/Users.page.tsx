@@ -3,12 +3,13 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  type RowSelectionState,
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { camelCase } from "lodash-es";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
@@ -31,6 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { USER_ROLE } from "~/config/userRoles";
 import { cn } from "~/lib/utils";
 import { type DropdownItems, EditDropdown } from "~/modules/Admin/Users/components/EditDropdown";
@@ -47,9 +49,10 @@ import { USER_ROLES } from "~/utils/userRoles";
 
 import { ImportUsersModal } from "./components/ImportUsersModal/ImportUsersModal";
 
-import type { GetUsersResponse } from "~/api/generated-api";
+import type { BulkAssignUsersToGroupBody, GetUsersResponse } from "~/api/generated-api";
 import type { UsersParams } from "~/api/queries/useUsers";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
+import type { Option } from "~/components/ui/multiselect";
 import type { UserRole } from "~/config/userRoles";
 
 type TUser = GetUsersResponse["data"][number];
@@ -67,13 +70,14 @@ const Users = () => {
   const navigate = useNavigate();
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   const [searchParams, setSearchParams] = React.useState<{
     keyword?: string;
     role?: UserRole;
     archived?: boolean;
     status?: string;
-    groupId?: string;
+    groups?: Option[];
   }>({ archived: false });
 
   const usersQueryParams = useMemo(() => {
@@ -85,7 +89,6 @@ const Users = () => {
 
   const { data: userData } = useAllUsersSuspense(usersQueryParams);
   const { data: groupData } = useGroupsQuerySuspense();
-  const groups = groupData.map(({ id, name }) => ({ groupId: id, groupName: name }));
 
   const [selectedValue, setSelectedValue] = React.useState<string>("");
 
@@ -148,8 +151,8 @@ const Users = () => {
       type: "status",
     },
     {
-      name: "groupId",
-      type: "select",
+      name: "groups",
+      type: "multiselect",
       placeholder: t("adminUsersView.filters.placeholder.groups"),
       options:
         groupData.map((item) => ({
@@ -223,11 +226,43 @@ const Users = () => {
       cell: ({ row }) => t(`common.roles.${camelCase(row.original.role)}`),
     },
     {
-      accessorKey: "groupName",
-      header: ({ column }) => (
-        <SortButton column={column}>{t("adminUsersView.field.group")}</SortButton>
-      ),
-      cell: ({ row }) => row.original.groupName,
+      accessorKey: "groups",
+      header: t("adminUsersView.field.group"),
+      cell: ({ row }) => {
+        const groups = row.original.groups;
+        const visibleGroups = groups.slice(0, 1);
+        const remainingCount = groups.length - visibleGroups.length;
+
+        return (
+          <div className="flex gap-1">
+            {visibleGroups.map((group) => (
+              <Badge key={group.id} variant="secondary">
+                {group.name}
+              </Badge>
+            ))}
+            {remainingCount > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Badge variant="default" className="cursor-help">
+                      +{remainingCount}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="p-2 rounded-lg">
+                    <div className="flex flex-col gap-1 !px-0">
+                      {groups.slice(1).map((group) => (
+                        <Badge key={group.id} variant="secondary">
+                          {group.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "archived",
@@ -266,49 +301,66 @@ const Users = () => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: handleSortingChange,
+    onRowSelectionChange: setRowSelection,
     manualSorting: true,
     state: {
       sorting,
+      rowSelection,
     },
   });
 
-  const selectedUsers = table.getSelectedRowModel().rows.map((row) => row.original.id);
+  const [selectedUsers, setSelectedUsers] = useState<BulkAssignUsersToGroupBody>([]);
 
-  const handleDeleteUsers = () => {
-    deleteUsers({ data: { userIds: selectedUsers } }).then(() => {
+  useEffect(() => {
+    setSelectedUsers(
+      table.getSelectedRowModel().rows.map((row) => ({
+        userId: row.original.id,
+        groups: row.original.groups.map((group) => group.id),
+      })),
+    );
+  }, [table, rowSelection]);
+
+  const handleDeleteUsers = useCallback(() => {
+    deleteUsers({ data: { userIds: selectedUsers.map((user) => user.userId) } }).then(() => {
       table.resetRowSelection();
       queryClient.invalidateQueries({ queryKey: ["users"] });
-    });
-  };
-
-  const handleArchiveUsers = () => {
-    archiveUsers({ data: { userIds: selectedUsers }, searchParams }).then(() => {
-      table.resetRowSelection();
       setShowEditModal(null);
     });
-  };
+  }, [deleteUsers, selectedUsers, table]);
 
-  const handleUsersGroups = () => {
-    updateUsersGroups({
-      data: {
-        userIds: selectedUsers,
-        groupId: selectedValue,
-      },
+  const handleArchiveUsers = useCallback(() => {
+    archiveUsers({
+      data: { userIds: selectedUsers.map((user) => user.userId) },
+      searchParams,
     }).then(() => {
       table.resetRowSelection();
       setShowEditModal(null);
     });
-  };
+  }, [archiveUsers, searchParams, selectedUsers, table]);
+
+  const handleUsersGroups = useCallback(
+    (payload?: BulkAssignUsersToGroupBody) => {
+      const data = payload ?? selectedUsers;
+
+      updateUsersGroups({
+        data,
+      }).then(() => {
+        table.resetRowSelection();
+        setShowEditModal(null);
+      });
+    },
+    [selectedUsers, table, updateUsersGroups],
+  );
 
   const handleRowClick = (userId: string) => {
     navigate(userId);
   };
 
-  const editMutation = {
+  const editMutation: Record<string, (payload?: BulkAssignUsersToGroupBody) => void> = {
     role: () => {},
     group: handleUsersGroups,
-    delete: handleDeleteUsers,
-    archive: handleArchiveUsers,
+    delete: () => handleDeleteUsers(),
+    archive: () => handleArchiveUsers(),
   };
 
   const { totalItems, perPage, page } = userData?.pagination || {};
@@ -332,9 +384,9 @@ const Users = () => {
             type={showEditModal}
             onConfirm={editMutation[showEditModal]}
             onCancel={() => setShowEditModal(null)}
-            groupData={groups}
+            groupData={groupData}
             roleData={Object.values(USER_ROLES)}
-            selectedUsers={selectedUsers.length}
+            selectedUsers={selectedUsers}
             selectedValue={selectedValue}
             setSelectedValue={setSelectedValue}
           />

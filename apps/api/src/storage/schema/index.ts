@@ -1,3 +1,5 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -15,11 +17,15 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
+import { ACTIVITY_LOG_RESOURCE_TYPES, ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
+import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, id, timestamps } from "./utils";
 
+import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
+import type { CourseSettings } from "src/courses/types/settings";
 
 export const users = pgTable("users", {
   ...id,
@@ -130,8 +136,8 @@ export const coursesStatusEnum = pgEnum("status", ["draft", "published", "privat
 export const courses = pgTable("courses", {
   ...id,
   ...timestamps,
-  title: varchar("title", { length: 250 }).notNull(),
-  description: varchar("description", { length: 20_000 }),
+  title: jsonb("title").default({}).notNull(),
+  description: jsonb("description").default({}).notNull(),
   thumbnailS3Key: varchar("thumbnail_s3_key", { length: 200 }),
   status: coursesStatusEnum("status").notNull().default("draft"),
   hasCertificate: boolean("has_certificate").notNull().default(false),
@@ -147,12 +153,21 @@ export const courses = pgTable("courses", {
     .notNull(),
   stripeProductId: text("stripe_product_id"),
   stripePriceId: text("stripe_price_id"),
+  settings: jsonb("settings")
+    .$type<CourseSettings>()
+    .notNull()
+    .default({ lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED }),
+  baseLanguage: text("base_language").notNull().default("en"),
+  availableLocales: text("available_locales")
+    .array()
+    .notNull()
+    .default(sql`ARRAY['en']::text[]`),
 });
 
 export const chapters = pgTable("chapters", {
   ...id,
   ...timestamps,
-  title: varchar("title", { length: 250 }).notNull(),
+  title: jsonb("title").default({}).notNull(),
   courseId: uuid("course_id")
     .references(() => courses.id, { onDelete: "cascade" })
     .notNull(),
@@ -171,8 +186,8 @@ export const lessons = pgTable("lessons", {
     .references(() => chapters.id, { onDelete: "cascade" })
     .notNull(),
   type: varchar("type", { length: 20 }).notNull(),
-  title: varchar("title", { length: 250 }).notNull(),
-  description: text("description"),
+  title: jsonb("title").default({}).notNull(),
+  description: jsonb("description"),
   thresholdScore: integer("threshold_score"),
   attemptsLimit: integer("attempts_limit"),
   quizCooldownInHours: integer("quiz_cooldown_in_hours"),
@@ -190,6 +205,8 @@ export const aiMentorLessons = pgTable("ai_mentor_lessons", {
     .notNull(),
   aiMentorInstructions: text("ai_mentor_instructions").notNull(),
   completionConditions: text("completion_conditions").notNull(),
+  name: text("name").notNull().default("AI Mentor"),
+  avatarReference: varchar("avatar_reference", { length: 200 }),
   type: text("type").notNull().default("mentor"),
 });
 
@@ -228,11 +245,11 @@ export const questions = pgTable("questions", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   type: text("type").notNull(),
-  title: varchar("title", { length: 250 }).notNull(),
+  title: jsonb("title").default({}).notNull(),
   displayOrder: integer("display_order"),
   photoS3Key: varchar("photo_s3_key", { length: 200 }),
-  description: text("description"),
-  solutionExplanation: text("solution_explanation"),
+  description: jsonb("description"),
+  solutionExplanation: jsonb("solution_explanation"),
 });
 
 export const questionAnswerOptions = pgTable("question_answer_options", {
@@ -241,10 +258,10 @@ export const questionAnswerOptions = pgTable("question_answer_options", {
   questionId: uuid("question_id")
     .references(() => questions.id, { onDelete: "cascade" })
     .notNull(),
-  optionText: text("option_text").notNull(),
+  optionText: jsonb("option_text").default({}).notNull(),
   isCorrect: boolean("is_correct").notNull(),
   displayOrder: integer("display_order"),
-  matchedWord: varchar("matched_word", { length: 100 }),
+  matchedWord: jsonb("matched_word"),
   scaleAnswer: integer("scale_answer"),
 });
 
@@ -285,6 +302,13 @@ export const studentCourses = pgTable(
       withTimezone: true,
       precision: 3,
     }),
+    courseCompletionMetadata: jsonb("course_completion_metadata"),
+    enrolledAt: timestamp("enrolled_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).defaultNow(),
+    status: varchar("status").notNull().default("enrolled"), // enrolled/not_enrolled
     paymentId: varchar("payment_id", { length: 50 }),
     enrolledByGroupId: uuid("enrolled_by_group_id").references(() => groups.id),
   },
@@ -317,6 +341,7 @@ export const studentLessonProgress = pgTable(
       withTimezone: true,
       precision: 3,
     }),
+    languageAnswered: text("language_answered").default(SUPPORTED_LANGUAGES.EN),
   },
   (table) => ({
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),
@@ -439,8 +464,7 @@ export const groupUsers = pgTable(
     ...timestamps,
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
-      .notNull()
-      .unique(),
+      .notNull(),
     groupId: uuid("group_id")
       .references(() => groups.id, { onDelete: "cascade" })
       .notNull(),
@@ -638,5 +662,38 @@ export const userOnboarding = pgTable(
   },
   (table) => ({
     unq: unique().on(table.userId),
+  }),
+);
+
+export const activityLogsActionTypeEnum = pgEnum(
+  "activity_log_action_type",
+  Object.values(ACTIVITY_LOG_ACTION_TYPES) as [string, ...string[]],
+);
+
+export const activityLogsResourceTypeEnum = pgEnum(
+  "activity_log_resource_type",
+  Object.values(ACTIVITY_LOG_RESOURCE_TYPES) as [string, ...string[]],
+);
+
+export const activityLogs = pgTable(
+  "activity_logs",
+  {
+    ...id,
+    ...timestamps,
+    actorId: uuid("actor_id")
+      .references(() => users.id, { onDelete: "restrict" })
+      .notNull(),
+    actorEmail: text("actor_email").notNull(),
+    actorRole: text("actor_role").notNull(),
+    actionType: activityLogsActionTypeEnum("action_type").notNull(),
+    resourceType: activityLogsResourceTypeEnum("resource_type"),
+    resourceId: uuid("resource_id"),
+    metadata: jsonb("metadata").$type<ActivityLogMetadata>().notNull(),
+  },
+  (table) => ({
+    actorIdx: index("activity_logs_actor_idx").on(table.actorId, table.createdAt),
+    actionIdx: index("activity_logs_action_idx").on(table.actionType, table.createdAt),
+    timeframeIdx: index("activity_logs_timeframe_idx").on(table.createdAt),
+    resourceIdx: index("activity_logs_resource_idx").on(table.resourceType, table.resourceId),
   }),
 );

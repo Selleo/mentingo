@@ -33,6 +33,9 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { groupsFilterSchema } from "src/group/group.schema";
+import { GroupsFilterSchema } from "src/group/group.types";
 import {
   type CreateUserBody,
   createUserSchema,
@@ -90,7 +93,7 @@ export class UserController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: sortUserFieldsOptions },
-      { type: "query", name: "groupId", schema: Type.String() },
+      { type: "query", name: "groups", schema: groupsFilterSchema },
     ],
     response: paginatedResponse(allUsersSchema),
   })
@@ -101,13 +104,13 @@ export class UserController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortUserFieldsOptions,
-    @Query("groupId") groupId: string,
+    @Query("groups") groups: GroupsFilterSchema,
   ): Promise<PaginatedResponse<AllUsersResponse>> {
     const filters: UsersFilterSchema = {
       keyword,
       role,
       archived: archived ? archived === "true" : undefined,
-      groupId,
+      groups,
     };
 
     const query = { filters, page, perPage, sort };
@@ -156,14 +159,14 @@ export class UserController {
   async updateUser(
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
-      if (currentUserId !== id) {
+      if (currentUser.userId !== id) {
         throw new ForbiddenException("You can only update your own account");
       }
 
-      await this.usersService.updateUser(id, data);
+      await this.usersService.updateUser(id, data, currentUser);
       const updatedUser = await this.usersService.getUserById(id);
 
       return new BaseResponse(updatedUser);
@@ -237,9 +240,10 @@ export class UserController {
   async adminUpdateUser(
     @Query("id") id: UUIDType,
     @Body() data: UpdateUserBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<Static<typeof baseUserResponseSchema>>> {
     {
-      await this.usersService.updateUser(id, data);
+      await this.usersService.updateUser(id, data, currentUser);
       const updatedUser = await this.usersService.getUserById(id);
 
       return new BaseResponse(updatedUser);
@@ -267,21 +271,6 @@ export class UserController {
     return null;
   }
 
-  @Delete("user")
-  @Roles(USER_ROLES.ADMIN)
-  @Validate({
-    response: nullResponse(),
-    request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
-  })
-  async deleteUser(
-    @Query("id") id: UUIDType,
-    @CurrentUser("userId") currentUserId: UUIDType,
-  ): Promise<null> {
-    await this.usersService.deleteUser(currentUserId, id);
-
-    return null;
-  }
-
   @Delete()
   @Roles(USER_ROLES.ADMIN)
   @Validate({
@@ -290,9 +279,9 @@ export class UserController {
   })
   async deleteBulkUsers(
     @Body() data: DeleteUsersSchema,
-    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<null> {
-    await this.usersService.deleteBulkUsers(currentUserId, data.userIds);
+    await this.usersService.deleteBulkUsers(currentUser, data.userIds);
 
     return null;
   }
@@ -302,8 +291,11 @@ export class UserController {
   @Validate({
     request: [{ type: "body", schema: bulkAssignUsersGroupsSchema }],
   })
-  async bulkAssignUsersToGroup(@Body() data: BulkAssignUserGroups) {
-    await this.usersService.bulkAssignUsersToGroup(data);
+  async bulkAssignUsersToGroup(
+    @Body() data: BulkAssignUserGroups,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    await this.usersService.bulkAssignUsersToGroup(data, currentUser);
 
     return new BaseResponse({
       message: "User groups upserted successfully",
@@ -332,9 +324,9 @@ export class UserController {
   })
   async createUser(
     @Body() data: CreateUserBody,
-    @CurrentUser("userId") creatorId: UUIDType,
+    @CurrentUser() creator: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.usersService.createUser(data, undefined, creatorId);
+    const { id } = await this.usersService.createUser(data, undefined, creator);
 
     return new BaseResponse({
       id,
@@ -362,9 +354,9 @@ export class UserController {
   })
   async importUsers(
     @UploadedFile() usersFile: Express.Multer.File,
-    @CurrentUser("userId") creatorId: UUIDType,
+    @CurrentUser() creator: CurrentUserType,
   ) {
-    const importStats = await this.usersService.importUsers(usersFile, creatorId);
+    const importStats = await this.usersService.importUsers(usersFile, creator);
 
     return new BaseResponse(importStats);
   }

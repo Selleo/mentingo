@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import MultipleSelector from "~/components/ui/multiselect";
 import {
   Select,
   SelectContent,
@@ -15,14 +16,20 @@ import {
 import { cn } from "~/lib/utils";
 
 import type React from "react";
+import type { Option } from "~/components/ui/multiselect";
 
-export type FilterType = "text" | "select" | "state" | "status";
+export type FilterType = "text" | "select" | "state" | "status" | "multiselect";
 
 export type TextFilterValue = string | undefined;
 export type SelectFilterValue = string | undefined;
 export type StatusFilterValue = boolean | undefined;
+export type MultiSelectFilterValue = Option[] | undefined;
 
-export type FilterValue = TextFilterValue | SelectFilterValue | StatusFilterValue;
+export type FilterValue =
+  | TextFilterValue
+  | SelectFilterValue
+  | StatusFilterValue
+  | MultiSelectFilterValue;
 
 export type FilterOption = {
   value: string;
@@ -41,7 +48,7 @@ export type TextFilterConfig = BaseFilterConfig & {
 };
 
 export type SelectFilterConfig = BaseFilterConfig & {
-  type: "select" | "state";
+  type: "select" | "state" | "multiselect";
   options: FilterOption[] | undefined;
 };
 
@@ -124,6 +131,38 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
                 defaultValue={values?.[filter?.name] as string}
               />
             </div>
+          );
+        }
+
+        if (filter?.type === "multiselect" && filter?.name === "groups") {
+          return (
+            <MultipleSelector
+              key={filter?.name}
+              value={values?.[filter?.name] as Option[]}
+              options={filter?.options}
+              onChange={(option) => {
+                if (option.length == 0) {
+                  return handleChange(filter?.name, undefined);
+                }
+
+                handleChange(filter?.name, option);
+              }}
+              placeholder={filter?.placeholder}
+              hidePlaceholderWhenSelected
+              hideClearAllButton
+              maxSelectedVisible={2}
+              className="w-fit h-[42px] bg-background p-1.5 max-w-[320px] rounded-lg"
+              badgeClassName="bg-accent text-accent-foreground text-sm hover:bg-accent max-w-[120px]"
+              commandProps={{
+                label: t("adminGroupsView.groupSelect.label"),
+                className: "w-fit",
+              }}
+              inputProps={{
+                className: "flex-1 min-w-0 py-0 body-base",
+              }}
+              searchFilter
+              textInputDisabled
+            />
           );
         }
 

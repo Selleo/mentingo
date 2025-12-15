@@ -19,6 +19,7 @@ const QuestionWrapper = ({
   item,
   isOpen,
   handleToggle,
+  isStructureLocked = false,
 }: {
   questionType: QuestionType;
   questionIndex: number;
@@ -28,6 +29,7 @@ const QuestionWrapper = ({
   item: Question;
   isOpen: boolean;
   handleToggle: () => void;
+  isStructureLocked?: boolean;
 }) => {
   const isOpenQuestion =
     questionType === QuestionType.BRIEF_RESPONSE || questionType === QuestionType.DETAILED_RESPONSE;
@@ -57,6 +59,7 @@ const QuestionWrapper = ({
             dragTrigger={dragTrigger}
             item={item}
             isOpenQuestion={isOpenQuestion}
+            isStructureLocked={isStructureLocked}
           />
           {isOpen && <AccordionContent>{children}</AccordionContent>}
         </div>

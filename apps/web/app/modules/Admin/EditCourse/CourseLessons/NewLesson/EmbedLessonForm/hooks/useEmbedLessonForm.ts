@@ -14,18 +14,21 @@ import { ContentTypes } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { embedLessonFormSchema } from "../schemas/embedLessonForm.schema";
 
 import type { EmbedLessonFormValues } from "../schemas/embedLessonForm.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type EmbedLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit?: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
+  language: SupportedLanguages;
 };
 
 export const useEmbedLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setContentTypeToDisplay,
+  language,
 }: EmbedLessonFormProps) => {
   const { t } = useTranslation();
 
@@ -60,6 +63,7 @@ export const useEmbedLessonForm = ({
           ...values,
           lessonId: lessonToEdit.id,
           resources: values.resources || [],
+          language,
         },
         lessonId: lessonToEdit.id,
         courseId,

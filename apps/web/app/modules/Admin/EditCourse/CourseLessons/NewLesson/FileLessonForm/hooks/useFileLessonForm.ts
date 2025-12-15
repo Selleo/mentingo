@@ -14,18 +14,21 @@ import { fileLessonFormSchema } from "../validators/fileLessonFormSchema";
 
 import type { LessonTypes } from "../../../CourseLessons.types";
 import type { FileLessonFormValues } from "../validators/fileLessonFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type FileLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit?: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
+  language: SupportedLanguages;
 };
 
 export const useFileLessonForm = ({
   chapterToEdit,
   lessonToEdit,
   setContentTypeToDisplay,
+  language,
 }: FileLessonFormProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: createFile } = useBetaCreateFileItem();
@@ -59,8 +62,10 @@ export const useFileLessonForm = ({
 
     try {
       if (lessonToEdit) {
-        await updateFileItem({ data: { ...values }, fileLessonId: lessonToEdit.id });
-        await queryClient.invalidateQueries({ queryKey: ["lesson", lessonToEdit.id] });
+        await updateFileItem({
+          data: { ...values, language },
+          fileLessonId: lessonToEdit.id,
+        });
       } else {
         await createFile({
           data: { ...values, chapterId: chapterToEdit.id },

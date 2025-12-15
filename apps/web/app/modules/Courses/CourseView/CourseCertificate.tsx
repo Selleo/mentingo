@@ -10,12 +10,15 @@ import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { useUserRole } from "~/hooks/useUserRole";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
 const CourseCertificate = () => {
   const { t } = useTranslation();
   const { id = "" } = useParams();
-  const { data: course } = useCourse(id);
+  const { language } = useLanguageStore();
+
+  const { data: course } = useCourse(id, language);
   const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
@@ -25,6 +28,7 @@ const CourseCertificate = () => {
   const { data: certificate } = useCertificate({
     userId: currentUser?.id,
     courseId: id,
+    language,
   });
 
   const hasFinishedCourse = useMemo(() => {
@@ -53,7 +57,7 @@ const CourseCertificate = () => {
 
   return (
     <div>
-      {hasFinishedCourse && (
+      {certificate && hasFinishedCourse && (
         <Card className="p-4 md:px-8 flex items-center gap-4 bg-success-50">
           <div className="bg-success-50 aspect-square size-10 rounded-full grid place-items-center">
             <Icon name="InputRoundedMarkerSuccess" className="size-4" />
@@ -68,7 +72,7 @@ const CourseCertificate = () => {
         </Card>
       )}
 
-      {isCertificatePreviewOpen && isStudent && (
+      {certificate && isCertificatePreviewOpen && isStudent && (
         <button
           className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
           onClick={handleCloseCertificatePreview}

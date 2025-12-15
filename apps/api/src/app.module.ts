@@ -8,6 +8,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 
 import { EnvModule } from "src/env/env.module";
 
+import { ActivityLogsModule } from "./activity-logs/activity-logs.module";
 import { AiModule } from "./ai/ai.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { AuthModule } from "./auth/auth.module";
@@ -36,6 +37,7 @@ import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
 import { LessonModule } from "./lesson/lesson.module";
+import { LocalizationModule } from "./localization/localization.module";
 import { QuestionsModule } from "./questions/question.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
@@ -120,6 +122,8 @@ import { UserModule } from "./user/user.module";
     AnnouncementsModule,
     IngestionModule,
     EnvModule,
+    LocalizationModule,
+    ActivityLogsModule,
   ],
   controllers: [],
   providers: [

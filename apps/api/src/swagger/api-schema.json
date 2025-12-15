@@ -791,7 +791,26 @@
     "/api/statistics/user-stats": {
       "get": {
         "operationId": "StatisticsController_getUserStatistics",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -808,7 +827,26 @@
     "/api/statistics/stats": {
       "get": {
         "operationId": "StatisticsController_getStats",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -930,11 +968,14 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "groups",
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1224,33 +1265,6 @@
         }
       }
     },
-    "/api/user/user": {
-      "delete": {
-        "operationId": "UserController_deleteUser",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteUserResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/user/bulk/groups": {
       "patch": {
         "operationId": "UserController_bulkAssignUsersToGroup",
@@ -1368,6 +1382,318 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MarkOnboardingCompleteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/all": {
+      "get": {
+        "operationId": "GroupController_getAllGroups",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/{groupId}": {
+      "get": {
+        "operationId": "GroupController_getGroupById",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupByIdResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "GroupController_updateGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGroupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GroupController_deleteGroup",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/user/{userId}": {
+      "get": {
+        "operationId": "GroupController_getUserGroups",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group": {
+      "post": {
+        "operationId": "GroupController_createGroup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGroupResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "GroupController_bulkDeleteGroups",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDeleteGroupsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkDeleteGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/set": {
+      "post": {
+        "operationId": "GroupController_setUserGroups",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/groupIds"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetUserGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/by-course/{courseId}": {
+      "get": {
+        "operationId": "GroupController_getGroupsByCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupsByCourseResponse"
                 }
               }
             }
@@ -1524,6 +1850,24 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -1672,6 +2016,24 @@
                 }
               ]
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -1726,12 +2088,14 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "groups",
             "required": false,
             "in": "query",
             "schema": {
-              "format": "uuid",
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1890,6 +2254,24 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -1971,6 +2353,24 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -1997,6 +2397,24 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -2049,6 +2467,24 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -2132,6 +2568,70 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UpdateHasCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/update-lesson-sequence/{courseId}": {
+      "patch": {
+        "operationId": "CourseController_updateLessonSequenceEnabled",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLessonSequenceEnabledBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateLessonSequenceEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/lesson-sequence-enabled/{courseId}": {
+      "get": {
+        "operationId": "CourseController_getLessonSequenceEnabled",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLessonSequenceEnabledResponse"
                 }
               }
             }
@@ -2248,6 +2748,43 @@
         }
       }
     },
+    "/api/course/{courseId}/unenroll-groups-from-course": {
+      "delete": {
+        "operationId": "CourseController_unenrollGroupsFromCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnenrollGroupsFromCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnenrollGroupsFromCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/deleteCourse/{id}": {
       "delete": {
         "operationId": "CourseController_deleteCourse",
@@ -2304,15 +2841,26 @@
     },
     "/api/course/unenroll-course": {
       "delete": {
-        "operationId": "CourseController_unenrollCourse",
+        "operationId": "CourseController_unenrollCourses",
         "parameters": [
           {
-            "name": "id",
+            "name": "courseId",
             "required": false,
             "in": "query",
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "userIds",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2321,7 +2869,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnenrollCourseResponse"
+                  "$ref": "#/components/schemas/UnenrollCoursesResponse"
                 }
               }
             }
@@ -2367,6 +2915,24 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -2431,10 +2997,6 @@
                   "type": "string"
                 },
                 {
-                  "const": "groupName",
-                  "type": "string"
-                },
-                {
                   "const": "completedLessonsCount",
                   "type": "string"
                 },
@@ -2447,15 +3009,29 @@
                   "type": "string"
                 },
                 {
-                  "const": "-groupName",
-                  "type": "string"
-                },
-                {
                   "const": "-completedLessonsCount",
                   "type": "string"
                 },
                 {
                   "const": "-lastActivity",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
                   "type": "string"
                 }
               ]
@@ -2560,6 +3136,24 @@
                 }
               ]
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -2652,6 +3246,24 @@
                 }
               ]
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -2667,6 +3279,84 @@
         }
       }
     },
+    "/api/course/beta-create-language/{courseId}": {
+      "post": {
+        "operationId": "CourseController_createLanguage",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/course/language/{courseId}": {
+      "delete": {
+        "operationId": "CourseController_deleteLanguage",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/chapter": {
       "get": {
         "operationId": "ChapterController_getChapterWithLesson",
@@ -2678,6 +3368,24 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -2880,6 +3588,24 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -2904,15 +3630,26 @@
             "required": true,
             "in": "path",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
           {
-            "name": "userLanguage",
-            "required": true,
+            "name": "language",
+            "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -3337,6 +4074,49 @@
         }
       }
     },
+    "/api/lesson/ai-mentor/avatar": {
+      "post": {
+        "operationId": "LessonController_uploadAiMentorAvatar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lessonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "nullable": true
+                  }
+                },
+                "required": [
+                  "lessonId",
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/update-lesson-display-order": {
       "patch": {
         "operationId": "LessonController_updateLessonDisplayOrder",
@@ -3376,6 +4156,24 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -3402,6 +4200,24 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -3463,6 +4279,24 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -3537,14 +4371,6 @@
             "in": "query",
             "schema": {
               "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
               "type": "string"
             }
           }
@@ -4321,353 +5147,6 @@
         }
       }
     },
-    "/api/group/all": {
-      "get": {
-        "operationId": "GroupController_getAllGroups",
-        "parameters": [
-          {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAllGroupsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/{groupId}": {
-      "get": {
-        "operationId": "GroupController_getGroupById",
-        "parameters": [
-          {
-            "name": "groupId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetGroupByIdResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "GroupController_updateGroup",
-        "parameters": [
-          {
-            "name": "groupId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateGroupBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "GroupController_deleteGroup",
-        "parameters": [
-          {
-            "name": "groupId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/user/{userId}": {
-      "get": {
-        "operationId": "GroupController_getUserGroups",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetUserGroupsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group": {
-      "post": {
-        "operationId": "GroupController_createGroup",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateGroupBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "GroupController_bulkDeleteGroups",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkDeleteGroupsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BulkDeleteGroupsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/assign": {
-      "post": {
-        "operationId": "GroupController_assignUserToGroup",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AssignUserToGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/unassign": {
-      "delete": {
-        "operationId": "GroupController_unassignUserFromGroup",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnassignUserFromGroupResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/group/by-course/{courseId}": {
-      "get": {
-        "operationId": "GroupController_getGroupsByCourse",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetGroupsByCourseResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/scorm/upload": {
       "post": {
         "operationId": "ScormController_uploadScormPackage",
@@ -5109,11 +5588,11 @@
           "language": {
             "anyOf": [
               {
-                "const": "pl",
+                "const": "en",
                 "type": "string"
               },
               {
-                "const": "en",
+                "const": "pl",
                 "type": "string"
               }
             ]
@@ -5520,16 +5999,7 @@
             "type": "string"
           },
           "language": {
-            "anyOf": [
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "en",
-                "type": "string"
-              }
-            ]
+            "type": "string"
           }
         },
         "required": [
@@ -7439,31 +7909,28 @@
                 {
                   "type": "object",
                   "properties": {
-                    "groupId": {
-                      "anyOf": [
-                        {
-                          "format": "uuid",
-                          "type": "string"
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
                         },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "groupName": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                        "required": [
+                          "id",
+                          "name"
+                        ]
+                      }
                     }
                   },
                   "required": [
-                    "groupId",
-                    "groupName"
+                    "groups"
                   ]
                 }
               ]
@@ -7550,26 +8017,24 @@
                   }
                 ]
               },
-              "groupId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "groupName": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                  "required": [
+                    "id",
+                    "name"
+                  ]
+                }
               }
             },
             "required": [
@@ -7583,8 +8048,7 @@
               "archived",
               "deletedAt",
               "profilePictureUrl",
-              "groupId",
-              "groupName"
+              "groups"
             ]
           }
         },
@@ -7715,11 +8179,13 @@
           "lastName": {
             "type": "string"
           },
-          "groupId": {
+          "groups": {
             "anyOf": [
               {
-                "format": "uuid",
-                "type": "string"
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               {
                 "type": "null"
@@ -7871,11 +8337,13 @@
           "lastName": {
             "type": "string"
           },
-          "groupId": {
+          "groups": {
             "anyOf": [
               {
-                "format": "uuid",
-                "type": "string"
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               {
                 "type": "null"
@@ -8027,9 +8495,6 @@
       "ChangePasswordResponse": {
         "type": "null"
       },
-      "DeleteUserResponse": {
-        "type": "null"
-      },
       "DeleteBulkUsersBody": {
         "type": "object",
         "properties": {
@@ -8048,24 +8513,27 @@
         "type": "null"
       },
       "BulkAssignUsersToGroupBody": {
-        "type": "object",
-        "properties": {
-          "userIds": {
-            "type": "array",
-            "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "userId": {
               "format": "uuid",
               "type": "string"
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "format": "uuid",
+                "type": "string"
+              }
             }
           },
-          "groupId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "userIds",
-          "groupId"
-        ]
+          "required": [
+            "userId",
+            "groups"
+          ]
+        }
       },
       "ArchiveBulkUsersBody": {
         "type": "object",
@@ -8328,6 +8796,575 @@
               "settings",
               "providerInformation"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAllGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "characteristic": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "archived": {
+                        "type": "boolean"
+                      },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "createdAt",
+                      "updatedAt",
+                      "email",
+                      "firstName",
+                      "lastName",
+                      "role",
+                      "archived",
+                      "deletedAt",
+                      "profilePictureUrl"
+                    ]
+                  }
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "characteristic"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetGroupByIdResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "characteristic": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "archived": {
+                      "type": "boolean"
+                    },
+                    "deletedAt": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "role",
+                    "archived",
+                    "deletedAt",
+                    "profilePictureUrl"
+                  ]
+                }
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "characteristic"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetUserGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "characteristic": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "archived": {
+                        "type": "boolean"
+                      },
+                      "deletedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "createdAt",
+                      "updatedAt",
+                      "email",
+                      "firstName",
+                      "lastName",
+                      "role",
+                      "archived",
+                      "deletedAt",
+                      "profilePictureUrl"
+                    ]
+                  }
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "characteristic"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreateGroupBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "characteristic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateGroupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateGroupBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "characteristic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateGroupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "characteristic": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteGroupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BulkDeleteGroupsBody": {
+        "type": "array",
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "BulkDeleteGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "groupIds": {
+        "type": "array",
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        }
+      },
+      "SetUserGroupsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetGroupsByCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "characteristic": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "createdAt",
+                "updatedAt"
+              ]
+            }
           }
         },
         "required": [
@@ -8672,30 +9709,31 @@
                     }
                   ]
                 },
-                "groupId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
+                "groups": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
                     },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "groupName": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
                 },
                 "id": {
                   "format": "uuid",
                   "type": "string"
+                },
+                "isEnrolledByGroup": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -8703,9 +9741,9 @@
                 "lastName",
                 "email",
                 "enrolledAt",
-                "groupId",
-                "groupName",
-                "id"
+                "groups",
+                "id",
+                "isEnrolledByGroup"
               ]
             }
           }
@@ -9305,6 +10343,33 @@
                     "type": "null"
                   }
                 ]
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
@@ -9318,7 +10383,9 @@
               "priceInCents",
               "title",
               "stripeProductId",
-              "stripePriceId"
+              "stripePriceId",
+              "availableLocales",
+              "baseLanguage"
             ]
           }
         },
@@ -9423,6 +10490,9 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "avatarReferenceUrl": {
+                            "type": "string"
                           },
                           "fileType": {
                             "anyOf": [
@@ -9579,6 +10649,19 @@
                                             "type": "null"
                                           }
                                         ]
+                                      },
+                                      "language": {
+                                        "default": "en",
+                                        "anyOf": [
+                                          {
+                                            "const": "en",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "pl",
+                                            "type": "string"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
@@ -9587,6 +10670,19 @@
                                       "isCorrect"
                                     ]
                                   }
+                                },
+                                "language": {
+                                  "default": "en",
+                                  "anyOf": [
+                                    {
+                                      "const": "en",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "pl",
+                                      "type": "string"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
@@ -9629,6 +10725,16 @@
                                         "type": "string"
                                       }
                                     ]
+                                  },
+                                  "avatarReference": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -9636,7 +10742,8 @@
                                   "lessonId",
                                   "aiMentorInstructions",
                                   "completionConditions",
-                                  "type"
+                                  "type",
+                                  "avatarReference"
                                 ]
                               },
                               {
@@ -9774,6 +10881,33 @@
               },
               "title": {
                 "type": "string"
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
@@ -9785,7 +10919,9 @@
               "id",
               "status",
               "priceInCents",
-              "title"
+              "title",
+              "availableLocales",
+              "baseLanguage"
             ]
           }
         },
@@ -9839,12 +10975,26 @@
               },
               "hasCertificate": {
                 "type": "boolean"
+              },
+              "language": {
+                "default": "en",
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
               "title",
               "description",
-              "categoryId"
+              "categoryId",
+              "language"
             ]
           },
           {
@@ -9932,6 +11082,19 @@
           },
           "archived": {
             "type": "boolean"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
           }
         }
       },
@@ -9977,6 +11140,55 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateLessonSequenceEnabledBody": {
+        "type": "object",
+        "properties": {
+          "lessonSequenceEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "lessonSequenceEnabled"
+        ]
+      },
+      "UpdateLessonSequenceEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLessonSequenceEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "lessonSequenceEnabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lessonSequenceEnabled"
             ]
           }
         },
@@ -10071,6 +11283,40 @@
           "data"
         ]
       },
+      "UnenrollGroupsFromCourseBody": {
+        "type": "object",
+        "properties": {
+          "groupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "groupIds"
+        ]
+      },
+      "UnenrollGroupsFromCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DeleteCourseResponse": {
         "type": "null"
       },
@@ -10092,7 +11338,7 @@
       "DeleteManyCoursesResponse": {
         "type": "null"
       },
-      "UnenrollCourseResponse": {
+      "UnenrollCoursesResponse": {
         "type": "null"
       },
       "GetCourseStatisticsResponse": {
@@ -10230,10 +11476,25 @@
                     }
                   ]
                 },
-                "groupName": {
+                "groups": {
                   "anyOf": [
                     {
-                      "type": "string"
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name"
+                        ]
+                      }
                     },
                     {
                       "type": "null"
@@ -10258,7 +11519,7 @@
                 "studentId",
                 "studentName",
                 "studentAvatarUrl",
-                "groupName",
+                "groups",
                 "completedLessonsCount",
                 "lastActivity"
               ]
@@ -10743,6 +12004,9 @@
                         }
                       ]
                     },
+                    "avatarReferenceUrl": {
+                      "type": "string"
+                    },
                     "fileType": {
                       "anyOf": [
                         {
@@ -10898,6 +12162,19 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "language": {
+                                  "default": "en",
+                                  "anyOf": [
+                                    {
+                                      "const": "en",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "pl",
+                                      "type": "string"
+                                    }
+                                  ]
                                 }
                               },
                               "required": [
@@ -10906,6 +12183,19 @@
                                 "isCorrect"
                               ]
                             }
+                          },
+                          "language": {
+                            "default": "en",
+                            "anyOf": [
+                              {
+                                "const": "en",
+                                "type": "string"
+                              },
+                              {
+                                "const": "pl",
+                                "type": "string"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -10948,6 +12238,16 @@
                                   "type": "string"
                                 }
                               ]
+                            },
+                            "avatarReference": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -10955,7 +12255,8 @@
                             "lessonId",
                             "aiMentorInstructions",
                             "completionConditions",
-                            "type"
+                            "type",
+                            "avatarReference"
                           ]
                         },
                         {
@@ -11057,214 +12358,315 @@
         ]
       },
       "UpdateChapterBody": {
-        "type": "object",
         "allOf": [
           {
             "type": "object",
-            "properties": {
-              "title": {
-                "type": "string"
-              },
-              "lessons": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "anyOf": [
-                        {
-                          "const": "text",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "lessons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
                           "type": "string"
                         },
-                        {
-                          "const": "presentation",
+                        "title": {
                           "type": "string"
                         },
-                        {
-                          "const": "video",
+                        "type": {
+                          "anyOf": [
+                            {
+                              "const": "text",
+                              "type": "string"
+                            },
+                            {
+                              "const": "presentation",
+                              "type": "string"
+                            },
+                            {
+                              "const": "video",
+                              "type": "string"
+                            },
+                            {
+                              "const": "quiz",
+                              "type": "string"
+                            },
+                            {
+                              "const": "ai_mentor",
+                              "type": "string"
+                            },
+                            {
+                              "const": "embed",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "description": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "displayOrder": {
+                          "type": "number"
+                        },
+                        "fileS3Key": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "avatarReferenceUrl": {
                           "type": "string"
                         },
-                        {
-                          "const": "quiz",
-                          "type": "string"
+                        "fileType": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
-                        {
-                          "const": "ai_mentor",
-                          "type": "string"
-                        },
-                        {
-                          "const": "embed",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "description": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "displayOrder": {
-                      "type": "number"
-                    },
-                    "fileS3Key": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "fileType": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "questions": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "type": {
-                            "anyOf": [
-                              {
-                                "const": "brief_response",
+                        "questions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
                                 "type": "string"
                               },
-                              {
-                                "const": "detailed_response",
+                              "type": {
+                                "anyOf": [
+                                  {
+                                    "const": "brief_response",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "detailed_response",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "match_words",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "scale_1_5",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "single_choice",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "multiple_choice",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "true_or_false",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "photo_question_single_choice",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "photo_question_multiple_choice",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "fill_in_the_blanks_text",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "fill_in_the_blanks_dnd",
+                                    "type": "string"
+                                  }
+                                ]
+                              },
+                              "description": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "title": {
                                 "type": "string"
                               },
-                              {
-                                "const": "match_words",
+                              "displayOrder": {
+                                "type": "number"
+                              },
+                              "solutionExplanation": {
                                 "type": "string"
                               },
-                              {
-                                "const": "scale_1_5",
-                                "type": "string"
+                              "photoS3Key": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
                               },
-                              {
-                                "const": "single_choice",
-                                "type": "string"
+                              "options": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    "optionText": {
+                                      "maxLength": 250,
+                                      "type": "string"
+                                    },
+                                    "displayOrder": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "isStudentAnswer": {
+                                      "anyOf": [
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "isCorrect": {
+                                      "type": "boolean"
+                                    },
+                                    "questionId": {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    "matchedWord": {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "scaleAnswer": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "language": {
+                                      "default": "en",
+                                      "anyOf": [
+                                        {
+                                          "const": "en",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "const": "pl",
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "optionText",
+                                    "displayOrder",
+                                    "isCorrect"
+                                  ]
+                                }
                               },
-                              {
-                                "const": "multiple_choice",
-                                "type": "string"
-                              },
-                              {
-                                "const": "true_or_false",
-                                "type": "string"
-                              },
-                              {
-                                "const": "photo_question_single_choice",
-                                "type": "string"
-                              },
-                              {
-                                "const": "photo_question_multiple_choice",
-                                "type": "string"
-                              },
-                              {
-                                "const": "fill_in_the_blanks_text",
-                                "type": "string"
-                              },
-                              {
-                                "const": "fill_in_the_blanks_dnd",
-                                "type": "string"
+                              "language": {
+                                "default": "en",
+                                "anyOf": [
+                                  {
+                                    "const": "en",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "pl",
+                                    "type": "string"
+                                  }
+                                ]
                               }
+                            },
+                            "required": [
+                              "type",
+                              "title"
                             ]
-                          },
-                          "description": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "displayOrder": {
-                            "type": "number"
-                          },
-                          "solutionExplanation": {
-                            "type": "string"
-                          },
-                          "photoS3Key": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "options": {
-                            "type": "array",
-                            "items": {
+                          }
+                        },
+                        "aiMentor": {
+                          "anyOf": [
+                            {
                               "type": "object",
                               "properties": {
                                 "id": {
                                   "format": "uuid",
                                   "type": "string"
                                 },
-                                "optionText": {
-                                  "maxLength": 250,
-                                  "type": "string"
-                                },
-                                "displayOrder": {
-                                  "anyOf": [
-                                    {
-                                      "type": "number"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "isStudentAnswer": {
-                                  "anyOf": [
-                                    {
-                                      "type": "boolean"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
-                                },
-                                "isCorrect": {
-                                  "type": "boolean"
-                                },
-                                "questionId": {
+                                "lessonId": {
                                   "format": "uuid",
                                   "type": "string"
                                 },
-                                "matchedWord": {
+                                "aiMentorInstructions": {
+                                  "type": "string"
+                                },
+                                "completionConditions": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "anyOf": [
+                                    {
+                                      "const": "mentor",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "teacher",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "roleplay",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "avatarReference": {
                                   "anyOf": [
                                     {
                                       "type": "string"
@@ -11273,141 +12675,105 @@
                                       "type": "null"
                                     }
                                   ]
-                                },
-                                "scaleAnswer": {
-                                  "anyOf": [
-                                    {
-                                      "type": "number"
-                                    },
-                                    {
-                                      "type": "null"
-                                    }
-                                  ]
                                 }
                               },
                               "required": [
-                                "optionText",
-                                "displayOrder",
-                                "isCorrect"
+                                "id",
+                                "lessonId",
+                                "aiMentorInstructions",
+                                "completionConditions",
+                                "type",
+                                "avatarReference"
                               ]
+                            },
+                            {
+                              "type": "null"
                             }
-                          }
-                        },
-                        "required": [
-                          "type",
-                          "title"
-                        ]
-                      }
-                    },
-                    "aiMentor": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "lessonId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "aiMentorInstructions": {
-                              "type": "string"
-                            },
-                            "completionConditions": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "anyOf": [
-                                {
-                                  "const": "mentor",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "teacher",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "roleplay",
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "lessonId",
-                            "aiMentorInstructions",
-                            "completionConditions",
-                            "type"
                           ]
                         },
-                        {
-                          "type": "null"
+                        "updatedAt": {
+                          "type": "string"
                         }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "type",
+                        "displayOrder"
                       ]
-                    },
-                    "updatedAt": {
-                      "type": "string"
                     }
                   },
-                  "required": [
-                    "id",
-                    "title",
-                    "type",
-                    "displayOrder"
-                  ]
+                  "chapterProgress": {
+                    "anyOf": [
+                      {
+                        "const": "not_started",
+                        "type": "string"
+                      },
+                      {
+                        "const": "in_progress",
+                        "type": "string"
+                      },
+                      {
+                        "const": "completed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "blocked",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isFreemium": {
+                    "type": "boolean"
+                  },
+                  "enrolled": {
+                    "type": "boolean"
+                  },
+                  "isSubmitted": {
+                    "type": "boolean"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "quizCount": {
+                    "type": "number"
+                  }
                 }
               },
-              "chapterProgress": {
-                "anyOf": [
-                  {
-                    "const": "not_started",
-                    "type": "string"
-                  },
-                  {
-                    "const": "in_progress",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "blocked",
+              {
+                "type": "object",
+                "properties": {
+                  "courseId": {
+                    "format": "uuid",
                     "type": "string"
                   }
-                ]
-              },
-              "isFreemium": {
-                "type": "boolean"
-              },
-              "enrolled": {
-                "type": "boolean"
-              },
-              "isSubmitted": {
-                "type": "boolean"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "quizCount": {
-                "type": "number"
+                }
               }
-            }
+            ]
           },
           {
             "type": "object",
             "properties": {
-              "courseId": {
-                "format": "uuid",
-                "type": "string"
+              "language": {
+                "default": "en",
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
-            }
+            },
+            "required": [
+              "language"
+            ]
           }
         ]
       },
@@ -11853,6 +13219,19 @@
                             ]
                           }
                         },
+                        "language": {
+                          "default": "en",
+                          "anyOf": [
+                            {
+                              "const": "en",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pl",
+                              "type": "string"
+                            }
+                          ]
+                        },
                         "passQuestion": {
                           "anyOf": [
                             {
@@ -11998,11 +13377,11 @@
               "userLanguage": {
                 "anyOf": [
                   {
-                    "const": "pl",
+                    "const": "en",
                     "type": "string"
                   },
                   {
-                    "const": "en",
+                    "const": "pl",
                     "type": "string"
                   }
                 ]
@@ -12144,6 +13523,34 @@
                     "type": "null"
                   }
                 ]
+              },
+              "aiMentor": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "avatarReferenceUrl": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -12224,6 +13631,9 @@
                     "type": "null"
                   }
                 ]
+              },
+              "avatarReferenceUrl": {
+                "type": "string"
               },
               "fileType": {
                 "anyOf": [
@@ -12380,6 +13790,19 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "language": {
+                            "default": "en",
+                            "anyOf": [
+                              {
+                                "const": "en",
+                                "type": "string"
+                              },
+                              {
+                                "const": "pl",
+                                "type": "string"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -12388,6 +13811,19 @@
                           "isCorrect"
                         ]
                       }
+                    },
+                    "language": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -12430,6 +13866,16 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -12437,7 +13883,8 @@
                       "lessonId",
                       "aiMentorInstructions",
                       "completionConditions",
-                      "type"
+                      "type",
+                      "avatarReference"
                     ]
                   },
                   {
@@ -12524,6 +13971,9 @@
                   }
                 ]
               },
+              "avatarReferenceUrl": {
+                "type": "string"
+              },
               "fileType": {
                 "anyOf": [
                   {
@@ -12679,6 +14129,19 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "language": {
+                            "default": "en",
+                            "anyOf": [
+                              {
+                                "const": "en",
+                                "type": "string"
+                              },
+                              {
+                                "const": "pl",
+                                "type": "string"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -12687,6 +14150,19 @@
                           "isCorrect"
                         ]
                       }
+                    },
+                    "language": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -12729,6 +14205,16 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "avatarReference": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -12736,7 +14222,8 @@
                       "lessonId",
                       "aiMentorInstructions",
                       "completionConditions",
-                      "type"
+                      "type",
+                      "avatarReference"
                     ]
                   },
                   {
@@ -12783,6 +14270,9 @@
                     "type": "string"
                   }
                 ]
+              },
+              "name": {
+                "type": "string"
               }
             },
             "required": [
@@ -12819,171 +14309,272 @@
         ]
       },
       "BetaUpdateAiMentorLessonBody": {
-        "type": "object",
         "allOf": [
           {
             "type": "object",
-            "properties": {
-              "title": {
-                "type": "string"
-              },
-              "description": {
-                "anyOf": [
-                  {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "title": {
                     "type": "string"
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "fileS3Key": {
-                "anyOf": [
-                  {
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "fileS3Key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "avatarReferenceUrl": {
                     "type": "string"
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "fileType": {
-                "anyOf": [
-                  {
-                    "type": "string"
+                  "fileType": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "questions": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "type": {
-                      "anyOf": [
-                        {
-                          "const": "brief_response",
+                  "questions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
                           "type": "string"
                         },
-                        {
-                          "const": "detailed_response",
+                        "type": {
+                          "anyOf": [
+                            {
+                              "const": "brief_response",
+                              "type": "string"
+                            },
+                            {
+                              "const": "detailed_response",
+                              "type": "string"
+                            },
+                            {
+                              "const": "match_words",
+                              "type": "string"
+                            },
+                            {
+                              "const": "scale_1_5",
+                              "type": "string"
+                            },
+                            {
+                              "const": "single_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "multiple_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "true_or_false",
+                              "type": "string"
+                            },
+                            {
+                              "const": "photo_question_single_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "photo_question_multiple_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fill_in_the_blanks_text",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "description": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "title": {
                           "type": "string"
                         },
-                        {
-                          "const": "match_words",
+                        "displayOrder": {
+                          "type": "number"
+                        },
+                        "solutionExplanation": {
                           "type": "string"
                         },
-                        {
-                          "const": "scale_1_5",
-                          "type": "string"
+                        "photoS3Key": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
-                        {
-                          "const": "single_choice",
-                          "type": "string"
+                        "options": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "optionText": {
+                                "maxLength": 250,
+                                "type": "string"
+                              },
+                              "displayOrder": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "isStudentAnswer": {
+                                "anyOf": [
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "isCorrect": {
+                                "type": "boolean"
+                              },
+                              "questionId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "matchedWord": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "scaleAnswer": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "language": {
+                                "default": "en",
+                                "anyOf": [
+                                  {
+                                    "const": "en",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "pl",
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "optionText",
+                              "displayOrder",
+                              "isCorrect"
+                            ]
+                          }
                         },
-                        {
-                          "const": "multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "true_or_false",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_single_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_text",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_dnd",
-                          "type": "string"
+                        "language": {
+                          "default": "en",
+                          "anyOf": [
+                            {
+                              "const": "en",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pl",
+                              "type": "string"
+                            }
+                          ]
                         }
+                      },
+                      "required": [
+                        "type",
+                        "title"
                       ]
-                    },
-                    "description": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "displayOrder": {
-                      "type": "number"
-                    },
-                    "solutionExplanation": {
-                      "type": "string"
-                    },
-                    "photoS3Key": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "options": {
-                      "type": "array",
-                      "items": {
+                    }
+                  },
+                  "aiMentor": {
+                    "anyOf": [
+                      {
                         "type": "object",
                         "properties": {
                           "id": {
                             "format": "uuid",
                             "type": "string"
                           },
-                          "optionText": {
-                            "maxLength": 250,
-                            "type": "string"
-                          },
-                          "displayOrder": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isStudentAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "boolean"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isCorrect": {
-                            "type": "boolean"
-                          },
-                          "questionId": {
+                          "lessonId": {
                             "format": "uuid",
                             "type": "string"
                           },
-                          "matchedWord": {
+                          "aiMentorInstructions": {
+                            "type": "string"
+                          },
+                          "completionConditions": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "anyOf": [
+                              {
+                                "const": "mentor",
+                                "type": "string"
+                              },
+                              {
+                                "const": "teacher",
+                                "type": "string"
+                              },
+                              {
+                                "const": "roleplay",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "avatarReference": {
                             "anyOf": [
                               {
                                 "type": "string"
@@ -12992,119 +14583,86 @@
                                 "type": "null"
                               }
                             ]
-                          },
-                          "scaleAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
                           }
                         },
                         "required": [
-                          "optionText",
-                          "displayOrder",
-                          "isCorrect"
+                          "id",
+                          "lessonId",
+                          "aiMentorInstructions",
+                          "completionConditions",
+                          "type",
+                          "avatarReference"
                         ]
+                      },
+                      {
+                        "type": "null"
                       }
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "title"
-                  ]
-                }
-              },
-              "aiMentor": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "lessonId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "aiMentorInstructions": {
-                        "type": "string"
-                      },
-                      "completionConditions": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "anyOf": [
-                          {
-                            "const": "mentor",
-                            "type": "string"
-                          },
-                          {
-                            "const": "teacher",
-                            "type": "string"
-                          },
-                          {
-                            "const": "roleplay",
-                            "type": "string"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "lessonId",
-                      "aiMentorInstructions",
-                      "completionConditions",
-                      "type"
                     ]
                   },
-                  {
-                    "type": "null"
+                  "updatedAt": {
+                    "type": "string"
                   }
+                },
+                "required": [
+                  "title"
                 ]
               },
-              "updatedAt": {
-                "type": "string"
+              {
+                "type": "object",
+                "properties": {
+                  "aiMentorInstructions": {
+                    "type": "string"
+                  },
+                  "completionConditions": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "anyOf": [
+                      {
+                        "const": "mentor",
+                        "type": "string"
+                      },
+                      {
+                        "const": "teacher",
+                        "type": "string"
+                      },
+                      {
+                        "const": "roleplay",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "aiMentorInstructions",
+                  "completionConditions",
+                  "type"
+                ]
               }
-            },
-            "required": [
-              "title"
             ]
           },
           {
             "type": "object",
             "properties": {
-              "aiMentorInstructions": {
-                "type": "string"
-              },
-              "completionConditions": {
-                "type": "string"
-              },
-              "type": {
+              "language": {
+                "default": "en",
                 "anyOf": [
                   {
-                    "const": "mentor",
+                    "const": "en",
                     "type": "string"
                   },
                   {
-                    "const": "teacher",
-                    "type": "string"
-                  },
-                  {
-                    "const": "roleplay",
+                    "const": "pl",
                     "type": "string"
                   }
                 ]
               }
             },
             "required": [
-              "aiMentorInstructions",
-              "completionConditions",
-              "type"
+              "language"
             ]
           }
         ]
@@ -13320,6 +14878,19 @@
                                 "type": "null"
                               }
                             ]
+                          },
+                          "language": {
+                            "default": "en",
+                            "anyOf": [
+                              {
+                                "const": "en",
+                                "type": "string"
+                              },
+                              {
+                                "const": "pl",
+                                "type": "string"
+                              }
+                            ]
                           }
                         },
                         "required": [
@@ -13328,6 +14899,19 @@
                           "isCorrect"
                         ]
                       }
+                    },
+                    "language": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -13387,226 +14971,277 @@
         ]
       },
       "BetaUpdateQuizLessonBody": {
-        "type": "object",
         "allOf": [
           {
             "type": "object",
-            "properties": {
-              "title": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              },
-              "solutionExplanation": {
-                "type": "string"
-              },
-              "fileS3Key": {
-                "type": "string"
-              },
-              "fileType": {
-                "type": "string"
-              },
-              "thresholdScore": {
-                "type": "number"
-              },
-              "attemptsLimit": {
-                "anyOf": [
-                  {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "solutionExplanation": {
+                    "type": "string"
+                  },
+                  "fileS3Key": {
+                    "type": "string"
+                  },
+                  "fileType": {
+                    "type": "string"
+                  },
+                  "thresholdScore": {
                     "type": "number"
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "quizCooldownInHours": {
-                "anyOf": [
-                  {
-                    "type": "number"
+                  "attemptsLimit": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "questions": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "type": {
-                      "anyOf": [
-                        {
-                          "const": "brief_response",
+                  "quizCooldownInHours": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "questions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
                           "type": "string"
                         },
-                        {
-                          "const": "detailed_response",
+                        "type": {
+                          "anyOf": [
+                            {
+                              "const": "brief_response",
+                              "type": "string"
+                            },
+                            {
+                              "const": "detailed_response",
+                              "type": "string"
+                            },
+                            {
+                              "const": "match_words",
+                              "type": "string"
+                            },
+                            {
+                              "const": "scale_1_5",
+                              "type": "string"
+                            },
+                            {
+                              "const": "single_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "multiple_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "true_or_false",
+                              "type": "string"
+                            },
+                            {
+                              "const": "photo_question_single_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "photo_question_multiple_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fill_in_the_blanks_text",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "description": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "title": {
                           "type": "string"
                         },
-                        {
-                          "const": "match_words",
+                        "displayOrder": {
+                          "type": "number"
+                        },
+                        "solutionExplanation": {
                           "type": "string"
                         },
-                        {
-                          "const": "scale_1_5",
-                          "type": "string"
+                        "photoS3Key": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
-                        {
-                          "const": "single_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "true_or_false",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_single_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_text",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_dnd",
-                          "type": "string"
-                        }
-                      ]
-                    },
-                    "description": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "displayOrder": {
-                      "type": "number"
-                    },
-                    "solutionExplanation": {
-                      "type": "string"
-                    },
-                    "photoS3Key": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "options": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "optionText": {
-                            "maxLength": 250,
-                            "type": "string"
-                          },
-                          "displayOrder": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isStudentAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "boolean"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isCorrect": {
-                            "type": "boolean"
-                          },
-                          "questionId": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "matchedWord": {
-                            "anyOf": [
-                              {
+                        "options": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
                                 "type": "string"
                               },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "scaleAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "number"
+                              "optionText": {
+                                "maxLength": 250,
+                                "type": "string"
                               },
-                              {
-                                "type": "null"
+                              "displayOrder": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "isStudentAnswer": {
+                                "anyOf": [
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "isCorrect": {
+                                "type": "boolean"
+                              },
+                              "questionId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "matchedWord": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "scaleAnswer": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "language": {
+                                "default": "en",
+                                "anyOf": [
+                                  {
+                                    "const": "en",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "pl",
+                                    "type": "string"
+                                  }
+                                ]
                               }
+                            },
+                            "required": [
+                              "optionText",
+                              "displayOrder",
+                              "isCorrect"
                             ]
                           }
                         },
-                        "required": [
-                          "optionText",
-                          "displayOrder",
-                          "isCorrect"
-                        ]
-                      }
+                        "language": {
+                          "default": "en",
+                          "anyOf": [
+                            {
+                              "const": "en",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pl",
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "title"
+                      ]
                     }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "chapterId": {
+                    "format": "uuid",
+                    "type": "string"
                   },
-                  "required": [
-                    "type",
-                    "title"
-                  ]
+                  "displayOrder": {
+                    "type": "number"
+                  }
                 }
               }
-            }
+            ]
           },
           {
             "type": "object",
             "properties": {
-              "chapterId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "displayOrder": {
-                "type": "number"
+              "language": {
+                "default": "en",
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
-            }
+            },
+            "required": [
+              "language"
+            ]
           }
         ]
       },
@@ -13630,199 +15265,300 @@
         ]
       },
       "BetaUpdateLessonBody": {
-        "type": "object",
         "allOf": [
           {
             "type": "object",
-            "properties": {
-              "title": {
-                "type": "string"
-              },
-              "type": {
-                "anyOf": [
-                  {
-                    "const": "text",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "title": {
                     "type": "string"
                   },
-                  {
-                    "const": "presentation",
+                  "type": {
+                    "anyOf": [
+                      {
+                        "const": "text",
+                        "type": "string"
+                      },
+                      {
+                        "const": "presentation",
+                        "type": "string"
+                      },
+                      {
+                        "const": "video",
+                        "type": "string"
+                      },
+                      {
+                        "const": "quiz",
+                        "type": "string"
+                      },
+                      {
+                        "const": "ai_mentor",
+                        "type": "string"
+                      },
+                      {
+                        "const": "embed",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "fileS3Key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "avatarReferenceUrl": {
                     "type": "string"
                   },
-                  {
-                    "const": "video",
-                    "type": "string"
+                  "fileType": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   },
-                  {
-                    "const": "quiz",
-                    "type": "string"
-                  },
-                  {
-                    "const": "ai_mentor",
-                    "type": "string"
-                  },
-                  {
-                    "const": "embed",
-                    "type": "string"
-                  }
-                ]
-              },
-              "description": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "fileS3Key": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "fileType": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "questions": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "type": {
-                      "anyOf": [
-                        {
-                          "const": "brief_response",
+                  "questions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
                           "type": "string"
                         },
-                        {
-                          "const": "detailed_response",
+                        "type": {
+                          "anyOf": [
+                            {
+                              "const": "brief_response",
+                              "type": "string"
+                            },
+                            {
+                              "const": "detailed_response",
+                              "type": "string"
+                            },
+                            {
+                              "const": "match_words",
+                              "type": "string"
+                            },
+                            {
+                              "const": "scale_1_5",
+                              "type": "string"
+                            },
+                            {
+                              "const": "single_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "multiple_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "true_or_false",
+                              "type": "string"
+                            },
+                            {
+                              "const": "photo_question_single_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "photo_question_multiple_choice",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fill_in_the_blanks_text",
+                              "type": "string"
+                            },
+                            {
+                              "const": "fill_in_the_blanks_dnd",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "description": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "title": {
                           "type": "string"
                         },
-                        {
-                          "const": "match_words",
+                        "displayOrder": {
+                          "type": "number"
+                        },
+                        "solutionExplanation": {
                           "type": "string"
                         },
-                        {
-                          "const": "scale_1_5",
-                          "type": "string"
+                        "photoS3Key": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
-                        {
-                          "const": "single_choice",
-                          "type": "string"
+                        "options": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "optionText": {
+                                "maxLength": 250,
+                                "type": "string"
+                              },
+                              "displayOrder": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "isStudentAnswer": {
+                                "anyOf": [
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "isCorrect": {
+                                "type": "boolean"
+                              },
+                              "questionId": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "matchedWord": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "scaleAnswer": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "language": {
+                                "default": "en",
+                                "anyOf": [
+                                  {
+                                    "const": "en",
+                                    "type": "string"
+                                  },
+                                  {
+                                    "const": "pl",
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "optionText",
+                              "displayOrder",
+                              "isCorrect"
+                            ]
+                          }
                         },
-                        {
-                          "const": "multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "true_or_false",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_single_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "photo_question_multiple_choice",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_text",
-                          "type": "string"
-                        },
-                        {
-                          "const": "fill_in_the_blanks_dnd",
-                          "type": "string"
+                        "language": {
+                          "default": "en",
+                          "anyOf": [
+                            {
+                              "const": "en",
+                              "type": "string"
+                            },
+                            {
+                              "const": "pl",
+                              "type": "string"
+                            }
+                          ]
                         }
+                      },
+                      "required": [
+                        "type",
+                        "title"
                       ]
-                    },
-                    "description": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "displayOrder": {
-                      "type": "number"
-                    },
-                    "solutionExplanation": {
-                      "type": "string"
-                    },
-                    "photoS3Key": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "options": {
-                      "type": "array",
-                      "items": {
+                    }
+                  },
+                  "aiMentor": {
+                    "anyOf": [
+                      {
                         "type": "object",
                         "properties": {
                           "id": {
                             "format": "uuid",
                             "type": "string"
                           },
-                          "optionText": {
-                            "maxLength": 250,
-                            "type": "string"
-                          },
-                          "displayOrder": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isStudentAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "boolean"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "isCorrect": {
-                            "type": "boolean"
-                          },
-                          "questionId": {
+                          "lessonId": {
                             "format": "uuid",
                             "type": "string"
                           },
-                          "matchedWord": {
+                          "aiMentorInstructions": {
+                            "type": "string"
+                          },
+                          "completionConditions": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "anyOf": [
+                              {
+                                "const": "mentor",
+                                "type": "string"
+                              },
+                              {
+                                "const": "teacher",
+                                "type": "string"
+                              },
+                              {
+                                "const": "roleplay",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "avatarReference": {
                             "anyOf": [
                               {
                                 "type": "string"
@@ -13831,97 +15567,61 @@
                                 "type": "null"
                               }
                             ]
-                          },
-                          "scaleAnswer": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
                           }
                         },
                         "required": [
-                          "optionText",
-                          "displayOrder",
-                          "isCorrect"
+                          "id",
+                          "lessonId",
+                          "aiMentorInstructions",
+                          "completionConditions",
+                          "type",
+                          "avatarReference"
                         ]
+                      },
+                      {
+                        "type": "null"
                       }
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "title"
-                  ]
-                }
-              },
-              "aiMentor": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "lessonId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "aiMentorInstructions": {
-                        "type": "string"
-                      },
-                      "completionConditions": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "anyOf": [
-                          {
-                            "const": "mentor",
-                            "type": "string"
-                          },
-                          {
-                            "const": "teacher",
-                            "type": "string"
-                          },
-                          {
-                            "const": "roleplay",
-                            "type": "string"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "lessonId",
-                      "aiMentorInstructions",
-                      "completionConditions",
-                      "type"
                     ]
                   },
-                  {
-                    "type": "null"
+                  "updatedAt": {
+                    "type": "string"
                   }
-                ]
+                }
               },
-              "updatedAt": {
-                "type": "string"
+              {
+                "type": "object",
+                "properties": {
+                  "chapterId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "displayOrder": {
+                    "type": "number"
+                  }
+                }
               }
-            }
+            ]
           },
           {
             "type": "object",
             "properties": {
-              "chapterId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "displayOrder": {
-                "type": "number"
+              "language": {
+                "default": "en",
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  }
+                ]
               }
-            }
+            },
+            "required": [
+              "language"
+            ]
           }
         ]
       },
@@ -14031,11 +15731,24 @@
                 "answers"
               ]
             }
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
           "lessonId",
-          "questionsAnswers"
+          "questionsAnswers",
+          "language"
         ]
       },
       "EvaluationQuizResponse": {
@@ -14228,13 +15941,27 @@
           "lessonId": {
             "format": "uuid",
             "type": "string"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
           "title",
           "type",
           "resources",
-          "lessonId"
+          "lessonId",
+          "language"
         ]
       },
       "UpdateEmbedLessonResponse": {
@@ -14497,11 +16224,11 @@
               "userLanguage": {
                 "anyOf": [
                   {
-                    "const": "pl",
+                    "const": "en",
                     "type": "string"
                   },
                   {
-                    "const": "en",
+                    "const": "pl",
                     "type": "string"
                   }
                 ]
@@ -15740,587 +17467,6 @@
             "required": [
               "message"
             ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetAllGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "characteristic": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "users": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string"
-                      },
-                      "updatedAt": {
-                        "type": "string"
-                      },
-                      "email": {
-                        "type": "string"
-                      },
-                      "firstName": {
-                        "type": "string"
-                      },
-                      "lastName": {
-                        "type": "string"
-                      },
-                      "role": {
-                        "type": "string"
-                      },
-                      "archived": {
-                        "type": "boolean"
-                      },
-                      "deletedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "createdAt",
-                      "updatedAt",
-                      "email",
-                      "firstName",
-                      "lastName",
-                      "role",
-                      "archived",
-                      "deletedAt",
-                      "profilePictureUrl"
-                    ]
-                  }
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "characteristic"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "GetGroupByIdResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "characteristic": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "users": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "createdAt": {
-                      "type": "string"
-                    },
-                    "updatedAt": {
-                      "type": "string"
-                    },
-                    "email": {
-                      "type": "string"
-                    },
-                    "firstName": {
-                      "type": "string"
-                    },
-                    "lastName": {
-                      "type": "string"
-                    },
-                    "role": {
-                      "type": "string"
-                    },
-                    "archived": {
-                      "type": "boolean"
-                    },
-                    "deletedAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "profilePictureUrl": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "createdAt",
-                    "updatedAt",
-                    "email",
-                    "firstName",
-                    "lastName",
-                    "role",
-                    "archived",
-                    "deletedAt",
-                    "profilePictureUrl"
-                  ]
-                }
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "characteristic"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetUserGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "characteristic": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "users": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string"
-                      },
-                      "updatedAt": {
-                        "type": "string"
-                      },
-                      "email": {
-                        "type": "string"
-                      },
-                      "firstName": {
-                        "type": "string"
-                      },
-                      "lastName": {
-                        "type": "string"
-                      },
-                      "role": {
-                        "type": "string"
-                      },
-                      "archived": {
-                        "type": "boolean"
-                      },
-                      "deletedAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "createdAt",
-                      "updatedAt",
-                      "email",
-                      "firstName",
-                      "lastName",
-                      "role",
-                      "archived",
-                      "deletedAt",
-                      "profilePictureUrl"
-                    ]
-                  }
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "characteristic"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "CreateGroupBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "characteristic": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "CreateGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateGroupBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "characteristic": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "UpdateGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "characteristic": {
-                "type": "string"
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "createdAt",
-              "updatedAt"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "DeleteGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "BulkDeleteGroupsBody": {
-        "type": "array",
-        "items": {
-          "format": "uuid",
-          "type": "string"
-        }
-      },
-      "BulkDeleteGroupsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "AssignUserToGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UnassignUserFromGroupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetGroupsByCourseResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "characteristic": {
-                  "type": "string"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "createdAt",
-                "updatedAt"
-              ]
-            }
           }
         },
         "required": [

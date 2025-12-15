@@ -4,6 +4,7 @@ import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUs
 import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
 import { contentCreatorCoursesOptions } from "~/api/queries/useContentCreatorCourses";
 import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { AnnouncementEntry } from "./AnnouncementEntry";
 import { CourseEntry } from "./CourseEntry";
@@ -23,13 +24,15 @@ export const GlobalSearchContentCreatorResults = ({
   setTotalItems: (count: number) => void;
 }) => {
   const { data: currentUser } = useCurrentUserSuspense();
+  const { language } = useLanguageStore();
+
   const tabsToDisplay = useQueries({
     queries: [
       contentCreatorCoursesOptions(currentUser?.id ?? "", { searchQuery: debouncedSearch }, true, {
         enabled: debouncedSearch.length >= 3,
       }),
       availableCoursesQueryOptions(
-        { searchQuery: debouncedSearch },
+        { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
       announcementsForUserOptions(

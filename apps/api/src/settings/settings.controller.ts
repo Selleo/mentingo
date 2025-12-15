@@ -20,6 +20,7 @@ import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
@@ -95,9 +96,9 @@ export class SettingsController {
     response: baseResponse(adminSettingsJSONContentSchema),
   })
   async updateAdminNewUserNotification(
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
-    const result = await this.settingsService.updateAdminNewUserNotification(userId);
+    const result = await this.settingsService.updateAdminNewUserNotification(currentUserId);
     return new BaseResponse(result);
   }
 
@@ -106,10 +107,11 @@ export class SettingsController {
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
-  async updateUnregisteredUserCoursesAccessibility(): Promise<
-    BaseResponse<GlobalSettingsJSONContentSchema>
-  > {
-    const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility();
+  async updateUnregisteredUserCoursesAccessibility(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result =
+      await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility(currentUser);
     return new BaseResponse(result);
   }
 
@@ -118,8 +120,10 @@ export class SettingsController {
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
-  async updateEnforceSSO(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
-    const result = await this.settingsService.updateGlobalEnforceSSO();
+  async updateEnforceSSO(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalEnforceSSO(currentUser);
     return new BaseResponse(result);
   }
 
@@ -143,10 +147,12 @@ export class SettingsController {
   })
   async updateColorSchema(
     @Body() body: UpdateGlobalColorSchemaBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateGlobalColorSchema(
       body.primaryColor,
       body.contrastColor,
+      currentUser,
     );
     return new BaseResponse(result);
   }
@@ -183,8 +189,11 @@ export class SettingsController {
       },
     },
   })
-  async updatePlatformLogo(@UploadedFile() logo: Express.Multer.File | null): Promise<void> {
-    await this.settingsService.uploadPlatformLogo(logo);
+  async updatePlatformLogo(
+    @UploadedFile() logo: Express.Multer.File | null,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<void> {
+    await this.settingsService.uploadPlatformLogo(logo, currentUser);
   }
 
   @Get("platform-simple-logo")
@@ -219,8 +228,11 @@ export class SettingsController {
       },
     },
   })
-  async updatePlatformSimpleLogo(@UploadedFile() logo: Express.Multer.File | null): Promise<void> {
-    await this.settingsService.uploadPlatformSimpleLogo(logo);
+  async updatePlatformSimpleLogo(
+    @UploadedFile() logo: Express.Multer.File | null,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<void> {
+    await this.settingsService.uploadPlatformSimpleLogo(logo, currentUser);
   }
 
   @Get("login-background")
@@ -257,8 +269,9 @@ export class SettingsController {
   })
   async updateLoginBackground(
     @UploadedFile() loginBackground: Express.Multer.File | null,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
-    await this.settingsService.uploadLoginBackgroundImage(loginBackground);
+    await this.settingsService.uploadLoginBackgroundImage(loginBackground, currentUser);
   }
 
   @Get("company-information")
@@ -277,8 +290,13 @@ export class SettingsController {
     request: [{ type: "body", schema: companyInformationJSONSchema }],
     response: baseResponse(companyInformationJSONSchema),
   })
-  async updateCompanyInformation(@Body() companyInfo: CompanyInformaitonJSONSchema) {
-    return new BaseResponse(await this.settingsService.updateCompanyInformation(companyInfo));
+  async updateCompanyInformation(
+    @Body() companyInfo: CompanyInformaitonJSONSchema,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return new BaseResponse(
+      await this.settingsService.updateCompanyInformation(companyInfo, currentUser),
+    );
   }
 
   @Patch("admin/mfa-enforced-roles")
@@ -288,8 +306,9 @@ export class SettingsController {
   })
   async updateMFAEnforcedRoles(
     @Body() rolesRequest: UpdateMFAEnforcedRolesRequest,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
-    return await this.settingsService.updateMFAEnforcedRoles(rolesRequest);
+    return await this.settingsService.updateMFAEnforcedRoles(rolesRequest, currentUser);
   }
 
   @Patch("certificate-background")
@@ -309,9 +328,10 @@ export class SettingsController {
   })
   async updateCertificateBackground(
     @UploadedFile() certificateBackground: Express.Multer.File,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(
-      await this.settingsService.updateCertificateBackground(certificateBackground),
+      await this.settingsService.updateCertificateBackground(certificateBackground, currentUser),
     );
   }
 
@@ -322,9 +342,11 @@ export class SettingsController {
   })
   async updateDefaultCourseCurrency(
     @Body() newSettings: UpdateDefaultCourseCurrencyBody,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const updatedGlobalSettings = await this.settingsService.updateDefaultCourseCurrency(
       newSettings.defaultCourseCurrency,
+      currentUser,
     );
 
     return new BaseResponse(updatedGlobalSettings);
@@ -332,8 +354,10 @@ export class SettingsController {
 
   @Patch("admin/invite-only-registration")
   @Roles(USER_ROLES.ADMIN)
-  async updateInviteOnlyRegistration() {
-    return new BaseResponse(await this.settingsService.updateGlobalInviteOnlyRegistration());
+  async updateInviteOnlyRegistration(@CurrentUser() currentUser: CurrentUserType) {
+    return new BaseResponse(
+      await this.settingsService.updateGlobalInviteOnlyRegistration(currentUser),
+    );
   }
 
   @Patch("admin/user-email-triggers/:triggerKey")
@@ -341,8 +365,13 @@ export class SettingsController {
     request: [{ type: "param", name: "triggerKey", schema: Type.String() }],
   })
   @Roles(USER_ROLES.ADMIN)
-  async updateUserEmailTriggers(@Param("triggerKey") triggerKey: string) {
-    return new BaseResponse(await this.settingsService.updateUserEmailTriggers(triggerKey));
+  async updateUserEmailTriggers(
+    @Param("triggerKey") triggerKey: string,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return new BaseResponse(
+      await this.settingsService.updateUserEmailTriggers(triggerKey, currentUser),
+    );
   }
 
   @Patch("admin/config-warning-dismissed")

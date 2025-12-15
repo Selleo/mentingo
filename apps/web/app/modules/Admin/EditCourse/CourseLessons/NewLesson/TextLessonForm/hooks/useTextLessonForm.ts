@@ -18,12 +18,14 @@ import {
 import { textLessonFormSchema } from "../validators/useTextLessonFormSchema";
 
 import type { TextLessonFormValues } from "../validators/useTextLessonFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 
 type TextLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setOpenChapter?: (chapterId: string) => void;
+  language: SupportedLanguages;
 };
 
 export const useTextLessonForm = ({
@@ -31,6 +33,7 @@ export const useTextLessonForm = ({
   lessonToEdit,
   setContentTypeToDisplay,
   setOpenChapter,
+  language,
 }: TextLessonFormProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: createTextBlock } = useCreateBetaTextLesson();
@@ -64,12 +67,19 @@ export const useTextLessonForm = ({
 
     try {
       if (lessonToEdit) {
-        // @ts-expect-error - Need to be refactored
-        await updateTextBlockItem({ data: { ...values }, lessonId: lessonToEdit.id });
+        await updateTextBlockItem({
+          data: {
+            ...values,
+            language,
+          },
+          lessonId: lessonToEdit.id,
+        });
       } else {
         await createTextBlock({
-          // @ts-expect-error - Need to be refactored
-          data: { ...values, chapterId: chapterToEdit.id },
+          data: {
+            ...values,
+            chapterId: chapterToEdit.id,
+          },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }

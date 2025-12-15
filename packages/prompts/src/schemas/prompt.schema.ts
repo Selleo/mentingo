@@ -1,14 +1,5 @@
 import { Type } from "@sinclair/typebox";
 
-const groupsSchema = Type.Optional(
-  Type.Array(
-    Type.Object({
-      name: Type.String(),
-      characteristic: Type.Union([Type.String(), Type.Null()]),
-    }),
-  ),
-);
-
 export const judgePromptSchema = Type.Object({
   language: Type.String(),
   lessonInstructions: Type.String(),
@@ -20,7 +11,8 @@ export const aiPromptSchema = Type.Object({
   lessonTitle: Type.String(),
   lessonInstructions: Type.String(),
   securityAndRagBlock: Type.String(),
-  groups: groupsSchema,
+  name: Type.String(),
+  groups: Type.Optional(Type.Array(Type.String())),
 });
 
 export const summaryPromptSchema = Type.Object({

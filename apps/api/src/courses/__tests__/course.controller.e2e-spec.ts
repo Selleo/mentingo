@@ -282,7 +282,8 @@ describe("CourseController (e2e)", () => {
           expect(
             response.body.data.every(
               (course: CourseTest) =>
-                course.title.includes("Python") || course.description?.includes("Python"),
+                (course.title as string)?.includes("Python") ||
+                (course.description as string)?.includes("Python"),
             ),
           ).toBe(true);
         });
@@ -626,7 +627,8 @@ describe("CourseController (e2e)", () => {
         expect(
           response.body.data.every(
             (course: CourseTest) =>
-              course.title.includes("Python") || course.description?.includes("Python"),
+              (course.title as string)?.includes("Python") ||
+              (course.description as string)?.includes("Python"),
           ),
         ).toBe(true);
       });
@@ -849,8 +851,8 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
+                isEnrolledByGroup: false,
               },
               {
                 firstName: students[1].firstName,
@@ -858,8 +860,8 @@ describe("CourseController (e2e)", () => {
                 email: students[1].email,
                 id: students[1].id,
                 enrolledAt: null,
-                groupName: null,
-                groupId: null,
+                groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -906,8 +908,8 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -954,8 +956,8 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -1002,8 +1004,8 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -1050,8 +1052,8 @@ describe("CourseController (e2e)", () => {
                 email: students[1].email,
                 id: students[1].id,
                 enrolledAt: null,
-                groupName: null,
-                groupId: null,
+                groups: [],
+                isEnrolledByGroup: false,
               },
               {
                 firstName: students[0].firstName,
@@ -1059,8 +1061,8 @@ describe("CourseController (e2e)", () => {
                 email: students[0].email,
                 id: students[0].id,
                 enrolledAt: studentCourse[0].createdAt,
-                groupName: null,
-                groupId: null,
+                groups: [],
+                isEnrolledByGroup: false,
               },
             ],
           });
@@ -1234,7 +1236,8 @@ describe("CourseController (e2e)", () => {
         expect(
           response.body.data.every(
             (course: CourseTest) =>
-              course.title.includes("Python") || course.description?.includes("Python"),
+              (course.title as string)?.includes("Python") ||
+              (course.description as string)?.includes("Python"),
           ),
         ).toBe(true);
       });
@@ -1913,7 +1916,8 @@ describe("CourseController (e2e)", () => {
             const newUser = await userFactory.withCredentials({ password }).create();
 
             await request(app.getHttpServer())
-              .post(`/api/group/assign?userId=${newUser.id}&groupId=${group.id}`)
+              .post(`/api/group/set?userId=${newUser.id}`)
+              .send([group.id])
               .set("Cookie", cookies)
               .expect(201);
 

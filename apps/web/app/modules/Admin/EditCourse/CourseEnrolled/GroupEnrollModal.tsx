@@ -26,6 +26,7 @@ type Props = {
   courseId: string;
   groups: GetAllGroupsResponse["data"];
   enrolledGroups?: GetGroupsByCourseResponse["data"];
+  renderTrigger?: boolean;
 };
 
 export const GroupEnrollModal = ({
@@ -34,6 +35,7 @@ export const GroupEnrollModal = ({
   courseId,
   groups,
   enrolledGroups,
+  renderTrigger = true,
 }: Props) => {
   const { mutate: bulkGroupEnroll } = useBulkGroupCourseEnroll(courseId);
 
@@ -67,9 +69,11 @@ export const GroupEnrollModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger>
-        <Button variant="outline">{t("adminCourseView.enrolled.enrollGroups")}</Button>
-      </DialogTrigger>
+      {renderTrigger && (
+        <DialogTrigger>
+          <Button variant="primary">{t("adminCourseView.enrolled.enrollGroups")}</Button>
+        </DialogTrigger>
+      )}
       <DialogPortal>
         <DialogOverlay />
         <DialogContent className="max-w-2xl">

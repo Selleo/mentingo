@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@remix-run/react";
 import { last, startCase } from "lodash-es";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CourseProgress from "~/components/CourseProgress";
@@ -13,11 +13,14 @@ import {
 } from "~/components/ui/accordion";
 import { Badge } from "~/components/ui/badge";
 import { CategoryChip } from "~/components/ui/CategoryChip";
+import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { cn } from "~/lib/utils";
 import {
   CHAPTER_PROGRESS_STATUSES,
   LessonTypesIcons,
 } from "~/modules/Courses/CourseView/lessonTypes";
+
+import { getChaptersWithAccess } from "../utils";
 
 import { LESSON_PROGRESS_STATUSES } from "./types";
 import { getCurrentChapterId } from "./utils";
@@ -37,12 +40,19 @@ const progressBadge = {
 } as const;
 
 export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
+  const { t } = useTranslation();
   const { state } = useLocation();
 
   const [activeChapter, setActiveChapter] = useState<string | undefined>(
     state?.chapterId ?? getCurrentChapterId(course, lessonId),
   );
-  const { t } = useTranslation();
+
+  const { sequenceEnabled } = useLessonsSequence(course?.id);
+
+  const chapters = useMemo(
+    () => getChaptersWithAccess(course?.chapters || [], sequenceEnabled),
+    [course?.chapters, sequenceEnabled],
+  );
 
   useEffect(() => {
     setActiveChapter(state?.chapterId ?? getCurrentChapterId(course, lessonId));
@@ -80,7 +90,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
               value={activeChapter}
               onValueChange={handleAccordionChange}
             >
-              {course?.chapters?.map(
+              {chapters?.map(
                 ({
                   id,
                   title,
@@ -116,24 +126,27 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                         <Icon name="CarretDownLarge" className="size-6 text-primary-700" />
                       </AccordionTrigger>
                       <AccordionContent className="flex flex-col rounded-b-lg border border-t-0">
-                        {lessons?.map(({ id, title, status, type }) => {
+                        {lessons?.map(({ id, title, status, type, hasAccess }) => {
+                          const isBlocked =
+                            status === LESSON_PROGRESS_STATUSES.BLOCKED || !hasAccess;
+
                           return (
                             <Link
                               key={id}
-                              to={
-                                status === LESSON_PROGRESS_STATUSES.BLOCKED
-                                  ? "#"
-                                  : `/course/${course.id}/lesson/${id}`
-                              }
+                              to={isBlocked ? "#" : `/course/${course.id}/lesson/${id}`}
                               className={cn("flex gap-x-4 px-6 py-2 hover:bg-neutral-50", {
-                                "cursor-not-allowed": status === LESSON_PROGRESS_STATUSES.BLOCKED,
+                                "cursor-not-allowed hover:bg-transparent opacity-30": isBlocked,
                                 "border-l-2 border-l-primary-600 bg-primary-50 last:rounded-es-lg":
                                   lessonId === id,
                               })}
                             >
                               <Badge
                                 variant="icon"
-                                icon={progressBadge[status]}
+                                icon={
+                                  progressBadge[
+                                    isBlocked ? LESSON_PROGRESS_STATUSES.BLOCKED : status
+                                  ]
+                                }
                                 iconClasses="w-6 h-auto shrink-0"
                               />{" "}
                               <div className="flex flex-1 flex-col break-words overflow-x-hidden">

@@ -10,14 +10,17 @@ import { cn } from "~/lib/utils";
 
 import { useCoursePricingForm } from "./hooks/useCoursePricingForm";
 
+import type { SupportedLanguages } from "@repo/shared";
+
 type CoursePricingProps = {
   courseId: string;
   priceInCents?: number;
   currency?: string;
+  language: SupportedLanguages;
 };
 
-const CoursePricing = ({ courseId, priceInCents, currency }: CoursePricingProps) => {
-  const { form, onSubmit } = useCoursePricingForm({ courseId, priceInCents, currency });
+const CoursePricing = ({ courseId, priceInCents, currency, language }: CoursePricingProps) => {
+  const { form, onSubmit } = useCoursePricingForm({ courseId, priceInCents, currency, language });
   const { setValue, watch } = form;
   const { t } = useTranslation();
 

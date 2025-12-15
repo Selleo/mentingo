@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useCreateAiMentorLesson } from "~/api/mutations/admin/useCreateAiMentorLesson";
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
 import { useUpdateAiMentorLesson } from "~/api/mutations/admin/useUpdateAiMentorLesson";
+import { useUploadAiMentorAvatar } from "~/api/mutations/admin/useUploadAiMentorAvatar";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import {
@@ -23,12 +24,14 @@ import {
 import { aiMentorLessonFormSchema } from "../validators/useAiMentorLessonFormSchema";
 
 import type { AiMentorLessonFormValues } from "../validators/useAiMentorLessonFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 
 type AiMentorLessonFormProps = {
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setOpenChapter?: (chapterId: string) => void;
+  language: SupportedLanguages;
 };
 
 export const useAiMentorLessonForm = ({
@@ -36,6 +39,7 @@ export const useAiMentorLessonForm = ({
   lessonToEdit,
   setContentTypeToDisplay,
   setOpenChapter,
+  language,
 }: AiMentorLessonFormProps) => {
   const { id: courseId } = useParams();
   const { t } = useTranslation();
@@ -44,6 +48,8 @@ export const useAiMentorLessonForm = ({
   const { mutateAsync: createAiMentorLesson } = useCreateAiMentorLesson();
   const { mutateAsync: updateAiMentorLesson } = useUpdateAiMentorLesson();
   const { mutateAsync: deleteAiMentorLesson } = useDeleteLesson();
+  const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
+
   const form = useForm<AiMentorLessonFormValues>({
     resolver: zodResolver(aiMentorLessonFormSchema(t)),
     defaultValues: {
@@ -51,6 +57,7 @@ export const useAiMentorLessonForm = ({
       aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
       completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
       type: lessonToEdit?.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
+      name: lessonToEdit?.aiMentor?.name || "",
     },
   });
 
@@ -60,9 +67,10 @@ export const useAiMentorLessonForm = ({
     if (lessonToEdit) {
       reset({
         title: lessonToEdit.title,
-        aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
-        completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
-        type: lessonToEdit?.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
+        aiMentorInstructions: lessonToEdit.aiMentor?.aiMentorInstructions || "",
+        completionConditions: lessonToEdit.aiMentor?.completionConditions || "",
+        type: lessonToEdit.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
+        name: lessonToEdit.aiMentor?.name || "",
       });
     }
   }, [lessonToEdit, reset]);
@@ -102,18 +110,21 @@ export const useAiMentorLessonForm = ({
     setSelectedSuggestion(null);
   };
 
-  const onSubmit = async (values: AiMentorLessonFormValues) => {
+  const onSubmit = async (values: AiMentorLessonFormValues, file?: File | null) => {
     if (!chapterToEdit) return;
 
     try {
       if (lessonToEdit) {
         await updateAiMentorLesson({
-          data: { ...values, type: values.type },
+          data: { ...values, language },
           lessonId: lessonToEdit.id,
         });
+        if (file !== undefined) {
+          await uploadAvatar({ lessonId: lessonToEdit?.id, file });
+        }
       } else {
         await createAiMentorLesson({
-          data: { ...values, chapterId: chapterToEdit.id, type: values.type },
+          data: { ...values, chapterId: chapterToEdit.id },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }

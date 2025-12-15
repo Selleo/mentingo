@@ -21,9 +21,14 @@ import type { UseFormReturn } from "react-hook-form";
 type AnswerSelectQuestionProps = {
   form: UseFormReturn<QuizLessonFormValues>;
   questionIndex: number;
+  isStructureLocked?: boolean;
 };
 
-const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps) => {
+const AnswerSelectQuestion = ({
+  form,
+  questionIndex,
+  isStructureLocked = false,
+}: AnswerSelectQuestionProps) => {
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const questionType = form.getValues(`questions.${questionIndex}.type`);
@@ -31,6 +36,8 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
   const errors = form.formState.errors;
 
   const handleAddOption = useCallback(() => {
+    if (isStructureLocked) return;
+
     const currentOptions: QuestionOption[] =
       form.getValues(`questions.${questionIndex}.options`) || [];
 
@@ -44,10 +51,12 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
       shouldDirty: true,
       shouldValidate: true,
     });
-  }, [form, questionIndex]);
+  }, [form, questionIndex, isStructureLocked]);
 
   const handleRemoveOption = useCallback(
     (optionIndex: number) => {
+      if (isStructureLocked) return;
+
       const currentOptions: QuestionOption[] =
         form.getValues(`questions.${questionIndex}.options`) || [];
       const updatedOptions = currentOptions.filter((_, index) => index !== optionIndex);
@@ -56,22 +65,27 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
         shouldValidate: true,
       });
     },
-    [form, questionIndex],
+    [form, questionIndex, isStructureLocked],
   );
 
   const handleRemoveQuestion = useCallback(() => {
+    if (isStructureLocked) return;
+
     const currentQuestions = form.getValues("questions") || [];
     const updatedQuestions = currentQuestions.filter((_, index) => index !== questionIndex);
     form.setValue("questions", updatedQuestions, { shouldDirty: true, shouldValidate: true });
-  }, [form, questionIndex]);
+  }, [form, questionIndex, isStructureLocked]);
 
   const handleOptionChange = useCallback(
     (optionIndex: number, field: "optionText" | "isCorrect", value: string | boolean) => {
+      // When translating (structure locked), allow text edits but block structural/correctness changes.
+      if (isStructureLocked && field === "isCorrect") return;
+
       const currentOptions: QuestionOption[] =
         form.getValues(`questions.${questionIndex}.options`) || [];
       const updatedOptions = [...currentOptions];
 
-      if (field === "isCorrect") {
+      if (field === "isCorrect" && !isStructureLocked) {
         if (questionType === QuestionType.SINGLE_CHOICE) {
           updatedOptions.forEach((option, index) => {
             if (index !== optionIndex) option.isCorrect = false;
@@ -85,7 +99,7 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
         shouldValidate: true,
       });
     },
-    [form, questionIndex, questionType],
+    [form, questionIndex, questionType, isStructureLocked],
   );
 
   const onDeleteQuestion = () => {
@@ -127,9 +141,11 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                     <SortableList.Item id={item.sortableId}>
                       <div className="mt-2">
                         <div className="flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
-                          <SortableList.DragHandle>
-                            <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
-                          </SortableList.DragHandle>
+                          {!isStructureLocked && (
+                            <SortableList.DragHandle>
+                              <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
+                            </SortableList.DragHandle>
+                          )}
                           <Input
                             type="text"
                             name={`questions.${questionIndex}.options.${index}.optionText`}
@@ -149,6 +165,7 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                                 checked={item.isCorrect === true}
                                 onChange={() => handleOptionChange(index, "isCorrect", true)}
                                 className="size-4 cursor-pointer"
+                                disabled={isStructureLocked}
                               />
                             ) : (
                               <div className="cursor-pointer">
@@ -160,6 +177,7 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                                   onCheckedChange={() =>
                                     handleOptionChange(index, "isCorrect", !item.isCorrect)
                                   }
+                                  disabled={isStructureLocked}
                                 />
                               </div>
                             )}
@@ -173,15 +191,17 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
                             </Label>
                             <TooltipProvider delayDuration={0}>
                               <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="group">
-                                    <Icon
-                                      name="TrashIcon"
-                                      className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
-                                      onClick={() => handleRemoveOption(index)}
-                                    />
-                                  </div>
-                                </TooltipTrigger>
+                                {!isStructureLocked && (
+                                  <TooltipTrigger asChild>
+                                    <div className="group">
+                                      <Icon
+                                        name="TrashIcon"
+                                        className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
+                                        onClick={() => handleRemoveOption(index)}
+                                      />
+                                    </div>
+                                  </TooltipTrigger>
+                                )}
                                 <TooltipContent
                                   side="top"
                                   align="center"
@@ -209,21 +229,25 @@ const AnswerSelectQuestion = ({ form, questionIndex }: AnswerSelectQuestionProps
             </p>
           )}
           <div className="ml-14 mt-4 flex gap-2">
-            <Button
-              type="button"
-              data-testid={`add-options-button-${questionIndex}`}
-              className="bg-primary-700"
-              onClick={handleAddOption}
-            >
-              {t("adminCourseView.curriculum.lesson.button.addOption")}
-            </Button>
-            <Button
-              type="button"
-              className="bg-color-white border border-neutral-300 text-error-700"
-              onClick={() => setIsDeleteModalOpen(true)}
-            >
-              {t("adminCourseView.curriculum.lesson.button.deleteQuestion")}
-            </Button>
+            {!isStructureLocked && (
+              <>
+                <Button
+                  type="button"
+                  data-testid={`add-options-button-${questionIndex}`}
+                  className="bg-primary-700"
+                  onClick={handleAddOption}
+                >
+                  {t("adminCourseView.curriculum.lesson.button.addOption")}
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-color-white border border-neutral-300 text-error-700"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                >
+                  {t("adminCourseView.curriculum.lesson.button.deleteQuestion")}
+                </Button>
+              </>
+            )}
           </div>
           <DeleteConfirmationModal
             open={isDeleteModalOpen}

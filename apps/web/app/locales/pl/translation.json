@@ -19,6 +19,9 @@
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie..."
     },
+    "toast": {
+      "noAccess": "Nie masz uprawnień do tego zasobu"
+    },
     "tooltip": {
       "soon": "Dostępne wkrótce"
     },
@@ -52,6 +55,10 @@
     "continueWithGoogle": "Kontynuuj z użyciem Google",
     "continueWithMicrosoft": "Kontynuuj z użyciem Microsoft",
     "continueWithSlack": "Kontynuuj z użyciem Slack"
+  },
+  "lessons": {
+    "sequenceUpdatedSuccessfully": "Kolejność lekcji została pomyślnie zaktualizowana",
+    "sequenceUpdateFailed": "Nie udało się zaktualizować kolejności lekcji"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -522,6 +529,11 @@
     }
   },
   "adminCoursesView": {
+    "settings": {
+      "other": {
+        "reachedCharactersLimit": "Osiągnięto limit znaków."
+      }
+    },
     "filters": {
       "placeholder": {
         "title": "Szukaj po tytule ...",
@@ -645,7 +657,7 @@
       "placeholder": {
         "searchByKeyword": "Szukaj po słowie kluczowym...",
         "roles": "Role",
-        "groups": "Grupy"
+        "groups": "Wszystkie Grupy"
       }
     },
     "field": {
@@ -705,7 +717,7 @@
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "archive": "Czy na pewno chcesz zarchiwizować te konta?",
-        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (student, content_creator lub admin), groupName (opcjonalne), language (en lub pl).",
+        "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (admin, student lub content_creator), groups (\"group1,group2\"), language (en lub pl).",
         "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
         "noUsersSkipped": "Nie pominięto żadnych użytkowników."
       },
@@ -744,7 +756,7 @@
       "role": "Rola",
       "language": "Język",
       "status": "Status",
-      "groupId": "Grupa"
+      "groups": "Grupa"
     },
     "toast": {
       "userCreatedSuccessfully": "Użytkownik utworzony pomyślnie",
@@ -835,6 +847,10 @@
   "adminGroupsView": {
     "name": "Nazwa grupy",
     "characteristic": "Charakterystyka",
+    "groupSelect": {
+      "label": "Wybierz grupy",
+      "noGroups": "Nie znaleziono grup"
+    },
     "buttons": {
       "create": "Stwórz nową grupę",
       "deleteSelected": "Usuń wybrane"
@@ -900,8 +916,12 @@
       "status": "Status",
       "pricing": "Cennik",
       "preview": "Podgląd",
+      "generateMissingTranslations": "Wygeneruj brakujące tłumaczenia",
       "enrolledStudents": "Zapisani studenci",
-      "testAiMentor": "Przetestuj AI Mentora"
+      "testAiMentor": "Przetestuj AI Mentora",
+      "notAddedLanguages": "Niedodane",
+      "baseLanguage": "Domyślny",
+      "generateMissingTranslationsDescription": "Czy na pewno chcesz wygenerować brakujące tłumaczenia? Ta akcja może zająć kilka chwil."
     },
     "toast": {
       "createCourseSuccessfully": "Kurs utworzony pomyślnie",
@@ -911,7 +931,13 @@
       "maxTitleLengthExceeded_one": "Tytuł nie może mieć więcej niż {{count}} znak",
       "maxTitleLengthExceeded_few": "Tytuł nie może mieć więcej niż {{count}} znaki",
       "maxTitleLengthExceeded_many": "Tytuł nie może mieć więcej niż {{count}} znaków",
-      "maxTitleLengthExceeded_other": "Tytuł nie może mieć więcej niż {{count}} znaków"
+      "maxTitleLengthExceeded_other": "Tytuł nie może mieć więcej niż {{count}} znaków",
+      "aiMentorAvatarIncorrectType": "Nieprawidłowy typ pliku. Prześlij obraz w formacie JPG, JPEG, PNG lub SVG.",
+      "languageNotSupported": "Ten kurs nie obsługuje tego języka.",
+      "updateCourseMissingLanguage": "Nie podano języka do tłumaczenia",
+      "successfullyDeletedLanguage": "Język został pomyślnie usunięty z kursu",
+      "invalidLanguageToDelete": "Nie możesz usunąć tego języka",
+      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy."
     },
     "settings": {
       "breadcrumbs": {
@@ -944,7 +970,8 @@
         "title": "Tytuł kursu",
         "category": "Kategoria",
         "description": "Opis",
-        "thumbnail": "Miniatura"
+        "thumbnail": "Miniatura",
+        "baseLanguage": "Język podstawowy"
       },
       "placeholder": {
         "title": "Wprowadź tytuł",
@@ -954,7 +981,11 @@
       "other": {
         "charactersLeft": "Pozostało znaków",
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
-        "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie."
+        "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
+        "enforceLessonSequence": "Wymuś sekwencję lekcji",
+        "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
+        "fallbackLanguageWarning": "Ostrzeżenie: Niektóre pola są puste. Zamiast nich zostaną użyte tłumaczenia z języka bazowego.",
+        "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
       },
       "validation": {
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
@@ -993,7 +1024,8 @@
       },
       "chapter": {
         "button": {
-          "addChapter": "Dodaj rozdział"
+          "addChapter": "Dodaj rozdział",
+          "addChapterDisabledTooltip": "Aby dodać rozdział, musisz być w języku bazowym."
         },
         "toast": {
           "chapterCreatedSuccessfully": "Rozdział utworzony pomyślnie",
@@ -1019,7 +1051,8 @@
           "addWords": "Dodaj słowa",
           "saveLesson": "Zapisz lekcje",
           "addResource": "Dodaj zasób",
-          "removeResource": "Usuń zasób"
+          "removeResource": "Usuń zasób",
+          "addLessonDisabledTooltip": "Aby utworzyć lekcję, musisz być w języku bazowym."
         },
         "breadcrumbs": {
           "back": "Wstecz"
@@ -1099,6 +1132,8 @@
           "words": "Słowa",
           "sentence": "Zdanie",
           "sourceUrl": "Adres URL źródła",
+          "aiMentor": "AI Mentor",
+          "mentorName": "Nazwa Mentora",
           "aiMentorInstructions": "Instrukcje AI Mentora",
           "completionConditions": "Warunki zaliczenia",
           "passThreshold": "Próg zaliczenia",
@@ -1139,6 +1174,8 @@
           "option": "Opcja",
           "presentation": "Prezentacja",
           "singleChoice": "Pojedynczy wybór",
+          "dropOrClick": "Upuść obraz tutaj lub kliknij, aby przesłać",
+          "allowedFormats": "PNG, JPG lub SVG",
           "multipleChoice": "Wielokrotny wybór",
           "matchWords": "Dopasowanie",
           "trueOrFalse": "Prawda/fałsz",
@@ -1148,6 +1185,8 @@
           "briefResponse": "Krótka odpowiedź",
           "detailedResponse": "Odpowiedź rozwinięta",
           "scale1_5": "Skala 1 do 5",
+          "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
+          "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
           "selectQuestionType": "Wybierz typ pytania",
           "textLessonDescription": "Ten typ pozwala na tworzenie treści tekstowych za pomocą edytora tekstu.",
           "videoLessonDescription": "Wybierz ten typ, jeśli chcesz umieścić pliki wideo, takie jak MP4.",
@@ -1164,10 +1203,11 @@
           "leaveContentBodyValidate": "Aby zapisać zmiany, popraw błędy w formularzu.",
           "aiMentorInstructionsTooltip": "Opisz, jak AI Mentor powinien zachowywać się podczas lekcji. Uwzględnij kontekst, rolę lub scenariusz, który AI powinien realizować. To określa, jak AI będzie prowadzić rozmowę.",
           "aiMentorTypeTooltip": "Zachowuje się jak postać w scenariuszu, ale w trakcie sceny zadaje pytania i pomaga wyciągać wnioski.\n Przykład: „Co zrobiłbyś teraz w roli menadżera?”",
-          "aiTeacherTypeTooltip": "Tłumaczy, uczy i zadaje pytania — jak nauczyciel.\n Przykład: „W tej sytuacji klient zgłasza obiekcję cenową. Co powinieneś odpowiedzieć i dlaczego?”",
+          "aiTeacherTypeTooltip": "Tłumaczy, uczy i zadaje pytania - jak nauczyciel.\n Przykład: „W tej sytuacji klient zgłasza obiekcję cenową. Co powinieneś odpowiedzieć i dlaczego?”",
           "aiRoleplayTypeTooltip": " Symuluje realistyczną postać i sytuację – bez wychodzenia z roli.\n Przykład: „To już drugi raz, kiedy wasza usługa zawiodła. Co zamierzacie z tym zrobić?”",
           "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
           "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
+          "aiMentorPersonaTooltip": "Tu określasz personę lekcji. Możesz wybrać imię i awatar dla AI Mentora. Persona będzie przedstawiać się tym imieniem, a wybrany awatar będzie wyświetlany podczas lekcji.",
           "suggestedExamples": "Sugerowane przykłady",
           "charactersLeft": "pozostałe znaki",
           "optional": "opcjonalnie",
@@ -1191,11 +1231,12 @@
             "conditions": {
               "scenarioSimulation": "<ul><li>Student pyta o budżet klienta.</li><li>Student pyta o harmonogram.</li><li>Student używa sprzedaży SPIN lub innej techniki sprzedażowej.</li><li>Student identyfikuje kluczowe problemy klienta.</li><li>Student składa propozycję, która odpowiada ograniczeniom klienta.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
               "problemSolving": "<ul><li>Student uznaje wkład pracownika.</li><li>Student uczciwie wyjaśnia sytuację budżetową.</li><li>Student proponuje alternatywę niefinansową (np. dodatkowe korzyści, możliwość rozwoju).</li><li>Student zgadza się wrócić do tematu w późniejszym terminie.</li><li>Student utrzymuje szanujący, wspierający ton.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
-              "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki muszą być spełnione.)</em>",
-              "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu — wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
+              "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu - wszystkie warunki muszą być spełnione.)</em>",
+              "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu - wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
             }
           },
-          "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko."
+          "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
+          "dragWord": "Przeciągnij słowo do zdania"
         }
       },
       "validation": {
@@ -1233,9 +1274,10 @@
       "filters": {
         "placeholder": {
           "searchByKeyword": "Szukaj po słowie kluczowym...",
-          "groups": "Grupy"
+          "groups": "Wszystkie Grupy"
         }
       },
+      "enroll": "Zapisz",
       "enrollSelected": "Zapisz wybranych na kurs",
       "enrollGroups": "Zapisz wybrane grupy na kurs",
       "enrollGroupsModal": {
@@ -1248,6 +1290,8 @@
       "members_few": "{{count}} członków",
       "members_many": "{{count}} członków",
       "members_other": "{{count}} członków",
+      "unenrollSelected": "Wypisz wybranych z kursu",
+      "unenrollGroups": "Wypisz grupy",
       "table": {
         "name": "Imię",
         "surname": "Nazwisko",
@@ -1255,13 +1299,27 @@
         "status": "Status uczestnictwa",
         "enrollmentDate": "Data zapisania na kurs"
       },
+      "toast": {
+        "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled.",
+        "studentsEnrolledByGroup": "Nie można wypisać tych studentów, ponieważ {{count}} z nich zostało zapisanych przez grupę.",
+        "groupsUnenrolledSuccessfully": "Pomyślnie wypisano grupy z kursu",
+        "alreadyEnrolledByGroup": {
+          "title": "Niektórzy użytkownicy są już zapisani przez grupę"
+        }
+      },
       "statuses": {
         "enrolled": "Zapisany",
+        "enrolledByGroup": "Zapisany przez grupę",
+        "individuallyEnrolled": "Zapisany indywidualnie",
         "notEnrolled": "Niezapisany"
       },
       "confirmation": {
         "title": "Potwierdź zapis",
         "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
+      },
+      "unenrollConfirmation": {
+        "title": "Potwierdź wypisanie",
+        "description": "Czy na pewno chcesz wypisać wybranych studentów z tego kursu? Tej operacji nie można cofnąć."
       },
       "successResponse": "studentów zostało zapisanych do kursu."
     },
@@ -1314,8 +1372,20 @@
       },
       "empty": {
         "noUsers": "Brak zapisanych",
-        "enrolled": "użytkowników"
+        "enrolled": "użytkowników",
+        "noGroups": "Brak grup"
       }
+    },
+    "createLanguage": {
+      "title": "Utwórz nowy język",
+      "description": "Czy na pewno chcesz utworzyć nowy język dla tego kursu?",
+      "success": "Język został utworzony pomyślnie",
+      "alreadyExists": "Ten język już istnieje.",
+      "editConstraints": "W językach innych niż {{baseLanguage}} nie możesz tworzyć nowych lekcji, rozdziałów ani dodawać nowych pytań do quizów."
+    },
+    "deleteLanguage": {
+      "title": "Usuń język",
+      "description": "Czy na pewno chcesz usunąć ten język?"
     }
   },
   "registerView": {
@@ -1446,7 +1516,10 @@
   },
   "studentLessonView": {
     "error": {
-      "lessonIdNotFound": "Nie znaleziono ID lekcji"
+      "lessonIdNotFound": "Nie znaleziono ID lekcji",
+      "notAuthorizedTitle": "Brak uprawnień",
+      "notAuthorizedDescription": "Nie masz uprawnień do dostępu do tej lekcji.",
+      "goBackToCourse": "Wróć do kursu"
     },
     "other": {
       "lesson": "Lekcja",

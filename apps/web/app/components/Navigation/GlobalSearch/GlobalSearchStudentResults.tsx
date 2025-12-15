@@ -4,6 +4,7 @@ import { studentLessonsQueryOptions } from "~/api/queries";
 import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
 import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
 import { studentCoursesQueryOptions } from "~/api/queries/useStudentCourses";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { AnnouncementEntry } from "./AnnouncementEntry";
 import { CourseEntry } from "./CourseEntry";
@@ -24,6 +25,8 @@ export const GlobalSearchStudentResults = ({
   activeIndex: number;
   setTotalItems: (count: number) => void;
 }) => {
+  const { language } = useLanguageStore();
+
   const tabsToDisplay = useQueries({
     queries: [
       studentCoursesQueryOptions(
@@ -31,7 +34,7 @@ export const GlobalSearchStudentResults = ({
         { enabled: debouncedSearch.length >= 3 },
       ),
       availableCoursesQueryOptions(
-        { searchQuery: debouncedSearch },
+        { searchQuery: debouncedSearch, language },
         { enabled: debouncedSearch.length >= 3 },
       ),
       announcementsForUserOptions(

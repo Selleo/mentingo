@@ -1,12 +1,17 @@
 import { Type } from "@sinclair/typebox";
 
 import { baseResponse, paginatedResponse, UUIDSchema } from "src/common";
-import { allCoursesSchema, allStudentCoursesSchema } from "src/courses/schemas/course.schema";
+import {
+  allCoursesSchema,
+  allStudentCoursesSchema,
+  supportedLanguagesSchema,
+} from "src/courses/schemas/course.schema";
 import {
   coursesStatusOptions,
   sortCourseFieldsOptions,
   sortEnrolledStudentsOptions,
 } from "src/courses/schemas/courseQuery";
+import { groupsFilterSchema } from "src/group/group.schema";
 
 import { enrolledStudentSchema } from "../schemas/enrolledStudent.schema";
 
@@ -35,6 +40,7 @@ export const allCoursesValidation = {
       schema: Type.Number({ minimum: 1 }),
     },
     { type: "query" as const, name: "perPage", schema: Type.Number() },
+    { type: "query" as const, name: "language", schema: supportedLanguagesSchema },
   ],
 };
 
@@ -63,6 +69,7 @@ export const studentCoursesValidation = {
     },
     { type: "query" as const, name: "perPage", schema: Type.Number() },
     { type: "query" as const, name: "sort", schema: sortCourseFieldsOptions },
+    { type: "query" as const, name: "language", schema: supportedLanguagesSchema },
   ],
 };
 
@@ -92,6 +99,7 @@ export const coursesValidation = {
     { type: "query" as const, name: "perPage", schema: Type.Number() },
     { type: "query" as const, name: "sort", schema: sortCourseFieldsOptions },
     { type: "query" as const, name: "excludeCourseId", schema: UUIDSchema },
+    { type: "query" as const, name: "language", schema: supportedLanguagesSchema },
   ],
 };
 
@@ -111,8 +119,8 @@ export const studentsWithEnrolmentValidation = {
     },
     {
       type: "query" as const,
-      name: "groupId",
-      schema: UUIDSchema,
+      name: "groups",
+      schema: groupsFilterSchema,
     },
   ],
 };

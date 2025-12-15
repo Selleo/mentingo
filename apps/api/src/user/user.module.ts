@@ -1,4 +1,4 @@
-import { Module, forwardRef } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
@@ -7,6 +7,8 @@ import { EmailModule } from "src/common/emails/emails.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
+import { GroupModule } from "src/group/group.module";
+import { GroupService } from "src/group/group.service";
 import { S3Module } from "src/s3/s3.module";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsModule } from "src/settings/settings.module";
@@ -25,7 +27,8 @@ import { UserService } from "./user.service";
     BunnyStreamModule,
     StatisticsModule,
     SettingsModule,
-    forwardRef(() => CourseModule),
+    GroupModule,
+    CourseModule,
   ],
   controllers: [UserController],
   providers: [
@@ -36,6 +39,7 @@ import { UserService } from "./user.service";
     StatisticsService,
     CreatePasswordService,
     UserInactivityEmailCron,
+    GroupService,
   ],
   exports: [UserService, StatisticsService],
 })

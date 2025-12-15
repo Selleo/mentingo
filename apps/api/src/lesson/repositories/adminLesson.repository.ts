@@ -1,7 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
+import { eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { LocalizationService } from "src/localization/localization.service";
 import {
   aiMentorLessons,
   chapters,
@@ -10,7 +12,6 @@ import {
   lessons,
   questionAnswerOptions,
   questions,
-  studentQuestionAnswers,
 } from "src/storage/schema";
 
 import { LESSON_TYPES } from "../lesson.type";
@@ -26,30 +27,147 @@ import type {
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
-import type { AiMentorType } from "@repo/shared";
+import type { AiMentorType, SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { LessonActivityLogOption, LessonActivityLogQuestion } from "src/activity-logs/types";
+import type { QuestionType } from "src/questions/schema/question.types";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class AdminLessonRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
-  async getLesson(id: UUIDType) {
-    return this.db.select().from(lessons).where(eq(lessons.id, id));
+  async getLesson(id: UUIDType, language?: SupportedLanguages) {
+    return this.db
+      .select({
+        ...getTableColumns(lessons),
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+        aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
+        aiMentorCompletionConditions: aiMentorLessons.completionConditions,
+        aiMentorName: aiMentorLessons.name,
+        aiMentorAvatarReference: aiMentorLessons.avatarReference,
+        aiMentorType: aiMentorLessons.type,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(aiMentorLessons, eq(aiMentorLessons.lessonId, lessons.id))
+      .where(eq(lessons.id, id));
   }
 
-  async createLessonForChapter(data: CreateLessonBody) {
-    const [lesson] = await this.db.insert(lessons).values(data).returning();
+  async createLessonForChapter(data: CreateLessonBody, language: SupportedLanguages) {
+    const [lesson] = await this.db
+      .insert(lessons)
+      .values({
+        ...data,
+        title: buildJsonbField(language, data.title),
+        description: buildJsonbField(language, data.description),
+      })
+      .returning({
+        ...getTableColumns(lessons),
+        title: sql<string>`lessons.title->>${language}`,
+        description: sql<string>`lessons.description->>${language}`,
+      });
     return lesson;
   }
 
   async updateLesson(id: UUIDType, data: UpdateLessonBody) {
     const [updatedLesson] = await this.db
       .update(lessons)
-      .set(data)
+      .set({
+        ...data,
+        title: setJsonbField(lessons.title, data.language, data.title),
+        description: setJsonbField(lessons.description, data.language, data.description),
+      })
       .where(eq(lessons.id, id))
-      .returning();
+      .returning({
+        ...getTableColumns(lessons),
+        title: sql<string>`lessons.title->>${data.language}`,
+        description: sql<string>`lessons.description->>${data.language}`,
+      });
+
     return updatedLesson;
+  }
+
+  async getQuestionsWithOptions(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ): Promise<
+    Array<
+      LessonActivityLogQuestion & {
+        options?: LessonActivityLogOption[];
+      }
+    >
+  > {
+    const questionsList = await dbInstance
+      .select({
+        id: questions.id,
+        type: sql<QuestionType>`${questions.type}`,
+        title: this.localizationService.getLocalizedSqlField(questions.title, language),
+        description: this.localizationService.getLocalizedSqlField(questions.description, language),
+        solutionExplanation: this.localizationService.getLocalizedSqlField(
+          questions.solutionExplanation,
+          language,
+        ),
+        displayOrder: questions.displayOrder,
+        photoS3Key: questions.photoS3Key,
+      })
+      .from(questions)
+      .innerJoin(lessons, eq(questions.lessonId, lessons.id))
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(eq(questions.lessonId, lessonId))
+      .orderBy(questions.displayOrder);
+
+    if (questionsList.length === 0) return [];
+
+    const options = await dbInstance
+      .select({
+        id: questionAnswerOptions.id,
+        questionId: questionAnswerOptions.questionId,
+        optionText: this.localizationService.getLocalizedSqlField(
+          questionAnswerOptions.optionText,
+          language,
+        ),
+        isCorrect: questionAnswerOptions.isCorrect,
+        displayOrder: questionAnswerOptions.displayOrder,
+        matchedWord: this.localizationService.getLocalizedSqlField(
+          questionAnswerOptions.matchedWord,
+          language,
+        ),
+        scaleAnswer: questionAnswerOptions.scaleAnswer,
+      })
+      .from(questionAnswerOptions)
+      .innerJoin(questions, eq(questionAnswerOptions.questionId, questions.id))
+      .innerJoin(lessons, eq(questions.lessonId, lessons.id))
+      .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(courses, eq(chapters.courseId, courses.id))
+      .where(
+        inArray(
+          questionAnswerOptions.questionId,
+          questionsList.map((question) => question.id),
+        ),
+      )
+      .orderBy(questionAnswerOptions.displayOrder);
+
+    type QuestionOption = (typeof options)[number];
+
+    const optionsByQuestion = options.reduce<Record<UUIDType, QuestionOption[]>>((acc, option) => {
+      acc[option.questionId] = [...(acc[option.questionId] ?? []), option];
+      return acc;
+    }, {});
+
+    return questionsList.map((question) => ({
+      ...question,
+      options: (optionsByQuestion[question.id] ?? []).map(
+        ({ questionId: _questionId, ...rest }) => rest,
+      ),
+    }));
   }
 
   async updateQuizLessonWithQuestionsAndOptions(
@@ -60,9 +178,9 @@ export class AdminLessonRepository {
     return dbInstance
       .update(lessons)
       .set({
-        title: data.title,
+        title: setJsonbField(lessons.title, data.language, data.title),
         type: LESSON_TYPES.QUIZ,
-        description: data.description,
+        description: setJsonbField(lessons.description, data.language, data.description),
         chapterId: data.chapterId,
         thresholdScore: data.thresholdScore,
         attemptsLimit: data.attemptsLimit,
@@ -74,21 +192,26 @@ export class AdminLessonRepository {
   async createQuizLessonWithQuestionsAndOptions(
     data: CreateQuizLessonBody,
     displayOrder: number,
+    language: SupportedLanguages,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     const [lesson] = await dbInstance
       .insert(lessons)
       .values({
-        title: data.title,
+        title: buildJsonbField(language, data.title),
+        description: buildJsonbField(language, data.description),
         type: LESSON_TYPES.QUIZ,
-        description: data.description,
         chapterId: data?.chapterId,
         displayOrder,
         thresholdScore: data.thresholdScore,
         attemptsLimit: data.attemptsLimit,
         quizCooldownInHours: data.quizCooldownInHours,
       })
-      .returning();
+      .returning({
+        ...getTableColumns(lessons),
+        title: sql<string>`lessons.title->>${language}`,
+        description: sql<string>`lessons.description->>${language}`,
+      });
 
     return lesson;
   }
@@ -96,18 +219,23 @@ export class AdminLessonRepository {
   async createAiMentorLesson(
     data: CreateAiMentorLessonBody,
     displayOrder: number,
+    language: SupportedLanguages,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     const [lesson] = await dbInstance
       .insert(lessons)
       .values({
-        title: data.title,
+        title: buildJsonbField(language, data.title),
         type: LESSON_TYPES.AI_MENTOR,
         chapterId: data?.chapterId,
         displayOrder,
         isExternal: true,
       })
-      .returning();
+      .returning({
+        ...getTableColumns(lessons),
+        title: sql<string>`lessons.title->>${language}::text`,
+        description: sql<string>`lessons.description->>${language}::text`,
+      });
 
     return lesson;
   }
@@ -117,7 +245,19 @@ export class AdminLessonRepository {
     data: UpdateLessonBody,
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
-    return dbInstance.update(lessons).set(data).where(eq(lessons.id, id)).returning();
+    return dbInstance
+      .update(lessons)
+      .set({
+        ...data,
+        title: setJsonbField(lessons.title, data.language, data.title),
+        description: setJsonbField(lessons.description, data.language, data.description),
+      })
+      .where(eq(lessons.id, id))
+      .returning({
+        ...getTableColumns(lessons),
+        title: sql<string>`lessons.title->>${data.language}`,
+        description: sql<string>`lessons.description->>${data.language}`,
+      });
   }
 
   async updateAiMentorLessonData(
@@ -126,6 +266,7 @@ export class AdminLessonRepository {
       aiMentorInstructions: string;
       completionConditions: string;
       type: AiMentorType;
+      name?: string;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
@@ -141,32 +282,11 @@ export class AdminLessonRepository {
       aiMentorInstructions: string;
       completionConditions: string;
       type: AiMentorType;
+      name?: string;
     },
     dbInstance: PostgresJsDatabase<typeof schema> = this.db,
   ) {
     return dbInstance.insert(aiMentorLessons).values(data).returning();
-  }
-
-  async getQuestions(conditions: any[]) {
-    return this.db
-      .select()
-      .from(questions)
-      .where(and(...conditions));
-  }
-
-  async getQuestionAnswers(questionId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {
-    const dbInstance = trx ?? this.db;
-
-    return dbInstance
-      .select({
-        id: questionAnswerOptions.id,
-        optionText: questionAnswerOptions.optionText,
-        isCorrect: questionAnswerOptions.isCorrect,
-        displayOrder: questionAnswerOptions.displayOrder,
-        questionId: questionAnswerOptions.questionId,
-      })
-      .from(questionAnswerOptions)
-      .where(eq(questionAnswerOptions.questionId, questionId));
   }
 
   async getMaxDisplayOrder(chapterId: UUIDType) {
@@ -178,25 +298,6 @@ export class AdminLessonRepository {
       .where(eq(lessons.chapterId, chapterId));
 
     return result.maxOrder;
-  }
-
-  async getQuestionAnswerOptions(questionId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {
-    const dbInstance = trx ?? this.db;
-
-    return dbInstance
-      .select()
-      .from(questionAnswerOptions)
-      .where(eq(questionAnswerOptions.questionId, questionId));
-  }
-
-  async getQuestionStudentAnswers(
-    questionId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
-    return dbInstance
-      .select()
-      .from(studentQuestionAnswers)
-      .where(eq(studentQuestionAnswers.questionId, questionId));
   }
 
   async removeLesson(lessonId: UUIDType, dbInstance: PostgresJsDatabase<typeof schema> = this.db) {
@@ -264,12 +365,25 @@ export class AdminLessonRepository {
   }
 
   async getExistingQuestions(lessonId: UUIDType, trx: PostgresJsDatabase<typeof schema>) {
-    return trx.select({ id: questions.id }).from(questions).where(eq(questions.lessonId, lessonId));
+    return trx
+      .select({
+        id: questions.id,
+        type: questions.type,
+        displayOrder: questions.displayOrder,
+      })
+      .from(questions)
+      .where(eq(questions.lessonId, lessonId));
   }
 
   async getExistingOptions(questionId: UUIDType, trx: PostgresJsDatabase<typeof schema>) {
     const existingOptions = await trx
-      .select({ id: questionAnswerOptions.id })
+      .select({
+        id: questionAnswerOptions.id,
+        displayOrder: questionAnswerOptions.displayOrder,
+        isCorrect: questionAnswerOptions.isCorrect,
+        matchedWord: questionAnswerOptions.matchedWord,
+        scaleAnswer: questionAnswerOptions.scaleAnswer,
+      })
       .from(questionAnswerOptions)
       .where(eq(questionAnswerOptions.questionId, questionId));
 
@@ -283,7 +397,19 @@ export class AdminLessonRepository {
   ) {
     return trx
       .update(questionAnswerOptions)
-      .set(optionData)
+      .set({
+        ...optionData,
+        optionText: setJsonbField(
+          questionAnswerOptions.optionText,
+          optionData.language,
+          optionData.optionText,
+        ),
+        matchedWord: setJsonbField(
+          questionAnswerOptions.matchedWord,
+          optionData.language,
+          optionData.matchedWord,
+        ),
+      })
       .where(eq(questionAnswerOptions.id, optionId))
       .returning();
   }
@@ -298,6 +424,8 @@ export class AdminLessonRepository {
       .values({
         questionId,
         ...optionData,
+        optionText: buildJsonbField(optionData.language, optionData.optionText),
+        matchedWord: buildJsonbField(optionData.language, optionData.matchedWord),
       })
       .returning();
   }
@@ -333,6 +461,8 @@ export class AdminLessonRepository {
         lessonId,
         authorId,
         ...questionData,
+        title: buildJsonbField(questionData.language, questionData.title),
+        description: buildJsonbField(questionData.language, questionData.description),
       })
       .onConflictDoUpdate({
         target: questions.id,
@@ -340,55 +470,17 @@ export class AdminLessonRepository {
           lessonId,
           authorId,
           ...questionData,
+          title: setJsonbField(questions.title, questionData.language, questionData.title),
+          description: setJsonbField(
+            questions.description,
+            questionData.language,
+            questionData.description,
+          ),
         },
       })
       .returning({ id: questions.id });
 
     return result.id;
-  }
-
-  async removeQuestionAnswerOptions(
-    questionId: UUIDType,
-    idsToDelete: UUIDType[],
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
-    return dbInstance
-      .delete(questionAnswerOptions)
-      .where(
-        and(
-          eq(questionAnswerOptions.questionId, questionId),
-          inArray(questionAnswerOptions.id, idsToDelete),
-        ),
-      );
-  }
-
-  async upsertQuestionAnswerOptions(
-    questionId: UUIDType,
-    option: {
-      id?: UUIDType;
-      optionText: string;
-      isCorrect: boolean;
-      displayOrder: number;
-    },
-    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
-  ) {
-    return dbInstance
-      .insert(questionAnswerOptions)
-      .values({
-        id: option.id,
-        questionId,
-        optionText: option.optionText,
-        isCorrect: option.isCorrect,
-        displayOrder: option.displayOrder,
-      })
-      .onConflictDoUpdate({
-        target: questionAnswerOptions.id,
-        set: {
-          optionText: option.optionText,
-          isCorrect: option.isCorrect,
-          displayOrder: option.displayOrder,
-        },
-      });
   }
 
   async getLessonResourcesForLesson(lessonId: UUIDType) {
@@ -465,5 +557,12 @@ export class AdminLessonRepository {
 
   async getCourse(courseId: UUIDType) {
     return this.db.select().from(courses).where(eq(courses.id, courseId));
+  }
+
+  async updateAiMentorAvatar(lessonId: UUIDType, fileKey: string | null) {
+    return this.db
+      .update(aiMentorLessons)
+      .set({ avatarReference: fileKey })
+      .where(eq(aiMentorLessons.lessonId, lessonId));
   }
 }

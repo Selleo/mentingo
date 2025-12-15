@@ -317,7 +317,7 @@ export class CreateCourseActions {
     await page.locator('[data-testid="new-word-input"]').fill(word);
     await page.locator('[data-testid="add-word"]').click();
 
-    const draggableElement = page.locator(`span:text("${word}")`).locator("..");
+    const draggableElement = page.getByTestId(`drag-${word}`);
     await draggableElement.waitFor({ state: "visible" });
 
     const editableElement = page.locator('div[contenteditable="true"]');

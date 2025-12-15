@@ -93,7 +93,8 @@ export class PromptService implements OnModuleInit {
       });
 
     const { lessonId } = await this.aiRepository.findLessonIdByThreadId(threadId);
-    const contextInfo = content + history[history.length - 1]?.content ?? "";
+    const lastHistoryEntry = history[history.length - 1];
+    const contextInfo = content + (lastHistoryEntry?.content ?? "");
 
     const { chunks: context } = await observe(
       async () => {
@@ -115,7 +116,7 @@ export class PromptService implements OnModuleInit {
       eq(aiMentorThreads.id, data.threadId),
     ]);
 
-    const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId);
+    const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId, userLanguage);
 
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
 
@@ -141,8 +142,9 @@ export class PromptService implements OnModuleInit {
 
     const prompt = await this.loadPrompt(promptChoice, {
       lessonTitle: lesson.title,
+      name: lesson.name,
       lessonInstructions: lesson.instructions,
-      groups: groups,
+      groups: groups.map((group) => `${group.name}: ${group.characteristic}\n`),
       securityAndRagBlock: securityAndRagBlock,
     });
 

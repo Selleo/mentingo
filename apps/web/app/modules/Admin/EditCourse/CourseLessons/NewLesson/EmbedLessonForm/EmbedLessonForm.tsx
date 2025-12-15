@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
@@ -17,12 +18,14 @@ import { DEFAULT_EMBED_LESSON_RESOURCE, MAX_EMBED_LESSON_RESOURCES } from "./con
 import { useEmbedLessonForm } from "./hooks/useEmbedLessonForm";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
+import type { SupportedLanguages } from "@repo/shared";
 
 type EmbedLessonProps = {
   lessonToEdit?: Lesson | null;
   chapterToEdit: Chapter | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
+  language: SupportedLanguages;
 };
 
 export const EmbedLessonForm = ({
@@ -30,6 +33,7 @@ export const EmbedLessonForm = ({
   chapterToEdit,
   setContentTypeToDisplay,
   setSelectedLesson,
+  language,
 }: EmbedLessonProps) => {
   const { t } = useTranslation();
 
@@ -39,11 +43,10 @@ export const EmbedLessonForm = ({
     lessonToEdit,
     chapterToEdit,
     setContentTypeToDisplay,
+    language,
   });
 
   const resources = form.watch("resources");
-
-  console.log("resources", resources);
 
   const hasReachedMaxResources = useMemo(() => {
     return isArray(resources) && resources.length >= MAX_EMBED_LESSON_RESOURCES;
@@ -65,9 +68,12 @@ export const EmbedLessonForm = ({
 
   const onCloseDeleteModal = () => setIsModalOpen(false);
 
+  const missingTranslations = lessonToEdit && !lessonToEdit.title.trim();
+
   return (
     <Card>
       <CardHeader className="px-8 pb-6 pt-8">
+        {missingTranslations && <MissingTranslationsAlert />}
         {!lessonToEdit && (
           <Breadcrumb
             lessonLabel={t("adminCourseView.curriculum.lesson.other.embed")}

@@ -2,50 +2,66 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
   Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  forwardRef,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
   between,
   count,
   countDistinct,
   eq,
+  getTableColumns,
   ilike,
   inArray,
   isNotNull,
   isNull,
   like,
   ne,
+  not,
   or,
   sql,
 } from "drizzle-orm";
-import { isEmpty } from "lodash";
+import { isEmpty, isEqual } from "lodash";
 
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
+import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
+import {
+  CreateCourseEvent,
+  UpdateCourseEvent,
+  EnrollGroupToCourseEvent,
+  EnrollCourseEvent,
+} from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
+import { AdminLessonService } from "src/lesson/services/adminLesson.service";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
-import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
 import {
   aiMentorStudentLessonProgress,
   categories,
+  certificates,
   chapters,
   courses,
   coursesSummaryStats,
@@ -53,22 +69,23 @@ import {
   groups,
   groupUsers,
   lessons,
+  questionAnswerOptions,
   questions,
   quizAttempts,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
-  studentQuestionAnswers,
   users,
 } from "../storage/schema";
 
+import { LESSON_SEQUENCE_ENABLED } from "./constants";
 import {
   COURSE_ENROLLMENT_SCOPES,
   CourseSortFields,
-  EnrolledStudentSortFields,
+  CourseStudentAiMentorResultsSortFields,
   CourseStudentProgressionSortFields,
   CourseStudentQuizResultsSortFields,
-  CourseStudentAiMentorResultsSortFields,
+  EnrolledStudentSortFields,
 } from "./schemas/courseQuery";
 
 import type {
@@ -79,27 +96,31 @@ import type {
   CourseAverageQuizScoresResponse,
   CourseStatisticsResponse,
   CourseStatusDistribution,
+  LessonSequenceEnabledResponse,
 } from "./schemas/course.schema";
 import type {
-  CourseStudentProgressionSortField,
-  CourseStudentProgressionQuery,
   CourseEnrollmentScope,
   CoursesFilterSchema,
   CourseSortField,
   CoursesQuery,
-  EnrolledStudentFilterSchema,
-  CourseStudentQuizResultsQuery,
-  CourseStudentQuizResultsSortField,
   CourseStudentAiMentorResultsQuery,
   CourseStudentAiMentorResultsSortField,
+  CourseStudentProgressionQuery,
+  CourseStudentProgressionSortField,
+  CourseStudentQuizResultsQuery,
+  CourseStudentQuizResultsSortField,
+  EnrolledStudentFilterSchema,
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
 import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { BaseResponse, Pagination, UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -120,7 +141,9 @@ export class CourseService {
     private readonly settingsService: SettingsService,
     private readonly stripeService: StripeService,
     private readonly envService: EnvService,
+    private readonly localizationService: LocalizationService,
     private readonly eventBus: EventBus,
+    private readonly adminLessonService: AdminLessonService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
@@ -135,6 +158,7 @@ export class CourseService {
       sort = CourseSortFields.title,
       currentUserId,
       currentUserRole,
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -148,8 +172,8 @@ export class CourseService {
     const queryDB = this.db
       .select({
         id: courses.id,
-        title: courses.title,
-        description: sql<string>`${courses.description}`,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        description: this.localizationService.getLocalizedSqlField(courses.description, language),
         thumbnailUrl: courses.thumbnailS3Key,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorAvatarUrl: sql<string>`${users.avatarReference}`,
@@ -183,6 +207,8 @@ export class CourseService {
         coursesSummaryStats.freePurchasedCount,
         coursesSummaryStats.paidPurchasedCount,
         courses.createdAt,
+        courses.availableLocales,
+        courses.baseLanguage,
       )
       .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -234,6 +260,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       filters = {},
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -241,13 +268,14 @@ export class CourseService {
     return this.db.transaction(async (trx) => {
       const conditions = [
         eq(studentCourses.studentId, userId),
+        eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         or(eq(courses.status, "published"), eq(courses.status, "private")),
         isNull(users.deletedAt),
       ];
       conditions.push(...this.getFiltersConditions(filters, false));
 
       const queryDB = trx
-        .select(this.getSelectField())
+        .select(this.getSelectField(language))
         .from(studentCourses)
         .innerJoin(courses, eq(studentCourses.courseId, courses.id))
         .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -269,6 +297,8 @@ export class CourseService {
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
           studentCourses.finishedChapterCount,
+          courses.availableLocales,
+          courses.baseLanguage,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -333,8 +363,8 @@ export class CourseService {
       );
     }
 
-    if (filters.groupId) {
-      conditions.push(eq(groupUsers.groupId, filters.groupId));
+    if (filters.groups?.length) {
+      conditions.push(getGroupFilterConditions(filters.groups));
     }
 
     conditions.push(isNull(users.deletedAt));
@@ -345,9 +375,15 @@ export class CourseService {
         lastName: users.lastName,
         email: users.email,
         id: users.id,
-        enrolledAt: studentCourses.createdAt,
-        groupId: groups.id,
-        groupName: groups.name,
+        enrolledAt: sql<
+          string | null
+        >`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.enrolledAt} ELSE NULL END`,
+        groups: sql<
+          Array<{ id: string; name: string }>
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
+          "groups",
+        ),
+        isEnrolledByGroup: sql<boolean>`${studentCourses.enrolledByGroupId} IS NOT NULL`,
       })
       .from(users)
       .leftJoin(
@@ -357,10 +393,30 @@ export class CourseService {
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
-      .orderBy(sortOrder(studentCourses.createdAt));
+      .groupBy(
+        users.id,
+        studentCourses.enrolledAt,
+        studentCourses.status,
+        studentCourses.enrolledByGroupId,
+      )
+      .orderBy(sortOrder(studentCourses.enrolledAt));
 
     return {
       data: data ?? [],
+    };
+  }
+
+  async getCourseSequenceEnabled(courseId: UUIDType): Promise<LessonSequenceEnabledResponse> {
+    const course = await this.db.query.courses.findFirst({
+      where: (courses, { eq }) => eq(courses.id, courseId),
+    });
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    return {
+      lessonSequenceEnabled: course?.settings.lessonSequenceEnabled,
     };
   }
 
@@ -373,6 +429,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       filters = {},
+      language,
     } = query;
     const { sortOrder, sortedField } = getSortOptions(sort);
 
@@ -394,8 +451,8 @@ export class CourseService {
       const queryDB = trx
         .select({
           id: courses.id,
-          description: sql<string>`${courses.description}`,
-          title: courses.title,
+          title: this.localizationService.getLocalizedSqlField(courses.title, language),
+          description: this.localizationService.getLocalizedSqlField(courses.description, language),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
           authorId: sql<string>`${courses.authorId}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -435,6 +492,8 @@ export class CourseService {
           categories.title,
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
+          courses.availableLocales,
+          courses.baseLanguage,
         )
         .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
 
@@ -480,22 +539,25 @@ export class CourseService {
     });
   }
 
-  async getCourse(id: UUIDType, userId: UUIDType): Promise<CommonShowCourse> {
+  async getCourse(
+    id: UUIDType,
+    userId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<CommonShowCourse> {
     //TODO: to remove
     const testDeployment = "test";
-
     testDeployment;
 
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: courses.title,
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
         category: sql<string>`${categories.title}`,
-        description: sql<string>`${courses.description}`,
+        description: this.localizationService.getLocalizedSqlField(courses.description, language),
         courseChapterCount: courses.chapterCount,
-        completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         status: courses.status,
         isScorm: courses.isScorm,
         priceInCents: courses.priceInCents,
@@ -511,6 +573,8 @@ export class CourseService {
           )`,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -530,15 +594,17 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: chapters.title,
+        title: this.localizationService.getLocalizedSqlField(chapters.title, language),
         isSubmitted: sql<boolean>`
           EXISTS (
             SELECT 1
             FROM ${studentChapterProgress}
+            JOIN ${studentCourses} ON ${studentCourses.courseId} = ${course.id} AND ${studentCourses.studentId} = ${studentChapterProgress.studentId} 
             WHERE ${studentChapterProgress.chapterId} = ${chapters.id}
               AND ${studentChapterProgress.courseId} = ${course.id}
               AND ${studentChapterProgress.studentId} = ${userId}
               AND ${studentChapterProgress.completedAt} IS NOT NULL
+              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
           )::BOOLEAN`,
         lessonCount: chapters.lessonCount,
         quizCount: sql<number>`
@@ -546,9 +612,10 @@ export class CourseService {
           FROM ${lessons}
           WHERE ${lessons.chapterId} = ${chapters.id}
             AND ${lessons.type} = ${LESSON_TYPES.QUIZ})::INTEGER`,
-        completedLessonCount: sql<number>`COALESCE(${studentChapterProgress.completedLessonCount}, 0)`,
+        completedLessonCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentChapterProgress.completedLessonCount}, 0) ELSE 0 END`,
         chapterProgress: sql<ProgressStatus>`
           CASE
+            WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
             WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
             WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
               SELECT 1
@@ -569,13 +636,22 @@ export class CourseService {
               FROM (
                 SELECT
                   ${lessons.id} AS id,
-                  ${lessons.title} AS title,
+                  ${this.localizationService.getLocalizedSqlField(
+                    lessons.title,
+                    language,
+                  )} AS title,
                   ${lessons.type} AS type,
                   ${lessons.displayOrder} AS "displayOrder",
                   ${lessons.isExternal} AS "isExternal",
                   CASE
-                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${PROGRESS_STATUSES.BLOCKED}
-                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${studentLessonProgress.isQuizPassed} IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${PROGRESS_STATUSES.COMPLETED}
+                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${
+                      PROGRESS_STATUSES.BLOCKED
+                    }
+                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${
+                      studentLessonProgress.isQuizPassed
+                    } IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${
+                      PROGRESS_STATUSES.COMPLETED
+                    }
                     WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
                     ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
                   END AS status,
@@ -584,9 +660,12 @@ export class CourseService {
                     ELSE NULL
                   END AS "quizQuestionCount"
                 FROM ${lessons}
-                LEFT JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
+                LEFT JOIN ${studentLessonProgress} ON ${lessons.id} = ${
+                  studentLessonProgress.lessonId
+                }
                   AND ${studentLessonProgress.studentId} = ${userId}
                 LEFT JOIN ${questions} ON ${lessons.id} = ${questions.lessonId}
+                LEFT JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
                 WHERE ${lessons.chapterId} = ${chapters.id}
                 GROUP BY
                   ${lessons.id},
@@ -597,7 +676,9 @@ export class CourseService {
                   ${studentLessonProgress.completedQuestionCount},
                   ${studentLessonProgress.isStarted},
                   ${chapters.isFreemium},
-                  ${studentLessonProgress.isQuizPassed}
+                  ${studentLessonProgress.isQuizPassed},
+                  ${courses.availableLocales},
+                  ${courses.baseLanguage}
                 ORDER BY ${lessons.displayOrder}
               ) AS lesson_data
             ),
@@ -613,6 +694,11 @@ export class CourseService {
           eq(studentChapterProgress.studentId, userId),
         ),
       )
+      .leftJoin(
+        studentCourses,
+        and(eq(studentCourses.courseId, course.id), eq(studentCourses.studentId, userId)),
+      )
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
@@ -625,21 +711,28 @@ export class CourseService {
     };
   }
 
-  async getBetaCourseById(id: UUIDType, currentUserId: UUIDType, currentUserRole: UserRole) {
+  async getBetaCourseById(
+    id: UUIDType,
+    language: SupportedLanguages,
+    currentUserId: UUIDType,
+    currentUserRole: UserRole,
+  ) {
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: courses.title,
+        title: this.localizationService.getFieldByLanguage(courses.title, language),
         thumbnailS3Key: sql<string>`COALESCE(${courses.thumbnailS3Key}, '')`,
         category: categories.title,
         categoryId: categories.id,
-        description: sql<string>`${courses.description}`,
+        description: this.localizationService.getFieldByLanguage(courses.description, language),
         courseChapterCount: courses.chapterCount,
         status: courses.status,
         priceInCents: courses.priceInCents,
         currency: courses.currency,
         authorId: courses.authorId,
         hasCertificate: courses.hasCertificate,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
       })
       .from(courses)
       .innerJoin(categories, eq(courses.categoryId, categories.id))
@@ -654,7 +747,7 @@ export class CourseService {
     const courseChapterList = await this.db
       .select({
         id: chapters.id,
-        title: chapters.title,
+        title: this.localizationService.getFieldByLanguage(chapters.title, language),
         displayOrder: sql<number>`${chapters.displayOrder}`,
         lessonCount: chapters.lessonCount,
         updatedAt: chapters.updatedAt,
@@ -671,6 +764,7 @@ export class CourseService {
         `,
       })
       .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
@@ -681,7 +775,7 @@ export class CourseService {
     const updatedCourseLessonList = await Promise.all(
       courseChapterList?.map(async (chapter) => {
         const lessons: AdminLessonWithContentSchema[] =
-          await this.adminChapterRepository.getBetaChapterLessons(chapter.id);
+          await this.adminChapterRepository.getBetaChapterLessons(chapter.id, language);
 
         const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(lessons);
 
@@ -707,6 +801,7 @@ export class CourseService {
     title,
     description,
     searchQuery,
+    language,
   }: {
     currentUserId: UUIDType;
     authorId: UUIDType;
@@ -715,11 +810,17 @@ export class CourseService {
     title?: string;
     description?: string;
     searchQuery?: string;
+    language: SupportedLanguages;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
 
     if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
-      conditions.push(eq(studentCourses.studentId, currentUserId));
+      conditions.push(
+        ...[
+          eq(studentCourses.studentId, currentUserId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ],
+      );
     }
 
     if (scope === COURSE_ENROLLMENT_SCOPES.AVAILABLE) {
@@ -736,18 +837,31 @@ export class CourseService {
     }
 
     if (title) {
-      conditions.push(ilike(courses.title, `%${title}%`));
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${title}%`})`,
+      );
     }
 
     if (description) {
-      conditions.push(ilike(courses.description, `%${description}%`));
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${description}%`})`,
+      );
     }
 
     if (searchQuery) {
       const searchCondition = or(
-        ilike(courses.title, `%${searchQuery}%`),
-        ilike(courses.description, `%${searchQuery}%`),
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
       );
+
       if (searchCondition) {
         conditions.push(searchCondition);
       }
@@ -756,15 +870,15 @@ export class CourseService {
     const contentCreatorCourses = await this.db
       .select({
         id: courses.id,
-        description: sql<string>`${courses.description}`,
-        title: courses.title,
+        description: this.localizationService.getLocalizedSqlField(courses.description, language),
+        title: this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailUrl: courses.thumbnailS3Key,
         authorId: sql<string>`${courses.authorId}`,
         author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
         authorEmail: sql<string>`${users.email}`,
         authorAvatarUrl: sql<string>`${users.avatarReference}`,
         category: sql<string>`${categories.title}`,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN true ELSE false END`,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
         enrolledParticipantCount: sql<number>`0`,
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`0`,
@@ -798,6 +912,9 @@ export class CourseService {
         users.avatarReference,
         studentCourses.studentId,
         categories.title,
+        courses.availableLocales,
+        courses.baseLanguage,
+        studentCourses.status,
       )
       .orderBy(
         sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NULL THEN TRUE ELSE FALSE END`,
@@ -822,12 +939,23 @@ export class CourseService {
     );
   }
 
-  async updateHasCertificate(courseId: UUIDType, hasCertificate: boolean) {
+  async updateHasCertificate(
+    courseId: UUIDType,
+    hasCertificate: boolean,
+    currentUser: CurrentUser,
+  ) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
       throw new NotFoundException("Course not found");
     }
+
+    const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.COURSE,
+      courseId,
+    );
+
+    const previousSnapshot = await this.buildCourseActivitySnapshot(courseId, resolvedLanguage);
 
     const [updatedCourse] = await this.db
       .update(courses)
@@ -835,19 +963,96 @@ export class CourseService {
       .where(eq(courses.id, courseId))
       .returning();
 
+    if (hasCertificate) {
+      this.eventBus.publish(new UpdateHasCertificateEvent(courseId));
+    }
+
     if (!updatedCourse) {
       throw new ConflictException("Failed to update course");
     }
 
+    const updatedSnapshot = await this.buildCourseActivitySnapshot(courseId, resolvedLanguage);
+
+    if (this.areCourseSnapshotsEqual(previousSnapshot, updatedSnapshot)) return updatedCourse;
+
+    this.eventBus.publish(
+      new UpdateCourseEvent({
+        courseId,
+        actor: currentUser,
+        previousCourseData: previousSnapshot,
+        updatedCourseData: updatedSnapshot,
+      }),
+    );
+
     return updatedCourse;
+  }
+
+  async updateLessonSequenceEnabled(
+    courseId: UUIDType,
+    lessonSequenceEnabled: boolean,
+    currentUser: CurrentUser,
+  ) {
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.COURSE,
+      courseId,
+    );
+
+    const previousSnapshot = await this.buildCourseActivitySnapshot(courseId, resolvedLanguage);
+
+    const [updatedCourse] = await this.db
+      .update(courses)
+      .set({
+        settings: sql`
+          jsonb_set(
+            COALESCE(${courses.settings}, '{}'::jsonb),
+        '{lessonSequenceEnabled}',
+        to_jsonb(${lessonSequenceEnabled}::boolean),
+        true
+        )
+      `,
+      })
+      .where(eq(courses.id, courseId))
+      .returning();
+
+    if (!updatedCourse) {
+      throw new ConflictException("Failed to update course");
+    }
+
+    const updatedSnapshot = await this.buildCourseActivitySnapshot(courseId, resolvedLanguage);
+
+    if (this.areCourseSnapshotsEqual(previousSnapshot, updatedSnapshot)) return updatedCourse;
+
+    this.eventBus.publish(
+      new UpdateCourseEvent({
+        courseId,
+        actor: currentUser,
+        previousCourseData: previousSnapshot,
+        updatedCourseData: updatedSnapshot,
+      }),
+    );
+
+    return updatedCourse;
+  }
+
+  private areCourseSnapshotsEqual(
+    previousSnapshot: CourseActivityLogSnapshot | null,
+    updatedSnapshot: CourseActivityLogSnapshot | null,
+  ) {
+    return isEqual(previousSnapshot, updatedSnapshot);
   }
 
   async createCourse(
     createCourseBody: CreateCourseBody,
-    authorId: UUIDType,
+    currentUser: CurrentUser,
     isPlaywrightTest: boolean,
   ) {
-    return this.db.transaction(async (trx) => {
+    const newCourse = await this.db.transaction(async (trx) => {
       const [category] = await trx
         .select()
         .from(categories)
@@ -881,20 +1086,25 @@ export class CourseService {
         }
       }
 
+      const settings = sql`json_build_object('lessonSequenceEnabled', ${LESSON_SEQUENCE_ENABLED}::boolean)`;
+
       const [newCourse] = await trx
         .insert(courses)
         .values({
-          title: createCourseBody.title,
-          description: createCourseBody.description,
+          title: buildJsonbField(createCourseBody.language, createCourseBody.title),
+          description: buildJsonbField(createCourseBody.language, createCourseBody.description),
+          baseLanguage: createCourseBody.language,
+          availableLocales: [createCourseBody.language],
           thumbnailS3Key: createCourseBody.thumbnailS3Key,
           status: createCourseBody.status,
           priceInCents: createCourseBody.priceInCents,
           currency: finalCurrency,
           isScorm: createCourseBody.isScorm,
-          authorId,
+          authorId: currentUser.userId,
           categoryId: createCourseBody.categoryId,
           stripeProductId: productId,
           stripePriceId: priceId,
+          settings: settingsToJSONBuildObject(settings),
         })
         .returning();
 
@@ -902,141 +1112,210 @@ export class CourseService {
         throw new ConflictException("Failed to create course");
       }
 
-      await trx.insert(coursesSummaryStats).values({ courseId: newCourse.id, authorId });
+      await trx
+        .insert(coursesSummaryStats)
+        .values({ courseId: newCourse.id, authorId: currentUser.userId });
 
       return newCourse;
     });
+
+    const createdCourseSnapshot = await this.buildCourseActivitySnapshot(
+      newCourse.id,
+      createCourseBody.language,
+    );
+
+    this.eventBus.publish(
+      new CreateCourseEvent({
+        courseId: newCourse.id,
+        actor: currentUser,
+        createdCourse: createdCourseSnapshot,
+      }),
+    );
+
+    return newCourse;
   }
 
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
+    currentUser: CurrentUser,
     isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
-    return this.db.transaction(async (trx) => {
-      const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
+    const { userId: currentUserId, role: currentUserRole } = currentUser;
 
-      const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
+    const { updatedCourse, previousCourseSnapshot, updatedCourseSnapshot } =
+      await this.db.transaction(async (trx) => {
+        const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
 
-      if (!existingCourse) {
-        throw new NotFoundException("Course not found");
-      }
+        const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
 
-      if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
-        throw new ForbiddenException("You don't have permission to update course");
-      }
-
-      if (updateCourseBody.categoryId) {
-        const [category] = await trx
-          .select()
-          .from(categories)
-          .where(eq(categories.id, updateCourseBody.categoryId));
-
-        if (!category) {
-          throw new NotFoundException("Category not found");
+        if (!updateCourseBody.language) {
+          throw new BadRequestException("adminCourseView.toast.updateCourseMissingLanguage");
         }
-      }
 
-      // TODO: to remove and start use file service
-      let imageKey = undefined;
-      if (image) {
-        try {
-          const fileExtension = image.originalname.split(".").pop();
-          const resource = `courses/${crypto.randomUUID()}.${fileExtension}`;
-          imageKey = await this.fileService.uploadFile(image, resource);
-        } catch (error) {
-          throw new ConflictException("Failed to upload course image");
+        if (!existingCourse.availableLocales.includes(updateCourseBody.language)) {
+          throw new BadRequestException("adminCourseView.toast.languageNotSupported");
         }
-      }
 
-      const { priceInCents, currency, ...rest } = updateCourseBody;
+        if (!existingCourse) {
+          throw new NotFoundException("Course not found");
+        }
 
-      const updateData = {
-        ...rest,
-        ...(isStripeConfigured ? { priceInCents, currency } : {}),
-        ...(imageKey && { imageUrl: imageKey.fileUrl }),
-      };
+        if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
+          throw new ForbiddenException("You don't have permission to update course");
+        }
 
-      const [updatedCourse] = await trx
-        .update(courses)
-        .set(updateData)
-        .where(eq(courses.id, id))
-        .returning();
+        const previousSnapshot = await this.buildCourseActivitySnapshot(
+          id,
+          updateCourseBody.language,
+          trx,
+        );
 
-      if (!updatedCourse) {
-        throw new ConflictException("Failed to update course");
-      }
+        if (updateCourseBody.categoryId) {
+          const [category] = await trx
+            .select()
+            .from(categories)
+            .where(eq(categories.id, updateCourseBody.categoryId));
 
-      if (!isPlaywrightTest && isStripeConfigured) {
-        // --- create stripe product if it doesn't exist yet ---
-        if (!updatedCourse.stripeProductId) {
-          const { productId, priceId } = await this.stripeService.createProduct({
-            name: updatedCourse.title,
-            description: updatedCourse.description ?? "",
-            amountInCents: updatedCourse.priceInCents ?? 0,
-            currency: updatedCourse.currency ?? "usd",
-          });
-
-          await trx
-            .update(courses)
-            .set({
-              stripeProductId: productId,
-              stripePriceId: priceId,
-            })
-            .where(eq(courses.id, id));
-        } else {
-          // --- stripe product update ---
-          const productUpdatePayload = {
-            ...(updateCourseBody.title && { name: updateCourseBody.title }),
-            ...(updateCourseBody.description && { description: updateCourseBody.description }),
-          };
-
-          if (hasDataToUpdate(productUpdatePayload)) {
-            await this.stripeService.updateProduct(
-              updatedCourse.stripeProductId,
-              productUpdatePayload,
-            );
+          if (!category) {
+            throw new NotFoundException("Category not found");
           }
+        }
 
-          // --- stripe price update ---
-          const hasPriceUpdate =
-            updateCourseBody.priceInCents !== undefined || updateCourseBody.currency !== undefined;
+        // TODO: to remove and start use file service
+        let imageKey = undefined;
+        if (image) {
+          try {
+            const fileExtension = image.originalname.split(".").pop();
+            const resource = `courses/${crypto.randomUUID()}.${fileExtension}`;
+            imageKey = await this.fileService.uploadFile(image, resource);
+          } catch (error) {
+            throw new ConflictException("Failed to upload course image");
+          }
+        }
 
-          if (updatedCourse.stripePriceId && hasPriceUpdate) {
-            const pricePayload: Stripe.PriceCreateParams = {
-              product: updatedCourse.stripeProductId,
-              currency: updateCourseBody.currency ?? "usd",
-              ...(updateCourseBody.priceInCents !== undefined && {
-                unit_amount: updateCourseBody.priceInCents,
-              }),
-            };
+        const { priceInCents, currency, title, description, language, ...rest } = updateCourseBody;
 
-            const newStripePrice = await this.stripeService.createPrice(pricePayload);
+        const updateData = {
+          ...rest,
+          title: setJsonbField(courses.title, language, title),
+          description: setJsonbField(courses.description, language, description),
+          ...(isStripeConfigured ? { priceInCents, currency } : {}),
+          ...(imageKey && { imageUrl: imageKey.fileUrl }),
+        };
 
-            if (newStripePrice.id) {
-              await this.stripeService.updatePrice(updatedCourse.stripePriceId, { active: false });
+        const [updatedCourse] = await trx
+          .update(courses)
+          .set(updateData)
+          .where(eq(courses.id, id))
+          .returning();
 
-              await trx
-                .update(courses)
-                .set({ stripePriceId: newStripePrice.id })
-                .where(eq(courses.id, id));
+        if (!updatedCourse) {
+          throw new ConflictException("Failed to update course");
+        }
+
+        if (!isPlaywrightTest && isStripeConfigured) {
+          // --- create stripe product if it doesn't exist yet ---
+          if (!updatedCourse.stripeProductId) {
+            const { productId, priceId } = await this.stripeService.createProduct({
+              name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
+              description:
+                (updatedCourse.description as Record<string, string>)[updatedCourse.baseLanguage] ??
+                "",
+              amountInCents: updatedCourse.priceInCents ?? 0,
+              currency: updatedCourse.currency ?? "usd",
+            });
+
+            await trx
+              .update(courses)
+              .set({
+                stripeProductId: productId,
+                stripePriceId: priceId,
+              })
+              .where(eq(courses.id, id));
+          } else {
+            // --- stripe product update ---
+            if (updateCourseBody.language === updatedCourse.baseLanguage) {
+              const productUpdatePayload = {
+                name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
+                description: (updatedCourse.description as Record<string, string>)[
+                  updatedCourse.baseLanguage
+                ],
+              };
+
+              await this.stripeService.updateProduct(
+                updatedCourse.stripeProductId,
+                productUpdatePayload,
+              );
+            }
+
+            // --- stripe price update ---
+            const hasPriceUpdate =
+              updateCourseBody.priceInCents !== undefined ||
+              updateCourseBody.currency !== undefined;
+
+            if (updatedCourse.stripePriceId && hasPriceUpdate) {
+              const pricePayload: Stripe.PriceCreateParams = {
+                product: updatedCourse.stripeProductId,
+                currency: updateCourseBody.currency ?? "usd",
+                ...(updateCourseBody.priceInCents !== undefined && {
+                  unit_amount: updateCourseBody.priceInCents,
+                }),
+              };
+
+              const newStripePrice = await this.stripeService.createPrice(pricePayload);
+
+              if (newStripePrice.id) {
+                await this.stripeService.updatePrice(updatedCourse.stripePriceId, {
+                  active: false,
+                });
+
+                await trx
+                  .update(courses)
+                  .set({ stripePriceId: newStripePrice.id })
+                  .where(eq(courses.id, id));
+              }
             }
           }
         }
-      }
 
+        const updatedSnapshot = await this.buildCourseActivitySnapshot(id, language, trx);
+
+        return {
+          updatedCourse,
+          previousCourseSnapshot: previousSnapshot,
+          updatedCourseSnapshot: updatedSnapshot,
+        };
+      });
+
+    if (this.areCourseSnapshotsEqual(previousCourseSnapshot, updatedCourseSnapshot)) {
       return updatedCourse;
-    });
+    }
+
+    this.eventBus.publish(
+      new UpdateCourseEvent({
+        courseId: id,
+        actor: currentUser,
+        previousCourseData: previousCourseSnapshot,
+        updatedCourseData: updatedCourseSnapshot,
+      }),
+    );
+
+    return updatedCourse;
   }
 
-  async enrollCourse(id: UUIDType, studentId: UUIDType, testKey?: string, paymentId?: string) {
+  async enrollCourse(
+    id: UUIDType,
+    studentId: UUIDType,
+    testKey?: string,
+    paymentId?: string,
+    currentUser?: CurrentUser,
+  ) {
     const [course] = await this.db
       .select({
         id: courses.id,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         price: courses.priceInCents,
         userDeletedAt: users.deletedAt,
       })
@@ -1056,13 +1335,23 @@ export class CourseService {
 
     if (course.enrolled) throw new ConflictException("Course is already enrolled");
 
-    this.db.transaction(async (trx) => {
+    await this.db.transaction(async (trx) => {
       await this.createStudentCourse(id, studentId, paymentId, null);
       await this.createCourseDependencies(id, studentId, paymentId, trx);
     });
+
+    if (currentUser) {
+      this.eventBus.publish(
+        new EnrollCourseEvent({
+          courseId: id,
+          userId: studentId,
+          actor: currentUser,
+        }),
+      );
+    }
   }
 
-  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment) {
+  async enrollCourses(courseId: UUIDType, body: CreateCoursesEnrollment, currentUser: CurrentUser) {
     const { studentIds } = body;
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
@@ -1073,10 +1362,15 @@ export class CourseService {
     const existingStudentsEnrollments = await this.db
       .select({
         studentId: studentCourses.studentId,
+        enrolledByGroupId: studentCourses.enrolledByGroupId,
       })
       .from(studentCourses)
       .where(
-        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, studentIds)),
+        and(
+          eq(studentCourses.courseId, courseId),
+          inArray(studentCourses.studentId, studentIds),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
       );
 
     const studentsToEnroll = await this.db
@@ -1104,13 +1398,19 @@ export class CourseService {
         return {
           studentId,
           courseId,
+          enrolledAt: sql`NOW()`,
+          status: COURSE_ENROLLMENT.ENROLLED,
           enrolledByGroupId: null,
         };
       });
 
-      await trx.insert(studentCourses).values(studentCoursesValues);
-
-      this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
+      await trx
+        .insert(studentCourses)
+        .values(studentCoursesValues)
+        .onConflictDoUpdate({
+          target: [studentCourses.studentId, studentCourses.courseId],
+          set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+        });
 
       await Promise.all(
         studentIds.map(async (studentId) => {
@@ -1118,9 +1418,20 @@ export class CourseService {
         }),
       );
     });
+
+    this.eventBus.publish(new UsersAssignedToCourseEvent({ studentIds, courseId }));
+    studentIds.forEach((studentId) =>
+      this.eventBus.publish(
+        new EnrollCourseEvent({
+          courseId,
+          userId: studentId,
+          actor: currentUser,
+        }),
+      ),
+    );
   }
 
-  async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], adminId?: UUIDType) {
+  async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], currentUser?: CurrentUser) {
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
     if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
 
@@ -1128,20 +1439,19 @@ export class CourseService {
     if (!groupExists.length) throw new NotFoundException("Groups not found");
 
     const groupUsersList = await this.db
-      .select()
+      .select({ ...getTableColumns(groupUsers), role: users.role })
       .from(groupUsers)
+      .innerJoin(users, eq(groupUsers.userId, users.id))
       .where(inArray(groupUsers.groupId, groupIds));
 
-    // Check if groups are already enrolled to this course
     const existingGroupEnrollments = await this.db
       .select({ groupId: groupCourses.groupId })
       .from(groupCourses)
       .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
 
-    const existingGroupIds = existingGroupEnrollments.map((e: any) => e.groupId);
+    const existingGroupIds = existingGroupEnrollments.map((e) => e.groupId);
     const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
 
-    // Get existing student enrollments to avoid duplicates (only if there are users)
     let existingStudentIds: string[] = [];
     let newStudentIds: string[] = [];
 
@@ -1154,62 +1464,180 @@ export class CourseService {
         .where(
           and(
             eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
             inArray(
               studentCourses.studentId,
-              groupUsersList.map((gu: any) => gu.userId),
+              groupUsersList.map((gu) => gu.userId),
             ),
           ),
         );
 
-      existingStudentIds = existingEnrollments.map((e: any) => e.studentId);
+      existingStudentIds = existingEnrollments.map((e) => e.studentId);
       newStudentIds = groupUsersList
-        .map((gu: any) => gu.userId)
-        .filter((userId: any) => !existingStudentIds.includes(userId));
+        .filter(
+          ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
+        )
+        .map((gu) => gu.userId);
     }
 
     await this.db.transaction(async (trx) => {
-      // Save group-course relationships (even if group is empty or all users were already enrolled)
       if (newGroupIds.length > 0) {
-        const groupCoursesValues = newGroupIds.map((groupId: any) => ({
+        const groupCoursesValues = newGroupIds.map((groupId) => ({
           groupId,
           courseId,
-          enrolledBy: adminId || null,
+          enrolledBy: currentUser?.userId || null,
         }));
 
         await trx.insert(groupCourses).values(groupCoursesValues);
       }
 
-      // Create student course enrollments with enrolledByGroupId for new students
       if (newStudentIds.length > 0 && newGroupIds.length > 0) {
-        // Create a map of userId to groupId for users enrolled from groups
         const userIdToGroupId = new Map<string, string>();
+
         for (const groupId of newGroupIds) {
-          const usersInGroup = groupUsersList.filter((gu: any) => gu.groupId === groupId);
-          usersInGroup.forEach((gu: any) => {
+          const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
+
+          usersInGroup.forEach((gu) => {
             if (newStudentIds.includes(gu.userId)) {
               userIdToGroupId.set(gu.userId, groupId);
             }
           });
         }
 
-        const studentCoursesValues = newStudentIds.map((studentId: any) => ({
+        const studentCoursesValues = newStudentIds.map((studentId) => ({
           studentId,
           courseId,
           enrolledByGroupId: userIdToGroupId.get(studentId) || null,
+          status: COURSE_ENROLLMENT.ENROLLED,
         }));
 
-        await trx.insert(studentCourses).values(studentCoursesValues);
+        await trx
+          .insert(studentCourses)
+          .values(studentCoursesValues)
+          .onConflictDoUpdate({
+            target: [studentCourses.courseId, studentCourses.studentId],
+            set: {
+              enrolledAt: sql`EXCLUDED.enrolled_at`,
+              status: sql`EXCLUDED.status`,
+              enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
+            },
+          });
 
-        // Create course dependencies for each student
         await Promise.all(
-          newStudentIds.map(async (studentId: any) => {
+          newStudentIds.map(async (studentId) => {
             await this.createCourseDependencies(courseId, studentId, null, trx);
           }),
         );
       }
     });
 
+    if (currentUser && newGroupIds.length > 0) {
+      newGroupIds.forEach((groupId) =>
+        this.eventBus.publish(
+          new EnrollGroupToCourseEvent({
+            courseId,
+            groupId,
+            actor: currentUser,
+          }),
+        ),
+      );
+    }
+
     return null;
+  }
+
+  async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
+    const groupEnrollments = await this.db
+      .select({ groupId: groupCourses.groupId })
+      .from(groupCourses)
+      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
+
+    if (!groupEnrollments.length)
+      throw new NotFoundException("No group enrollments found for the specified course and groups");
+
+    const studentsToUnenroll = await this.db
+      .select({ id: studentCourses.studentId })
+      .from(studentCourses)
+      .innerJoin(users, eq(studentCourses.studentId, users.id))
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          inArray(studentCourses.enrolledByGroupId, groupIds),
+          eq(users.role, USER_ROLES.STUDENT),
+        ),
+      );
+
+    const studentIdsToUnenroll = studentsToUnenroll.map((s) => s.id);
+
+    await this.db.transaction(async (trx) => {
+      await trx
+        .delete(groupCourses)
+        .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
+
+      if (!!studentIdsToUnenroll.length) {
+        const studentsEnrolledInOtherGroups = await trx
+          .select({
+            studentId: groupUsers.userId,
+            groupId: groupCourses.groupId,
+          })
+          .from(groupUsers)
+          .innerJoin(groupCourses, eq(groupUsers.groupId, groupCourses.groupId))
+          .where(
+            and(
+              inArray(groupUsers.userId, studentIdsToUnenroll),
+              eq(groupCourses.courseId, courseId),
+              not(inArray(groupCourses.groupId, groupIds)),
+            ),
+          )
+          .orderBy(groupUsers.createdAt);
+
+        const studentsWithOtherGroups = [
+          ...new Set(studentsEnrolledInOtherGroups.map(({ studentId }) => studentId)),
+        ];
+
+        const studentsToCompletelyUnenroll = studentIdsToUnenroll.filter(
+          (studentId) => !studentsWithOtherGroups.includes(studentId),
+        );
+
+        if (studentsWithOtherGroups.length) {
+          await Promise.all(
+            studentsWithOtherGroups.map((studentId) => {
+              const newGroupId = studentsEnrolledInOtherGroups.find(
+                (student) => student.studentId === studentId,
+              )?.groupId;
+
+              return trx
+                .update(studentCourses)
+                .set({
+                  enrolledByGroupId: newGroupId,
+                })
+                .where(
+                  and(
+                    eq(studentCourses.courseId, courseId),
+                    eq(studentCourses.studentId, studentId),
+                  ),
+                );
+            }),
+          );
+        }
+
+        if (studentsToCompletelyUnenroll.length) {
+          await trx
+            .update(studentCourses)
+            .set({
+              status: COURSE_ENROLLMENT.NOT_ENROLLED,
+              enrolledAt: null,
+              enrolledByGroupId: null,
+            })
+            .where(
+              and(
+                eq(studentCourses.courseId, courseId),
+                inArray(studentCourses.studentId, studentsToCompletelyUnenroll),
+              ),
+            );
+        }
+      }
+    });
   }
 
   async createStudentCourse(
@@ -1220,7 +1648,18 @@ export class CourseService {
   ): Promise<StudentCourseSelect> {
     const [enrolledCourse] = await this.db
       .insert(studentCourses)
-      .values({ studentId, courseId, paymentId, enrolledByGroupId })
+      .values({
+        studentId,
+        courseId,
+        paymentId,
+        enrolledAt: sql`NOW()`,
+        status: COURSE_ENROLLMENT.ENROLLED,
+        enrolledByGroupId,
+      })
+      .onConflictDoUpdate({
+        target: [studentCourses.studentId, studentCourses.courseId],
+        set: { enrolledAt: sql`EXCLUDED.enrolled_at`, status: sql`EXCLUDED.status` },
+      })
       .returning();
 
     if (!enrolledCourse) throw new ConflictException("Course not enrolled");
@@ -1234,6 +1673,17 @@ export class CourseService {
     paymentId: string | null = null,
     trx: PostgresJsDatabase<typeof schema>,
   ) {
+    const alreadyHasEnrollmentRecord = Boolean(
+      (
+        await trx
+          .select({ id: studentCourses.id })
+          .from(studentCourses)
+          .where(
+            and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)),
+          )
+      ).length,
+    );
+
     const courseChapterList = await trx
       .select({
         id: chapters.id,
@@ -1250,22 +1700,27 @@ export class CourseService {
       trx,
     );
 
-    await this.createStatisicRecordForCourse(
-      courseId,
-      paymentId,
-      isEmpty(existingLessonProgress),
-      trx,
-    );
+    if (!alreadyHasEnrollmentRecord) {
+      await this.createStatisicRecordForCourse(
+        courseId,
+        paymentId,
+        isEmpty(existingLessonProgress),
+        trx,
+      );
+    }
 
     if (courseChapterList.length > 0) {
-      await trx.insert(studentChapterProgress).values(
-        courseChapterList.map((chapter) => ({
-          studentId,
-          chapterId: chapter.id,
-          courseId,
-          completedLessonItemCount: 0,
-        })),
-      );
+      await trx
+        .insert(studentChapterProgress)
+        .values(
+          courseChapterList.map((chapter) => ({
+            studentId,
+            chapterId: chapter.id,
+            courseId,
+            completedLessonItemCount: 0,
+          })),
+        )
+        .onConflictDoNothing();
 
       await Promise.all(
         courseChapterList.map(async (chapter) => {
@@ -1274,16 +1729,19 @@ export class CourseService {
             .from(lessons)
             .where(eq(lessons.chapterId, chapter.id));
 
-          await trx.insert(studentLessonProgress).values(
-            chapterLessons.map((lesson) => ({
-              studentId,
-              lessonId: lesson.id,
-              chapterId: chapter.id,
-              completedQuestionCount: 0,
-              quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
-              completedAt: null,
-            })),
-          );
+          await trx
+            .insert(studentLessonProgress)
+            .values(
+              chapterLessons.map((lesson) => ({
+                studentId,
+                lessonId: lesson.id,
+                chapterId: chapter.id,
+                completedQuestionCount: 0,
+                quizScore: lesson.type === LESSON_TYPES.QUIZ ? 0 : null,
+                completedAt: null,
+              })),
+            )
+            .onConflictDoNothing();
         }),
       );
     }
@@ -1351,76 +1809,96 @@ export class CourseService {
     });
   }
 
-  async unenrollCourse(id: UUIDType, userId: UUIDType) {
-    const [course] = await this.db
+  async unenrollCourse(courseId: UUIDType, userIds: UUIDType[]) {
+    const studentEnrollments = await this.db
       .select({
-        id: courses.id,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
+        studentId: studentCourses.studentId,
+        status: studentCourses.status,
+        enrolledByGroupId: studentCourses.enrolledByGroupId,
       })
-      .from(courses)
-      .leftJoin(
-        studentCourses,
-        and(eq(courses.id, studentCourses.courseId), eq(studentCourses.studentId, userId)),
-      )
-      .where(and(eq(courses.id, id)));
+      .from(studentCourses)
+      .where(
+        and(eq(studentCourses.courseId, courseId), inArray(studentCourses.studentId, userIds)),
+      );
 
-    if (!course) throw new NotFoundException("Course not found");
+    const enrolledStudentIds = studentEnrollments.reduce<string[]>((studentIds, enrollment) => {
+      if (enrollment.status === COURSE_ENROLLMENT.ENROLLED) studentIds.push(enrollment.studentId);
+      return studentIds;
+    }, []);
 
-    if (!course.enrolled) throw new ConflictException("Course is not enrolled");
+    const missingOrUnenrolledCount = userIds.length - enrolledStudentIds.length;
+
+    if (missingOrUnenrolledCount > 0) {
+      throw new BadRequestException({
+        message: "adminCourseView.enrolled.toast.someStudentsUnenrolled",
+        count: missingOrUnenrolledCount,
+      });
+    }
+
+    const studentsEnrolledByGroup = studentEnrollments.filter(
+      (enrollment) => enrollment.enrolledByGroupId,
+    );
+
+    if (studentsEnrolledByGroup.length > 0) {
+      throw new BadRequestException({
+        message: "adminCourseView.enrolled.toast.studentsEnrolledByGroup",
+        count: studentsEnrolledByGroup.length,
+      });
+    }
+
+    const studentsWithGroupEnrollment = await this.db
+      .select({
+        studentId: groupUsers.userId,
+        groupId: groupCourses.groupId,
+      })
+      .from(groupUsers)
+      .innerJoin(groupCourses, eq(groupUsers.groupId, groupCourses.groupId))
+      .where(and(inArray(groupUsers.userId, userIds), eq(groupCourses.courseId, courseId)))
+      .orderBy(groupUsers.createdAt);
+
+    const studentGroupMap = new Map<string, string>();
+
+    studentsWithGroupEnrollment.forEach(({ studentId, groupId }) => {
+      if (!studentGroupMap.has(studentId)) {
+        studentGroupMap.set(studentId, groupId);
+      }
+    });
+
+    const studentsToUpdate = Array.from(studentGroupMap.keys());
+    const studentsToUnenroll = userIds.filter((id) => !studentGroupMap.has(id));
 
     await this.db.transaction(async (trx) => {
-      const [deletedCourse] = await trx
-        .delete(studentCourses)
-        .where(and(eq(studentCourses.courseId, id), eq(studentCourses.studentId, userId)))
-        .returning();
-
-      if (!deletedCourse) throw new ConflictException("Course not unenrolled");
-
-      const courseChapterList = await trx
-        .select({ id: chapters.id })
-        .from(chapters)
-        .where(eq(chapters.courseId, id));
-
-      const courseChapterIds = courseChapterList.map((l) => l.id);
-
-      await trx
-        .delete(studentChapterProgress)
-        .where(
-          and(
-            eq(studentChapterProgress.courseId, id),
-            inArray(studentChapterProgress.chapterId, courseChapterIds),
-            eq(studentChapterProgress.studentId, userId),
+      // Update students enrolled by groups to add group association
+      if (studentsToUpdate.length > 0) {
+        await Promise.all(
+          Array.from(studentGroupMap.entries()).map(([studentId, groupId]) =>
+            trx
+              .update(studentCourses)
+              .set({
+                enrolledByGroupId: groupId,
+              })
+              .where(
+                and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)),
+              ),
           ),
-        )
-        .returning();
+        );
+      }
 
-      const courseQuestionList = await trx
-        .select({ id: questions.id })
-        .from(questions)
-        .leftJoin(lessons, eq(lessons.id, questions.lessonId))
-        .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
-        .where(eq(chapters.courseId, id));
-      const courseStudentQuestionIds = courseQuestionList.map((question) => question.id);
-
-      await trx
-        .delete(studentQuestionAnswers)
-        .where(
-          and(
-            inArray(studentQuestionAnswers.questionId, courseStudentQuestionIds),
-            eq(studentQuestionAnswers.studentId, userId),
-          ),
-        )
-        .returning();
-
-      await trx
-        .delete(studentLessonProgress)
-        .where(
-          and(
-            inArray(studentLessonProgress.lessonId, courseChapterIds),
-            eq(studentLessonProgress.studentId, userId),
-          ),
-        )
-        .returning();
+      if (studentsToUnenroll.length > 0) {
+        await trx
+          .update(studentCourses)
+          .set({
+            enrolledAt: null,
+            status: COURSE_ENROLLMENT.NOT_ENROLLED,
+            enrolledByGroupId: null,
+          })
+          .where(
+            and(
+              inArray(studentCourses.studentId, studentsToUnenroll),
+              eq(studentCourses.courseId, courseId),
+            ),
+          );
+      }
     });
   }
 
@@ -1462,8 +1940,14 @@ export class CourseService {
           }
         }
 
+        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarReference) {
+          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+
+          return { ...updatedLesson, avatarReferenceUrl: signedUrl };
+        }
+
         if (lesson.questions && Array.isArray(lesson.questions)) {
-          const questionsWithSignedUrls = await Promise.all(
+          updatedLesson.questions = await Promise.all(
             lesson.questions.map(async (question) => {
               if (question.photoS3Key) {
                 if (!question.photoS3Key.startsWith("https://")) {
@@ -1481,7 +1965,6 @@ export class CourseService {
               return question;
             }),
           );
-          updatedLesson.questions = questionsWithSignedUrls;
         }
 
         return updatedLesson;
@@ -1489,11 +1972,11 @@ export class CourseService {
     );
   }
 
-  private getSelectField() {
+  private getSelectField(language: SupportedLanguages) {
     return {
       id: courses.id,
-      description: sql<string>`${courses.description}`,
-      title: courses.title,
+      title: this.localizationService.getLocalizedSqlField(courses.title, language),
+      description: this.localizationService.getLocalizedSqlField(courses.description, language),
       thumbnailUrl: courses.thumbnailS3Key,
       authorId: sql<string>`${courses.authorId}`,
       author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
@@ -1518,21 +2001,33 @@ export class CourseService {
 
   private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
     const conditions = [];
+
     if (filters.title) {
-      conditions.push(ilike(courses.title, `%${filters.title.toLowerCase()}%`));
-    }
-    if (filters.description) {
-      conditions.push(ilike(courses.description, `%${filters.description}%`));
-    }
-    if (filters.searchQuery) {
-      const searchCondition = or(
-        ilike(courses.title, `%${filters.searchQuery}%`),
-        ilike(courses.description, `%${filters.searchQuery}%`),
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.title}%`})`,
       );
-      if (searchCondition) {
-        conditions.push(searchCondition);
-      }
     }
+
+    if (filters.description) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
+      );
+    }
+
+    if (filters.searchQuery) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.title
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
+          courses.description
+        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
+      );
+    }
+
     if (filters.category) {
       conditions.push(like(categories.title, `%${filters.category}%`));
     }
@@ -1582,6 +2077,7 @@ export class CourseService {
     excludeCourseId?: UUIDType,
   ) {
     const conditions = [];
+
     if (authorId) {
       conditions.push(eq(courses.authorId, authorId));
     }
@@ -1596,7 +2092,9 @@ export class CourseService {
       WHERE ${conditions.length ? and(...conditions) : true} AND ${courses.id} NOT IN (
         SELECT DISTINCT ${studentCourses.courseId}
         FROM ${studentCourses}
-        WHERE ${studentCourses.studentId} = ${currentUserId}
+        WHERE ${studentCourses.studentId} = ${currentUserId} AND ${studentCourses.status} = ${
+          COURSE_ENROLLMENT.ENROLLED
+        }
       )
     `);
 
@@ -1618,26 +2116,27 @@ export class CourseService {
                 COUNT(DISTINCT CASE WHEN sc.progress = 'completed' THEN sc.student_id END) AS completed_count,
                 COUNT(DISTINCT sc.student_id) AS total_count
               FROM ${studentCourses} AS sc
-              WHERE sc.course_id = ${id}
+              WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
             ) AS stats
           ),
           0
         )::float`,
         averageCompletionPercentage: sql<number>`COALESCE(
-          (
+        (
+          SELECT
+            ROUND((CAST(total_completed AS DECIMAL) / NULLIF(total_rows, 0)) * 100, 2)
+          FROM (
             SELECT
-              ROUND((CAST(total_completed AS DECIMAL) / NULLIF(total_rows, 0)) * 100, 0)
-            FROM (
-              SELECT
-                COUNT(*) FILTER (WHERE slp.completed_at IS NOT NULL) AS total_completed,
-                COUNT(*) AS total_rows
-              FROM ${studentLessonProgress} AS slp
-              JOIN ${lessons} AS l ON slp.lesson_id = l.id
-              JOIN ${chapters} AS ch ON l.chapter_id = ch.id
-              WHERE ch.course_id = ${id}
-            ) AS stats
-          ),
-          0
+              COUNT(*) FILTER (WHERE slp.completed_at IS NOT NULL) AS total_completed,
+              COUNT(*) AS total_rows
+            FROM ${studentLessonProgress} AS slp
+            JOIN ${lessons} AS l ON slp.lesson_id = l.id
+            JOIN ${chapters} AS ch ON l.chapter_id = ch.id
+            JOIN ${studentCourses} AS sc ON slp.student_id = sc.student_id AND ch.course_id = sc.course_id
+            WHERE ch.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+          ) AS stats
+        ),
+        0
         )::float`,
         courseStatusDistribution: sql<CourseStatusDistribution>`COALESCE(
           (
@@ -1646,7 +2145,7 @@ export class CourseService {
                 sc.progress AS progress,
                 COUNT(*) AS count
               FROM ${studentCourses} AS sc
-              WHERE sc.course_id = ${id}
+              WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
               GROUP BY sc.progress
             ) AS progress_counts
           ),
@@ -1655,12 +2154,20 @@ export class CourseService {
       })
       .from(coursesSummaryStats)
       .leftJoin(studentCourses, eq(coursesSummaryStats.courseId, studentCourses.courseId))
-      .where(eq(coursesSummaryStats.courseId, id));
+      .where(
+        and(
+          eq(coursesSummaryStats.courseId, id),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
 
     return courseStats;
   }
 
-  async getAverageQuizScoreForCourse(courseId: UUIDType): Promise<CourseAverageQuizScoresResponse> {
+  async getAverageQuizScoreForCourse(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<CourseAverageQuizScoresResponse> {
     const [averageScorePerQuiz] = await this.db
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
@@ -1668,17 +2175,24 @@ export class CourseService {
             SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
             FROM (
               SELECT
-                l.id AS quiz_id,
-                l.title AS quiz_name,
-                l.display_order AS lesson_order,
+                lessons.id AS quiz_id,
+                ${this.localizationService.getLocalizedSqlField(
+                  lessons.title,
+                  language,
+                  "co",
+                )} AS quiz_name,
+                lessons.display_order AS lesson_order,
                 ROUND(AVG(slp.quiz_score), 0) AS average_score,
                 COUNT(DISTINCT slp.student_id) AS finished_count
-              FROM ${lessons} l
-              JOIN ${studentLessonProgress} slp ON l.id = slp.lesson_id
-              JOIN ${chapters} c ON l.chapter_id = c.id
-              WHERE c.course_id = ${courseId} AND l.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL
-              GROUP BY l.id, l.title, l.display_order
-              ORDER BY l.display_order
+              FROM ${lessons}
+              JOIN ${studentLessonProgress} slp ON lessons.id = slp.lesson_id
+              JOIN ${chapters} c ON lessons.chapter_id = c.id
+              JOIN ${studentCourses} sc ON slp.student_id = sc.student_id AND sc.course_id = c.course_id
+              JOIN ${courses} co ON co.id = c.course_id
+              WHERE c.course_id = ${courseId} AND lessons.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${
+                COURSE_ENROLLMENT.ENROLLED
+              }
+              GROUP BY lessons.id, lessons.title, lessons.display_order, co.available_locales, co.base_language
             ) AS subquery
           ),
           '[]'::jsonb
@@ -1699,6 +2213,7 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
       searchQuery = "",
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -1708,14 +2223,24 @@ export class CourseService {
       lastActivityExpression,
       completedLessonsCountExpression,
       groupNameExpression,
-    } = this.getStudentCourseStatisticsExpressions(courseId);
+    } = await this.getStudentCourseStatisticsExpressions(courseId, language);
+
+    const conditions = [
+      eq(studentCourses.courseId, courseId),
+      or(
+        ilike(users.firstName, `%${searchQuery}%`),
+        ilike(users.lastName, `%${searchQuery}%`),
+        ilike(groups.name, `%${searchQuery}%`),
+      ),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+    ];
 
     const studentsProgress = await this.db
       .select({
         studentId: sql<UUIDType>`${users.id}`,
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
-        groupName: groupNameExpression,
+        groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
         lastActivity: lastActivityExpression,
       })
@@ -1723,23 +2248,16 @@ export class CourseService {
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groups.id, groupUsers.groupId))
-      .where(
-        and(
-          eq(studentCourses.courseId, courseId),
-          or(
-            ilike(users.firstName, `%${searchQuery}%`),
-            ilike(users.lastName, `%${searchQuery}%`),
-            ilike(groups.name, `%${searchQuery}%`),
-          ),
-        ),
-      )
+      .where(and(...conditions))
       .limit(perPage)
       .offset((page - 1) * perPage)
+      .groupBy(users.id)
       .orderBy(
         sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
+          await this.getCourseStatisticsColumnToSortBy(
             sortedField as CourseStudentProgressionSortField,
             courseId,
+            language,
           ),
         ),
       );
@@ -1750,16 +2268,7 @@ export class CourseService {
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groups.id, groupUsers.groupId))
-      .where(
-        and(
-          eq(studentCourses.courseId, courseId),
-          or(
-            ilike(users.firstName, `%${searchQuery}%`),
-            ilike(users.lastName, `%${searchQuery}%`),
-            ilike(groups.name, `%${searchQuery}%`),
-          ),
-        ),
-      );
+      .where(and(...conditions));
 
     const allStudentsProgress = await Promise.all(
       studentsProgress.map(async (studentProgress) => {
@@ -1787,12 +2296,15 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       quizId = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
+      language,
     } = query;
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
       isNotNull(studentLessonProgress.completedAt),
       isNotNull(studentLessonProgress.attempts),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      eq(chapters.courseId, courseId),
     ];
 
     if (quizId) conditions.push(eq(lessons.id, quizId));
@@ -1800,7 +2312,15 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const { lastAttemptExpression, studentNameExpression, quizNameExpression } =
-      this.getStudentCourseStatisticsExpressions(courseId);
+      await this.getStudentCourseStatisticsExpressions(courseId, language);
+
+    const order = sortOrder(
+      await this.getCourseStatisticsColumnToSortBy(
+        sortedField as CourseStudentQuizResultsSortField,
+        courseId,
+        language,
+      ),
+    );
 
     const quizResults = await this.db
       .select({
@@ -1818,23 +2338,17 @@ export class CourseService {
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
-      .orderBy(
-        sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentQuizResultsSortField,
-            courseId,
-          ),
-        ),
-      )
+      .where(and(...conditions))
+      .orderBy(order)
       .limit(perPage)
-      .offset((page - 1) * perPage)
-      .where(and(...conditions));
+      .offset((page - 1) * perPage);
 
     const [{ totalCount }] = await this.db
       .select({ totalCount: count() })
       .from(studentLessonProgress)
       .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
       .where(and(...conditions));
 
     const allStudentsResults = await Promise.all(
@@ -1863,19 +2377,33 @@ export class CourseService {
       perPage = DEFAULT_PAGE_SIZE,
       lessonId = "",
       sort = CourseStudentQuizResultsSortFields.studentName,
+      language,
     } = query;
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
       eq(lessons.type, LESSON_TYPES.AI_MENTOR),
       eq(studentLessonProgress.id, aiMentorStudentLessonProgress.studentLessonProgressId),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      eq(chapters.courseId, courseId),
     ];
 
     if (lessonId) conditions.push(eq(lessons.id, lessonId));
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const { studentNameExpression } = this.getStudentCourseStatisticsExpressions(courseId);
+    const { studentNameExpression } = await this.getStudentCourseStatisticsExpressions(
+      courseId,
+      language,
+    );
+
+    const order = sortOrder(
+      await this.getCourseStatisticsColumnToSortBy(
+        sortedField as CourseStudentAiMentorResultsSortField,
+        courseId,
+        language,
+      ),
+    );
 
     const quizResults = await this.db
       .select({
@@ -1883,11 +2411,12 @@ export class CourseService {
         studentName: studentNameExpression,
         studentAvatarKey: users.avatarReference,
         lessonId: sql<UUIDType>`${lessons.id}`,
-        lessonName: sql<string>`${lessons.title}`,
+        lessonName: this.localizationService.getLocalizedSqlField(lessons.title, language),
         score: sql<number>`${aiMentorStudentLessonProgress.percentage}`,
         lastSession: sql<string>`TO_CHAR(${aiMentorStudentLessonProgress.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(studentCourses)
+      .innerJoin(courses, eq(courses.id, studentCourses.courseId))
       .leftJoin(users, eq(studentCourses.studentId, users.id))
       .leftJoin(studentLessonProgress, eq(studentLessonProgress.studentId, users.id))
       .leftJoin(
@@ -1895,14 +2424,8 @@ export class CourseService {
         eq(aiMentorStudentLessonProgress.studentLessonProgressId, studentLessonProgress.id),
       )
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
-      .orderBy(
-        sortOrder(
-          this.getCourseStatisticsColumnToSortBy(
-            sortedField as CourseStudentAiMentorResultsSortField,
-            courseId,
-          ),
-        ),
-      )
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .orderBy(order)
       .limit(perPage)
       .offset((page - 1) * perPage)
       .where(and(...conditions));
@@ -1916,6 +2439,7 @@ export class CourseService {
       )
       .leftJoin(studentCourses, eq(studentLessonProgress.studentId, studentCourses.studentId))
       .leftJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .where(and(...conditions));
 
     const allStudentsResults = await Promise.all(
@@ -1937,12 +2461,13 @@ export class CourseService {
     };
   }
 
-  private getCourseStatisticsColumnToSortBy(
+  private async getCourseStatisticsColumnToSortBy(
     sort:
       | CourseStudentProgressionSortField
       | CourseStudentQuizResultsSortField
       | CourseStudentAiMentorResultsSortField,
     courseId: UUIDType,
+    language: SupportedLanguages,
   ) {
     const {
       lastAttemptExpression,
@@ -1951,7 +2476,7 @@ export class CourseService {
       groupNameExpression,
       lastActivityExpression,
       completedLessonsCountExpression,
-    } = this.getStudentCourseStatisticsExpressions(courseId);
+    } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     switch (sort) {
       case CourseStudentProgressionSortFields.studentName:
@@ -1971,7 +2496,7 @@ export class CourseService {
       case CourseStudentQuizResultsSortFields.quizScore:
         return studentLessonProgress.quizScore;
       case CourseStudentAiMentorResultsSortFields.lessonName:
-        return lessons.title;
+        return this.localizationService.getLocalizedSqlField(lessons.title, language);
       case CourseStudentAiMentorResultsSortFields.score:
         return aiMentorStudentLessonProgress.percentage;
       case CourseStudentAiMentorResultsSortFields.lastSession:
@@ -1981,7 +2506,10 @@ export class CourseService {
     }
   }
 
-  private getStudentCourseStatisticsExpressions(courseId: UUIDType) {
+  private async getStudentCourseStatisticsExpressions(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+  ) {
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -2003,8 +2531,8 @@ export class CourseService {
             AND slp.completed_at IS NOT NULL
         ), 0)::float`;
 
-    const groupNameExpression = sql<string | null>`(
-          SELECT g.name
+    const groupNameExpression = sql<Array<{ id: string; name: string }>>`(
+          SELECT json_agg(json_build_object('id', g.id, 'name', g.name))
           FROM ${groups} g
           JOIN ${groupUsers} gu ON gu.group_id = g.id
           WHERE gu.user_id = ${users.id}
@@ -2021,10 +2549,12 @@ export class CourseService {
         )`;
 
     const quizNameExpression = sql<string>`(
-          SELECT l.title
-          FROM ${lessons} l
-          WHERE l.id = ${studentLessonProgress.lessonId}
-            AND l.type = 'quiz'
+          SELECT ${this.localizationService.getLocalizedSqlField(lessons.title, language, "c")}
+          FROM ${lessons}
+          JOIN ${chapters} ch ON ch.id = lessons.chapter_id
+          JOIN ${courses} c ON c.id = ch.course_id
+          WHERE lessons.id = ${studentLessonProgress.lessonId}
+            AND lessons.type = 'quiz'
         )`;
 
     return {
@@ -2037,21 +2567,193 @@ export class CourseService {
     };
   }
 
-  async getCourseName(courseId: UUIDType) {
-    const [{ courseName }] = await this.db
-      .select({ courseName: courses.title })
+  async getCourseEmailData(courseId: UUIDType, language?: SupportedLanguages) {
+    const [courseData] = await this.db
+      .select({
+        courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
+        hasCertificate: courses.hasCertificate,
+      })
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    return courseName;
+    return courseData;
   }
 
-  async getChapterName(chapterId: UUIDType) {
+  private async buildCourseActivitySnapshot(
+    courseId: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: PostgresJsDatabase<typeof schema> = this.db,
+  ): Promise<CourseActivityLogSnapshot> {
+    const {
+      language: resolvedLanguage,
+      baseLanguage,
+      availableLocales,
+    } = await this.localizationService.getBaseLanguage(ENTITY_TYPE.COURSE, courseId, language);
+
+    const [course] = await dbInstance
+      .select({
+        id: courses.id,
+        title: this.localizationService.getLocalizedSqlField(courses.title, resolvedLanguage),
+        description: this.localizationService.getLocalizedSqlField(
+          courses.description,
+          resolvedLanguage,
+        ),
+        status: courses.status,
+        priceInCents: courses.priceInCents,
+        currency: courses.currency,
+        hasCertificate: courses.hasCertificate,
+        isScorm: courses.isScorm,
+        categoryId: courses.categoryId,
+        authorId: courses.authorId,
+        thumbnailS3Key: courses.thumbnailS3Key,
+        settings: courses.settings,
+        stripeProductId: courses.stripeProductId,
+        stripePriceId: courses.stripePriceId,
+      })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("Course not found");
+
+    return {
+      ...course,
+      baseLanguage,
+      availableLocales: Array.isArray(availableLocales) ? availableLocales : [availableLocales],
+    };
+  }
+
+  async getChapterName(chapterId: UUIDType, language?: SupportedLanguages) {
     const [{ chapterName }] = await this.db
-      .select({ chapterName: chapters.title })
+      .select({
+        chapterName: this.localizationService.getLocalizedSqlField(chapters.title, language),
+      })
       .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.id, chapterId));
 
     return chapterName;
+  }
+
+  async getStudentsWithoutCertificate(courseId: UUIDType) {
+    return this.db
+      .select({ ...getTableColumns(studentCourses) })
+      .from(studentCourses)
+      .leftJoin(
+        certificates,
+        and(
+          eq(certificates.courseId, studentCourses.courseId),
+          eq(certificates.userId, studentCourses.studentId),
+        ),
+      )
+      .where(
+        and(
+          isNotNull(studentCourses.completedAt),
+          isNull(certificates.userId),
+          eq(studentCourses.courseId, courseId),
+        ),
+      );
+  }
+
+  async createLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    userId: UUIDType,
+    role: UserRole,
+  ) {
+    await this.adminLessonService.validateAccess("course", role, userId, courseId);
+
+    const [{ availableLocales }] = await this.db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (availableLocales.includes(language)) {
+      throw new BadRequestException("adminCourseView.createLanguage.alreadyExists");
+    }
+
+    const newLanguages = [...availableLocales, language];
+
+    await this.db
+      .update(courses)
+      .set({ availableLocales: newLanguages })
+      .where(eq(courses.id, courseId));
+  }
+
+  async deleteLanguage(
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    role: UserRole,
+    userId: UUIDType,
+  ) {
+    const { baseLanguage, availableLocales } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.COURSE,
+      courseId,
+    );
+
+    if (!availableLocales.includes(language) || baseLanguage === language) {
+      throw new BadRequestException({ message: "adminCourseView.toast.invalidLanguageToDelete" });
+    }
+
+    const data = await this.getBetaCourseById(courseId, language, userId, role);
+
+    return this.db.transaction(async (trx) => {
+      const chapterIds = data.chapters.map(({ id }) => id);
+      const lessonIds: UUIDType[] = [];
+      const questionIds: UUIDType[] = [];
+
+      for (const chapter of data.chapters) {
+        for (const lesson of chapter.lessons ?? []) {
+          lessonIds.push(lesson.id);
+          if (lesson.type === LESSON_TYPES.QUIZ && lesson.questions) {
+            for (const q of lesson.questions) if (q.id) questionIds.push(q.id);
+          }
+        }
+      }
+
+      if (chapterIds.length) {
+        await trx
+          .update(chapters)
+          .set({ title: deleteJsonbField(chapters.title, language) })
+          .where(inArray(chapters.id, chapterIds));
+      }
+
+      if (lessonIds.length) {
+        await trx
+          .update(lessons)
+          .set({
+            title: deleteJsonbField(lessons.title, language),
+            description: deleteJsonbField(lessons.description, language),
+          })
+          .where(inArray(lessons.id, lessonIds));
+      }
+
+      if (questionIds.length) {
+        await trx
+          .update(questions)
+          .set({
+            title: deleteJsonbField(questions.title, language),
+            description: deleteJsonbField(questions.description, language),
+            solutionExplanation: deleteJsonbField(questions.solutionExplanation, language),
+          })
+          .where(inArray(questions.id, questionIds));
+
+        await trx
+          .update(questionAnswerOptions)
+          .set({
+            optionText: deleteJsonbField(questionAnswerOptions.optionText, language),
+            matchedWord: deleteJsonbField(questionAnswerOptions.matchedWord, language),
+          })
+          .where(inArray(questionAnswerOptions.questionId, questionIds));
+      }
+
+      await trx
+        .update(courses)
+        .set({
+          title: deleteJsonbField(courses.title, language),
+          description: deleteJsonbField(courses.description, language),
+          availableLocales: sql`ARRAY_REMOVE(${courses.availableLocales}, ${language})`,
+        })
+        .where(eq(courses.id, courseId));
+    });
   }
 }

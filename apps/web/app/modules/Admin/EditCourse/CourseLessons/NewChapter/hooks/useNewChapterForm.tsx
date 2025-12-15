@@ -12,10 +12,12 @@ import { type Chapter, ContentTypes } from "../../../EditCourse.types";
 import { newChapterFormSchema } from "../validators/newChapterFormSchema";
 
 import type { NewChapterFormValues } from "../validators/newChapterFormSchema";
+import type { SupportedLanguages } from "@repo/shared";
 
 type UseNewChapterFormProps = {
   courseId: string;
   chapter: Chapter | null;
+  language: SupportedLanguages;
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
 };
 
@@ -23,6 +25,7 @@ export const useNewChapterForm = ({
   courseId,
   chapter,
   setContentTypeToDisplay,
+  language,
 }: UseNewChapterFormProps) => {
   const { mutateAsync: createChapter } = useBetaCreateChapter();
   const { mutateAsync: updateChapter } = useUpdateChapter();
@@ -46,7 +49,7 @@ export const useNewChapterForm = ({
   const onSubmit = async (data: NewChapterFormValues) => {
     try {
       if (chapter) {
-        await updateChapter({ data, chapterId: chapter.id });
+        await updateChapter({ data: { ...data, language }, chapterId: chapter.id });
         queryClient.invalidateQueries({
           queryKey: [COURSE_QUERY_KEY, { id: courseId }],
         });

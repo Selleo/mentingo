@@ -22,17 +22,3 @@ export const MESSAGE_ROLE = {
 } as const;
 
 export type MessageRole = (typeof MESSAGE_ROLE)[keyof typeof MESSAGE_ROLE];
-
-export const SUPPORTED_LANGUAGES = {
-  PL: "pl",
-  EN: "en",
-};
-
-export type SupportedLanguages = (typeof SUPPORTED_LANGUAGES)[keyof typeof SUPPORTED_LANGUAGES];
-
-export const LANGUAGES = {
-  PL: "pl",
-  EN: "en",
-} as const;
-
-export type Languages = (typeof LANGUAGES)[keyof typeof LANGUAGES];

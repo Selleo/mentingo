@@ -1,6 +1,62 @@
+<a name="v3.23.0"></a>
+
+## [v3.23.0] - 10.12.2025
+
+### Features:
+
+- enable multi-language user interface support for courses ([#1062](https://github.com/Selleo/mentingo/issues/1062))
+
+- allow admins to unenroll groups from courses ([#1065](https://github.com/Selleo/mentingo/issues/1065))
+
+- add log tracking to improve visibility into user actions ([#1038](https://github.com/Selleo/mentingo/issues/1038))
+
+- prepare environment for multi-language course ([#969](https://github.com/Selleo/mentingo/issues/969))
+
+- allow customizing the AI mentor’s appearance ([#1003](https://github.com/Selleo/mentingo/issues/1003))
+
+- allow admin to unenroll users from courses ([#1017](https://github.com/Selleo/mentingo/issues/1017))
+
+- allow assigning users to multiple groups ([#991](https://github.com/Selleo/mentingo/issues/991))
+
+- allow admin to enforce sequential lesson progression for students ([#981](https://github.com/Selleo/mentingo/issues/981))
+
+### Bug Fixes:
+
+- handle unenrollment properly for students assigned to multiple groups ([#1069](https://github.com/Selleo/mentingo/issues/1069))
+
+- ensure quiz completion is tracked correctly ([#1068](https://github.com/Selleo/mentingo/issues/1068))
+
+- ensure AI mentor messages update correctly ([#1046](https://github.com/Selleo/mentingo/issues/1046))
+
+- not working enforcing lesson sequence when creating a new course ([#1061](https://github.com/Selleo/mentingo/issues/1061))
+
+- improve student dashboard layout on mobile ([#1042](https://github.com/Selleo/mentingo/issues/1042))
+
+- auto-generate certificates when course certificate settings change ([#1053](https://github.com/Selleo/mentingo/issues/1053))
+
+- improve button behavior in the mobile menu ([#1039](https://github.com/Selleo/mentingo/issues/1039))
+
+- close the global search modal after selecting an item ([#1040](https://github.com/Selleo/mentingo/issues/1040))
+
+- reduce excessive gaps between elements in texts ([#1047](https://github.com/Selleo/mentingo/issues/1047))
+
+- improve horizontal spacing in course description ([#1048](https://github.com/Selleo/mentingo/issues/1048))
+
+- certificate generation no longer ignores settings ([#1033](https://github.com/Selleo/mentingo/issues/1033))
+
+- correctly display users with no groups in statistics ([#1029](https://github.com/Selleo/mentingo/issues/1029))
+
+- ensure image uploads in text lessons handle links correctly ([#1022](https://github.com/Selleo/mentingo/issues/1022))
+
+- make drag-and-drop in quizzes work properly on mobile ([#1015](https://github.com/Selleo/mentingo/issues/1015))
+
+### Chores:
+
+- clean up dependencies by removing intro.js ([#1063](https://github.com/Selleo/mentingo/issues/1063))
+
 <a name="v3.22.0"></a>
 
-## [v3.22.0] - 28.11.2025
+## [v3.22.0] - 01.12.2025
 
 ### Features:
 
@@ -77,6 +133,8 @@
 - certificates components ([#950](https://github.com/Selleo/mentingo/issues/950))
 
 ### Documentation:
+
+- update changelog for version v3.22.0
 
 - update documentation to clarify contributing to project ([#937](https://github.com/Selleo/mentingo/issues/937))
 
@@ -2068,7 +2126,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.22.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.23.0...HEAD
+[v3.23.0]: https://github.com/Selleo/mentingo/compare/v3.22.0...v3.23.0
 [v3.22.0]: https://github.com/Selleo/mentingo/compare/v3.21.0...v3.22.0
 [v3.21.0]: https://github.com/Selleo/mentingo/compare/v3.20.0...v3.21.0
 [v3.20.0]: https://github.com/Selleo/mentingo/compare/v3.19.1...v3.20.0

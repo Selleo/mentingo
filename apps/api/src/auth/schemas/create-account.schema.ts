@@ -1,6 +1,5 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
-
-import { SUPPORTED_LANGUAGES } from "src/ai/utils/ai.type";
 
 import { passwordSchema } from "./password.schema";
 

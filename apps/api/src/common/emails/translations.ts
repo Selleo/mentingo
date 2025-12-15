@@ -1,6 +1,4 @@
-import { LANGUAGES } from "src/ai/utils/ai.type";
-
-import type { Languages } from "src/ai/utils/ai.type";
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 
 export const EMAIL_SUBJECTS_TRANSLATIONS = {
   welcomeEmail: {
@@ -57,11 +55,11 @@ export type EmailSubjectKey = keyof typeof EMAIL_SUBJECTS_TRANSLATIONS;
 
 export const getEmailSubject = (
   key: EmailSubjectKey,
-  language: Languages,
+  language: SupportedLanguages,
   replacements: Record<string, string> = {},
 ) => {
   const translations = EMAIL_SUBJECTS_TRANSLATIONS[key];
-  const template = translations[language] ?? translations[LANGUAGES.EN];
+  const template = translations[language] ?? translations[SUPPORTED_LANGUAGES.EN];
 
   return Object.entries(replacements).reduce((result, [token, value]) => {
     return result.replace(new RegExp(`{{${token}}}`, "g"), value);

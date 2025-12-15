@@ -14,15 +14,17 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiResponse } from "@nestjs/swagger";
+import { SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
-import { SupportedLanguages } from "src/ai/utils/ai.type";
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -68,6 +70,7 @@ export class LessonController {
       { type: "query", name: "description", schema: Type.String() },
       { type: "query", name: "searchQuery", schema: Type.String() },
       { type: "query", name: "lessonCompleted", schema: Type.String() },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: baseResponse(Type.Array(enrolledLessonSchema)),
   })
@@ -76,6 +79,7 @@ export class LessonController {
     @Query("description") description: string,
     @Query("searchQuery") searchQuery: string,
     @Query("lessonCompleted") lessonCompleted: string,
+    @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<EnrolledLesson[]>> {
     const filters: EnrolledLessonsFilters = {
@@ -84,23 +88,27 @@ export class LessonController {
       searchQuery,
       lessonCompleted: lessonCompleted ? lessonCompleted === "true" : undefined,
     };
-    const lessons = await this.lessonService.getEnrolledLessons(userId, filters);
+    const lessons = await this.lessonService.getEnrolledLessons(userId, filters, language);
     return new BaseResponse(lessons);
   }
 
   @Get(":id")
   @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
     response: baseResponse(lessonShowSchema),
   })
   async getLessonById(
     @Param("id") id: UUIDType,
-    @Query("userLanguage") userLanguage: SupportedLanguages,
+    @Query("language") language: SupportedLanguages,
+    @Query("studentId") studentId: UUIDType,
     @CurrentUser("userId") userId: UUIDType,
     @CurrentUser("role") userRole: UserRole,
-    @Query("studentId") studentId: UUIDType,
   ): Promise<BaseResponse<LessonShow>> {
     return new BaseResponse(
-      await this.lessonService.getLessonById(id, studentId || userId, userRole, userLanguage),
+      await this.lessonService.getLessonById(id, studentId || userId, userRole, language),
     );
   }
 
@@ -117,14 +125,9 @@ export class LessonController {
   })
   async betaCreateLesson(
     @Body() createLessonBody: CreateLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const id = await this.adminLessonsService.createLessonForChapter(
-      createLessonBody,
-      userId,
-      role,
-    );
+    const id = await this.adminLessonsService.createLessonForChapter(createLessonBody, currentUser);
 
     return new BaseResponse({ id, message: "Lesson created successfully" });
   }
@@ -143,14 +146,13 @@ export class LessonController {
   })
   async betaCreateAiMentorLesson(
     @Body() createAiMentorLessonBody: CreateAiMentorLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const id = await this.adminLessonsService.createAiMentorLesson(
       createAiMentorLessonBody,
-      userId,
-      role,
+      currentUser,
     );
+
     return new BaseResponse({ id, message: "AI Mentor lesson created successfully" });
   }
 
@@ -174,10 +176,10 @@ export class LessonController {
   async betaUpdateAiMentorLesson(
     @Query("id") id: UUIDType,
     @Body() data: UpdateAiMentorLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateAiMentorLesson(id, data, userId, role);
+    await this.adminLessonsService.updateAiMentorLesson(id, data, currentUser);
+
     return new BaseResponse({ message: "AI Mentor lesson updated successfully" });
   }
 
@@ -195,10 +197,9 @@ export class LessonController {
   })
   async betaCreateQuizLesson(
     @Body() createQuizLessonBody: CreateQuizLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const id = await this.adminLessonsService.createQuizLesson(createQuizLessonBody, userId, role);
+    const id = await this.adminLessonsService.createQuizLesson(createQuizLessonBody, currentUser);
 
     return new BaseResponse({ id, message: "Quiz created successfully" }) as any;
   }
@@ -223,10 +224,9 @@ export class LessonController {
   async betaUpdateQuizLesson(
     @Query("id") id: UUIDType,
     @Body() data: UpdateQuizLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateQuizLesson(id, data, userId, role);
+    await this.adminLessonsService.updateQuizLesson(id, data, currentUser);
     return new BaseResponse({ message: "Quiz updated successfully" });
   }
 
@@ -249,10 +249,9 @@ export class LessonController {
   async betaUpdateLesson(
     @Query("id") id: UUIDType,
     @Body() data: UpdateLessonBody,
-    @CurrentUser("role") role: UserRole,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateLesson(id, data, userId, role);
+    await this.adminLessonsService.updateLesson(id, data, currentUser);
     return new BaseResponse({ message: "Text block updated successfully" });
   }
 
@@ -264,11 +263,9 @@ export class LessonController {
   })
   async removeLesson(
     @Query("lessonId") lessonId: UUIDType,
-    @CurrentUser("role") role: UserRole,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.removeLesson(lessonId, userId, role);
-
+    await this.adminLessonsService.removeLesson(lessonId, currentUser);
     return new BaseResponse({
       message: "Lesson removed from course successfully",
     });
@@ -364,10 +361,9 @@ export class LessonController {
   })
   async createEmbedLesson(
     @Body() data: CreateEmbedLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.createEmbedLesson(data, userId, role);
+    await this.adminLessonsService.createEmbedLesson(data, currentUser);
     return new BaseResponse({ message: "Embed lesson created successfully" });
   }
 
@@ -383,10 +379,9 @@ export class LessonController {
   async updateEmbedLesson(
     @Param("id") id: UUIDType,
     @Body() data: UpdateEmbedLessonBody,
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.adminLessonsService.updateEmbedLesson(id, userId, role, data);
+    await this.adminLessonsService.updateEmbedLesson(id, currentUser, data);
     return new BaseResponse({ message: "Embed lesson updated successfully" });
   }
 
@@ -428,6 +423,43 @@ export class LessonController {
     return this.lessonService.getLessonImage(res, userId, role, resourceId);
   }
 
+  @Post("ai-mentor/avatar")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        lessonId: { type: "string", format: "uuid" },
+        file: {
+          type: "string",
+          format: "binary",
+          nullable: true,
+        },
+      },
+      required: ["lessonId", "file"],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: "File uploaded successfully",
+    type: String,
+  })
+  async uploadAiMentorAvatar(
+    @CurrentUser("role") role: UserRole,
+    @CurrentUser("userId") userId: UUIDType,
+    @Body("lessonId") lessonId: UUIDType,
+    @UploadedFile() uploadedFile: Express.Multer.File | null,
+  ) {
+    await this.adminLessonsService.uploadAvatarToAiMentorLesson(
+      userId,
+      role,
+      lessonId,
+      uploadedFile,
+    );
+  }
+
   @Patch("update-lesson-display-order")
   @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
   @Validate({
@@ -449,13 +481,11 @@ export class LessonController {
       lessonId: UUIDType;
       displayOrder: number;
     },
-    @CurrentUser("userId") userId: UUIDType,
-    @CurrentUser("role") role: UserRole,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.adminLessonsService.updateLessonDisplayOrder({
       ...body,
-      currentUserId: userId,
-      currentUserRole: role,
+      currentUser,
     });
 
     return new BaseResponse({

@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import {
@@ -27,7 +28,10 @@ import { InlineCategoryCreationForm } from "../../Categories/components/InlineCa
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
 import CourseCertificateSetting from "./components/CourseCertificateSetting";
+import CourseLessonSequenceSwitch from "./components/CourseLessonSequenceSwitch";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
+
+import type { SupportedLanguages } from "@repo/shared";
 
 type CourseSettingsProps = {
   courseId?: string;
@@ -37,6 +41,7 @@ type CourseSettingsProps = {
   thumbnailS3SingedUrl?: string | null;
   thumbnailS3Key?: string;
   hasCertificate?: boolean;
+  courseLanguage: SupportedLanguages;
 };
 
 const CourseSettings = ({
@@ -47,6 +52,7 @@ const CourseSettings = ({
   thumbnailS3SingedUrl,
   thumbnailS3Key,
   hasCertificate = false,
+  courseLanguage,
 }: CourseSettingsProps) => {
   const { t } = useTranslation();
 
@@ -55,12 +61,15 @@ const CourseSettings = ({
     description,
     categoryId,
     thumbnailS3Key,
+    courseLanguage,
     courseId: courseId || "",
   });
+
   const { data: categories } = useCategoriesSuspense();
   const [isUploading, setIsUploading] = useState(false);
   const { mutateAsync: uploadFile } = useUploadFile();
-  const isFormValid = form.formState.isValid;
+  const isFormValid = form.formState.isDirty;
+
   const [displayThumbnailUrl, setDisplayThumbnailUrl] = useState<string | undefined>(
     thumbnailS3SingedUrl || undefined,
   );
@@ -103,10 +112,14 @@ const CourseSettings = ({
     }
   };
 
+  const isMissingContent = !title?.trim() || !description?.trim();
+
   return (
     <div className="flex h-full w-full gap-x-6">
       <div className="w-full basis-full">
         <div className="flex h-full w-full flex-col gap-y-6 overflow-y-auto rounded-lg border border-gray-200 bg-white p-8 shadow-md">
+          {isMissingContent && <MissingTranslationsAlert />}
+
           <div className="flex flex-col gap-y-1">
             {courseId && (
               <CourseCertificateSetting courseId={courseId} hasCertificate={hasCertificate} />
@@ -161,7 +174,12 @@ const CourseSettings = ({
               <Editor
                 id="description"
                 content={description}
-                onChange={(value) => form.setValue("description", value)}
+                onChange={(value) =>
+                  form.setValue("description", value, {
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  })
+                }
               />
               {watchedDescription.length > MAX_COURSE_DESCRIPTION_HTML_LENGTH && (
                 <p className="text-sm text-red-500">
@@ -169,8 +187,11 @@ const CourseSettings = ({
                 </p>
               )}
               {descriptionFieldCharactersLeft <= 0 && (
-                <p className="text-sm text-red-500">You have reached the character limit.</p>
+                <p className="text-sm text-red-500">
+                  {t("adminCourseView.settings.other.reachedCharactersLimit")}
+                </p>
               )}
+              {courseId && <CourseLessonSequenceSwitch courseId={courseId} />}
               <FormField
                 control={form.control}
                 name="thumbnailS3Key"

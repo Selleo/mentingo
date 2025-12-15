@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "fishery";
 
-import { groups, groupUsers } from "../../src/storage/schema";
+import { groups, groupUsers } from "src/storage/schema";
 
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { DatabasePg } from "src/common";

@@ -3,12 +3,8 @@ import { useParams } from "@remix-run/react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import {
-  useSubmitQuiz,
-  useRetakeQuiz,
-  useQuizRetakeStatus,
-  useMarkLessonAsCompleted,
-} from "~/api/mutations";
+import { useSubmitQuiz, useRetakeQuiz, useQuizRetakeStatus } from "~/api/mutations";
+import { certificatesQueryOptions } from "~/api/queries/useCertificates";
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
@@ -21,7 +17,7 @@ import {
 } from "~/components/ui/tooltip";
 import { toast } from "~/components/ui/use-toast";
 import { useUserRole } from "~/hooks/useUserRole";
-import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
@@ -47,6 +43,8 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
   const { t } = useTranslation();
   const { isAdminLike } = useUserRole();
 
+  const { language } = useLanguageStore();
+
   const questions = lesson.quizDetails?.questions;
   const isUserSubmittedAnswer = Boolean(lesson.lessonCompleted);
 
@@ -56,14 +54,11 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
     resolver: zodResolver(QuizFormSchema(t)),
   });
 
-  const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(userId);
-
   const submitQuiz = useSubmitQuiz({
     handleOnSuccess: () => {
-      if (isAdminLike) return;
-      if (lesson.type == LessonType.QUIZ) {
-        markLessonAsCompleted({ lessonId: previewLessonId || lessonId });
-      }
+      queryClient.invalidateQueries({ queryKey: ["lesson", lessonId] });
+      queryClient.invalidateQueries({ queryKey: ["lessonProgress", lessonId] });
+      queryClient.invalidateQueries(certificatesQueryOptions({ userId }));
     },
   });
 
@@ -85,7 +80,7 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
   if (!questions?.length) return null;
 
   const handleOnSubmit = async (data: QuizForm) => {
-    submitQuiz.mutate({ lessonId, questionsAnswers: parseQuizFormData(data) });
+    submitQuiz.mutate({ lessonId, questionsAnswers: parseQuizFormData(data), language });
   };
 
   const handleRetake = () => {
