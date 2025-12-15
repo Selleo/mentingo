@@ -48,7 +48,7 @@ export default function NewsDetailsPage() {
     );
   }
 
-  const headerImage = news.resources?.images?.[0]?.fileUrl;
+  const headerImageUrl = news.resources?.coverImage?.fileUrl;
   const publishedDate = news.publishedAt ? new Date(news.publishedAt) : null;
 
   return (
@@ -105,9 +105,9 @@ export default function NewsDetailsPage() {
           </div>
         )}
 
-        {headerImage ? (
+        {headerImageUrl ? (
           <img
-            src={headerImage}
+            src={headerImageUrl}
             alt={news.title}
             className="w-full h-[500px] rounded-lg object-cover"
           />

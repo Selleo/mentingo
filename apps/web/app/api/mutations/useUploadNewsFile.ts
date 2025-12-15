@@ -1,8 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { ApiClient } from "../api-client";
-import { newsQueryOptions } from "../queries/useNews";
-import { NEWS_LIST_QUERY_KEY } from "../queries/useNewsList";
 
 type UploadNewsFileOptions = {
   id: string;
@@ -13,8 +11,6 @@ type UploadNewsFileOptions = {
 };
 
 export function useUploadNewsFile() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ id, file, language, title, description }: UploadNewsFileOptions) => {
       const formData = new FormData();
@@ -39,11 +35,11 @@ export function useUploadNewsFile() {
 
       return response.data;
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: newsQueryOptions(variables.id, { language: variables.language }).queryKey,
-      });
-      queryClient.invalidateQueries({ queryKey: NEWS_LIST_QUERY_KEY });
+    onSuccess: (_data) => {
+      // queryClient.invalidateQueries({
+      //   queryKey: newsQueryOptions(variables.id, { language: variables.language }).queryKey,
+      // });
+      // queryClient.invalidateQueries({ queryKey: NEWS_LIST_QUERY_KEY });
     },
     onError: (error) => {
       if (error instanceof Error) {

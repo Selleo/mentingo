@@ -171,7 +171,8 @@
       "title": "Tytuł",
       "intro": "Wprowadzenie",
       "content": "Treść",
-      "image": "Obraz"
+      "image": "Obraz",
+      "status": "Status"
     },
     "placeholder": {
       "title": "Wpisz tytuł aktualności",
@@ -179,10 +180,21 @@
     },
     "createOrEdit": "Dodaj/edytuj aktualność",
     "edit": "Edytuj",
+    "status": {
+      "draft": "Szkic",
+      "published": "Opublikowany"
+    },
     "button": {
       "save": "Zapisz aktualność",
       "edit": "Edytuj aktualność",
       "delete": "Usuń"
+    },
+    "validation": {
+      "titleRequired": "Tytuł jest wymagany",
+      "introRequired": "Wprowadzenie jest wymagane",
+      "contentRequired": "Treść jest wymagana",
+      "imageRequired": "Obraz jest wymagany",
+      "statusRequired": "Status jest wymagany"
     }
   },
   "globalSearch": {

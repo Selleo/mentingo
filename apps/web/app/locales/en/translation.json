@@ -170,7 +170,8 @@
       "title": "Title",
       "intro": "Introduction",
       "content": "Content",
-      "image": "Image"
+      "image": "Image",
+      "status": "Status"
     },
     "placeholder": {
       "title": "Enter news title",
@@ -178,10 +179,21 @@
     },
     "createOrEdit": "Create news",
     "edit": "Edit",
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
     "button": {
       "save": "Save news",
       "edit": "Edit news",
       "delete": "Delete"
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "introRequired": "Introduction is required",
+      "contentRequired": "Content is required",
+      "imageRequired": "Image is required",
+      "statusRequired": "Status is required"
     }
   },
   "globalSearch": {
