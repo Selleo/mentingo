@@ -26,3 +26,10 @@ export {
   usePlatformSimpleLogoSuspense,
   platformSimpleLogoQueryOptions,
 } from "./usePlatformSimpleLogo";
+export {
+  newsListQueryOptions,
+  useNewsList,
+  useNewsListSuspense,
+  NEWS_LIST_QUERY_KEY,
+} from "./useNewsList";
+export { newsQueryOptions, useNews, useNewsSuspense, NEWS_QUERY_KEY } from "./useNews";

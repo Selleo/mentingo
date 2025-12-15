@@ -2,32 +2,23 @@ import { useNavigate, useSearchParams } from "@remix-run/react";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useNewsList } from "~/api/queries";
 import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
 import { useUserRole } from "~/hooks/useUserRole";
 
 import { PageWrapper } from "../../components/PageWrapper";
 import { Pagination } from "../../components/Pagination/Pagination";
+import Loader from "../common/Loader/Loader";
+import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
 import NewsItem from "./NewsItem";
-import { getPaginationData } from "./utils";
-
-const mockedNews = Array.from({ length: 20 }).map((_, idx) => ({
-  id: idx + 1,
-  title: `Sample News Title ${idx + 1}`,
-  introduction: `This is the introduction for news item ${idx + 1}. It gives a brief overview of the news content.`,
-  author: `Author ${(idx % 5) + 1}`,
-  createdAt: new Date(Date.now() - idx * 1000 * 60 * 60 * 24).toISOString(),
-  image: `https://picsum.photos/seed/news${idx + 1}/400/200`,
-  content: `This is the main content of news item ${idx + 1}. It contains all the details, story text, and any relevant information for this news post. It may be long or short, depending on the topic covered.`,
-}));
+import { getPaginationData, ITEMS_ON_FIRST_PAGE, ITEMS_ON_OTHER_PAGES } from "./utils";
 
 function NewsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const { isAdminLike } = useUserRole();
 
   const parsePageParam = useCallback(() => {
     const pageParam = Number(searchParams.get("page"));
@@ -36,7 +27,15 @@ function NewsPage() {
 
   const [currentPage, setCurrentPage] = useState<number>(() => parsePageParam());
 
-  const totalItems = mockedNews.length;
+  const { isAdminLike } = useUserRole();
+  const { language } = useLanguageStore();
+  const { data: newsList, isLoading: isLoadingNewsList } = useNewsList({
+    language,
+    page: currentPage,
+    perPage: currentPage === 1 ? ITEMS_ON_FIRST_PAGE : ITEMS_ON_OTHER_PAGES,
+  });
+
+  const totalItems = newsList?.length ?? 0;
   const { totalPages, itemsPerPage, startItem, endItem } = useMemo(
     () => getPaginationData(totalItems, currentPage),
     [currentPage, totalItems],
@@ -51,10 +50,10 @@ function NewsPage() {
   };
 
   const renderNewsContent = () => {
-    const pageNews = mockedNews.slice(startItem - 1, endItem);
+    const pageNews = newsList?.slice(startItem - 1, endItem);
 
-    if (currentPage === 1 && pageNews.length) {
-      const [firstNews, ...moreNews] = pageNews;
+    if (currentPage === 1) {
+      const [firstNews, ...moreNews] = pageNews ?? [];
 
       return (
         <>
@@ -73,22 +72,28 @@ function NewsPage() {
             )}
           </div>
 
-          <NewsItem {...firstNews} isBig />
+          {firstNews || moreNews.length ? (
+            <>
+              <NewsItem {...firstNews} isBig />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {moreNews.map((news) => (
-              <NewsItem key={news.id} {...news} />
-            ))}
-          </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {moreNews.map((news) => (
+                  <NewsItem key={news.id} {...news} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <h3 className="body-base-md">No news</h3>
+            </div>
+          )}
         </>
       );
     }
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-        {pageNews.map((news) => (
-          <NewsItem key={news.id} {...news} />
-        ))}
+        {pageNews?.map((news) => <NewsItem key={news.id} {...news} />)}
       </div>
     );
   };
@@ -100,6 +105,14 @@ function NewsPage() {
       setCurrentPage(clamped);
     }
   }, [currentPage, totalPages, parsePageParam]);
+
+  if (isLoadingNewsList) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <PageWrapper
@@ -117,17 +130,19 @@ function NewsPage() {
     >
       {renderNewsContent()}
 
-      <Pagination
-        className="border-t"
-        totalItems={totalItems}
-        overrideTotalPages={totalPages}
-        startItemOverride={startItem}
-        endItemOverride={endItem}
-        itemsPerPage={itemsPerPage as 7}
-        currentPage={currentPage}
-        canChangeItemsPerPage={false}
-        onPageChange={changePage}
-      />
+      {totalItems > 0 ? (
+        <Pagination
+          className="border-t"
+          totalItems={totalItems}
+          overrideTotalPages={totalPages}
+          startItemOverride={startItem}
+          endItemOverride={endItem}
+          itemsPerPage={itemsPerPage as 7}
+          currentPage={currentPage}
+          canChangeItemsPerPage={false}
+          onPageChange={changePage}
+        />
+      ) : null}
     </PageWrapper>
   );
 }
