@@ -3,11 +3,12 @@ import { Readable } from "stream";
 
 import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
-import Excel from "exceljs";
-import { isEmpty } from "lodash";
+import { parse } from "csv-parse";
+import readXlsxFile from "read-excel-file/node";
 import sharp from "sharp";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
+import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import { S3Service } from "src/s3/s3.service";
 
 import {
@@ -19,7 +20,6 @@ import {
 import { FileGuard } from "./guards/file.guard";
 
 import type { FileValidationOptions } from "./guards/file.guard";
-import type { ExcelHyperlinkCell } from "./types/excel";
 import type { Static, TSchema } from "@sinclair/typebox";
 
 @Injectable()
@@ -144,59 +144,65 @@ export class FileService {
     const validator = TypeCompiler.Compile(schema);
 
     const fileStream = Readable.from(file.buffer);
-    const workbook = new Excel.Workbook();
 
-    const worksheet =
+    const rows =
       file.mimetype === ALLOWED_EXCEL_MIME_TYPES_MAP.csv
-        ? await workbook.csv.read(fileStream, {
-            parserOptions: { delimiter: "," },
-          })
-        : await workbook.xlsx.read(fileStream).then(() => workbook.worksheets[0]);
+        ? await this.readCsvToRows(fileStream)
+        : await readXlsxFile(file.buffer, { sheet: 1 });
 
-    const allSheetValues = worksheet.getSheetValues();
-    if (!allSheetValues || allSheetValues.length <= 1)
+    if (!rows || rows.length <= 1)
       throw new BadRequestException({ message: "files.import.fileEmpty" });
 
-    const headers = (allSheetValues[1] as string[]).map((h) => String(h).trim().replace(/\r/, ""));
-    const rows = allSheetValues.slice(2);
+    const headers = rows[0].map(normalizeHeader);
+    const dataRows = rows.slice(1);
 
-    const parsedCsvData = rows.map((rowValues) => {
+    const parsed = dataRows.map((rowValues) => {
       if (!Array.isArray(rowValues)) return;
 
       const parsedObject: Record<string, string | string[]> = {};
 
       headers.forEach((header, colIndex) => {
-        const normalizedHeader = header.trim();
+        if (!header) return;
 
-        const cellValue = rowValues[colIndex];
-
-        if (header === "groups" && typeof cellValue === "string") {
-          parsedObject[normalizedHeader] = cellValue.split(",");
-
-          return;
-        }
-
-        if (cellValue && typeof cellValue === "object" && "hyperlink" in cellValue) {
-          parsedObject[normalizedHeader] = String((cellValue as ExcelHyperlinkCell).hyperlink)
-            .replace(/^mailto:/, "")
-            .trim();
-
-          return;
-        }
-
-        if (!isEmpty(cellValue)) parsedObject[normalizedHeader] = String(cellValue).trim();
+        const v = normalizeCellValue(header, rowValues[colIndex]);
+        if (v !== undefined) parsedObject[header] = v;
       });
 
-      if (isEmpty(parsedObject)) return null;
+      if (isEmptyObject(parsedObject)) return null;
 
-      if (!validator.Check(parsedObject))
+      const schemaKeys = Object.keys(schema.properties || {});
+      const filteredObject = Object.fromEntries(
+        Object.entries(parsedObject).filter(([key]) => schemaKeys.includes(key)),
+      );
+
+      if (!validator.Check(filteredObject)) {
         throw new BadRequestException({
           message: "files.import.requiredDataMissing",
         });
+      }
 
-      return parsedObject as Static<T>;
+      return validator.Encode(filteredObject) as Static<T>;
     });
 
-    return parsedCsvData.filter((item) => item !== null);
+    return parsed.filter((item) => item !== null);
+  }
+
+  async readCsvToRows(input: Readable, delimiter = ","): Promise<any[][]> {
+    return new Promise((resolve, reject) => {
+      const rows: any[][] = [];
+      input
+        .pipe(
+          parse({
+            delimiter,
+            relax_quotes: true,
+            bom: true,
+            trim: true,
+            skip_empty_lines: true,
+          }),
+        )
+        .on("data", (row) => rows.push(row))
+        .on("end", () => resolve(rows))
+        .on("error", reject);
+    });
   }
 }
