@@ -7,8 +7,6 @@ type NewsVideoProps = {
 };
 
 export const NewsVideo = ({ url, isExternal = false, description }: NewsVideoProps) => {
-  console.log({ description });
-
   return (
     <div className="flex flex-col gap-3">
       <figure className="overflow-hidden rounded-lg shadow-lg">

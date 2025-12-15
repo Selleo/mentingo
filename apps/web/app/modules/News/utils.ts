@@ -14,7 +14,6 @@ export const getPaginationData = (totalItems: number, currentPage: number) => {
   const remainingItems = totalItems - ITEMS_ON_FIRST_PAGE;
   const additionalPages = Math.ceil(remainingItems / ITEMS_ON_OTHER_PAGES);
   const computedTotalPages = 1 + additionalPages;
-
   const isFirstPage = currentPage === 1;
   const pageItemsPerPage = isFirstPage ? ITEMS_ON_FIRST_PAGE : ITEMS_ON_OTHER_PAGES;
   const offset = isFirstPage ? 0 : ITEMS_ON_FIRST_PAGE + (currentPage - 2) * ITEMS_ON_OTHER_PAGES;
