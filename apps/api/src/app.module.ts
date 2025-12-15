@@ -39,6 +39,7 @@ import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
+import { NewsModule } from "./news/news.module";
 import { QuestionsModule } from "./questions/question.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
@@ -126,6 +127,7 @@ import { UserModule } from "./user/user.module";
     LocalizationModule,
     ActivityLogsModule,
     QAModule,
+    NewsModule,
   ],
   controllers: [],
   providers: [

@@ -477,6 +477,20 @@
       "when": 1765451091424,
       "tag": "0067_activity_logs_drop_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1765786100783,
+      "tag": "0068_add_central_resources_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1765786156798,
+      "tag": "0069_add_news_table",
+      "breakpoints": true
     }
   ]
 }

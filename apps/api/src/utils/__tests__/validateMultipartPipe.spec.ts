@@ -117,4 +117,28 @@ describe("ValidateMultipartPipe", () => {
     const result = pipe.transform(multipartData);
     expect(result.isActive).toBe(false);
   });
+
+  it("should ignore empty strings for optional fields", () => {
+    const multipartData = {
+      name: "John",
+      age: "30",
+      isActive: "true",
+      meta: "",
+    };
+    const result = pipe.transform(multipartData);
+    expect(result).toEqual({
+      name: "John",
+      age: 30,
+      isActive: true,
+    });
+  });
+
+  it("should fail when required fields are empty strings", () => {
+    const multipartData = {
+      name: "",
+      age: "30",
+      isActive: "true",
+    };
+    expect(() => pipe.transform(multipartData)).toThrow(BadRequestException);
+  });
 });
