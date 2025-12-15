@@ -99,8 +99,9 @@ export class NewsController {
   async getNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<GetNewsResponse[]>> {
-    const newsList = await this.newsService.getNewsList(language, page);
+    const newsList = await this.newsService.getNewsList(language, page, currentUser);
 
     return new PaginatedResponse(newsList);
   }

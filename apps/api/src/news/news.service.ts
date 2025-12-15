@@ -144,10 +144,10 @@ export class NewsService {
     return { page: currentPage, perPage, offset };
   }
 
-  async getNewsList(requestedLanguage: SupportedLanguages, page = 1) {
+  async getNewsList(requestedLanguage: SupportedLanguages, page = 1, currentUser?: CurrentUser) {
     const pagination = this.getPaginationForNews(page);
 
-    const conditions = this.getVisibleNewsConditions(requestedLanguage);
+    const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
 
     const newsList = await this.db
       .select({
@@ -316,7 +316,15 @@ export class NewsService {
     isDraftMode = false,
     currentUser?: CurrentUser,
   ) {
-    const draftModeConditions = isDraftMode ? [sql`${news.publishedAt} IS NULL`] : [];
+    const isAdminLike =
+      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+
+    if (isDraftMode && !isAdminLike)
+      throw new NotFoundException("adminNewsView.toast.notFoundError");
+
+    const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
+      isDraftMode,
+    });
 
     const [existingNews] = await this.db
       .select({
@@ -329,17 +337,11 @@ export class NewsService {
       })
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
-      .where(and(eq(news.id, newsId), ne(news.archived, true), ...draftModeConditions));
+      .where(and(eq(news.id, newsId), ...accessConditions));
 
     if (!existingNews) throw new NotFoundException("adminNewsView.toast.notFoundError");
 
-    if (isDraftMode && existingNews.publishedAt !== null)
-      throw new NotFoundException("adminNewsView.toast.notFoundError");
-
-    if (
-      (currentUser?.role === USER_ROLES.STUDENT || !currentUser) &&
-      existingNews.publishedAt === null
-    )
+    if (!isDraftMode && existingNews.publishedAt === null)
       throw new NotFoundException("adminNewsView.toast.notFoundError");
 
     const resources = await this.getNewsResources(newsId, requestedLanguage);
@@ -358,6 +360,7 @@ export class NewsService {
         isDraftMode ? existingNews.createdAt : existingNews.publishedAt,
         requestedLanguage,
         isDraftMode,
+        currentUser,
       )),
     };
   }
@@ -367,15 +370,16 @@ export class NewsService {
     referenceDate: string | null,
     language: SupportedLanguages,
     isDraftMode = false,
+    currentUser?: CurrentUser,
   ) {
     if (!referenceDate) {
       return { nextNews: null, previousNews: null };
     }
 
-    const baseConditions = this.getVisibleNewsConditions(language, currentNewsId);
-    const adjacentNewsConditions = isDraftMode
-      ? [...baseConditions, sql`${news.publishedAt} IS NULL`]
-      : [...baseConditions, sql`${news.publishedAt} IS NOT NULL`];
+    const adjacentNewsConditions = this.getNewsAccessConditions(language, currentUser, {
+      isDraftMode,
+      excludedId: currentNewsId,
+    });
 
     const sortColumn = isDraftMode ? news.createdAt : news.publishedAt;
 
@@ -679,15 +683,32 @@ export class NewsService {
     return updateData;
   }
 
-  private getVisibleNewsConditions(language: SupportedLanguages, excludedId?: UUIDType) {
+  private getVisibleNewsConditions(
+    language: SupportedLanguages,
+    currentUser?: CurrentUser,
+    excludedId?: UUIDType,
+  ) {
+    return this.getNewsAccessConditions(language, currentUser, { excludedId });
+  }
+
+  private getNewsAccessConditions(
+    language: SupportedLanguages,
+    currentUser?: CurrentUser,
+    options?: { isDraftMode?: boolean; excludedId?: UUIDType },
+  ) {
+    const isAdminLike =
+      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR;
+
     const conditions = [
       ne(news.archived, true),
-      eq(news.isPublic, true),
-      sql`${language} = ANY(${news.availableLocales})`,
-      sql`${news.publishedAt} IS NOT NULL`,
+      ...(options?.isDraftMode
+        ? [sql`${news.publishedAt} IS NULL`]
+        : [sql`${news.publishedAt} IS NOT NULL`]),
+      ...(!currentUser ? [eq(news.isPublic, true)] : []),
+      ...(isAdminLike ? [] : [sql`${language} = ANY(${news.availableLocales})`]),
     ];
 
-    if (excludedId) conditions.push(ne(news.id, excludedId));
+    if (options?.excludedId) conditions.push(ne(news.id, options.excludedId));
 
     return conditions;
   }
