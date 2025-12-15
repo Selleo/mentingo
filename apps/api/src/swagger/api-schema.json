@@ -19791,12 +19791,9 @@
             ]
           },
           "title": {
-            "minLength": 1,
-            "maxLength": 200,
             "type": "string"
           },
           "summary": {
-            "maxLength": 500,
             "type": "string"
           },
           "content": {

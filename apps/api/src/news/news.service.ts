@@ -89,9 +89,7 @@ export class NewsService {
 
     const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
-    const sanitizedUpdateData = this.sanitizeUpdatePayload(updateNewsData);
-
-    const finalUpdateData = this.buildUpdateData(existingNews, sanitizedUpdateData, language);
+    const finalUpdateData = this.buildUpdateData(existingNews, updateNewsData, language);
 
     if (coverFile) {
       await this.uploadCoverImageToNews(
@@ -669,28 +667,13 @@ export class NewsService {
       if (field in updateNewsData && updateNewsData[field] !== undefined)
         updateData[field] = updateNewsData[field];
 
-      if (field === "status" && !isEmpty(updateData[field])) updateData["publishedAt"] = new Date();
+      if (field === "status" && !isEmpty(updateData[field])) {
+        if (updateData[field] === "published") updateData["publishedAt"] = new Date().toISOString();
+        if (updateData[field] === "draft") updateData["publishedAt"] = null;
+      }
     });
 
     return updateData;
-  }
-
-  private sanitizeUpdatePayload(updateNewsData: Omit<UpdateNews, "language">) {
-    const payload: Partial<Omit<UpdateNews, "language">> = {};
-
-    const normalizedTitle = this.normalizeNonEmptyString(updateNewsData.title);
-    if (normalizedTitle) payload.title = normalizedTitle;
-
-    const normalizedSummary = this.normalizeString(updateNewsData.summary, { trim: false });
-    if (normalizedSummary !== undefined) payload.summary = normalizedSummary;
-
-    const normalizedContent = this.normalizeString(updateNewsData.content, { trim: false });
-    if (normalizedContent !== undefined) payload.content = normalizedContent;
-
-    if (this.isValidStatus(updateNewsData.status)) payload.status = updateNewsData.status;
-    if (typeof updateNewsData.isPublic === "boolean") payload.isPublic = updateNewsData.isPublic;
-
-    return payload;
   }
 
   private getVisibleNewsConditions(language: SupportedLanguages, excludedId?: UUIDType) {
@@ -743,24 +726,6 @@ export class NewsService {
     ].filter(Boolean);
 
     return segments.join("/");
-  }
-
-  private normalizeString(
-    value: unknown,
-    options: { trim?: boolean } = { trim: true },
-  ): string | undefined {
-    if (typeof value !== "string") return undefined;
-    const result = options.trim === false ? value : value.trim();
-    return result;
-  }
-
-  private normalizeNonEmptyString(value: unknown) {
-    const normalized = this.normalizeString(value);
-    return normalized ? normalized : undefined;
-  }
-
-  private isValidStatus(status: unknown): status is "draft" | "published" {
-    return status === "draft" || status === "published";
   }
 
   private async buildNewsActivitySnapshot(

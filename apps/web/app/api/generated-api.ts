@@ -2998,12 +2998,7 @@ export interface CreateNewsResponse {
 export interface UpdateNewsBody {
   /** @default "en" */
   language: "en" | "pl";
-  /**
-   * @minLength 1
-   * @maxLength 200
-   */
   title?: string;
-  /** @maxLength 500 */
   summary?: string;
   content?: string;
   status?: "draft" | "published" | "";

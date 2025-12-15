@@ -6,8 +6,8 @@ import type { Static } from "@sinclair/typebox";
 
 export const updateNewsSchema = Type.Object({
   language: supportedLanguagesSchema,
-  title: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })),
-  summary: Type.Optional(Type.String({ maxLength: 500 })),
+  title: Type.Optional(Type.String()),
+  summary: Type.Optional(Type.String()),
   content: Type.Optional(Type.String()),
   status: Type.Optional(
     Type.Union([Type.Literal("draft"), Type.Literal("published"), Type.Literal("")]),
