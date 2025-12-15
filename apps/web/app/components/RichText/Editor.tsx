@@ -31,28 +31,6 @@ const Editor = ({
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
 }: EditorProps) => {
-  // const handleFileInsert = async (
-  //   e: DragEvent | ClipboardEvent,
-  //   file?: File,
-  //   editor?: TiptapEditor | null,
-  // ) => {
-  //   if (!file || !lessonId) return;
-
-  //   e.preventDefault();
-
-  //   if (!allowFiles) {
-  //     return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
-  //   }
-
-  //   if (acceptedFileTypes.includes(file.type)) {
-  //     const uploaded = await uploadFile({ file, lessonId });
-
-  //     const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
-
-  //     editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
-  //   }
-  // };
-
   const editor = useEditor({
     extensions: [...plugins],
     content: content,

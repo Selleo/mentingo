@@ -67,3 +67,9 @@ export const FILE_TYPES_MAP: Record<string, string> = {
 };
 
 export const ACCEPTED_FILE_TYPES = ".pdf,.docx,.txt";
+
+export const ACCEPTED_FILE_MIME_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+];

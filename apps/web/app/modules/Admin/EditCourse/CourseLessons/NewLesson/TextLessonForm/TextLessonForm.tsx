@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
 import Editor from "~/components/RichText/Editor";
@@ -9,14 +10,20 @@ import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
+import { baseUrl } from "~/utils/baseUrl";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
+import {
+  ACCEPTED_FILE_MIME_TYPES,
+  ACCEPTED_FILE_TYPES,
+} from "../AiMentorLessonForm/utils/AiMentor.constants";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { useTextLessonForm } from "./hooks/useTextLessonForm";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { Editor as TiptapEditor } from "@tiptap/react";
 
 type TextLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -43,12 +50,26 @@ const TextLessonForm = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { mutateAsync: uploadFile } = useLessonFileUpload();
+
   const onCloseModal = () => {
     setIsModalOpen(false);
   };
 
   const onClickDelete = () => {
     setIsModalOpen(true);
+  };
+
+  const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
+    if (!file || !lessonToEdit?.id) return;
+
+    if (ACCEPTED_FILE_MIME_TYPES.includes(file.type)) {
+      const uploaded = await uploadFile({ file, lessonId: lessonToEdit.id });
+
+      const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
+
+      editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
+    }
   };
 
   const missingTranslations =
@@ -106,6 +127,8 @@ const TextLessonForm = ({
                     content={field.value}
                     lessonId={lessonToEdit?.id}
                     allowFiles={!!lessonToEdit?.id}
+                    acceptedFileTypes={[ACCEPTED_FILE_TYPES]}
+                    onUpload={handleFileUpload}
                     {...field}
                   />
                 </FormControl>

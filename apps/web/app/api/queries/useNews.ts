@@ -37,4 +37,3 @@ export function useNews(id: string, params?: NewsQueryParams, options?: QueryOpt
 export function useNewsSuspense(id: string, params?: NewsQueryParams, options?: QueryOptions) {
   return useSuspenseQuery(newsQueryOptions(id, params, options));
 }
-

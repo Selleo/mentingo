@@ -20,7 +20,9 @@ export const routes: (
           route("qa/new", "modules/QA/CreateQA.page.tsx");
           route("qa/:id", "modules/QA/EditQA.page.tsx");
           route("news", "modules/News/News.page.tsx");
-          route("news/:newsId", "modules/News/NewsDetails.page.tsx");
+          route("news/:newsId", "modules/News/NewsDetails.page.tsx", {
+            id: "news-details",
+          });
         });
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Statistics/Statistics.page.tsx", {

@@ -1,18 +1,28 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "@remix-run/react";
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-use";
+import { z } from "zod";
 
-import { useCreateNews, useUpdateNews, useUploadNewsFile } from "../../api/mutations";
+import { useUpdateNews, useUploadNewsFile } from "../../api/mutations";
 import { useNews } from "../../api/queries";
 import { FormTextField } from "../../components/Form/FormTextField";
 import Editor from "../../components/RichText/Editor";
 import Viewer from "../../components/RichText/Viever";
 import { Button } from "../../components/ui/button";
-import { Form, FormControl, FormField, FormItem } from "../../components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "../../components/ui/form";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { baseUrl } from "../../utils/baseUrl";
 import Loader from "../common/Loader/Loader";
@@ -25,6 +35,16 @@ type NewsFormValues = {
   intro: string;
   content: string;
   imageUrl: string;
+  status: "draft" | "published";
+};
+
+type UpdateNewsPayload = {
+  language: "en" | "pl";
+  title: string;
+  summary: string;
+  content: string;
+  status: "draft" | "published";
+  cover?: File;
 };
 
 type NewsFormPageProps = {
@@ -35,21 +55,34 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { newsId } = useParams();
+  const location = useLocation();
+  const createdNewsId = location.state?.usr?.createdNewsId;
   const isEdit = Boolean(newsId);
+  const id = isEdit ? newsId : createdNewsId;
   const fileRef = useRef<File | null>(null);
-  const persistedNewsIdRef = useRef<string>(newsId ?? "");
 
   const [tabValue, setTabValue] = useState("editor");
 
   const { language } = useLanguageStore();
   const { data: existingNews, isLoading: isLoadingNews } = useNews(
-    persistedNewsIdRef.current,
+    id,
     { language },
     { enabled: isEdit },
   );
-  const { mutateAsync: createNews } = useCreateNews();
   const { mutateAsync: updateNews } = useUpdateNews();
   const { mutateAsync: uploadNewsFile } = useUploadNewsFile();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        title: z.string().min(1, t("newsView.validation.titleRequired")),
+        intro: z.string().min(1, t("newsView.validation.introRequired")),
+        content: z.string().min(1, t("newsView.validation.contentRequired")),
+        imageUrl: z.string().min(1, t("newsView.validation.imageRequired")),
+        status: z.enum(["draft", "published"]),
+      }),
+    [t],
+  );
 
   const form = useForm<NewsFormValues>({
     defaultValues: {
@@ -57,65 +90,40 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       intro: defaultValues?.intro ?? "",
       content: defaultValues?.content ?? "",
       imageUrl: defaultValues?.imageUrl ?? "",
+      status: defaultValues?.status ?? "draft",
     },
+    resolver: zodResolver(schema),
   });
 
   const onSubmit = async (values: NewsFormValues) => {
-    let targetId = persistedNewsIdRef.current || newsId;
+    console.log({ id });
+    if (!id) return;
 
-    if (!targetId) {
-      const created = await createNews({ language });
-      targetId = created.data.id;
-      persistedNewsIdRef.current = targetId;
-    }
-
-    if (!targetId) return;
-
-    const basePayload = {
-      language,
-      title: values.title,
-      summary: values.intro,
-      content: values.content,
-      status: "published" as const,
-      isPublic: true,
-    };
+    const formData = new FormData();
+    formData.append("language", language);
+    formData.append("title", values.title);
+    formData.append("summary", values.intro);
+    formData.append("content", values.content);
+    formData.append("status", values.status);
 
     if (fileRef.current) {
-      const formData = new FormData();
-      Object.entries(basePayload).forEach(([key, value]) => {
-        formData.append(key, String(value));
-      });
       formData.append("cover", fileRef.current);
-
-      await updateNews({
-        id: targetId,
-        data: formData as unknown as typeof basePayload,
-      });
-    } else {
-      await updateNews({
-        id: targetId,
-        data: basePayload,
-      });
     }
 
-    navigate(`/news/${targetId}`);
+    await updateNews({
+      id,
+      data: formData as unknown as UpdateNewsPayload,
+    });
+
+    navigate(`/news/${id}`);
   };
 
   const handleFileUpload = async (file?: File, editor?: TipTapEditor | null) => {
-    if (!file) return;
-    let targetNewsId = persistedNewsIdRef.current || newsId;
-
-    if (!targetNewsId) {
-      const newNews = await createNews({ language });
-      targetNewsId = newNews.data.id;
-      persistedNewsIdRef.current = targetNewsId;
-    }
-
-    if (!targetNewsId) return;
+    if (!file || !id) return;
 
     await uploadNewsFile(
       {
-        id: targetNewsId,
+        id,
         file,
         language,
         title: "content-file-title",
@@ -148,6 +156,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       intro: existingNews.summary ?? "",
       content: existingNews.content ?? "",
       imageUrl: existingNews.resources?.images?.[0]?.fileUrl ?? "",
+      status: (existingNews.status as "draft" | "published") ?? "draft",
     });
   }, [existingNews, form]);
 
@@ -179,22 +188,32 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
             placeholder={t("newsView.placeholder.title")}
           />
 
-          <div className="flex flex-col gap-2 mt-6">
-            <Label htmlFor="media-upload" className="body-base-md text-neutral-950">
-              {t("newsView.field.image")}
-            </Label>
-            <Input
-              id="media-upload"
-              type="file"
-              accept={[...ALLOWED_LESSON_IMAGE_FILE_TYPES, ...ALLOWED_VIDEO_FILE_TYPES].join(",")}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-
-                handleSaveHeaderImage(file);
-              }}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem className="flex flex-col gap-2 mt-6">
+                <Label htmlFor="media-upload" className="body-base-md text-neutral-950">
+                  {t("newsView.field.image")}
+                </Label>
+                <Input
+                  id="media-upload"
+                  type="file"
+                  accept={[...ALLOWED_LESSON_IMAGE_FILE_TYPES, ...ALLOWED_VIDEO_FILE_TYPES].join(
+                    ",",
+                  )}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    handleSaveHeaderImage(file);
+                    field.onChange(file.name);
+                  }}
+                  required
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <div className="flex items-center mt-6">
             <span className="mr-1 text-red-500">*</span>
@@ -206,6 +225,30 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
             control={form.control}
             name="intro"
             placeholder={t("newsView.placeholder.intro")}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem className="mt-4">
+                <Label htmlFor="status" className="mr-2">
+                  {t("newsView.field.status")}
+                </Label>
+                <Select
+                  value={field.value}
+                  onValueChange={(val) => field.onChange(val as "draft" | "published")}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">{t("newsView.status.draft")}</SelectItem>
+                    <SelectItem value="published">{t("newsView.status.published")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
           />
 
           {/* TODO: status field TBD */}
@@ -225,18 +268,21 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
 
                   <TabsContent value="editor">
                     <FormControl>
-                      <Editor
-                        id="content"
-                        lessonId="lessonId"
-                        content={field.value}
-                        allowFiles
-                        acceptedFileTypes={[
-                          ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
-                          ...ALLOWED_VIDEO_FILE_TYPES,
-                        ]}
-                        onUpload={handleFileUpload}
-                        {...field}
-                      />
+                      <div className="flex flex-col gap-y-1.5">
+                        <Editor
+                          id="content"
+                          lessonId="lessonId"
+                          content={field.value}
+                          allowFiles
+                          acceptedFileTypes={[
+                            ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+                            ...ALLOWED_VIDEO_FILE_TYPES,
+                          ]}
+                          onUpload={handleFileUpload}
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
                     </FormControl>
                   </TabsContent>
 
