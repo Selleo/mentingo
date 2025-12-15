@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common";
 
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { QUEUE_NAMES, QueueService } from "src/queue";
+import { USER_ROLES } from "src/user/schemas/userRoles";
 import { WsGateway } from "src/websocket";
 
 import type { createCache } from "cache-manager";
@@ -94,6 +95,10 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: JoinLessonPayload,
   ): Promise<void> {
+    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+      return;
+    }
+
     const userId = socket.data.user.userId;
     const { lessonId, courseId } = payload;
     const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
@@ -117,6 +122,10 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: LeaveLessonPayload,
   ): Promise<void> {
+    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+      return;
+    }
+
     const userId = socket.data.user.userId;
     const { lessonId } = payload;
     const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
@@ -138,6 +147,10 @@ export class LearningTimeService implements OnModuleInit {
     socket: AuthenticatedSocket,
     payload: HeartbeatPayload,
   ): Promise<void> {
+    if (socket.data.user.role !== USER_ROLES.STUDENT) {
+      return;
+    }
+
     const userId = socket.data.user.userId;
     const { lessonId, courseId, isActive } = payload;
     const sessionKey = this.getSessionKey(userId, lessonId, socket.id);
