@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { lessonLearningTime, lessons, users } from "src/storage/schema";
@@ -33,9 +33,7 @@ export class LearningTimeRepository {
         totalSeconds: lessonLearningTime.totalSeconds,
       })
       .from(lessonLearningTime)
-      .where(
-        sql`${lessonLearningTime.userId} = ${userId} AND ${lessonLearningTime.lessonId} = ${lessonId}`,
-      );
+      .where(and(eq(lessonLearningTime.userId, userId), eq(lessonLearningTime.lessonId, lessonId)));
 
     return result?.totalSeconds ?? 0;
   }

@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
-import { io, type Socket } from "socket.io-client";
+
+import { getSocket } from "~/api/socket";
+
+import type { Socket } from "socket.io-client";
 
 interface UseLearningTimeTrackerOptions {
   lessonId: string;
@@ -51,30 +54,25 @@ export function useLearningTimeTracker({
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
 
-    const apiUrl = import.meta.env.VITE_API_URL || window.location.origin;
-    const wsUrl = `${apiUrl.replace(/^http/, "ws")}/ws`;
-
-    const socket = io(wsUrl, {
-      withCredentials: true,
-      transports: ["websocket", "polling"],
-      autoConnect: true,
-    });
-
+    const socket = getSocket();
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      isConnectedRef.current = true;
-      console.debug("[LearningTimeTracker] Connected to WebSocket");
-
+    const startTracking = () => {
       socket.emit("join:lesson", { lessonId, courseId });
 
       if (heartbeatIntervalRef.current) {
         clearInterval(heartbeatIntervalRef.current);
       }
       heartbeatIntervalRef.current = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
-    });
+    };
 
-    socket.on("disconnect", () => {
+    const handleConnect = () => {
+      isConnectedRef.current = true;
+      console.debug("[LearningTimeTracker] Connected to WebSocket");
+      startTracking();
+    };
+
+    const handleDisconnect = () => {
       isConnectedRef.current = false;
       console.debug("[LearningTimeTracker] Disconnected from WebSocket");
 
@@ -82,11 +80,21 @@ export function useLearningTimeTracker({
         clearInterval(heartbeatIntervalRef.current);
         heartbeatIntervalRef.current = null;
       }
-    });
+    };
 
-    socket.on("connect_error", (error) => {
+    const handleConnectError = (error: Error) => {
       console.error("[LearningTimeTracker] Connection error:", error.message);
-    });
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+
+    if (socket.connected) {
+      startTracking();
+    } else {
+      socket.connect();
+    }
 
     const activityEvents = ["mousedown", "mousemove", "keydown", "scroll", "touchstart"];
     activityEvents.forEach((event) => {
@@ -126,13 +134,16 @@ export function useLearningTimeTracker({
         clearTimeout(idleTimeoutRef.current);
       }
 
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+
       activityEvents.forEach((event) => {
         document.removeEventListener(event, resetIdleTimer);
       });
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
 
-      socket.disconnect();
       socketRef.current = null;
     };
   }, [enabled, lessonId, courseId, sendHeartbeat, resetIdleTimer]);

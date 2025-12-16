@@ -2,6 +2,7 @@ import { type CanActivate, type ExecutionContext, Injectable, Logger } from "@ne
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { WsException } from "@nestjs/websockets";
+import { parse } from "cookie";
 
 import type { AuthenticatedSocket, WsUser } from "src/websocket/websocket.types";
 
@@ -60,9 +61,10 @@ export class WsJwtGuard implements CanActivate {
 
     const cookies = client.handshake?.headers?.cookie;
     if (cookies) {
-      const accessTokenMatch = cookies.match(/access_token=([^;]+)/);
-      if (accessTokenMatch) {
-        return accessTokenMatch[1];
+      const parsed = parse(cookies);
+
+      if (parsed.access_token) {
+        return parsed.access_token;
       }
     }
 
