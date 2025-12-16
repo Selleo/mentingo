@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
-import { lessonLearningTime, lessons, users } from "src/storage/schema";
+import { courses, lessonLearningTime, lessons, users } from "src/storage/schema";
 
 import type { UUIDType } from "src/common";
 
@@ -42,7 +42,7 @@ export class LearningTimeRepository {
     return this.db
       .select({
         lessonId: lessonLearningTime.lessonId,
-        lessonTitle: lessons.title,
+        lessonTitle: sql<string>`${lessons.title}->>${courses.baseLanguage}`,
         userId: lessonLearningTime.userId,
         userFirstName: users.firstName,
         userLastName: users.lastName,
@@ -52,6 +52,7 @@ export class LearningTimeRepository {
       .from(lessonLearningTime)
       .innerJoin(users, eq(lessonLearningTime.userId, users.id))
       .innerJoin(lessons, eq(lessonLearningTime.lessonId, lessons.id))
+      .innerJoin(courses, eq(lessonLearningTime.courseId, courses.id))
       .where(eq(lessonLearningTime.courseId, courseId));
   }
 
@@ -59,15 +60,21 @@ export class LearningTimeRepository {
     return this.db
       .select({
         lessonId: lessonLearningTime.lessonId,
-        lessonTitle: lessons.title,
+        lessonTitle: sql<string>`${lessons.title}->>${courses.baseLanguage}`,
         averageSeconds: sql<number>`ROUND(AVG(${lessonLearningTime.totalSeconds}))::INTEGER`,
         totalUsers: sql<number>`COUNT(DISTINCT ${lessonLearningTime.userId})::INTEGER`,
         totalSeconds: sql<number>`SUM(${lessonLearningTime.totalSeconds})::INTEGER`,
       })
       .from(lessonLearningTime)
       .innerJoin(lessons, eq(lessonLearningTime.lessonId, lessons.id))
+      .innerJoin(courses, eq(lessonLearningTime.courseId, courses.id))
       .where(eq(lessonLearningTime.courseId, courseId))
-      .groupBy(lessonLearningTime.lessonId, lessons.title, lessons.displayOrder)
+      .groupBy(
+        lessonLearningTime.lessonId,
+        lessons.title,
+        lessons.displayOrder,
+        courses.baseLanguage,
+      )
       .orderBy(lessons.displayOrder);
   }
 
