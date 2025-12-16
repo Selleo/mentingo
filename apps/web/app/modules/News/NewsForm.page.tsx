@@ -1,6 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "@remix-run/react";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+} from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -24,27 +30,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { Switch } from "../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { baseUrl } from "../../utils/baseUrl";
+import { filterChangedData } from "../../utils/filterChangedData";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
+import { NewsLanguageSelector } from "./components/NewsLanguageSelector";
+
+import type { SupportedLanguages } from "@repo/shared";
 import type { Editor as TipTapEditor } from "@tiptap/react";
 
 type NewsFormValues = {
   title: string;
-  intro: string;
+  summary: string;
   content: string;
   imageUrl: string;
   status: "draft" | "published";
+  isPublic: boolean;
 };
 
 type UpdateNewsPayload = {
   language: "en" | "pl";
-  title: string;
-  summary: string;
-  content: string;
-  status: "draft" | "published";
+  title?: string;
+  summary?: string;
+  content?: string;
+  status?: "draft" | "published";
+  isPublic?: boolean;
   cover?: File;
 };
 
@@ -64,7 +77,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
 
   const [tabValue, setTabValue] = useState("editor");
 
-  const { language } = useLanguageStore();
+  const { language, setLanguage } = useLanguageStore();
   const { data: existingNews, isLoading: isLoadingNews } = useNews(
     id,
     { language },
@@ -84,37 +97,45 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const schema = useMemo(
     () =>
       z.object({
-        title: z.string().min(1, t("newsView.validation.titleRequired")),
-        intro: z.string().min(1, t("newsView.validation.introRequired")),
-        content: z.string().min(1, t("newsView.validation.contentRequired")),
-        imageUrl: z.string().min(1, t("newsView.validation.imageRequired")),
+        title: z.string(),
+        summary: z.string(),
+        content: z.string(),
+        imageUrl: z.string(),
         status: z.enum(["draft", "published"]),
+        isPublic: z.boolean(),
       }),
-    [t],
+    [],
   );
 
   const form = useForm<NewsFormValues>({
     defaultValues: {
       title: defaultValues?.title ?? "",
-      intro: defaultValues?.intro ?? "",
+      summary: defaultValues?.summary ?? "",
       content: defaultValues?.content ?? "",
       imageUrl: defaultValues?.imageUrl ?? "",
       status: defaultValues?.status ?? "draft",
+      isPublic: defaultValues?.isPublic ?? false,
     },
     resolver: zodResolver(schema),
   });
 
-  const { reset } = form;
+  const { reset, getValues } = form;
+  const initialValuesRef = useRef<NewsFormValues | null>(null);
 
   const onSubmit = async (values: NewsFormValues) => {
     if (!id) return;
 
     const formData = new FormData();
     formData.append("language", language);
-    formData.append("title", values.title);
-    formData.append("summary", values.intro);
-    formData.append("content", values.content);
-    formData.append("status", values.status);
+
+    const changedValues = filterChangedData<NewsFormValues>(values, initialValuesRef.current ?? {});
+
+    if (changedValues.title) formData.append("title", changedValues.title);
+    if (changedValues.summary) formData.append("summary", changedValues.summary);
+    if (changedValues.content) formData.append("content", changedValues.content);
+    if (changedValues.status) formData.append("status", changedValues.status);
+    if (changedValues.isPublic !== undefined)
+      formData.append("isPublic", String(changedValues.isPublic));
 
     if (fileRef.current) {
       formData.append("cover", fileRef.current);
@@ -141,7 +162,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       },
       {
         onSuccess: (data) => {
-          const imageUrl = `${baseUrl}/api/news/news-image/${data.data.resourceId}`;
+          const imageUrl = `${baseUrl}/api/news/resource/${data.data.resourceId}`;
           editor
             ?.chain()
             .insertContent("<br />")
@@ -159,14 +180,23 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   useEffect(() => {
     if (!existingNews) return;
 
-    reset({
+    const initialValues: NewsFormValues = {
       title: existingNews.title ?? "",
-      intro: existingNews.summary ?? "",
+      summary: existingNews.summary ?? "",
       content: existingNews.plainContent ?? "",
       imageUrl: existingNews.resources?.images?.[0]?.fileUrl ?? "",
       status: (existingNews.status as "draft" | "published") ?? "draft",
-    });
+      isPublic: existingNews.isPublic ?? false,
+    };
+
+    reset(initialValues);
+    initialValuesRef.current = initialValues;
   }, [existingNews, reset]);
+
+  useEffect(() => {
+    if (initialValuesRef.current) return;
+    initialValuesRef.current = getValues();
+  }, [getValues]);
 
   const fetchPreview = useCallback(
     async (contentValue: string) => {
@@ -196,10 +226,25 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       <div className="mx-auto w-full max-w-6xl mt-10">
         <div className="flex flex-col gap-8 rounded-3xl bg-white p-8 shadow-sm ring-1 ring-neutral-100">
           <header className="flex flex-col gap-2 border-b border-neutral-200 pb-4">
-            <p className="text-sm font-semibold leading-5 text-primary-600">
-              {t("navigationSideBar.news")}
-            </p>
-            <h1 className="text-[32px] font-bold leading-[1.1] text-neutral-950">{pageTitle}</h1>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold leading-5 text-primary-600">
+                  {t("navigationSideBar.news")}
+                </p>
+                <h1 className="text-[32px] font-bold leading-[1.1] text-neutral-950">
+                  {pageTitle}
+                </h1>
+              </div>
+              {id && (
+                <NewsLanguageSelector
+                  newsId={id}
+                  value={language}
+                  baseLanguage={existingNews?.baseLanguage as SupportedLanguages}
+                  availableLocales={existingNews?.availableLocales as SupportedLanguages[]}
+                  onChange={(lang) => setLanguage(lang)}
+                />
+              )}
+            </div>
           </header>
 
           <Form {...form}>
@@ -207,7 +252,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="title" className="flex items-center gap-1 text-neutral-900">
-                    <span className="text-red-500">*</span>
                     {t("newsView.field.title")}
                   </Label>
                   <FormTextField
@@ -242,9 +286,43 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="isPublic"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col gap-2 ">
+                      <Label htmlFor="isPublic" className="text-neutral-900">
+                        {t("newsView.field.isPublic")}
+                      </Label>
+                      <div className="flex items-center gap-3 rounded-xl h-[42px] py-2 px-3 border border-neutral-300">
+                        <Switch
+                          id="isPublic"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          aria-label={t("newsView.field.isPublic")}
+                        />
+                        <p className="text-sm text-neutral-700">
+                          {t("newsView.isPublicDescription")}
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="summary" className="flex items-center gap-1 text-neutral-900">
+                    {t("newsView.field.summary")}
+                  </Label>
+                  <FormTextField
+                    control={form.control}
+                    name="summary"
+                    placeholder={t("newsView.placeholder.summary")}
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="w-full">
                 <FormField
                   control={form.control}
                   name="imageUrl"
@@ -266,24 +344,11 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                           handleSaveHeaderImage(file);
                           field.onChange(file.name);
                         }}
-                        required
                       />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="intro" className="flex items-center gap-1 text-neutral-900">
-                    <span className="text-red-500">*</span>
-                    {t("newsView.field.intro")}
-                  </Label>
-                  <FormTextField
-                    control={form.control}
-                    name="intro"
-                    placeholder={t("newsView.placeholder.intro")}
-                  />
-                </div>
               </div>
 
               <FormField
@@ -292,7 +357,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-3">
                     <Label htmlFor="content" className="flex items-center gap-1 text-neutral-900">
-                      <span className="text-red-500">*</span>
                       {t("newsView.field.content")}
                     </Label>
                     <Tabs
@@ -321,6 +385,9 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                               acceptedFileTypes={[
                                 ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
                                 ...ALLOWED_VIDEO_FILE_TYPES,
+                                ...ALLOWED_EXCEL_FILE_TYPES,
+                                ...ALLOWED_PDF_FILE_TYPES,
+                                ...ALLOWED_WORD_FILE_TYPES,
                               ]}
                               onUpload={handleFileUpload}
                               {...field}

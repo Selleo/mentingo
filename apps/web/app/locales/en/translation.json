@@ -168,13 +168,16 @@
     },
     "field": {
       "title": "Title",
+      "summary": "Summary",
       "intro": "Introduction",
       "content": "Content",
       "image": "Image",
-      "status": "Status"
+      "status": "Status",
+      "isPublic": "Is public"
     },
     "placeholder": {
       "title": "Enter news title",
+      "summary": "Add a short summary",
       "intro": "Add a short intro"
     },
     "createOrEdit": "Create news",
@@ -194,6 +197,16 @@
       "contentRequired": "Content is required",
       "imageRequired": "Image is required",
       "statusRequired": "Status is required"
+    },
+    "isPublicDescription": "Allow everyone to see this news item.",
+    "language": {
+      "label": "Language",
+      "baseLanguage": "Base language",
+      "notAddedLanguages": "Languages to add",
+      "createTitle": "Create translation",
+      "createDescription": "Create a translation for this news in {{language}}?",
+      "deleteTitle": "Delete translation",
+      "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
     }
   },
   "globalSearch": {

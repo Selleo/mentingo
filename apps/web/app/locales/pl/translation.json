@@ -169,13 +169,16 @@
     },
     "field": {
       "title": "Tytuł",
+      "summary": "Podsumowanie",
       "intro": "Wprowadzenie",
       "content": "Treść",
       "image": "Obraz",
-      "status": "Status"
+      "status": "Status",
+      "isPublic": "Publiczne"
     },
     "placeholder": {
       "title": "Wpisz tytuł aktualności",
+      "summary": "Dodaj krótkie podsumowanie",
       "intro": "Dodaj krótkie wprowadzenie"
     },
     "createOrEdit": "Dodaj/edytuj aktualność",
@@ -195,6 +198,16 @@
       "contentRequired": "Treść jest wymagana",
       "imageRequired": "Obraz jest wymagany",
       "statusRequired": "Status jest wymagany"
+    },
+    "isPublicDescription": "Pozwól wszystkim zobaczyć tę aktualność.",
+    "language": {
+      "label": "Język",
+      "baseLanguage": "Język bazowy",
+      "notAddedLanguages": "Języki do dodania",
+      "createTitle": "Utwórz tłumaczenie",
+      "createDescription": "Utworzyć tłumaczenie tej aktualności na język {{language}}?",
+      "deleteTitle": "Usuń tłumaczenie",
+      "deleteDescription": "Usunąć tłumaczenie w języku {{language}}? Treść zostanie usunięta."
     }
   },
   "globalSearch": {

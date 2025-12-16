@@ -3,6 +3,8 @@ import { formatDate } from "date-fns";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "~/lib/utils";
+
 import { useDeleteNews } from "../../api/mutations";
 import { useNews } from "../../api/queries";
 import { Icon } from "../../components/Icon";
@@ -115,7 +117,11 @@ export default function NewsDetailsPage() {
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-5 border-b border-neutral-200 pb-8 px-10">
+        <div
+          className={cn("flex flex-col gap-5 border-b border-neutral-200 pb-8 px-10", {
+            "pt-10": !headerImageUrl,
+          })}
+        >
           <h1 className="text-[40px] font-bold leading-[1.1] text-neutral-950">{news.title}</h1>
           <p className="text-lg font-normal leading-8 text-neutral-700">{news.summary}</p>
           <div className="flex flex-wrap items-center gap-3 text-sm font-normal leading-5 text-neutral-700">
