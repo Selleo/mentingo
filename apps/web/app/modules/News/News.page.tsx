@@ -1,9 +1,9 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreateNews } from "../../api/mutations";
-import { useNewsList } from "../../api/queries";
+import { useDraftNewsList, useNewsList } from "../../api/queries";
 import { Icon } from "../../components/Icon";
 import { PageWrapper } from "../../components/PageWrapper";
 import { Pagination } from "../../components/Pagination/Pagination";
@@ -34,42 +34,40 @@ function NewsPage() {
 
   const [currentPage, setCurrentPage] = useState<number>(() => parsePageParam());
   const [statusFilter, setStatusFilter] = useState<"published" | "draft">("published");
+  const { isAdminLike } = useUserRole();
+  const isDraftTab = isAdminLike && statusFilter === "draft";
 
   const { mutateAsync: createNews } = useCreateNews();
-  const { isAdminLike } = useUserRole();
   const { language } = useLanguageStore();
-  const itemsPerPage = currentPage === 1 ? ITEMS_ON_FIRST_PAGE : ITEMS_ON_OTHER_PAGES;
-  const { data: newsList, isLoading: isLoadingNewsList } = useNewsList({
+  const fallbackItemsPerPage = currentPage === 1 ? ITEMS_ON_FIRST_PAGE : ITEMS_ON_OTHER_PAGES;
+  const { data: newsList, isLoading: isLoadingPublishedNewsList } = useNewsList({
     language,
     page: currentPage,
-    perPage: itemsPerPage,
+    perPage: fallbackItemsPerPage,
   });
+  const { data: draftNewsList, isLoading: isLoadingDraftNewsList } = useDraftNewsList(
+    { language, page: currentPage, perPage: fallbackItemsPerPage },
+    { enabled: isDraftTab },
+  );
+  const currentNewsList = isDraftTab ? draftNewsList : newsList;
+  const displayedNews = currentNewsList?.data ?? [];
+  const totalItems = currentNewsList?.pagination?.totalItems ?? displayedNews.length;
+  const itemsPerPage = currentNewsList?.pagination?.perPage ?? fallbackItemsPerPage;
 
-  const filteredNews = useMemo(() => {
-    const data = newsList?.data ?? [];
-    if (!isAdminLike) return data;
-    return data.filter((item) => item.status === statusFilter);
-  }, [newsList?.data, isAdminLike, statusFilter]);
-
-  const filteredTotalItems = filteredNews.length;
-
-  const remainingAfterFirst = Math.max(filteredTotalItems - ITEMS_ON_FIRST_PAGE, 0);
+  const remainingAfterFirst = Math.max(totalItems - ITEMS_ON_FIRST_PAGE, 0);
   const extraPages = Math.ceil(remainingAfterFirst / ITEMS_ON_OTHER_PAGES);
-  const totalPages = filteredTotalItems > 0 ? 1 + extraPages : 1;
+  const totalPages = totalItems > 0 ? 1 + extraPages : 1;
   const startItem =
-    filteredTotalItems > 0
+    totalItems > 0
       ? currentPage === 1
         ? 1
         : ITEMS_ON_FIRST_PAGE + (currentPage - 2) * ITEMS_ON_OTHER_PAGES + 1
       : 0;
   const endItem =
-    filteredTotalItems > 0
+    totalItems > 0
       ? currentPage === 1
-        ? Math.min(ITEMS_ON_FIRST_PAGE, filteredTotalItems)
-        : Math.min(
-            ITEMS_ON_FIRST_PAGE + (currentPage - 1) * ITEMS_ON_OTHER_PAGES,
-            filteredTotalItems,
-          )
+        ? Math.min(ITEMS_ON_FIRST_PAGE, totalItems)
+        : Math.min(ITEMS_ON_FIRST_PAGE + (currentPage - 1) * ITEMS_ON_OTHER_PAGES, totalItems)
       : 0;
 
   const changePage = (newPage: number) => {
@@ -96,7 +94,7 @@ function NewsPage() {
   }, [createNews, language, navigate]);
 
   const renderNewsContent = useCallback(() => {
-    const pageNews = filteredNews ?? [];
+    const pageNews = displayedNews ?? [];
 
     if (currentPage === 1) {
       const [firstNews, ...moreNews] = pageNews ?? [];
@@ -145,7 +143,7 @@ function NewsPage() {
 
               {moreNews.length ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
-                  {moreNews.map((news: (typeof filteredNews)[number]) => (
+                  {moreNews.map((news: (typeof displayedNews)[number]) => (
                     <NewsItem key={news.id} {...news} />
                   ))}
                 </div>
@@ -162,13 +160,13 @@ function NewsPage() {
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
-        {pageNews?.map((news: (typeof filteredNews)[number]) => (
+        {pageNews?.map((news: (typeof displayedNews)[number]) => (
           <NewsItem key={news.id} {...news} />
         ))}
       </div>
     );
   }, [
-    filteredNews,
+    displayedNews,
     currentPage,
     t,
     isAdminLike,
@@ -177,6 +175,8 @@ function NewsPage() {
     setSearchParams,
     createEmptyNews,
   ]);
+
+  const isLoadingNewsList = isDraftTab ? isLoadingDraftNewsList : isLoadingPublishedNewsList;
 
   if (isLoadingNewsList) {
     return (
@@ -202,10 +202,10 @@ function NewsPage() {
     >
       {renderNewsContent()}
 
-      {filteredTotalItems > 0 ? (
+      {totalItems > 0 ? (
         <Pagination
           className="border-t"
-          totalItems={filteredTotalItems}
+          totalItems={totalItems}
           overrideTotalPages={totalPages}
           startItemOverride={startItem}
           endItemOverride={endItem}
