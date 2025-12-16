@@ -66,6 +66,8 @@ export { default as KeyboardX } from "./keyboardX.svg?react";
 export { default as Archive } from "./archive.svg?react";
 export { default as News } from "./news.svg?react";
 export { default as Calendar } from "./calendar.svg?react";
+export { default as Articles } from "./articles.svg?react";
+export { default as Article } from "./article.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 

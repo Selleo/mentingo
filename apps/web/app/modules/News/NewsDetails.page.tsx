@@ -59,7 +59,7 @@ export default function NewsDetailsPage() {
         { title: news.title, href: `/news/${news.id}` },
       ]}
       className="flex flex-col gap-6"
-      sideContent={
+      rightSideContent={
         <TOC
           contentHtml={news.content}
           onContentWithIds={(html) => setContentWithIds(html || "")}

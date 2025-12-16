@@ -23,6 +23,10 @@ export const routes: (
           route("news/:newsId", "modules/News/NewsDetails.page.tsx", {
             id: "news-details",
           });
+          route("articles", "modules/Articles/Articles.page.tsx");
+          route("articles/:articleId", "modules/Articles/ArticleDetails.page.tsx", {
+            id: "article-details",
+          });
         });
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Statistics/Statistics.page.tsx", {
@@ -36,6 +40,12 @@ export const routes: (
           });
           route("news/add", "modules/News/NewsForm.page.tsx", {
             id: "add-news",
+          });
+          route("articles/:articleId/edit", "modules/Articles/ArticleForm.page.tsx", {
+            id: "edit-article",
+          });
+          route("articles/add", "modules/Articles/ArticleForm.page.tsx", {
+            id: "add-article",
           });
           route("profile/:id", "modules/Profile/Profile.page.tsx");
         });

@@ -84,6 +84,11 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
               </div>
               <Separator className="hidden h-10 md:block" orientation="vertical" />
               <div className="hidden items-center gap-3 md:flex">
+                <Link to="/articles">
+                  <Button variant="outline" className="w-full">
+                    {t("navigationSideBar.articles")}
+                  </Button>
+                </Link>
                 <Link to="/news">
                   <Button variant="outline" className="w-full">
                     {t("navigationSideBar.news")}

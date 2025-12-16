@@ -50,6 +50,11 @@ export const getNavigationConfig = (
         iconName: "Course",
       },
       {
+        label: t("navigationSideBar.articles"),
+        path: `articles`,
+        iconName: "Articles",
+      },
+      {
         label: t("navigationSideBar.news"),
         path: `news`,
         iconName: "News",
