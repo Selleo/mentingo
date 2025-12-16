@@ -138,7 +138,7 @@ export default function NewsDetailsPage() {
           </div>
         </div>
 
-        {news.content ? <Viewer style="prose" content={contentWithIds} className="px-10" /> : null}
+        {news.content ? <Viewer variant="news" content={contentWithIds} className="px-10" /> : null}
 
         <div className="mx-auto w-full border-b border-primary-100" />
 

@@ -1,3 +1,4 @@
+import { mergeAttributes } from "@tiptap/core";
 import { Heading } from "@tiptap/extension-heading";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
@@ -13,6 +14,22 @@ const HeadingWithId = Heading.extend({
       renderHTML: (attrs) => (attrs.id ? { id: attrs.id } : {}),
     },
   }),
+});
+
+const LinkWithDownload = Link.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      download: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("download"),
+        renderHTML: (attrs) => (attrs.download ? { download: attrs.download } : {}),
+      },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["a", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
+  },
 });
 
 export const plugins = [
@@ -34,7 +51,7 @@ export const plugins = [
     },
     onReadOnlyChecked: (_node, _checked) => true,
   }),
-  Link.configure({
+  LinkWithDownload.configure({
     openOnClick: false,
     HTMLAttributes: {
       class: "text-primary-700 underline",

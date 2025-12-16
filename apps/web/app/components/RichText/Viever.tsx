@@ -32,18 +32,7 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
     },
     news: {
       wrapper: newsVariantClasses.wrapper,
-      editor: [
-        newsVariantClasses.layout,
-        newsVariantClasses.headings,
-        newsVariantClasses.paragraph,
-        newsVariantClasses.ul,
-        newsVariantClasses.ol,
-        newsVariantClasses.quotes,
-        newsVariantClasses.images,
-        newsVariantClasses.links,
-        newsVariantClasses.hr,
-        newsVariantClasses.code,
-      ],
+      editor: [newsVariantClasses.layout],
       content: "prose prose-neutral max-w-none",
     },
   } as const;
