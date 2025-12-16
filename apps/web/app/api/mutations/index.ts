@@ -26,3 +26,4 @@ export { useDeleteNews } from "./useDeleteNews";
 export { useAddNewsLanguage } from "./useAddNewsLanguage";
 export { useDeleteNewsLanguage } from "./useDeleteNewsLanguage";
 export { useUploadNewsFile } from "./useUploadNewsFile";
+export { usePreviewNews } from "./usePreviewNews";

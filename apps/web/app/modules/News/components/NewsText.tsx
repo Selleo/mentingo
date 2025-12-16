@@ -5,9 +5,5 @@ type NewsTextProps = {
 };
 
 export const NewsText = ({ content }: NewsTextProps) => {
-  return (
-    <div className="rounded-lg bg-white p-4 shadow-sm">
-      <Viewer variant="lesson" content={content} />
-    </div>
-  );
+  return <Viewer variant="news" content={content} />;
 };

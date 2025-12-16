@@ -28,7 +28,7 @@ export default function NewsDetailsPage() {
   );
   const { mutateAsync: deleteNews } = useDeleteNews();
 
-  const [contentWithIds, setContentWithIds] = useState(news?.content ?? "");
+  const [contentWithIds, setContentWithIds] = useState(news?.plainContent ?? "");
 
   if (isLoadingNews) {
     return (
@@ -58,7 +58,7 @@ export default function NewsDetailsPage() {
         { title: t("navigationSideBar.news"), href: "/news" },
         { title: news.title, href: `/news/${news.id}` },
       ]}
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-10 bg-neutral-50/80"
       sideContent={
         <TOC
           contentHtml={news.content}
@@ -66,108 +66,104 @@ export default function NewsDetailsPage() {
         />
       }
     >
-      <div className="flex flex-col gap-8">
-        {isAdminLike && (
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              className="w-28 gap-2"
-              onClick={() => {
-                navigate(`edit`);
-              }}
-            >
-              <Icon name="Edit" className="size-4" />
-              <span className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("newsView.edit")}
-              </span>
-            </Button>
-            <Button
-              variant="outline"
-              className="w-28 gap-2"
-              onClick={() => {
-                if (!newsId) return;
+      {isAdminLike && (
+        <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
+          <Button
+            variant="outline"
+            className="w-28 gap-2"
+            onClick={() => {
+              navigate(`edit`);
+            }}
+          >
+            <Icon name="Edit" className="size-4" />
+            <span className="text-sm font-semibold leading-5 text-neutral-800">
+              {t("newsView.edit")}
+            </span>
+          </Button>
+          <Button
+            variant="outline"
+            className="w-28 gap-2"
+            onClick={() => {
+              if (!newsId) return;
 
-                deleteNews(
-                  { id: newsId },
-                  {
-                    onSuccess: () => {
-                      navigate("/news");
-                    },
+              deleteNews(
+                { id: newsId },
+                {
+                  onSuccess: () => {
+                    navigate("/news");
                   },
-                );
-              }}
-            >
-              <Icon name="TrashIcon" className="size-4" />
-              <span className="text-sm font-semibold leading-5 text-neutral-800">
-                {t("newsView.button.delete")}
-              </span>
-            </Button>
-          </div>
-        )}
+                },
+              );
+            }}
+          >
+            <Icon name="TrashIcon" className="size-4" />
+            <span className="text-sm font-semibold leading-5 text-neutral-800">
+              {t("newsView.button.delete")}
+            </span>
+          </Button>
+        </div>
+      )}
 
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 bg-white rounded-3xl">
         {headerImageUrl ? (
-          <img
-            src={headerImageUrl}
-            alt={news.title}
-            className="w-full h-[500px] rounded-lg object-cover"
-          />
+          <div className="overflow-hidden bg-white rounded-t-3xl px-10 pt-10 pb-6">
+            <img
+              src={headerImageUrl}
+              alt={news.title}
+              className="h-[380px] w-full object-cover md:h-[480px] rounded-3xl"
+            />
+          </div>
         ) : null}
 
-        <div className="flex flex-col gap-4 border-b-[1px] border-primary-100 pb-3">
-          <h1 className="text-[42px] font-bold text-neutral-950 leading-10">{news.title}</h1>
-          <p className="text-lg font-normal text-neutral-800 leading-7">{news.summary}</p>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-5 border-b border-neutral-200 pb-8 px-10">
+          <h1 className="text-[40px] font-bold leading-[1.1] text-neutral-950">{news.title}</h1>
+          <p className="text-lg font-normal leading-8 text-neutral-700">{news.summary}</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm font-normal leading-5 text-neutral-700">
+            <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-neutral-100">
               <Icon name="Calendar" className="text-neutral-600 size-4" />
-              <p className="text-sm font-normal leading-5 text-neutral-600">
+              <p className="text-neutral-800">
                 {publishedDate ? formatDate(publishedDate, "d MMMM yyyy") : "-"}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-sm ring-1 ring-neutral-100">
               <Icon name="User" className="text-neutral-600 size-4" />
-              <p className="text-sm font-normal leading-5 text-neutral-600">{news.authorName}</p>
+              <p className="text-neutral-800">{news.authorName}</p>
             </div>
           </div>
         </div>
-      </div>
 
-      <header className="space-y-3">
-        <p className="subtle text-neutral-700">{news.summary}</p>
-      </header>
+        {news.content ? <Viewer variant="news" content={contentWithIds} className="px-10" /> : null}
 
-      {news.content ? (
-        <div className="flex flex-col gap-6">
-          <Viewer variant="lesson" content={contentWithIds} />
+        <div className="mx-auto w-full border-b border-primary-100" />
+
+        <div className="mx-auto flex w-full items-center justify-between pb-6 px-6">
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 select-none disabled:opacity-50"
+            onClick={() => {
+              navigate(`/news/${news.previousNews}`);
+            }}
+            disabled={!news.previousNews}
+          >
+            <Icon name="ChevronLeft" className="size-5 text-neutral-800" />
+            <span className="text-sm font-semibold leading-5 text-neutral-800">
+              {t("newsView.previousNews")}
+            </span>
+          </Button>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 select-none disabled:opacity-50"
+            onClick={() => {
+              navigate(`/news/${news.nextNews}`);
+            }}
+            disabled={!news.nextNews}
+          >
+            <span className="text-sm font-semibold leading-5 text-neutral-800">
+              {t("newsView.nextNews")}
+            </span>
+            <Icon name="ChevronRight" className="size-5 text-neutral-800" />
+          </Button>
         </div>
-      ) : null}
-
-      <div className="border-b border-primary-100" />
-
-      <div className="flex items-center justify-between pb-14">
-        <button
-          className="flex items-center gap-2 disabled:opacity-50"
-          onClick={() => {
-            // navigate(`/news/id`);
-          }}
-          disabled={false}
-        >
-          <Icon name="ChevronLeft" className="size-5 text-neutral-800" />
-          <span className="text-sm font-semibold leading-5 text-neutral-800">
-            {t("newsView.previousNews")}
-          </span>
-        </button>
-        <button
-          className="flex items-center gap-2 disabled:opacity-50"
-          onClick={() => {
-            // navigate(`/news/id`);
-          }}
-          disabled={true}
-        >
-          <span className="text-sm font-semibold leading-5 text-neutral-800">
-            {t("newsView.nextNews")}
-          </span>
-          <Icon name="ChevronRight" className="size-5 text-neutral-800" />
-        </button>
       </div>
     </PageWrapper>
   );

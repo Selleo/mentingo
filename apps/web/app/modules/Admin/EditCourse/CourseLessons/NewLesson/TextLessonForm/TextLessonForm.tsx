@@ -13,10 +13,6 @@ import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents
 import { baseUrl } from "~/utils/baseUrl";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
-import {
-  ACCEPTED_FILE_MIME_TYPES,
-  ACCEPTED_FILE_TYPES,
-} from "../AiMentorLessonForm/utils/AiMentor.constants";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { useTextLessonForm } from "./hooks/useTextLessonForm";
@@ -63,13 +59,9 @@ const TextLessonForm = ({
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
     if (!file || !lessonToEdit?.id) return;
 
-    if (ACCEPTED_FILE_MIME_TYPES.includes(file.type)) {
-      const uploaded = await uploadFile({ file, lessonId: lessonToEdit.id });
-
-      const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
-
-      editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
-    }
+    const uploaded = await uploadFile({ file, lessonId: lessonToEdit.id });
+    const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
+    editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
   };
 
   const missingTranslations =
@@ -127,7 +119,6 @@ const TextLessonForm = ({
                     content={field.value}
                     lessonId={lessonToEdit?.id}
                     allowFiles={!!lessonToEdit?.id}
-                    acceptedFileTypes={[ACCEPTED_FILE_TYPES]}
                     onUpload={handleFileUpload}
                     {...field}
                   />

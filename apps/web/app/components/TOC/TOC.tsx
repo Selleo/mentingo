@@ -88,7 +88,7 @@ export const TOC = ({ contentHtml, onContentWithIds }: Props) => {
 
   return (
     // 66px is the height of the header navigation
-    <div className="p-6 border-l border-l-border gap-4 w-80 self-start sticky top-0 h-[calc(100vh-66px)] overflow-auto 2xl:h-[100vh] 2xl:top-0 hidden md:block">
+    <div className="p-6 border-l border-l-border gap-4 w-80 self-start sticky top-0 h-[calc(100vh-66px)] overflow-auto 2xl:h-[100vh] 2xl:top-0 hidden md:block bg-white">
       <h4 className="uppercase text-xs text-neutral-700">Table of contents</h4>
 
       <ul className="mt-3 flex flex-col gap-2 text-neutral-900 text-sm leading-5">{listItems}</ul>
