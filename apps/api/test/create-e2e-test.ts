@@ -1,35 +1,76 @@
+import fs from "fs";
+
 import { Test, type TestingModule } from "@nestjs/testing";
 import cookieParser from "cookie-parser";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as express from "express";
+import postgres from "postgres";
 
+import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 
 import { AppModule } from "../src/app.module";
+import * as schema from "../src/storage/schema";
 
 import { EmailTestingAdapter } from "./helpers/test-email.adapter";
-import { setupTestDatabase } from "./test-database";
+import { truncateAllTables } from "./helpers/test-helpers";
 
+import type { DatabasePg } from "../src/common";
 import type { Provider } from "@nestjs/common";
 
-export async function createE2ETest(customProviders: Provider[] = []) {
-  const { db, pgConnectionString } = await setupTestDatabase();
+const CONFIG_FILE = "/tmp/test-containers.json";
 
-  process.env.DATABASE_URL = pgConnectionString;
+function getTestConfig() {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    throw new Error(`Test containers config not found at ${CONFIG_FILE}. Run globalSetup first.`);
+  }
+  return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
+}
+
+type E2ETestOptions = {
+  customProviders?: Provider[];
+  enableActivityLogs?: boolean;
+};
+
+export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provider[] = {}) {
+  const options = Array.isArray(optionsOrProviders)
+    ? { customProviders: optionsOrProviders }
+    : optionsOrProviders;
+
+  const customProviders = options.customProviders ?? [];
+  const enableActivityLogs = options.enableActivityLogs ?? false;
+
+  const config = getTestConfig();
+
+  const sql = postgres(config.pgConnectionString, { max: 10 });
+  const db = drizzle(sql, { schema }) as DatabasePg;
+
+  await truncateAllTables(db);
+
+  process.env.DATABASE_URL = config.pgConnectionString;
+  process.env.REDIS_URL = config.redisUrl;
   process.env.NODE_ENV = "test";
 
-  const moduleFixture: TestingModule = await Test.createTestingModule({
+  let testModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
-    providers: [
-      ...customProviders,
-      {
-        provide: "DB",
-        useValue: db,
-      },
-    ],
+    providers: [...customProviders],
   })
+    .overrideProvider("DB")
+    .useValue(db)
     .overrideProvider(EmailAdapter)
-    .useClass(EmailTestingAdapter)
-    .compile();
+    .useClass(EmailTestingAdapter);
+
+  // Disable activity logging by default to prevent deadlocks between
+  // async activity log INSERTs and TRUNCATE during test cleanup.
+  // Only enable for activity-logs.e2e-spec.ts tests.
+  if (!enableActivityLogs) {
+    testModuleBuilder = testModuleBuilder.overrideProvider(ActivityLogsService).useValue({
+      recordActivity: async () => {},
+      persistActivityLog: async () => {},
+    });
+  }
+
+  const moduleFixture: TestingModule = await testModuleBuilder.compile();
 
   const app = moduleFixture.createNestApplication({
     bodyParser: false,
@@ -60,5 +101,8 @@ export async function createE2ETest(customProviders: Provider[] = []) {
     app,
     moduleFixture,
     db,
+    cleanup: async () => {
+      await sql.end();
+    },
   };
 }

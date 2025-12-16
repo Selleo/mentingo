@@ -1,46 +1,65 @@
+import fs from "fs";
+
 import { Test, type TestingModule } from "@nestjs/testing";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 
 import { AppModule } from "../src/app.module";
+import * as schema from "../src/storage/schema";
 
 import { EmailTestingAdapter } from "./helpers/test-email.adapter";
-import { setupTestDatabase } from "./test-database";
+import { truncateAllTables } from "./helpers/test-helpers";
 
 import type { DatabasePg } from "../src/common";
 import type { Provider } from "@nestjs/common";
-import type { StartedTestContainer } from "testcontainers";
+
+const CONFIG_FILE = "/tmp/test-containers.json";
 
 export interface TestContext {
   module: TestingModule;
   db: DatabasePg;
-  pgContainer: StartedTestContainer;
   teardown: () => Promise<void>;
 }
 
-export async function createUnitTest(customProviders: Provider[] = []): Promise<TestContext> {
-  const { db, pgContainer, pgConnectionString } = await setupTestDatabase();
+function getTestConfig() {
+  if (!fs.existsSync(CONFIG_FILE)) {
+    throw new Error(`Test containers config not found at ${CONFIG_FILE}. Run globalSetup first.`);
+  }
+  return JSON.parse(fs.readFileSync(CONFIG_FILE, "utf-8"));
+}
 
-  process.env.DATABASE_URL = pgConnectionString;
+export async function createUnitTest(customProviders: Provider[] = []): Promise<TestContext> {
+  const config = getTestConfig();
+
+  const sql = postgres(config.pgConnectionString, { max: 10 });
+  const db = drizzle(sql, { schema }) as DatabasePg;
+
+  // Truncate all tables and recreate global settings to ensure clean state
+  await truncateAllTables(db);
+
+  process.env.DATABASE_URL = config.pgConnectionString;
+  process.env.REDIS_URL = config.redisUrl;
+  process.env.NODE_ENV = "test";
 
   const module: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
     providers: [...customProviders],
   })
+    .overrideProvider("DB")
+    .useValue(db)
     .overrideProvider(EmailAdapter)
     .useClass(EmailTestingAdapter)
     .compile();
 
   const teardown = async () => {
-    if (pgContainer) {
-      await pgContainer.stop();
-    }
+    await sql.end({ timeout: 5 });
   };
 
   return {
     module,
     db,
-    pgContainer,
     teardown,
   };
 }
