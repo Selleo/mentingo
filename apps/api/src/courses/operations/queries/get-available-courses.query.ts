@@ -11,7 +11,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { courses, users, categories, coursesSummaryStats, chapters, studentCourses } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
-import { BaseCourseQueryService } from "./base-course-query.service";
+import { BaseCourseQuery } from "./base-course.query";
 
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType, Pagination } from "src/common";
@@ -21,7 +21,7 @@ import type * as schema from "src/storage/schema";
 
 
 @Injectable()
-export class GetAvailableCoursesService extends BaseCourseQueryService {
+export class GetAvailableCoursesQuery extends BaseCourseQuery {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService, private readonly localizationService: LocalizationService,
 		@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 	) {

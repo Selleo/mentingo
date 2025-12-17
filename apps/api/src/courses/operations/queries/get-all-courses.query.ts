@@ -12,15 +12,14 @@ import { UserService } from "src/user/user.service";
 
 import { CourseSortFields } from "../../schemas/courseQuery";
 
-import { BaseCourseQueryService } from "./base-course-query.service";
-
+import { BaseCourseQuery } from "./base-course.query";
 
 import type { AllCoursesResponse } from "../../schemas/course.schema";
 import type { CoursesQuery, CourseSortField } from "../../schemas/courseQuery";
 import type { Pagination } from "src/common";
 
 @Injectable()
-export class GetAllCoursesService extends BaseCourseQueryService {
+export class GetAllCoursesQuery extends BaseCourseQuery {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService, private readonly localizationService: LocalizationService,
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 ) {

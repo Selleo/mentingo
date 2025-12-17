@@ -18,7 +18,7 @@ import type { ProgressStatus } from "src/utils/types/progress.type";
 
 
 @Injectable()
-export class GetCourseService {
+export class GetCourseQuery {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService,
 			@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 			private readonly localizationService: LocalizationService,

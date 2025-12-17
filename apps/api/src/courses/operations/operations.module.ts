@@ -10,32 +10,32 @@ import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
 import { UserModule } from "src/user/user.module";
 
-import { EnrollGroupsToCourseService } from "./commands/enroll-groups-to-course.command";
-import { UnenrollGroupsFromCoursesService } from "./commands/unenroll-groups-from-courses.command";
-import { UpdateCourseService } from "./commands/update-course-command";
-import { GetAllCoursesService } from "./queries/get-all-courses.service";
-import { GetAvailableCoursesService } from "./queries/get-available-courses.service";
-import { GetBetaCourseByIdService } from "./queries/get-beta-course-by-id.service";
-import { GetContentCreatorCoursesService } from "./queries/get-content-creator-courses.service";
-import { GetCourseService } from "./queries/get-course.service";
-import { GetCoursesForUserService } from "./queries/get-courses-for-user.service";
-import { GetStudentsWithEnrollmentDateService } from "./queries/get-students-with-enrollment-date.service";
+import { EnrollGroupsToCourseCommand } from "./commands/enroll-groups-to-course.command";
+import { UnenrollGroupsFromCoursesCommand } from "./commands/unenroll-groups-from-courses.command";
+import { UpdateCourseCommand } from "./commands/update-course-command";
+import { GetAllCoursesQuery } from "./queries/get-all-courses.query";
+import { GetAvailableCoursesQuery } from "./queries/get-available-courses.query";
+import { GetBetaCourseByIdQuery } from "./queries/get-beta-course-by-id.query";
+import { GetContentCreatorCoursesQuery } from "./queries/get-content-creator-courses.query";
+import { GetCourseQuery } from "./queries/get-course.query";
+import { GetCoursesForUserQuery } from "./queries/get-courses-for-user.query";
+import { GetStudentsWithEnrollmentDateQuery } from "./queries/get-students-with-enrollment-date.query";
 
 
 const queryServices = [
-  GetAllCoursesService,
-  GetAvailableCoursesService,
-  GetBetaCourseByIdService,
-  GetContentCreatorCoursesService,
-  GetCourseService,
-  GetCoursesForUserService,
-  GetStudentsWithEnrollmentDateService,
+  GetAllCoursesQuery,
+  GetAvailableCoursesQuery,
+  GetBetaCourseByIdQuery,
+  GetContentCreatorCoursesQuery,
+  GetCourseQuery,
+  GetCoursesForUserQuery,
+  GetStudentsWithEnrollmentDateQuery,
 ];
 
 const updaterServices = [
-  EnrollGroupsToCourseService,
-  UnenrollGroupsFromCoursesService,
-  UpdateCourseService,
+  EnrollGroupsToCourseCommand,
+  UnenrollGroupsFromCoursesCommand,
+  UpdateCourseCommand,
 ];
 
 @Module({

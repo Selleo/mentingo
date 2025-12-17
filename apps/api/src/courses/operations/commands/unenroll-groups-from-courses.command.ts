@@ -12,7 +12,7 @@ import type { UUIDType } from "src/common";
 
 
 @Injectable()
-export class UnenrollGroupsFromCoursesService {
+export class UnenrollGroupsFromCoursesCommand {
 	constructor(@Inject("DB") private readonly db: DatabasePg,
 			) {}
  async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {

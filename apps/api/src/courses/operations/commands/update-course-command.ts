@@ -28,7 +28,7 @@ import type Stripe from "stripe";
 
 
 @Injectable()
-export class UpdateCourseService {
+export class UpdateCourseCommand {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService,
 				@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 				private readonly localizationService: LocalizationService,

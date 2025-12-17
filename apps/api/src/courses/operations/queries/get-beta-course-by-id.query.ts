@@ -17,7 +17,7 @@ import type { UserRole } from "src/user/schemas/userRoles";
 
 
 @Injectable()
-export class GetBetaCourseByIdService {
+export class GetBetaCourseByIdQuery {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService,
 			@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 			private readonly localizationService: LocalizationService,

@@ -7,7 +7,7 @@ import { CourseSortFields } from "../../schemas/courseQuery";
 import type { CourseSortField, CoursesFilterSchema } from "../../schemas/courseQuery";
 import type { SQL } from "drizzle-orm";
 
-export abstract class BaseCourseQueryService {
+export abstract class BaseCourseQuery {
 	protected getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true): SQL<unknown>[] {
 		const conditions: SQL<unknown>[] = [];
 

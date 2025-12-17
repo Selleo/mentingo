@@ -17,7 +17,7 @@ import type { CourseEnrollmentScope } from "src/courses/schemas/courseQuery";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
-export class GetContentCreatorCoursesService {
+export class GetContentCreatorCoursesQuery {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService,
 			@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 			private readonly localizationService: LocalizationService,

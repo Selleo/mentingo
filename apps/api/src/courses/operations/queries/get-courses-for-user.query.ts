@@ -13,7 +13,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { studentCourses, courses, users, categories, coursesSummaryStats, chapters } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
-import { BaseCourseQueryService } from "./base-course-query.service";
+import { BaseCourseQuery } from "./base-course.query";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQLWrapper } from "drizzle-orm";
@@ -22,7 +22,7 @@ import type { AllStudentCoursesResponse } from "src/courses/schemas/course.schem
 import type { CoursesQuery, CourseSortField } from "src/courses/schemas/courseQuery";
 
 @Injectable()
-export class GetCoursesForUserService extends BaseCourseQueryService {
+export class GetCoursesForUserQuery extends BaseCourseQuery {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService,
 		@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
 		private readonly localizationService: LocalizationService,

@@ -18,7 +18,7 @@ import type { EnrolledStudent } from "src/courses/schemas/enrolledStudent.schema
 
 
 @Injectable()
-export class GetStudentsWithEnrollmentDateService {
+export class GetStudentsWithEnrollmentDateQuery {
 	constructor(@Inject("DB") private readonly db: DatabasePg,
 	) {}
 	async getStudentsWithEnrollmentDate(

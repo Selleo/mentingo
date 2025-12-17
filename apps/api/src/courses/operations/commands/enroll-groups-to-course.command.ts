@@ -23,7 +23,7 @@ import type * as schema from "src/storage/schema";
 
 
 @Injectable()
-export class EnrollGroupsToCourseService {
+export class EnrollGroupsToCourseCommand {
 	constructor(@Inject("DB") private readonly db: DatabasePg,
 	private readonly lessonRepository: LessonRepository,
 	private readonly eventBus: EventBus,

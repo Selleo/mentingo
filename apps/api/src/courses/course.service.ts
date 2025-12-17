@@ -68,16 +68,16 @@ import {
 } from "../storage/schema";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
-import { EnrollGroupsToCourseService } from "./operations/commands/enroll-groups-to-course.command";
-import { UnenrollGroupsFromCoursesService } from "./operations/commands/unenroll-groups-from-courses.command";
-import { UpdateCourseService } from "./operations/commands/update-course-command";
-import { GetAvailableCoursesService } from "./operations/queries/get-available-courses.service";
-import { GetBetaCourseByIdService } from "./operations/queries/get-beta-course-by-id.service";
-import { GetContentCreatorCoursesService } from "./operations/queries/get-content-creator-courses.service";
-import { GetCourseService } from "./operations/queries/get-course.service";
-import { GetCoursesForUserService } from "./operations/queries/get-courses-for-user.service";
-import { GetStudentsWithEnrollmentDateService } from "./operations/queries/get-students-with-enrollment-date.service";
-import { GetAllCoursesService } from "./operations/queries/index";
+import { EnrollGroupsToCourseCommand } from "./operations/commands/enroll-groups-to-course.command";
+import { UnenrollGroupsFromCoursesCommand } from "./operations/commands/unenroll-groups-from-courses.command";
+import { UpdateCourseCommand } from "./operations/commands/update-course-command";
+import { GetAllCoursesQuery } from "./operations/queries/get-all-courses.query";
+import { GetAvailableCoursesQuery } from "./operations/queries/get-available-courses.query";
+import { GetBetaCourseByIdQuery } from "./operations/queries/get-beta-course-by-id.query";
+import { GetContentCreatorCoursesQuery } from "./operations/queries/get-content-creator-courses.query";
+import { GetCourseQuery } from "./operations/queries/get-course.query";
+import { GetCoursesForUserQuery } from "./operations/queries/get-courses-for-user.query";
+import { GetStudentsWithEnrollmentDateQuery } from "./operations/queries/get-students-with-enrollment-date.query";
 import {
   CourseStudentAiMentorResultsSortFields,
   CourseStudentProgressionSortFields,
@@ -127,33 +127,33 @@ export class CourseService {
     private readonly localizationService: LocalizationService,
     private readonly eventBus: EventBus,
     private readonly adminLessonService: AdminLessonService,
-    private readonly getAllCoursesService: GetAllCoursesService,
-    private readonly getCourseForUserService: GetCoursesForUserService,
-    private readonly getAvailableCoursesService: GetAvailableCoursesService,
-    private readonly getStudentsWithEnrollmentDateService: GetStudentsWithEnrollmentDateService,
-    private readonly getCourseService: GetCourseService,
-    private readonly getBetaCourseByIdService: GetBetaCourseByIdService,
-    private readonly getContentCreatorCoursesService: GetContentCreatorCoursesService,
-    private readonly updateCourseService: UpdateCourseService,
-    private readonly unenrollGroupsFromCoursesService: UnenrollGroupsFromCoursesService,
-    private readonly enrollGroupsToCourseService: EnrollGroupsToCourseService,
+    private readonly getAllCoursesQuery: GetAllCoursesQuery,
+    private readonly getCourseForUserQuery: GetCoursesForUserQuery,
+    private readonly getAvailableCoursesQuery: GetAvailableCoursesQuery,
+    private readonly getStudentsWithEnrollmentDateQuery: GetStudentsWithEnrollmentDateQuery,
+    private readonly getCourseQuery: GetCourseQuery,
+    private readonly getBetaCourseByIdQuery: GetBetaCourseByIdQuery,
+    private readonly getContentCreatorCoursesQuery: GetContentCreatorCoursesQuery,
+    private readonly updateCourseCommand: UpdateCourseCommand,
+    private readonly unenrollGroupsFromCoursesCommand: UnenrollGroupsFromCoursesCommand,
+    private readonly enrollGroupsToCourseCommand: EnrollGroupsToCourseCommand,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
   getAllCourses(query: CoursesQuery) {
-    return this.getAllCoursesService.getAllCourses(query)
+    return this.getAllCoursesQuery.getAllCourses(query)
   }
 
   getCoursesForUser(query: CoursesQuery, userId: UUIDType) {
-    return this.getCourseForUserService.getCoursesForUser(query, userId)
+    return this.getCourseForUserQuery.getCoursesForUser(query, userId)
   }
 
   getStudentsWithEnrollmentDate(courseId: UUIDType, filters: EnrolledStudentFilterSchema) {
-    return this.getStudentsWithEnrollmentDateService.getStudentsWithEnrollmentDate(courseId, filters)
+    return this.getStudentsWithEnrollmentDateQuery.getStudentsWithEnrollmentDate(courseId, filters)
   }
 
   getAvailableCourses(query: CoursesQuery, userId?: UUIDType) {
-     return this.getAvailableCoursesService.getAvailableCourses(query, userId);
+     return this.getAvailableCoursesQuery.getAvailableCourses(query, userId);
    }
 
   async getCourseSequenceEnabled(courseId: UUIDType): Promise<LessonSequenceEnabledResponse> {
@@ -173,16 +173,16 @@ export class CourseService {
   getCourse(id: UUIDType,
 		 userId: UUIDType,
 		 language: SupportedLanguages) {
-    return this.getCourseService.getCourse(id, userId, language);
+    return this.getCourseQuery.getCourse(id, userId, language);
   }
 
 
   getBetaCourseById(id: UUIDType, language: SupportedLanguages, currentUserId: UUIDType, currentUserRole: UserRole) {
-    return this.getBetaCourseByIdService.getBetaCourseById(id, language, currentUserId, currentUserRole);
+    return this.getBetaCourseByIdQuery.getBetaCourseById(id, language, currentUserId, currentUserRole);
   }
 
   getContentCreatorCourses({ currentUserId, authorId, scope, excludeCourseId, title, description, searchQuery, language }: { currentUserId: string, authorId: string, scope: CourseEnrollmentScope, excludeCourseId: string, title: string, description: string, searchQuery: string, language: SupportedLanguages }) {
-    return this.getContentCreatorCoursesService.getContentCreatorCourses({
+    return this.getContentCreatorCoursesQuery.getContentCreatorCourses({
       currentUserId,
       authorId,
       scope,
@@ -398,7 +398,7 @@ export class CourseService {
     isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
-    return this.updateCourseService.updateCourse(id, updateCourseBody, currentUser, isPlaywrightTest, image);
+    return this.updateCourseCommand.updateCourse(id, updateCourseBody, currentUser, isPlaywrightTest, image);
   }
 
   async enrollCourse(
@@ -528,11 +528,11 @@ export class CourseService {
   }
 
   async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], currentUser?: CurrentUser) {
-    return this.enrollGroupsToCourseService.enrollGroupsToCourse(courseId, groupIds, currentUser);
+    return this.enrollGroupsToCourseCommand.enrollGroupsToCourse(courseId, groupIds, currentUser);
   }
 
   unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
-    return this.unenrollGroupsFromCoursesService.unenrollGroupsFromCourse(courseId, groupIds);
+    return this.unenrollGroupsFromCoursesCommand.unenrollGroupsFromCourse(courseId, groupIds);
   }
 
   async createStudentCourse(
