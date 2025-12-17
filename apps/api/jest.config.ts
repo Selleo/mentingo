@@ -11,8 +11,6 @@ const config: Config = {
   coverageDirectory: "./coverage",
   testEnvironment: "node",
   setupFilesAfterEnv: ["<rootDir>/test/jest-setup.ts"],
-  globalSetup: "<rootDir>/test/global-setup.ts",
-  globalTeardown: "<rootDir>/test/global-teardown.ts",
   moduleNameMapper: {
     "^src/(.*)$": "<rootDir>/src/$1",
   },
