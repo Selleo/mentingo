@@ -33,7 +33,7 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
     news: {
       wrapper: newsVariantClasses.wrapper,
       editor: [newsVariantClasses.layout],
-      content: "prose prose-neutral max-w-none",
+      content: ["prose prose-neutral max-w-none", newsVariantClasses.links].join(" "),
     },
   } as const;
 

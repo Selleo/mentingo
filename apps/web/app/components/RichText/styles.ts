@@ -41,7 +41,6 @@ export const newsVariantClasses = {
   links: `
       [&_a]:font-semibold
       [&_a]:text-primary-700
-      [&_a]:underline
       [&_a[download]]:inline-flex
       [&_a[download]]:items-center
       [&_a[download]]:gap-2
@@ -55,10 +54,10 @@ export const newsVariantClasses = {
       [&_a[download]]:text-primary-800
       [&_a[download]]:shadow-sm
       [&_a[download]]:transition-colors
-      [&_a[download]]:hover:bg-primary-50
-      [&_a[download]]:hover:text-primary-900
+      [&_a[download]:hover]:bg-primary-50
+      [&_a[download]:hover]:text-primary-900
       [&_a[download]::before]:content-['⬇']
-      [&_a[download]::before]:text-[11px]
+      [&_a[download]::before]:text-[1.5rempx]
       [&_a[download]::before]:text-primary-800
     `,
 };

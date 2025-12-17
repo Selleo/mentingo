@@ -406,7 +406,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                           ) : (
                             <Viewer
                               content={previewContent}
-                              style="prose"
+                              variant="news"
                               className="prose max-w-none"
                             />
                           )}
