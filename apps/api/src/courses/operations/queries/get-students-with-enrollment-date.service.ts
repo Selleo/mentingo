@@ -11,6 +11,7 @@ import { EnrolledStudentSortFields } from "src/courses/schemas/courseQuery";
 import { users, studentCourses, groups, groupUsers } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
+import type { SQLWrapper } from "drizzle-orm";
 import type { UUIDType, BaseResponse } from "src/common";
 import type { EnrolledStudentFilterSchema } from "src/courses/schemas/courseQuery";
 import type { EnrolledStudent } from "src/courses/schemas/enrolledStudent.schema";
@@ -71,7 +72,7 @@ export class GetStudentsWithEnrollmentDateService {
 				)
 				.leftJoin(groupUsers, eq(users.id, groupUsers.userId))
 				.leftJoin(groups, eq(groupUsers.groupId, groups.id))
-				.where(and(...(conditions.filter(Boolean) as any), eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
+				.where(and(...(conditions as SQLWrapper[]), eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
 				.groupBy(
 					users.id,
 					studentCourses.enrolledAt,

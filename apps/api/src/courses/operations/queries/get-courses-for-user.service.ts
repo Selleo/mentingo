@@ -14,6 +14,7 @@ import { studentCourses, courses, users, categories, coursesSummaryStats, chapte
 import { UserService } from "src/user/user.service";
 
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQLWrapper } from "drizzle-orm";
 import type { UUIDType, Pagination } from "src/common";
 import type { AllStudentCoursesResponse } from "src/courses/schemas/course.schema";
 import type { CoursesQuery, CourseSortField, CoursesFilterSchema } from "src/courses/schemas/courseQuery";
@@ -54,7 +55,7 @@ export class GetCoursesForUserService {
 				 .innerJoin(categories, eq(courses.categoryId, categories.id))
 				 .leftJoin(users, eq(courses.authorId, users.id))
 				 .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
-				 .where(and(...conditions.filter(Boolean) as any))
+				 .where(and(...conditions as SQLWrapper[]))
 				 .groupBy(
 					 courses.id,
 					 courses.title,
@@ -84,7 +85,7 @@ export class GetCoursesForUserService {
 				 .innerJoin(courses, eq(studentCourses.courseId, courses.id))
 				 .innerJoin(categories, eq(courses.categoryId, categories.id))
 				 .leftJoin(users, eq(courses.authorId, users.id))
-				 .where(and(...conditions.filter(Boolean) as any));
+				 .where(and(...conditions as SQLWrapper[]));
  
 			 const dataWithS3SignedUrls = await Promise.all(
 				 data.map(async (item) => {
