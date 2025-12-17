@@ -9,7 +9,7 @@ import { ChunkService } from "src/ingestion/services/chunk.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { EmbeddingService } from "src/ingestion/services/embedding.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
-import { QueueService } from "src/ingestion/services/queue.service";
+import { IngestionQueueService } from "src/ingestion/services/queue.service";
 import { IngestionWorker } from "src/ingestion/workers/ingestion.worker";
 
 import { IngestionController } from "./ingestion.controller";
@@ -23,7 +23,7 @@ import { IngestionController } from "./ingestion.controller";
     IngestionRepository,
     DocumentService,
     DocumentRepository,
-    QueueService,
+    IngestionQueueService,
     IngestionWorker,
     ChunkService,
     EmbeddingService,

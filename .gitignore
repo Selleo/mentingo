@@ -38,6 +38,7 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+.eslintcache
 
 # WebStorm local settings
 .idea

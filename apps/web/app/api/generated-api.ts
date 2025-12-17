@@ -1351,6 +1351,30 @@ export interface GetCourseStatisticsResponse {
   };
 }
 
+export interface GetCourseLearningTimeStatisticsResponse {
+  data: {
+    averagePerLesson: {
+      lessonId: string;
+      lessonTitle: string;
+      averageSeconds: number;
+      totalUsers: number;
+      totalSeconds: number;
+    }[];
+    totalPerStudent: {
+      userId: string;
+      userFirstName: string;
+      userLastName: string;
+      userEmail: string;
+      totalSeconds: number;
+      lessonsWithTime: number;
+    }[];
+    courseTotals: {
+      totalSeconds: number;
+      uniqueUsers: number;
+    };
+  };
+}
+
 export interface GetAverageQuizScoresResponse {
   data: {
     averageScoresPerQuiz: {
@@ -4608,6 +4632,23 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetCourseStatistics: (courseId: string, params: RequestParams = {}) =>
       this.request<GetCourseStatisticsResponse, any>({
         path: `/api/course/${courseId}/statistics`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseLearningTimeStatistics
+     * @request GET:/api/course/{courseId}/statistics/learning-time
+     */
+    courseControllerGetCourseLearningTimeStatistics: (
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseLearningTimeStatisticsResponse, any>({
+        path: `/api/course/${courseId}/statistics/learning-time`,
         method: "GET",
         format: "json",
         ...params,

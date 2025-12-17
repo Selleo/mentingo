@@ -31,6 +31,7 @@
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "0.6.9",
+    "tsc-files": "^1.1.4",
     "turbo": "^2.2.3"
   },
   "packageManager": "pnpm@10.22.0",

@@ -136,11 +136,15 @@ export class LessonRepository {
               END
           )
         `,
-        aiMentor: sql<{ name: string; avatarReference: string } | null>`
-          json_build_object(
-             'name', ai_mentor_lessons.name,
-             'avatarReference', ai_mentor_lessons.avatar_reference
-          )
+        aiMentor: sql<{ name: string; avatarReferenceUrl: string } | null>`
+          CASE
+            WHEN ai_mentor_lessons.name IS NOT NULL THEN
+              json_build_object(
+                'name', ai_mentor_lessons.name,
+                'avatarReferenceUrl', ai_mentor_lessons.avatar_reference
+              )
+            ELSE NULL
+          END
         `,
         isExternal: sql<boolean>`${lessons.isExternal}`,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,

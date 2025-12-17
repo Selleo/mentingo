@@ -2982,6 +2982,33 @@
         }
       }
     },
+    "/api/course/{courseId}/statistics/learning-time": {
+      "get": {
+        "operationId": "CourseController_getCourseLearningTimeStatistics",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseLearningTimeStatisticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{courseId}/statistics/average-quiz-score": {
       "get": {
         "operationId": "CourseController_getAverageQuizScores",
@@ -11784,6 +11811,103 @@
           "data"
         ]
       },
+      "GetCourseLearningTimeStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "averagePerLesson": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "lessonId": {
+                      "type": "string"
+                    },
+                    "lessonTitle": {
+                      "type": "string"
+                    },
+                    "averageSeconds": {
+                      "type": "number"
+                    },
+                    "totalUsers": {
+                      "type": "number"
+                    },
+                    "totalSeconds": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "lessonId",
+                    "lessonTitle",
+                    "averageSeconds",
+                    "totalUsers",
+                    "totalSeconds"
+                  ]
+                }
+              },
+              "totalPerStudent": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string"
+                    },
+                    "userFirstName": {
+                      "type": "string"
+                    },
+                    "userLastName": {
+                      "type": "string"
+                    },
+                    "userEmail": {
+                      "type": "string"
+                    },
+                    "totalSeconds": {
+                      "type": "number"
+                    },
+                    "lessonsWithTime": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "userFirstName",
+                    "userLastName",
+                    "userEmail",
+                    "totalSeconds",
+                    "lessonsWithTime"
+                  ]
+                }
+              },
+              "courseTotals": {
+                "type": "object",
+                "properties": {
+                  "totalSeconds": {
+                    "type": "number"
+                  },
+                  "uniqueUsers": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalSeconds",
+                  "uniqueUsers"
+                ]
+              }
+            },
+            "required": [
+              "averagePerLesson",
+              "totalPerStudent",
+              "courseTotals"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetAverageQuizScoresResponse": {
         "type": "object",
         "properties": {
@@ -13910,14 +14034,7 @@
                     "type": "object",
                     "properties": {
                       "name": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
+                        "type": "string"
                       },
                       "avatarReferenceUrl": {
                         "type": "string"

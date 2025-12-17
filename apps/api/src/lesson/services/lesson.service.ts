@@ -128,8 +128,8 @@ export class LessonService {
 
       let avatarUrl = undefined;
 
-      if (lesson.aiMentor?.avatarReference) {
-        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+      if (lesson.aiMentor?.avatarReferenceUrl) {
+        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReferenceUrl);
       }
 
       return {

@@ -10,27 +10,41 @@ import * as schema from "../src/storage/schema";
 import type { DatabasePg } from "../src/common";
 
 let pgContainer: StartedTestContainer;
+let redisContainer: StartedTestContainer;
 let sql: ReturnType<typeof postgres>;
 let db: DatabasePg;
 
 export async function setupTestDatabase(): Promise<{
   db: DatabasePg;
   pgContainer: StartedTestContainer;
+  redisContainer: StartedTestContainer;
   pgConnectionString: string;
+  redisUrl: string;
 }> {
-  pgContainer = await new GenericContainer("pgvector/pgvector:pg16")
-    .withExposedPorts(5432)
-    .withEnvironment({
-      POSTGRES_DB: "testdb",
-      POSTGRES_USER: "testuser",
-      POSTGRES_PASSWORD: "testpass",
-    })
-    .withWaitStrategy(Wait.forLogMessage("database system is ready to accept connections"))
-    .start();
+  const [pgContainerStarted, redisContainerStarted] = await Promise.all([
+    new GenericContainer("pgvector/pgvector:pg16")
+      .withExposedPorts(5432)
+      .withEnvironment({
+        POSTGRES_DB: "testdb",
+        POSTGRES_USER: "testuser",
+        POSTGRES_PASSWORD: "testpass",
+      })
+      .withWaitStrategy(Wait.forLogMessage("database system is ready to accept connections"))
+      .start(),
+    new GenericContainer("redis:7-alpine")
+      .withExposedPorts(6379)
+      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
+      .start(),
+  ]);
+
+  pgContainer = pgContainerStarted;
+  redisContainer = redisContainerStarted;
 
   const pgConnectionString = `postgresql://testuser:testpass@${pgContainer.getHost()}:${pgContainer.getMappedPort(
     5432,
   )}/testdb`;
+
+  const redisUrl = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
 
   sql = postgres(pgConnectionString);
   db = drizzle(sql, { schema }) as DatabasePg;
@@ -66,13 +80,14 @@ export async function setupTestDatabase(): Promise<{
     throw migrationError;
   }
 
-  return { db, pgContainer, pgConnectionString };
+  return { db, pgContainer, redisContainer, pgConnectionString, redisUrl };
 }
 
 export async function closeTestDatabase() {
   console.info("Attempting to close test database resources...");
   let pgSqlClosed = false;
   let pgContainerStopped = false;
+  let redisContainerStopped = false;
 
   if (sql) {
     try {
@@ -98,7 +113,19 @@ export async function closeTestDatabase() {
     pgContainerStopped = true;
   }
 
+  if (redisContainer) {
+    try {
+      await redisContainer.stop({ timeout: 10000 });
+      redisContainerStopped = true;
+      console.info("Redis test container stopped successfully.");
+    } catch (containerError) {
+      console.error("Error stopping Redis test container:", containerError);
+    }
+  } else {
+    redisContainerStopped = true;
+  }
+
   console.info(
-    `Resource cleanup status: pgSqlClosed=${pgSqlClosed}, pgContainerStopped=${pgContainerStopped}`,
+    `Resource cleanup status: pgSqlClosed=${pgSqlClosed}, pgContainerStopped=${pgContainerStopped}, redisContainerStopped=${redisContainerStopped}`,
   );
 }

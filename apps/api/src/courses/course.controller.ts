@@ -70,6 +70,7 @@ import {
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
 import { GroupsFilterSchema } from "src/group/group.types";
+import { LearningTimeService, learningTimeStatisticsSchema } from "src/learning-time";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import {
@@ -100,7 +101,10 @@ import type {
 @Controller("course")
 @UseGuards(RolesGuard)
 export class CourseController {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly learningTimeService: LearningTimeService,
+  ) {}
 
   @Get("all")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
@@ -579,6 +583,18 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
   ): Promise<BaseResponse<CourseStatisticsResponse>> {
     const data = await this.courseService.getCourseStatistics(courseId);
+
+    return new BaseResponse(data);
+  }
+
+  @Get(":courseId/statistics/learning-time")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    response: baseResponse(learningTimeStatisticsSchema),
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+  })
+  async getCourseLearningTimeStatistics(@Param("courseId") courseId: UUIDType) {
+    const data = await this.learningTimeService.getLearningTimeStatistics(courseId);
 
     return new BaseResponse(data);
   }
