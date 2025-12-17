@@ -1,79 +1,66 @@
 /* eslint-disable no-console */
-import fs from "fs";
 import path from "path";
 
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
-import { GenericContainer, Wait } from "testcontainers";
 
-const CONFIG_FILE = "/tmp/test-containers.json";
-
-export default async function globalSetup() {
-  console.info("🚀 Starting shared test containers...");
-
-  const [pgContainer, redisContainer] = await Promise.all([
-    new GenericContainer("pgvector/pgvector:pg16")
-      .withExposedPorts(5432)
-      .withEnvironment({
-        POSTGRES_DB: "testdb",
-        POSTGRES_USER: "testuser",
-        POSTGRES_PASSWORD: "testpass",
-      })
-      .withWaitStrategy(Wait.forLogMessage("database system is ready to accept connections"))
-      .start(),
-    new GenericContainer("redis:7-alpine")
-      .withExposedPorts(6379)
-      .withWaitStrategy(Wait.forLogMessage("Ready to accept connections"))
-      .start(),
-  ]);
-
-  const pgConnectionString = `postgresql://testuser:testpass@${pgContainer.getHost()}:${pgContainer.getMappedPort(
-    5432,
-  )}/testdb`;
-  const redisUrl = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
-
-  console.info("📦 Containers started, running migrations...");
-
-  const sql = postgres(pgConnectionString);
-  const db = drizzle(sql);
-
-  let migrationRetries = 0;
-  const maxMigrationRetries = 5;
-
-  while (migrationRetries < maxMigrationRetries) {
+async function waitForPostgres(url: string, maxAttempts = 5): Promise<void> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      await migrate(db, {
-        migrationsFolder: path.join(__dirname, "../src/storage/migrations"),
-      });
-      console.info("✅ Migrations completed successfully");
-      break;
-    } catch (migrationError: any) {
-      migrationRetries++;
-      console.info(
-        `Migration attempt ${migrationRetries}/${maxMigrationRetries} failed:`,
-        migrationError.message,
-      );
-
-      if (migrationRetries >= maxMigrationRetries) {
-        console.error("All migration attempts failed:", migrationError);
-        throw migrationError;
+      const sql = postgres(url, { connect_timeout: 2 });
+      await sql`SELECT 1`;
+      await sql.end();
+      return;
+    } catch (e: any) {
+      if (attempt === maxAttempts) {
+        throw new Error(
+          `\n\n❌ PostgreSQL is not available at ${url}\n` +
+            `   Make sure Docker containers are running:\n` +
+            `   $ docker compose up -d\n\n`,
+        );
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.info(`⏳ Waiting for PostgreSQL... (attempt ${attempt}/${maxAttempts})`);
+      await new Promise((r) => setTimeout(r, 1000));
     }
   }
+}
 
-  await sql.end();
+export default async function globalSetup() {
+  const mainDbUrl =
+    process.env.DATABASE_URL || "postgresql://postgres:guidebook@localhost:5432/guidebook";
+  const testDbUrl =
+    process.env.DATABASE_TEST_URL ||
+    "postgresql://postgres:guidebook@localhost:5432/guidebook_test";
 
-  const config = {
-    pgConnectionString,
-    redisUrl,
-    pgContainerId: pgContainer.getId(),
-    redisContainerId: redisContainer.getId(),
-  };
+  console.info("Setting up test database...");
 
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+  await waitForPostgres(mainDbUrl);
 
-  console.info("✅ Global setup complete. Config saved to", CONFIG_FILE);
+  const adminSql = postgres(mainDbUrl);
+  try {
+    await adminSql.unsafe(`CREATE DATABASE guidebook_test`);
+    console.info("Created guidebook_test database");
+  } catch (e: any) {
+    if (!e.message.includes("already exists")) {
+      await adminSql.end();
+      throw e;
+    }
+    console.info("Database guidebook_test already exists");
+  }
+  await adminSql.end();
+
+  const testSql = postgres(testDbUrl, { max: 1 });
+  const db = drizzle(testSql);
+
+  try {
+    await migrate(db, {
+      migrationsFolder: path.join(__dirname, "../src/storage/migrations"),
+    });
+    console.info("✅ Migrations completed successfully");
+  } finally {
+    await testSql.end();
+  }
+
+  console.info("✅ Test database ready");
 }
