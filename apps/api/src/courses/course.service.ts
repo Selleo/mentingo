@@ -12,38 +12,28 @@ import { EventBus } from "@nestjs/cqrs";
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import {
   and,
-  between,
   count,
-  countDistinct,
   eq,
   getTableColumns,
   ilike,
   inArray,
   isNotNull,
   isNull,
-  like,
-  ne,
-  not,
   or,
   sql,
 } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
 
-import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
-import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
-import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers";
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
 import {
   CreateCourseEvent,
-  UpdateCourseEvent,
-  EnrollGroupToCourseEvent,
-  EnrollCourseEvent,
+  UpdateCourseEvent, EnrollCourseEvent
 } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
-import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
@@ -55,7 +45,6 @@ import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
-import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
 import {
@@ -79,19 +68,24 @@ import {
 } from "../storage/schema";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
+import { GetAvailableCoursesService } from "./operations/queries/get-available-courses.service";
+import { GetBetaCourseByIdService } from "./operations/queries/get-beta-course-by-id.service";
+import { GetContentCreatorCoursesService } from "./operations/queries/get-content-creator-courses.service";
+import { GetCourseService } from "./operations/queries/get-course.service";
+import { GetCoursesForUserService } from "./operations/queries/get-courses-for-user.service";
+import { GetStudentsWithEnrollmentDateService } from "./operations/queries/get-students-with-enrollment-date.service";
+import { GetAllCoursesService } from "./operations/queries/index";
+import { EnrollGroupsToCourseService } from "./operations/updaters/enroll-groups-to-course.service";
+import { UnenrollGroupsFromCoursesService } from "./operations/updaters/unenroll-groups-from-courses.service";
+import { UpdateCourseService } from "./operations/updaters/update-course-service";
 import {
-  COURSE_ENROLLMENT_SCOPES,
-  CourseSortFields,
   CourseStudentAiMentorResultsSortFields,
   CourseStudentProgressionSortFields,
   CourseStudentQuizResultsSortFields,
-  EnrolledStudentSortFields,
 } from "./schemas/courseQuery";
 
+
 import type {
-  AllCoursesForContentCreatorResponse,
-  AllCoursesResponse,
-  AllStudentCoursesResponse,
   CourseAverageQuizScorePerQuiz,
   CourseAverageQuizScoresResponse,
   CourseStatisticsResponse,
@@ -100,8 +94,6 @@ import type {
 } from "./schemas/course.schema";
 import type {
   CourseEnrollmentScope,
-  CoursesFilterSchema,
-  CourseSortField,
   CoursesQuery,
   CourseStudentAiMentorResultsQuery,
   CourseStudentAiMentorResultsSortField,
@@ -113,29 +105,20 @@ import type {
 } from "./schemas/courseQuery";
 import type { CreateCourseBody } from "./schemas/createCourse.schema";
 import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment";
-import type { EnrolledStudent, StudentCourseSelect } from "./schemas/enrolledStudent.schema";
-import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
+import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
-import type { BaseResponse, Pagination, UUIDType } from "src/common";
+import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type {
-  AdminLessonWithContentSchema,
-  LessonForChapterSchema,
-} from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
-import type { ProgressStatus } from "src/utils/types/progress.type";
-import type Stripe from "stripe";
 
 @Injectable()
 export class CourseService {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    private readonly adminChapterRepository: AdminChapterRepository,
-    private readonly fileService: FileService,
     private readonly lessonRepository: LessonRepository,
     private readonly statisticsRepository: StatisticsRepository,
     private readonly settingsService: SettingsService,
@@ -144,267 +127,34 @@ export class CourseService {
     private readonly localizationService: LocalizationService,
     private readonly eventBus: EventBus,
     private readonly adminLessonService: AdminLessonService,
+    private readonly getAllCoursesService: GetAllCoursesService,
+    private readonly getCourseForUserService: GetCoursesForUserService,
+    private readonly getAvailableCoursesService: GetAvailableCoursesService,
+    private readonly getStudentsWithEnrollmentDateService: GetStudentsWithEnrollmentDateService,
+    private readonly getCourseService: GetCourseService,
+    private readonly getBetaCourseByIdService: GetBetaCourseByIdService,
+    private readonly getContentCreatorCoursesService: GetContentCreatorCoursesService,
+    private readonly updateCourseService: UpdateCourseService,
+    private readonly unenrollGroupsFromCoursesService: UnenrollGroupsFromCoursesService,
+    private readonly enrollGroupsToCourseService: EnrollGroupsToCourseService,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
   ) {}
 
-  async getAllCourses(query: CoursesQuery): Promise<{
-    data: AllCoursesResponse;
-    pagination: Pagination;
-  }> {
-    const {
-      filters = {},
-      page = 1,
-      perPage = DEFAULT_PAGE_SIZE,
-      sort = CourseSortFields.title,
-      currentUserId,
-      currentUserRole,
-      language,
-    } = query;
-
-    const { sortOrder, sortedField } = getSortOptions(sort);
-
-    const conditions = this.getFiltersConditions(filters, false);
-
-    if (currentUserRole === USER_ROLES.CONTENT_CREATOR && currentUserId) {
-      conditions.push(eq(courses.authorId, currentUserId));
-    }
-
-    const queryDB = this.db
-      .select({
-        id: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
-        description: this.localizationService.getLocalizedSqlField(courses.description, language),
-        thumbnailUrl: courses.thumbnailS3Key,
-        author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
-        authorAvatarUrl: sql<string>`${users.avatarReference}`,
-        category: sql<string>`${categories.title}`,
-        enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
-        courseChapterCount: courses.chapterCount,
-        priceInCents: courses.priceInCents,
-        currency: courses.currency,
-        status: courses.status,
-        createdAt: courses.createdAt,
-        stripeProductId: courses.stripeProductId,
-        stripePriceId: courses.stripePriceId,
-      })
-      .from(courses)
-      .leftJoin(categories, eq(courses.categoryId, categories.id))
-      .leftJoin(users, eq(courses.authorId, users.id))
-      .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
-      .where(and(...conditions))
-      .groupBy(
-        courses.id,
-        courses.title,
-        courses.description,
-        courses.thumbnailS3Key,
-        users.firstName,
-        users.lastName,
-        users.avatarReference,
-        categories.title,
-        courses.priceInCents,
-        courses.currency,
-        courses.status,
-        coursesSummaryStats.freePurchasedCount,
-        coursesSummaryStats.paidPurchasedCount,
-        courses.createdAt,
-        courses.availableLocales,
-        courses.baseLanguage,
-      )
-      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
-
-    const dynamicQuery = queryDB.$dynamic();
-    const paginatedQuery = addPagination(dynamicQuery, page, perPage);
-    const data = await paginatedQuery;
-
-    const dataWithS3SignedUrls = await Promise.all(
-      data.map(async (item) => {
-        if (!item.thumbnailUrl) return item;
-
-        try {
-          const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-          const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-            item.authorAvatarUrl,
-          );
-          return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
-        } catch (error) {
-          console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-          return item;
-        }
-      }),
-    );
-
-    const [{ totalItems }] = await this.db
-      .select({ totalItems: countDistinct(courses.id) })
-      .from(courses)
-      .leftJoin(categories, eq(courses.categoryId, categories.id))
-      .leftJoin(users, eq(courses.authorId, users.id))
-      .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
-      .where(and(...conditions));
-
-    return {
-      data: dataWithS3SignedUrls,
-      pagination: {
-        totalItems,
-        page,
-        perPage,
-      },
-    };
+  getAllCourses(query: CoursesQuery) {
+    return this.getAllCoursesService.getAllCourses(query)
   }
 
-  async getCoursesForUser(
-    query: CoursesQuery,
-    userId: UUIDType,
-  ): Promise<{ data: AllStudentCoursesResponse; pagination: Pagination }> {
-    const {
-      sort = CourseSortFields.title,
-      perPage = DEFAULT_PAGE_SIZE,
-      page = 1,
-      filters = {},
-      language,
-    } = query;
-
-    const { sortOrder, sortedField } = getSortOptions(sort);
-
-    return this.db.transaction(async (trx) => {
-      const conditions = [
-        eq(studentCourses.studentId, userId),
-        eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-        or(eq(courses.status, "published"), eq(courses.status, "private")),
-        isNull(users.deletedAt),
-      ];
-      conditions.push(...this.getFiltersConditions(filters, false));
-
-      const queryDB = trx
-        .select(this.getSelectField(language))
-        .from(studentCourses)
-        .innerJoin(courses, eq(studentCourses.courseId, courses.id))
-        .innerJoin(categories, eq(courses.categoryId, categories.id))
-        .leftJoin(users, eq(courses.authorId, users.id))
-        .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
-        .where(and(...conditions))
-        .groupBy(
-          courses.id,
-          courses.title,
-          courses.thumbnailS3Key,
-          courses.description,
-          courses.authorId,
-          users.firstName,
-          users.lastName,
-          users.email,
-          users.avatarReference,
-          studentCourses.studentId,
-          categories.title,
-          coursesSummaryStats.freePurchasedCount,
-          coursesSummaryStats.paidPurchasedCount,
-          studentCourses.finishedChapterCount,
-          courses.availableLocales,
-          courses.baseLanguage,
-        )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
-
-      const dynamicQuery = queryDB.$dynamic();
-      const paginatedQuery = addPagination(dynamicQuery, page, perPage);
-      const data = await paginatedQuery;
-      const [{ totalItems }] = await trx
-        .select({ totalItems: countDistinct(courses.id) })
-        .from(studentCourses)
-        .innerJoin(courses, eq(studentCourses.courseId, courses.id))
-        .innerJoin(categories, eq(courses.categoryId, categories.id))
-        .leftJoin(users, eq(courses.authorId, users.id))
-        .where(and(...conditions));
-
-      const dataWithS3SignedUrls = await Promise.all(
-        data.map(async (item) => {
-          if (!item.thumbnailUrl) return item;
-
-          try {
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              item.authorAvatarUrl,
-            );
-            return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
-          } catch (error) {
-            console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-            return item;
-          }
-        }),
-      );
-
-      return {
-        data: dataWithS3SignedUrls,
-        pagination: {
-          totalItems: totalItems || 0,
-          page,
-          perPage,
-        },
-      };
-    });
+  getCoursesForUser(query: CoursesQuery, userId: UUIDType) {
+    return this.getCourseForUserService.getCoursesForUser(query, userId)
   }
 
-  async getStudentsWithEnrollmentDate(
-    courseId: UUIDType,
-    filters: EnrolledStudentFilterSchema,
-  ): Promise<BaseResponse<EnrolledStudent[]>> {
-    const { keyword, sort = EnrolledStudentSortFields.enrolledAt } = filters;
-
-    const { sortOrder } = getSortOptions(sort);
-
-    const conditions = [];
-
-    if (keyword) {
-      const searchKeyword = keyword.toLowerCase();
-
-      conditions.push(
-        or(
-          ilike(users.firstName, `%${searchKeyword}%`),
-          ilike(users.lastName, `%${searchKeyword}%`),
-          ilike(users.email, `%${searchKeyword}%`),
-        ),
-      );
-    }
-
-    if (filters.groups?.length) {
-      conditions.push(getGroupFilterConditions(filters.groups));
-    }
-
-    conditions.push(isNull(users.deletedAt));
-
-    const data = await this.db
-      .select({
-        firstName: users.firstName,
-        lastName: users.lastName,
-        email: users.email,
-        id: users.id,
-        enrolledAt: sql<
-          string | null
-        >`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.enrolledAt} ELSE NULL END`,
-        groups: sql<
-          Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
-          "groups",
-        ),
-        isEnrolledByGroup: sql<boolean>`${studentCourses.enrolledByGroupId} IS NOT NULL`,
-      })
-      .from(users)
-      .leftJoin(
-        studentCourses,
-        and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
-      )
-      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(...conditions, eq(users.role, USER_ROLES.STUDENT), eq(users.archived, false)))
-      .groupBy(
-        users.id,
-        studentCourses.enrolledAt,
-        studentCourses.status,
-        studentCourses.enrolledByGroupId,
-      )
-      .orderBy(sortOrder(studentCourses.enrolledAt));
-
-    return {
-      data: data ?? [],
-    };
+  getStudentsWithEnrollmentDate(courseId: UUIDType, filters: EnrolledStudentFilterSchema) {
+    return this.getStudentsWithEnrollmentDateService.getStudentsWithEnrollmentDate(courseId, filters)
   }
+
+  getAvailableCourses(query: CoursesQuery, userId?: UUIDType) {
+     return this.getAvailableCoursesService.getAvailableCourses(query, userId);
+   }
 
   async getCourseSequenceEnabled(courseId: UUIDType): Promise<LessonSequenceEnabledResponse> {
     const course = await this.db.query.courses.findFirst({
@@ -420,524 +170,30 @@ export class CourseService {
     };
   }
 
-  async getAvailableCourses(
-    query: CoursesQuery,
-    currentUserId?: UUIDType,
-  ): Promise<{ data: AllStudentCoursesResponse; pagination: Pagination }> {
-    const {
-      sort = CourseSortFields.title,
-      perPage = DEFAULT_PAGE_SIZE,
-      page = 1,
-      filters = {},
+  getCourse(id: UUIDType,
+		 userId: UUIDType,
+		 language: SupportedLanguages) {
+    return this.getCourseService.getCourse(id, userId, language);
+  }
+
+
+  getBetaCourseById(id: UUIDType, language: SupportedLanguages, currentUserId: UUIDType, currentUserRole: UserRole) {
+    return this.getBetaCourseByIdService.getBetaCourseById(id, language, currentUserId, currentUserRole);
+  }
+
+  getContentCreatorCourses({ currentUserId, authorId, scope, excludeCourseId, title, description, searchQuery, language }: { currentUserId: string, authorId: string, scope: CourseEnrollmentScope, excludeCourseId: string, title: string, description: string, searchQuery: string, language: SupportedLanguages }) {
+    return this.getContentCreatorCoursesService.getContentCreatorCourses({
+      currentUserId,
+      authorId,
+      scope,
+      excludeCourseId,
+      title,
+      description,
+      searchQuery,
       language,
-    } = query;
-    const { sortOrder, sortedField } = getSortOptions(sort);
-
-    return this.db.transaction(async (trx) => {
-      const availableCourseIds = await this.getAvailableCourseIds(
-        trx,
-        currentUserId,
-        undefined,
-        query.excludeCourseId,
-      );
-
-      const conditions = [eq(courses.status, "published")];
-      conditions.push(...this.getFiltersConditions(filters));
-
-      if (availableCourseIds.length > 0) {
-        conditions.push(inArray(courses.id, availableCourseIds));
-      }
-
-      const queryDB = trx
-        .select({
-          id: courses.id,
-          title: this.localizationService.getLocalizedSqlField(courses.title, language),
-          description: this.localizationService.getLocalizedSqlField(courses.description, language),
-          thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
-          authorId: sql<string>`${courses.authorId}`,
-          author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
-          authorEmail: sql<string>`${users.email}`,
-          authorAvatarUrl: sql<string>`${users.avatarReference}`,
-          category: sql<string>`${categories.title}`,
-          enrolled: sql<boolean>`FALSE`,
-          enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
-          courseChapterCount: courses.chapterCount,
-          completedChapterCount: sql<number>`0`,
-          priceInCents: courses.priceInCents,
-          currency: courses.currency,
-          hasFreeChapters: sql<boolean>`
-            EXISTS (
-              SELECT 1
-              FROM ${chapters}
-              WHERE ${chapters.courseId} = ${courses.id}
-                AND ${chapters.isFreemium} = TRUE
-            )
-          `,
-        })
-        .from(courses)
-        .leftJoin(categories, eq(courses.categoryId, categories.id))
-        .leftJoin(users, eq(courses.authorId, users.id))
-        .leftJoin(coursesSummaryStats, eq(courses.id, coursesSummaryStats.courseId))
-        .where(and(...conditions))
-        .groupBy(
-          courses.id,
-          courses.title,
-          courses.thumbnailS3Key,
-          courses.description,
-          courses.authorId,
-          users.firstName,
-          users.lastName,
-          users.email,
-          users.avatarReference,
-          categories.title,
-          coursesSummaryStats.freePurchasedCount,
-          coursesSummaryStats.paidPurchasedCount,
-          courses.availableLocales,
-          courses.baseLanguage,
-        )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField)));
-
-      const dynamicQuery = queryDB.$dynamic();
-      const paginatedQuery = addPagination(dynamicQuery, page, perPage);
-      const data = await paginatedQuery;
-      const [{ totalItems }] = await trx
-        .select({ totalItems: countDistinct(courses.id) })
-        .from(courses)
-        .leftJoin(categories, eq(courses.categoryId, categories.id))
-        .leftJoin(users, eq(courses.authorId, users.id))
-        .where(and(...conditions));
-
-      const dataWithS3SignedUrls = await Promise.all(
-        data.map(async (item) => {
-          try {
-            const { authorAvatarUrl, ...itemWithoutReferences } = item;
-
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
-
-            return {
-              ...itemWithoutReferences,
-              thumbnailUrl: signedUrl,
-              authorAvatarUrl: authorAvatarSignedUrl,
-            };
-          } catch (error) {
-            console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-            return item;
-          }
-        }),
-      );
-
-      return {
-        data: dataWithS3SignedUrls,
-        pagination: {
-          totalItems: totalItems || 0,
-          page,
-          perPage,
-        },
-      };
     });
   }
 
-  async getCourse(
-    id: UUIDType,
-    userId: UUIDType,
-    language: SupportedLanguages,
-  ): Promise<CommonShowCourse> {
-    //TODO: to remove
-    const testDeployment = "test";
-    testDeployment;
-
-    const [course] = await this.db
-      .select({
-        id: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
-        thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
-        category: sql<string>`${categories.title}`,
-        description: this.localizationService.getLocalizedSqlField(courses.description, language),
-        courseChapterCount: courses.chapterCount,
-        completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
-        status: courses.status,
-        isScorm: courses.isScorm,
-        priceInCents: courses.priceInCents,
-        currency: courses.currency,
-        authorId: courses.authorId,
-        hasCertificate: courses.hasCertificate,
-        hasFreeChapter: sql<boolean>`
-          EXISTS (
-            SELECT 1
-            FROM ${chapters}
-            WHERE ${chapters.courseId} = ${courses.id}
-              AND ${chapters.isFreemium} = TRUE
-          )`,
-        stripeProductId: courses.stripeProductId,
-        stripePriceId: courses.stripePriceId,
-        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
-        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-      })
-      .from(courses)
-      .leftJoin(categories, eq(courses.categoryId, categories.id))
-      .leftJoin(
-        studentCourses,
-        and(eq(courses.id, studentCourses.courseId), eq(studentCourses.studentId, userId)),
-      )
-      .where(eq(courses.id, id));
-
-    const isEnrolled = !!course.enrolled;
-    const NON_PUBLIC_STATUSES = ["draft", "private"];
-
-    if (!course) throw new NotFoundException("Course not found");
-    if (userId !== course.authorId && NON_PUBLIC_STATUSES.includes(course.status) && !isEnrolled)
-      throw new ForbiddenException("You have no access to this course");
-
-    const courseChapterList = await this.db
-      .select({
-        id: chapters.id,
-        title: this.localizationService.getLocalizedSqlField(chapters.title, language),
-        isSubmitted: sql<boolean>`
-          EXISTS (
-            SELECT 1
-            FROM ${studentChapterProgress}
-            JOIN ${studentCourses} ON ${studentCourses.courseId} = ${course.id} AND ${studentCourses.studentId} = ${studentChapterProgress.studentId} 
-            WHERE ${studentChapterProgress.chapterId} = ${chapters.id}
-              AND ${studentChapterProgress.courseId} = ${course.id}
-              AND ${studentChapterProgress.studentId} = ${userId}
-              AND ${studentChapterProgress.completedAt} IS NOT NULL
-              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
-          )::BOOLEAN`,
-        lessonCount: chapters.lessonCount,
-        quizCount: sql<number>`
-          (SELECT COUNT(*)
-          FROM ${lessons}
-          WHERE ${lessons.chapterId} = ${chapters.id}
-            AND ${lessons.type} = ${LESSON_TYPES.QUIZ})::INTEGER`,
-        completedLessonCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentChapterProgress.completedLessonCount}, 0) ELSE 0 END`,
-        chapterProgress: sql<ProgressStatus>`
-          CASE
-            WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.NOT_ENROLLED} THEN ${PROGRESS_STATUSES.NOT_STARTED}
-            WHEN ${studentChapterProgress.completedAt} IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
-            WHEN ${studentChapterProgress.completedLessonCount} > 0 OR EXISTS (
-              SELECT 1
-              FROM ${studentLessonProgress}
-              WHERE ${studentLessonProgress.chapterId} = ${chapters.id}
-                AND ${studentLessonProgress.studentId} = ${userId}
-                AND ${studentLessonProgress.isStarted} = TRUE
-            ) THEN ${PROGRESS_STATUSES.IN_PROGRESS}
-            ELSE ${PROGRESS_STATUSES.NOT_STARTED}
-          END
-        `,
-        isFreemium: chapters.isFreemium,
-        displayOrder: sql<number>`${chapters.displayOrder}`,
-        lessons: sql<LessonForChapterSchema>`
-          COALESCE(
-            (
-              SELECT json_agg(lesson_data)
-              FROM (
-                SELECT
-                  ${lessons.id} AS id,
-                  ${this.localizationService.getLocalizedSqlField(
-                    lessons.title,
-                    language,
-                  )} AS title,
-                  ${lessons.type} AS type,
-                  ${lessons.displayOrder} AS "displayOrder",
-                  ${lessons.isExternal} AS "isExternal",
-                  CASE
-                    WHEN (${chapters.isFreemium} = FALSE AND ${isEnrolled} = FALSE) THEN ${
-                      PROGRESS_STATUSES.BLOCKED
-                    }
-                    WHEN ${studentLessonProgress.completedAt} IS NOT NULL AND (${
-                      studentLessonProgress.isQuizPassed
-                    } IS TRUE OR ${studentLessonProgress.isQuizPassed} IS NULL) THEN ${
-                      PROGRESS_STATUSES.COMPLETED
-                    }
-                    WHEN ${studentLessonProgress.isStarted} THEN  ${PROGRESS_STATUSES.IN_PROGRESS}
-                    ELSE  ${PROGRESS_STATUSES.NOT_STARTED}
-                  END AS status,
-                  CASE
-                    WHEN ${lessons.type} = ${LESSON_TYPES.QUIZ} THEN COUNT(${questions.id})
-                    ELSE NULL
-                  END AS "quizQuestionCount"
-                FROM ${lessons}
-                LEFT JOIN ${studentLessonProgress} ON ${lessons.id} = ${
-                  studentLessonProgress.lessonId
-                }
-                  AND ${studentLessonProgress.studentId} = ${userId}
-                LEFT JOIN ${questions} ON ${lessons.id} = ${questions.lessonId}
-                LEFT JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
-                WHERE ${lessons.chapterId} = ${chapters.id}
-                GROUP BY
-                  ${lessons.id},
-                  ${lessons.type},
-                  ${lessons.displayOrder},
-                  ${lessons.title},
-                  ${studentLessonProgress.completedAt},
-                  ${studentLessonProgress.completedQuestionCount},
-                  ${studentLessonProgress.isStarted},
-                  ${chapters.isFreemium},
-                  ${studentLessonProgress.isQuizPassed},
-                  ${courses.availableLocales},
-                  ${courses.baseLanguage}
-                ORDER BY ${lessons.displayOrder}
-              ) AS lesson_data
-            ),
-            '[]'::json
-          )
-        `,
-      })
-      .from(chapters)
-      .leftJoin(
-        studentChapterProgress,
-        and(
-          eq(studentChapterProgress.chapterId, chapters.id),
-          eq(studentChapterProgress.studentId, userId),
-        ),
-      )
-      .leftJoin(
-        studentCourses,
-        and(eq(studentCourses.courseId, course.id), eq(studentCourses.studentId, userId)),
-      )
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
-      .orderBy(chapters.displayOrder);
-
-    const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailS3Key);
-
-    return {
-      ...course,
-      thumbnailUrl,
-      chapters: courseChapterList,
-    };
-  }
-
-  async getBetaCourseById(
-    id: UUIDType,
-    language: SupportedLanguages,
-    currentUserId: UUIDType,
-    currentUserRole: UserRole,
-  ) {
-    const [course] = await this.db
-      .select({
-        id: courses.id,
-        title: this.localizationService.getFieldByLanguage(courses.title, language),
-        thumbnailS3Key: sql<string>`COALESCE(${courses.thumbnailS3Key}, '')`,
-        category: categories.title,
-        categoryId: categories.id,
-        description: this.localizationService.getFieldByLanguage(courses.description, language),
-        courseChapterCount: courses.chapterCount,
-        status: courses.status,
-        priceInCents: courses.priceInCents,
-        currency: courses.currency,
-        authorId: courses.authorId,
-        hasCertificate: courses.hasCertificate,
-        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
-        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-      })
-      .from(courses)
-      .innerJoin(categories, eq(courses.categoryId, categories.id))
-      .where(and(eq(courses.id, id)));
-
-    if (!course) throw new NotFoundException("Course not found");
-
-    if (currentUserRole !== USER_ROLES.ADMIN && course.authorId !== currentUserId) {
-      throw new ForbiddenException("You do not have permission to edit this course");
-    }
-
-    const courseChapterList = await this.db
-      .select({
-        id: chapters.id,
-        title: this.localizationService.getFieldByLanguage(chapters.title, language),
-        displayOrder: sql<number>`${chapters.displayOrder}`,
-        lessonCount: chapters.lessonCount,
-        updatedAt: chapters.updatedAt,
-        isFree: chapters.isFreemium,
-        lessons: sql<LessonForChapterSchema>`
-          COALESCE(
-            (
-              SELECT array_agg(${lessons.id} ORDER BY ${lessons.displayOrder})
-              FROM ${lessons}
-              WHERE ${lessons.chapterId} = ${chapters.id}
-            ),
-            '{}'
-          )
-        `,
-      })
-      .from(chapters)
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
-      .orderBy(chapters.displayOrder);
-
-    const thumbnailS3SingedUrl = course.thumbnailS3Key
-      ? await this.fileService.getFileUrl(course.thumbnailS3Key)
-      : null;
-
-    const updatedCourseLessonList = await Promise.all(
-      courseChapterList?.map(async (chapter) => {
-        const lessons: AdminLessonWithContentSchema[] =
-          await this.adminChapterRepository.getBetaChapterLessons(chapter.id, language);
-
-        const lessonsWithSignedUrls = await this.addS3SignedUrlsToLessonsAndQuestions(lessons);
-
-        return {
-          ...chapter,
-          lessons: lessonsWithSignedUrls,
-        };
-      }),
-    );
-
-    return {
-      ...course,
-      thumbnailS3SingedUrl,
-      chapters: updatedCourseLessonList ?? [],
-    };
-  }
-
-  async getContentCreatorCourses({
-    currentUserId,
-    authorId,
-    scope,
-    excludeCourseId,
-    title,
-    description,
-    searchQuery,
-    language,
-  }: {
-    currentUserId: UUIDType;
-    authorId: UUIDType;
-    scope: CourseEnrollmentScope;
-    excludeCourseId?: UUIDType;
-    title?: string;
-    description?: string;
-    searchQuery?: string;
-    language: SupportedLanguages;
-  }): Promise<AllCoursesForContentCreatorResponse> {
-    const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
-
-    if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
-      conditions.push(
-        ...[
-          eq(studentCourses.studentId, currentUserId),
-          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-        ],
-      );
-    }
-
-    if (scope === COURSE_ENROLLMENT_SCOPES.AVAILABLE) {
-      const availableCourseIds = await this.getAvailableCourseIds(
-        this.db,
-        currentUserId,
-        authorId,
-        excludeCourseId,
-      );
-
-      if (!availableCourseIds.length) return [];
-
-      conditions.push(inArray(courses.id, availableCourseIds));
-    }
-
-    if (title) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${title}%`})`,
-      );
-    }
-
-    if (description) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${description}%`})`,
-      );
-    }
-
-    if (searchQuery) {
-      const searchCondition = or(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
-      );
-
-      if (searchCondition) {
-        conditions.push(searchCondition);
-      }
-    }
-
-    const contentCreatorCourses = await this.db
-      .select({
-        id: courses.id,
-        description: this.localizationService.getLocalizedSqlField(courses.description, language),
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
-        thumbnailUrl: courses.thumbnailS3Key,
-        authorId: sql<string>`${courses.authorId}`,
-        author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
-        authorEmail: sql<string>`${users.email}`,
-        authorAvatarUrl: sql<string>`${users.avatarReference}`,
-        category: sql<string>`${categories.title}`,
-        enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
-        enrolledParticipantCount: sql<number>`0`,
-        courseChapterCount: courses.chapterCount,
-        completedChapterCount: sql<number>`0`,
-        priceInCents: courses.priceInCents,
-        currency: courses.currency,
-        hasFreeChapters: sql<boolean>`
-        EXISTS (
-          SELECT 1
-          FROM ${chapters}
-          WHERE ${chapters.courseId} = ${courses.id}
-            AND ${chapters.isFreemium} = true
-        )`,
-      })
-      .from(courses)
-      .leftJoin(
-        studentCourses,
-        and(eq(studentCourses.courseId, courses.id), eq(studentCourses.studentId, currentUserId)),
-      )
-      .leftJoin(categories, eq(courses.categoryId, categories.id))
-      .leftJoin(users, eq(courses.authorId, users.id))
-      .where(and(...conditions))
-      .groupBy(
-        courses.id,
-        courses.title,
-        courses.thumbnailS3Key,
-        courses.description,
-        courses.authorId,
-        users.firstName,
-        users.lastName,
-        users.email,
-        users.avatarReference,
-        studentCourses.studentId,
-        categories.title,
-        courses.availableLocales,
-        courses.baseLanguage,
-        studentCourses.status,
-      )
-      .orderBy(
-        sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NULL THEN TRUE ELSE FALSE END`,
-        courses.title,
-      );
-
-    return await Promise.all(
-      contentCreatorCourses.map(async (course) => {
-        const { authorAvatarUrl, ...courseWithoutReferences } = course;
-
-        const authorAvatarSignedUrl =
-          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
-
-        return {
-          ...courseWithoutReferences,
-          thumbnailUrl: course.thumbnailUrl
-            ? await this.fileService.getFileUrl(course.thumbnailUrl)
-            : course.thumbnailUrl,
-          authorAvatarUrl: authorAvatarSignedUrl,
-        };
-      }),
-    );
-  }
 
   async updateHasCertificate(
     courseId: UUIDType,
@@ -1134,175 +390,15 @@ export class CourseService {
 
     return newCourse;
   }
-
-  async updateCourse(
+  
+  updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
     currentUser: CurrentUser,
     isPlaywrightTest: boolean,
     image?: Express.Multer.File,
   ) {
-    const { userId: currentUserId, role: currentUserRole } = currentUser;
-
-    const { updatedCourse, previousCourseSnapshot, updatedCourseSnapshot } =
-      await this.db.transaction(async (trx) => {
-        const [existingCourse] = await trx.select().from(courses).where(eq(courses.id, id));
-
-        const { enabled: isStripeConfigured } = await this.envService.getStripeConfigured();
-
-        if (!updateCourseBody.language) {
-          throw new BadRequestException("adminCourseView.toast.updateCourseMissingLanguage");
-        }
-
-        if (!existingCourse.availableLocales.includes(updateCourseBody.language)) {
-          throw new BadRequestException("adminCourseView.toast.languageNotSupported");
-        }
-
-        if (!existingCourse) {
-          throw new NotFoundException("Course not found");
-        }
-
-        if (existingCourse.authorId !== currentUserId && currentUserRole !== USER_ROLES.ADMIN) {
-          throw new ForbiddenException("You don't have permission to update course");
-        }
-
-        const previousSnapshot = await this.buildCourseActivitySnapshot(
-          id,
-          updateCourseBody.language,
-          trx,
-        );
-
-        if (updateCourseBody.categoryId) {
-          const [category] = await trx
-            .select()
-            .from(categories)
-            .where(eq(categories.id, updateCourseBody.categoryId));
-
-          if (!category) {
-            throw new NotFoundException("Category not found");
-          }
-        }
-
-        // TODO: to remove and start use file service
-        let imageKey = undefined;
-        if (image) {
-          try {
-            const fileExtension = image.originalname.split(".").pop();
-            const resource = `courses/${crypto.randomUUID()}.${fileExtension}`;
-            imageKey = await this.fileService.uploadFile(image, resource);
-          } catch (error) {
-            throw new ConflictException("Failed to upload course image");
-          }
-        }
-
-        const { priceInCents, currency, title, description, language, ...rest } = updateCourseBody;
-
-        const updateData = {
-          ...rest,
-          title: setJsonbField(courses.title, language, title),
-          description: setJsonbField(courses.description, language, description),
-          ...(isStripeConfigured ? { priceInCents, currency } : {}),
-          ...(imageKey && { imageUrl: imageKey.fileUrl }),
-        };
-
-        const [updatedCourse] = await trx
-          .update(courses)
-          .set(updateData)
-          .where(eq(courses.id, id))
-          .returning();
-
-        if (!updatedCourse) {
-          throw new ConflictException("Failed to update course");
-        }
-
-        if (!isPlaywrightTest && isStripeConfigured) {
-          // --- create stripe product if it doesn't exist yet ---
-          if (!updatedCourse.stripeProductId) {
-            const { productId, priceId } = await this.stripeService.createProduct({
-              name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
-              description:
-                (updatedCourse.description as Record<string, string>)[updatedCourse.baseLanguage] ??
-                "",
-              amountInCents: updatedCourse.priceInCents ?? 0,
-              currency: updatedCourse.currency ?? "usd",
-            });
-
-            await trx
-              .update(courses)
-              .set({
-                stripeProductId: productId,
-                stripePriceId: priceId,
-              })
-              .where(eq(courses.id, id));
-          } else {
-            // --- stripe product update ---
-            if (updateCourseBody.language === updatedCourse.baseLanguage) {
-              const productUpdatePayload = {
-                name: (updatedCourse.title as Record<string, string>)[updatedCourse.baseLanguage],
-                description: (updatedCourse.description as Record<string, string>)[
-                  updatedCourse.baseLanguage
-                ],
-              };
-
-              await this.stripeService.updateProduct(
-                updatedCourse.stripeProductId,
-                productUpdatePayload,
-              );
-            }
-
-            // --- stripe price update ---
-            const hasPriceUpdate =
-              updateCourseBody.priceInCents !== undefined ||
-              updateCourseBody.currency !== undefined;
-
-            if (updatedCourse.stripePriceId && hasPriceUpdate) {
-              const pricePayload: Stripe.PriceCreateParams = {
-                product: updatedCourse.stripeProductId,
-                currency: updateCourseBody.currency ?? "usd",
-                ...(updateCourseBody.priceInCents !== undefined && {
-                  unit_amount: updateCourseBody.priceInCents,
-                }),
-              };
-
-              const newStripePrice = await this.stripeService.createPrice(pricePayload);
-
-              if (newStripePrice.id) {
-                await this.stripeService.updatePrice(updatedCourse.stripePriceId, {
-                  active: false,
-                });
-
-                await trx
-                  .update(courses)
-                  .set({ stripePriceId: newStripePrice.id })
-                  .where(eq(courses.id, id));
-              }
-            }
-          }
-        }
-
-        const updatedSnapshot = await this.buildCourseActivitySnapshot(id, language, trx);
-
-        return {
-          updatedCourse,
-          previousCourseSnapshot: previousSnapshot,
-          updatedCourseSnapshot: updatedSnapshot,
-        };
-      });
-
-    if (this.areCourseSnapshotsEqual(previousCourseSnapshot, updatedCourseSnapshot)) {
-      return updatedCourse;
-    }
-
-    this.eventBus.publish(
-      new UpdateCourseEvent({
-        courseId: id,
-        actor: currentUser,
-        previousCourseData: previousCourseSnapshot,
-        updatedCourseData: updatedCourseSnapshot,
-      }),
-    );
-
-    return updatedCourse;
+    return this.updateCourseService.updateCourse(id, updateCourseBody, currentUser, isPlaywrightTest, image);
   }
 
   async enrollCourse(
@@ -1432,212 +528,11 @@ export class CourseService {
   }
 
   async enrollGroupsToCourse(courseId: UUIDType, groupIds: UUIDType[], currentUser?: CurrentUser) {
-    const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
-    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
-
-    const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
-    if (!groupExists.length) throw new NotFoundException("Groups not found");
-
-    const groupUsersList = await this.db
-      .select({ ...getTableColumns(groupUsers), role: users.role })
-      .from(groupUsers)
-      .innerJoin(users, eq(groupUsers.userId, users.id))
-      .where(inArray(groupUsers.groupId, groupIds));
-
-    const existingGroupEnrollments = await this.db
-      .select({ groupId: groupCourses.groupId })
-      .from(groupCourses)
-      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
-
-    const existingGroupIds = existingGroupEnrollments.map((e) => e.groupId);
-    const newGroupIds = groupIds.filter((groupId) => !existingGroupIds.includes(groupId));
-
-    let existingStudentIds: string[] = [];
-    let newStudentIds: string[] = [];
-
-    if (groupUsersList.length > 0) {
-      const existingEnrollments = await this.db
-        .select({
-          studentId: studentCourses.studentId,
-        })
-        .from(studentCourses)
-        .where(
-          and(
-            eq(studentCourses.courseId, courseId),
-            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-            inArray(
-              studentCourses.studentId,
-              groupUsersList.map((gu) => gu.userId),
-            ),
-          ),
-        );
-
-      existingStudentIds = existingEnrollments.map((e) => e.studentId);
-      newStudentIds = groupUsersList
-        .filter(
-          ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
-        )
-        .map((gu) => gu.userId);
-    }
-
-    await this.db.transaction(async (trx) => {
-      if (newGroupIds.length > 0) {
-        const groupCoursesValues = newGroupIds.map((groupId) => ({
-          groupId,
-          courseId,
-          enrolledBy: currentUser?.userId || null,
-        }));
-
-        await trx.insert(groupCourses).values(groupCoursesValues);
-      }
-
-      if (newStudentIds.length > 0 && newGroupIds.length > 0) {
-        const userIdToGroupId = new Map<string, string>();
-
-        for (const groupId of newGroupIds) {
-          const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
-
-          usersInGroup.forEach((gu) => {
-            if (newStudentIds.includes(gu.userId)) {
-              userIdToGroupId.set(gu.userId, groupId);
-            }
-          });
-        }
-
-        const studentCoursesValues = newStudentIds.map((studentId) => ({
-          studentId,
-          courseId,
-          enrolledByGroupId: userIdToGroupId.get(studentId) || null,
-          status: COURSE_ENROLLMENT.ENROLLED,
-        }));
-
-        await trx
-          .insert(studentCourses)
-          .values(studentCoursesValues)
-          .onConflictDoUpdate({
-            target: [studentCourses.courseId, studentCourses.studentId],
-            set: {
-              enrolledAt: sql`EXCLUDED.enrolled_at`,
-              status: sql`EXCLUDED.status`,
-              enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
-            },
-          });
-
-        await Promise.all(
-          newStudentIds.map(async (studentId) => {
-            await this.createCourseDependencies(courseId, studentId, null, trx);
-          }),
-        );
-      }
-    });
-
-    if (currentUser && newGroupIds.length > 0) {
-      newGroupIds.forEach((groupId) =>
-        this.eventBus.publish(
-          new EnrollGroupToCourseEvent({
-            courseId,
-            groupId,
-            actor: currentUser,
-          }),
-        ),
-      );
-    }
-
-    return null;
+    return this.enrollGroupsToCourseService.enrollGroupsToCourse(courseId, groupIds, currentUser);
   }
 
-  async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
-    const groupEnrollments = await this.db
-      .select({ groupId: groupCourses.groupId })
-      .from(groupCourses)
-      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
-
-    if (!groupEnrollments.length)
-      throw new NotFoundException("No group enrollments found for the specified course and groups");
-
-    const studentsToUnenroll = await this.db
-      .select({ id: studentCourses.studentId })
-      .from(studentCourses)
-      .innerJoin(users, eq(studentCourses.studentId, users.id))
-      .where(
-        and(
-          eq(studentCourses.courseId, courseId),
-          inArray(studentCourses.enrolledByGroupId, groupIds),
-          eq(users.role, USER_ROLES.STUDENT),
-        ),
-      );
-
-    const studentIdsToUnenroll = studentsToUnenroll.map((s) => s.id);
-
-    await this.db.transaction(async (trx) => {
-      await trx
-        .delete(groupCourses)
-        .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
-
-      if (!!studentIdsToUnenroll.length) {
-        const studentsEnrolledInOtherGroups = await trx
-          .select({
-            studentId: groupUsers.userId,
-            groupId: groupCourses.groupId,
-          })
-          .from(groupUsers)
-          .innerJoin(groupCourses, eq(groupUsers.groupId, groupCourses.groupId))
-          .where(
-            and(
-              inArray(groupUsers.userId, studentIdsToUnenroll),
-              eq(groupCourses.courseId, courseId),
-              not(inArray(groupCourses.groupId, groupIds)),
-            ),
-          )
-          .orderBy(groupUsers.createdAt);
-
-        const studentsWithOtherGroups = [
-          ...new Set(studentsEnrolledInOtherGroups.map(({ studentId }) => studentId)),
-        ];
-
-        const studentsToCompletelyUnenroll = studentIdsToUnenroll.filter(
-          (studentId) => !studentsWithOtherGroups.includes(studentId),
-        );
-
-        if (studentsWithOtherGroups.length) {
-          await Promise.all(
-            studentsWithOtherGroups.map((studentId) => {
-              const newGroupId = studentsEnrolledInOtherGroups.find(
-                (student) => student.studentId === studentId,
-              )?.groupId;
-
-              return trx
-                .update(studentCourses)
-                .set({
-                  enrolledByGroupId: newGroupId,
-                })
-                .where(
-                  and(
-                    eq(studentCourses.courseId, courseId),
-                    eq(studentCourses.studentId, studentId),
-                  ),
-                );
-            }),
-          );
-        }
-
-        if (studentsToCompletelyUnenroll.length) {
-          await trx
-            .update(studentCourses)
-            .set({
-              status: COURSE_ENROLLMENT.NOT_ENROLLED,
-              enrolledAt: null,
-              enrolledByGroupId: null,
-            })
-            .where(
-              and(
-                eq(studentCourses.courseId, courseId),
-                inArray(studentCourses.studentId, studentsToCompletelyUnenroll),
-              ),
-            );
-        }
-      }
-    });
+  unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
+    return this.unenrollGroupsFromCoursesService.unenrollGroupsFromCourse(courseId, groupIds);
   }
 
   async createStudentCourse(
@@ -1920,185 +815,6 @@ export class CourseService {
       courseId,
       dbInstance,
     );
-  }
-
-  private async addS3SignedUrlsToLessonsAndQuestions(lessons: AdminLessonWithContentSchema[]) {
-    return await Promise.all(
-      lessons.map(async (lesson) => {
-        const updatedLesson = { ...lesson };
-        if (
-          lesson.fileS3Key &&
-          (lesson.type === LESSON_TYPES.VIDEO || lesson.type === LESSON_TYPES.PRESENTATION)
-        ) {
-          if (!lesson.fileS3Key.startsWith("https://")) {
-            try {
-              const signedUrl = await this.fileService.getFileUrl(lesson.fileS3Key);
-              return { ...updatedLesson, fileS3SignedUrl: signedUrl };
-            } catch (error) {
-              console.error(`Failed to get signed URL for ${lesson.fileS3Key}:`, error);
-            }
-          }
-        }
-
-        if (lesson.type === LESSON_TYPES.AI_MENTOR && lesson.aiMentor?.avatarReference) {
-          const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
-
-          return { ...updatedLesson, avatarReferenceUrl: signedUrl };
-        }
-
-        if (lesson.questions && Array.isArray(lesson.questions)) {
-          updatedLesson.questions = await Promise.all(
-            lesson.questions.map(async (question) => {
-              if (question.photoS3Key) {
-                if (!question.photoS3Key.startsWith("https://")) {
-                  try {
-                    const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
-                    return { ...question, photoS3SingedUrl: signedUrl };
-                  } catch (error) {
-                    console.error(
-                      `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
-                      error,
-                    );
-                  }
-                }
-              }
-              return question;
-            }),
-          );
-        }
-
-        return updatedLesson;
-      }),
-    );
-  }
-
-  private getSelectField(language: SupportedLanguages) {
-    return {
-      id: courses.id,
-      title: this.localizationService.getLocalizedSqlField(courses.title, language),
-      description: this.localizationService.getLocalizedSqlField(courses.description, language),
-      thumbnailUrl: courses.thumbnailS3Key,
-      authorId: sql<string>`${courses.authorId}`,
-      author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
-      authorEmail: sql<string>`${users.email}`,
-      authorAvatarUrl: sql<string>`${users.avatarReference}`,
-      category: sql<string>`${categories.title}`,
-      enrolled: sql<boolean>`CASE WHEN ${studentCourses.studentId} IS NOT NULL THEN TRUE ELSE FALSE END`,
-      enrolledParticipantCount: sql<number>`COALESCE(${coursesSummaryStats.freePurchasedCount} + ${coursesSummaryStats.paidPurchasedCount}, 0)`,
-      courseChapterCount: courses.chapterCount,
-      completedChapterCount: sql<number>`COALESCE(${studentCourses.finishedChapterCount}, 0)`,
-      priceInCents: courses.priceInCents,
-      currency: courses.currency,
-      hasFreeChapter: sql<boolean>`
-        EXISTS (
-          SELECT 1
-          FROM ${chapters}
-          WHERE ${chapters.courseId} = ${courses.id}
-            AND ${chapters.isFreemium} = TRUE
-        )`,
-    };
-  }
-
-  private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
-    const conditions = [];
-
-    if (filters.title) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.title}%`})`,
-      );
-    }
-
-    if (filters.description) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
-      );
-    }
-
-    if (filters.searchQuery) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
-      );
-    }
-
-    if (filters.category) {
-      conditions.push(like(categories.title, `%${filters.category}%`));
-    }
-    if (filters.author) {
-      const authorNameConcat = sql`CONCAT(${users.firstName}, ' ' , ${users.lastName})`;
-      conditions.push(sql`${authorNameConcat} LIKE ${`%${filters.author}%`}`);
-    }
-    if (filters.creationDateRange) {
-      const [startDate, endDate] = filters.creationDateRange;
-      const start = new Date(startDate).toISOString();
-      const end = new Date(endDate).toISOString();
-
-      conditions.push(between(courses.createdAt, start, end));
-    }
-    if (filters.status) {
-      conditions.push(eq(courses.status, filters.status));
-    }
-
-    if (publishedOnly) {
-      conditions.push(eq(courses.status, "published"));
-    }
-
-    return conditions ?? undefined;
-  }
-
-  private getColumnToSortBy(sort: CourseSortField) {
-    switch (sort) {
-      case CourseSortFields.author:
-        return sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
-      case CourseSortFields.category:
-        return categories.title;
-      case CourseSortFields.creationDate:
-        return courses.createdAt;
-      case CourseSortFields.chapterCount:
-        return count(studentCourses.courseId);
-      case CourseSortFields.enrolledParticipantsCount:
-        return count(studentCourses.courseId);
-      default:
-        return courses.title;
-    }
-  }
-
-  private async getAvailableCourseIds(
-    trx: PostgresJsDatabase<typeof schema>,
-    currentUserId?: UUIDType,
-    authorId?: UUIDType,
-    excludeCourseId?: UUIDType,
-  ) {
-    const conditions = [];
-
-    if (authorId) {
-      conditions.push(eq(courses.authorId, authorId));
-    }
-
-    if (excludeCourseId) {
-      conditions.push(ne(courses.id, excludeCourseId));
-    }
-
-    const availableCourses: Record<string, string>[] = await trx.execute(sql`
-      SELECT ${courses.id} AS "courseId"
-      FROM ${courses}
-      WHERE ${conditions.length ? and(...conditions) : true} AND ${courses.id} NOT IN (
-        SELECT DISTINCT ${studentCourses.courseId}
-        FROM ${studentCourses}
-        WHERE ${studentCourses.studentId} = ${currentUserId} AND ${studentCourses.status} = ${
-          COURSE_ENROLLMENT.ENROLLED
-        }
-      )
-    `);
-
-    return availableCourses.map(({ courseId }) => courseId);
   }
 
   async getCourseStatistics(id: UUIDType): Promise<CourseStatisticsResponse> {
