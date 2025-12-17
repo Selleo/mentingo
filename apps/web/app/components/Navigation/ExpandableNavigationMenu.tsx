@@ -1,5 +1,4 @@
 import { ChevronDown } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { cn } from "~/lib/utils";
@@ -119,30 +118,17 @@ export const ExpandableNavigationMenu = ({
         </DropdownMenuContent>
       )}
 
-      <AnimatePresence mode="wait" initial={false}>
-        {!isBetween1440And1680 && isExpanded && (
-          <motion.menu
-            className="ml-4 flex flex-col gap-y-3"
-            animate={{ opacity: 1 }}
-            initial={{ opacity: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            {items.map((item, index) => {
-              return (
-                <motion.div
-                  key={item.label}
-                  animate={{ opacity: 1, y: 0 }}
-                  initial={{ y: -20, opacity: 0 }}
-                  exit={{ y: -20, opacity: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <NavigationMenuItem item={item} setIsMobileNavOpen={setIsMobileNavOpen} />
-                </motion.div>
-              );
-            })}
-          </motion.menu>
-        )}
-      </AnimatePresence>
+      {!isBetween1440And1680 && isExpanded && (
+        <menu className="ml-4 flex flex-col gap-y-3">
+          {items.map((item) => {
+            return (
+              <div key={item.label}>
+                <NavigationMenuItem item={item} setIsMobileNavOpen={setIsMobileNavOpen} />
+              </div>
+            );
+          })}
+        </menu>
+      )}
     </DropdownMenu>
   );
 };

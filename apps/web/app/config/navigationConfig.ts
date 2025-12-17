@@ -54,13 +54,11 @@ export const getNavigationConfig = (
         path: `news`,
         iconName: "News",
       },
-    ],
-  },
-  {
-    title: t("navigationSideBar.qa"),
-    isExpandable: false,
-    restrictedRoles: [USER_ROLE.student],
-    items: [
+      {
+        label: t("navigationSideBar.articles"),
+        path: `articles`,
+        iconName: "Articles",
+      },
       ...(isQAEnabled
         ? ([
             {
@@ -78,15 +76,6 @@ export const getNavigationConfig = (
     isExpandable: true,
     restrictedRoles: [USER_ROLE.admin],
     items: [
-      ...(isQAEnabled
-        ? [
-            {
-              label: t("navigationSideBar.qa"),
-              path: "qa",
-              iconName: "Quiz",
-            } as NavigationItem,
-          ]
-        : []),
       {
         label: t("navigationSideBar.announcements"),
         path: `announcements`,

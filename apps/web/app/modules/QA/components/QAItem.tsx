@@ -7,7 +7,7 @@ import { Icon } from "~/components/Icon";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/LanguageSelector";
+import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
 import DeleteQADialog from "~/modules/QA/components/DeleteQADialog";
 
 import type { SupportedLanguages } from "@repo/shared";

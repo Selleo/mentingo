@@ -1,21 +1,22 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCreateNews } from "../../api/mutations";
-import { useDraftNewsList, useNewsList } from "../../api/queries";
-import { Icon } from "../../components/Icon";
-import { PageWrapper } from "../../components/PageWrapper";
-import { Pagination } from "../../components/Pagination/Pagination";
-import { Button } from "../../components/ui/button";
+import { useCreateNews } from "~/api/mutations";
+import { useDraftNewsList, useNewsList } from "~/api/queries";
+import { Icon } from "~/components/Icon";
+import { PageWrapper } from "~/components/PageWrapper";
+import { Pagination } from "~/components/Pagination/Pagination";
+import { Button } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/ui/select";
-import { useUserRole } from "../../hooks/useUserRole";
+} from "~/components/ui/select";
+import { useUserRole } from "~/hooks/useUserRole";
+
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
@@ -50,7 +51,7 @@ function NewsPage() {
     { enabled: isDraftTab },
   );
   const currentNewsList = isDraftTab ? draftNewsList : newsList;
-  const displayedNews = currentNewsList?.data ?? [];
+  const displayedNews = useMemo(() => currentNewsList?.data ?? [], [currentNewsList]);
   const totalItems = currentNewsList?.pagination?.totalItems ?? displayedNews.length;
   const itemsPerPage = currentNewsList?.pagination?.perPage ?? fallbackItemsPerPage;
 
@@ -151,7 +152,7 @@ function NewsPage() {
             </>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <h3 className="body-base-md">No news</h3>
+              <h3 className="body-base-md">{t("newsView.notFound")}</h3>
             </div>
           )}
         </>

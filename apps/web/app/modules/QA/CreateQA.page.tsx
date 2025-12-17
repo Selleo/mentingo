@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/LanguageSelector";
+import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { qaFormSchema, type QAFormValues } from "~/modules/QA/qa.types";
 import { setPageTitle } from "~/utils/setPageTitle";

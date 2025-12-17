@@ -45,6 +45,10 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
         continue;
       }
 
+      if (typeof value === "string" && value.trim() === "") {
+        continue;
+      }
+
       if (Array.isArray(value)) {
         const parsedArray = value.map((item) => this.parseValue(item));
 

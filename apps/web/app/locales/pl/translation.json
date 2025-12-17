@@ -21,11 +21,13 @@
     },
     "toast": {
       "noAccess": "Nie masz uprawnień do tego zasobu",
-      "globalSettingsNotFound": "Ustawienia globalne nie zostały znalezione"
+      "globalSettingsNotFound": "Ustawienia globalne nie zostały znalezione",
+      "somethingWentWrong": "Coś poszło nie tak..."
     },
     "tooltip": {
       "soon": "Dostępne wkrótce"
     },
+    "tableOfContents": "Spis treści",
     "roles": {
       "admin": "Administrator",
       "contentCreator": "Twórca treści",
@@ -154,7 +156,8 @@
     "ariaLabels": {
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     },
-    "qa": "Q&A"
+    "qa": "Q&A",
+    "articles": "Artykuły"
   },
   "newsView": {
     "header": "Aktualności",
@@ -2173,6 +2176,100 @@
     "delete": {
       "title": "Usuń Q&A",
       "confirm": "Czy na pewno chcesz usunąć Q&A?"
+    }
+  },
+  "adminArticleView": {
+    "toc": {
+      "title": "Baza wiedzy",
+      "actions": {
+        "add": "Dodaj",
+        "newLabel": "Nowe",
+        "newSection": "Nowa sekcja",
+        "newArticle": "Nowy artykuł"
+      }
+    },
+    "dialog": {
+      "createArticle": {
+        "title": "Utwórz artykuł",
+        "sectionLabel": "Sekcja",
+        "sectionPlaceholder": "Wybierz sekcję",
+        "create": "Utwórz"
+      }
+    },
+    "toast": {
+      "createSectionError": "Nie udało się utworzyć sekcji",
+      "updateError": "Nie udało się zaktualizować",
+      "languageAlreadyExists": "Ten język już istnieje",
+      "createLanguageError": "Nie udało się dodać języka",
+      "minimumLanguageError": "Wymagany jest co najmniej jeden język",
+      "cannotRemoveBaseLanguage": "Nie można usunąć języka bazowego",
+      "removeLanguageError": "Nie udało się usunąć języka",
+      "sectionHasAssignedArticles": "Nie można usunąć sekcji z przypisanymi artykułami",
+      "deleteSectionError": "Nie udało się usunąć sekcji",
+      "createError": "Nie udało się utworzyć artykułu",
+      "deleteError": "Nie udało się usunąć artykułu",
+      "notFoundError": "Nie znaleziono artykułu",
+      "invalidCoverType": "Nieprawidłowy typ okładki",
+      "invalidLanguageError": "Nieprawidłowy język"
+    },
+    "section": {
+      "editTitle": "Edytuj sekcję",
+      "editDescription": "Zaktualizuj tytuł sekcji i zarządzaj tłumaczeniami.",
+      "sectionId": "ID sekcji: {{id}}",
+      "cannotDeleteWithArticles": "Nie można usunąć sekcji z przypisanymi artykułami.",
+      "languageLabel": "Język",
+      "languageHelp": "Zmień język, aby edytować tytuł. Jeśli wersja nie istnieje, pojawi się prośba o jej utworzenie.",
+      "fields": {
+        "title": "Tytuł",
+        "titleError": "Tytuł jest wymagany"
+      },
+      "delete": {
+        "title": "Usuń sekcję",
+        "description": "Czy na pewno chcesz usunąć tę sekcję? Tej operacji nie można cofnąć."
+      },
+      "language": {
+        "label": "Język",
+        "baseLanguage": "Domyślny",
+        "notAddedLanguages": "Nie dodano",
+        "createTitle": "Utwórz język",
+        "createDescription": "Utworzyć wersję {{language}} dla tej sekcji?",
+        "deleteTitle": "Usuń język",
+        "deleteDescription": "Usunąć wersję {{language}} dla tej sekcji?"
+      }
+    },
+    "form": {
+      "createTitle": "Utwórz artykuł",
+      "editTitle": "Edytuj artykuł",
+      "createButton": "Utwórz i edytuj",
+      "saveButton": "Zapisz",
+      "fields": {
+        "title": "Tytuł",
+        "summary": "Wprowadzenie",
+        "content": "Treść",
+        "status": "Status",
+        "isPublic": "Publiczny",
+        "cover": "Obraz okładki"
+      },
+      "placeholders": {
+        "title": "Wpisz tytuł",
+        "summary": "Wpisz wprowadzenie"
+      },
+      "status": {
+        "draft": "Szkic",
+        "published": "Opublikowany"
+      },
+      "isPublicDescription": "Widoczny dla wszystkich użytkowników",
+      "preview": "Podgląd",
+      "editor": "Edytor"
+    }
+  },
+  "articlesView": {
+    "notFound": "Nie znaleziono artykułu",
+    "previousArticle": "Poprzedni artykuł",
+    "nextArticle": "Następny artykuł",
+    "deleteModal": {
+      "title": "Usuń artykuł",
+      "description": "Czy na pewno chcesz usunąć ten artykuł? Tej operacji nie można cofnąć."
     }
   }
 }

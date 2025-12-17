@@ -1,15 +1,20 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 
-import { cn } from "../../lib/utils";
+import { cn } from "~/lib/utils";
 
 import { plugins } from "./plugins";
-import { defaultClasses, lessonVariantClasses, newsVariantClasses } from "./styles";
+import {
+  newsVariantClasses,
+  articleVariantClasses,
+  defaultClasses,
+  lessonVariantClasses,
+} from "./styles";
 
 type ViewerProps = {
   content: string;
   style?: "default" | "prose";
   className?: string;
-  variant?: "default" | "lesson" | "news";
+  variant?: "default" | "lesson" | "article" | "news";
 };
 
 const Viewer = ({ content, style, className, variant = "default" }: ViewerProps) => {
@@ -29,6 +34,11 @@ const Viewer = ({ content, style, className, variant = "default" }: ViewerProps)
         lessonVariantClasses.ul,
       ],
       content: "prose max-w-none dark:prose-invert",
+    },
+    article: {
+      wrapper: articleVariantClasses.wrapper,
+      editor: [articleVariantClasses.layout],
+      content: ["prose prose-neutral max-w-none", articleVariantClasses.links].join(" "),
     },
     news: {
       wrapper: newsVariantClasses.wrapper,

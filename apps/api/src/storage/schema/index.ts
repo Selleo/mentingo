@@ -750,7 +750,7 @@ export const resourceEntity = pgTable(
       .notNull(),
     entityId: uuid("entity_id").notNull(),
     entityType: varchar("entity_type", { length: 100 }).notNull(),
-    relationshipType: varchar("relationship_type", { length: 100 }).notNull().default("attachment"),
+    relationshipType: varchar("relationship_type", { length: 100 }).notNull().default("attachment"), // attachment / cover_image
   },
   (table) => ({
     resourceIdx: index("resource_entity_resource_idx").on(table.resourceId),
@@ -763,6 +763,47 @@ export const resourceEntity = pgTable(
     unq: unique().on(table.resourceId, table.entityId, table.entityType, table.relationshipType),
   }),
 );
+
+export const articleStatusEnum = pgEnum("article_status", ["draft", "published"]);
+
+export const articles = pgTable(
+  "articles",
+  {
+    ...id,
+    ...timestamps,
+    title: jsonb("title").notNull().default({}),
+    summary: jsonb("summary").notNull().default({}),
+    content: jsonb("content").notNull().default({}),
+    status: articleStatusEnum("status").notNull().default("draft"),
+    isPublic: boolean("is_public").notNull().default(true),
+    archived,
+    baseLanguage,
+    availableLocales,
+    publishedAt: timestamp("published_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    articleSectionId: uuid("article_section_id").references(() => articleSections.id, {
+      onDelete: "cascade",
+    }),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    updatedBy: uuid("updated_by_id").references(() => users.id, { onDelete: "set null" }),
+  },
+  (table) => ({
+    articleSectionIdx: index("article_section_idx").on(table.articleSectionId),
+  }),
+);
+
+export const articleSections = pgTable("article_sections", {
+  ...id,
+  ...timestamps,
+  title: jsonb("title").notNull().default({}),
+  baseLanguage,
+  availableLocales,
+});
 
 export const newsStatusEnum = pgEnum("news_status", ["draft", "published"]);
 

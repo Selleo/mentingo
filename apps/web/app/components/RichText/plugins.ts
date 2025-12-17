@@ -6,7 +6,7 @@ import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
-import { Iframe } from "./extensions/iframe";
+import { Iframe } from "~/components/RichText/extensions/iframe";
 
 const HeadingWithId = Heading.extend({
   addAttributes: () => ({
@@ -41,7 +41,6 @@ export const plugins = [
   HeadingWithId.configure({
     levels: [1, 2, 3, 4, 5, 6],
   }),
-  Iframe,
   TaskList.configure({
     HTMLAttributes: {
       class: "list-none",
@@ -67,4 +66,5 @@ export const plugins = [
       class: "max-w-full h-auto m-0",
     },
   }),
+  Iframe,
 ];
