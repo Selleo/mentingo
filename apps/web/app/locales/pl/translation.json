@@ -146,6 +146,7 @@
     "categories": "Kategorie",
     "users": "Użytkownicy",
     "groups": "Grupy",
+    "news": "Aktualności",
     "providerInformation": "Informacje",
     "announcements": "Ogłoszenia",
     "promotionCodes": "Kody promocyjne",
@@ -154,6 +155,60 @@
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     },
     "qa": "Q&A"
+  },
+  "newsView": {
+    "header": "Aktualności",
+    "notFound": "Nie znaleziono aktualności.",
+    "previousArticle": "Poprzedni artykuł",
+    "nextArticle": "Następny artykuł",
+    "prompt": {
+      "photoUrl": "Adres URL zdjęcia",
+      "photoCaption": "Podpis do zdjęcia (opcjonalnie)",
+      "videoUrl": "Adres URL wideo (mp4 itp.)",
+      "videoCaption": "Podpis do wideo (opcjonalnie)"
+    },
+    "field": {
+      "title": "Tytuł",
+      "summary": "Podsumowanie",
+      "intro": "Wprowadzenie",
+      "content": "Treść",
+      "image": "Obraz",
+      "status": "Status",
+      "isPublic": "Publiczne"
+    },
+    "placeholder": {
+      "title": "Wpisz tytuł aktualności",
+      "summary": "Dodaj krótkie podsumowanie",
+      "intro": "Dodaj krótkie wprowadzenie"
+    },
+    "createOrEdit": "Dodaj/edytuj aktualność",
+    "edit": "Edytuj",
+    "status": {
+      "draft": "Szkic",
+      "published": "Opublikowany"
+    },
+    "button": {
+      "save": "Zapisz aktualność",
+      "edit": "Edytuj aktualność",
+      "delete": "Usuń"
+    },
+    "validation": {
+      "titleRequired": "Tytuł jest wymagany",
+      "introRequired": "Wprowadzenie jest wymagane",
+      "contentRequired": "Treść jest wymagana",
+      "imageRequired": "Obraz jest wymagany",
+      "statusRequired": "Status jest wymagany"
+    },
+    "isPublicDescription": "Pozwól wszystkim zobaczyć tę aktualność.",
+    "language": {
+      "label": "Język",
+      "baseLanguage": "Język bazowy",
+      "notAddedLanguages": "Języki do dodania",
+      "createTitle": "Utwórz tłumaczenie",
+      "createDescription": "Utworzyć tłumaczenie tej aktualności na język {{language}}?",
+      "deleteTitle": "Usuń tłumaczenie",
+      "deleteDescription": "Usunąć tłumaczenie w języku {{language}}? Treść zostanie usunięta."
+    }
   },
   "globalSearch": {
     "notFound": "Niestety nic nie znaleziono",
@@ -739,7 +794,8 @@
       "dashboard": "Panel główny",
       "users": "Użytkownicy",
       "createNew": "Utwórz nowego użytkownika",
-      "back": "Wstecz"
+      "back": "Wstecz",
+      "news": "Aktualności"
     }
   },
   "adminUserView": {

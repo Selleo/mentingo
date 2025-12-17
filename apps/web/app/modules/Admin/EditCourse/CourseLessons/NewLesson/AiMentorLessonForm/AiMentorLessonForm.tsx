@@ -370,7 +370,7 @@ const AiMentorLessonForm = ({
                 name="type"
               ></FormField>
 
-              <div className="mb-4 grid grid-cols-1 lg:grid-cols-2">
+              <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-2">
                 <div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -409,7 +409,6 @@ const AiMentorLessonForm = ({
                             placeholder={t(
                               "adminCourseView.curriculum.lesson.placeholder.aiMentorInstructions",
                             )}
-                            className="h-48 grow resize-none overflow-y-auto"
                             parentClassName="lg:rounded-r-none"
                             {...field}
                           />
@@ -458,8 +457,7 @@ const AiMentorLessonForm = ({
                             placeholder={t(
                               "adminCourseView.curriculum.lesson.placeholder.completionConditions",
                             )}
-                            className="h-48 grow resize-none overflow-y-auto"
-                            parentClassName="lg:rounded-l-none lg:border-l-0"
+                            parentClassName="lg:rounded-l-none"
                             {...field}
                           />
                         </FormControl>

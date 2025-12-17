@@ -33,3 +33,13 @@ export function buildJsonbField(key?: string | null, value?: string | null) {
 export function deleteJsonbField(field: AnyPgColumn, key: string) {
   return sql`${field} - ${key}::text`;
 }
+
+export function buildJsonbFieldWithMultipleEntries(entries: Record<string, string>) {
+  const keys = Object.keys(entries);
+
+  if (!keys.length) return undefined;
+
+  const sqlEntries = keys.map((key) => sql`${key}::text, ${entries[key]}::text`);
+
+  return sql`jsonb_build_object(${sql.join(sqlEntries, ", ")})`;
+}

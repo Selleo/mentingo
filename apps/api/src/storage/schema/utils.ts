@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const id = {
   id: uuid("id")
@@ -37,3 +37,9 @@ export const STATUS = {
 export const STATUS_KEYS = Object.fromEntries(
   Object.entries(STATUS).map(([key, { value }]) => [key, value]),
 );
+
+export const baseLanguage = text("base_language").notNull().default("en");
+export const availableLocales = text("available_locales")
+  .array()
+  .notNull()
+  .default(sql`ARRAY['en']::text[]`);

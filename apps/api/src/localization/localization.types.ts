@@ -1,6 +1,6 @@
-import type { courses, questionsAndAnswers } from "src/storage/schema";
+import type { courses, questionsAndAnswers, news } from "src/storage/schema";
 
-export type EntityType = "course" | "chapter" | "lesson" | "qa";
+export type EntityType = "course" | "chapter" | "lesson" | "qa" | "news";
 
 export const ENTITY_TYPE = {
   COURSE: "course",
@@ -17,4 +17,4 @@ export const ENTITY_FIELD = {
   DESCRIPTION: "description",
 } as const;
 
-export type BaseTable = typeof courses | typeof questionsAndAnswers;
+export type BaseTable = typeof courses | typeof questionsAndAnswers | typeof news;

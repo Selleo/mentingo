@@ -33,3 +33,31 @@ export const lessonVariantClasses = {
   ul: "[&>div>ul>li>p]:body-base [&>div>ul>li>p]:text-neutral-900 [&>div>ul>li>p>strong]:text-neutral-950",
   ol: "[&>div>ol>li>p]:body-base [&>div>ol>li>p]:text-neutral-900 [&>div>ol>li>p>strong]:text-neutral-950",
 };
+
+export const newsVariantClasses = {
+  wrapper: "w-full py-10",
+  layout:
+    "[&>div]:flex [&>div]:flex-col [&>div]:space-y-8 [&>div]:leading-[1.9] [&>div]:text-neutral-900 [&>div]:tracking-tight",
+  links: `
+      [&_a]:font-semibold
+      [&_a]:text-primary-700
+      [&_a[download]]:inline-flex
+      [&_a[download]]:items-center
+      [&_a[download]]:gap-2
+      [&_a[download]]:px-3
+      [&_a[download]]:py-1.5
+      [&_a[download]]:rounded-lg
+      [&_a[download]]:border
+      [&_a[download]]:border-primary-200
+      [&_a[download]]:no-underline
+      [&_a[download]]:text-sm
+      [&_a[download]]:text-primary-800
+      [&_a[download]]:shadow-sm
+      [&_a[download]]:transition-colors
+      [&_a[download]:hover]:bg-primary-50
+      [&_a[download]:hover]:text-primary-900
+      [&_a[download]::before]:content-['⬇']
+      [&_a[download]::before]:text-[1.5rempx]
+      [&_a[download]::before]:text-primary-800
+    `,
+};

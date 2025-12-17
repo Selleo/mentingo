@@ -1,11 +1,47 @@
+import { mergeAttributes } from "@tiptap/core";
+import { Heading } from "@tiptap/extension-heading";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
+import { Iframe } from "./extensions/iframe";
+
+const HeadingWithId = Heading.extend({
+  addAttributes: () => ({
+    id: {
+      default: null,
+      parseHTML: (element) => element.getAttribute("id"),
+      renderHTML: (attrs) => (attrs.id ? { id: attrs.id } : {}),
+    },
+  }),
+});
+
+const LinkWithDownload = Link.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      download: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("download"),
+        renderHTML: (attrs) => (attrs.download ? { download: attrs.download } : {}),
+      },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["a", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
+  },
+});
+
 export const plugins = [
-  StarterKit,
+  StarterKit.configure({
+    heading: false,
+  }),
+  HeadingWithId.configure({
+    levels: [1, 2, 3, 4, 5, 6],
+  }),
+  Iframe,
   TaskList.configure({
     HTMLAttributes: {
       class: "list-none",
@@ -18,7 +54,7 @@ export const plugins = [
     },
     onReadOnlyChecked: (_node, _checked) => true,
   }),
-  Link.configure({
+  LinkWithDownload.configure({
     openOnClick: false,
     HTMLAttributes: {
       class: "text-primary-700 underline",

@@ -40,6 +40,7 @@ import { IngestionModule } from "./ingestion/ingestion.module";
 import { LearningTimeModule } from "./learning-time/learning-time.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
+import { NewsModule } from "./news/news.module";
 import { QuestionsModule } from "./questions/question.module";
 import { QueueModule } from "./queue/queue.module";
 import { S3Module } from "./s3/s3.module";
@@ -132,6 +133,7 @@ import { WebSocketModule } from "./websocket/websocket.module";
     LocalizationModule,
     ActivityLogsModule,
     QAModule,
+    NewsModule,
   ],
   controllers: [],
   providers: [

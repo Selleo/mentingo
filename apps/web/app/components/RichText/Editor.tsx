@@ -1,13 +1,8 @@
 import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
 
-import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
-import { useToast } from "~/components/ui/use-toast";
-import { cn } from "~/lib/utils";
-import { LessonTypes } from "~/modules/Courses/CourseView/lessonTypes";
-import { baseUrl } from "~/utils/baseUrl";
+import { cn } from "../../lib/utils";
 
 import { plugins } from "./plugins";
 import { defaultClasses } from "./styles";
@@ -16,51 +11,26 @@ import EditorToolbar from "./toolbar/EditorToolbar";
 type EditorProps = {
   content?: string;
   onChange: (value: string) => void;
+  onUpload?: (file?: File, editor?: TiptapEditor | null) => Promise<void>;
   placeholder?: string;
   id?: string;
-  className?: string;
   parentClassName?: string;
-  lessonType?: string;
   lessonId?: string;
+  allowFiles?: boolean;
+  acceptedFileTypes?: string[];
 };
 
 const Editor = ({
   content,
   placeholder,
   onChange,
+  onUpload,
   id,
-  className,
   parentClassName,
-  lessonType,
   lessonId,
+  allowFiles = false,
+  acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
 }: EditorProps) => {
-  const { mutateAsync: uploadFile } = useLessonFileUpload();
-
-  const { toast } = useToast();
-  const { t } = useTranslation();
-
-  const handleFileInsert = async (
-    e: DragEvent | ClipboardEvent,
-    file?: File,
-    editor?: TiptapEditor | null,
-  ) => {
-    if (!file || !lessonId) return;
-
-    e.preventDefault();
-
-    if (lessonType != LessonTypes.text) {
-      return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
-    }
-
-    if (ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type)) {
-      const uploaded = await uploadFile({ file, lessonId });
-
-      const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
-
-      editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
-    }
-  };
-
   const editor = useEditor({
     extensions: [...plugins],
     content: content,
@@ -68,18 +38,16 @@ const Editor = ({
       onChange(editor.getHTML());
     },
     onPaste: async (e) => {
-      if (!lessonId) return;
-
       const file = e.clipboardData?.files[0];
+      e.preventDefault();
 
-      await handleFileInsert(e, file, editor);
+      await onUpload?.(file, editor);
     },
     onDrop: async (e) => {
-      if (!lessonId) return;
-
       const file = e.dataTransfer?.files[0];
+      e.preventDefault();
 
-      await handleFileInsert(e, file, editor);
+      await onUpload?.(file, editor);
     },
     editorProps: {
       attributes: {
@@ -96,7 +64,12 @@ const Editor = ({
 
   if (!editor) return <></>;
 
-  const editorClasses = cn("h-full", defaultClasses.ul, defaultClasses.ol, defaultClasses.taskList);
+  const editorClasses = cn(
+    "h-full min-h-[200px]",
+    defaultClasses.ul,
+    defaultClasses.ol,
+    defaultClasses.taskList,
+  );
 
   return (
     <div
@@ -107,22 +80,12 @@ const Editor = ({
     >
       <EditorToolbar
         editor={editor}
-        allowFiles={lessonType === LessonTypes.text}
+        allowFiles={allowFiles}
         lessonId={lessonId}
+        acceptedFileTypes={acceptedFileTypes}
+        onUpload={onUpload}
       />
-      <div
-        className={cn(
-          "relative h-[200px] max-h-[600px] min-h-[200px] resize-y overflow-auto [&_.ProseMirror]:h-full [&_.ProseMirror]:max-h-full [&_.ProseMirror]:min-h-full",
-          className,
-        )}
-      >
-        <EditorContent
-          id={id}
-          editor={editor}
-          placeholder={placeholder}
-          className={editorClasses}
-        />
-      </div>
+      <EditorContent id={id} editor={editor} placeholder={placeholder} className={editorClasses} />
     </div>
   );
 };

@@ -145,6 +145,7 @@
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
+    "news": "News",
     "providerInformation": "Information",
     "announcements": "Announcements",
     "promotionCodes": "Promotion Codes",
@@ -153,6 +154,60 @@
       "goToAvailableCourses": "Go to available courses"
     },
     "qa": "Q&A"
+  },
+  "newsView": {
+    "header": "News",
+    "notFound": "News not found.",
+    "previousNews": "Previous news",
+    "nextNews": "Next news",
+    "prompt": {
+      "photoUrl": "Photo URL",
+      "photoCaption": "Photo caption (optional)",
+      "videoUrl": "Video URL (mp4, etc.)",
+      "videoCaption": "Video caption (optional)"
+    },
+    "field": {
+      "title": "Title",
+      "summary": "Summary",
+      "intro": "Introduction",
+      "content": "Content",
+      "image": "Image",
+      "status": "Status",
+      "isPublic": "Is public"
+    },
+    "placeholder": {
+      "title": "Enter news title",
+      "summary": "Add a short summary",
+      "intro": "Add a short intro"
+    },
+    "createOrEdit": "Create news",
+    "edit": "Edit",
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "button": {
+      "save": "Save news",
+      "edit": "Edit news",
+      "delete": "Delete"
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "introRequired": "Introduction is required",
+      "contentRequired": "Content is required",
+      "imageRequired": "Image is required",
+      "statusRequired": "Status is required"
+    },
+    "isPublicDescription": "Allow everyone to see this news item.",
+    "language": {
+      "label": "Language",
+      "baseLanguage": "Base language",
+      "notAddedLanguages": "Languages to add",
+      "createTitle": "Create translation",
+      "createDescription": "Create a translation for this news in {{language}}?",
+      "deleteTitle": "Delete translation",
+      "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+    }
   },
   "globalSearch": {
     "notFound": "Unfortunately nothing was found",
@@ -755,7 +810,8 @@
       "dashboard": "Dashboard",
       "users": "Users",
       "createNew": "Create new user",
-      "back": "Back"
+      "back": "Back",
+      "news": "News"
     }
   },
   "adminUserView": {
@@ -1966,7 +2022,7 @@
       },
       "upload": {
         "uploadFailed": "File upload failed",
-        "tooltip": "Upload: Allows you to upload an image"
+        "tooltip": "Upload: Allows you to upload file"
       }
     }
   },

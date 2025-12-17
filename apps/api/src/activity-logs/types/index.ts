@@ -34,6 +34,7 @@ export const ACTIVITY_LOG_RESOURCE_TYPES = {
   INTEGRATION: "integration",
   CATEGORY: "category",
   QA: "qa",
+  NEWS: "news",
 } as const;
 
 export type ActivityLogResourceType =
@@ -167,6 +168,18 @@ export type CategoryActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
   archived?: boolean | null;
+};
+
+export type NewsActivityLogSnapshot = {
+  id: UUIDType;
+  title?: string | null;
+  summary?: string | null;
+  status?: string | null;
+  isPublic?: boolean | null;
+  publishedAt?: string | null;
+  authorId?: UUIDType | null;
+  baseLanguage?: string;
+  availableLocales?: string[];
 };
 
 export type UserActivityLogSnapshot = {

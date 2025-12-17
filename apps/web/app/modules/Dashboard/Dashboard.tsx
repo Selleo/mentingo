@@ -59,6 +59,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
     const publicNavigationLinks = [
       ...(QAAccessible ? [{ to: "/qa", label: t("navigationSideBar.qa") }] : []),
       ...(coursesAccessible ? [{ to: "/courses", label: t("navigationSideBar.courses") }] : []),
+      { to: "/news", label: t("navigationSideBar.news") },
     ];
 
     return (
@@ -81,6 +82,7 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
                 {coursesAccessible && (
                   <NavLinkItem to="/courses" label={t("navigationSideBar.courses")} />
                 )}
+                <NavLinkItem to="/news" label={t("navigationSideBar.news")} />
               </div>
               <Separator className="hidden h-10 md:block" orientation="vertical" />
               <div className="hidden items-center gap-3 md:flex">

@@ -21,7 +21,7 @@ import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { archived, id, timestamps } from "./utils";
+import { archived, availableLocales, baseLanguage, id, timestamps } from "./utils";
 
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -726,4 +726,63 @@ export const questionsAndAnswers = pgTable("questions_and_answers", {
     .array()
     .notNull()
     .default(sql`ARRAY['en']::text[]`),
+});
+
+export const resources = pgTable("resources", {
+  ...id,
+  ...timestamps,
+  title: jsonb("title").notNull().default({}),
+  description: jsonb("description").notNull().default({}),
+  reference: varchar("reference", { length: 200 }).notNull(),
+  contentType: varchar("content_type", { length: 100 }).notNull(),
+  metadata: jsonb("metadata").default({}),
+  uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
+  archived,
+});
+
+export const resourceEntity = pgTable(
+  "resource_entity",
+  {
+    ...id,
+    ...timestamps,
+    resourceId: uuid("resource_id")
+      .references(() => resources.id, { onDelete: "cascade" })
+      .notNull(),
+    entityId: uuid("entity_id").notNull(),
+    entityType: varchar("entity_type", { length: 100 }).notNull(),
+    relationshipType: varchar("relationship_type", { length: 100 }).notNull().default("attachment"),
+  },
+  (table) => ({
+    resourceIdx: index("resource_entity_resource_idx").on(table.resourceId),
+    entityIdx: index("resource_entity_entity_idx").on(table.entityId, table.entityType),
+    relationshipIdx: index("resource_entity_relationship_idx").on(
+      table.entityId,
+      table.entityType,
+      table.relationshipType,
+    ),
+    unq: unique().on(table.resourceId, table.entityId, table.entityType, table.relationshipType),
+  }),
+);
+
+export const newsStatusEnum = pgEnum("news_status", ["draft", "published"]);
+
+export const news = pgTable("news", {
+  ...id,
+  ...timestamps,
+  title: jsonb("title").notNull().default({}),
+  summary: jsonb("summary").default({}),
+  content: jsonb("content").default({}),
+  status: newsStatusEnum("status").notNull().default("draft"),
+  isPublic: boolean("is_public").notNull().default(true),
+  archived,
+  baseLanguage,
+  availableLocales,
+  publishedAt: timestamp("published_at", {
+    mode: "string",
+    withTimezone: true,
+    precision: 3,
+  }),
+  authorId: uuid("author_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
 });
