@@ -12,7 +12,8 @@ export async function setupTestDatabase(): Promise<{
   redisUrl: string;
 }> {
   const pgConnectionString =
-    process.env.DATABASE_TEST_URL || "postgresql://postgres:guidebook@localhost:5432/guidebook_test";
+    process.env.DATABASE_TEST_URL ||
+    "postgresql://postgres:guidebook@localhost:5432/guidebook_test";
   const redisUrl = process.env.REDIS_TEST_URL || "redis://localhost:6379/1";
 
   const sql = postgres(pgConnectionString, { max: 10 });
