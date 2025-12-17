@@ -9,14 +9,12 @@ import { LocalizationService } from "src/localization/localization.service";
 import { courses, categories, chapters, studentCourses, users } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
 
-
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { UUIDType } from "src/common";
 import type { AllCoursesForContentCreatorResponse } from "src/courses/schemas/course.schema";
 import type { CourseEnrollmentScope } from "src/courses/schemas/courseQuery";
 import type * as schema from "src/storage/schema";
-
 
 @Injectable()
 export class GetContentCreatorCoursesService {

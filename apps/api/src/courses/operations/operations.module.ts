@@ -10,6 +10,9 @@ import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
 import { UserModule } from "src/user/user.module";
 
+import { EnrollGroupsToCourseService } from "./commands/enroll-groups-to-course.command";
+import { UnenrollGroupsFromCoursesService } from "./commands/unenroll-groups-from-courses.command";
+import { UpdateCourseService } from "./commands/update-course-command";
 import { GetAllCoursesService } from "./queries/get-all-courses.service";
 import { GetAvailableCoursesService } from "./queries/get-available-courses.service";
 import { GetBetaCourseByIdService } from "./queries/get-beta-course-by-id.service";
@@ -17,9 +20,6 @@ import { GetContentCreatorCoursesService } from "./queries/get-content-creator-c
 import { GetCourseService } from "./queries/get-course.service";
 import { GetCoursesForUserService } from "./queries/get-courses-for-user.service";
 import { GetStudentsWithEnrollmentDateService } from "./queries/get-students-with-enrollment-date.service";
-import { EnrollGroupsToCourseService } from "./updaters/enroll-groups-to-course.service";
-import { UnenrollGroupsFromCoursesService } from "./updaters/unenroll-groups-from-courses.service";
-import { UpdateCourseService } from "./updaters/update-course-service";
 
 
 const queryServices = [

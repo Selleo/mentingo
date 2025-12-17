@@ -1,26 +1,31 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
-import { eq, sql, and, countDistinct, like, between, count } from "drizzle-orm";
+import { eq, sql, and, countDistinct } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE, addPagination } from "src/common/pagination";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
-import { courses, users, categories, coursesSummaryStats, studentCourses } from "src/storage/schema";
+import { courses, users, categories, coursesSummaryStats } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
 
 import { CourseSortFields } from "../../schemas/courseQuery";
 
+import { BaseCourseQueryService } from "./base-course-query.service";
+
+
 import type { AllCoursesResponse } from "../../schemas/course.schema";
-import type { CoursesQuery, CourseSortField, CoursesFilterSchema } from "../../schemas/courseQuery";
+import type { CoursesQuery, CourseSortField } from "../../schemas/courseQuery";
 import type { Pagination } from "src/common";
 
 @Injectable()
-export class GetAllCoursesService {
+export class GetAllCoursesService extends BaseCourseQueryService {
 	constructor(@Inject("DB") private readonly db: DatabasePg,private readonly fileService: FileService, private readonly localizationService: LocalizationService,
 	@Inject(forwardRef(() => UserService)) private readonly userService: UserService,
-) {}
+) {
+		super();
+	}
 	async getAllCourses(query: CoursesQuery): Promise<{
 			data: AllCoursesResponse;
 			pagination: Pagination;
@@ -124,75 +129,4 @@ export class GetAllCoursesService {
 				},
 			};
 		}
-
-		private getFiltersConditions(filters: CoursesFilterSchema, publishedOnly = true) {
-				const conditions = [];
-		
-				if (filters.title) {
-					conditions.push(
-						sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-							courses.title
-						}) AS t(k, v) WHERE v ILIKE ${`%${filters.title}%`})`,
-					);
-				}
-		
-				if (filters.description) {
-					conditions.push(
-						sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-							courses.description
-						}) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
-					);
-				}
-		
-				if (filters.searchQuery) {
-					conditions.push(
-						sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-							courses.title
-						}) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
-							courses.description
-						}) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
-					);
-				}
-		
-				if (filters.category) {
-					conditions.push(like(categories.title, `%${filters.category}%`));
-				}
-				if (filters.author) {
-					const authorNameConcat = sql`CONCAT(${users.firstName}, ' ' , ${users.lastName})`;
-					conditions.push(sql`${authorNameConcat} LIKE ${`%${filters.author}%`}`);
-				}
-				if (filters.creationDateRange) {
-					const [startDate, endDate] = filters.creationDateRange;
-					const start = new Date(startDate).toISOString();
-					const end = new Date(endDate).toISOString();
-		
-					conditions.push(between(courses.createdAt, start, end));
-				}
-				if (filters.status) {
-					conditions.push(eq(courses.status, filters.status));
-				}
-		
-				if (publishedOnly) {
-					conditions.push(eq(courses.status, "published"));
-				}
-		
-				return conditions ?? undefined;
-			}
-		
-			private getColumnToSortBy(sort: CourseSortField) {
-				switch (sort) {
-					case CourseSortFields.author:
-						return sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
-					case CourseSortFields.category:
-						return categories.title;
-					case CourseSortFields.creationDate:
-						return courses.createdAt;
-					case CourseSortFields.chapterCount:
-						return count(studentCourses.courseId);
-					case CourseSortFields.enrolledParticipantsCount:
-						return count(studentCourses.courseId);
-					default:
-						return courses.title;
-				}
-			}
 }

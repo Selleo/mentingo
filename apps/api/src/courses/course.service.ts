@@ -68,6 +68,9 @@ import {
 } from "../storage/schema";
 
 import { LESSON_SEQUENCE_ENABLED } from "./constants";
+import { EnrollGroupsToCourseService } from "./operations/commands/enroll-groups-to-course.command";
+import { UnenrollGroupsFromCoursesService } from "./operations/commands/unenroll-groups-from-courses.command";
+import { UpdateCourseService } from "./operations/commands/update-course-command";
 import { GetAvailableCoursesService } from "./operations/queries/get-available-courses.service";
 import { GetBetaCourseByIdService } from "./operations/queries/get-beta-course-by-id.service";
 import { GetContentCreatorCoursesService } from "./operations/queries/get-content-creator-courses.service";
@@ -75,9 +78,6 @@ import { GetCourseService } from "./operations/queries/get-course.service";
 import { GetCoursesForUserService } from "./operations/queries/get-courses-for-user.service";
 import { GetStudentsWithEnrollmentDateService } from "./operations/queries/get-students-with-enrollment-date.service";
 import { GetAllCoursesService } from "./operations/queries/index";
-import { EnrollGroupsToCourseService } from "./operations/updaters/enroll-groups-to-course.service";
-import { UnenrollGroupsFromCoursesService } from "./operations/updaters/unenroll-groups-from-courses.service";
-import { UpdateCourseService } from "./operations/updaters/update-course-service";
 import {
   CourseStudentAiMentorResultsSortFields,
   CourseStudentProgressionSortFields,
