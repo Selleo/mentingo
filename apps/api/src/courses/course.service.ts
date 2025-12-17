@@ -1550,9 +1550,23 @@ export class CourseService {
           status: COURSE_ENROLLMENT.ENROLLED,
         }));
 
+        const uniqueCoursesValues = Array.from(
+          new Map(
+            studentCoursesValues.map((student) => [
+              `${student.studentId}-${student.courseId}`,
+              {
+                studentId: student.studentId,
+                courseId: student.courseId,
+                enrolledByGroupId: student.enrolledByGroupId,
+                status: student.status,
+              },
+            ]),
+          ).values(),
+        );
+
         await trx
           .insert(studentCourses)
-          .values(studentCoursesValues)
+          .values(uniqueCoursesValues)
           .onConflictDoUpdate({
             target: [studentCourses.courseId, studentCourses.studentId],
             set: {

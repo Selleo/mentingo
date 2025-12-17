@@ -7,6 +7,7 @@ import { useCourse, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
+import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
 import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { LessonSidebar } from "~/modules/Courses/Lesson/LessonSidebar";
@@ -47,6 +48,12 @@ export default function LessonPage() {
     isError: lessonError,
   } = useLesson(lessonId, language);
   const { data: course } = useCourse(courseId, language);
+
+  useLearningTimeTracker({
+    lessonId,
+    courseId,
+    enabled: !!lesson && !!course,
+  });
 
   useEffect(() => {
     if (lessonError) {

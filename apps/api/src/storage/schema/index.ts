@@ -428,6 +428,28 @@ export const courseStudentsStats = pgTable(
   }),
 );
 
+export const lessonLearningTime = pgTable(
+  "lesson_learning_time",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    totalSeconds: integer("total_seconds").notNull().default(0),
+  },
+  (table) => ({
+    unq: unique().on(table.userId, table.lessonId),
+    userCourseIdx: index("lesson_learning_time_user_course_idx").on(table.userId, table.courseId),
+  }),
+);
+
 export const scormMetadata = pgTable("scorm_metadata", {
   ...id,
   ...timestamps,

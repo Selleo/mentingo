@@ -1,5 +1,9 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
   "rootDir": "..",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
@@ -10,8 +14,9 @@
     "^src/(.*)$": "<rootDir>/src/$1"
   },
   "globalSetup": "<rootDir>/test/global-setup.ts",
-  "globalTeardown": "<rootDir>/test/global-teardown.ts",
-  "setupFilesAfterEnv": ["<rootDir>/test/jest-e2e-setup.ts"],
+  "setupFilesAfterEnv": [
+    "<rootDir>/test/jest-e2e-setup.ts"
+  ],
   "verbose": true,
   "testTimeout": 30000,
   "maxWorkers": 1,

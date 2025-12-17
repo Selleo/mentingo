@@ -1,27 +1,20 @@
 import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { type Job, Queue, QueueEvents } from "bullmq";
 
-import { buildRedisConnection } from "src/common/configuration/redis";
+import {
+  type DocumentIngestionJobData,
+  QUEUE_NAMES,
+  QueueService as GlobalQueueService,
+} from "src/queue";
 
-import type { OnModuleDestroy } from "@nestjs/common";
-import type { RedisConfigSchema } from "src/common/configuration/redis";
+import type { Job } from "bullmq";
 
 @Injectable()
-export class QueueService implements OnModuleDestroy {
-  private ingestQueue: Queue;
-  private ingestQueueEvents: QueueEvents;
-
-  constructor(private readonly config: ConfigService) {
-    const redisCfg = this.config.get("redis") as RedisConfigSchema;
-    const connection = redisCfg && buildRedisConnection(redisCfg);
-
-    this.ingestQueue = new Queue("document-ingestion", { connection });
-    this.ingestQueueEvents = new QueueEvents("document-ingestion", { connection });
-  }
+export class IngestionQueueService {
+  constructor(private readonly queueService: GlobalQueueService) {}
 
   async enqueueDocumentIngestion(file: Express.Multer.File, documentId: string, sha256: string) {
-    return this.ingestQueue.add(
+    return this.queueService.enqueue<DocumentIngestionJobData>(
+      QUEUE_NAMES.DOCUMENT_INGESTION,
       "document-ingestion",
       { file, documentId, sha256 },
       { attempts: 3, backoff: { type: "exponential", delay: 1000 } },
@@ -29,13 +22,6 @@ export class QueueService implements OnModuleDestroy {
   }
 
   async waitForJobsCompletion(jobs: Job[]) {
-    await this.ingestQueueEvents.waitUntilReady();
-
-    return Promise.allSettled(jobs.map((j) => j.waitUntilFinished(this.ingestQueueEvents)));
-  }
-
-  async onModuleDestroy() {
-    await this.ingestQueue.close();
-    await this.ingestQueueEvents.close();
+    return this.queueService.waitForJobsCompletion(QUEUE_NAMES.DOCUMENT_INGESTION, jobs);
   }
 }
