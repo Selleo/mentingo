@@ -275,7 +275,7 @@ export class AiService {
     }>,
     language: SupportedLanguages,
     courseId: string,
-    chunkSize: number = 30,
+    chunkSize: number = 10,
   ) {
     return observe(
       async () => {
