@@ -33,3 +33,6 @@ export * from "./group/delete-group.event";
 export * from "./group/enroll-user-to-group.event";
 export * from "./group/enroll-group-to-course.event";
 export * from "./course/enroll-course.event";
+export * from "./news/create-news.event";
+export * from "./news/update-news.event";
+export * from "./news/delete-news.event";

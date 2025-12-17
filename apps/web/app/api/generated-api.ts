@@ -2804,8 +2804,8 @@ export interface GetIsConfigSetupResponse {
 export interface GetQAResponse {
   /** @format uuid */
   id: string;
-  title: string;
-  description: string;
+  title: string | null;
+  description: string | null;
   baseLanguage: "en" | "pl";
   availableLocales: ("en" | "pl")[];
 }
@@ -2813,8 +2813,8 @@ export interface GetQAResponse {
 export type GetAllQAResponse = {
   /** @format uuid */
   id: string;
-  title: string;
-  description: string;
+  title: string | null;
+  description: string | null;
   baseLanguage: "en" | "pl";
   availableLocales: ("en" | "pl")[];
 }[];
@@ -2828,6 +2828,275 @@ export interface CreateQABody {
 export interface UpdateQABody {
   title?: string;
   description?: string;
+}
+
+export interface GetDraftNewsListResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    /** @default "en" */
+    baseLanguage: "en" | "pl";
+    availableLocales: ("en" | "pl")[];
+    publishedAt: string | null;
+    authorName: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextNews?: string | null;
+    previousNews?: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GenerateNewsPreviewBody {
+  /** @format uuid */
+  newsId: string;
+  /** @default "en" */
+  language: "en" | "pl";
+  content: string;
+}
+
+export interface GenerateNewsPreviewResponse {
+  data: {
+    parsedContent: string;
+  };
+}
+
+export interface GetNewsResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    plainContent: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    /** @default "en" */
+    baseLanguage: "en" | "pl";
+    availableLocales: ("en" | "pl")[];
+    publishedAt: string | null;
+    authorName: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextNews?: string | null;
+    previousNews?: string | null;
+  };
+}
+
+export interface GetNewsListResponse {
+  data: {
+    id: string;
+    title: string;
+    content: string;
+    summary: string;
+    status: string;
+    isPublic: boolean;
+    /** @default "en" */
+    baseLanguage: "en" | "pl";
+    availableLocales: ("en" | "pl")[];
+    publishedAt: string | null;
+    authorName: string;
+    resources?: {
+      images: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      videos: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      attachments: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      }[];
+      coverImage?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+      };
+    };
+    createdAt: string;
+    updatedAt: string;
+    nextNews?: string | null;
+    previousNews?: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateNewsBody {
+  /** @default "en" */
+  language: "en" | "pl";
+}
+
+export interface CreateNewsResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface UpdateNewsBody {
+  /** @default "en" */
+  language: "en" | "pl";
+  title?: string;
+  summary?: string;
+  content?: string;
+  status?: "draft" | "published";
+  isPublic?: boolean | "true" | "false";
+  /**
+   * Cover image file
+   * @format binary
+   */
+  cover?: File;
+}
+
+export interface UpdateNewsResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface AddNewLanguageBody {
+  /** @default "en" */
+  language: "en" | "pl";
+}
+
+export interface AddNewLanguageResponse {
+  data: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface DeleteNewsLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    availableLocales: string[];
+  };
+}
+
+export interface DeleteNewsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
+export interface UploadFileToNewsResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+  };
 }
 
 import type {
@@ -6231,6 +6500,208 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/qa/language/${qaId}`,
         method: "DELETE",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetDraftNewsList
+     * @request GET:/api/news/drafts
+     */
+    newsControllerGetDraftNewsList: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+        /** @min 1 */
+        page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetDraftNewsListResponse, any>({
+        path: `/api/news/drafts`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGenerateNewsPreview
+     * @request POST:/api/news/preview
+     */
+    newsControllerGenerateNewsPreview: (
+      data: GenerateNewsPreviewBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<GenerateNewsPreviewResponse, any>({
+        path: `/api/news/preview`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetNews
+     * @request GET:/api/news/{id}
+     */
+    newsControllerGetNews: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerUpdateNews
+     * @request PATCH:/api/news/{id}
+     */
+    newsControllerUpdateNews: (id: string, data: UpdateNewsBody, params: RequestParams = {}) =>
+      this.request<UpdateNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerAddNewLanguage
+     * @summary Add a new language to a news item
+     * @request POST:/api/news/{id}
+     */
+    newsControllerAddNewLanguage: (
+      id: string,
+      data: AddNewLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AddNewLanguageResponse, any>({
+        path: `/api/news/${id}`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerDeleteNews
+     * @request DELETE:/api/news/{id}
+     */
+    newsControllerDeleteNews: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteNewsResponse, any>({
+        path: `/api/news/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerGetNewsList
+     * @request GET:/api/news
+     */
+    newsControllerGetNewsList: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+        /** @min 1 */
+        page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetNewsListResponse, any>({
+        path: `/api/news`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerCreateNews
+     * @request POST:/api/news
+     */
+    newsControllerCreateNews: (data: CreateNewsBody, params: RequestParams = {}) =>
+      this.request<CreateNewsResponse, any>({
+        path: `/api/news`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerDeleteNewsLanguage
+     * @request DELETE:/api/news/{id}/language
+     */
+    newsControllerDeleteNewsLanguage: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteNewsLanguageResponse, any>({
+        path: `/api/news/${id}/language`,
+        method: "DELETE",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name NewsControllerUploadFileToNews
+     * @request POST:/api/news/{id}/upload
+     */
+    newsControllerUploadFileToNews: (
+      id: string,
+      data: {
+        /** @format binary */
+        file: File;
+        language: "en" | "pl";
+        title: string;
+        description: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadFileToNewsResponse, any>({
+        path: `/api/news/${id}/upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
         ...params,
       }),
   };

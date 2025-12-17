@@ -1,30 +1,40 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { BadRequestException, ConflictException, Inject, Injectable } from "@nestjs/common";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { parse } from "csv-parse";
+import { and, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import readXlsxFile from "read-excel-file/node";
 import sharp from "sharp";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
+import { DatabasePg } from "src/common";
+import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import { S3Service } from "src/s3/s3.service";
+import { resources, resourceEntity } from "src/storage/schema";
 
 import {
   MAX_FILE_SIZE,
   ALLOWED_EXCEL_MIME_TYPES,
   ALLOWED_EXCEL_MIME_TYPES_MAP,
   ALLOWED_MIME_TYPES,
+  RESOURCE_RELATIONSHIP_TYPES,
 } from "./file.constants";
 import { FileGuard } from "./guards/file.guard";
 
+import type { ResourceRelationshipType, EntityType, ResourceCategory } from "./file.constants";
 import type { FileValidationOptions } from "./guards/file.guard";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
+import type { UUIDType } from "src/common";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 @Injectable()
 export class FileService {
   constructor(
+    @Inject("DB") private readonly db: DatabasePg,
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
   ) {}
@@ -204,5 +214,121 @@ export class FileService {
         .on("end", () => resolve(rows))
         .on("error", reject);
     });
+  }
+
+  /**
+   * Upload a file and create a resource record linked to an entity
+   * @param file - The uploaded file from Express.Multer
+   * @param resource - The resource path/category for organizing uploads (e.g., 'courses', 'lessons')
+   * @param entityId - The ID of the entity this resource belongs to
+   * @param entityType - The type of entity (e.g., 'course', 'lesson', 'chapter', 'question')
+   * @param relationshipType - The relationship between resource and entity (default: 'attachment')
+   * @param currentUser - Current user object
+   * @param title - Multilingual title object (optional)
+   * @param description - Multilingual description object (optional)
+   * @returns Object containing resourceId, fileKey, and fileUrl
+   */
+  async uploadResource(
+    file: Express.Multer.File,
+    folder: string,
+    resource: ResourceCategory,
+    entityId: string,
+    entityType: EntityType,
+    relationshipType: ResourceRelationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+    title: Partial<Record<SupportedLanguages, string>> = {},
+    description: Partial<Record<SupportedLanguages, string>> = {},
+    currentUser?: CurrentUser,
+    options?: { folderIncludesResource?: boolean },
+  ) {
+    const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
+
+    const { fileKey } = await this.uploadFile(file, resourceFolder);
+
+    const { insertedResource } = await this.db.transaction(async (trx) => {
+      const [insertedResource] = await trx
+        .insert(resources)
+        .values({
+          title: buildJsonbFieldWithMultipleEntries(title || {}),
+          description: buildJsonbFieldWithMultipleEntries(description || {}),
+          reference: fileKey,
+          contentType: file.mimetype,
+          metadata: {
+            originalFilename: file.originalname,
+            size: file.size,
+          },
+          uploadedBy: currentUser?.userId || null,
+        })
+        .returning();
+
+      await trx.insert(resourceEntity).values({
+        resourceId: insertedResource.id,
+        entityId,
+        entityType,
+        relationshipType,
+      });
+
+      return { insertedResource };
+    });
+
+    if (!insertedResource) throw new BadRequestException("adminResources.toast.uploadError");
+
+    return {
+      resourceId: insertedResource.id,
+      fileKey,
+      fileUrl: await this.getFileUrl(fileKey),
+    };
+  }
+
+  /**
+   * Get all resources for a specific entity
+   * @param entityId - The ID of the entity
+   * @param entityType - The type of entity (e.g., 'course', 'lesson', 'chapter', 'question')
+   * @param relationshipType - Filter by relationship type (optional)
+   * @returns Array of resources with file URLs
+   */
+  async getResourcesForEntity(
+    entityId: UUIDType,
+    entityType: string,
+    relationshipType?: string,
+    language?: SupportedLanguages,
+  ) {
+    const conditions = [
+      eq(resourceEntity.entityId, entityId),
+      eq(resourceEntity.entityType, entityType),
+      eq(resources.archived, false),
+      relationshipType ? eq(resourceEntity.relationshipType, relationshipType) : null,
+    ].filter((condition): condition is ReturnType<typeof eq> => Boolean(condition));
+
+    const resourceSelect = language
+      ? {
+          ...getTableColumns(resources),
+          title: sql`COALESCE(${resources.title}->>${language}::text,'')`,
+          description: sql`COALESCE(${resources.description}->>${language}::text,'')`,
+        }
+      : getTableColumns(resources);
+
+    const results = await this.db
+      .select({
+        ...resourceSelect,
+      })
+      .from(resources)
+      .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))
+      .where(and(...conditions));
+
+    return Promise.all(
+      results.map(async (resource) => ({
+        ...resource,
+        fileUrl: await this.getFileUrl(resource.reference),
+      })),
+    );
+  }
+
+  async archiveResources(resourceIds: UUIDType[]) {
+    if (!resourceIds.length) return;
+
+    await this.db
+      .update(resources)
+      .set({ archived: true })
+      .where(and(eq(resources.archived, false), inArray(resources.id, resourceIds)));
   }
 }

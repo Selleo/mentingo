@@ -3,10 +3,12 @@ import { eq, sql } from "drizzle-orm";
 import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { chapters, courses, lessons, questionsAndAnswers } from "src/storage/schema";
 
-import { type BaseTable, ENTITY_TYPE, type EntityType } from "./localization.types";
+import { ENTITY_TYPE } from "./localization.types";
 
+import type { BaseTable, EntityType } from "./localization.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
@@ -109,5 +111,33 @@ export class LocalizationService {
             ''
         )
     `;
+  }
+
+  /**
+   * Updates localizable fields in an entity by setting JSONB field values for the specified language
+   * @param localizableFields Array of field names that should be localized
+   * @param existingEntity The current entity data containing existing field values
+   * @param updateData The data containing new values to update
+   * @param language The language to update the fields for
+   * @returns Object with updated localizable fields
+   */
+  updateLocalizableFields<
+    TEntity extends Record<string, any>,
+    TUpdateData extends Record<string, any>,
+    TField extends keyof TUpdateData & keyof TEntity,
+  >(
+    localizableFields: readonly TField[],
+    existingEntity: TEntity,
+    updateData: TUpdateData,
+    language: string,
+  ): Partial<Record<TField, unknown>> {
+    const result: Partial<Record<TField, unknown>> = {};
+
+    localizableFields.forEach((field) => {
+      if (field in updateData && updateData[field] !== undefined)
+        result[field] = setJsonbField(existingEntity[field], language, updateData[field]);
+    });
+
+    return result;
   }
 }

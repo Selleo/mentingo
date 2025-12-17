@@ -14,8 +14,8 @@ import type { SupportedLanguages } from "@repo/shared";
 import type React from "react";
 
 interface Props {
-  title: string;
-  description: string;
+  title: string | null;
+  description: string | null;
   id: string;
   availableLocales?: SupportedLanguages[];
   isAdmin?: boolean;
