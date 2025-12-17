@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "@remix-run/react";
 import { formatDate } from "date-fns";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
@@ -31,6 +31,7 @@ export default function NewsDetailsPage() {
   const { mutateAsync: deleteNews } = useDeleteNews();
 
   const [contentWithIds, setContentWithIds] = useState(news?.plainContent ?? "");
+  const handleContentWithIds = useCallback((html: string) => setContentWithIds(html || ""), []);
 
   if (isLoadingNews) {
     return (
@@ -61,12 +62,7 @@ export default function NewsDetailsPage() {
         { title: news.title, href: `/news/${news.id}` },
       ]}
       className="flex flex-col gap-10 bg-neutral-50/80"
-      sideContent={
-        <TOC
-          contentHtml={news.content}
-          onContentWithIds={(html) => setContentWithIds(html || "")}
-        />
-      }
+      sideContent={<TOC contentHtml={news.content} onContentWithIds={handleContentWithIds} />}
     >
       {isAdminLike && (
         <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
