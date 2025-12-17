@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
@@ -12,6 +13,7 @@ import type { EnrollGroupsToCourseBody } from "~/api/generated-api";
 
 export function useBulkGroupCourseEnroll(courseId = "") {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (input: EnrollGroupsToCourseBody) => {
@@ -23,7 +25,7 @@ export function useBulkGroupCourseEnroll(courseId = "") {
     onSuccess: async ({ data }) => {
       toast({
         variant: "default",
-        description: data.message,
+        description: t(data.message),
       });
 
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
