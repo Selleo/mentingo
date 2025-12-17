@@ -23,7 +23,7 @@ const Breadcrumb = () => {
             onClick={() => navigate("/admin/courses")}
             className="mr-2 w-min"
           >
-            <Icon name="ChevronLeft" className="mr-2 size-3" />
+            <Icon name="ArrowLeft" className="mr-2 size-3" />
             {t("adminCourseView.settings.breadcrumbs.back")}
           </Button>
         </BreadcrumbLink>

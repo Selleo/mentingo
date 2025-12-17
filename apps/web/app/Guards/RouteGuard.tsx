@@ -1,21 +1,22 @@
 import { useLocation, useNavigate } from "@remix-run/react";
 import { useLayoutEffect } from "react";
 
-import { routeAccessConfig } from "~/config/routeAccessConfig";
-import { useUserRole } from "~/hooks/useUserRole";
+import { routeAccessConfig } from "../config/routeAccessConfig";
+import { useUserRole } from "../hooks/useUserRole";
 
+import type { UserRole } from "../config/userRoles";
 import type { ReactNode } from "react";
-import type { UserRole } from "~/config/userRoles";
 
 export const checkRouteAccess = (path: string, userRole: UserRole) => {
   for (const [pattern, roles] of Object.entries(routeAccessConfig)) {
     const patternSegments = pattern.split("/");
     const pathSegments = path.split("/");
+    const hasRoleAccess = roles.includes(userRole);
 
     if (pattern.endsWith("/*")) {
       const prefix = pattern.slice(0, -2);
-      if (path.startsWith(prefix) && roles.includes(userRole)) {
-        return true;
+      if (path.startsWith(prefix)) {
+        return hasRoleAccess;
       }
       continue;
     }
@@ -32,8 +33,8 @@ export const checkRouteAccess = (path: string, userRole: UserRole) => {
       return segment === pathSegments[index];
     });
 
-    if (matches && roles.includes(userRole)) {
-      return true;
+    if (matches) {
+      return hasRoleAccess;
     }
   }
 

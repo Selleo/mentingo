@@ -19,6 +19,10 @@ export const routes: (
           route("qa", "modules/QA/QA.page.tsx");
           route("qa/new", "modules/QA/CreateQA.page.tsx");
           route("qa/:id", "modules/QA/EditQA.page.tsx");
+          route("news", "modules/News/News.page.tsx");
+          route("news/:newsId", "modules/News/NewsDetails.page.tsx", {
+            id: "news-details",
+          });
         });
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Statistics/Statistics.page.tsx", {
@@ -27,6 +31,12 @@ export const routes: (
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
           route("announcements", "modules/Announcements/Announcements.page.tsx");
+          route("news/:newsId/edit", "modules/News/NewsForm.page.tsx", {
+            id: "edit-news",
+          });
+          route("news/add", "modules/News/NewsForm.page.tsx", {
+            id: "add-news",
+          });
           route("profile/:id", "modules/Profile/Profile.page.tsx");
         });
         route("course/:courseId/lesson", "modules/Courses/Lesson/Lesson.layout.tsx", () => {

@@ -17,14 +17,11 @@ import {
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useLessonFileUpload } from "~/api/mutations/admin/useLessonFileUpload";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ToggleGroup, Toolbar } from "~/components/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
-import { baseUrl } from "~/utils/baseUrl";
 
 import { InsertLinkDialog } from "../components/InsertLinkDialog";
 
@@ -37,13 +34,17 @@ type EditorToolbarProps = {
   editor: Editor;
   allowFiles?: boolean;
   lessonId?: string;
+  acceptedFileTypes?: string[];
+  onUpload?: (file?: File, editor?: Editor | null) => Promise<void>;
 };
 
-const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarProps) => {
+const EditorToolbar = ({
+  editor,
+  allowFiles = false,
+  acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  onUpload,
+}: EditorToolbarProps) => {
   const { t } = useTranslation();
-  const { toast } = useToast();
-
-  const { mutateAsync: uploadImage } = useLessonFileUpload();
 
   const fileUploadRef = useRef<HTMLInputElement | null>(null);
 
@@ -66,20 +67,12 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
     fileUploadRef.current?.click();
   });
 
-  const acceptedImages = ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",");
+  const acceptedImages = acceptedFileTypes.join(",");
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
-    if (!file || !lessonId) {
-      return toast({ title: t("richTextEditor.toolbar.upload.uploadFailed") });
-    }
-
-    const uploaded = await uploadImage({ file, lessonId });
-
-    const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
-
-    editor.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
+    onUpload?.(file, editor);
 
     if (fileUploadRef.current) {
       fileUploadRef.current.value = "";
@@ -108,7 +101,7 @@ const EditorToolbar = ({ editor, lessonId, allowFiles = false }: EditorToolbarPr
             </TooltipTrigger>
             <TooltipContent>{t("richTextEditor.toolbar.link.tooltip")}</TooltipContent>
           </Tooltip>
-          {lessonId && allowFiles && (
+          {allowFiles && (
             <Tooltip>
               <TooltipTrigger>
                 <Input
