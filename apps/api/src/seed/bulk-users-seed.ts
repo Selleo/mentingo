@@ -12,6 +12,7 @@ import {
   DEFAULT_STUDENT_SETTINGS,
 } from "src/settings/constants/settings.constants";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -32,6 +33,7 @@ import { niceCourses } from "./nice-data-seeds";
 import { createNiceCourses } from "./seed-helpers";
 
 import type { DatabasePg, UUIDType } from "../common";
+import type { UserRole } from "../user/schemas/userRoles";
 
 dotenv.config({ path: "./.env" });
 
@@ -43,17 +45,14 @@ const connectionString = process.env.DATABASE_URL!;
 const sqlConnect = postgres(connectionString);
 const db = drizzle(sqlConnect) as DatabasePg;
 
-function generateDeterministicEmail(
-  role: typeof USER_ROLES.STUDENT | typeof USER_ROLES.ADMIN | typeof USER_ROLES.CONTENT_CREATOR,
-  index: number,
-): string {
+function generateDeterministicEmail(role: UserRole, index: number): string {
   const roleKey = role === USER_ROLES.CONTENT_CREATOR ? "creator" : role.toLowerCase();
   return `user+${roleKey}+${index}@example.com`;
 }
 
 export async function generateBulkUsers(
   count: number,
-  role: typeof USER_ROLES.STUDENT | typeof USER_ROLES.ADMIN | typeof USER_ROLES.CONTENT_CREATOR,
+  role: UserRole,
   password: string = "password",
   startIndex: number = 1,
 ) {
@@ -169,7 +168,7 @@ async function createStudentCourses(courses: any[], studentIds: UUIDType[]) {
         courseId: course.id,
         numberOfAssignments: faker.number.int({ min: 0, max: 10 }),
         numberOfFinishedAssignments: faker.number.int({ min: 0, max: 10 }),
-        state: "not_started",
+        state: PROGRESS_STATUSES.NOT_STARTED,
         archived: false,
         enrolledByGroupId: null,
         createdAt: course.createdAt,
