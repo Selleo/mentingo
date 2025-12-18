@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from "@nestjs/common";
+import { Logger, OnModuleInit, UseGuards } from "@nestjs/common";
 import {
   ConnectedSocket,
   MessageBody,
