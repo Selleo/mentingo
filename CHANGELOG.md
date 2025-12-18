@@ -1,6 +1,36 @@
+<a name="v3.24.0"></a>
+
+## [v3.24.0] - 17.12.2025
+
+### Features:
+
+- introduce news functionality ([#1105](https://github.com/Selleo/mentingo/issues/1105))
+
+- add autoplay to streamline lesson progression ([#1024](https://github.com/Selleo/mentingo/issues/1024))
+
+- provide learning time insights for admins ([#1055](https://github.com/Selleo/mentingo/issues/1055))
+
+- add Q&A section with most frequently asked questions and answers ([#1082](https://github.com/Selleo/mentingo/issues/1082))
+
+- enhance enrolled students table with improved sorting and pagination ([#1074](https://github.com/Selleo/mentingo/issues/1074))
+
+### Bug Fixes:
+
+- correct translations and group enrollment for users in multiple groups ([#1084](https://github.com/Selleo/mentingo/issues/1084))
+
+- improve AI mentor lesson evaluation ([#1070](https://github.com/Selleo/mentingo/issues/1070))
+
+### Chores:
+
+- add license check action
+
+### Code Refactoring:
+
+- replaced exceljs lib
+
 <a name="v3.23.0"></a>
 
-## [v3.23.0] - 10.12.2025
+## [v3.23.0] - 11.12.2025
 
 ### Features:
 
@@ -53,6 +83,10 @@
 ### Chores:
 
 - clean up dependencies by removing intro.js ([#1063](https://github.com/Selleo/mentingo/issues/1063))
+
+### Documentation:
+
+- update changelog for version v3.23.0
 
 <a name="v3.22.0"></a>
 
@@ -2126,7 +2160,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.23.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.24.0...HEAD
+[v3.24.0]: https://github.com/Selleo/mentingo/compare/v3.23.0...v3.24.0
 [v3.23.0]: https://github.com/Selleo/mentingo/compare/v3.22.0...v3.23.0
 [v3.22.0]: https://github.com/Selleo/mentingo/compare/v3.21.0...v3.22.0
 [v3.21.0]: https://github.com/Selleo/mentingo/compare/v3.20.0...v3.21.0
