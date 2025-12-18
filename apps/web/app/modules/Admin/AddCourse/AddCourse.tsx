@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/LanguageSelector";
+import { courseLanguages } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
 import { setPageTitle } from "~/utils/setPageTitle";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 

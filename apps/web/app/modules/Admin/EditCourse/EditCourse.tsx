@@ -20,7 +20,7 @@ import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LeaveModalProvider } from "~/context/LeaveModalContext";
 import { useTrackDataUpdatedAt } from "~/hooks/useTrackDataUpdatedAt";
-import { LanguageSelector } from "~/modules/Admin/EditCourse/compontents/LanguageSelector";
+import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/compontents/CourseLanguageSelector";
 import { CourseEnrolled } from "~/modules/Admin/EditCourse/CourseEnrolled/CourseEnrolled";
 import { useEditCourseTabs } from "~/modules/Admin/EditCourse/hooks/useEditCourseTabs";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -147,7 +147,7 @@ const EditCourse = () => {
 
             <div className="flex gap-4 items-center">
               <div className="flex gap-2 items-center">
-                <LanguageSelector
+                <CourseLanguageSelector
                   courseLanguage={courseLanguage}
                   course={
                     course && {

@@ -2,6 +2,13 @@ import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
 import { BadRequestException, ConflictException, Inject, Injectable } from "@nestjs/common";
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+} from "@repo/shared";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { parse } from "csv-parse";
 import { and, eq, getTableColumns, inArray, sql } from "drizzle-orm";
@@ -242,7 +249,16 @@ export class FileService {
   ) {
     const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
 
-    const { fileKey } = await this.uploadFile(file, resourceFolder);
+    const { fileKey } = await this.uploadFile(file, resourceFolder, {
+      allowedTypes: [
+        ...ALLOWED_PDF_FILE_TYPES,
+        ...ALLOWED_EXCEL_FILE_TYPES,
+        ...ALLOWED_WORD_FILE_TYPES,
+        ...ALLOWED_VIDEO_FILE_TYPES,
+        ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+      ],
+      maxSize: MAX_FILE_SIZE,
+    });
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx

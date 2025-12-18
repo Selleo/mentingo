@@ -1,6 +1,7 @@
 export * from "./constants/accessGuard";
 export * from "./constants/aiMentorAvatar";
 export * from "./constants/aiMentorTypes";
+export * from "./constants/articlesTypes";
 export * from "./constants/courseEnrollment";
 export * from "./constants/fileTypes";
 export * from "./constants/languages";

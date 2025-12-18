@@ -54,7 +54,7 @@ type LanguageSelectorProps = {
   setOpenGenerateTranslationModal: (open: boolean) => void;
 };
 
-export const LanguageSelector = ({
+export const CourseLanguageSelector = ({
   courseLanguage,
   course,
   onChange,

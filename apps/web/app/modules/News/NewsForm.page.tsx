@@ -87,7 +87,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const { mutateAsync: uploadNewsFile } = useUploadNewsFile();
   const { mutateAsync: previewNews, isPending: isPreviewLoading } = usePreviewNews();
   const [previewContent, setPreviewContent] = useState("");
-  const pageTitle = isEdit ? t("newsView.button.edit") : t("newsView.createOrEdit");
+  const pageTitle = isEdit ? t("newsView.edit") : t("newsView.create");
   const breadcrumbs = [
     { title: t("navigationSideBar.dashboard"), href: "/" },
     { title: t("navigationSideBar.news"), href: "/news" },
@@ -370,8 +370,8 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                       className="flex flex-col gap-3"
                     >
                       <TabsList className="w-fit bg-primary-50">
-                        <TabsTrigger value="editor">Editor</TabsTrigger>
-                        <TabsTrigger value="preview">Preview</TabsTrigger>
+                        <TabsTrigger value="editor">{t("newsView.editor")}</TabsTrigger>
+                        <TabsTrigger value="preview">{t("newsView.preview")}</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="editor">
@@ -379,7 +379,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                           <div className="flex flex-col gap-y-1.5">
                             <Editor
                               id="content"
-                              lessonId="lessonId"
                               content={field.value}
                               allowFiles
                               acceptedFileTypes={[
@@ -428,9 +427,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                 >
                   {t("common.button.cancel")}
                 </Button>
-                <Button type="submit">
-                  {isEdit ? t("newsView.button.edit") : t("newsView.button.save")}
-                </Button>
+                <Button type="submit">{t("common.button.save")}</Button>
               </div>
             </form>
           </Form>

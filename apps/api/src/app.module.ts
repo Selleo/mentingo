@@ -8,10 +8,14 @@ import { ScheduleModule } from "@nestjs/schedule";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
 import { EnvModule } from "src/env/env.module";
+import { LearningTimeModule } from "src/learning-time";
 import { QAModule } from "src/qa/qa.module";
+import { QueueModule } from "src/queue";
+import { WebSocketModule } from "src/websocket";
 
 import { AiModule } from "./ai/ai.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
+import { ArticlesModule } from "./articles/articles.module";
 import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
@@ -37,12 +41,10 @@ import { FileModule } from "./file/files.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
-import { LearningTimeModule } from "./learning-time/learning-time.module";
 import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { NewsModule } from "./news/news.module";
 import { QuestionsModule } from "./questions/question.module";
-import { QueueModule } from "./queue/queue.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
@@ -53,7 +55,6 @@ import { StripeModule } from "./stripe/stripe.module";
 import { StudentLessonProgressModule } from "./studentLessonProgress/studentLessonProgress.module";
 import { TestConfigModule } from "./test-config/test-config.module";
 import { UserModule } from "./user/user.module";
-import { WebSocketModule } from "./websocket/websocket.module";
 
 @Module({
   imports: [
@@ -134,6 +135,7 @@ import { WebSocketModule } from "./websocket/websocket.module";
     ActivityLogsModule,
     QAModule,
     NewsModule,
+    ArticlesModule,
   ],
   controllers: [],
   providers: [

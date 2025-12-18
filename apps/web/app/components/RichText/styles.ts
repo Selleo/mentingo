@@ -34,7 +34,7 @@ export const lessonVariantClasses = {
   ol: "[&>div>ol>li>p]:body-base [&>div>ol>li>p]:text-neutral-900 [&>div>ol>li>p>strong]:text-neutral-950",
 };
 
-export const newsVariantClasses = {
+export const articleVariantClasses = {
   wrapper: "w-full py-10",
   layout:
     "[&>div]:flex [&>div]:flex-col [&>div]:space-y-8 [&>div]:leading-[1.9] [&>div]:text-neutral-900 [&>div]:tracking-tight",
@@ -61,3 +61,5 @@ export const newsVariantClasses = {
       [&_a[download]::before]:text-primary-800
     `,
 };
+
+export const newsVariantClasses = articleVariantClasses;

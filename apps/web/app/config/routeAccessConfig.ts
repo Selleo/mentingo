@@ -90,6 +90,7 @@ export const routeAccessConfig = createRouteConfig({
   "profile/:id": ALL_ROLES,
   "course/:courseId/lesson/:lessonId": ALL_ROLES,
   announcements: ALL_ROLES,
+  "articles/:articleId/edit": ADMIN_AND_CONTENT_CREATOR,
   "news/add": ADMIN_AND_CONTENT_CREATOR,
   "news/:newsId/edit": ADMIN_AND_CONTENT_CREATOR,
   //Client and public
@@ -97,6 +98,8 @@ export const routeAccessConfig = createRouteConfig({
   courses: ALL_ROLES,
   qa: ALL_ROLES,
   "qa/:id": ADMIN_ONLY,
+  articles: ALL_ROLES,
+  "articles/:articleId": ALL_ROLES,
   news: ALL_ROLES,
   "news/:newsId": ALL_ROLES,
 

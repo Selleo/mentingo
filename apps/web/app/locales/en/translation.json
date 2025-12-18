@@ -20,11 +20,13 @@
     },
     "toast": {
       "noAccess": "You do not have permission to access this resource",
-      "globalSettingsNotFound": "Global settings not found"
+      "globalSettingsNotFound": "Global settings not found",
+      "somethingWentWrong": "Something went wrong..."
     },
     "tooltip": {
       "soon": "Cooming soon"
     },
+    "tableOfContents": "Table of contents",
     "roles": {
       "admin": "Admin",
       "contentCreator": "Content creator",
@@ -145,6 +147,7 @@
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
+    "articles": "Articles",
     "news": "News",
     "providerInformation": "Information",
     "announcements": "Announcements",
@@ -180,15 +183,15 @@
       "summary": "Add a short summary",
       "intro": "Add a short intro"
     },
-    "createOrEdit": "Create news",
+    "create": "Create",
     "edit": "Edit",
     "status": {
       "draft": "Draft",
-      "published": "Published"
+      "published": "Published",
+      "draftMany": "Drafts",
+      "publishedMany": "Published"
     },
     "button": {
-      "save": "Save news",
-      "edit": "Edit news",
       "delete": "Delete"
     },
     "validation": {
@@ -198,10 +201,12 @@
       "imageRequired": "Image is required",
       "statusRequired": "Status is required"
     },
-    "isPublicDescription": "Allow everyone to see this news item.",
+    "editor": "Editor",
+    "preview": "Preview",
+    "isPublicDescription": "Share this news also for non-logged in users.",
     "language": {
       "label": "Language",
-      "baseLanguage": "Base language",
+      "baseLanguage": "Default",
       "notAddedLanguages": "Languages to add",
       "createTitle": "Create translation",
       "createDescription": "Create a translation for this news in {{language}}?",
@@ -2008,6 +2013,14 @@
   },
   "richTextEditor": {
     "toolbar": {
+      "format": {
+        "placeholder": "Select format",
+        "paragraph": "Paragraph",
+        "h1": "Heading 1",
+        "h2": "Heading 2",
+        "h3": "Heading 3",
+        "h4": "Heading 4"
+      },
       "link": {
         "tooltip": "Link: Makes selected text a hyperlink",
         "dialog": {
@@ -2158,6 +2171,100 @@
     "delete": {
       "title": "Delete Q&A",
       "confirm": "Are you sure you want to delete Q&A?"
+    }
+  },
+  "adminArticleView": {
+    "toc": {
+      "title": "Knowledge base",
+      "actions": {
+        "add": "Add",
+        "newLabel": "New",
+        "newSection": "New section",
+        "newArticle": "New article"
+      }
+    },
+    "dialog": {
+      "createArticle": {
+        "title": "Create article",
+        "sectionLabel": "Section",
+        "sectionPlaceholder": "Select a section",
+        "create": "Create"
+      }
+    },
+    "toast": {
+      "createSectionError": "Failed to create section",
+      "updateError": "Failed to update",
+      "languageAlreadyExists": "This language already exists",
+      "createLanguageError": "Failed to add language",
+      "minimumLanguageError": "At least one language is required",
+      "cannotRemoveBaseLanguage": "Base language cannot be removed",
+      "removeLanguageError": "Failed to remove language",
+      "sectionHasAssignedArticles": "Cannot delete a section with assigned articles",
+      "deleteSectionError": "Failed to delete section",
+      "createError": "Failed to create article",
+      "deleteError": "Failed to delete article",
+      "notFoundError": "Article not found",
+      "invalidCoverType": "Invalid cover type",
+      "invalidLanguageError": "Invalid language"
+    },
+    "section": {
+      "editTitle": "Edit section",
+      "editDescription": "Update the section title and manage translations.",
+      "sectionId": "Section ID: {{id}}",
+      "cannotDeleteWithArticles": "You cannot delete a section that has assigned articles.",
+      "languageLabel": "Language",
+      "languageHelp": "Switch language to edit the title. If it isn't created yet, you'll be prompted to create it.",
+      "fields": {
+        "title": "Title",
+        "titleError": "Title is required"
+      },
+      "delete": {
+        "title": "Delete section",
+        "description": "Are you sure you want to delete this section? This action cannot be undone."
+      },
+      "language": {
+        "label": "Language",
+        "baseLanguage": "Default",
+        "notAddedLanguages": "Not added",
+        "createTitle": "Create language",
+        "createDescription": "Create the {{language}} version for this section?",
+        "deleteTitle": "Delete language",
+        "deleteDescription": "Delete the {{language}} version for this section?"
+      }
+    },
+    "form": {
+      "createTitle": "Create article",
+      "editTitle": "Edit article",
+      "createButton": "Create and edit",
+      "saveButton": "Save",
+      "fields": {
+        "title": "Title",
+        "summary": "Introduction",
+        "content": "Content",
+        "status": "Status",
+        "isPublic": "Public",
+        "cover": "Cover image"
+      },
+      "placeholders": {
+        "title": "Enter title",
+        "summary": "Enter introduction"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published"
+      },
+      "isPublicDescription": "Visible to all users",
+      "preview": "Preview",
+      "editor": "Editor"
+    }
+  },
+  "articlesView": {
+    "notFound": "Article not found",
+    "previousArticle": "Previous article",
+    "nextArticle": "Next article",
+    "deleteModal": {
+      "title": "Delete article",
+      "description": "Are you sure you want to delete this article? This action cannot be undone."
     }
   }
 }

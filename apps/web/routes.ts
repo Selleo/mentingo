@@ -19,6 +19,16 @@ export const routes: (
           route("qa", "modules/QA/QA.page.tsx");
           route("qa/new", "modules/QA/CreateQA.page.tsx");
           route("qa/:id", "modules/QA/EditQA.page.tsx");
+          route("articles", "modules/Articles/Articles.page.tsx");
+          route("articles/:articleId", "modules/Articles/ArticleDetails.page.tsx", {
+            id: "article-details",
+          });
+          route("news/:newsId/edit", "modules/News/NewsForm.page.tsx", {
+            id: "edit-news",
+          });
+          route("news/add", "modules/News/NewsForm.page.tsx", {
+            id: "add-news",
+          });
           route("news", "modules/News/News.page.tsx");
           route("news/:newsId", "modules/News/NewsDetails.page.tsx", {
             id: "news-details",
@@ -31,11 +41,8 @@ export const routes: (
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
           route("announcements", "modules/Announcements/Announcements.page.tsx");
-          route("news/:newsId/edit", "modules/News/NewsForm.page.tsx", {
-            id: "edit-news",
-          });
-          route("news/add", "modules/News/NewsForm.page.tsx", {
-            id: "add-news",
+          route("articles/:articleId/edit", "modules/Articles/ArticleForm.page.tsx", {
+            id: "edit-article",
           });
           route("profile/:id", "modules/Profile/Profile.page.tsx");
         });

@@ -498,6 +498,13 @@
       "when": 1765981661766,
       "tag": "0070_add_news_table",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1765998441888,
+      "tag": "0071_added_articles_table",
+      "breakpoints": true
     }
   ]
 }

@@ -3,16 +3,16 @@ import { formatDate } from "date-fns";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteNews } from "~/api/mutations";
+import { useNews } from "~/api/queries";
+import { Icon } from "~/components/Icon";
+import { PageWrapper } from "~/components/PageWrapper";
+import Viewer from "~/components/RichText/Viever";
+import { TOC } from "~/components/TOC/TOC";
+import { Button } from "~/components/ui/button";
+import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 
-import { useDeleteNews } from "../../api/mutations";
-import { useNews } from "../../api/queries";
-import { Icon } from "../../components/Icon";
-import { PageWrapper } from "../../components/PageWrapper";
-import Viewer from "../../components/RichText/Viever";
-import { TOC } from "../../components/TOC/TOC";
-import { Button } from "../../components/ui/button";
-import { useUserRole } from "../../hooks/useUserRole";
 import Loader from "../common/Loader/Loader";
 import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
@@ -62,7 +62,7 @@ export default function NewsDetailsPage() {
         { title: news.title, href: `/news/${news.id}` },
       ]}
       className="flex flex-col gap-10 bg-neutral-50/80"
-      sideContent={<TOC contentHtml={news.content} onContentWithIds={handleContentWithIds} />}
+      rightSideContent={<TOC contentHtml={news.content} onContentWithIds={handleContentWithIds} />}
     >
       {isAdminLike && (
         <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
@@ -81,10 +81,10 @@ export default function NewsDetailsPage() {
           <Button
             variant="outline"
             className="w-28 gap-2"
-            onClick={() => {
+            onClick={async () => {
               if (!newsId) return;
 
-              deleteNews(
+              await deleteNews(
                 { id: newsId },
                 {
                   onSuccess: () => {
@@ -134,7 +134,9 @@ export default function NewsDetailsPage() {
           </div>
         </div>
 
-        {news.content ? <Viewer variant="news" content={contentWithIds} className="px-10" /> : null}
+        {news.content ? (
+          <Viewer variant="news" content={contentWithIds || news.content} className="px-10" />
+        ) : null}
 
         <div className="mx-auto w-full border-b border-primary-100" />
 

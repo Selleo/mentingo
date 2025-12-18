@@ -2,7 +2,7 @@ import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { EditorContent, useEditor, type Editor as TiptapEditor } from "@tiptap/react";
 import { useEffect } from "react";
 
-import { cn } from "../../lib/utils";
+import { cn } from "~/lib/utils";
 
 import { plugins } from "./plugins";
 import { defaultClasses } from "./styles";
