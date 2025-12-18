@@ -9,13 +9,17 @@ import { StarterKit } from "@tiptap/starter-kit";
 import { Iframe } from "~/components/RichText/extensions/iframe";
 
 const HeadingWithId = Heading.extend({
-  addAttributes: () => ({
-    id: {
-      default: null,
-      parseHTML: (element) => element.getAttribute("id"),
-      renderHTML: (attrs) => (attrs.id ? { id: attrs.id } : {}),
-    },
-  }),
+  name: "heading",
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      id: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("id"),
+        renderHTML: (attrs) => (attrs.id ? { id: attrs.id } : {}),
+      },
+    };
+  },
 });
 
 const LinkWithDownload = Link.extend({

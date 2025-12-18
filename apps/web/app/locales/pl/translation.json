@@ -184,15 +184,15 @@
       "summary": "Dodaj krótkie podsumowanie",
       "intro": "Dodaj krótkie wprowadzenie"
     },
-    "createOrEdit": "Dodaj/edytuj aktualność",
+    "create": "Dodaj",
     "edit": "Edytuj",
     "status": {
-      "draft": "Szkic",
-      "published": "Opublikowany"
+      "draft": "Wersja robocza",
+      "published": "Opublikowany",
+      "draftMany": "Wersje robocze",
+      "publishedMany": "Opublikowane"
     },
     "button": {
-      "save": "Zapisz aktualność",
-      "edit": "Edytuj aktualność",
       "delete": "Usuń"
     },
     "validation": {
@@ -202,7 +202,9 @@
       "imageRequired": "Obraz jest wymagany",
       "statusRequired": "Status jest wymagany"
     },
-    "isPublicDescription": "Pozwól wszystkim zobaczyć tę aktualność.",
+    "editor": "Edytor",
+    "preview": "Podgląd",
+    "isPublicDescription": "Udostępnij tę aktualność także dla niezalogowanych użytkowników.",
     "language": {
       "label": "Język",
       "baseLanguage": "Język bazowy",
@@ -2026,6 +2028,14 @@
   },
   "richTextEditor": {
     "toolbar": {
+      "format": {
+        "placeholder": "Wybierz format",
+        "paragraph": "Tekst zwykły",
+        "h1": "Nagłówek 1",
+        "h2": "Nagłówek 2",
+        "h3": "Nagłówek 3",
+        "h4": "Nagłówek 4"
+      },
       "link": {
         "tooltip": "Link: Wstaw lub edytuj link",
         "dialog": {

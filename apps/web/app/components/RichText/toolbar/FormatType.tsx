@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import {
   Select,
   SelectContent,
@@ -14,6 +16,8 @@ type FormatTypeProps = {
 };
 
 export function FormatType({ editor }: FormatTypeProps) {
+  const { t } = useTranslation();
+
   const value = () => {
     if (editor.isActive("paragraph")) return "paragraph";
     if (editor.isActive("heading", { level: 1 })) return "h1";
@@ -58,29 +62,25 @@ export function FormatType({ editor }: FormatTypeProps) {
     }
 
     const chain = editor.chain().focus();
-    if (value === "paragraph") return chain.setNode("paragraph").run();
-    if (value === "h1") return chain.setNode("heading", { level: 1 }).run();
-    if (value === "h2") return chain.setNode("heading", { level: 2 }).run();
-    if (value === "h3") return chain.setNode("heading", { level: 3 }).run();
-    if (value === "h4") return chain.setNode("heading", { level: 4 }).run();
-    if (value === "h5") return chain.setNode("heading", { level: 5 }).run();
-    if (value === "h6") return chain.setNode("heading", { level: 6 }).run();
+    if (value === "paragraph") return chain.setParagraph().run();
+    if (value === "h1") return chain.setHeading({ level: 1 }).run();
+    if (value === "h2") return chain.setHeading({ level: 2 }).run();
+    if (value === "h3") return chain.setHeading({ level: 3 }).run();
+    if (value === "h4") return chain.setHeading({ level: 4 }).run();
   };
 
   return (
     <Select onValueChange={onChange} defaultValue={value()} value={value()}>
       <SelectTrigger className="invisible h-8 w-[120px] sm:visible">
-        <SelectValue placeholder="Select format" />
+        <SelectValue placeholder={t("richTextEditor.toolbar.format.placeholder")} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectItem value="paragraph">Paragraph</SelectItem>
-          <SelectItem value="h1">H1</SelectItem>
-          <SelectItem value="h2">H2</SelectItem>
-          <SelectItem value="h3">H3</SelectItem>
-          <SelectItem value="h4">H4</SelectItem>
-          <SelectItem value="h5">H5</SelectItem>
-          <SelectItem value="h6">H6</SelectItem>
+          <SelectItem value="paragraph">{t("richTextEditor.toolbar.format.paragraph")}</SelectItem>
+          <SelectItem value="h1">{t("richTextEditor.toolbar.format.h1")}</SelectItem>
+          <SelectItem value="h2">{t("richTextEditor.toolbar.format.h2")}</SelectItem>
+          <SelectItem value="h3">{t("richTextEditor.toolbar.format.h3")}</SelectItem>
+          <SelectItem value="h4">{t("richTextEditor.toolbar.format.h4")}</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>

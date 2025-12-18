@@ -183,15 +183,15 @@
       "summary": "Add a short summary",
       "intro": "Add a short intro"
     },
-    "createOrEdit": "Create news",
+    "create": "Create",
     "edit": "Edit",
     "status": {
       "draft": "Draft",
-      "published": "Published"
+      "published": "Published",
+      "draftMany": "Drafts",
+      "publishedMany": "Published"
     },
     "button": {
-      "save": "Save news",
-      "edit": "Edit news",
       "delete": "Delete"
     },
     "validation": {
@@ -201,7 +201,9 @@
       "imageRequired": "Image is required",
       "statusRequired": "Status is required"
     },
-    "isPublicDescription": "Allow everyone to see this news item.",
+    "editor": "Editor",
+    "preview": "Preview",
+    "isPublicDescription": "Share this news also for non-logged in users.",
     "language": {
       "label": "Language",
       "baseLanguage": "Base language",
@@ -2011,6 +2013,14 @@
   },
   "richTextEditor": {
     "toolbar": {
+      "format": {
+        "placeholder": "Select format",
+        "paragraph": "Paragraph",
+        "h1": "Heading 1",
+        "h2": "Heading 2",
+        "h3": "Heading 3",
+        "h4": "Heading 4"
+      },
       "link": {
         "tooltip": "Link: Makes selected text a hyperlink",
         "dialog": {

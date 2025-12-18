@@ -117,12 +117,12 @@ function NewsPage() {
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-48">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="published">{t("newsView.status.published")}</SelectItem>
-                    <SelectItem value="draft">{t("newsView.status.draft")}</SelectItem>
+                    <SelectItem value="published">{t("newsView.status.publishedMany")}</SelectItem>
+                    <SelectItem value="draft">{t("newsView.status.draftMany")}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
