@@ -316,11 +316,19 @@ export class ArticlesRepository {
       );
   }
 
-  async getArticleSections(requestedLanguage: SupportedLanguages, conditions: SQL<unknown>[]) {
-    const sectionTitle = this.localizationService.getFieldByLanguage(
-      articleSections.title,
-      requestedLanguage,
-    );
+  async getArticleSections(
+    requestedLanguage: SupportedLanguages,
+    conditions: SQL<unknown>[],
+    currentUser?: CurrentUser,
+  ) {
+    const sectionTitle =
+      currentUser?.role === USER_ROLES.ADMIN || currentUser?.role === USER_ROLES.CONTENT_CREATOR
+        ? this.localizationService.getFieldByLanguage(articleSections.title, requestedLanguage)
+        : this.localizationService.getLocalizedSqlField(
+            articleSections.title,
+            requestedLanguage,
+            articleSections,
+          );
 
     const articleTitle = this.localizationService.getFieldByLanguage(
       articles.title,

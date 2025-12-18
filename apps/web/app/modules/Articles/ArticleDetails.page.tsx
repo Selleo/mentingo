@@ -79,7 +79,7 @@ export default function ArticleDetailsPage() {
             variant="outline"
             className="w-28 gap-2"
             onClick={() => {
-              navigate(`edit`);
+              navigate(`/articles/${article.id}/edit`);
             }}
           >
             <Icon name="Edit" className="size-4" />
@@ -104,11 +104,11 @@ export default function ArticleDetailsPage() {
           <h1 className="text-[40px] font-bold leading-[1.1] text-neutral-950">{article.title}</h1>
           <p className="text-lg font-normal leading-8 text-neutral-700">{article.summary}</p>
           <div className="flex flex-wrap items-center gap-1 text-sm font-normal leading-5 text-neutral-700">
-            <div className="flex items-center gap-2 bg-white px-3 py-1">
+            <div className="flex items-center gap-2 px-3 py-1">
               <Icon name="User" className="text-neutral-600 size-4" />
               <p className="text-neutral-800">{article.authorName}</p>
             </div>
-            <div className="flex items-center gap-2 bg-white px-3 py-1">
+            <div className="flex items-center gap-2 px-3 py-1">
               <Icon name="Calendar" className="text-neutral-600 size-4" />
               <p className="text-neutral-800">
                 {publishedDate ? format(publishedDate, "d MMMM yyyy") : "-"}
@@ -126,12 +126,6 @@ export default function ArticleDetailsPage() {
             />
           </div>
         ) : null}
-
-        {article.summary && (
-          <div className="border-r p-6 bg-red-100 border-l-[5px] rounded-r-lg border-l-red-500">
-            {article.summary}
-          </div>
-        )}
 
         {contentWithIds || article.content ? (
           <Viewer variant="article" content={contentWithIds || article.content} className="mt-4" />

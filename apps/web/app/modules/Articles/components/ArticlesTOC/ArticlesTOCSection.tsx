@@ -85,7 +85,7 @@ export function ArticlesTOCSection({
                   type="button"
                   variant="ghost"
                   className={cn(
-                    "group h-auto w-full justify-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-primary-50 hover:text-primary-700",
+                    "group h-auto w-full justify-start items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-primary-50 hover:text-primary-700",
                     isActive ? "bg-primary-50 text-primary-700" : "text-neutral-700",
                   )}
                   onClick={() => onNavigate(article.id)}
@@ -93,11 +93,15 @@ export function ArticlesTOCSection({
                   <Icon
                     name="Article"
                     className={cn(
-                      "size-4 shrink-0 transition-colors group-hover:text-primary-700",
+                      "size-4 shrink-0 mt-0.5 transition-colors group-hover:text-primary-700",
                       isActive ? "text-primary-700" : "text-neutral-500",
                     )}
                   />
-                  <span className={cn("truncate text-sm", { "font-medium": isActive })}>
+                  <span
+                    className={cn("whitespace-normal break-words text-sm", {
+                      "font-medium": isActive,
+                    })}
+                  >
                     {article.title}
                   </span>
                 </Button>

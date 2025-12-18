@@ -1,4 +1,10 @@
-import type { courses, questionsAndAnswers, news, articles } from "src/storage/schema";
+import type {
+  courses,
+  questionsAndAnswers,
+  news,
+  articles,
+  articleSections,
+} from "src/storage/schema";
 
 export const ENTITY_TYPE = {
   COURSE: "course",
@@ -19,4 +25,9 @@ export const ENTITY_FIELD = {
   DESCRIPTION: "description",
 } as const;
 
-export type BaseTable = typeof courses | typeof questionsAndAnswers | typeof articles | typeof news;
+export type BaseTable =
+  | typeof courses
+  | typeof questionsAndAnswers
+  | typeof articles
+  | typeof news
+  | typeof articleSections;

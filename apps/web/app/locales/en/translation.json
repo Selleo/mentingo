@@ -206,7 +206,7 @@
     "isPublicDescription": "Share this news also for non-logged in users.",
     "language": {
       "label": "Language",
-      "baseLanguage": "Base language",
+      "baseLanguage": "Default",
       "notAddedLanguages": "Languages to add",
       "createTitle": "Create translation",
       "createDescription": "Create a translation for this news in {{language}}?",

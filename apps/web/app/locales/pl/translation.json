@@ -207,7 +207,7 @@
     "isPublicDescription": "Udostępnij tę aktualność także dla niezalogowanych użytkowników.",
     "language": {
       "label": "Język",
-      "baseLanguage": "Język bazowy",
+      "baseLanguage": "Domyślny",
       "notAddedLanguages": "Języki do dodania",
       "createTitle": "Utwórz tłumaczenie",
       "createDescription": "Utworzyć tłumaczenie tej aktualności na język {{language}}?",

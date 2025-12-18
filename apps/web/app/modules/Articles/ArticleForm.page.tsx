@@ -327,7 +327,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                           <div className="flex flex-col gap-y-1.5">
                             <Editor
                               id="content"
-                              lessonId="lessonId"
                               content={field.value}
                               allowFiles
                               acceptedFileTypes={[

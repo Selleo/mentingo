@@ -317,6 +317,7 @@ export class ArticlesService {
     const sections = await this.articlesRepository.getArticleSections(
       requestedLanguage,
       conditions,
+      currentUser,
     );
 
     return { sections };
