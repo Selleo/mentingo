@@ -14598,6 +14598,9 @@
                 },
                 "chapterDisplayOrder": {
                   "type": "number"
+                },
+                "searchRank": {
+                  "type": "number"
                 }
               },
               "required": [

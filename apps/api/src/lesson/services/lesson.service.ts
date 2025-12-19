@@ -30,12 +30,12 @@ import { LessonRepository } from "../repositories/lesson.repository";
 
 import type {
   AnswerQuestionBody,
-  EnrolledLesson,
   EnrolledLessonsFilters,
   LessonShow,
   QuestionBody,
   QuestionDetails,
 } from "../lesson.schema";
+import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Response } from "express";
 import type { UUIDType } from "src/common";
@@ -399,7 +399,7 @@ export class LessonService {
     userId: UUIDType,
     filters: EnrolledLessonsFilters,
     language: SupportedLanguages,
-  ): Promise<EnrolledLesson[]> {
+  ): Promise<EnrolledLessonWithSearch[]> {
     return await this.lessonRepository.getEnrolledLessons(userId, filters, language);
   }
 

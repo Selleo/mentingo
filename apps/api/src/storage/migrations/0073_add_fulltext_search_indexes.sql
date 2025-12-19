@@ -1,0 +1,32 @@
+-- Custom SQL migration file, put you code below! --
+
+-- Full-text search GIN indexes for lesson content
+-- These are functional indexes that compute tsvector on the fly
+
+-- Lessons: search title and description (JSONB fields)
+CREATE INDEX IF NOT EXISTS lessons_search_idx ON lessons USING GIN (
+  (
+    setweight(jsonb_to_tsvector('english', title, '["string"]'), 'A') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(description, '{}'::jsonb), '["string"]'), 'B')
+  )
+);
+
+-- Questions: search title, description, and solution explanation
+CREATE INDEX IF NOT EXISTS questions_search_idx ON questions USING GIN (
+  (
+    setweight(jsonb_to_tsvector('english', title, '["string"]'), 'A') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(description, '{}'::jsonb), '["string"]'), 'B') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(solution_explanation, '{}'::jsonb), '["string"]'), 'C')
+  )
+);
+
+-- Question answer options: search option text
+CREATE INDEX IF NOT EXISTS question_answer_options_search_idx ON question_answer_options USING GIN (
+  jsonb_to_tsvector('english', option_text, '["string"]')
+);
+
+-- Lesson resources: search source content (HTML stripped)
+CREATE INDEX IF NOT EXISTS lesson_resources_search_idx ON lesson_resources USING GIN (
+  to_tsvector('english', regexp_replace(regexp_replace(COALESCE(source, ''), '<[^>]+>', '', 'g'), '&[^;]+;', '', 'g'))
+);
+

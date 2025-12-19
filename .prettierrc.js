@@ -16,9 +16,6 @@ module.exports = {
   overrides: [
     {
       files: ["apps/web/**/*.{ts,tsx,js,jsx}"],
-      options: {
-        tailwindConfig: path.resolve(__dirname, "apps/web/tailwind.config.ts"),
-      },
     },
   ],
 };

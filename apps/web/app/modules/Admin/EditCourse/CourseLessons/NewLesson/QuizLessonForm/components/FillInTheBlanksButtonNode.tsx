@@ -15,7 +15,9 @@ const FillInTheBlanksButton = ({ node, getPos, editor }: NodeViewProps) => {
 
     if (getPos && editor) {
       const pos = getPos();
-      editor.commands.deleteRange({ from: pos, to: pos + 1 });
+      if (typeof pos === "number") {
+        editor.commands.deleteRange({ from: pos, to: pos + 1 });
+      }
     }
   };
 
