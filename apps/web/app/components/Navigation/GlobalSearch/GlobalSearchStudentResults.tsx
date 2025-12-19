@@ -42,7 +42,7 @@ export const GlobalSearchStudentResults = ({
         { enabled: debouncedSearch.length >= 3 },
       ),
       studentLessonsQueryOptions(
-        { searchQuery: debouncedSearch, lessonCompleted: false },
+        { searchQuery: debouncedSearch },
         { enabled: debouncedSearch.length >= 3 },
       ),
     ],

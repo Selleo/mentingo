@@ -11,6 +11,7 @@ import {
   chapters,
   courses,
   lessons,
+  questionAnswerOptions,
   questions,
   quizAttempts,
   studentCourses,
@@ -26,6 +27,21 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { AdminQuestionBody, EnrolledLessonsFilters } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
+
+export type EnrolledLessonWithSearch = {
+  id: UUIDType;
+  title: string;
+  type: LessonTypes;
+  description: string | null;
+  displayOrder: number;
+  lessonCompleted: boolean;
+  courseId: UUIDType;
+  courseTitle: string;
+  chapterId: UUIDType;
+  chapterTitle: string;
+  chapterDisplayOrder: number;
+  searchRank?: number;
+};
 
 @Injectable()
 export class LessonRepository {
@@ -351,35 +367,24 @@ export class LessonRepository {
     userId: UUIDType,
     filters: EnrolledLessonsFilters,
     language: SupportedLanguages,
-  ) {
-    const conditions = [
+  ): Promise<EnrolledLessonWithSearch[]> {
+    const conditions: SQL[] = [
       eq(studentCourses.studentId, userId),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
     ];
 
+    // Simple filters (non-search)
     if (filters.title) {
       conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.title}%`})`,
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
+             WHERE v ILIKE ${`%${filters.title}%`})`,
       );
     }
 
     if (filters.description) {
       conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
-      );
-    }
-
-    if (filters.searchQuery) {
-      conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`}) OR EXISTS (SELECT 1 FROM jsonb_each_text(${
-          lessons.description
-        }) AS t(k, v) WHERE v ILIKE ${`%${filters.searchQuery}%`})`,
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.description}) AS t(k, v) 
+             WHERE v ILIKE ${`%${filters.description}%`})`,
       );
     }
 
@@ -391,6 +396,84 @@ export class LessonRepository {
       }
     }
 
+    // Full-text search across all lesson content
+    if (filters.searchQuery) {
+      const searchTerm = filters.searchQuery.trim();
+
+      // Define tsvector expressions matching our functional GIN indexes
+      const lessonTsVector = sql`(
+        setweight(jsonb_to_tsvector('english', ${lessons.title}, '["string"]'), 'A') ||
+        setweight(jsonb_to_tsvector('english', COALESCE(${lessons.description}, '{}'::jsonb), '["string"]'), 'B')
+      )`;
+
+      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+
+      // Search across lessons, questions, and answer options
+      // Returns lessons where ANY of these match:
+      // 1. Lesson title/description
+      // 2. Question title/description/solution
+      // 3. Answer option text
+      // 4. Lesson resource content
+      conditions.push(sql`(
+        ${lessonTsVector} @@ ${tsQuery}
+        OR EXISTS (
+          SELECT 1 FROM ${questions} q
+          WHERE q.lesson_id = ${lessons.id}
+          AND (
+            setweight(jsonb_to_tsvector('english', q.title, '["string"]'), 'A') ||
+            setweight(jsonb_to_tsvector('english', COALESCE(q.description, '{}'::jsonb), '["string"]'), 'B') ||
+            setweight(jsonb_to_tsvector('english', COALESCE(q.solution_explanation, '{}'::jsonb), '["string"]'), 'C')
+          ) @@ ${tsQuery}
+        )
+        OR EXISTS (
+          SELECT 1 FROM ${questions} q
+          INNER JOIN ${questionAnswerOptions} qao ON qao.question_id = q.id
+          WHERE q.lesson_id = ${lessons.id}
+          AND jsonb_to_tsvector('english', qao.option_text, '["string"]') @@ ${tsQuery}
+        )
+        OR EXISTS (
+          SELECT 1 FROM ${lessonResources} lr
+          WHERE lr.lesson_id = ${lessons.id}
+          AND to_tsvector('english', regexp_replace(regexp_replace(COALESCE(lr.source, ''), '<[^>]+>', '', 'g'), '&[^;]+;', '', 'g')) @@ ${tsQuery}
+        )
+      )`);
+
+      // Execute query with ranking
+      return this.db
+        .select({
+          id: lessons.id,
+          title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+          type: sql<LessonTypes>`${lessons.type}`,
+          description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+          displayOrder: sql<number>`${lessons.displayOrder}`,
+          lessonCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
+          courseId: courses.id,
+          courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
+          chapterId: chapters.id,
+          chapterTitle: this.localizationService.getLocalizedSqlField(chapters.title, language),
+          chapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
+          searchRank: sql<number>`ts_rank(${lessonTsVector}, ${tsQuery})`,
+        })
+        .from(lessons)
+        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+        .innerJoin(courses, eq(courses.id, chapters.courseId))
+        .innerJoin(studentCourses, eq(studentCourses.courseId, courses.id))
+        .leftJoin(
+          studentLessonProgress,
+          and(
+            eq(studentLessonProgress.lessonId, lessons.id),
+            eq(studentLessonProgress.studentId, userId),
+          ),
+        )
+        .where(and(...conditions))
+        .orderBy(
+          desc(sql`ts_rank(${lessonTsVector}, ${tsQuery})`),
+          chapters.displayOrder,
+          lessons.displayOrder,
+        );
+    }
+
+    // Fallback without full-text search
     return this.db
       .select({
         id: lessons.id,

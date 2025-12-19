@@ -122,7 +122,6 @@ This guide provides a complete walkthrough for creating, building, and integrati
 2. Navigate to **Prompts** and click **Create new prompt**.
 
 3. Configure the prompt:
-
    - **Name:** Must exactly match the `id` from your YAML file (e.g., `lesson-summary`).
    - **Variables:** Add each variable from your schema with exact names.
 

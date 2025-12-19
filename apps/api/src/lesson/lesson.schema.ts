@@ -318,6 +318,7 @@ export const enrolledLessonSchema = Type.Object({
   chapterId: UUIDSchema,
   chapterTitle: Type.String(),
   chapterDisplayOrder: Type.Number(),
+  searchRank: Type.Optional(Type.Number()),
 });
 
 export type AdminLessonWithContentSchema = Static<typeof adminLessonSchema>;
