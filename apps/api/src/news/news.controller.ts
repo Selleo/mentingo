@@ -107,15 +107,17 @@ export class NewsController {
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
     ],
     response: paginatedNewsListResponseSchema,
   })
   async getNewsList(
     @Query("language") language: SupportedLanguages,
     @Query("page") page = 1,
+    @Query("searchQuery") searchQuery?: string,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<GetNewsResponse[]>> {
-    const newsList = await this.newsService.getNewsList(language, page, currentUser);
+    const newsList = await this.newsService.getNewsList(language, page, currentUser, searchQuery);
 
     return new PaginatedResponse(newsList);
   }

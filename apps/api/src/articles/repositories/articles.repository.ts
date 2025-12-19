@@ -144,7 +144,25 @@ export class ArticlesRepository {
       });
   }
 
-  async getArticles(requestedLanguage: SupportedLanguages, conditions: SQL<unknown>[]) {
+  async getArticles(
+    requestedLanguage: SupportedLanguages,
+    conditions: SQL<unknown>[],
+    searchQuery?: string,
+  ) {
+    const searchConditions = [...conditions];
+
+    // Full-text search condition
+    if (searchQuery && searchQuery.trim().length >= 3) {
+      const searchTerm = searchQuery.trim();
+      const articlesTsVector = sql`(
+        setweight(jsonb_to_tsvector('english', ${articles.title}, '["string"]'), 'A') ||
+        setweight(jsonb_to_tsvector('english', COALESCE(${articles.summary}, '{}'::jsonb), '["string"]'), 'B') ||
+        setweight(jsonb_to_tsvector('english', COALESCE(${articles.content}, '{}'::jsonb), '["string"]'), 'C')
+      )`;
+      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+      searchConditions.push(sql`${articlesTsVector} @@ ${tsQuery}`);
+    }
+
     return this.db
       .select({
         ...getTableColumns(articles),
@@ -154,7 +172,7 @@ export class ArticlesRepository {
       .from(articles)
       .innerJoin(articleSections, eq(articleSections.id, articles.articleSectionId))
       .leftJoin(users, eq(users.id, articles.authorId))
-      .where(and(...conditions))
+      .where(and(...searchConditions))
       .orderBy(desc(articles.publishedAt));
   }
 

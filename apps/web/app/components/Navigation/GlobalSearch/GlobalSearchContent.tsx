@@ -9,9 +9,12 @@ import type {
   GetAllCategoriesResponse,
   GetAllCoursesResponse,
   GetAllGroupsResponse,
+  GetAllQAResponse,
   GetAnnouncementsForUserResponse,
+  GetArticlesResponse,
   GetAvailableCoursesResponse,
   GetEnrolledLessonsResponse,
+  GetNewsListResponse,
   GetStudentCoursesResponse,
   GetUsersResponse,
 } from "~/api/generated-api";
@@ -80,6 +83,27 @@ export type GlobalSearchItem =
         item: GetEnrolledLessonsResponse["data"][number];
         onSelect: () => void;
       }) => JSX.Element;
+    }
+  | {
+      resultType: "news";
+      resultData: GetNewsListResponse["data"];
+      Component: (props: {
+        item: GetNewsListResponse["data"][number];
+        onSelect: () => void;
+      }) => JSX.Element;
+    }
+  | {
+      resultType: "articles";
+      resultData: GetArticlesResponse;
+      Component: (props: {
+        item: GetArticlesResponse[number];
+        onSelect: () => void;
+      }) => JSX.Element;
+    }
+  | {
+      resultType: "qa";
+      resultData: GetAllQAResponse;
+      Component: (props: { item: GetAllQAResponse[number]; onSelect: () => void }) => JSX.Element;
     };
 
 export const GlobalSearchContent = ({
