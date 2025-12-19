@@ -152,19 +152,25 @@ export class NotifyUsersHandler implements IEventHandler {
     const courseLink = `${process.env.CORS_ORIGIN}/course/${courseId}`;
     const { courseName } = await this.courseService.getCourseEmailData(courseId);
 
+    const dueDatesByStudent = await this.courseService.getStudentsDueDatesForCourse(
+      courseId,
+      studentIds,
+    );
+
     const studentContacts = await this.userService.getStudentEmailsByIds(studentIds);
 
-    await Promise.all(
+    await Promise.allSettled(
       studentContacts.map(async ({ id: studentId, email }) => {
         const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(studentId);
 
         const { text, html } = new UserAssignedToCourseEmail({
           courseName,
           courseLink,
+          formatedCourseDueDate: dueDatesByStudent[studentId] ?? null,
           ...defaultEmailSettings,
         });
 
-        return this.emailService.sendEmailWithLogo({
+        return await this.emailService.sendEmailWithLogo({
           to: email,
           subject: getEmailSubject("userCourseAssignmentEmail", defaultEmailSettings.language, {
             courseName,

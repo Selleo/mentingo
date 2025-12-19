@@ -235,13 +235,15 @@ const CreatePromotionCode = () => {
                 <Label htmlFor="expiresAt" className="text-right">
                   {t("adminPromotionCodesView.field.expiresAt")}
                 </Label>
-                <Input
-                  id="expiresAt"
-                  {...field}
-                  type="date"
-                  min={new Date().toISOString()}
-                  value={field.value}
-                />
+                <div className="relative">
+                  <Input
+                    id="expiresAt"
+                    {...field}
+                    type="date"
+                    min={new Date().toISOString()}
+                    value={field.value}
+                  />
+                </div>
               </FormItem>
             )}
           />

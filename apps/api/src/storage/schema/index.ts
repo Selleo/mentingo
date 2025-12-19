@@ -508,6 +508,8 @@ export const groupCourses = pgTable(
       .references(() => courses.id, { onDelete: "cascade" })
       .notNull(),
     enrolledBy: uuid("enrolled_by").references(() => users.id),
+    isMandatory: boolean("is_mandatory").notNull().default(false),
+    dueDate: timestamp("due_date", { withTimezone: true }),
   },
   (table) => ({
     unq: unique().on(table.groupId, table.courseId),

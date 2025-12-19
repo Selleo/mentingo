@@ -29,6 +29,7 @@ export const commonShowCourseSchema = Type.Object({
   stripePriceId: Type.Union([Type.String(), Type.Null()]),
   availableLocales: Type.Array(Type.Enum(SUPPORTED_LANGUAGES)),
   baseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
+  dueDate: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const commonShowBetaCourseSchema = Type.Object({

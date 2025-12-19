@@ -22,6 +22,7 @@ export type UserSettings = {
 export type AdminSettings = UserSettings & {
   adminNewUserNotification: boolean;
   adminFinishedCourseNotification: boolean;
+  adminOverdueCourseNotification: boolean;
 };
 
 export type AllSettings = UserSettings | AdminSettings | GlobalSettings;

@@ -21,7 +21,7 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator className={cn("flex items-center justify-center text-current")}>
       {props.checked === "indeterminate" && <Minus className="size-4" />}
 
-      {isSquareCheck && <div className="border-px h-[9px] w-[9px] bg-primary-700" />}
+      {isSquareCheck && <div className="border-px size-[9px] bg-primary-700" />}
 
       {!isSquareCheck && props.checked !== "indeterminate" && <Check className="size-4" />}
     </CheckboxPrimitive.Indicator>

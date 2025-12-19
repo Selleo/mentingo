@@ -505,6 +505,13 @@
       "when": 1765998441888,
       "tag": "0071_added_articles_table",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1766136948319,
+      "tag": "0072_add_is_mandatory_and_due_date_columns_to_group_courses",
+      "breakpoints": true
     }
   ]
 }

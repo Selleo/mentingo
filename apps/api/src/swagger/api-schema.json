@@ -406,6 +406,23 @@
         }
       }
     },
+    "/api/settings/admin/overdue-course-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminOverdueCourseNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminOverdueCourseNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/color-schema": {
       "patch": {
         "operationId": "SettingsController_updateColorSchema",
@@ -8348,6 +8365,54 @@
           "data"
         ]
       },
+      "UpdateAdminOverdueCourseNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              },
+              "configWarningDismissed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification",
+              "configWarningDismissed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UpdateColorSchemaBody": {
         "type": "object",
         "properties": {
@@ -10611,6 +10676,19 @@
               },
               "updatedAt": {
                 "type": "string"
+              },
+              "isMandatory": {
+                "type": "boolean"
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -10719,6 +10797,19 @@
                 },
                 "updatedAt": {
                   "type": "string"
+                },
+                "isMandatory": {
+                  "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -10996,6 +11087,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -11010,7 +11111,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           },
@@ -11251,6 +11353,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -11265,7 +11377,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           },
@@ -11410,6 +11523,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -11426,7 +11549,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           }
@@ -11759,6 +11883,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -11774,7 +11908,8 @@
               "stripeProductId",
               "stripePriceId",
               "availableLocales",
-              "baseLanguage"
+              "baseLanguage",
+              "dueDate"
             ]
           }
         },
@@ -12641,16 +12776,38 @@
       "EnrollGroupsToCourseBody": {
         "type": "object",
         "properties": {
-          "groupIds": {
+          "groups": {
             "type": "array",
             "items": {
-              "format": "uuid",
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "isMandatory": {
+                  "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "isMandatory"
+              ]
             }
           }
         },
         "required": [
-          "groupIds"
+          "groups"
         ]
       },
       "EnrollGroupsToCourseResponse": {

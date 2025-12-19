@@ -374,6 +374,8 @@ export class GroupService {
         name: groups.name,
         createdAt: groups.createdAt,
         updatedAt: groups.updatedAt,
+        isMandatory: groupCourses.isMandatory,
+        dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(groupCourses)
       .innerJoin(groups, eq(groups.id, groupCourses.groupId))

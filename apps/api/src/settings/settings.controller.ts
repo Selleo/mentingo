@@ -140,6 +140,19 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/overdue-course-notification")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    response: baseResponse(adminSettingsJSONContentSchema),
+  })
+  async updateAdminOverdueCourseNotification(
+    @CurrentUser("userId") userId: UUIDType,
+  ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
+    const result =
+      await this.settingsService.updateAdminSetOverdueCourseNotificationForUser(userId);
+    return new BaseResponse(result);
+  }
+
   @Patch("admin/color-schema")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
