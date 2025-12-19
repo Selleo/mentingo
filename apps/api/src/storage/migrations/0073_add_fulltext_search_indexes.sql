@@ -30,3 +30,29 @@ CREATE INDEX IF NOT EXISTS lesson_resources_search_idx ON lesson_resources USING
   to_tsvector('english', regexp_replace(regexp_replace(COALESCE(source, ''), '<[^>]+>', '', 'g'), '&[^;]+;', '', 'g'))
 );
 
+-- News: search title, summary, and content (JSONB fields)
+CREATE INDEX IF NOT EXISTS news_search_idx ON news USING GIN (
+  (
+    setweight(jsonb_to_tsvector('english', title, '["string"]'), 'A') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(summary, '{}'::jsonb), '["string"]'), 'B') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(content, '{}'::jsonb), '["string"]'), 'C')
+  )
+);
+
+-- Articles: search title, summary, and content (JSONB fields)
+CREATE INDEX IF NOT EXISTS articles_search_idx ON articles USING GIN (
+  (
+    setweight(jsonb_to_tsvector('english', title, '["string"]'), 'A') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(summary, '{}'::jsonb), '["string"]'), 'B') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(content, '{}'::jsonb), '["string"]'), 'C')
+  )
+);
+
+-- Q&A: search title and description (JSONB fields)
+CREATE INDEX IF NOT EXISTS questions_and_answers_search_idx ON questions_and_answers USING GIN (
+  (
+    setweight(jsonb_to_tsvector('english', title, '["string"]'), 'A') ||
+    setweight(jsonb_to_tsvector('english', COALESCE(description, '{}'::jsonb), '["string"]'), 'B')
+  )
+);
+

@@ -1862,6 +1862,7 @@ export interface GetEnrolledLessonsResponse {
     chapterId: string;
     chapterTitle: string;
     chapterDisplayOrder: number;
+    searchRank?: number;
   }[];
 }
 
@@ -7234,6 +7235,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -7427,6 +7429,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
         /** @min 1 */
         page?: number;
       },
@@ -7729,6 +7732,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl";
+        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>

@@ -334,13 +334,17 @@ export class ArticlesService {
     return updatedArticle;
   }
 
-  async getArticles(requestedLanguage: SupportedLanguages, currentUser?: CurrentUser) {
+  async getArticles(
+    requestedLanguage: SupportedLanguages,
+    currentUser?: CurrentUser,
+    searchQuery?: string,
+  ) {
     const conditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
       currentUser,
     );
 
-    return this.articlesRepository.getArticles(requestedLanguage, conditions);
+    return this.articlesRepository.getArticles(requestedLanguage, conditions, searchQuery);
   }
 
   async getDraftArticles(requestedLanguage: SupportedLanguages) {

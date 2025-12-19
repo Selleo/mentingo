@@ -262,7 +262,10 @@
       "availableCourses": "Dostępne kursy",
       "noSearchResults": "Brak wyników wyszukiwania dla:",
       "announcements": "Powiadomienia",
-      "lessons": "Lekcje"
+      "lessons": "Lekcje",
+      "news": "Aktualności",
+      "articles": "Artykuły",
+      "qa": "Pytania i odpowiedzi"
     }
   },
   "providerInformation": {

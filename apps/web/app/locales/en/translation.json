@@ -259,7 +259,10 @@
       "availableCourses": "Available Courses",
       "noSearchResults": "No search results for:",
       "announcements": "Announcements",
-      "lessons": "Lessons"
+      "lessons": "Lessons",
+      "news": "News",
+      "articles": "Articles",
+      "qa": "Q&A"
     }
   },
   "providerInformation": {

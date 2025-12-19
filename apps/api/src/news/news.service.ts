@@ -144,10 +144,27 @@ export class NewsService {
     return { page: currentPage, perPage, offset };
   }
 
-  async getNewsList(requestedLanguage: SupportedLanguages, page = 1, currentUser?: CurrentUser) {
+  async getNewsList(
+    requestedLanguage: SupportedLanguages,
+    page = 1,
+    currentUser?: CurrentUser,
+    searchQuery?: string,
+  ) {
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
+
+    // Full-text search condition
+    if (searchQuery && searchQuery.trim().length >= 3) {
+      const searchTerm = searchQuery.trim();
+      const newsTsVector = sql`(
+        setweight(jsonb_to_tsvector('english', ${news.title}, '["string"]'), 'A') ||
+        setweight(jsonb_to_tsvector('english', COALESCE(${news.summary}, '{}'::jsonb), '["string"]'), 'B') ||
+        setweight(jsonb_to_tsvector('english', COALESCE(${news.content}, '{}'::jsonb), '["string"]'), 'C')
+      )`;
+      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+      conditions.push(sql`${newsTsVector} @@ ${tsQuery}`);
+    }
 
     const newsList = await this.db
       .select({
