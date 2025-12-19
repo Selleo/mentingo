@@ -3254,15 +3254,6 @@
               "format": "uuid",
               "type": "string"
             }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -3290,73 +3281,6 @@
               "format": "uuid",
               "type": "string"
             }
-          },
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "studentName",
-                  "type": "string"
-                },
-                {
-                  "const": "totalSeconds",
-                  "type": "string"
-                },
-                {
-                  "const": "-studentName",
-                  "type": "string"
-                },
-                {
-                  "const": "-totalSeconds",
-                  "type": "string"
-                }
-              ]
-            }
           }
         ],
         "responses": {
@@ -3372,33 +3296,6 @@
         }
       }
     },
-    "/api/course/{courseId}/statistics/learning-time-filter-options": {
-      "get": {
-        "operationId": "CourseController_getCourseLearningStatisticsFilterOptions",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCourseLearningStatisticsFilterOptionsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/course/{courseId}/statistics/average-quiz-score": {
       "get": {
         "operationId": "CourseController_getAverageQuizScores",
@@ -3407,15 +3304,6 @@
             "name": "courseId",
             "required": true,
             "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -3487,15 +3375,6 @@
             "required": false,
             "in": "query",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
               "type": "string"
             }
           },
@@ -3618,23 +3497,6 @@
             }
           },
           {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "sort",
             "required": false,
             "in": "query",
@@ -3746,23 +3608,6 @@
           },
           {
             "name": "lessonId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "groupId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "search",
             "required": false,
             "in": "query",
             "schema": {
@@ -13945,17 +13790,13 @@
                     "count"
                   ]
                 }
-              },
-              "averageSeconds": {
-                "type": "number"
               }
             },
             "required": [
               "enrolledCount",
               "completionPercentage",
               "averageCompletionPercentage",
-              "courseStatusDistribution",
-              "averageSeconds"
+              "courseStatusDistribution"
             ]
           }
         },
@@ -13969,130 +13810,90 @@
           "data": {
             "type": "object",
             "properties": {
-              "users": {
+              "averagePerLesson": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "id": {
-                      "format": "uuid",
+                    "lessonId": {
                       "type": "string"
                     },
-                    "name": {
+                    "lessonTitle": {
                       "type": "string"
                     },
-                    "studentAvatarUrl": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                    "averageSeconds": {
+                      "type": "number"
+                    },
+                    "totalUsers": {
+                      "type": "number"
+                    },
+                    "totalSeconds": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "lessonId",
+                    "lessonTitle",
+                    "averageSeconds",
+                    "totalUsers",
+                    "totalSeconds"
+                  ]
+                }
+              },
+              "totalPerStudent": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "string"
+                    },
+                    "userFirstName": {
+                      "type": "string"
+                    },
+                    "userLastName": {
+                      "type": "string"
+                    },
+                    "userEmail": {
+                      "type": "string"
                     },
                     "totalSeconds": {
                       "type": "number"
                     },
-                    "groups": {
-                      "anyOf": [
-                        {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "name": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "name"
-                            ]
-                          }
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
+                    "lessonsWithTime": {
+                      "type": "number"
                     }
                   },
                   "required": [
-                    "id",
-                    "name",
-                    "studentAvatarUrl",
+                    "userId",
+                    "userFirstName",
+                    "userLastName",
+                    "userEmail",
                     "totalSeconds",
-                    "groups"
+                    "lessonsWithTime"
                   ]
                 }
-              }
-            },
-            "required": [
-              "users"
-            ]
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
               },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "GetCourseLearningStatisticsFilterOptionsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "groups": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    }
+              "courseTotals": {
+                "type": "object",
+                "properties": {
+                  "totalSeconds": {
+                    "type": "number"
                   },
-                  "required": [
-                    "id",
-                    "name"
-                  ]
-                }
+                  "uniqueUsers": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "totalSeconds",
+                  "uniqueUsers"
+                ]
               }
             },
             "required": [
-              "groups"
+              "averagePerLesson",
+              "totalPerStudent",
+              "courseTotals"
             ]
           }
         },
