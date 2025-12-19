@@ -1,1 +1,2 @@
-ALTER TABLE "group_courses" ADD COLUMN "settings" jsonb DEFAULT '{"isMandatory":false}'::jsonb NOT NULL;
+ALTER TABLE "group_courses" ADD COLUMN "is_mandatory" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "group_courses" ADD COLUMN "due_date" timestamp with time zone;

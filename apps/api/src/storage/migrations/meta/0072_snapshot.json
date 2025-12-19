@@ -1,5 +1,5 @@
 {
-  "id": "df6e4b8f-2efc-42ae-89c5-6f87f3a8726f",
+  "id": "a03ef53a-fa52-4c32-ad10-47e6dec9ca77",
   "prevId": "c7815fd1-570d-45da-88ff-a6a0ba758d20",
   "version": "7",
   "dialect": "postgresql",
@@ -1884,12 +1884,18 @@
           "primaryKey": false,
           "notNull": false
         },
-        "settings": {
-          "name": "settings",
-          "type": "jsonb",
+        "is_mandatory": {
+          "name": "is_mandatory",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": "'{\"isMandatory\":false}'::jsonb"
+          "default": false
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

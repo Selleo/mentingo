@@ -1606,6 +1606,7 @@ export class CourseService {
           studentId,
           courseId,
           enrolledByGroupId: userIdToGroupId.get(studentId) || null,
+          status: COURSE_ENROLLMENT.ENROLLED,
         }));
 
         const uniqueCoursesValues = Array.from(
@@ -2918,7 +2919,19 @@ export class CourseService {
         studentCourses,
         and(
           eq(studentCourses.courseId, courses.id),
-          eq(studentCourses.enrolledByGroupId, groups.id),
+          or(
+            eq(studentCourses.enrolledByGroupId, groups.id),
+            and(
+              eq(groupCourses.isMandatory, true),
+              sql`EXISTS (
+                SELECT 1
+                FROM ${groupUsers}
+                WHERE ${groupUsers.groupId} = ${groups.id}
+                  AND ${groupUsers.userId} = ${studentCourses.studentId}
+                  AND ${studentCourses.enrolledByGroupId} IS NULL
+              )`,
+            ),
+          ),
         ),
       )
       .innerJoin(users, eq(users.id, studentCourses.studentId))

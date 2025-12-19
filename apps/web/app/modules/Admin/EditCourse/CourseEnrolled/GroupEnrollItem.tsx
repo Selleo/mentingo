@@ -31,9 +31,9 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
   return (
     <div
       className={cn(
-        "rounded-lg flex border-2 bg-white px-4 py-3 gap-4 shadow-sm border-neutral-200",
+        "group rounded-xl flex border bg-white px-4 py-4 gap-4 shadow-sm border-neutral-200 transition-all duration-200 hover:border-neutral-300 hover:shadow-md overflow-visible",
         {
-          "bg-neutral-50 border-color-black": selected,
+          "bg-neutral-50 border-color-black ring-1 ring-inset ring-color-black/10": selected,
         },
       )}
     >
@@ -48,61 +48,78 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                   checked={!!field.value}
                   onCheckedChange={(currentValue) => field.onChange(Boolean(currentValue))}
                   aria-label={`select-group-${id}`}
-                  className="mt-2"
+                  className="mt-1.5"
                 />
               </FormControl>
             </FormItem>
           )}
         />
-        <div className="flex h-9 w-9 min-w-9 items-center justify-center rounded-md bg-neutral-50">
-          <Icon name="Group" className="size-5 text-nautral-900" />
+        <div
+          className={cn(
+            "flex h-9 w-9 min-w-9 items-center justify-center rounded-lg bg-neutral-100 text-neutral-900 transition-colors",
+            {
+              "bg-white shadow-sm": selected,
+            },
+          )}
+        >
+          <Icon name="Group" className="size-5 text-neutral-900" />
         </div>
       </div>
 
       <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col">
-          <p className="text-color-black text-sm font-medium whitespace-normal">
-            <span className="break-all">{name}</span>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-color-black text-sm font-semibold whitespace-normal leading-snug">
+              <span className="break-all">{name}</span>
+            </p>
             {isGroupEnrolled && (
               <Badge
                 variant="success"
                 icon="InputRoundedMarkerSuccess"
-                className="ml-2 !inline-flex text-xs align-middle max-h-6"
+                className="!inline-flex text-xs align-middle max-h-6"
                 iconClasses="size-3"
               >
                 {t("adminCourseView.enrolled.alreadyEnrolled")}
               </Badge>
             )}
-          </p>
-          <div className="text-neutral-700 text-base leading-[150%]">
+          </div>
+          <div className="text-neutral-600 text-sm leading-[150%]">
             {t("adminCourseView.enrolled.members", { count: usersCount })}
           </div>
         </div>
         {selected ? (
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
+          <div className="rounded-xl border border-neutral-200/80 bg-gradient-to-b from-white to-neutral-50 p-4 flex flex-col gap-3 shadow-sm">
+            <div
+              className={cn("flex items-center justify-between", {
+                "pb-3 border-b border-neutral-200/70": obligatory,
+              })}
+            >
               <div className="flex items-center gap-2">
-                <span className="text-color-black">{t("adminCourseView.mandatoryCourse")}</span>
+                <span className="text-color-black text-sm font-medium">
+                  {t("adminCourseView.mandatoryCourse")}
+                </span>
                 <Icon name="Info" className="size-4 text-zest-600" />
               </div>
-              <FormField
-                control={control}
-                name={`groups.${index}.obligatory`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Switch
-                        checked={!!field.value}
-                        onCheckedChange={(val) => field.onChange(Boolean(val))}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="rounded-full bg-white px-1 py-0.5">
+                <FormField
+                  control={control}
+                  name={`groups.${index}.obligatory`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Switch
+                          checked={!!field.value}
+                          onCheckedChange={(val) => field.onChange(Boolean(val))}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             {obligatory ? (
-              <div>
+              <div className="pt-2">
                 <FormField
                   control={control}
                   name={`groups.${index}.deadline`}
@@ -118,7 +135,10 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <label htmlFor={`groups.${index}.deadline`} className="text-color-black">
+                      <label
+                        htmlFor={`groups.${index}.deadline`}
+                        className="text-color-black text-sm font-medium"
+                      >
                         {t("adminCourseView.deadline")} *
                       </label>
                       <FormControl className="relative">
@@ -129,7 +149,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                             field.onChange(e.target.value);
                           }}
                           placeholder={t("adminCourseView.selectDate")}
-                          className="w-full"
+                          className="w-full bg-white"
                         />
                       </FormControl>
                       <FormMessage />
