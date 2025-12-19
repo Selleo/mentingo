@@ -3,7 +3,7 @@ import { first, get, last, orderBy } from "lodash-es";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCourse, useLesson } from "~/api/queries";
+import { useCourse, useCurrentUser, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -38,7 +38,9 @@ export default function LessonPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { courseId = "", lessonId = "" } = useParams();
+
   const { language } = useLanguageStore();
+  const { data: user } = useCurrentUser();
 
   const [error, setError] = useState(false);
 
@@ -46,7 +48,7 @@ export default function LessonPage() {
     data: lesson,
     isFetching: lessonLoading,
     isError: lessonError,
-  } = useLesson(lessonId, language);
+  } = useLesson(lessonId, language, user?.id || "");
   const { data: course } = useCourse(courseId, language);
 
   useLearningTimeTracker({
