@@ -547,9 +547,10 @@ const addChapters = async (page: Page) => {
 
   for (const title of TEST_DATA.chapters) {
     await addChapterButton.click();
-    const chapterTitleInput = page.getByLabel("* Title");
-    await expect(chapterTitleInput).toBeVisible();
+    const chapterTitleInput = page.getByLabel(NEW_COURSE.label.title, { exact: false }).first();
+    await chapterTitleInput.waitFor({ state: "visible" });
     await chapterTitleInput.fill(title);
+    await expect(chapterTitleInput).toHaveValue(title);
     await page.getByRole("button", { name: "Save" }).click();
     await expect(addChapterButton).toBeVisible();
   }
@@ -598,7 +599,8 @@ const addLessonsToFirstChapter = async (page: Page) => {
   await page
     .getByPlaceholder("Provide description about the")
     .fill(TEST_DATA.lessons.video.description);
-  await expect(page.getByRole("button", { name: "Remove video" })).toBeVisible();
+  const removeVideoButton = page.getByRole("button", { name: "Remove video" });
+  await removeVideoButton.waitFor({ state: "visible" });
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByPlaceholder("Provide lesson title...")).toHaveValue(
     TEST_DATA.lessons.video.title,
@@ -609,8 +611,10 @@ const addLessonsToFirstChapter = async (page: Page) => {
   const presentationLessonType = page.getByLabel(
     "Choose adminCourseView.curriculum.lesson.other.presentation lesson type",
   );
+  await expect(presentationLessonType).toBeVisible();
   await presentationLessonType.waitFor({ state: "visible" });
-  await presentationLessonType.click();
+  await expect(presentationLessonType).toBeEnabled();
+  await presentationLessonType.click({ force: true });
   await page.getByPlaceholder("Provide lesson title...").fill(TEST_DATA.lessons.presentation.title);
   await page.getByLabel("Curriculum").getByRole("combobox").click();
   await page.getByLabel("Upload file").click();
@@ -632,6 +636,7 @@ const buildQuiz = async (page: Page) => {
     "Choose adminCourseView.curriculum.lesson.other.quiz lesson type",
   );
   await expect(quizLessonType).toBeVisible();
+  await quizLessonType.waitFor({ state: "visible" });
   await quizLessonType.click();
   await page.getByLabel("*Title").fill(TEST_DATA.lessons.quiz.title);
   await page.getByPlaceholder("0").fill(TEST_DATA.lessons.quiz.score);
@@ -841,6 +846,16 @@ const publishAndEnroll = async (page: Page) => {
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();
+
+  const enrollmentErrorResponse = await page
+    .waitForResponse((response) => response.status() >= 500, { timeout: 3000 })
+    .catch(() => null);
+
+  if (enrollmentErrorResponse) {
+    throw new Error(
+      `Student enrollment failed with ${enrollmentErrorResponse.status()} on ${enrollmentErrorResponse.url()}`,
+    );
+  }
 };
 
 const studentCompletesCourse = async (page: Page) => {
@@ -851,6 +866,7 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByRole("button", { name: "Login" }).click();
   await page.getByRole("link", { name: "Courses", exact: true }).click();
   await page.getByTestId("title").click();
+  await expect(page.getByRole("tab", { name: "Statistics" })).toBeHidden();
   await page.getByTestId("chapter 1").click();
   await page.getByRole("link", { name: "title Text Not Started" }).click();
   await expect(
@@ -877,24 +893,29 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByTestId("next-lesson-button").click();
   await expect(page.getByText("Lesson 5/6 – Ai MentorBeta")).toBeVisible();
   await expect(page.getByText(TEST_DATA.lessons.aiMentor).first()).toBeVisible();
-  await page
-    .getByPlaceholder("Write a message...")
-    .fill(
-      "I value the effort and results you’ve delivered. I understand why you’re asking, and I want to find a way to recognize your contributions even with our current budget constraints.",
-    );
-  await page.getByRole("button", { name: "Send" }).click();
-  await page
-    .getByPlaceholder("Write a message...")
-    .fill(
-      "offer a funded professional development plan (e.g., a course or certification of their choice) with dedicated time to complete it, signaling investment in their growth even before a salary change is possible",
-    );
-  await page.getByRole("button", { name: "Send" }).click();
-  await page
-    .getByPlaceholder("Write a message...")
-    .fill(
-      "Let’s revisit compensation at the next review cycle in X months, or sooner if we hit A/B/C milestones (e.g., revenue target, project delivery, budget reset). I’ll keep you updated quarterly so you’re never in the dark.",
-    );
-  await page.getByRole("button", { name: "Send" }).click();
+  const messageInput = page.getByPlaceholder("Write a message...");
+  const sendButton = page.getByRole("button", { name: "Send" });
+
+  const firstMessage =
+    "I value the effort and results you’ve delivered. I understand why you’re asking, and I want to find a way to recognize your contributions even with our current budget constraints.";
+  await messageInput.fill(firstMessage);
+  await expect(messageInput).toHaveValue(firstMessage);
+  await expect(sendButton).toBeEnabled();
+  await sendButton.click();
+
+  const secondMessage =
+    "offer a funded professional development plan (e.g., a course or certification of their choice) with dedicated time to complete it, signaling investment in their growth even before a salary change is possible";
+  await messageInput.fill(secondMessage);
+  await expect(messageInput).toHaveValue(secondMessage);
+  await expect(sendButton).toBeEnabled();
+  await sendButton.click();
+
+  const thirdMessage =
+    "Let’s revisit compensation at the next review cycle in X months, or sooner if we hit A/B/C milestones (e.g., revenue target, project delivery, budget reset). I’ll keep you updated quarterly so you’re never in the dark.";
+  await messageInput.fill(thirdMessage);
+  await expect(messageInput).toHaveValue(thirdMessage);
+  await expect(sendButton).toBeEnabled();
+  await sendButton.click();
   await page.getByRole("button", { name: "Check" }).click();
   await page.getByRole("link", { name: "embed lesson Embed" }).click();
   await expect(page.locator("div").filter({ hasText: /^Lesson 6\/6 – Embed$/ })).toBeVisible();
