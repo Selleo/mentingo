@@ -33,6 +33,8 @@ export type NavigationGroups = {
 export const getNavigationConfig = (
   t: TFunction,
   isQAEnabled = false,
+  isNewsEnabled = false,
+  isArticlesEnabled = false,
   isStripeConfigured = false,
 ): NavigationGroups[] => [
   {
@@ -49,16 +51,24 @@ export const getNavigationConfig = (
         path: "courses",
         iconName: "Course",
       },
-      {
-        label: t("navigationSideBar.news"),
-        path: `news`,
-        iconName: "News",
-      },
-      {
-        label: t("navigationSideBar.articles"),
-        path: `articles`,
-        iconName: "Articles",
-      },
+      ...(isNewsEnabled
+        ? ([
+            {
+              label: t("navigationSideBar.news"),
+              path: `news`,
+              iconName: "News",
+            },
+          ] as NavigationItem[])
+        : []),
+      ...(isArticlesEnabled
+        ? ([
+            {
+              label: t("navigationSideBar.articles"),
+              path: `articles`,
+              iconName: "Articles",
+            },
+          ] as NavigationItem[])
+        : []),
       ...(isQAEnabled
         ? ([
             {

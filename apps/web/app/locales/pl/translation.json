@@ -1767,7 +1767,9 @@
       "settings": "Ustawienia"
     },
     "toast": {
-      "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane"
+      "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
+      "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
+      "articlesSettingUpdatedSuccessfully": "Ustawienia artykułów zostały pomyślnie zaktualizowane"
     }
   },
   "platformSimpleLogo": {
@@ -2159,6 +2161,46 @@
     },
     "tooltip": {
       "disabled": "Aby przełączyć to pole, najpierw włącz sekcję Q&A."
+    }
+  },
+  "newsPreferences": {
+    "subHeader": "Skonfiguruj ustawienia aktualności",
+    "header": "Ustawienia aktualności",
+    "settings": {
+      "newsEnabled": {
+        "label": "Włącz sekcję aktualności",
+        "description": "Włącz sekcję aktualności. Gdy jest wyłączona, sekcja aktualności jest ukryta dla wszystkich użytkowników."
+      },
+      "newsPublic": {
+        "label": "Pokaż sekcję aktualności niezarejestrowanym użytkownikom",
+        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję aktualności (można włączyć tylko, gdy sekcja aktualności jest aktywna)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "Sekcja aktualności nie jest włączona"
+    },
+    "tooltip": {
+      "disabled": "Aby przełączyć to pole, najpierw włącz sekcję aktualności."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Skonfiguruj ustawienia artykułów",
+    "header": "Ustawienia artykułów",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Włącz sekcję artykułów",
+        "description": "Włącz sekcję artykułów. Gdy jest wyłączona, sekcja artykułów jest ukryta dla wszystkich użytkowników."
+      },
+      "articlesPublic": {
+        "label": "Pokaż sekcję artykułów niezarejestrowanym użytkownikom",
+        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję artykułów (można włączyć tylko, gdy sekcja artykułów jest aktywna)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "Sekcja artykułów nie jest włączona"
+    },
+    "tooltip": {
+      "disabled": "Aby przełączyć to pole, najpierw włącz sekcję artykułów."
     }
   },
   "qaView": {

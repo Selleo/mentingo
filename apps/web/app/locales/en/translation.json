@@ -1775,7 +1775,9 @@
       "error": {
         "globalNotFound": "Global settings not found"
       },
-      "qaSettingUpdatedSuccessfully": "QA settings updated successfully"
+      "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
+      "newsSettingUpdatedSuccessfully": "News settings updated successfully",
+      "articlesSettingUpdatedSuccessfully": "Articles settings updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -2142,6 +2144,46 @@
     },
     "tooltip": {
       "disabled": "To toggle this field, please enable the Q&A section first."
+    }
+  },
+  "newsPreferences": {
+    "subHeader": "Configure news settings",
+    "header": "News Settings",
+    "settings": {
+      "newsEnabled": {
+        "label": "Enable news section",
+        "description": "Enable the news section. When disabled, the news section is hidden for all users."
+      },
+      "newsPublic": {
+        "label": "Show news section to unregistered users",
+        "description": "Allow unregistered users to view the news section (can only be toggled, when news section is enabled)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "The news section is not enabled"
+    },
+    "tooltip": {
+      "disabled": "To toggle this field, please enable the news section first."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Configure articles settings",
+    "header": "Articles Settings",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Enable articles section",
+        "description": "Enable the articles section. When disabled, the articles section is hidden for all users."
+      },
+      "articlesPublic": {
+        "label": "Show articles section to unregistered users",
+        "description": "Allow unregistered users to view the articles section (can only be toggled, when articles section is enabled)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "The articles section is not enabled"
+    },
+    "tooltip": {
+      "disabled": "To toggle this field, please enable the articles section first."
     }
   },
   "qaView": {
