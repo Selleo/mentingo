@@ -11,7 +11,14 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
-import { ALLOWED_QA_SETTINGS, type AllowedQASettings } from "@repo/shared";
+import {
+  ALLOWED_ARTICLES_SETTINGS,
+  ALLOWED_NEWS_SETTINGS,
+  ALLOWED_QA_SETTINGS,
+  type AllowedArticlesSettings,
+  type AllowedNewsSettings,
+  type AllowedQASettings,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -412,5 +419,23 @@ export class SettingsController {
   @Roles(USER_ROLES.ADMIN)
   async updateQaSetting(@Param("setting") setting: AllowedQASettings) {
     return new BaseResponse(await this.settingsService.updateQASetting(setting));
+  }
+
+  @Patch("admin/news/:setting")
+  @Validate({
+    request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_NEWS_SETTINGS) }],
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async updateNewsSetting(@Param("setting") setting: AllowedNewsSettings) {
+    return new BaseResponse(await this.settingsService.updateNewsSetting(setting));
+  }
+
+  @Patch("admin/articles/:setting")
+  @Validate({
+    request: [{ type: "param", name: "setting", schema: Type.Enum(ALLOWED_ARTICLES_SETTINGS) }],
+  })
+  @Roles(USER_ROLES.ADMIN)
+  async updateArticlesSetting(@Param("setting") setting: AllowedArticlesSettings) {
+    return new BaseResponse(await this.settingsService.updateArticlesSetting(setting));
   }
 }
