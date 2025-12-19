@@ -166,8 +166,8 @@
     "notFound": "Nie znaleziono aktualności.",
     "previousNews": "Poprzednia aktualność",
     "nextNews": "Następna aktualność",
-    "previousArticle": "Poprzednia baza wiedzy",
-    "nextArticle": "Następna baza wiedzy",
+    "previousArticle": "Poprzedni wpis do bazy wiedzy",
+    "nextArticle": "Następny wpis do bazy wiedzy",
     "prompt": {
       "photoUrl": "Adres URL zdjęcia",
       "photoCaption": "Podpis do zdjęcia (opcjonalnie)",
@@ -2249,12 +2249,12 @@
         "add": "Dodaj",
         "newLabel": "Nowe",
         "newSection": "Nowa sekcja",
-        "newArticle": "Nowa baza wiedzy"
+        "newArticle": "Nowy wpis do bazy wiedzy"
       }
     },
     "dialog": {
       "createArticle": {
-        "title": "Utwórz bazę wiedzy",
+        "title": "Utwórz wpis do bazy wiedzy",
         "sectionLabel": "Sekcja",
         "sectionPlaceholder": "Wybierz sekcję",
         "create": "Utwórz"
@@ -2270,9 +2270,9 @@
       "removeLanguageError": "Nie udało się usunąć języka",
       "sectionHasAssignedArticles": "Nie można usunąć sekcji z przypisanymi wpisami bazy wiedzy",
       "deleteSectionError": "Nie udało się usunąć sekcji",
-      "createError": "Nie udało się utworzyć bazy wiedzy",
-      "deleteError": "Nie udało się usunąć bazy wiedzy",
-      "notFoundError": "Nie znaleziono bazy wiedzy",
+      "createError": "Nie udało się utworzyć wpisu do bazy wiedzy",
+      "deleteError": "Nie udało się usunąć wpisu do bazy wiedzy",
+      "notFoundError": "Nie znaleziono wpisu do bazy wiedzy",
       "invalidCoverType": "Nieprawidłowy typ okładki",
       "invalidLanguageError": "Nieprawidłowy język"
     },
@@ -2302,8 +2302,8 @@
       }
     },
     "form": {
-      "createTitle": "Utwórz bazę wiedzy",
-      "editTitle": "Edytuj bazę wiedzy",
+      "createTitle": "Utwórz wpis do bazy wiedzy",
+      "editTitle": "Edytuj wpis do bazy wiedzy",
       "createButton": "Utwórz i edytuj",
       "saveButton": "Zapisz",
       "fields": {
@@ -2328,12 +2328,12 @@
     }
   },
   "articlesView": {
-    "notFound": "Nie znaleziono bazy wiedzy",
-    "previousArticle": "Poprzednia baza wiedzy",
-    "nextArticle": "Następna baza wiedzy",
+    "notFound": "Nie znaleziono wpisu do bazy wiedzy",
+    "previousArticle": "Poprzedni wpis do bazy wiedzy",
+    "nextArticle": "Następny wpis do bazy wiedzy",
     "deleteModal": {
-      "title": "Usuń bazę wiedzy",
-      "description": "Czy na pewno chcesz usunąć tę bazę wiedzy? Tej operacji nie można cofnąć."
+      "title": "Usuń wpis do bazy wiedzy",
+      "description": "Czy na pewno chcesz usunąć ten wpis do bazy wiedzy? Tej operacji nie można cofnąć."
     }
   }
 }
