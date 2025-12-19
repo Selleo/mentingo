@@ -162,6 +162,8 @@
   "newsView": {
     "header": "Aktualności",
     "notFound": "Nie znaleziono aktualności.",
+    "previousNews": "Poprzednia aktualność",
+    "nextNews": "Następna aktualność",
     "previousArticle": "Poprzedni artykuł",
     "nextArticle": "Następny artykuł",
     "prompt": {
