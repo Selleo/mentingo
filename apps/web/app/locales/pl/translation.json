@@ -1467,6 +1467,12 @@
         "noUsers": "Brak zapisanych",
         "enrolled": "użytkowników",
         "noGroups": "Brak grup"
+      },
+      "studentFilter": {
+        "placeholder": "Wszyscy studenci"
+      },
+      "groupFilter": {
+        "placeholder": "Wszystkie grupy"
       }
     },
     "createLanguage": {

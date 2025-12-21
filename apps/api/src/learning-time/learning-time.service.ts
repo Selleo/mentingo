@@ -14,6 +14,9 @@ import type {
   JoinLessonPayload,
   LeaveLessonPayload,
 } from "src/websocket/websocket.types";
+import { LearningTimeQuery } from "src/learning-time/learning-time.types";
+import { eq, inArray, SQL } from "drizzle-orm";
+import { lessonLearningTime } from "src/storage/schema";
 
 type CacheManager = ReturnType<typeof createCache>;
 const CACHE_MANAGER = "CACHE_MANAGER";
@@ -239,11 +242,17 @@ export class LearningTimeService implements OnModuleInit {
     });
   }
 
-  async getLearningTimeStatistics(courseId: UUIDType) {
+  async getLearningTimeStatistics(courseId: UUIDType, query: LearningTimeQuery) {
+    const availableUserIds = await this.getFilteredUserIds(query);
+
+    const conditions = availableUserIds.length
+      ? [inArray(lessonLearningTime.userId, availableUserIds)]
+      : [];
+
     const [averagePerLesson, totalPerStudent, courseTotals] = await Promise.all([
-      this.learningTimeRepository.getAverageLearningTimePerLesson(courseId),
-      this.learningTimeRepository.getTotalLearningTimePerStudent(courseId),
-      this.learningTimeRepository.getCourseTotalLearningTime(courseId),
+      this.learningTimeRepository.getAverageLearningTimePerLesson(courseId, conditions),
+      this.learningTimeRepository.getTotalLearningTimePerStudent(courseId, conditions),
+      this.learningTimeRepository.getCourseTotalLearningTime(courseId, conditions),
     ]);
 
     return {
@@ -255,5 +264,29 @@ export class LearningTimeService implements OnModuleInit {
 
   async getDetailedLearningTime(courseId: UUIDType) {
     return this.learningTimeRepository.getLearningTimeForCourse(courseId);
+  }
+
+  async getFilterOptions(courseId: UUIDType) {
+    const [users, groups] = await Promise.all([
+      this.learningTimeRepository.getStudentsInCourse(courseId),
+      this.learningTimeRepository.getGroupsInCourse(courseId),
+    ]);
+
+    return { groups, users };
+  }
+
+  private async getFilteredUserIds(query: LearningTimeQuery) {
+    const userIds = new Set();
+
+    if (query.userId) {
+      userIds.add(query.userId);
+    }
+
+    if (query.groupId) {
+      const users = await this.learningTimeRepository.getStudentsByGroup(query.groupId);
+      users.forEach(({ id }) => userIds.add(id));
+    }
+
+    return Array.from(userIds) as string[];
   }
 }

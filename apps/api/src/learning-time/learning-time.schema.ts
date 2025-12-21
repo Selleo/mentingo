@@ -1,4 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
+import { UUIDSchema } from "src/common";
 
 export const learningTimeStatisticsSchema = Type.Object({
   averagePerLesson: Type.Array(
@@ -25,6 +26,20 @@ export const learningTimeStatisticsSchema = Type.Object({
     uniqueUsers: Type.Number(),
   }),
 });
+
+const filterObject = Type.Object({
+  id: UUIDSchema,
+  name: Type.String(),
+});
+
+export const learningTimeStatisticsFilterOptionsSchema = Type.Object({
+  users: Type.Array(filterObject),
+  groups: Type.Array(filterObject),
+});
+
+export type LearningTimeStatisticsFilterOptionsBody = Static<
+  typeof learningTimeStatisticsFilterOptionsSchema
+>;
 
 export type LearningTimeStatistics = Static<typeof learningTimeStatisticsSchema>;
 
