@@ -76,7 +76,11 @@ import {
   studentsWithEnrolmentValidation,
 } from "src/courses/validations/validations";
 import { GroupsFilterSchema } from "src/group/group.types";
-import { LearningTimeService, learningTimeStatisticsSchema } from "src/learning-time";
+import {
+  LearningTimeService,
+  learningTimeStatisticsFilterOptionsSchema,
+  learningTimeStatisticsSchema,
+} from "src/learning-time";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
 import { coursesSettingsSchema } from "./schemas/coursesSettings.schema";
@@ -639,10 +643,31 @@ export class CourseController {
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     response: baseResponse(learningTimeStatisticsSchema),
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "userId", schema: UUIDSchema },
+      { type: "query", name: "groupId", schema: UUIDSchema },
+    ],
+  })
+  async getCourseLearningTimeStatistics(
+    @Param("courseId") courseId: UUIDType,
+    @Query("userId") userId: UUIDType,
+    @Query("groupId") groupId: UUIDType,
+  ) {
+    const query = { userId, groupId };
+    const data = await this.learningTimeService.getLearningTimeStatistics(courseId, query);
+
+    return new BaseResponse(data);
+  }
+
+  @Get(":courseId/statistics/learning-time-filter-options")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    response: baseResponse(learningTimeStatisticsFilterOptionsSchema),
     request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
   })
-  async getCourseLearningTimeStatistics(@Param("courseId") courseId: UUIDType) {
-    const data = await this.learningTimeService.getLearningTimeStatistics(courseId);
+  async getCourseLearningStatisticsFilterOptions(@Param("courseId") courseId: UUIDType) {
+    const data = await this.learningTimeService.getFilterOptions(courseId);
 
     return new BaseResponse(data);
   }

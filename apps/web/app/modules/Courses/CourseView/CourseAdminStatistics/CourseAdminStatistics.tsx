@@ -9,6 +9,7 @@ import {
   useCourseAverageScorePerQuiz,
 } from "~/api/queries/admin/useCourseAverageScorePerQuiz";
 import { useCourseLearningTimeStatistics } from "~/api/queries/admin/useCourseLearningTimeStatistics";
+import { useCourseLearningTimeStatisticsFilter } from "~/api/queries/admin/useCourseLearningTimeStatisticsFilterOptions";
 import { useCourseStatistics } from "~/api/queries/admin/useCourseStatistics";
 import { COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
@@ -42,6 +43,7 @@ import {
 import { CourseStudentsAiMentorResultsTable } from "./components/CourseStudentsAiMentorResults";
 
 import type { GetCourseResponse } from "~/api/generated-api";
+import type { CourseLearningTimeFilterQuery } from "~/api/queries/admin/useCourseLearningTimeStatistics";
 import type { CourseStudentsAiMentorResultsQueryParams } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import type { CourseStudentsProgressQueryParams } from "~/api/queries/admin/useCourseStudentsProgress";
 import type { CourseStudentsQuizResultsQueryParams } from "~/api/queries/admin/useCourseStudentsQuizResults";
@@ -89,6 +91,9 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     {},
   );
 
+  const [learningTimeStatsParams, setLearningTimeStatsParams] =
+    useState<CourseLearningTimeFilterQuery>({});
+
   const [aiMentorSearchParams, setAiMentorSearchParams] =
     useState<CourseStudentsAiMentorResultsQueryParams>({});
 
@@ -124,7 +129,18 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     enabled: isAdminLike,
   });
   const { data: averageQuizScores } = useCourseAverageScorePerQuiz({ id, enabled: isAdminLike });
-  const { data: learningTimeStats } = useCourseLearningTimeStatistics({ id, enabled: isAdminLike });
+  const { data: learningTimeStats } = useCourseLearningTimeStatistics({
+    id,
+    enabled: isAdminLike,
+    query: learningTimeStatsParams,
+  });
+
+  const { data: learningTimeFilterOptions } = useCourseLearningTimeStatisticsFilter({
+    id,
+    enabled: isAdminLike,
+  });
+
+  console.log(learningTimeStatsParams);
 
   const formatLearningTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -139,6 +155,27 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     {
       name: "search",
       type: "text",
+    },
+  ];
+
+  const timeFilterConfig: FilterConfig[] = [
+    {
+      name: "userId",
+      type: "select",
+      options: learningTimeFilterOptions?.users.map((user) => ({
+        label: user.name,
+        value: user.id,
+      })),
+      placeholder: t("adminCourseView.statistics.studentFilter.placeholder")
+    },
+    {
+      name: "groupId",
+      type: "select",
+      options: learningTimeFilterOptions?.groups.map((group) => ({
+        label: group.name,
+        value: group.id,
+      })),
+      placeholder: t("adminCourseView.statistics.groupFilter.placeholder")
     },
   ];
 
@@ -174,6 +211,10 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     handleFilterChange(setAiMentorSearchParams, name, value);
   };
 
+  const handleLearningTimeFilterChange = (name: string, value: FilterValue) => {
+    handleFilterChange(setLearningTimeStatsParams, name, value);
+  };
+
   return (
     <TooltipProvider>
       <Card>
@@ -185,6 +226,16 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-8">
+          <div>
+            <SearchFilter
+              filters={timeFilterConfig}
+              values={{
+                groupId: learningTimeStatsParams.groupId,
+                userId: learningTimeStatsParams.userId,
+              }}
+              onChange={handleLearningTimeFilterChange}
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 grid-rows-auto md:grid-rows-5">
             <CourseAdminStatisticsCard
               title={t("adminCourseView.statistics.overview.enrolledCount")}

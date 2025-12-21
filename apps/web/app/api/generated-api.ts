@@ -1498,6 +1498,21 @@ export interface GetCourseLearningTimeStatisticsResponse {
   };
 }
 
+export interface GetCourseLearningStatisticsFilterOptionsResponse {
+  data: {
+    users: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
 export interface GetAverageQuizScoresResponse {
   data: {
     averageScoresPerQuiz: {
@@ -5508,10 +5523,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     courseControllerGetCourseLearningTimeStatistics: (
       courseId: string,
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @format uuid */
+        groupId?: string;
+      },
       params: RequestParams = {},
     ) =>
       this.request<GetCourseLearningTimeStatisticsResponse, any>({
         path: `/api/course/${courseId}/statistics/learning-time`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseLearningStatisticsFilterOptions
+     * @request GET:/api/course/{courseId}/statistics/learning-time-filter-options
+     */
+    courseControllerGetCourseLearningStatisticsFilterOptions: (
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseLearningStatisticsFilterOptionsResponse, any>({
+        path: `/api/course/${courseId}/statistics/learning-time-filter-options`,
         method: "GET",
         format: "json",
         ...params,

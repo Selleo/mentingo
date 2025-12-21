@@ -1471,6 +1471,12 @@
         "noUsers": "No users",
         "enrolled": "enrolled",
         "noGroups": "No groups"
+      },
+      "studentFilter": {
+        "placeholder": "All students"
+      },
+      "groupFilter": {
+        "placeholder": "All groups"
       }
     },
     "createLanguage": {
