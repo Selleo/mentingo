@@ -2653,9 +2653,9 @@
         }
       }
     },
-    "/api/course/update-lesson-sequence/{courseId}": {
+    "/api/course/settings/{courseId}": {
       "patch": {
-        "operationId": "CourseController_updateLessonSequenceEnabled",
+        "operationId": "CourseController_updateCourseSettings",
         "parameters": [
           {
             "name": "courseId",
@@ -2672,7 +2672,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateLessonSequenceEnabledBody"
+                "$ref": "#/components/schemas/UpdateCourseSettingsBody"
               }
             }
           }
@@ -2682,7 +2682,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateLessonSequenceEnabledResponse"
+                  "$ref": "#/components/schemas/UpdateCourseSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "CourseController_getCourseSettings",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseSettingsResponse"
                 }
               }
             }
@@ -12536,18 +12561,21 @@
           "data"
         ]
       },
-      "UpdateLessonSequenceEnabledBody": {
+      "UpdateCourseSettingsBody": {
+        "additionalProperties": false,
         "type": "object",
         "properties": {
           "lessonSequenceEnabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "quizFeedbackEnabled": {
+            "default": true,
             "type": "boolean"
           }
-        },
-        "required": [
-          "lessonSequenceEnabled"
-        ]
+        }
       },
-      "UpdateLessonSequenceEnabledResponse": {
+      "UpdateCourseSettingsResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -12559,6 +12587,32 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "lessonSequenceEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "quizFeedbackEnabled": {
+                "default": true,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lessonSequenceEnabled",
+              "quizFeedbackEnabled"
             ]
           }
         },
@@ -14940,6 +14994,9 @@
                     "updatedAt"
                   ]
                 }
+              },
+              "isQuizFeedbackRedacted": {
+                "type": "boolean"
               },
               "aiMentorDetails": {
                 "anyOf": [

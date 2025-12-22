@@ -1277,13 +1277,25 @@ export interface UpdateHasCertificateResponse {
   };
 }
 
-export interface UpdateLessonSequenceEnabledBody {
-  lessonSequenceEnabled: boolean;
+export interface UpdateCourseSettingsBody {
+  /** @default false */
+  lessonSequenceEnabled?: boolean;
+  /** @default true */
+  quizFeedbackEnabled?: boolean;
 }
 
-export interface UpdateLessonSequenceEnabledResponse {
+export interface UpdateCourseSettingsResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetCourseSettingsResponse {
+  data: {
+    /** @default false */
+    lessonSequenceEnabled: boolean;
+    /** @default true */
+    quizFeedbackEnabled: boolean;
   };
 }
 
@@ -1782,6 +1794,7 @@ export interface GetLessonByIdResponse {
       createdAt: string;
       updatedAt: string;
     }[];
+    isQuizFeedbackRedacted?: boolean;
     aiMentorDetails?: {
       minScore: number | null;
       maxScore: number | null;
@@ -5028,19 +5041,33 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CourseControllerUpdateLessonSequenceEnabled
-     * @request PATCH:/api/course/update-lesson-sequence/{courseId}
+     * @name CourseControllerUpdateCourseSettings
+     * @request PATCH:/api/course/settings/{courseId}
      */
-    courseControllerUpdateLessonSequenceEnabled: (
+    courseControllerUpdateCourseSettings: (
       courseId: string,
-      data: UpdateLessonSequenceEnabledBody,
+      data: UpdateCourseSettingsBody,
       params: RequestParams = {},
     ) =>
-      this.request<UpdateLessonSequenceEnabledResponse, any>({
-        path: `/api/course/update-lesson-sequence/${courseId}`,
+      this.request<UpdateCourseSettingsResponse, any>({
+        path: `/api/course/settings/${courseId}`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseSettings
+     * @request GET:/api/course/settings/{courseId}
+     */
+    courseControllerGetCourseSettings: (courseId: string, params: RequestParams = {}) =>
+      this.request<GetCourseSettingsResponse, any>({
+        path: `/api/course/settings/${courseId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
