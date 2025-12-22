@@ -154,14 +154,16 @@ export class NewsService {
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
 
-    // Full-text search condition
-    if (searchQuery && searchQuery.trim().length >= 3) {
-      const searchTerm = searchQuery.trim();
-      const newsTsVector = sql`(
-        setweight(jsonb_to_tsvector('english', ${news.title}, '["string"]'), 'A') ||
-        setweight(jsonb_to_tsvector('english', COALESCE(${news.summary}, '{}'::jsonb), '["string"]'), 'B') ||
-        setweight(jsonb_to_tsvector('english', COALESCE(${news.content}, '{}'::jsonb), '["string"]'), 'C')
-      )`;
+    // Full-text search setup
+    const isSearching = searchQuery && searchQuery.trim().length >= 3;
+    const searchTerm = isSearching ? searchQuery.trim() : null;
+    const newsTsVector = sql`(
+      setweight(jsonb_to_tsvector('english', ${news.title}, '["string"]'), 'A') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${news.summary}, '{}'::jsonb), '["string"]'), 'B') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${news.content}, '{}'::jsonb), '["string"]'), 'C')
+    )`;
+
+    if (isSearching && searchTerm) {
       const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
       conditions.push(sql`${newsTsVector} @@ ${tsQuery}`);
     }
@@ -179,7 +181,11 @@ export class NewsService {
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
       .where(and(...conditions))
-      .orderBy(sql`${news.publishedAt} DESC`)
+      .orderBy(
+        isSearching && searchTerm
+          ? sql`ts_rank(${newsTsVector}, websearch_to_tsquery('english', ${searchTerm})) DESC`
+          : sql`${news.publishedAt} DESC`,
+      )
       .limit(pagination.perPage)
       .offset(pagination.offset);
 
