@@ -3,7 +3,7 @@ import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
-import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
+import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/constants";
 
 import { categories, courses, users } from "../../src/storage/schema";
 
@@ -91,7 +91,10 @@ export const createCourseFactory = (db: DatabasePg) => {
       stripePriceId: null,
       baseLanguage: "en",
       availableLocales: ["en"],
-      settings: { lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED },
+      settings: {
+        lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
+        quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+      },
     };
   });
 };
