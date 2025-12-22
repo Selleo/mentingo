@@ -274,6 +274,9 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                     <FormItem className="flex flex-col gap-2">
                       <Label htmlFor="media-upload" className="body-base-md text-neutral-900">
                         {t("adminArticleView.form.fields.cover")}
+                        {field.value && (
+                          <span className="font-normal text-neutral-500"> ({field.value})</span>
+                        )}
                       </Label>
                       <Input
                         id="media-upload"

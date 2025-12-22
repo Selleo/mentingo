@@ -184,7 +184,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
       title: existingNews.title ?? "",
       summary: existingNews.summary ?? "",
       content: existingNews.plainContent ?? "",
-      imageUrl: existingNews.resources?.images?.[0]?.fileUrl ?? "",
+      imageUrl: existingNews.resources?.coverImage?.fileName ?? "",
       status: (existingNews.status as "draft" | "published") ?? "draft",
       isPublic: existingNews.isPublic ?? false,
     };
@@ -330,6 +330,9 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                     <FormItem className="flex flex-col gap-2">
                       <Label htmlFor="media-upload" className="body-base-md text-neutral-900">
                         {t("newsView.field.image")}
+                        {field.value && (
+                          <span className="font-normal text-neutral-500"> ({field.value})</span>
+                        )}
                       </Label>
                       <Input
                         id="media-upload"
