@@ -3,11 +3,13 @@ import { useTranslation } from "react-i18next";
 
 import { useCurrentUser, useStatistics } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Button } from "~/components/ui/button";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { AvgScoreAcrossAllQuizzesChart } from "~/modules/Statistics/Admin/components/AvgScoreAcrossAllQuizzessChart";
 import { ConversionsAfterFreemiumLessonChart } from "~/modules/Statistics/Admin/components/ConversionsAfterFreemiumLessonChart";
 import { EnrollmentChart } from "~/modules/Statistics/Admin/components/EnrollmentChart";
+import { useDownloadSummaryReport } from "~/modules/Statistics/Admin/hooks/useDownloadSummaryReport";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CourseCompletionPercentageChart, FiveMostPopularCoursesChart } from "./components";
@@ -23,6 +25,7 @@ export const AdminStatistics = () => {
   const { language } = useLanguageStore();
 
   const { data: statistics, isLoading } = useStatistics(language);
+  const { downloadReport, isDownloading } = useDownloadSummaryReport();
   const { t } = useTranslation();
   const totalCoursesCompletion =
     statistics?.totalCoursesCompletionStats.totalCoursesCompletion ?? 0;
@@ -117,15 +120,22 @@ export const AdminStatistics = () => {
 
   return (
     <PageWrapper className="flex flex-col gap-y-6 xl:!h-full xl:gap-y-8 2xl:!h-auto">
-      <div className="flex items-center gap-x-2 xl:gap-x-4">
-        <p className="h5 xl:h2 text-neutral-950">
-          {t("adminStatisticsView.header")} {user?.firstName}
-        </p>
-        <UserAvatar
-          className="size-12"
-          userName={`${user?.firstName} ${user?.lastName}`}
-          profilePictureUrl={user?.profilePictureUrl}
-        />
+      <div className="flex items-center justify-between gap-x-4">
+        <div className="flex items-center gap-x-2 xl:gap-x-4">
+          <p className="h5 xl:h2 text-neutral-950">
+            {t("adminStatisticsView.header")} {user?.firstName}
+          </p>
+          <UserAvatar
+            className="size-12"
+            userName={`${user?.firstName} ${user?.lastName}`}
+            profilePictureUrl={user?.profilePictureUrl}
+          />
+        </div>
+        <Button onClick={downloadReport} disabled={isDownloading}>
+          {isDownloading
+            ? t("adminStatisticsView.other.downloadingReport")
+            : t("adminStatisticsView.other.downloadReport")}
+        </Button>
       </div>
       <div className="grid grid-cols-1 gap-y-4 md:grid-cols-2 md:gap-x-4 md:gap-y-6 xl:h-full xl:grid-cols-4 xl:grid-rows-[minmax(min-content,_auto)]">
         <FiveMostPopularCoursesChart
