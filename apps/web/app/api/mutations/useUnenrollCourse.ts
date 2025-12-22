@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { courseStatisticsQueryOptions } from "~/api/queries/admin/useCourseStatistics";
+import { COURSE_STATISTICS_QUERY_KEY } from "~/api/queries/admin/useCourseStatistics";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
@@ -33,14 +33,14 @@ export function useUnenrollCourse() {
 
       return response.data;
     },
-    onSuccess: async (_, variables) => {
+    onSuccess: async () => {
       toast({
         variant: "default",
         description: t("enrollCourseView.toast.unenrollCourseSuccessfully"),
       });
 
-      await queryClient.invalidateQueries(courseStatisticsQueryOptions({ id: variables.courseId }));
-      await invalidateAllStatisticsQueries(variables.courseId);
+      await queryClient.invalidateQueries({ queryKey: [COURSE_STATISTICS_QUERY_KEY] });
+      await invalidateAllStatisticsQueries();
     },
     onError: (error: AxiosError) => {
       const apiResponseData = error.response?.data as { message: string; count: number };

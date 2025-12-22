@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
-import { courseStatisticsQueryOptions } from "~/api/queries/admin/useCourseStatistics";
+import { COURSE_STATISTICS_QUERY_KEY } from "~/api/queries/admin/useCourseStatistics";
 import { GROUPS_BY_COURSE_QUERY_KEY } from "~/api/queries/admin/useGroupsByCourse";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
@@ -27,10 +27,10 @@ export function useBulkCourseEnroll(courseId = "") {
         description: data.message,
       });
 
-      await queryClient.invalidateQueries(courseStatisticsQueryOptions({ id: courseId }));
+      await queryClient.invalidateQueries({ queryKey: [COURSE_STATISTICS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_BY_COURSE_QUERY_KEY, courseId] });
-      await invalidateAllStatisticsQueries(courseId);
+      await invalidateAllStatisticsQueries();
     },
 
     onError: (error) => {

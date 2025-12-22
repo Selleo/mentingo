@@ -1,30 +1,36 @@
 import { Type, type Static } from "@sinclair/typebox";
+
 import { UUIDSchema } from "src/common";
 
+export const learningTimeStatisticsSortFields = ["studentName", "totalSeconds"] as const;
+
+export type LearningTimeStatisticsSortField = (typeof learningTimeStatisticsSortFields)[number];
+
+export const learningTimeStatisticsSortOptions = Type.Union([
+  ...learningTimeStatisticsSortFields.map((field) => Type.Literal(field)),
+  ...learningTimeStatisticsSortFields.map((field) => Type.Literal(`-${field}`)),
+]);
+
+export type LearningTimeStatisticsSortOptions = Static<typeof learningTimeStatisticsSortOptions>;
+
 export const learningTimeStatisticsSchema = Type.Object({
-  averagePerLesson: Type.Array(
+  users: Type.Array(
     Type.Object({
-      lessonId: Type.String(),
-      lessonTitle: Type.String(),
-      averageSeconds: Type.Number(),
-      totalUsers: Type.Number(),
+      id: UUIDSchema,
+      name: Type.String(),
+      studentAvatarUrl: Type.Union([Type.String(), Type.Null()]),
       totalSeconds: Type.Number(),
+      groups: Type.Union([
+        Type.Array(
+          Type.Object({
+            id: Type.String(),
+            name: Type.String(),
+          }),
+        ),
+        Type.Null(),
+      ]),
     }),
   ),
-  totalPerStudent: Type.Array(
-    Type.Object({
-      userId: Type.String(),
-      userFirstName: Type.String(),
-      userLastName: Type.String(),
-      userEmail: Type.String(),
-      totalSeconds: Type.Number(),
-      lessonsWithTime: Type.Number(),
-    }),
-  ),
-  courseTotals: Type.Object({
-    totalSeconds: Type.Number(),
-    uniqueUsers: Type.Number(),
-  }),
 });
 
 const filterObject = Type.Object({
@@ -33,7 +39,6 @@ const filterObject = Type.Object({
 });
 
 export const learningTimeStatisticsFilterOptionsSchema = Type.Object({
-  users: Type.Array(filterObject),
   groups: Type.Array(filterObject),
 });
 

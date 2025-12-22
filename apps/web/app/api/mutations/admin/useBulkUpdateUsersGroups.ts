@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
+import { COURSE_STATISTICS_FILTER_OPTIONS_QUERY_KEY } from "~/api/queries/admin/useCourseLearningTimeStatisticsFilterOptions";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -32,6 +33,9 @@ export function useBulkUpdateUsersGroups() {
 
       await queryClient.invalidateQueries({ queryKey: ["users"] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await queryClient.invalidateQueries({
+        queryKey: [COURSE_STATISTICS_FILTER_OPTIONS_QUERY_KEY],
+      });
     },
     onError: (error) => {
       if (error instanceof AxiosError) {

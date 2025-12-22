@@ -12,8 +12,11 @@ export const COURSE_LEARNING_TIME_STATISTICS_QUERY_KEY = [
 export type LearningTimeStatistics = GetCourseLearningTimeStatisticsResponse["data"];
 
 export type CourseLearningTimeFilterQuery = {
-  userId?: string;
   groupId?: string;
+  search?: string;
+  page?: number;
+  perPage?: number;
+  sort?: "studentName" | "totalSeconds" | "-studentName" | "-totalSeconds";
 };
 
 interface CourseLearningTimeStatisticsQueryOptions {
@@ -38,7 +41,6 @@ export const courseLearningTimeStatisticsQueryOptions = ({
 
       return response.data;
     },
-    select: (data) => data.data,
   });
 
 export function useCourseLearningTimeStatistics({
