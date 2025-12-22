@@ -18,14 +18,14 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
-import { LESSON_SEQUENCE_ENABLED } from "src/courses/constants";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { archived, availableLocales, baseLanguage, id, timestamps } from "./utils";
 
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
-import type { CourseSettings } from "src/courses/types/settings";
+import { coursesSettingsSchema } from "src/courses/types/settings";
+import { safeJsonb } from "src/utils/safe-jsonb";
 
 export const users = pgTable("users", {
   ...id,
@@ -133,6 +133,7 @@ export const resetTokens = pgTable("reset_tokens", {
 
 export const coursesStatusEnum = pgEnum("status", ["draft", "published", "private"]);
 
+const coursesSettings = safeJsonb("settings", coursesSettingsSchema);
 export const courses = pgTable("courses", {
   ...id,
   ...timestamps,
@@ -153,16 +154,14 @@ export const courses = pgTable("courses", {
     .notNull(),
   stripeProductId: text("stripe_product_id"),
   stripePriceId: text("stripe_price_id"),
-  settings: jsonb("settings")
-    .$type<CourseSettings>()
-    .notNull()
-    .default({ lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED }),
+  settings: coursesSettings.column.notNull(),
   baseLanguage: text("base_language").notNull().default("en"),
   availableLocales: text("available_locales")
     .array()
     .notNull()
     .default(sql`ARRAY['en']::text[]`),
 });
+export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
 
 export const chapters = pgTable("chapters", {
   ...id,
