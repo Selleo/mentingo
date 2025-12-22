@@ -63,13 +63,15 @@ export class QARepository {
   async getAllQA(language?: SupportedLanguages, searchQuery?: string) {
     const conditions: ReturnType<typeof sql>[] = [];
 
-    // Full-text search condition
-    if (searchQuery && searchQuery.trim().length >= 3) {
-      const searchTerm = searchQuery.trim();
-      const qaTsVector = sql`(
-        setweight(jsonb_to_tsvector('english', ${questionsAndAnswers.title}, '["string"]'), 'A') ||
-        setweight(jsonb_to_tsvector('english', COALESCE(${questionsAndAnswers.description}, '{}'::jsonb), '["string"]'), 'B')
-      )`;
+    // Full-text search setup
+    const isSearching = searchQuery && searchQuery.trim().length >= 3;
+    const searchTerm = isSearching ? searchQuery.trim() : null;
+    const qaTsVector = sql`(
+      setweight(jsonb_to_tsvector('english', ${questionsAndAnswers.title}, '["string"]'), 'A') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${questionsAndAnswers.description}, '{}'::jsonb), '["string"]'), 'B')
+    )`;
+
+    if (isSearching && searchTerm) {
       const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
       conditions.push(sql`${qaTsVector} @@ ${tsQuery}`);
     }
@@ -91,7 +93,12 @@ export class QARepository {
         availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
       })
       .from(questionsAndAnswers)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(
+        isSearching && searchTerm
+          ? sql`ts_rank(${qaTsVector}, websearch_to_tsquery('english', ${searchTerm})) DESC`
+          : sql`${questionsAndAnswers.createdAt} DESC`,
+      );
   }
 
   async createLanguage(qaId: UUIDType, languages: string[], language: SupportedLanguages) {

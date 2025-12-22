@@ -151,14 +151,16 @@ export class ArticlesRepository {
   ) {
     const searchConditions = [...conditions];
 
-    // Full-text search condition
-    if (searchQuery && searchQuery.trim().length >= 3) {
-      const searchTerm = searchQuery.trim();
-      const articlesTsVector = sql`(
-        setweight(jsonb_to_tsvector('english', ${articles.title}, '["string"]'), 'A') ||
-        setweight(jsonb_to_tsvector('english', COALESCE(${articles.summary}, '{}'::jsonb), '["string"]'), 'B') ||
-        setweight(jsonb_to_tsvector('english', COALESCE(${articles.content}, '{}'::jsonb), '["string"]'), 'C')
-      )`;
+    // Full-text search setup
+    const isSearching = searchQuery && searchQuery.trim().length >= 3;
+    const searchTerm = isSearching ? searchQuery.trim() : null;
+    const articlesTsVector = sql`(
+      setweight(jsonb_to_tsvector('english', ${articles.title}, '["string"]'), 'A') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${articles.summary}, '{}'::jsonb), '["string"]'), 'B') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${articles.content}, '{}'::jsonb), '["string"]'), 'C')
+    )`;
+
+    if (isSearching && searchTerm) {
       const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
       searchConditions.push(sql`${articlesTsVector} @@ ${tsQuery}`);
     }
@@ -173,7 +175,11 @@ export class ArticlesRepository {
       .innerJoin(articleSections, eq(articleSections.id, articles.articleSectionId))
       .leftJoin(users, eq(users.id, articles.authorId))
       .where(and(...searchConditions))
-      .orderBy(desc(articles.publishedAt));
+      .orderBy(
+        isSearching && searchTerm
+          ? sql`ts_rank(${articlesTsVector}, websearch_to_tsquery('english', ${searchTerm})) DESC`
+          : desc(articles.publishedAt),
+      );
   }
 
   async getDraftArticles(requestedLanguage: SupportedLanguages) {
