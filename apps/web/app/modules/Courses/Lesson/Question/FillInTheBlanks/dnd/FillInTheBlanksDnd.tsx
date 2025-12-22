@@ -16,6 +16,7 @@ import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import Viewer from "~/components/RichText/Viever";
+import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
 import { DndBlank } from "./DndBlank";
 import { DraggableWord } from "./DraggableWord";
@@ -57,6 +58,7 @@ const getAnswers = (options: QuizQuestionOption[] | undefined) => {
 
 export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCompleted }) => {
   const { t } = useTranslation();
+  const { isQuizFeedbackRedacted } = useQuizContext();
   const [words, setWords] = useState<DndWord[]>(getAnswers(question.options));
   const [currentlyDraggedWord, setCurrentlyDraggedWord] = useState<DndWord | null>(null);
   const { setValue } = useFormContext<QuizForm>();
@@ -284,7 +286,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
           }}
         />
         <WordBank words={wordBankWords} />
-        {solutionExplanation && !question.passQuestion && (
+        {solutionExplanation && !question.passQuestion && !isQuizFeedbackRedacted && (
           <div className="mt-4">
             <span className="body-base-md text-error-700">
               {t("studentLessonView.other.correctSentence")}
