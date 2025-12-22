@@ -11,6 +11,8 @@ export type CourseStudentsAiMentorResultsQueryParams = {
   page?: number;
   perPage?: number;
   lessonId?: string;
+  groupId?: string;
+  search?: string;
   sort?:
     | "studentName"
     | "lessonName"
