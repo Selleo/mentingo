@@ -3133,6 +3133,15 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3177,6 +3186,55 @@
             "schema": {
               "format": "uuid",
               "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "totalSeconds",
+                  "type": "string"
+                },
+                {
+                  "const": "-studentName",
+                  "type": "string"
+                },
+                {
+                  "const": "-totalSeconds",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -3228,6 +3286,15 @@
             "name": "courseId",
             "required": true,
             "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -3299,6 +3366,15 @@
             "required": false,
             "in": "query",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
               "type": "string"
             }
           },
@@ -3398,6 +3474,23 @@
           },
           {
             "name": "quizId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
             "required": false,
             "in": "query",
             "schema": {
@@ -3516,6 +3609,23 @@
           },
           {
             "name": "lessonId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
             "required": false,
             "in": "query",
             "schema": {
@@ -13334,13 +13444,17 @@
                     "count"
                   ]
                 }
+              },
+              "averageSeconds": {
+                "type": "number"
               }
             },
             "required": [
               "enrolledCount",
               "completionPercentage",
               "averageCompletionPercentage",
-              "courseStatusDistribution"
+              "courseStatusDistribution",
+              "averageSeconds"
             ]
           }
         },
@@ -13349,103 +13463,6 @@
         ]
       },
       "GetCourseLearningTimeStatisticsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "averagePerLesson": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "lessonId": {
-                      "type": "string"
-                    },
-                    "lessonTitle": {
-                      "type": "string"
-                    },
-                    "averageSeconds": {
-                      "type": "number"
-                    },
-                    "totalUsers": {
-                      "type": "number"
-                    },
-                    "totalSeconds": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "lessonId",
-                    "lessonTitle",
-                    "averageSeconds",
-                    "totalUsers",
-                    "totalSeconds"
-                  ]
-                }
-              },
-              "totalPerStudent": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "userId": {
-                      "type": "string"
-                    },
-                    "userFirstName": {
-                      "type": "string"
-                    },
-                    "userLastName": {
-                      "type": "string"
-                    },
-                    "userEmail": {
-                      "type": "string"
-                    },
-                    "totalSeconds": {
-                      "type": "number"
-                    },
-                    "lessonsWithTime": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "userId",
-                    "userFirstName",
-                    "userLastName",
-                    "userEmail",
-                    "totalSeconds",
-                    "lessonsWithTime"
-                  ]
-                }
-              },
-              "courseTotals": {
-                "type": "object",
-                "properties": {
-                  "totalSeconds": {
-                    "type": "number"
-                  },
-                  "uniqueUsers": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "totalSeconds",
-                  "uniqueUsers"
-                ]
-              }
-            },
-            "required": [
-              "averagePerLesson",
-              "totalPerStudent",
-              "courseTotals"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetCourseLearningStatisticsFilterOptionsResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -13462,14 +13479,97 @@
                     },
                     "name": {
                       "type": "string"
+                    },
+                    "studentAvatarUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "totalSeconds": {
+                      "type": "number"
+                    },
+                    "groups": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
                     "id",
-                    "name"
+                    "name",
+                    "studentAvatarUrl",
+                    "totalSeconds",
+                    "groups"
                   ]
                 }
+              }
+            },
+            "required": [
+              "users"
+            ]
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
               },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCourseLearningStatisticsFilterOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
               "groups": {
                 "type": "array",
                 "items": {
@@ -13491,7 +13591,6 @@
               }
             },
             "required": [
-              "users",
               "groups"
             ]
           }

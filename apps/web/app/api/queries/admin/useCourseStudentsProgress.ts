@@ -8,6 +8,7 @@ export type CourseStudentsProgressQueryParams = {
   page?: number;
   perPage?: number;
   search?: string;
+  groupId?: string;
   sort?:
     | "studentName"
     | "completedLessonsCount"

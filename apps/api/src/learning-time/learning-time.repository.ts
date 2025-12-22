@@ -1,7 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, ne, SQL, sql } from "drizzle-orm";
+import { COURSE_ENROLLMENT } from "@repo/shared";
+import { and, countDistinct, eq, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import {
   courses,
   groups,
@@ -12,8 +14,8 @@ import {
   users,
 } from "src/storage/schema";
 
+import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
 
 @Injectable()
 export class LearningTimeRepository {
@@ -88,31 +90,77 @@ export class LearningTimeRepository {
   }
 
   async getTotalLearningTimePerStudent(courseId: UUIDType, conditions: SQL<unknown>[] = []) {
-    return this.db
-      .select({
-        userId: lessonLearningTime.userId,
-        userFirstName: users.firstName,
-        userLastName: users.lastName,
-        userEmail: users.email,
-        totalSeconds: sql<number>`SUM(${lessonLearningTime.totalSeconds})::INTEGER`,
-        lessonsWithTime: sql<number>`COUNT(DISTINCT ${lessonLearningTime.lessonId})::INTEGER`,
-      })
+    return this.buildTotalLearningTimePerStudentQuery(courseId, conditions);
+  }
+
+  async getTotalLearningTimePerStudentPaginated(
+    courseId: UUIDType,
+    conditions: SQL<unknown>[] = [],
+    page: number = 1,
+    perPage: number = DEFAULT_PAGE_SIZE,
+    orderBy?: SQL<unknown>,
+  ) {
+    const query = this.buildTotalLearningTimePerStudentQuery(courseId, conditions);
+
+    const orderedQuery = orderBy ? query.orderBy(orderBy) : query;
+
+    return addPagination(orderedQuery.$dynamic(), page, perPage);
+  }
+
+  async getTotalLearningTimePerStudentCount(courseId: UUIDType, conditions: SQL<unknown>[] = []) {
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: countDistinct(lessonLearningTime.userId) })
       .from(lessonLearningTime)
-      .innerJoin(users, eq(lessonLearningTime.userId, users.id))
-      .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions))
-      .groupBy(lessonLearningTime.userId, users.firstName, users.lastName, users.email);
+      .leftJoin(users, eq(users.id, lessonLearningTime.userId))
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .leftJoin(groups, eq(groups.id, groupUsers.groupId))
+      .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions));
+
+    return totalItems ?? 0;
   }
 
   async getCourseTotalLearningTime(courseId: UUIDType, conditions: SQL<unknown>[] = []) {
     const result = await this.db
       .select({
-        totalSeconds: sql<number>`COALESCE(SUM(${lessonLearningTime.totalSeconds}), 0)::INTEGER`,
+        averageSeconds: sql<number>`COALESCE(SUM(${lessonLearningTime.totalSeconds}), 0)::INTEGER / GREATEST(COUNT(DISTINCT ${lessonLearningTime.userId})::INTEGER, 1)`,
         uniqueUsers: sql<number>`COUNT(DISTINCT ${lessonLearningTime.userId})::INTEGER`,
       })
       .from(lessonLearningTime)
       .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions));
 
     return result[0] ?? { totalSeconds: 0, uniqueUsers: 0 };
+  }
+
+  private buildTotalLearningTimePerStudentQuery(
+    courseId: UUIDType,
+    conditions: SQL<unknown>[] = [],
+  ) {
+    return this.db
+      .select({
+        id: lessonLearningTime.userId,
+        name: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+        studentAvatarKey: users.avatarReference,
+        totalSeconds: sql<number>`SUM(${lessonLearningTime.totalSeconds})::INTEGER`,
+        groups: sql<Array<{ id: string; name: string }>>`(
+          SELECT json_agg(json_build_object('id', g.id, 'name', g.name))
+          FROM ${groups} g
+          JOIN ${groupUsers} gu ON gu.group_id = g.id
+          WHERE gu.user_id = ${users.id}
+        )`,
+      })
+      .from(lessonLearningTime)
+      .innerJoin(users, eq(lessonLearningTime.userId, users.id))
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .leftJoin(groups, eq(groups.id, groupUsers.groupId))
+      .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions))
+      .groupBy(
+        lessonLearningTime.userId,
+        users.firstName,
+        users.lastName,
+        users.email,
+        users.avatarReference,
+        users.id,
+      );
   }
 
   async getStudentsByGroup(groupId: UUIDType) {

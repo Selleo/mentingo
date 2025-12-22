@@ -176,6 +176,7 @@ export type CourseStudentProgressionQuery = {
   page?: number;
   perPage?: number;
   searchQuery?: string;
+  groupId: UUIDType;
   sort?: SortCourseStudentProgressionOptions;
   language: SupportedLanguages;
 };
@@ -215,6 +216,8 @@ export type CourseStudentQuizResultsQuery = {
   page?: number;
   perPage?: number;
   quizId?: string;
+  groupId?: UUIDType;
+  searchQuery?: string;
   sort?: SortCourseStudentQuizResultsOptions;
   language: SupportedLanguages;
 };
@@ -255,6 +258,8 @@ export type CourseStudentAiMentorResultsQuery = {
   page?: number;
   perPage?: number;
   lessonId?: UUIDType;
+  groupId?: UUIDType;
+  searchQuery?: string;
   sort?: SortCourseStudentAiMentorResultsOptions;
   language: SupportedLanguages;
 };

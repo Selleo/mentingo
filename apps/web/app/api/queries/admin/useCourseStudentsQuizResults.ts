@@ -8,6 +8,8 @@ export type CourseStudentsQuizResultsQueryParams = {
   page?: number;
   perPage?: number;
   quizId?: string;
+  groupId?: string;
+  search?: string;
   sort?:
     | "studentName"
     | "quizName"
