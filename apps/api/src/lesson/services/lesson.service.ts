@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import * as cheerio from "cheerio";
-import { isNotNull } from "drizzle-orm";
+import { eq, isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
@@ -20,7 +20,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
-import { studentLessonProgress } from "src/storage/schema";
+import { courses, studentLessonProgress } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
@@ -172,6 +172,35 @@ export class LessonService {
       }),
     );
 
+    const isQuizFeedbackRedacted = isStudent && !lesson.quizFeedbackEnabled;
+    console.log({ isStudent, quizFeedbackEnabled: lesson.quizFeedbackEnabled });
+
+    if (isQuizFeedbackRedacted) {
+      const redactedQuestions = questionListWithUrls.map((question) => ({
+        ...question,
+        passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
+        options: question.options?.map((option) => ({
+          ...option,
+          isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,
+        })),
+      }));
+
+      const quizDetails = {
+        questions: redactedQuestions,
+        questionCount: redactedQuestions.length,
+        score: 0,
+        correctAnswerCount: 0,
+        wrongAnswerCount: 0,
+      };
+
+      return {
+        ...lesson,
+        quizDetails,
+        thresholdScore: 0,
+        isQuizFeedbackRedacted: true,
+      };
+    }
+
     if (lesson.lessonCompleted && isNumber(lesson.quizScore)) {
       const [quizResult] = await this.lessonRepository.getQuizResult(
         lesson.id,
@@ -187,7 +216,7 @@ export class LessonService {
         wrongAnswerCount: quizResult?.wrongAnswerCount ?? 0,
       };
 
-      return { ...lesson, quizDetails };
+      return { ...lesson, quizDetails, isQuizFeedbackRedacted: false };
     }
 
     const quizDetails = {
@@ -198,12 +227,13 @@ export class LessonService {
       wrongAnswerCount: null,
     };
 
-    return { ...lesson, quizDetails };
+    return { ...lesson, quizDetails, isQuizFeedbackRedacted: false };
   }
 
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     userId: UUIDType,
+    userRole: UserRole,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;
@@ -295,6 +325,24 @@ export class LessonService {
             quizScore,
           ),
         );
+
+        const isStudent = userRole === USER_ROLES.STUDENT;
+        const [course] = await this.db
+          .select()
+          .from(courses)
+          .where(eq(courses.id, accessCourseLessonWithDetails.courseId))
+          .limit(1);
+
+        const isQuizFeedbackRedacted = isStudent && !course?.settings.quizFeedbackEnabled;
+
+        if (isQuizFeedbackRedacted) {
+          return {
+            correctAnswerCount: 0,
+            wrongAnswerCount: 0,
+            questionCount: evaluationResult.wrongAnswerCount + evaluationResult.correctAnswerCount,
+            score: 0,
+          };
+        }
 
         return {
           correctAnswerCount: evaluationResult.correctAnswerCount,
@@ -408,8 +456,8 @@ export class LessonService {
 
     const tags = $("a").toArray();
 
-    const tagsWithImages = tags.filter((tag) =>
-      $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
+    const tagsWithImages = tags.filter(
+      (tag) => $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
     );
 
     tagsWithImages.forEach((tag) => {

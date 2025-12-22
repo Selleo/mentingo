@@ -290,6 +290,7 @@ export class LessonController {
   async evaluationQuiz(
     @Body() answers: AnswerQuestionBody,
     @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") userRole: UserRole,
   ): Promise<
     BaseResponse<{
       message: string;
@@ -301,7 +302,11 @@ export class LessonController {
       };
     }>
   > {
-    const evaluationResult = await this.lessonService.evaluationQuiz(answers, currentUserId);
+    const evaluationResult = await this.lessonService.evaluationQuiz(
+      answers,
+      currentUserId,
+      userRole,
+    );
     return new BaseResponse({
       message: "Evaluation quiz successfully",
       data: evaluationResult,

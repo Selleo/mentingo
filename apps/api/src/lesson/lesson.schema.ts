@@ -187,6 +187,7 @@ export const lessonShowSchema = Type.Object({
   status: Type.Optional(Type.Enum(THREAD_STATUS)),
   threadId: Type.Optional(UUIDSchema),
   lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
+  isQuizFeedbackRedacted: Type.Optional(Type.Boolean()),
   aiMentorDetails: Type.Optional(
     Type.Union([
       Type.Object({
