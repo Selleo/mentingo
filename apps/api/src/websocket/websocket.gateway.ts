@@ -138,6 +138,36 @@ export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayD
     return { success: true };
   }
 
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("join:course")
+  async handleJoinCourse(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: { courseId: string },
+  ) {
+    const userId = client.data.user.userId;
+    const roomName = `course:${payload.courseId}`;
+    await client.join(roomName);
+
+    this.logger.debug(`User ${userId} joined course room: ${roomName}`);
+
+    return { success: true, room: roomName };
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("leave:course")
+  async handleLeaveCourse(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: { courseId: string },
+  ) {
+    const userId = client.data.user.userId;
+    const roomName = `course:${payload.courseId}`;
+    await client.leave(roomName);
+
+    this.logger.debug(`User ${userId} left course room: ${roomName}`);
+
+    return { success: true };
+  }
+
   onHeartbeat(handler: (socket: AuthenticatedSocket, payload: HeartbeatPayload) => Promise<void>) {
     this.heartbeatHandlers.push(handler);
   }

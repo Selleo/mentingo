@@ -7,6 +7,7 @@ import { useCourse, useLesson } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
 import ErrorPage from "~/components/ErrorPage/ErrorPage";
 import { PageWrapper } from "~/components/PageWrapper";
+import { useCourseUpdateListener } from "~/hooks/useCourseUpdateListener";
 import { useLearningTimeTracker } from "~/hooks/useLearningTimeTracker";
 import Loader from "~/modules/common/Loader/Loader";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
@@ -54,6 +55,9 @@ export default function LessonPage() {
     courseId,
     enabled: !!lesson && !!course,
   });
+
+  // Listen for real-time course updates (e.g., when admin removes a lesson)
+  useCourseUpdateListener(courseId);
 
   useEffect(() => {
     if (lessonError) {

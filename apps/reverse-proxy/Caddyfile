@@ -1,11 +1,22 @@
 app.lms.localhost {
-    reverse_proxy /api/* {
-        to http://localhost:3000
+    handle /socket.io/* {
+        reverse_proxy localhost:3000
     }
 
+    # API routes
+    handle /api/* {
+        reverse_proxy localhost:3000
+    }
+
+    # Frontend (catch-all)
     handle {
         reverse_proxy localhost:5173
     }
+}
+
+# Direct API access (for Swagger, etc.)
+api.lms.localhost {
+    reverse_proxy http://localhost:3000
 }
 
 mailbox.lms.localhost {

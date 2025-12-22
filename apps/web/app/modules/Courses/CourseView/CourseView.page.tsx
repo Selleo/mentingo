@@ -7,6 +7,7 @@ import { useCourse, useCurrentUser } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
+import { useCourseUpdateListener } from "~/hooks/useCourseUpdateListener";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
 import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
@@ -28,6 +29,9 @@ export default function CourseViewPage() {
   const { data: course } = useCourse(id, language);
   const { isStudent } = useUserRole();
   const { data: currentUser } = useCurrentUser();
+
+  // Listen for real-time course updates (e.g., when admin removes a lesson)
+  useCourseUpdateListener(id);
 
   const courseViewTabs = useMemo(
     () => [

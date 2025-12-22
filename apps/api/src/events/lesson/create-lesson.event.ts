@@ -4,6 +4,8 @@ import type { CurrentUser } from "src/common/types/current-user.type";
 
 type LessonCreationData = {
   lessonId: UUIDType;
+  chapterId: UUIDType;
+  courseId: UUIDType;
   actor: CurrentUser;
   createdLesson: LessonActivityLogSnapshot;
 };

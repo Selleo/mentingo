@@ -79,6 +79,11 @@ export class AdminLessonService {
       });
     }
 
+    const [course] = await this.adminLessonRepository.getCourseByChapter(data.chapterId);
+    if (!course) {
+      throw new NotFoundException("Course not found for chapter");
+    }
+
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     const lesson = await this.adminLessonRepository.createLessonForChapter(
@@ -96,6 +101,8 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
+        chapterId: data.chapterId,
+        courseId: course.id,
         actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
@@ -126,6 +133,11 @@ export class AdminLessonService {
 
     if (!data.name?.trim().length) data.name = "AI Mentor";
 
+    const [course] = await this.adminLessonRepository.getCourseByChapter(data.chapterId);
+    if (!course) {
+      throw new NotFoundException("Course not found for chapter");
+    }
+
     const lesson = await this.createAiMentorLessonWithTransaction(data, maxDisplayOrder + 1);
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
@@ -137,6 +149,8 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
+        chapterId: data.chapterId,
+        courseId: course.id,
         actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
@@ -164,6 +178,11 @@ export class AdminLessonService {
       data.chapterId,
     );
 
+    const [course] = await this.adminLessonRepository.getCourseByChapter(data.chapterId);
+    if (!course) {
+      throw new NotFoundException("Course not found for chapter");
+    }
+
     const lesson = await this.createQuizLessonWithQuestionsAndOptions(
       data,
       currentUser.userId,
@@ -180,6 +199,8 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
+        chapterId: data.chapterId,
+        courseId: course.id,
         actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),
@@ -346,6 +367,12 @@ export class AdminLessonService {
       throw new NotFoundException("Lesson not found");
     }
 
+    const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
+
+    if (!course) {
+      throw new NotFoundException("Course not found for lesson");
+    }
+
     await this.db.transaction(async (trx) => {
       await this.documentService.deleteAllDocumentsIfLast(lessonId, trx);
       await this.adminLessonRepository.removeLesson(lessonId, trx);
@@ -358,6 +385,8 @@ export class AdminLessonService {
         lessonId: lesson.id,
         actor: currentUser,
         lessonName: lesson.title,
+        chapterId: lesson.chapterId,
+        courseId: course.id,
       }),
     );
   }
@@ -749,6 +778,11 @@ export class AdminLessonService {
       data.chapterId,
     );
 
+    const [course] = await this.adminLessonRepository.getCourseByChapter(data.chapterId);
+    if (!course) {
+      throw new NotFoundException("Course not found for chapter");
+    }
+
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
     const lesson = await this.adminLessonRepository.createLessonForChapter(
@@ -781,6 +815,8 @@ export class AdminLessonService {
     await this.eventBus.publish(
       new CreateLessonEvent({
         lessonId: lesson.id,
+        chapterId: data.chapterId,
+        courseId: course.id,
         actor: currentUser,
         createdLesson: createdLessonSnapshot,
       }),

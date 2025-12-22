@@ -117,14 +117,17 @@ const FileUploadInput = ({
 
   if (!videoPreview && !file) {
     return (
+      // @ts-expect-error - getRootProps is not typed correctly
       <div {...getRootProps()} className="max-w-[440px]">
         <EmptyStateUpload contentTypeToDisplay={contentTypeToDisplay} className={className} />
+        {/* @ts-expect-error - getRootProps is not typed correctly */}
         <input {...getInputProps()} className="sr-only" />
       </div>
     );
   }
 
   return (
+    // @ts-expect-error - getRootProps is not typed correctly
     <div
       className={cn(
         "relative h-[240px] w-full max-w-[440px] overflow-hidden rounded-lg border border-neutral-200",
@@ -133,6 +136,7 @@ const FileUploadInput = ({
       {...getRootProps()}
     >
       {filePreview}
+      {/* @ts-expect-error - getRootProps is not typed correctly */}
       <input {...getInputProps()} className="sr-only" />
     </div>
   );

@@ -640,4 +640,195 @@ export class StudentLessonProgressService {
       role: user.role as UserRole,
     };
   }
+
+  /**
+   * Recalculates chapter and course progress for all enrolled students after a lesson is removed.
+   * This ensures that if a student has completed all remaining lessons in a chapter,
+   * the chapter (and possibly the course) will be marked as complete.
+   */
+  async recalculateProgressAfterLessonRemoval(
+    chapterId: UUIDType,
+    courseId: UUIDType,
+    actor: CurrentUser,
+  ) {
+    // Get the updated lesson count for the chapter
+    const [chapterData] = await this.db
+      .select({
+        lessonCount: chapters.lessonCount,
+      })
+      .from(chapters)
+      .where(eq(chapters.id, chapterId));
+
+    if (!chapterData) {
+      return [];
+    }
+
+    const lessonCount = chapterData.lessonCount;
+
+    // Get all enrolled students for this course
+    const enrolledStudents = await this.db
+      .select({
+        studentId: studentCourses.studentId,
+      })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
+
+    // For each enrolled student, recalculate their chapter progress
+    for (const { studentId } of enrolledStudents) {
+      // Get the count of completed lessons that still exist in the chapter
+      const [completedLessonsData] = await this.db
+        .select({ count: sql<number>`count(*)::INTEGER` })
+        .from(studentLessonProgress)
+        .innerJoin(lessons, eq(lessons.id, studentLessonProgress.lessonId))
+        .where(
+          and(
+            eq(studentLessonProgress.chapterId, chapterId),
+            eq(studentLessonProgress.studentId, studentId),
+            isNotNull(studentLessonProgress.completedAt),
+          ),
+        );
+
+      const completedLessonCount = completedLessonsData?.count ?? 0;
+
+      // Update chapter progress
+      if (completedLessonCount === lessonCount && lessonCount > 0) {
+        // Chapter is now complete - mark it as such
+        await this.db
+          .insert(studentChapterProgress)
+          .values({
+            completedLessonCount,
+            completedAt: sql`now()`,
+            courseId,
+            chapterId,
+            studentId,
+          })
+          .onConflictDoUpdate({
+            target: [
+              studentChapterProgress.studentId,
+              studentChapterProgress.chapterId,
+              studentChapterProgress.courseId,
+            ],
+            set: {
+              completedLessonCount,
+              completedAt: sql`now()`,
+            },
+          });
+
+        // Publish chapter finished event
+        this.eventBus.publish(
+          new UserChapterFinishedEvent({ chapterId, courseId, userId: studentId, actor }),
+        );
+
+        // Check if the course is now complete
+        await this.checkCourseIsCompletedForUser(courseId, studentId, actor);
+      } else {
+        // Update the completed lesson count without marking as complete
+        await this.db
+          .insert(studentChapterProgress)
+          .values({
+            completedLessonCount,
+            courseId,
+            chapterId,
+            studentId,
+          })
+          .onConflictDoUpdate({
+            target: [
+              studentChapterProgress.studentId,
+              studentChapterProgress.chapterId,
+              studentChapterProgress.courseId,
+            ],
+            set: {
+              completedLessonCount,
+            },
+          });
+      }
+    }
+
+    return enrolledStudents.map((s) => s.studentId);
+  }
+
+  /**
+   * Recalculates chapter and course progress for all enrolled students after a lesson is added.
+   * This ensures that if a chapter was previously marked as complete, it becomes incomplete
+   * and the finishedChapterCount is decremented.
+   * Returns all enrolled students for notification purposes.
+   */
+  async recalculateProgressAfterLessonAdded(chapterId: UUIDType, courseId: UUIDType) {
+    // Get all enrolled students for this course (for notifications)
+    const enrolledStudents = await this.db
+      .select({
+        studentId: studentCourses.studentId,
+      })
+      .from(studentCourses)
+      .where(
+        and(
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      );
+
+    // Find all students who have this chapter marked as completed
+    const studentsWithCompletedChapter = await this.db
+      .select({
+        studentId: studentChapterProgress.studentId,
+      })
+      .from(studentChapterProgress)
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.studentId, studentChapterProgress.studentId),
+          eq(studentCourses.courseId, courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .where(
+        and(
+          eq(studentChapterProgress.chapterId, chapterId),
+          eq(studentChapterProgress.courseId, courseId),
+          isNotNull(studentChapterProgress.completedAt),
+        ),
+      );
+
+    // For each student with a completed chapter, mark it as incomplete
+    for (const { studentId } of studentsWithCompletedChapter) {
+      // Clear the completedAt for this chapter
+      await this.db
+        .update(studentChapterProgress)
+        .set({
+          completedAt: null,
+        })
+        .where(
+          and(
+            eq(studentChapterProgress.chapterId, chapterId),
+            eq(studentChapterProgress.studentId, studentId),
+            eq(studentChapterProgress.courseId, courseId),
+          ),
+        );
+
+      // Decrement the finishedChapterCount for the student's course enrollment
+      await this.db
+        .update(studentCourses)
+        .set({
+          finishedChapterCount: sql`GREATEST(${studentCourses.finishedChapterCount} - 1, 0)`,
+          // If the course was completed, it's no longer complete
+          progress: PROGRESS_STATUSES.IN_PROGRESS,
+          completedAt: null,
+        })
+        .where(
+          and(
+            eq(studentCourses.studentId, studentId),
+            eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ),
+        );
+    }
+
+    // Return all enrolled students for notification purposes
+    return enrolledStudents.map((s) => s.studentId);
+  }
 }
