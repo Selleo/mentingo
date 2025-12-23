@@ -1,8 +1,9 @@
 import { screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { userEvent } from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
+
 import { CourseSettingsSwitches } from "./CourseSettingsSwitches";
 
 const mockMutate = vi.fn();
@@ -128,9 +129,9 @@ describe("CourseSettingsSwitches", () => {
 
   it("disables switches when loading", () => {
     mockUseCourseSettings.mockReturnValue({
-      data: undefined as any,
+      data: undefined,
       isLoading: true,
-    });
+    } as unknown as ReturnType<typeof mockUseCourseSettings>);
 
     renderWith({ withQuery: true }).render(<CourseSettingsSwitches courseId="test-course-id" />);
 
