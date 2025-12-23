@@ -2700,6 +2700,51 @@
         }
       }
     },
+    "/api/course/beta-course-missing-translations": {
+      "get": {
+        "operationId": "CourseController_hasMissingTranslations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HasMissingTranslationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -3578,6 +3623,45 @@
         ],
         "responses": {
           "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/course/generate-translations/{courseId}": {
+      "post": {
+        "operationId": "CourseController_generateTranslations",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
             "description": ""
           }
         }
@@ -5634,32 +5718,6 @@
         }
       }
     },
-    "/api/env/{envName}": {
-      "get": {
-        "operationId": "EnvController_getEnvKey",
-        "parameters": [
-          {
-            "name": "envName",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEnvKeyResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/env/bulk": {
       "post": {
         "operationId": "EnvController_bulkUpsertEnv",
@@ -5732,6 +5790,23 @@
         }
       }
     },
+    "/api/env/ai": {
+      "get": {
+        "operationId": "EnvController_getAIConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAIConfiguredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/env/config/setup": {
       "get": {
         "operationId": "EnvController_getIsConfigSetup",
@@ -5742,6 +5817,32 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetIsConfigSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/{envName}": {
+      "get": {
+        "operationId": "EnvController_getEnvKey",
+        "parameters": [
+          {
+            "name": "envName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnvKeyResponse"
                 }
               }
             }
@@ -12679,6 +12780,25 @@
               "title",
               "availableLocales",
               "baseLanguage"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "HasMissingTranslationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "hasMissingTranslations": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "hasMissingTranslations"
             ]
           }
         },
@@ -19783,29 +19903,6 @@
           "data"
         ]
       },
-      "GetEnvKeyResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name",
-              "value"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "bulkUpsertEnvBody": {
         "type": "array",
         "items": {
@@ -19891,6 +19988,25 @@
           "data"
         ]
       },
+      "GetAIConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetIsConfigSetupResponse": {
         "type": "object",
         "properties": {
@@ -19958,6 +20074,29 @@
               "notConfigured",
               "hasIssues",
               "isWarningDismissed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetEnvKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
             ]
           }
         },

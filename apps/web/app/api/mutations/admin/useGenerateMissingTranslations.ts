@@ -10,42 +10,44 @@ import { useToast } from "~/components/ui/use-toast";
 import type { SupportedLanguages } from "@repo/shared";
 import type { AxiosError } from "axios";
 
-export type DeleteCourseLanguageType = {
+type GenerateTranslationsOptions = {
   courseId: string;
   language: SupportedLanguages;
 };
 
-export function useDeleteCourseLanguage() {
-  const { toast } = useToast();
+export default function useGenerateMissingTranslations() {
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (options: DeleteCourseLanguageType) => {
-      const { language, courseId } = options;
+    mutationFn: async (options: GenerateTranslationsOptions) => {
+      const { courseId, language } = options;
 
-      const response = await ApiClient.api.courseControllerDeleteLanguage(courseId, { language });
+      const response = await ApiClient.api.courseControllerGenerateTranslations(courseId, {
+        language,
+      });
 
       return response.data;
     },
     onSuccess: async (_, variables) => {
-      const { courseId } = variables;
-
-      toast({ description: t("adminCourseView.toast.successfullyDeletedLanguage") });
+      const { courseId, language } = variables;
 
       await queryClient.invalidateQueries({
-        queryKey: [COURSE_QUERY_KEY],
+        queryKey: [COURSE_QUERY_KEY, { id: courseId, language }],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId }],
+        queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId, language }],
+      });
+
+      toast({
+        description: t("adminCourseView.toast.translationsGeneratedSuccessfully"),
       });
     },
     onError: (error: AxiosError) => {
-      const apiResponseData = error.response?.data as { message: string };
-      toast({
-        description: t(apiResponseData.message),
-        variant: "destructive",
-      });
+      const { message } = error.response?.data as { message: string };
+
+      toast({ description: t(message), variant: "destructive" });
     },
   });
 }

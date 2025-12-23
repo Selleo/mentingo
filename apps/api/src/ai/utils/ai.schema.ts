@@ -112,6 +112,11 @@ export const streamChatSchema = Type.Object({
   id: Type.Optional(UUIDSchema),
 });
 
+export const generateTranslationSchema = Type.Object({
+  translations: Type.Array(Type.String()),
+});
+
+export type GenerateTranslationBody = Static<typeof generateTranslationSchema>;
 export type StreamChatBody = Static<typeof streamChatSchema>;
 export type ResponseJudgeBody = Static<typeof responseJudgeSchema>;
 export type UpdateThreadBody = Static<typeof updateThreadSchema>;

@@ -1277,6 +1277,12 @@ export interface GetBetaCourseByIdResponse {
   };
 }
 
+export interface HasMissingTranslationsResponse {
+  data: {
+    hasMissingTranslations: boolean;
+  };
+}
+
 export type CreateCourseBody = {
   title: string;
   description: string;
@@ -2841,6 +2847,12 @@ export interface GetStripePublishableKeyResponse {
 }
 
 export interface GetStripeConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface GetAIConfiguredResponse {
   data: {
     enabled: boolean;
   };
@@ -5130,6 +5142,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerHasMissingTranslations
+     * @request GET:/api/course/beta-course-missing-translations
+     */
+    courseControllerHasMissingTranslations: (
+      query: {
+        /** @format uuid */
+        id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HasMissingTranslationsResponse, any>({
+        path: `/api/course/beta-course-missing-translations`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerUpdateCourse
      * @request PATCH:/api/course/{id}
      */
@@ -5527,6 +5562,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/course/language/${courseId}`,
         method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGenerateTranslations
+     * @request POST:/api/course/generate-translations/{courseId}
+     */
+    courseControllerGenerateTranslations: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/generate-translations/${courseId}`,
+        method: "POST",
         query: query,
         ...params,
       }),
@@ -6789,6 +6845,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetStripeConfigured: (params: RequestParams = {}) =>
       this.request<GetStripeConfiguredResponse, any>({
         path: `/api/env/frontend/stripe`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetAiConfigured
+     * @request GET:/api/env/ai
+     */
+    envControllerGetAiConfigured: (params: RequestParams = {}) =>
+      this.request<GetAIConfiguredResponse, any>({
+        path: `/api/env/ai`,
         method: "GET",
         format: "json",
         ...params,

@@ -12,7 +12,7 @@ export class EmbeddingService {
 
   async embedPages(chunkedPages: TextExtractionBody): Promise<number[][]> {
     {
-      const provider = await this.ragService.getOpenAI();
+      const provider = await this.ragService.getAISdkOpenAI();
 
       const { embeddings } = await embedMany({
         model: provider.textEmbeddingModel(OPENAI_MODELS.EMBEDDING),
