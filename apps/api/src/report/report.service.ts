@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import ExcelJS from "exceljs";
+import writeXlsxFile from "write-excel-file/node";
 
 import { ReportRepository } from "./repositories/report.repository";
 
+import type { StudentCourseReportRow } from "./repositories/report.repository";
 import type { SupportedLanguages } from "@repo/shared";
+import type { Schema } from "write-excel-file";
 
 interface ReportHeaders {
   studentName: string;
@@ -44,56 +46,72 @@ export class ReportService {
     const data = await this.reportRepository.getAllStudentCourseData(language);
     const headers = HEADERS[language] || HEADERS.en;
 
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = "Mentingo LMS";
-    workbook.created = new Date();
-
-    const worksheet = workbook.addWorksheet("Summary Report");
-
-    // Define columns with headers
-    worksheet.columns = [
-      { header: headers.studentName, key: "studentName", width: 25 },
-      { header: headers.groupName, key: "groupName", width: 20 },
-      { header: headers.courseName, key: "courseName", width: 35 },
-      { header: headers.lessonCount, key: "lessonCount", width: 15 },
-      { header: headers.completedLessons, key: "completedLessons", width: 18 },
-      { header: headers.progressPercentage, key: "progressPercentage", width: 12 },
-      { header: headers.quizResults, key: "quizResults", width: 40 },
+    const schema: Schema<StudentCourseReportRow> = [
+      {
+        column: headers.studentName,
+        type: String,
+        value: (row) => row.studentName,
+        width: 25,
+        fontWeight: "bold",
+        height: 20,
+      },
+      {
+        column: headers.groupName,
+        type: String,
+        value: (row) => row.groupName || "-",
+        width: 20,
+        height: 20,
+      },
+      {
+        column: headers.courseName,
+        type: String,
+        value: (row) => row.courseName,
+        width: 35,
+        height: 20,
+      },
+      {
+        column: headers.lessonCount,
+        type: Number,
+        value: (row) => row.lessonCount,
+        width: 15,
+        height: 20,
+      },
+      {
+        column: headers.completedLessons,
+        type: Number,
+        value: (row) => row.completedLessons,
+        width: 18,
+        height: 20,
+      },
+      {
+        column: headers.progressPercentage,
+        type: String,
+        value: (row) => `${row.progressPercentage}%`,
+        width: 12,
+        height: 20,
+      },
+      {
+        column: headers.quizResults,
+        type: String,
+        value: (row) => row.quizResults,
+        width: 40,
+        height: 20,
+      },
     ];
 
-    // Style header row
-    const headerRow = worksheet.getRow(1);
-    headerRow.font = { bold: true };
-    headerRow.fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "FFE2E8F0" },
-    };
-    headerRow.alignment = { vertical: "middle", horizontal: "center" };
-
-    // Add data rows
-    data.forEach((row) => {
-      worksheet.addRow({
-        studentName: row.studentName,
-        groupName: row.groupName || "-",
-        courseName: row.courseName,
-        lessonCount: row.lessonCount,
-        completedLessons: row.completedLessons,
-        progressPercentage: `${row.progressPercentage}%`,
-        quizResults: row.quizResults,
-      });
+    const buffer = await writeXlsxFile(data, {
+      schema,
+      sheet: "Summary Report",
+      stickyRowsCount: 1,
+      buffer: true,
+      fontFamily: "Calibri",
+      fontSize: 11,
+      getHeaderStyle: () => ({
+        fontWeight: "bold",
+        height: 25,
+        backgroundColor: "#E2E8F0",
+      }),
     });
-
-    // Auto-filter for all columns
-    worksheet.autoFilter = {
-      from: { row: 1, column: 1 },
-      to: { row: data.length + 1, column: 7 },
-    };
-
-    // Freeze header row
-    worksheet.views = [{ state: "frozen", ySplit: 1 }];
-
-    const buffer = await workbook.xlsx.writeBuffer();
 
     return Buffer.from(buffer);
   }
