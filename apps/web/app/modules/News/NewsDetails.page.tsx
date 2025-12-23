@@ -79,7 +79,7 @@ export default function NewsDetailsPage() {
               variant="outline"
               className="w-28 gap-2"
               onClick={() => {
-                navigate(`edit`);
+                navigate(`/news/${news.id}/edit`);
               }}
             >
               <Icon name="Edit" className="size-4" />
