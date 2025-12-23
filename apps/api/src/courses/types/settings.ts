@@ -1,4 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
+
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "../constants";
 
 export const coursesSettingsSchema = Type.Object(

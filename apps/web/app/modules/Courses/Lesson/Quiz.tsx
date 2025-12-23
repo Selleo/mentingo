@@ -19,6 +19,8 @@ import { toast } from "~/components/ui/use-toast";
 import { useUserRole } from "~/hooks/useUserRole";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { QuizContextProvider } from "../components/QuizContextProvider";
+
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
 import {
@@ -30,7 +32,6 @@ import {
 
 import type { QuizForm } from "./types";
 import type { GetLessonByIdResponse } from "~/api/generated-api";
-import { QuizContextProvider } from "../components/QuizContextProvider";
 
 type QuizProps = {
   lesson: GetLessonByIdResponse["data"];

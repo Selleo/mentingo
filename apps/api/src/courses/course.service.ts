@@ -64,7 +64,6 @@ import {
   certificates,
   chapters,
   courses,
-  coursesSettingsHelpers,
   coursesSummaryStats,
   groupCourses,
   groups,
@@ -119,6 +118,7 @@ import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
+import type { CoursesSettings } from "./types/settings";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
@@ -132,7 +132,6 @@ import type * as schema from "src/storage/schema";
 import type { UserRole } from "src/user/schemas/userRoles";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
-import type { CoursesSettings } from "./types/settings";
 
 @Injectable()
 export class CourseService {
@@ -452,8 +451,6 @@ export class CourseService {
     const course = await this.db.query.courses.findFirst({
       where: (courses, { eq }) => eq(courses.id, courseId),
     });
-
-    console.log({ courseId, courseSettings: course?.settings });
 
     if (!course) {
       throw new NotFoundException("Course not found");

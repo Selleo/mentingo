@@ -5,10 +5,10 @@ import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
+import { getCourseSettingsQueryKey } from "../queries/useCourseSettings.js";
 import { getLessonSequenceQueryKey } from "../queries/useLessonSequence.js";
 
 import type { UpdateCourseSettingsBody } from "../generated-api.js";
-import { getCourseSettingsQueryKey } from "../queries/useCourseSettings.js";
 
 type UpdateCourseSettingsParams = {
   courseId: string;

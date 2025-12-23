@@ -18,14 +18,14 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
+import { coursesSettingsSchema } from "src/courses/types/settings";
 import { USER_ROLES } from "src/user/schemas/userRoles";
+import { safeJsonb } from "src/utils/safe-jsonb";
 
 import { archived, availableLocales, baseLanguage, id, timestamps } from "./utils";
 
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
-import { coursesSettingsSchema } from "src/courses/types/settings";
-import { safeJsonb } from "src/utils/safe-jsonb";
 
 export const users = pgTable("users", {
   ...id,

@@ -1,10 +1,11 @@
-import { customType, type PgColumn } from "drizzle-orm/pg-core";
-import { Value } from "@sinclair/typebox/value";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
-import type { Static, TObject } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
 import { sql } from "drizzle-orm";
-import { match, P } from "ts-pattern";
+import { customType, type PgColumn } from "drizzle-orm/pg-core";
 import { cloneDeep } from "lodash";
+import { match, P } from "ts-pattern";
+
+import type { Static, TObject } from "@sinclair/typebox";
 
 export const safeJsonb = <Schema extends TObject>(name: string, schema: Schema) => {
   type DataType = Static<Schema>;

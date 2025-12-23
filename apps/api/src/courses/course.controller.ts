@@ -77,12 +77,14 @@ import { GroupsFilterSchema } from "src/group/group.types";
 import { LearningTimeService, learningTimeStatisticsSchema } from "src/learning-time";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
+import { coursesSettingsSchema } from "./schemas/coursesSettings.schema";
 import {
   CreateCoursesEnrollment,
   createCoursesEnrollmentSchema,
 } from "./schemas/createCoursesEnrollment";
 
 import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
+import type { CoursesSettings } from "./types/settings";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
@@ -101,8 +103,6 @@ import type {
   CommonShowBetaCourse,
   CommonShowCourse,
 } from "src/courses/schemas/showCourseCommon.schema";
-import { coursesSettingsSchema } from "./schemas/coursesSettings.schema";
-import type { CoursesSettings } from "./types/settings";
 
 @Controller("course")
 @UseGuards(RolesGuard)

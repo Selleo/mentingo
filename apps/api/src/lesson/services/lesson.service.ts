@@ -173,7 +173,6 @@ export class LessonService {
     );
 
     const isQuizFeedbackRedacted = isStudent && !lesson.quizFeedbackEnabled;
-    console.log({ isStudent, quizFeedbackEnabled: lesson.quizFeedbackEnabled });
 
     if (isQuizFeedbackRedacted) {
       const redactedQuestions = questionListWithUrls.map((question) => ({
