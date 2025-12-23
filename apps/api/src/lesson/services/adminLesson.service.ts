@@ -62,7 +62,7 @@ export class AdminLessonService {
 
     if (
       (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
-      (!data.fileS3Key || !data.fileType)
+      (!data.fileS3Key || (!data.fileType && !data.fileS3Key?.startsWith("processing-")))
     ) {
       throw new BadRequestException("File is required for video and presentation lessons");
     }
@@ -314,7 +314,7 @@ export class AdminLessonService {
 
     if (
       (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
-      (!data.fileS3Key || !data.fileType)
+      (!data.fileS3Key || (!data.fileType && !data.fileS3Key?.startsWith("processing-")))
     ) {
       throw new BadRequestException("File is required for video and presentation lessons");
     }

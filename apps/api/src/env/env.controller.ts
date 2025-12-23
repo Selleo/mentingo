@@ -16,6 +16,7 @@ import {
   getEnvResponseSchema,
   stripePublishableKeyResponseSchema,
   isEnvSetupResponseSchema,
+  aiConfiguredResponseSchema,
 } from "src/env/env.schema";
 import { EnvService } from "src/env/services/env.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -24,16 +25,6 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 @UseGuards(RolesGuard)
 export class EnvController {
   constructor(private readonly envService: EnvService) {}
-
-  @Get(":envName")
-  @Roles(USER_ROLES.ADMIN)
-  @Validate({
-    request: [{ type: "param", name: "envName", schema: Type.String() }],
-    response: baseResponse(getEnvResponseSchema),
-  })
-  async getEnvKey(@Param("envName") envName: string) {
-    return new BaseResponse(await this.envService.getEnv(envName));
-  }
 
   @Post("bulk")
   @Roles(USER_ROLES.ADMIN)
@@ -76,6 +67,14 @@ export class EnvController {
     return new BaseResponse(await this.envService.getStripeConfigured());
   }
 
+  @Get("ai")
+  @Validate({
+    response: baseResponse(aiConfiguredResponseSchema),
+  })
+  async getAIConfigured() {
+    return new BaseResponse(await this.envService.getAIConfigured());
+  }
+
   @Get("config/setup")
   @Roles(USER_ROLES.ADMIN)
   @Validate({
@@ -84,5 +83,15 @@ export class EnvController {
   async getIsConfigSetup(@CurrentUser("userId") userId: UUIDType) {
     const setup = await this.envService.getEnvSetup(userId);
     return new BaseResponse(setup);
+  }
+
+  @Get(":envName")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "param", name: "envName", schema: Type.String() }],
+    response: baseResponse(getEnvResponseSchema),
+  })
+  async getEnvKey(@Param("envName") envName: string) {
+    return new BaseResponse(await this.envService.getEnv(envName));
   }
 }

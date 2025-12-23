@@ -11,7 +11,7 @@ interface EmptyStateUploadProps {
 }
 
 const contentTypeFormats = {
-  [ContentTypes.VIDEO_LESSON_FORM]: "MP4, MOV, MPEG-2, or Hevc (max. 100MB)",
+  [ContentTypes.VIDEO_LESSON_FORM]: "MP4, MOV, MPEG-2, or Hevc (max. 5GB)",
   [ContentTypes.PRESENTATION_FORM]: "PPT/PPTX (max. 100MB)",
 };
 

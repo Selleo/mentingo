@@ -49,18 +49,20 @@ function NewsItem({
         <h3 className="text-xl font-gothic font-bold leading-6 text-white transition-all duration-300 group-hover:text-primary-500 text-left">
           {title}
         </h3>
-        <p className="text-base font-normal leading-7 text-white opacity-95 text-left">{summary}</p>
+        <p className="text-base font-normal leading-7 text-white opacity-95 text-left overflow-hidden max-h-[7rem] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
+          {summary}
+        </p>
         <div className="flex items-center gap-6">
           {date ? (
             <div className="flex items-center gap-2">
-              <Icon name="Calendar" />
+              <Icon name="Calendar" className="text-white" />
               <p className="text-sm font-normal leading-5 text-white opacity-80">
                 {formatDate(new Date(date), "d MMMM yyyy")}
               </p>
             </div>
           ) : null}
           <div className="flex items-center gap-2">
-            <Icon name="User" className="size-4" />
+            <Icon name="User" className="size-4 text-white" />
             <p className="text-sm font-normal leading-5 text-white opacity-80">{authorName}</p>
           </div>
         </div>

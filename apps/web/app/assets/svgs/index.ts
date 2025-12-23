@@ -33,7 +33,6 @@ export { default as Hat } from "./hat.svg?react";
 export { default as Multi } from "./multi.svg?react";
 export { default as CertificateTrophy } from "./certificateTrophy.svg?react";
 export { default as HandCoins } from "./hand-coins.svg?react";
-
 export { default as Success } from "./success.svg?react";
 export { default as CourseEmptyState } from "./course-empty-state.svg?react";
 export { default as DragAndDropIcon } from "./drag-and-drop.svg?react";
@@ -68,6 +67,8 @@ export { default as Articles } from "./articles.svg?react";
 export { default as Article } from "./article.svg?react";
 export { default as News } from "./news.svg?react";
 export { default as Calendar } from "./calendar.svg?react";
+export { default as Group } from "./group.svg?react";
+export { default as Library } from "./library.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 

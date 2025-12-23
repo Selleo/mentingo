@@ -406,6 +406,23 @@
         }
       }
     },
+    "/api/settings/admin/overdue-course-notification": {
+      "patch": {
+        "operationId": "SettingsController_updateAdminOverdueCourseNotification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAdminOverdueCourseNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/color-schema": {
       "patch": {
         "operationId": "SettingsController_updateColorSchema",
@@ -760,6 +777,64 @@
         }
       }
     },
+    "/api/settings/admin/news/{setting}": {
+      "patch": {
+        "operationId": "SettingsController_updateNewsSetting",
+        "parameters": [
+          {
+            "name": "setting",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "newsEnabled",
+                  "type": "string"
+                },
+                {
+                  "const": "unregisteredUserNewsAccessibility",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/settings/admin/articles/{setting}": {
+      "patch": {
+        "operationId": "SettingsController_updateArticlesSetting",
+        "parameters": [
+          {
+            "name": "setting",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "articlesEnabled",
+                  "type": "string"
+                },
+                {
+                  "const": "unregisteredUserArticlesAccessibility",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/file": {
       "post": {
         "operationId": "FileController_uploadFile",
@@ -778,6 +853,10 @@
                   "resource": {
                     "type": "string",
                     "description": "Optional resource type"
+                  },
+                  "lessonId": {
+                    "type": "string",
+                    "description": "Optional lesson ID for existing lessons"
                   }
                 }
               }
@@ -813,6 +892,48 @@
         "responses": {
           "200": {
             "description": "File deleted successfully"
+          }
+        }
+      }
+    },
+    "/api/file/bunny/webhook": {
+      "post": {
+        "operationId": "FileController_handleBunnyWebhook",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandleBunnyWebhookBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/file/associate-upload": {
+      "post": {
+        "operationId": "FileController_associateUploadWithLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssociateUploadWithLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
           }
         }
       }
@@ -2579,6 +2700,51 @@
         }
       }
     },
+    "/api/course/beta-course-missing-translations": {
+      "get": {
+        "operationId": "CourseController_hasMissingTranslations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HasMissingTranslationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -3482,6 +3648,45 @@
         ],
         "responses": {
           "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/course/generate-translations/{courseId}": {
+      "post": {
+        "operationId": "CourseController_generateTranslations",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
             "description": ""
           }
         }
@@ -5538,32 +5743,6 @@
         }
       }
     },
-    "/api/env/{envName}": {
-      "get": {
-        "operationId": "EnvController_getEnvKey",
-        "parameters": [
-          {
-            "name": "envName",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEnvKeyResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/env/bulk": {
       "post": {
         "operationId": "EnvController_bulkUpsertEnv",
@@ -5636,6 +5815,23 @@
         }
       }
     },
+    "/api/env/ai": {
+      "get": {
+        "operationId": "EnvController_getAIConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAIConfiguredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/env/config/setup": {
       "get": {
         "operationId": "EnvController_getIsConfigSetup",
@@ -5646,6 +5842,32 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetIsConfigSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/{envName}": {
+      "get": {
+        "operationId": "EnvController_getEnvKey",
+        "parameters": [
+          {
+            "name": "envName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnvKeyResponse"
                 }
               }
             }
@@ -7638,6 +7860,18 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -7654,7 +7888,11 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled"
             ]
           }
         },
@@ -8103,6 +8341,18 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -8119,7 +8369,11 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled"
             ]
           }
         },
@@ -8301,6 +8555,18 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -8317,7 +8583,11 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled"
             ]
           }
         },
@@ -8326,6 +8596,54 @@
         ]
       },
       "UpdateAdminFinishedCourseNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "isMFAEnabled": {
+                "default": false,
+                "type": "boolean"
+              },
+              "MFASecret": {
+                "anyOf": [
+                  {
+                    "default": null,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "adminNewUserNotification": {
+                "type": "boolean"
+              },
+              "adminFinishedCourseNotification": {
+                "type": "boolean"
+              },
+              "configWarningDismissed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "language",
+              "isMFAEnabled",
+              "MFASecret",
+              "adminNewUserNotification",
+              "adminFinishedCourseNotification",
+              "configWarningDismissed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAdminOverdueCourseNotificationResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -8564,6 +8882,18 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -8580,7 +8910,11 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled"
             ]
           }
         },
@@ -8863,11 +9197,76 @@
           },
           "fileUrl": {
             "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "uploadId": {
+            "type": "string"
           }
         },
         "required": [
-          "fileKey",
-          "fileUrl"
+          "fileKey"
+        ]
+      },
+      "HandleBunnyWebhookBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "Status": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "videoId": {
+            "type": "string"
+          },
+          "VideoId": {
+            "type": "string"
+          },
+          "videoGuid": {
+            "type": "string"
+          },
+          "VideoGuid": {
+            "type": "string"
+          },
+          "guid": {
+            "type": "string"
+          },
+          "Guid": {
+            "type": "string"
+          }
+        }
+      },
+      "AssociateUploadWithLessonBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lessonId",
+          "uploadId"
         ]
       },
       "GetUserStatisticsResponse": {
@@ -10636,6 +11035,19 @@
               },
               "updatedAt": {
                 "type": "string"
+              },
+              "isMandatory": {
+                "type": "boolean"
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -10744,6 +11156,19 @@
                 },
                 "updatedAt": {
                   "type": "string"
+                },
+                "isMandatory": {
+                  "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -11021,6 +11446,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -11035,7 +11470,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           },
@@ -11276,6 +11712,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -11290,7 +11736,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           },
@@ -11435,6 +11882,16 @@
                 },
                 "enrolled": {
                   "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -11451,7 +11908,8 @@
                 "enrolledParticipantCount",
                 "priceInCents",
                 "currency",
-                "completedChapterCount"
+                "completedChapterCount",
+                "dueDate"
               ]
             }
           }
@@ -11784,6 +12242,16 @@
                     "type": "string"
                   }
                 ]
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -11799,7 +12267,8 @@
               "stripeProductId",
               "stripePriceId",
               "availableLocales",
-              "baseLanguage"
+              "baseLanguage",
+              "dueDate"
             ]
           }
         },
@@ -12343,6 +12812,25 @@
           "data"
         ]
       },
+      "HasMissingTranslationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "hasMissingTranslations": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "hasMissingTranslations"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "CreateCourseBody": {
         "type": "object",
         "allOf": [
@@ -12695,16 +13183,38 @@
       "EnrollGroupsToCourseBody": {
         "type": "object",
         "properties": {
-          "groupIds": {
+          "groups": {
             "type": "array",
             "items": {
-              "format": "uuid",
-              "type": "string"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "isMandatory": {
+                  "type": "boolean"
+                },
+                "dueDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "isMandatory"
+              ]
             }
           }
         },
         "required": [
-          "groupIds"
+          "groups"
         ]
       },
       "EnrollGroupsToCourseResponse": {
@@ -19450,29 +19960,6 @@
           "data"
         ]
       },
-      "GetEnvKeyResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name",
-              "value"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "bulkUpsertEnvBody": {
         "type": "array",
         "items": {
@@ -19558,6 +20045,25 @@
           "data"
         ]
       },
+      "GetAIConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetIsConfigSetupResponse": {
         "type": "object",
         "properties": {
@@ -19625,6 +20131,29 @@
               "notConfigured",
               "hasIssues",
               "isWarningDismissed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetEnvKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
             ]
           }
         },

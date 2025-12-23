@@ -53,6 +53,7 @@
       "publish": "Publikuj",
       "uploadingImage": "Przesyłanie obrazu...",
       "copyUrl": "Adres URL został skopiowany do schowka",
+      "dueDate": "Termin do wykonania: {{date}}",
       "appVersion": "Wersja aplikacji: {{version}}"
     },
     "continueWithGoogle": "Kontynuuj z użyciem Google",
@@ -70,7 +71,10 @@
     "subHeader": "lub przeciągnij i upuść",
     "replace": "Kliknij, aby zastąpić",
     "toast": {
-      "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+      "fileUploadedSuccessfully": "Plik został pomyślnie przesłany",
+      "videoFailed": "Nie udało się przesłać wideo",
+      "videoReady": "Wideo jest gotowe do użycia",
+      "videoProcessingStarted": "Rozpoczęto przesyłanie wideo. Powiadomimy Cię, gdy zostanie przetworzone."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG lub SVG",
@@ -146,6 +150,7 @@
     "profile": "Profil",
     "dashboard": "Panel główny",
     "courses": "Kursy",
+    "content": "Treści",
     "findInApplication": "Znajdź w aplikacji",
     "categories": "Kategorie",
     "users": "Użytkownicy",
@@ -159,13 +164,15 @@
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     },
     "qa": "Q&A",
-    "articles": "Artykuły"
+    "articles": "Baza wiedzy"
   },
   "newsView": {
     "header": "Aktualności",
     "notFound": "Nie znaleziono aktualności.",
-    "previousArticle": "Poprzedni artykuł",
-    "nextArticle": "Następny artykuł",
+    "previousNews": "Poprzednia aktualność",
+    "nextNews": "Następna aktualność",
+    "previousArticle": "Poprzedni wpis do bazy wiedzy",
+    "nextArticle": "Następny wpis do bazy wiedzy",
     "prompt": {
       "photoUrl": "Adres URL zdjęcia",
       "photoCaption": "Podpis do zdjęcia (opcjonalnie)",
@@ -975,6 +982,10 @@
     }
   },
   "adminCourseView": {
+    "mandatoryCourse": "Kurs obowiązkowy",
+    "deadline": "Termin wykonania",
+    "selectDate": "Wybierz datę",
+    "deadlineRequired": "Termin wykonania jest wymagany dla obowiązkowego kursu",
     "common": {
       "settings": "Ustawienia",
       "curriculum": "Program nauczania",
@@ -1002,7 +1013,10 @@
       "updateCourseMissingLanguage": "Nie podano języka do tłumaczenia",
       "successfullyDeletedLanguage": "Język został pomyślnie usunięty z kursu",
       "invalidLanguageToDelete": "Nie możesz usunąć tego języka",
-      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy."
+      "cannotModifyQuestionsInNonBaseLanguage": "Nie można modyfikować pytań w języku innym niż bazowy.",
+      "noMissingTranslations": "Brak brakujących tłumaczeń",
+      "mismatchContentLength": "Liczba tłumaczeń nie jest równa liczbie wygenerowanych tłumaczeń",
+      "translationsGeneratedSuccessfully": "Tłumaczenia wygenerowane pomyślnie"
     },
     "settings": {
       "breadcrumbs": {
@@ -1346,10 +1360,10 @@
       },
       "enroll": "Zapisz",
       "enrollSelected": "Zapisz wybranych na kurs",
-      "enrollGroups": "Zapisz wybrane grupy na kurs",
+      "enrollGroups": "Zapisz grupy na kurs",
       "enrollGroupsModal": {
         "title": "Zapisz grupy do kursu",
-        "description": "Wybierz grupy do zapisania. Wszyscy członkowie wybranych grup zostaną automatycznie zapisani na ten kurs."
+        "description": "Wybierz grupy do przypisania. Wszyscy członkowie wybranych grup zostaną automatycznie zapisani do tego kursu. Możesz oznaczyć kurs jako obowiązkowy i ustawić termin wykonania."
       },
       "alreadyEnrolled": "Już zapisana",
       "members": "{{count}} członków",
@@ -1764,7 +1778,9 @@
       "settings": "Ustawienia"
     },
     "toast": {
-      "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane"
+      "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
+      "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
+      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane"
     }
   },
   "platformSimpleLogo": {
@@ -1833,13 +1849,17 @@
       "coursesVisibility": "Pokazuj kursy odwiedzającym",
       "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
-      "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs"
+      "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
+      "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
+      "studentsWithOverdueCourseNotificationDescription": "Otrzymuj powiadomienia, gdy studenci mają zaległe kursy"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
-      "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach"
+      "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
+      "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
+      "overdueCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o zaległych kursach"
     },
     "globalActionWarning": "Ta akcja ma globalny wpływ na aplikację. Zmieni zachowanie dla wszystkich użytkowników."
   },
@@ -2154,6 +2174,46 @@
       "disabled": "Aby przełączyć to pole, najpierw włącz sekcję Q&A."
     }
   },
+  "newsPreferences": {
+    "subHeader": "Skonfiguruj ustawienia aktualności",
+    "header": "Ustawienia aktualności",
+    "settings": {
+      "newsEnabled": {
+        "label": "Włącz sekcję aktualności",
+        "description": "Włącz sekcję aktualności. Gdy jest wyłączona, sekcja aktualności jest ukryta dla wszystkich użytkowników."
+      },
+      "newsPublic": {
+        "label": "Pokaż sekcję aktualności niezarejestrowanym użytkownikom",
+        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję aktualności (można włączyć tylko, gdy sekcja aktualności jest aktywna)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "Sekcja aktualności nie jest włączona"
+    },
+    "tooltip": {
+      "disabled": "Aby przełączyć to pole, najpierw włącz sekcję aktualności."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Skonfiguruj ustawienia bazy wiedzy",
+    "header": "Ustawienia bazy wiedzy",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Włącz sekcję bazy wiedzy",
+        "description": "Włącz sekcję bazy wiedzy. Gdy jest wyłączona, sekcja bazy wiedzy jest ukryta dla wszystkich użytkowników."
+      },
+      "articlesPublic": {
+        "label": "Pokaż sekcję bazy wiedzy niezarejestrowanym użytkownikom",
+        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję bazy wiedzy (można włączyć tylko, gdy sekcja bazy wiedzy jest aktywna)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "Sekcja bazy wiedzy nie jest włączona"
+    },
+    "tooltip": {
+      "disabled": "Aby przełączyć to pole, najpierw włącz sekcję bazy wiedzy."
+    }
+  },
   "qaView": {
     "button": {
       "createNew": "Utwórz nowe Q&A"
@@ -2199,12 +2259,12 @@
         "add": "Dodaj",
         "newLabel": "Nowe",
         "newSection": "Nowa sekcja",
-        "newArticle": "Nowy artykuł"
+        "newArticle": "Nowy wpis do bazy wiedzy"
       }
     },
     "dialog": {
       "createArticle": {
-        "title": "Utwórz artykuł",
+        "title": "Utwórz wpis do bazy wiedzy",
         "sectionLabel": "Sekcja",
         "sectionPlaceholder": "Wybierz sekcję",
         "create": "Utwórz"
@@ -2218,11 +2278,11 @@
       "minimumLanguageError": "Wymagany jest co najmniej jeden język",
       "cannotRemoveBaseLanguage": "Nie można usunąć języka bazowego",
       "removeLanguageError": "Nie udało się usunąć języka",
-      "sectionHasAssignedArticles": "Nie można usunąć sekcji z przypisanymi artykułami",
+      "sectionHasAssignedArticles": "Nie można usunąć sekcji z przypisanymi wpisami bazy wiedzy",
       "deleteSectionError": "Nie udało się usunąć sekcji",
-      "createError": "Nie udało się utworzyć artykułu",
-      "deleteError": "Nie udało się usunąć artykułu",
-      "notFoundError": "Nie znaleziono artykułu",
+      "createError": "Nie udało się utworzyć wpisu do bazy wiedzy",
+      "deleteError": "Nie udało się usunąć wpisu do bazy wiedzy",
+      "notFoundError": "Nie znaleziono wpisu do bazy wiedzy",
       "invalidCoverType": "Nieprawidłowy typ okładki",
       "invalidLanguageError": "Nieprawidłowy język"
     },
@@ -2230,7 +2290,7 @@
       "editTitle": "Edytuj sekcję",
       "editDescription": "Zaktualizuj tytuł sekcji i zarządzaj tłumaczeniami.",
       "sectionId": "ID sekcji: {{id}}",
-      "cannotDeleteWithArticles": "Nie można usunąć sekcji z przypisanymi artykułami.",
+      "cannotDeleteWithArticles": "Nie można usunąć sekcji z przypisanymi wpisami bazy wiedzy.",
       "languageLabel": "Język",
       "languageHelp": "Zmień język, aby edytować tytuł. Jeśli wersja nie istnieje, pojawi się prośba o jej utworzenie.",
       "fields": {
@@ -2252,8 +2312,8 @@
       }
     },
     "form": {
-      "createTitle": "Utwórz artykuł",
-      "editTitle": "Edytuj artykuł",
+      "createTitle": "Utwórz wpis do bazy wiedzy",
+      "editTitle": "Edytuj wpis do bazy wiedzy",
       "createButton": "Utwórz i edytuj",
       "saveButton": "Zapisz",
       "fields": {
@@ -2278,12 +2338,12 @@
     }
   },
   "articlesView": {
-    "notFound": "Nie znaleziono artykułu",
-    "previousArticle": "Poprzedni artykuł",
-    "nextArticle": "Następny artykuł",
+    "notFound": "Nie znaleziono wpisu do bazy wiedzy",
+    "previousArticle": "Poprzedni wpis do bazy wiedzy",
+    "nextArticle": "Następny wpis do bazy wiedzy",
     "deleteModal": {
-      "title": "Usuń artykuł",
-      "description": "Czy na pewno chcesz usunąć ten artykuł? Tej operacji nie można cofnąć."
+      "title": "Usuń wpis do bazy wiedzy",
+      "description": "Czy na pewno chcesz usunąć ten wpis do bazy wiedzy? Tej operacji nie można cofnąć."
     }
   }
 }

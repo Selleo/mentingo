@@ -40,6 +40,10 @@ export const globalSettingsJSONSchema = Type.Object({
   contrastColor: Type.Union([Type.String(), Type.Null()]),
   unregisteredUserQAAccessibility: Type.Boolean(),
   QAEnabled: Type.Boolean(),
+  unregisteredUserNewsAccessibility: Type.Boolean(),
+  newsEnabled: Type.Boolean(),
+  unregisteredUserArticlesAccessibility: Type.Boolean(),
+  articlesEnabled: Type.Boolean(),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

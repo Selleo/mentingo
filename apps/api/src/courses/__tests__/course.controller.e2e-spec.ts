@@ -1825,7 +1825,7 @@ describe("CourseController (e2e)", () => {
 
         await request(app.getHttpServer())
           .post(`/api/course/${course.id}/enroll-groups-to-course`)
-          .send({ groupIds: [] })
+          .send({ groups: [] })
           .expect(401);
       });
     });
@@ -1854,7 +1854,7 @@ describe("CourseController (e2e)", () => {
 
           await request(app.getHttpServer())
             .post(`/api/course/${course.id}/enroll-groups-to-course`)
-            .send({ groupIds: [] })
+            .send({ groups: [] })
             .set("Cookie", cookies)
             .expect(403);
         });
@@ -1873,7 +1873,7 @@ describe("CourseController (e2e)", () => {
 
             await request(app.getHttpServer())
               .post(`/api/course/${faker.string.uuid()}/enroll-groups-to-course`)
-              .send({ groupIds: [] })
+              .send({ groups: [] })
               .set("Cookie", cookies)
               .expect(404);
           });
@@ -1914,7 +1914,7 @@ describe("CourseController (e2e)", () => {
             // Enroll empty group to course
             await request(app.getHttpServer())
               .post(`/api/course/${course.id}/enroll-groups-to-course`)
-              .send({ groupIds: [group.id] })
+              .send({ groups: [{ id: group.id, isMandatory: false, dueDate: null }] })
               .set("Cookie", cookies)
               .expect(201);
 
@@ -2010,7 +2010,7 @@ describe("CourseController (e2e)", () => {
             // Enroll group to course
             await request(app.getHttpServer())
               .post(`/api/course/${course.id}/enroll-groups-to-course`)
-              .send({ groupIds: [group.id] })
+              .send({ groups: [{ id: group.id, isMandatory: false, dueDate: null }] })
               .set("Cookie", cookies)
               .expect(201);
 
@@ -2088,7 +2088,7 @@ describe("CourseController (e2e)", () => {
             // Try to enroll the group (all users are already enrolled)
             await request(app.getHttpServer())
               .post(`/api/course/${course.id}/enroll-groups-to-course`)
-              .send({ groupIds: [group.id] })
+              .send({ groups: [{ id: group.id, isMandatory: false, dueDate: null }] })
               .set("Cookie", cookies)
               .expect(201);
 
