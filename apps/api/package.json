@@ -161,7 +161,6 @@
     "prettier": "3.0.0",
     "source-map-support": "0.5.21",
     "supertest": "7.0.0",
-    "testcontainers": "10.10.3",
     "ts-jest": "29.1.0",
     "ts-loader": "9.4.3",
     "ts-node": "10.9.1",

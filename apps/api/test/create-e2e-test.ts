@@ -2,34 +2,54 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import cookieParser from "cookie-parser";
 import * as express from "express";
 
+import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 
 import { AppModule } from "../src/app.module";
 
 import { EmailTestingAdapter } from "./helpers/test-email.adapter";
+import { truncateAllTables } from "./helpers/test-helpers";
 import { setupTestDatabase } from "./test-database";
 
 import type { Provider } from "@nestjs/common";
 
-export async function createE2ETest(customProviders: Provider[] = []) {
-  const { db, pgConnectionString } = await setupTestDatabase();
+type E2ETestOptions = {
+  customProviders?: Provider[];
+  enableActivityLogs?: boolean;
+};
 
-  process.env.DATABASE_URL = pgConnectionString;
-  process.env.NODE_ENV = "test";
+export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provider[] = {}) {
+  const options = Array.isArray(optionsOrProviders)
+    ? { customProviders: optionsOrProviders }
+    : optionsOrProviders;
 
-  const moduleFixture: TestingModule = await Test.createTestingModule({
+  const customProviders = options.customProviders ?? [];
+  const enableActivityLogs = options.enableActivityLogs ?? false;
+
+  const { db, sql } = await setupTestDatabase();
+
+  await truncateAllTables(db);
+
+  let testModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
-    providers: [
-      ...customProviders,
-      {
-        provide: "DB",
-        useValue: db,
-      },
-    ],
+    providers: [...customProviders],
   })
+    .overrideProvider("DB")
+    .useValue(db)
     .overrideProvider(EmailAdapter)
-    .useClass(EmailTestingAdapter)
-    .compile();
+    .useClass(EmailTestingAdapter);
+
+  // Disable activity logging by default to prevent deadlocks between
+  // async activity log INSERTs and TRUNCATE during test cleanup.
+  // Only enable for activity-logs.e2e-spec.ts tests.
+  if (!enableActivityLogs) {
+    testModuleBuilder = testModuleBuilder.overrideProvider(ActivityLogsService).useValue({
+      recordActivity: async () => {},
+      persistActivityLog: async () => {},
+    });
+  }
+
+  const moduleFixture: TestingModule = await testModuleBuilder.compile();
 
   const app = moduleFixture.createNestApplication({
     bodyParser: false,
@@ -60,5 +80,8 @@ export async function createE2ETest(customProviders: Provider[] = []) {
     app,
     moduleFixture,
     db,
+    cleanup: async () => {
+      await sql.end();
+    },
   };
 }
