@@ -2832,6 +2832,12 @@ export interface GetStripeConfiguredResponse {
   };
 }
 
+export interface GetAIConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
 export interface GetIsConfigSetupResponse {
   data: {
     fullyConfigured: string[];
@@ -6784,6 +6790,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetStripeConfigured: (params: RequestParams = {}) =>
       this.request<GetStripeConfiguredResponse, any>({
         path: `/api/env/frontend/stripe`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetAiConfigured
+     * @request GET:/api/env/ai
+     */
+    envControllerGetAiConfigured: (params: RequestParams = {}) =>
+      this.request<GetAIConfiguredResponse, any>({
+        path: `/api/env/ai`,
         method: "GET",
         format: "json",
         ...params,

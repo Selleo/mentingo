@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
+import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -46,6 +47,7 @@ const EditCourse = () => {
   const { id } = useParams();
 
   const { data: isStripeConfigured } = useStripeConfigured();
+  const { data: isAIConfigured } = useAIConfigured();
 
   const { language } = useLanguageStore();
 
@@ -168,11 +170,12 @@ const EditCourse = () => {
                       availableLocales: course.availableLocales,
                     }
                   }
+                  isAIConfigured={isAIConfigured?.enabled ?? false}
                   onChange={setCourseLanguage}
                   setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
                 />
 
-                {hasMissingTranslations.data.hasMissingTranslations && (
+                {hasMissingTranslations.data.hasMissingTranslations && isAIConfigured?.enabled && (
                   <Dialog
                     open={openGenerateTranslationModal}
                     onOpenChange={setOpenGenerateTranslationModal}
