@@ -15,7 +15,7 @@ import { fileLessonFormSchema } from "../validators/fileLessonFormSchema";
 
 import type { LessonTypes } from "../../../CourseLessons.types";
 import type { FileLessonFormValues } from "../validators/fileLessonFormSchema";
-import type {SupportedLanguages} from "@repo/shared";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type FileLessonFormProps = {
@@ -80,7 +80,10 @@ export const useFileLessonForm = ({
 
         if (newLessonId && processingUploadId) {
           try {
-            await associateUploadWithLesson({ uploadId: processingUploadId, lessonId: newLessonId });
+            await associateUploadWithLesson({
+              uploadId: processingUploadId,
+              lessonId: newLessonId,
+            });
           } catch (associateError) {
             console.error("Failed to associate upload with lesson:", associateError);
             // Don't fail the whole operation if association fails

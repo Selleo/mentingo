@@ -8,3 +8,4 @@ export * from "./constants/languages";
 export * from "./constants/qaSettings";
 export * from "./constants/theme";
 export * from "./types/onboarding";
+export * from "./types/videoUploadTypes";

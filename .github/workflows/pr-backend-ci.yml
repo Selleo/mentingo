@@ -105,6 +105,7 @@ jobs:
 
       - name: Build the app
         run: pnpm run build
+
       - name: Verify build output
         run: |
           pnpm start:prod &

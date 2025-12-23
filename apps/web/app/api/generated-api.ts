@@ -484,6 +484,13 @@ export interface HandleBunnyWebhookBody {
   Guid?: string;
 }
 
+export interface AssociateUploadWithLessonBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  uploadId: string;
+}
+
 export interface GetUserStatisticsResponse {
   data: {
     averageStats: {
@@ -4266,25 +4273,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name FileControllerGetStatus
-     * @request GET:/api/file/status
-     */
-    fileControllerGetStatus: (
-      query: {
-        uploadId: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file/status`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name FileControllerHandleBunnyWebhook
      * @request POST:/api/file/bunny/webhook
      */
@@ -4304,12 +4292,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/file/associate-upload
      */
     fileControllerAssociateUploadWithLesson: (
-      data: {
-        /** Upload ID to associate with lesson */
-        uploadId: string;
-        /** Lesson ID to associate with upload */
-        lessonId: string;
-      },
+      data: AssociateUploadWithLessonBody,
       params: RequestParams = {},
     ) =>
       this.request<void, any>({

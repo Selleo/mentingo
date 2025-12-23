@@ -14,4 +14,3 @@ export const bunnyWebhookSchema = Type.Object({
 });
 
 export type BunnyWebhookBody = Static<typeof bunnyWebhookSchema>;
-

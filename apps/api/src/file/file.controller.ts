@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   Post,
   Query,
   UploadedFile,
@@ -22,7 +21,11 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { FileService } from "./file.service";
 import { bunnyWebhookSchema, type BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
-import { FileUploadResponse } from "./schemas/file.schema";
+import {
+  AssociateLessonWithUploadBody,
+  associateLessonWithUploadSchema,
+  FileUploadResponse,
+} from "./schemas/file.schema";
 
 @UseGuards(RolesGuard)
 @Controller("file")
@@ -60,15 +63,10 @@ export class FileController {
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body("resource") resource: string = "file",
-    @Body("lessonId") lessonId?: string,
+    @Body("lessonId") lessonId?: UUIDType,
     @CurrentUser("userId") userId?: UUIDType,
   ): Promise<FileUploadResponse> {
     return await this.fileService.uploadFile(file, resource, lessonId, undefined, userId);
-  }
-
-  @Get("status")
-  async getStatus(@Query("uploadId") uploadId: string) {
-    return this.fileService.getVideoUploadStatus(uploadId);
   }
 
   @Public()
@@ -97,30 +95,10 @@ export class FileController {
   }
 
   @Post("associate-upload")
-  @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        uploadId: {
-          type: "string",
-          description: "Upload ID to associate with lesson",
-        },
-        lessonId: {
-          type: "string",
-          description: "Lesson ID to associate with upload",
-        },
-      },
-      required: ["uploadId", "lessonId"],
-    },
+  @Validate({
+    request: [{ type: "body", schema: associateLessonWithUploadSchema }],
   })
-  @ApiResponse({
-    status: 200,
-    description: "Upload associated with lesson successfully",
-  })
-  async associateUploadWithLesson(
-    @Body("uploadId") uploadId: string,
-    @Body("lessonId") lessonId: string,
-  ): Promise<void> {
-    await this.fileService.associateUploadWithLesson(uploadId, lessonId);
+  async associateUploadWithLesson(@Body() data: AssociateLessonWithUploadBody): Promise<void> {
+    await this.fileService.associateUploadWithLesson(data.uploadId, data.lessonId);
   }
 }

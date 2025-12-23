@@ -12,7 +12,7 @@ type CreateFileOptions = {
   data: BetaCreateLessonBody;
 };
 
-type CreateLessonResult = BetaCreateLessonResponse['data'];
+type CreateLessonResult = BetaCreateLessonResponse["data"];
 
 export function useBetaCreateFileItem() {
   const { toast } = useToast();

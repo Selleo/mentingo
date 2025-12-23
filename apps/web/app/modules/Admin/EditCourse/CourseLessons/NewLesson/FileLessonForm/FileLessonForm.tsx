@@ -243,13 +243,11 @@ const FileLessonForm = ({
                   url={displayFileUrl}
                   onVideoSelected={() => {
                     toast({
-                      description: t("uploadFile.toast.videoProcessingStarted", {
-                        defaultValue: "Video upload started. We'll notify you once it's processed.",
-                      }),
+                      description: t("uploadFile.toast.videoProcessingStarted"),
                     });
 
                     form.setValue("fileS3Key", "processing-video");
-                    form.setValue("fileType", "mp4"); // Default video type
+                    form.setValue("fileType", "mp4");
                   }}
                 />
               </FormControl>

@@ -68,7 +68,10 @@
     "subHeader": "or drag and drop",
     "replace": "Click to replace",
     "toast": {
-      "fileUploadedSuccessfully": "File uploaded successfully"
+      "fileUploadedSuccessfully": "File uploaded successfully",
+      "videoFailed": "Video upload failed",
+      "videoReady": "Video is ready to use",
+      "videoProcessingStarted": "Video upload started. We'll notify you once it's processed."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG or SVG",

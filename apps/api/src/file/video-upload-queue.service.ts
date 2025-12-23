@@ -22,7 +22,8 @@ export class VideoUploadQueueService implements OnModuleDestroy {
   }
 
   async enqueueVideoUpload(
-    file: Express.Multer.File,
+    fileKey: string,
+    fileUrl: string,
     resource: string,
     uploadId: string,
     placeholderKey: string,
@@ -34,13 +35,9 @@ export class VideoUploadQueueService implements OnModuleDestroy {
         throw new Error("uploadId and placeholderKey are required");
       }
 
-      if (!file || !file.buffer) {
-        throw new Error("Valid file is required");
-      }
-
       const job = await this.videoUploadQueue.add(
         "video-upload",
-        { file, resource, uploadId, placeholderKey, fileType, lessonId },
+        { fileKey, fileUrl, resource, uploadId, placeholderKey, fileType, lessonId },
         {
           attempts: 3,
           backoff: { type: "exponential", delay: 1000 },

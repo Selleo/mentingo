@@ -1,22 +1,26 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
+import { Inject, Injectable, Logger, UseGuards } from "@nestjs/common";
+import {
+  ConnectedSocket,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from "@nestjs/websockets";
 import { createClient as createRedisClient } from "redis";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 
 import { buildRedisConnection, RedisConfigSchema } from "src/common/configuration/redis";
-import { CurrentUser } from "src/common/decorators/user.decorator";
-import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
+import { getUserRoomKey } from "src/file/utils/userRoom";
+import { AuthenticatedSocket, WsJwtGuard } from "src/websocket";
 
 import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import type { OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect } from "@nestjs/websockets";
+import type { OnGatewayInit } from "@nestjs/websockets";
+import type { VideoUploadStatus } from "@repo/shared";
 import type { RedisClientType } from "redis";
 import type { UUIDType } from "src/common";
-import * as cookie from "cookie";
 
 export type VideoUploadNotification = {
   uploadId: string;
-  status: "uploaded" | "processed" | "failed";
+  status: VideoUploadStatus;
   fileKey?: string;
   fileUrl?: string;
   error?: string;
@@ -34,7 +38,7 @@ export type VideoUploadNotification = {
 })
 @Injectable()
 export class VideoUploadNotificationGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy, OnModuleInit
+  implements OnGatewayInit, OnModuleDestroy, OnModuleInit
 {
   @WebSocketServer()
   server: Server;
@@ -44,10 +48,7 @@ export class VideoUploadNotificationGateway
   private redisPublisher: RedisClientType;
   private readonly channel = "video-upload:notifications";
 
-  constructor(
-    @Inject("REDIS_CONFIG") private readonly redisConfig: RedisConfigSchema,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(@Inject("REDIS_CONFIG") private readonly redisConfig: RedisConfigSchema) {}
 
   async onModuleInit() {
     await this.setupRedisSubscriber();
@@ -59,33 +60,27 @@ export class VideoUploadNotificationGateway
   }
 
   afterInit(_server: Server) {
-    _server.use(async (client: Socket, next) => {
-      const token = this.extractWsAccessToken(client);
-      if (!token) return next(new Error("Access token not found"));
-
-      client.data.user = await this.jwtService.verifyAsync(token);
-
-      return next();
-    });
-
     this.logger.log("Video upload notification gateway initialized");
   }
 
-  handleConnection(client: Socket) {
-    client.join(`user:${client.data.user.userId}`);
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("join:user")
+  async handleJoinUser(@ConnectedSocket() client: AuthenticatedSocket) {
+    const userId = client.data.user.userId;
 
-    this.logger.log(`Client connected: ${client.id}`);
+    this.logger.debug(`Client joined room ${getUserRoomKey(userId)}`);
+
+    client.join(getUserRoomKey(userId));
   }
 
-  handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-  }
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("leave:user")
+  async handleLeaveUser(@ConnectedSocket() client: AuthenticatedSocket) {
+    const userId = client.data.user.userId;
 
-  private extractWsAccessToken(client: Socket) {
-    const cookieHeader = client.handshake.headers.cookie;
-    if (!cookieHeader) return null;
+    this.logger.debug(`Client joined room ${getUserRoomKey(userId)}`);
 
-    return cookie.parse(cookieHeader)["access_token"] ?? null;
+    client.leave(getUserRoomKey(userId));
   }
 
   private async setupRedisSubscriber() {
@@ -94,38 +89,42 @@ export class VideoUploadNotificationGateway
 
       this.redisSubscriber = createRedisClient(connection);
 
-      this.redisSubscriber.on("error", (e) => this.logger.error("Redis sub error:", e));
-
-      await this.redisSubscriber.connect();
-
-      await this.redisSubscriber.subscribe(this.channel, (message) => {
-        try {
-          this.logger.log("Received Redis message:", message);
-
-          const notification: VideoUploadNotification = JSON.parse(message);
-
-          this.logger.log(
-            `Broadcasting to WebSocket: ${notification.uploadId}, status: ${notification.status}`,
-          );
-
-          this.server.to(`user:${notification.userId}`).emit("upload-status-change", notification);
-          this.logger.log(
-            `Broadcasted upload status change: ${notification.uploadId}, status: ${notification.status}`,
-          );
-        } catch (error) {
-          this.logger.error("Error parsing notification message:", error);
-        }
-      });
-
       this.redisPublisher = createRedisClient(connection);
 
-      this.redisPublisher.on("error", (e) => this.logger.error("Redis pub error:", e));
+      await Promise.all([this.redisSubscriber.connect(), this.redisPublisher.connect()]);
 
-      await this.redisPublisher.connect();
+      await this.redisSubscriber.subscribe(this.channel, (message) => {
+        const notification = this.safeParseNotification(message);
+        if (!notification?.userId) {
+          this.logger.warn("Ignoring upload notification without userId");
+          return;
+        }
+
+        this.logger.debug(
+          `Broadcasting to WebSocket: ${notification.uploadId}, status: ${notification.status}`,
+        );
+
+        this.server
+          .to(getUserRoomKey(notification.userId))
+          .emit("upload-status-change", notification);
+
+        this.logger.debug(
+          `Broadcasted upload status change: ${notification.uploadId}, status: ${notification.status}`,
+        );
+      });
 
       this.logger.log("Redis subscriber and publisher setup completed");
     } catch (error) {
       this.logger.error("Failed to setup Redis subscriber/publisher:", error);
+    }
+  }
+
+  private safeParseNotification(message: string): VideoUploadNotification | null {
+    try {
+      return JSON.parse(message) as VideoUploadNotification;
+    } catch (error) {
+      this.logger.error("Error parsing notification message:", error);
+      return null;
     }
   }
 
@@ -137,7 +136,7 @@ export class VideoUploadNotificationGateway
       }
 
       await this.redisPublisher.publish(this.channel, JSON.stringify(notification));
-      this.logger.log(
+      this.logger.debug(
         `Published notification: ${notification.uploadId}, status: ${notification.status}`,
       );
     } catch (error) {

@@ -93,7 +93,7 @@ importers:
         specifier: 10.2.7
         version: 10.2.7(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)(reflect-metadata@0.2.0)(rxjs@7.8.1)
       '@nestjs/event-emitter':
-        specifier: ^3.0.1
+        specifier: 3.0.1
         version: 3.0.1(@nestjs/common@10.0.0(reflect-metadata@0.2.0)(rxjs@7.8.1))(@nestjs/core@10.0.0)
       '@nestjs/jwt':
         specifier: 10.2.0

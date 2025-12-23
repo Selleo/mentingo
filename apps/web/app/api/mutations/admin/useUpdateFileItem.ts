@@ -25,8 +25,7 @@ export function useUpdateFileItem() {
 
       return response.data;
     },
-    onMutate: async () => {
-      // Optimistic update - immediately show success
+    onMutate: () => {
       toast({
         description: t("adminCourseView.curriculum.lesson.toast.fileLessonUpdatedSuccessfully"),
       });

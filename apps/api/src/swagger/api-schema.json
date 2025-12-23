@@ -838,26 +838,6 @@
         }
       }
     },
-    "/api/file/status": {
-      "get": {
-        "operationId": "FileController_getStatus",
-        "parameters": [
-          {
-            "name": "uploadId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/file/bunny/webhook": {
       "post": {
         "operationId": "FileController_handleBunnyWebhook",
@@ -888,28 +868,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "uploadId": {
-                    "type": "string",
-                    "description": "Upload ID to associate with lesson"
-                  },
-                  "lessonId": {
-                    "type": "string",
-                    "description": "Lesson ID to associate with upload"
-                  }
-                },
-                "required": [
-                  "uploadId",
-                  "lessonId"
-                ]
+                "$ref": "#/components/schemas/AssociateUploadWithLessonBody"
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Upload associated with lesson successfully"
+          "201": {
+            "description": ""
           }
         }
       }
@@ -9037,6 +9003,23 @@
             "type": "string"
           }
         }
+      },
+      "AssociateUploadWithLessonBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lessonId",
+          "uploadId"
+        ]
       },
       "GetUserStatisticsResponse": {
         "type": "object",

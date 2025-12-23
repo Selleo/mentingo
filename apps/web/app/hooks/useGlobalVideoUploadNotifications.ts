@@ -1,70 +1,57 @@
-import { useEffect, useRef } from "react";
+import { VIDEO_UPLOAD_STATUS } from "@repo/shared";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { io, type Socket } from "socket.io-client";
+import { match } from "ts-pattern";
 
+import { acquireSocket, releaseSocket } from "~/api/socket";
 import { useToast } from "~/components/ui/use-toast";
-import { baseUrl } from "~/utils/baseUrl";
 
-type UploadStatus = "uploaded" | "processed" | "failed";
+import type { VideoUploadStatus } from "@repo/shared";
 
 interface UploadNotification {
   uploadId: string;
-  status: UploadStatus;
+  status: VideoUploadStatus;
   fileKey?: string;
   fileUrl?: string;
   error?: string;
 }
 
-function createVideoUploadSocket() {
-  const socketUrl = baseUrl.replace(/^http/, "ws");
-
-  return io(socketUrl + "/ws", {
-    path: "/api/ws",
-    withCredentials: true,
-    transports: ["websocket"],
-  });
-}
-
 export function useGlobalVideoUploadNotifications() {
   const { toast } = useToast();
   const { t } = useTranslation();
-  const socketRef = useRef<Socket | null>(null);
-
   useEffect(() => {
-    socketRef.current = createVideoUploadSocket();
-    const socket = socketRef.current;
+    const socket = acquireSocket();
 
-    socket.on("connect", () => {
-      console.log("Connected to video upload notifications WebSocket");
-    });
+    const handleConnect = () => {
+      socket.emit("join:user");
+    };
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from video upload notifications");
-    });
+    socket.on("connect", handleConnect);
+    socket.connect();
 
-    socket.on("upload-status-change", (notification: UploadNotification) => {
-      console.log("WebSocket notification received:", notification);
+    if (socket.connected) {
+      handleConnect();
+    }
 
-      if (notification.status === "processed") {
-        toast({
-          description: t("uploadFile.toast.videoReady", {
-            defaultValue: "Video is ready to use.",
+    const handleUploadStatusChange = (notification: UploadNotification) => {
+      match(notification.status)
+        .with(VIDEO_UPLOAD_STATUS.PROCESSED, () =>
+          toast({
+            description: t("uploadFile.toast.videoReady"),
           }),
-        });
-      } else if (notification.status === "failed") {
-        toast({
-          description: t("uploadFile.toast.videoFailed", {
-            defaultValue: `Video upload failed: ${notification.error || "Unknown error"}`,
+        )
+        .with(VIDEO_UPLOAD_STATUS.FAILED, () =>
+          toast({
+            description: t("uploadFile.toast.videoFailed"),
           }),
-          variant: "destructive",
-        });
-      }
-    });
-
-    console.log(socketRef);
+        );
+    };
+    socket.on("upload-status-change", handleUploadStatusChange);
 
     return () => {
-      socket.disconnect();
+      socket.off("connect", handleConnect);
+      socket.off("upload-status-change", handleUploadStatusChange);
+      releaseSocket();
     };
   }, [toast, t]);
 }

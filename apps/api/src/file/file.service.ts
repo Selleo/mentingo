@@ -1,33 +1,29 @@
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
-import { BadRequestException, ConflictException, Inject, Injectable } from "@nestjs/common";
+import { Inject, BadRequestException, ConflictException, Injectable } from "@nestjs/common";
 import {
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  VIDEO_UPLOAD_STATUS,
 } from "@repo/shared";
-import { Inject, BadRequestException, ConflictException, Injectable } from "@nestjs/common";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
+import { CacheManagerStore } from "cache-manager";
 import { parse } from "csv-parse";
 import { and, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import readXlsxFile from "read-excel-file/node";
-import { eq } from "drizzle-orm";
-
-import { isEmpty } from "lodash";
 import sharp from "sharp";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { DatabasePg } from "src/common";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
-import { DatabasePg } from "src/common";
-import { VIDEO_UPLOAD_STATUS } from "src/file/types/video-upload.types";
 import { S3Service } from "src/s3/s3.service";
-import { resources, resourceEntity } from "src/storage/schema";
-import { lessons } from "src/storage/schema";
+import { resources, resourceEntity, lessons } from "src/storage/schema";
 
 import {
   MAX_FILE_SIZE,
@@ -44,25 +40,23 @@ import { VideoUploadQueueService } from "./video-upload-queue.service";
 
 import type { ResourceRelationshipType, EntityType, ResourceCategory } from "./file.constants";
 import type { FileValidationOptions } from "./guards/file.guard";
-import type { SupportedLanguages } from "@repo/shared";
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
-import type { ExcelHyperlinkCell } from "./types/excel";
 import type { VideoUploadState } from "./video-processing-state.service";
+import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
-import type { UUIDType } from "src/common";
 
 @Injectable()
 export class FileService {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
     private readonly videoUploadQueueService: VideoUploadQueueService,
     private readonly videoProcessingStateService: VideoProcessingStateService,
+    @Inject("DB") private readonly db: DatabasePg,
+    @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
     private readonly notificationGateway: VideoUploadNotificationGateway,
-    @Inject("CACHE_MANAGER") private readonly cache: any,
   ) {}
 
   async getFileUrl(fileKey: string): Promise<string> {
@@ -138,16 +132,18 @@ export class FileService {
             uploadId,
             placeholderKey,
             fileType,
-            currentUserId
+            currentUserId,
           );
         } catch (cacheError) {
-          console.error("Cache initialization failed:", cacheError);
-          throw new ConflictException("Cache service unavailable");
+          throw new BadRequestException("Cache service unavailable");
         }
+
+        const { fileKey, fileUrl } = await this.bunnyStreamService.upload(file);
 
         try {
           await this.videoUploadQueueService.enqueueVideoUpload(
-            file,
+            fileKey,
+            fileUrl,
             resource,
             uploadId,
             placeholderKey,
@@ -314,7 +310,7 @@ export class FileService {
   ) {
     const resourceFolder = options?.folderIncludesResource ? folder : `${resource}/${folder}`;
 
-    const { fileKey } = await this.uploadFile(file, resourceFolder, {
+    const { fileKey } = await this.uploadFile(file, resourceFolder, undefined, {
       allowedTypes: [
         ...ALLOWED_PDF_FILE_TYPES,
         ...ALLOWED_EXCEL_FILE_TYPES,
@@ -425,7 +421,6 @@ export class FileService {
   async handleBunnyWebhook(payload: BunnyWebhookBody & Record<string, unknown>) {
     const status = payload.status ?? payload.Status ?? 0;
 
-    console.log("Bunny webhook payload:", payload);
     const videoId =
       payload.videoId ||
       payload.VideoId ||
@@ -445,8 +440,10 @@ export class FileService {
     const fileKey = `bunny-${videoId}`;
     const fileUrl = await this.bunnyStreamService.getUrl(videoId);
 
-    const cacheKey = `video-upload:video:${videoId}`;
+    const cacheKey = videoKey(videoId);
     const uploadId = (await this.cache.get(cacheKey)) as string | undefined;
+
+    const data = (await this.cache.get(uploadKey(uploadId ?? ""))) as VideoUploadState | undefined;
 
     if (uploadId) {
       await this.notificationGateway.publishNotification({
@@ -454,6 +451,7 @@ export class FileService {
         status: VIDEO_UPLOAD_STATUS.PROCESSED,
         fileKey,
         fileUrl,
+        userId: data?.userId,
       });
     } else {
       throw new BadRequestException("No uploadId found in cache for videoId");
