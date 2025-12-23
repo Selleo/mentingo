@@ -13,6 +13,10 @@ export type GlobalSettings = {
   userEmailTriggers: GetPublicGlobalSettingsResponse["data"]["userEmailTriggers"];
   unregisteredUserQAAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserQAAccessibility"];
   QAEnabled: GetPublicGlobalSettingsResponse["data"]["QAEnabled"];
+  unregisteredUserNewsAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserNewsAccessibility"];
+  newsEnabled: GetPublicGlobalSettingsResponse["data"]["newsEnabled"];
+  unregisteredUserArticlesAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserArticlesAccessibility"];
+  articlesEnabled: GetPublicGlobalSettingsResponse["data"]["articlesEnabled"];
 };
 
 export type UserSettings = {

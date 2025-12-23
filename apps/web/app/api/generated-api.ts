@@ -182,6 +182,10 @@ export interface GetPublicGlobalSettingsResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
@@ -284,6 +288,10 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
@@ -319,6 +327,10 @@ export interface UpdateEnforceSSOResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
@@ -385,6 +397,10 @@ export interface UpdateColorSchemaResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
@@ -4200,6 +4216,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<void, any>({
         path: `/api/settings/admin/qa/${setting}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateNewsSetting
+     * @request PATCH:/api/settings/admin/news/{setting}
+     */
+    settingsControllerUpdateNewsSetting: (
+      setting: "newsEnabled" | "unregisteredUserNewsAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/news/${setting}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateArticlesSetting
+     * @request PATCH:/api/settings/admin/articles/{setting}
+     */
+    settingsControllerUpdateArticlesSetting: (
+      setting: "articlesEnabled" | "unregisteredUserArticlesAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/articles/${setting}`,
         method: "PATCH",
         ...params,
       }),

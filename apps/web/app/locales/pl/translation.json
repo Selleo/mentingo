@@ -145,6 +145,7 @@
     "profile": "Profil",
     "dashboard": "Panel główny",
     "courses": "Kursy",
+    "content": "Treści",
     "findInApplication": "Znajdź w aplikacji",
     "categories": "Kategorie",
     "users": "Użytkownicy",
@@ -158,15 +159,15 @@
       "goToAvailableCourses": "Przejdź do dostępnych kursów"
     },
     "qa": "Q&A",
-    "articles": "Artykuły"
+    "articles": "Baza wiedzy"
   },
   "newsView": {
     "header": "Aktualności",
     "notFound": "Nie znaleziono aktualności.",
     "previousNews": "Poprzednia aktualność",
     "nextNews": "Następna aktualność",
-    "previousArticle": "Poprzedni artykuł",
-    "nextArticle": "Następny artykuł",
+    "previousArticle": "Poprzedni wpis do bazy wiedzy",
+    "nextArticle": "Następny wpis do bazy wiedzy",
     "prompt": {
       "photoUrl": "Adres URL zdjęcia",
       "photoCaption": "Podpis do zdjęcia (opcjonalnie)",
@@ -1767,7 +1768,9 @@
       "settings": "Ustawienia"
     },
     "toast": {
-      "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane"
+      "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
+      "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
+      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane"
     }
   },
   "platformSimpleLogo": {
@@ -2161,6 +2164,46 @@
       "disabled": "Aby przełączyć to pole, najpierw włącz sekcję Q&A."
     }
   },
+  "newsPreferences": {
+    "subHeader": "Skonfiguruj ustawienia aktualności",
+    "header": "Ustawienia aktualności",
+    "settings": {
+      "newsEnabled": {
+        "label": "Włącz sekcję aktualności",
+        "description": "Włącz sekcję aktualności. Gdy jest wyłączona, sekcja aktualności jest ukryta dla wszystkich użytkowników."
+      },
+      "newsPublic": {
+        "label": "Pokaż sekcję aktualności niezarejestrowanym użytkownikom",
+        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję aktualności (można włączyć tylko, gdy sekcja aktualności jest aktywna)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "Sekcja aktualności nie jest włączona"
+    },
+    "tooltip": {
+      "disabled": "Aby przełączyć to pole, najpierw włącz sekcję aktualności."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Skonfiguruj ustawienia bazy wiedzy",
+    "header": "Ustawienia bazy wiedzy",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Włącz sekcję bazy wiedzy",
+        "description": "Włącz sekcję bazy wiedzy. Gdy jest wyłączona, sekcja bazy wiedzy jest ukryta dla wszystkich użytkowników."
+      },
+      "articlesPublic": {
+        "label": "Pokaż sekcję bazy wiedzy niezarejestrowanym użytkownikom",
+        "description": "Pozwól niezarejestrowanym użytkownikom przeglądać sekcję bazy wiedzy (można włączyć tylko, gdy sekcja bazy wiedzy jest aktywna)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "Sekcja bazy wiedzy nie jest włączona"
+    },
+    "tooltip": {
+      "disabled": "Aby przełączyć to pole, najpierw włącz sekcję bazy wiedzy."
+    }
+  },
   "qaView": {
     "button": {
       "createNew": "Utwórz nowe Q&A"
@@ -2206,12 +2249,12 @@
         "add": "Dodaj",
         "newLabel": "Nowe",
         "newSection": "Nowa sekcja",
-        "newArticle": "Nowy artykuł"
+        "newArticle": "Nowy wpis do bazy wiedzy"
       }
     },
     "dialog": {
       "createArticle": {
-        "title": "Utwórz artykuł",
+        "title": "Utwórz wpis do bazy wiedzy",
         "sectionLabel": "Sekcja",
         "sectionPlaceholder": "Wybierz sekcję",
         "create": "Utwórz"
@@ -2225,11 +2268,11 @@
       "minimumLanguageError": "Wymagany jest co najmniej jeden język",
       "cannotRemoveBaseLanguage": "Nie można usunąć języka bazowego",
       "removeLanguageError": "Nie udało się usunąć języka",
-      "sectionHasAssignedArticles": "Nie można usunąć sekcji z przypisanymi artykułami",
+      "sectionHasAssignedArticles": "Nie można usunąć sekcji z przypisanymi wpisami bazy wiedzy",
       "deleteSectionError": "Nie udało się usunąć sekcji",
-      "createError": "Nie udało się utworzyć artykułu",
-      "deleteError": "Nie udało się usunąć artykułu",
-      "notFoundError": "Nie znaleziono artykułu",
+      "createError": "Nie udało się utworzyć wpisu do bazy wiedzy",
+      "deleteError": "Nie udało się usunąć wpisu do bazy wiedzy",
+      "notFoundError": "Nie znaleziono wpisu do bazy wiedzy",
       "invalidCoverType": "Nieprawidłowy typ okładki",
       "invalidLanguageError": "Nieprawidłowy język"
     },
@@ -2237,7 +2280,7 @@
       "editTitle": "Edytuj sekcję",
       "editDescription": "Zaktualizuj tytuł sekcji i zarządzaj tłumaczeniami.",
       "sectionId": "ID sekcji: {{id}}",
-      "cannotDeleteWithArticles": "Nie można usunąć sekcji z przypisanymi artykułami.",
+      "cannotDeleteWithArticles": "Nie można usunąć sekcji z przypisanymi wpisami bazy wiedzy.",
       "languageLabel": "Język",
       "languageHelp": "Zmień język, aby edytować tytuł. Jeśli wersja nie istnieje, pojawi się prośba o jej utworzenie.",
       "fields": {
@@ -2259,8 +2302,8 @@
       }
     },
     "form": {
-      "createTitle": "Utwórz artykuł",
-      "editTitle": "Edytuj artykuł",
+      "createTitle": "Utwórz wpis do bazy wiedzy",
+      "editTitle": "Edytuj wpis do bazy wiedzy",
       "createButton": "Utwórz i edytuj",
       "saveButton": "Zapisz",
       "fields": {
@@ -2285,12 +2328,12 @@
     }
   },
   "articlesView": {
-    "notFound": "Nie znaleziono artykułu",
-    "previousArticle": "Poprzedni artykuł",
-    "nextArticle": "Następny artykuł",
+    "notFound": "Nie znaleziono wpisu do bazy wiedzy",
+    "previousArticle": "Poprzedni wpis do bazy wiedzy",
+    "nextArticle": "Następny wpis do bazy wiedzy",
     "deleteModal": {
-      "title": "Usuń artykuł",
-      "description": "Czy na pewno chcesz usunąć ten artykuł? Tej operacji nie można cofnąć."
+      "title": "Usuń wpis do bazy wiedzy",
+      "description": "Czy na pewno chcesz usunąć ten wpis do bazy wiedzy? Tej operacji nie można cofnąć."
     }
   }
 }

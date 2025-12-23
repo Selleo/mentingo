@@ -145,10 +145,11 @@
     "dashboard": "Dashboard",
     "findInApplication": "Find in application",
     "courses": "Courses",
+    "content": "Content",
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
-    "articles": "Articles",
+    "articles": "Knowledge base",
     "news": "News",
     "providerInformation": "Information",
     "announcements": "Announcements",
@@ -1775,7 +1776,9 @@
       "error": {
         "globalNotFound": "Global settings not found"
       },
-      "qaSettingUpdatedSuccessfully": "QA settings updated successfully"
+      "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
+      "newsSettingUpdatedSuccessfully": "News settings updated successfully",
+      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -2144,6 +2147,46 @@
       "disabled": "To toggle this field, please enable the Q&A section first."
     }
   },
+  "newsPreferences": {
+    "subHeader": "Configure news settings",
+    "header": "News Settings",
+    "settings": {
+      "newsEnabled": {
+        "label": "Enable news section",
+        "description": "Enable the news section. When disabled, the news section is hidden for all users."
+      },
+      "newsPublic": {
+        "label": "Show news section to unregistered users",
+        "description": "Allow unregistered users to view the news section (can only be toggled, when news section is enabled)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "The news section is not enabled"
+    },
+    "tooltip": {
+      "disabled": "To toggle this field, please enable the news section first."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Configure knowledge base settings",
+    "header": "Knowledge Base Settings",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Enable knowledge base section",
+        "description": "Enable the knowledge base section. When disabled, the knowledge base section is hidden for all users."
+      },
+      "articlesPublic": {
+        "label": "Show knowledge base section to unregistered users",
+        "description": "Allow unregistered users to view the knowledge base section (can only be toggled, when the knowledge base section is enabled)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "The knowledge base section is not enabled"
+    },
+    "tooltip": {
+      "disabled": "To toggle this field, please enable the knowledge base section first."
+    }
+  },
   "qaView": {
     "button": {
       "createNew": "Create new Q&A"
@@ -2189,12 +2232,12 @@
         "add": "Add",
         "newLabel": "New",
         "newSection": "New section",
-        "newArticle": "New article"
+        "newArticle": "New knowledge base entry"
       }
     },
     "dialog": {
       "createArticle": {
-        "title": "Create article",
+        "title": "Create knowledge base entry",
         "sectionLabel": "Section",
         "sectionPlaceholder": "Select a section",
         "create": "Create"
@@ -2208,11 +2251,11 @@
       "minimumLanguageError": "At least one language is required",
       "cannotRemoveBaseLanguage": "Base language cannot be removed",
       "removeLanguageError": "Failed to remove language",
-      "sectionHasAssignedArticles": "Cannot delete a section with assigned articles",
+      "sectionHasAssignedArticles": "Cannot delete a section with assigned knowledge base entries",
       "deleteSectionError": "Failed to delete section",
-      "createError": "Failed to create article",
-      "deleteError": "Failed to delete article",
-      "notFoundError": "Article not found",
+      "createError": "Failed to create knowledge base entry",
+      "deleteError": "Failed to delete knowledge base entry",
+      "notFoundError": "Knowledge base entry not found",
       "invalidCoverType": "Invalid cover type",
       "invalidLanguageError": "Invalid language"
     },
@@ -2220,7 +2263,7 @@
       "editTitle": "Edit section",
       "editDescription": "Update the section title and manage translations.",
       "sectionId": "Section ID: {{id}}",
-      "cannotDeleteWithArticles": "You cannot delete a section that has assigned articles.",
+      "cannotDeleteWithArticles": "You cannot delete a section that has assigned knowledge base entries.",
       "languageLabel": "Language",
       "languageHelp": "Switch language to edit the title. If it isn't created yet, you'll be prompted to create it.",
       "fields": {
@@ -2242,8 +2285,8 @@
       }
     },
     "form": {
-      "createTitle": "Create article",
-      "editTitle": "Edit article",
+      "createTitle": "Create knowledge base entry",
+      "editTitle": "Edit knowledge base entry",
       "createButton": "Create and edit",
       "saveButton": "Save",
       "fields": {
@@ -2268,12 +2311,12 @@
     }
   },
   "articlesView": {
-    "notFound": "Article not found",
-    "previousArticle": "Previous article",
-    "nextArticle": "Next article",
+    "notFound": "Knowledge base entry not found",
+    "previousArticle": "Previous knowledge base entry",
+    "nextArticle": "Next knowledge base entry",
     "deleteModal": {
-      "title": "Delete article",
-      "description": "Are you sure you want to delete this article? This action cannot be undone."
+      "title": "Delete knowledge base entry",
+      "description": "Are you sure you want to delete this knowledge base entry? This action cannot be undone."
     }
   }
 }

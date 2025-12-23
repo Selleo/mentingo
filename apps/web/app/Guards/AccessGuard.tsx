@@ -69,6 +69,18 @@ export const ContentAccessGuard = ({ children, type }: AccessGuardProps) => {
         globalSettings?.QAEnabled &&
         (globalSettings?.unregisteredUserQAAccessibility || isLoggedIn),
     )
+    .with(
+      ACCESS_GUARD.UNREGISTERED_NEWS_ACCESS,
+      () =>
+        globalSettings?.newsEnabled &&
+        (globalSettings?.unregisteredUserNewsAccessibility || isLoggedIn),
+    )
+    .with(
+      ACCESS_GUARD.UNREGISTERED_ARTICLES_ACCESS,
+      () =>
+        globalSettings?.articlesEnabled &&
+        (globalSettings?.unregisteredUserArticlesAccessibility || isLoggedIn),
+    )
     .exhaustive();
 
   useLayoutEffect(() => {
