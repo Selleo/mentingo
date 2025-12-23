@@ -77,7 +77,9 @@ export class QuestionRepository {
                         language,
                       )}
                     END,
-                  'isCorrect', CASE WHEN ${isCompleted} THEN ${questionAnswerOptions.isCorrect} ELSE NULL END,
+                  'isCorrect', CASE WHEN ${isCompleted} THEN ${
+                    questionAnswerOptions.isCorrect
+                  } ELSE NULL END,
                   'displayOrder',
                     CASE
                       WHEN ${isCompleted} THEN ${questionAnswerOptions.displayOrder}
@@ -86,9 +88,9 @@ export class QuestionRepository {
                     'isStudentAnswer',
                     CASE
                       WHEN ${studentQuestionAnswers.id} IS NULL THEN NULL
-                      WHEN ${
-                        studentQuestionAnswers.answer
-                      }->>CAST(${questionAnswerOptions.displayOrder} AS text) = ${this.localizationService.getLocalizedSqlField(
+                      WHEN ${studentQuestionAnswers.answer}->>CAST(${
+                        questionAnswerOptions.displayOrder
+                      } AS text) = ${this.localizationService.getLocalizedSqlField(
                         questionAnswerOptions.optionText,
                         language,
                       )} AND
@@ -96,9 +98,9 @@ export class QuestionRepository {
                         QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT
                       })
                       THEN TRUE
-                    WHEN ${
-                      studentQuestionAnswers.answer
-                    }->>CAST(${questionAnswerOptions.displayOrder} AS text) = ${questionAnswerOptions.isCorrect}::text AND
+                    WHEN ${studentQuestionAnswers.answer}->>CAST(${
+                      questionAnswerOptions.displayOrder
+                    } AS text) = ${questionAnswerOptions.isCorrect}::text AND
                       ${questions.type} = ${QUESTION_TYPE.TRUE_OR_FALSE}
                       THEN TRUE
                     WHEN EXISTS (
@@ -119,14 +121,18 @@ export class QuestionRepository {
                   'studentAnswer',  
                     CASE
                       WHEN ${studentQuestionAnswers.id} IS NULL THEN NULL
-                      ELSE ${studentQuestionAnswers.answer}->>CAST(${questionAnswerOptions.displayOrder} AS text)
+                      ELSE ${studentQuestionAnswers.answer}->>CAST(${
+                        questionAnswerOptions.displayOrder
+                      } AS text)
                     END
                 )
                 FROM ${questionAnswerOptions}
                 WHERE ${questionAnswerOptions.questionId} = questions.id
                 ORDER BY
                   CASE
-                    WHEN ${questions.type} in (${QUESTION_TYPE.FILL_IN_THE_BLANKS_DND}) AND ${!isCompleted}
+                    WHEN ${questions.type} in (${
+                      QUESTION_TYPE.FILL_IN_THE_BLANKS_DND
+                    }) AND ${!isCompleted}
                       THEN random()
                     ELSE ${questionAnswerOptions.displayOrder}
                   END
