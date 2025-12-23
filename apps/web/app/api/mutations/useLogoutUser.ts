@@ -4,13 +4,12 @@ import { AxiosError } from "axios";
 
 import { useToast } from "~/components/ui/use-toast";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
+import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
 
 import { ApiClient } from "../api-client";
 import { queryClient } from "../queryClient";
-
-import { useAuthStore } from "./../../modules/Auth/authStore";
 
 export function useLogoutUser() {
   const { toast } = useToast();
@@ -32,6 +31,7 @@ export function useLogoutUser() {
       return response.data;
     },
     onSuccess: async () => {
+      await queryClient.cancelQueries();
       queryClient.clear();
 
       clearHistory();

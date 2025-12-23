@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams } from "@remix-run/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -7,8 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useCreateBetaTextLesson } from "~/api/mutations/admin/useBetaCreateTextLesson";
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
 import { useUpdateTextLesson } from "~/api/mutations/admin/useUpdateTextLesson";
-import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
-import { queryClient } from "~/api/queryClient";
 import {
   type Chapter,
   ContentTypes,
@@ -35,7 +32,6 @@ export const useTextLessonForm = ({
   setOpenChapter,
   language,
 }: TextLessonFormProps) => {
-  const { id: courseId } = useParams();
   const { mutateAsync: createTextBlock } = useCreateBetaTextLesson();
   const { mutateAsync: updateTextBlockItem } = useUpdateTextLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
@@ -85,7 +81,6 @@ export const useTextLessonForm = ({
       }
 
       setContentTypeToDisplay(ContentTypes.EMPTY);
-      await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY, { id: courseId }] });
     } catch (error) {
       console.error("Error creating text block:", error);
     }
@@ -99,9 +94,6 @@ export const useTextLessonForm = ({
 
     try {
       await deleteLesson({ chapterId: chapterToEdit?.id, lessonId: lessonToEdit.id });
-      queryClient.invalidateQueries({
-        queryKey: [COURSE_QUERY_KEY, { id: courseId }],
-      });
       setContentTypeToDisplay(ContentTypes.EMPTY);
     } catch (error) {
       console.error("Failed to delete chapter:", error);
