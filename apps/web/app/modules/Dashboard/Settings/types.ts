@@ -17,6 +17,7 @@ export type GlobalSettings = {
   newsEnabled: GetPublicGlobalSettingsResponse["data"]["newsEnabled"];
   unregisteredUserArticlesAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserArticlesAccessibility"];
   articlesEnabled: GetPublicGlobalSettingsResponse["data"]["articlesEnabled"];
+  ageLimit: GetPublicGlobalSettingsResponse["data"]["ageLimit"];
 };
 
 export type UserSettings = {

@@ -1477,7 +1477,8 @@
       "firstName": "Imię",
       "lastName": "Nazwisko",
       "email": "Email",
-      "password": "Hasło"
+      "password": "Hasło",
+      "birthday": "Data urodzenia"
     },
     "other": {
       "alreadyHaveAccount": "Masz już konto?",
@@ -1490,7 +1491,8 @@
     "validation": {
       "firstName": "Imię jest wymagane",
       "lastName": "Nazwisko jest wymagane",
-      "email": "Nieprawidłowy email"
+      "email": "Nieprawidłowy email",
+      "birthday": "Aby się zarejestrować musisz mieć przynajmniej {{ageLimit}} lat"
     }
   },
   "courseChapterView": {
@@ -1776,7 +1778,8 @@
     "toast": {
       "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
-      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane"
+      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane",
+      "ageLimitUpdatedSuccessfully": "Limit wieku został pomyślnie zaktualizowany"
     }
   },
   "platformSimpleLogo": {
@@ -2043,6 +2046,16 @@
       "gbp": {
         "label": "Funt brytyjski",
         "sign": "£"
+      }
+    }
+  },
+  "ageLimitView": {
+    "header": "Ustaw limit wieku",
+    "subHeader": "Ustaw limit wieku wymagany dla nowych użytkowników na platformie",
+    "select": {
+      "placeholder": "Wybierz limit wieku",
+      "null": {
+        "label": "Brak ograniczenia"
       }
     }
   },

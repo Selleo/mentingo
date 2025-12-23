@@ -53,6 +53,8 @@ import {
   updateSettingsBodySchema,
   updateConfigWarningDismissedSchema,
   UpdateConfigWarningDismissedBody,
+  updateAgeLimitSchema,
+  UpdateAgeLimitBody,
 } from "./schemas/update-settings.schema";
 import { SettingsService } from "./settings.service";
 
@@ -437,5 +439,22 @@ export class SettingsController {
   @Roles(USER_ROLES.ADMIN)
   async updateArticlesSetting(@Param("setting") setting: AllowedArticlesSettings) {
     return new BaseResponse(await this.settingsService.updateArticlesSetting(setting));
+  }
+
+  @Patch("admin/age-limit")
+  @Roles(USER_ROLES.ADMIN)
+  @Validate({
+    request: [{ type: "body", schema: updateAgeLimitSchema }],
+  })
+  async updateAgeLimit(
+    @Body() body: UpdateAgeLimitBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const updatedGlobalSettings = await this.settingsService.updateAgeLimit(
+      body.ageLimit,
+      currentUser,
+    );
+
+    return new BaseResponse(updatedGlobalSettings);
   }
 }
