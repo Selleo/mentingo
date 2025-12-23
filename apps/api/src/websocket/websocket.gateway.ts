@@ -25,6 +25,8 @@ import type { Socket } from "socket.io";
     origin: process.env.CORS_ORIGIN?.split(",") || true,
     credentials: true,
   },
+  path: "/api/ws",
+  transports: ["websocket", "polling"],
 })
 export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

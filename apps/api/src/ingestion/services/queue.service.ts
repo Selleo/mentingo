@@ -17,7 +17,7 @@ export class IngestionQueueService {
       QUEUE_NAMES.DOCUMENT_INGESTION,
       "document-ingestion",
       { file, documentId, sha256 },
-      { attempts: 3, backoff: { type: "exponential", delay: 1000 } },
+      { attempts: 3, backoff: { type: "exponential", delay: 1000 }, removeOnComplete: true },
     );
   }
 

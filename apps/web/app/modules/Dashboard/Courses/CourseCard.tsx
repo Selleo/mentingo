@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
+import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
@@ -32,11 +33,13 @@ const CourseCard = ({
   thumbnailUrl,
   priceInCents,
   title,
+  dueDate,
 }: CourseCardProps) => {
-  const { isAdmin } = useUserRole();
   const { pathname } = useLocation();
-  const isScormCreatePage = pathname.includes("/admin/courses/new-scorm");
   const { t } = useTranslation();
+  const isScormCreatePage = pathname.includes("/admin/courses/new-scorm");
+
+  const { isAdmin } = useUserRole();
 
   return (
     <Link
@@ -74,6 +77,14 @@ const CourseCard = ({
               <Icon name="FreeRight" className="w-4" />
               {t("studentCoursesView.other.freeLessons")}
             </CardBadge>
+          )}
+          {dueDate && (
+            <CategoryChip
+              category={t("common.other.dueDate", { date: formatDate(dueDate, "dd.MM.yyyy") })}
+              color="text-warning-600"
+              className="bg-warning-50"
+              textClassName="text-zest-900"
+            />
           )}
         </div>
       </div>

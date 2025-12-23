@@ -334,7 +334,7 @@ export class UserService {
     }
 
     if (userAvatar) {
-      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", {
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", undefined, {
         allowedTypes: AVATAR_ALLOWED_TYPES,
         maxSize: AVATAR_MAX_SIZE,
         maxResolution: AVATAR_MAX_RESOLUTION,
@@ -861,6 +861,23 @@ export class UserService {
         and(
           eq(users.role, USER_ROLES.ADMIN),
           sql`${settings.settings}->>'adminFinishedCourseNotification' = 'true'`,
+          isNull(users.deletedAt),
+        ),
+      );
+  }
+
+  public async getAdminsToNotifyAboutOverdueCourse(): Promise<{ email: string; id: string }[]> {
+    return this.db
+      .select({
+        id: users.id,
+        email: users.email,
+      })
+      .from(users)
+      .innerJoin(settings, eq(users.id, settings.userId))
+      .where(
+        and(
+          eq(users.role, USER_ROLES.ADMIN),
+          sql`${settings.settings}->>'adminOverdueCourseNotification' = 'true'`,
           isNull(users.deletedAt),
         ),
       );

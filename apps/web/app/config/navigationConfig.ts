@@ -33,81 +33,106 @@ export type NavigationGroups = {
 export const getNavigationConfig = (
   t: TFunction,
   isQAEnabled = false,
+  isNewsEnabled = false,
+  isArticlesEnabled = false,
   isStripeConfigured = false,
-): NavigationGroups[] => [
-  {
-    title: t("navigationSideBar.courses"),
-    isExpandable: false,
-    items: [
-      {
-        label: t("navigationSideBar.dashboard"),
-        path: "",
-        iconName: "Dashboard",
-      },
-      {
-        label: t("navigationSideBar.courses"),
-        path: "courses",
-        iconName: "Course",
-      },
-      {
-        label: t("navigationSideBar.news"),
-        path: `news`,
-        iconName: "News",
-      },
-      {
-        label: t("navigationSideBar.articles"),
-        path: `articles`,
-        iconName: "Articles",
-      },
-      ...(isQAEnabled
-        ? ([
-            {
-              label: t("navigationSideBar.qa"),
-              path: "qa",
-              iconName: "Quiz",
-            },
-          ] as NavigationItem[])
-        : []),
-    ],
-  },
-  {
-    title: t("navigationSideBar.manage"),
-    icon: "Manage",
-    isExpandable: true,
-    restrictedRoles: [USER_ROLE.admin],
-    items: [
-      {
-        label: t("navigationSideBar.announcements"),
-        path: `announcements`,
-        iconName: "Bell",
-      },
-      {
-        label: t("navigationSideBar.users"),
-        path: "admin/users",
-        iconName: "Hat",
-      },
-      {
-        label: t("navigationSideBar.groups"),
-        path: "admin/groups",
-        iconName: "Share",
-      },
-      {
-        label: t("navigationSideBar.categories"),
-        path: "admin/categories",
-        iconName: "Category",
-      },
-      ...(isStripeConfigured
-        ? [
-            {
-              label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
-              path: "admin/promotion-codes",
-              iconName: "HandCoins",
-            } as NavigationItem,
-          ]
-        : []),
-    ],
-  },
-];
+): NavigationGroups[] => {
+  const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
+
+  return [
+    {
+      title: t("navigationSideBar.courses"),
+      isExpandable: false,
+      items: [
+        {
+          label: t("navigationSideBar.dashboard"),
+          path: "",
+          iconName: "Dashboard",
+        },
+        {
+          label: t("navigationSideBar.courses"),
+          path: "courses",
+          iconName: "Course",
+        },
+      ],
+    },
+    ...(isAnyContentFeatureEnabled
+      ? ([
+          {
+            title: t("navigationSideBar.content"),
+            icon: "Library",
+            isExpandable: true,
+            items: [
+              ...(isNewsEnabled
+                ? ([
+                    {
+                      label: t("navigationSideBar.news"),
+                      path: `news`,
+                      iconName: "News",
+                    },
+                  ] as NavigationItem[])
+                : []),
+              ...(isArticlesEnabled
+                ? ([
+                    {
+                      label: t("navigationSideBar.articles"),
+                      path: `articles`,
+                      iconName: "Articles",
+                    },
+                  ] as NavigationItem[])
+                : []),
+              ...(isQAEnabled
+                ? ([
+                    {
+                      label: t("navigationSideBar.qa"),
+                      path: "qa",
+                      iconName: "Quiz",
+                    },
+                  ] as NavigationItem[])
+                : []),
+            ],
+          },
+        ] satisfies NavigationGroups[])
+      : []),
+    {
+      title: t("navigationSideBar.manage"),
+      icon: "Manage",
+      isExpandable: true,
+      restrictedRoles: [USER_ROLE.admin],
+      items: [
+        {
+          label: t("navigationSideBar.announcements"),
+          path: `announcements`,
+          iconName: "Bell",
+        },
+        {
+          label: t("navigationSideBar.users"),
+          path: "admin/users",
+          iconName: "Hat",
+        },
+        {
+          label: t("navigationSideBar.groups"),
+          path: "admin/groups",
+          iconName: "Share",
+        },
+        {
+          label: t("navigationSideBar.categories"),
+          path: "admin/categories",
+          iconName: "Category",
+        },
+        ...(isStripeConfigured
+          ? [
+              {
+                label: t("navigationSideBar.promotionCodes", "Promotion Codes"),
+                path: "admin/promotion-codes",
+                iconName: "HandCoins",
+              } as NavigationItem,
+            ]
+          : []),
+      ],
+    },
+  ];
+};
 
 /**
  * Finds matching route access roles for a given path by checking different types of routes in order:

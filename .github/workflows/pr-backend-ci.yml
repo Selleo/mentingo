@@ -8,8 +8,10 @@ env:
   JWT_EXPIRATION_TIME: "15min"
   CORS_ORIGIN: ""
   EMAIL_ADAPTER: "mailhog"
-  DATABASE_URL: ""
-  REDIS_URL: "redis://localhost:6380"
+  DATABASE_URL: "postgresql://postgres:guidebook@localhost:5432/guidebook"
+  DATABASE_TEST_URL: "postgresql://postgres:guidebook@localhost:5432/guidebook_test"
+  REDIS_URL: "redis://localhost:6379/0"
+  REDIS_TEST_URL: "redis://localhost:6379/1"
   SMTP_HOST: ""
   SMTP_PORT: "1025"
   SMTP_USER: ""
@@ -75,7 +77,7 @@ jobs:
       redis:
         image: redis:alpine
         ports:
-          - 6380:6379
+          - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -105,6 +107,7 @@ jobs:
 
       - name: Build the app
         run: pnpm run build
+
       - name: Verify build output
         run: |
           pnpm start:prod &
@@ -131,6 +134,30 @@ jobs:
   test:
     name: Jest tests
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: guidebook
+          POSTGRES_DB: guidebook
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -185,9 +212,6 @@ jobs:
           }' || echo "Warning: Failed to set CORS configuration"
 
           echo "S3 setup completed successfully!"
-
-      - name: Start containers
-        run: docker compose -f "docker-compose.test.yml" up -d --build
 
       - uses: actions/setup-node@v4
         with:

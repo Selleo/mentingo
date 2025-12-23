@@ -1,4 +1,5 @@
 import { useNavigate } from "@remix-run/react";
+import { formatDate } from "date-fns";
 import { useTranslation } from "react-i18next";
 
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
@@ -19,14 +20,15 @@ type CourseOverviewProps = {
 };
 
 export default function CourseOverview({ course }: CourseOverviewProps) {
-  const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
-  const title = course?.title;
-  const description = course?.description || "";
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { isAdminLike, isAdmin } = useUserRole();
   const { currentUser } = useCurrentUserStore();
-  const navigate = useNavigate();
-  const { t } = useTranslation();
+
+  const imageUrl = course?.thumbnailUrl ?? CardPlaceholder;
+  const title = course?.title;
+  const description = course?.description || "";
 
   const navigateToEditCourse = () => navigate(`/admin/beta-courses/${course.id}`);
 
@@ -55,8 +57,18 @@ export default function CourseOverview({ course }: CourseOverviewProps) {
             />
           </div>
           <div className="flex w-full flex-col gap-y-2">
-            <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
               <CategoryChip category={course?.category} className="bg-primary-50" />
+              {course?.dueDate && (
+                <CategoryChip
+                  category={t("common.other.dueDate", {
+                    date: formatDate(course?.dueDate, "dd.MM.yyyy"),
+                  })}
+                  color="text-warning-600"
+                  className="bg-warning-50"
+                  textClassName="text-zest-900"
+                />
+              )}
 
               <Badge variant="default" className="flex gap-2">
                 {courseLanguages

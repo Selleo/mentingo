@@ -78,6 +78,7 @@ export default function CoursesPage() {
     category: state.category,
     sort: state.sort,
     language,
+    userId: currentUser?.id,
   });
 
   const { data: categories, isLoading: isCategoriesLoading } = useCategories();

@@ -40,9 +40,11 @@ import {
   allStudentCourseProgressionSchema,
   allStudentQuizResultsSchema,
   courseAverageQuizScoresSchema,
+  enrolledCourseGroupsPayload,
   getCourseStatisticsSchema,
   getLessonSequenceEnabledSchema,
   supportedLanguagesSchema,
+  EnrolledCourseGroupsPayload,
 } from "src/courses/schemas/course.schema";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -331,6 +333,31 @@ export class CourseController {
     );
   }
 
+  @Get("beta-course-missing-translations")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(Type.Object({ hasMissingTranslations: Type.Boolean() })),
+  })
+  async hasMissingTranslations(
+    @Query("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<BaseResponse<{ hasMissingTranslations: boolean }>> {
+    const hasMissingTranslations = await this.courseService.hasMissingTranslations(
+      id,
+      language,
+      currentUserId,
+      currentUserRole,
+    );
+
+    return new BaseResponse({ hasMissingTranslations });
+  }
+
   @Post()
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
@@ -500,17 +527,23 @@ export class CourseController {
       },
       {
         type: "body",
-        schema: Type.Object({ groupIds: Type.Array(UUIDSchema) }),
+        schema: enrolledCourseGroupsPayload,
       },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
   async enrollGroupsToCourse(
     @Param("courseId") courseId: UUIDType,
-    @Body() body: { groupIds: UUIDType[] } = { groupIds: [] },
-    @CurrentUser() currentUser: CurrentUserType,
+    @Body() body: EnrolledCourseGroupsPayload,
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.enrollGroupsToCourse(courseId, body.groupIds, currentUser);
+    await this.courseService.enrollGroupsToCourse(
+      courseId,
+      body.groups,
+      currentUserId,
+      currentUserRole,
+    );
 
     return new BaseResponse({ message: "Pomyślnie zapisano grupy na kurs" });
   }
@@ -784,5 +817,25 @@ export class CourseController {
     @CurrentUser("userId") userId: UUIDType,
   ) {
     return this.courseService.deleteLanguage(courseId, language, role, userId);
+  }
+
+  @Post("generate-translations/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "language",
+        schema: supportedLanguagesSchema,
+      },
+      { type: "param", name: "courseId", schema: UUIDSchema },
+    ],
+  })
+  async generateTranslations(
+    @Query("language") language: SupportedLanguages,
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.courseService.generateMissingTranslations(courseId, language, currentUser);
   }
 }

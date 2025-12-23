@@ -72,6 +72,7 @@ export const SCORM_CONFIG = [
           enrolledParticipantCount={0}
           priceInCents={0}
           currency={""}
+          dueDate={null}
           {...props}
         />
       );

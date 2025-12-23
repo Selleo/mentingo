@@ -5,7 +5,6 @@ import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { CourseModule } from "src/courses/course.module";
-import { FileService } from "src/file/file.service";
 import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
 import { GroupService } from "src/group/group.service";
@@ -33,7 +32,6 @@ import { UserService } from "./user.service";
   controllers: [UserController],
   providers: [
     UserService,
-    FileService,
     S3Service,
     BunnyStreamService,
     StatisticsService,

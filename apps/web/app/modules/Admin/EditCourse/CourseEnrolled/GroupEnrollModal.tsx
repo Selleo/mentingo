@@ -1,11 +1,13 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "i18next";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
 
-import { useBulkGroupCourseEnroll } from "~/api/mutations/admin/useBulkGroupCourseEnroll";
-import { Icon } from "~/components/Icon";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
+import { ScrollArea } from "~/components/ui/scroll-area";
+
+import { useBulkGroupCourseEnroll } from "../../../../api/mutations/admin/useBulkGroupCourseEnroll";
+import { Button } from "../../../../components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -15,10 +17,57 @@ import {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
-} from "~/components/ui/dialog";
+} from "../../../../components/ui/dialog";
+import { Form } from "../../../../components/ui/form";
 
-import type { FormEvent } from "react";
+import { GroupEnrollItem } from "./GroupEnrollItem";
+
 import type { GetAllGroupsResponse, GetGroupsByCourseResponse } from "~/api/generated-api";
+
+type GroupFormItem = {
+  id: string;
+  selected: boolean;
+  obligatory: boolean;
+  deadline: string;
+};
+
+export type GroupEnrollFormValues = {
+  groups: GroupFormItem[];
+};
+
+const groupItemSchema = z.object({
+  id: z.string(),
+  selected: z.boolean(),
+  obligatory: z.boolean(),
+  deadline: z.string().optional().nullable(),
+});
+
+const groupEnrollSchema = z
+  .object({
+    groups: z.array(groupItemSchema),
+  })
+  .superRefine((data, ctx) => {
+    data.groups.forEach((g, index) => {
+      if (!g.selected || !g.obligatory) return;
+
+      if (!g.deadline) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("adminCourseView.deadlineRequired"),
+          path: ["groups", index, "deadline"],
+        });
+        return;
+      }
+
+      if (Number.isNaN(Date.parse(g.deadline))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("adminCourseView.invalidDate"),
+          path: ["groups", index, "deadline"],
+        });
+      }
+    });
+  });
 
 type Props = {
   isOpen: boolean;
@@ -39,33 +88,51 @@ export const GroupEnrollModal = ({
 }: Props) => {
   const { mutate: bulkGroupEnroll } = useBulkGroupCourseEnroll(courseId);
 
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
-
   const enrolledIds = useMemo(
     () => new Set(enrolledGroups?.map((g) => g.id) ?? []),
     [enrolledGroups],
   );
 
-  const toggleGroupEnrollment = (groupId: string, isChecked: boolean, disabled?: boolean) => {
-    if (disabled) return;
+  const form = useForm<GroupEnrollFormValues>({
+    defaultValues: { groups: [] },
+    mode: "onChange",
+    resolver: zodResolver(groupEnrollSchema),
+  });
+  const watched = useWatch({ control: form.control, name: "groups" });
+  const selectedCount = (watched ?? []).filter((g) => g?.selected).length;
 
-    setSelectedGroupIds((prev) =>
-      isChecked ? [...prev, groupId] : prev.filter((id) => id !== groupId),
-    );
-  };
+  const handleSubmit = async (values: GroupEnrollFormValues) => {
+    const idsToEnroll = values.groups.filter((g) => g.selected).map((g) => g.id);
 
-  const handleGroupFormSubmit = (event: FormEvent) => {
-    event.preventDefault();
-
-    const groupIds = selectedGroupIds.filter(Boolean);
-
-    if (groupIds.length > 0) {
-      bulkGroupEnroll({ groupIds });
+    if (idsToEnroll.length > 0) {
+      bulkGroupEnroll({
+        groups: values.groups.map((g) => ({
+          id: g.id,
+          isMandatory: g.obligatory,
+          dueDate: g.deadline,
+        })),
+      });
     }
-
-    setSelectedGroupIds([]);
     onOpenChange(false);
   };
+
+  useEffect(() => {
+    const list =
+      groups?.map((g) => {
+        const enrolled = enrolledGroups?.find((eg) => eg.id === g.id);
+        const isMandatory = enrolled?.isMandatory;
+        const dueDate = enrolled?.dueDate;
+
+        return {
+          id: g.id,
+          selected: false,
+          obligatory: Boolean(isMandatory),
+          deadline: typeof dueDate === "string" ? dueDate : "",
+        };
+      }) ?? [];
+
+    form.reset({ groups: list });
+  }, [groups, enrolledGroups, form]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -76,68 +143,43 @@ export const GroupEnrollModal = ({
       )}
       <DialogPortal>
         <DialogOverlay />
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl gap-2">
           <DialogTitle>{t("adminCourseView.enrolled.enrollGroupsModal.title")}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="leading-5">
             {t("adminCourseView.enrolled.enrollGroupsModal.description")}
           </DialogDescription>
 
-          <div className="mt-4 grid gap-3">
-            {(groups || []).map((group) => {
-              const isGroupEnrolled = enrolledIds.has(group.id);
-              const isChecked = isGroupEnrolled || selectedGroupIds.includes(group.id);
-
-              return (
-                <div
-                  key={group.id}
-                  className="flex items-center justify-between gap-4 rounded-lg border bg-white px-4 py-3 shadow-sm"
-                >
-                  <div className="flex items-center gap-4">
-                    <Checkbox
-                      checked={isChecked}
-                      disabled={isGroupEnrolled}
-                      onCheckedChange={(currentValue) =>
-                        toggleGroupEnrollment(group.id, !!currentValue, isGroupEnrolled)
-                      }
-                      aria-label={`select-group-${group.id}`}
-                    />
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-100">
-                        <Icon name="User" className="size-5 text-neutral-600" />
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="text-sm font-medium text-neutral-900">{group.name}</div>
-                        <div className="text-xs text-neutral-500">
-                          {t("adminCourseView.enrolled.members", {
-                            count: group.users?.length ?? 0,
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {isGroupEnrolled && (
-                      <Badge className="bg-primary-50 text-primary-700" fontWeight="normal">
-                        {t("adminCourseView.enrolled.alreadyEnrolled")}
-                      </Badge>
-                    )}
-                  </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}>
+              <ScrollArea className="max-h-[60vh] h-[60vh]">
+                <div className="mt-2 grid gap-3 pr-3">
+                  {(groups || []).map((group, index) => {
+                    const isGroupEnrolled = enrolledIds.has(group.id);
+                    return (
+                      <GroupEnrollItem
+                        key={group.id}
+                        index={index}
+                        id={group.id}
+                        name={group.name}
+                        usersCount={group.users?.length ?? 0}
+                        isGroupEnrolled={isGroupEnrolled}
+                      />
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
-          <form onSubmit={handleGroupFormSubmit}>
-            <div className="flex justify-end gap-4 mt-6">
-              <DialogClose>
-                <Button type="reset" variant="ghost">
-                  {t("common.button.cancel")}
+              </ScrollArea>
+              <div className="flex justify-end gap-4 mt-6">
+                <DialogClose>
+                  <Button type="reset" variant="outline">
+                    {t("common.button.cancel")}
+                  </Button>
+                </DialogClose>
+                <Button type="submit" variant="primary" disabled={!selectedCount}>
+                  {t("adminCourseView.enrolled.enrollGroups")} ({selectedCount})
                 </Button>
-              </DialogClose>
-              <Button type="submit" variant="primary" disabled={!selectedGroupIds.length}>
-                {t("adminCourseView.enrolled.enrollGroups")}
-              </Button>
-            </div>
-          </form>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </DialogPortal>
     </Dialog>

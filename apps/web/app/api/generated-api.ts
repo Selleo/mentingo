@@ -182,6 +182,10 @@ export interface GetPublicGlobalSettingsResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
@@ -284,6 +288,10 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
@@ -319,10 +327,26 @@ export interface UpdateEnforceSSOResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
 export interface UpdateAdminFinishedCourseNotificationResponse {
+  data: {
+    language: string;
+    /** @default false */
+    isMFAEnabled: boolean;
+    MFASecret: string | null;
+    adminNewUserNotification: boolean;
+    adminFinishedCourseNotification: boolean;
+    configWarningDismissed: boolean;
+  };
+}
+
+export interface UpdateAdminOverdueCourseNotificationResponse {
   data: {
     language: string;
     /** @default false */
@@ -373,6 +397,10 @@ export interface UpdateColorSchemaResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
   };
 }
 
@@ -456,7 +484,27 @@ export interface UpdateConfigWarningDismissedResponse {
 
 export interface FileUploadResponse {
   fileKey: string;
-  fileUrl: string;
+  fileUrl?: string;
+  status?: string;
+  uploadId?: string;
+}
+
+export interface HandleBunnyWebhookBody {
+  status?: number | string;
+  Status?: number | string;
+  videoId?: string;
+  VideoId?: string;
+  videoGuid?: string;
+  VideoGuid?: string;
+  guid?: string;
+  Guid?: string;
+}
+
+export interface AssociateUploadWithLessonBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  uploadId: string;
 }
 
 export interface GetUserStatisticsResponse {
@@ -867,6 +915,8 @@ export interface UpdateGroupResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    isMandatory?: boolean;
+    dueDate?: string | null;
   };
 }
 
@@ -900,6 +950,8 @@ export interface GetGroupsByCourseResponse {
     characteristic?: string;
     createdAt: string;
     updatedAt: string;
+    isMandatory?: boolean;
+    dueDate?: string | null;
   }[];
 }
 
@@ -958,6 +1010,7 @@ export interface GetStudentCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1014,6 +1067,7 @@ export interface GetAvailableCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1047,6 +1101,7 @@ export interface GetContentCreatorCoursesResponse {
     stripePriceId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
+    dueDate: string | null;
   }[];
 }
 
@@ -1114,6 +1169,7 @@ export interface GetCourseResponse {
     stripePriceId: string | null;
     availableLocales: ("en" | "pl")[];
     baseLanguage: "en" | "pl";
+    dueDate: string | null;
   };
 }
 
@@ -1221,6 +1277,12 @@ export interface GetBetaCourseByIdResponse {
   };
 }
 
+export interface HasMissingTranslationsResponse {
+  data: {
+    hasMissingTranslations: boolean;
+  };
+}
+
 export type CreateCourseBody = {
   title: string;
   description: string;
@@ -1322,7 +1384,12 @@ export interface EnrollCoursesResponse {
 }
 
 export interface EnrollGroupsToCourseBody {
-  groupIds: string[];
+  groups: {
+    /** @format uuid */
+    id: string;
+    isMandatory: boolean;
+    dueDate?: string | null;
+  }[];
 }
 
 export interface EnrollGroupsToCourseResponse {
@@ -2798,6 +2865,12 @@ export interface GetStripeConfiguredResponse {
   };
 }
 
+export interface GetAIConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
 export interface GetIsConfigSetupResponse {
   data: {
     fullyConfigured: string[];
@@ -3906,6 +3979,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateAdminOverdueCourseNotification
+     * @request PATCH:/api/settings/admin/overdue-course-notification
+     */
+    settingsControllerUpdateAdminOverdueCourseNotification: (params: RequestParams = {}) =>
+      this.request<UpdateAdminOverdueCourseNotificationResponse, any>({
+        path: `/api/settings/admin/overdue-course-notification`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerUpdateColorSchema
      * @request PATCH:/api/settings/admin/color-schema
      */
@@ -4181,6 +4268,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateNewsSetting
+     * @request PATCH:/api/settings/admin/news/{setting}
+     */
+    settingsControllerUpdateNewsSetting: (
+      setting: "newsEnabled" | "unregisteredUserNewsAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/news/${setting}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateArticlesSetting
+     * @request PATCH:/api/settings/admin/articles/{setting}
+     */
+    settingsControllerUpdateArticlesSetting: (
+      setting: "articlesEnabled" | "unregisteredUserArticlesAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/articles/${setting}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name FileControllerUploadFile
      * @request POST:/api/file
      */
@@ -4190,6 +4309,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         file?: File;
         /** Optional resource type */
         resource?: string;
+        /** Optional lesson ID for existing lessons */
+        lessonId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -4219,6 +4340,39 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/file`,
         method: "DELETE",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerHandleBunnyWebhook
+     * @request POST:/api/file/bunny/webhook
+     */
+    fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/bunny/webhook`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerAssociateUploadWithLesson
+     * @request POST:/api/file/associate-upload
+     */
+    fileControllerAssociateUploadWithLesson: (
+      data: AssociateUploadWithLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file/associate-upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -5001,6 +5155,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerHasMissingTranslations
+     * @request GET:/api/course/beta-course-missing-translations
+     */
+    courseControllerHasMissingTranslations: (
+      query: {
+        /** @format uuid */
+        id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HasMissingTranslationsResponse, any>({
+        path: `/api/course/beta-course-missing-translations`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerUpdateCourse
      * @request PATCH:/api/course/{id}
      */
@@ -5412,6 +5589,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/course/language/${courseId}`,
         method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGenerateTranslations
+     * @request POST:/api/course/generate-translations/{courseId}
+     */
+    courseControllerGenerateTranslations: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/generate-translations/${courseId}`,
+        method: "POST",
         query: query,
         ...params,
       }),
@@ -6674,6 +6872,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetStripeConfigured: (params: RequestParams = {}) =>
       this.request<GetStripeConfiguredResponse, any>({
         path: `/api/env/frontend/stripe`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetAiConfigured
+     * @request GET:/api/env/ai
+     */
+    envControllerGetAiConfigured: (params: RequestParams = {}) =>
+      this.request<GetAIConfiguredResponse, any>({
+        path: `/api/env/ai`,
         method: "GET",
         format: "json",
         ...params,

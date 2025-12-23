@@ -13,6 +13,10 @@ export type GlobalSettings = {
   userEmailTriggers: GetPublicGlobalSettingsResponse["data"]["userEmailTriggers"];
   unregisteredUserQAAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserQAAccessibility"];
   QAEnabled: GetPublicGlobalSettingsResponse["data"]["QAEnabled"];
+  unregisteredUserNewsAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserNewsAccessibility"];
+  newsEnabled: GetPublicGlobalSettingsResponse["data"]["newsEnabled"];
+  unregisteredUserArticlesAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserArticlesAccessibility"];
+  articlesEnabled: GetPublicGlobalSettingsResponse["data"]["articlesEnabled"];
 };
 
 export type UserSettings = {
@@ -22,6 +26,7 @@ export type UserSettings = {
 export type AdminSettings = UserSettings & {
   adminNewUserNotification: boolean;
   adminFinishedCourseNotification: boolean;
+  adminOverdueCourseNotification: boolean;
 };
 
 export type AllSettings = UserSettings | AdminSettings | GlobalSettings;

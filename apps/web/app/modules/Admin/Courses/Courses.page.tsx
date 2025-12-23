@@ -44,7 +44,6 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { useToast } from "~/components/ui/use-toast";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
@@ -325,23 +324,6 @@ const Courses = () => {
           <p className="body-lg-md text-neutral-800">{t("adminCoursesView.courses.subHeader")}</p>
         </div>
         <div className="ml-auto flex gap-3">
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger>
-                <Button variant="outline" disabled>
-                  {t("adminCoursesView.button.uploadScorm")}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                align="center"
-                className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-              >
-                {t("common.tooltip.soon")}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
           <Link to="/admin/beta-courses/new">
             <Button variant="primary">{t("adminCoursesView.button.createNew")}</Button>
           </Link>

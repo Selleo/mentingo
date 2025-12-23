@@ -19,6 +19,10 @@ export const DEFAULT_EMAIL_TRIGGERS = {
 export const DEFAULT_GLOBAL_SETTINGS = {
   unregisteredUserQAAccessibility: false,
   QAEnabled: false,
+  unregisteredUserNewsAccessibility: false,
+  newsEnabled: false,
+  unregisteredUserArticlesAccessibility: false,
+  articlesEnabled: false,
   unregisteredUserCoursesAccessibility: false,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
   enforceSSO: false,
@@ -44,6 +48,7 @@ export const DEFAULT_ADMIN_SETTINGS = {
   ...DEFAULT_STUDENT_SETTINGS,
   adminNewUserNotification: true,
   adminFinishedCourseNotification: false,
+  adminOverdueCourseNotification: false,
   configWarningDismissed: false,
 };
 

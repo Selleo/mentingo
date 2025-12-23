@@ -59,7 +59,13 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
 
   if (!menuItems) {
     menuItems = mapNavigationItems(
-      getNavigationConfig(t, globalSettings?.QAEnabled, isStripeConfigured?.enabled),
+      getNavigationConfig(
+        t,
+        globalSettings?.QAEnabled,
+        globalSettings?.newsEnabled,
+        globalSettings?.articlesEnabled,
+        isStripeConfigured?.enabled,
+      ),
     );
   }
 
