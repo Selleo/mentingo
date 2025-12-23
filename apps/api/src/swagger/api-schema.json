@@ -6928,6 +6928,17 @@
           }
         }
       }
+    },
+    "/api/analytics/active-users": {
+      "get": {
+        "operationId": "AnalyticsController_getActiveUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {

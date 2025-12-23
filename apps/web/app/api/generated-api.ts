@@ -7424,5 +7424,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         format: "json",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @name AnalyticsControllerGetActiveUsers
+     * @request GET:/api/analytics/active-users
+     */
+    analyticsControllerGetActiveUsers: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/analytics/active-users`,
+        method: "GET",
+        ...params,
+      }),
   };
 }
