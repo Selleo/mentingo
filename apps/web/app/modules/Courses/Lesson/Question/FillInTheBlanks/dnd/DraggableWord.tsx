@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import { cn } from "~/lib/utils";
+import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
 import type { DndWord } from "./types";
 
@@ -22,15 +23,19 @@ export const DraggableWord = ({
     id: word.id,
     disabled: !!isStudentAnswer,
   });
+  const { isQuizFeedbackRedacted, isQuizSubmitted } = useQuizContext();
 
   const wordStyle = {
     transform: CSS.Transform?.toString(transform),
   };
 
   const quizWordStyle = cn("px-2 py-1 rounded-md text-black", {
-    "bg-primary-200": !isCorrect && !isStudentAnswer,
-    "bg-success-200": isCorrect && isStudentAnswer,
-    "bg-error-200": (!isCorrect && isStudentAnswer) || (isCorrect && !isStudentAnswer),
+    "bg-neutral-200": isQuizFeedbackRedacted && isQuizSubmitted,
+    "bg-primary-200": !isQuizFeedbackRedacted && !isCorrect && !isStudentAnswer,
+    "bg-success-200": !isQuizFeedbackRedacted && isCorrect && isStudentAnswer,
+    "bg-error-200":
+      !isQuizFeedbackRedacted &&
+      ((!isCorrect && isStudentAnswer) || (isCorrect && !isStudentAnswer)),
   });
 
   return (

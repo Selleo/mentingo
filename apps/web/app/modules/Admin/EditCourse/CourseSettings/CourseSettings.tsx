@@ -28,7 +28,7 @@ import { InlineCategoryCreationForm } from "../../Categories/components/InlineCa
 import CourseCardPreview from "../compontents/CourseCardPreview";
 
 import CourseCertificateSetting from "./components/CourseCertificateSetting";
-import CourseLessonSequenceSwitch from "./components/CourseLessonSequenceSwitch";
+import { CourseSettingsSwitches } from "./components/CourseSettingsSwitches";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -191,7 +191,7 @@ const CourseSettings = ({
                   {t("adminCourseView.settings.other.reachedCharactersLimit")}
                 </p>
               )}
-              {courseId && <CourseLessonSequenceSwitch courseId={courseId} />}
+              {courseId && <CourseSettingsSwitches courseId={courseId} />}
               <FormField
                 control={form.control}
                 name="thumbnailS3Key"

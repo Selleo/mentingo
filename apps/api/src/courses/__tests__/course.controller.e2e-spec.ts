@@ -2107,4 +2107,347 @@ describe("CourseController (e2e)", () => {
       });
     });
   });
+
+  describe("GET /api/course/settings/:courseId", () => {
+    describe("when user is not logged in", () => {
+      it("returns 401 for unauthorized request", async () => {
+        await request(app.getHttpServer())
+          .get(`/api/course/settings/${faker.string.uuid()}`)
+          .expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      describe("when user is student", () => {
+        it("returns 403 for unauthorized request", async () => {
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ role: USER_ROLES.STUDENT });
+          const cookies = await cookieFor(student, app);
+          const category = await categoryFactory.create();
+          const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+          const course = await courseFactory.create({
+            authorId: contentCreator.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(403);
+        });
+      });
+
+      describe("when user is admin", () => {
+        it("returns course settings with default values", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data).toBeDefined();
+          expect(response.body.data.quizFeedbackEnabled).toBeDefined();
+          expect(response.body.data.lessonSequenceEnabled).toBeDefined();
+          expect(typeof response.body.data.quizFeedbackEnabled).toBe("boolean");
+          expect(typeof response.body.data.lessonSequenceEnabled).toBe("boolean");
+        });
+
+        it("returns course settings with custom values", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+            settings: {
+              lessonSequenceEnabled: true,
+              quizFeedbackEnabled: false,
+            },
+          });
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data.quizFeedbackEnabled).toBe(false);
+          expect(response.body.data.lessonSequenceEnabled).toBe(true);
+        });
+
+        it("returns 404 when course does not exist", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .get(`/api/course/settings/${faker.string.uuid()}`)
+            .set("Cookie", cookies)
+            .expect(404);
+        });
+      });
+
+      describe("when user is content creator", () => {
+        it("returns course settings for own course", async () => {
+          const contentCreator = await userFactory
+            .withCredentials({ password })
+            .withContentCreatorSettings(db)
+            .create({ role: USER_ROLES.CONTENT_CREATOR });
+          const cookies = await cookieFor(contentCreator, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: contentCreator.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data).toBeDefined();
+          expect(response.body.data.quizFeedbackEnabled).toBeDefined();
+          expect(response.body.data.lessonSequenceEnabled).toBeDefined();
+        });
+      });
+    });
+  });
+
+  describe("PATCH /api/course/settings/:courseId", () => {
+    describe("when user is not logged in", () => {
+      it("returns 401 for unauthorized request", async () => {
+        await request(app.getHttpServer())
+          .patch(`/api/course/settings/${faker.string.uuid()}`)
+          .send({ quizFeedbackEnabled: false })
+          .expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      describe("when user is student", () => {
+        it("returns 403 for unauthorized request", async () => {
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ role: USER_ROLES.STUDENT });
+          const cookies = await cookieFor(student, app);
+          const category = await categoryFactory.create();
+          const contentCreator = await userFactory.create({ role: USER_ROLES.CONTENT_CREATOR });
+          const course = await courseFactory.create({
+            authorId: contentCreator.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          await request(app.getHttpServer())
+            .patch(`/api/course/settings/${course.id}`)
+            .send({ quizFeedbackEnabled: false })
+            .set("Cookie", cookies)
+            .expect(403);
+        });
+      });
+
+      describe("when user is admin", () => {
+        it("updates quizFeedbackEnabled flag to false", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const response = await request(app.getHttpServer())
+            .patch(`/api/course/settings/${course.id}`)
+            .send({ quizFeedbackEnabled: false })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data.message).toBe("Course lesson settings updated successfully");
+
+          const getResponse = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(getResponse.body.data.quizFeedbackEnabled).toBe(false);
+        });
+
+        it("updates quizFeedbackEnabled flag to true", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+            settings: {
+              lessonSequenceEnabled: false,
+              quizFeedbackEnabled: false,
+            },
+          });
+
+          const response = await request(app.getHttpServer())
+            .patch(`/api/course/settings/${course.id}`)
+            .send({ quizFeedbackEnabled: true })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data.message).toBe("Course lesson settings updated successfully");
+
+          const getResponse = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(getResponse.body.data.quizFeedbackEnabled).toBe(true);
+        });
+
+        it("updates both quizFeedbackEnabled and lessonSequenceEnabled flags", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const response = await request(app.getHttpServer())
+            .patch(`/api/course/settings/${course.id}`)
+            .send({
+              quizFeedbackEnabled: false,
+              lessonSequenceEnabled: true,
+            })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data.message).toBe("Course lesson settings updated successfully");
+
+          const getResponse = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(getResponse.body.data.quizFeedbackEnabled).toBe(false);
+          expect(getResponse.body.data.lessonSequenceEnabled).toBe(true);
+        });
+
+        it("preserves existing settings when updating only one flag", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+            settings: {
+              lessonSequenceEnabled: true,
+              quizFeedbackEnabled: true,
+            },
+          });
+
+          await request(app.getHttpServer())
+            .patch(`/api/course/settings/${course.id}`)
+            .send({ quizFeedbackEnabled: false })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          const getResponse = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(getResponse.body.data.quizFeedbackEnabled).toBe(false);
+          expect(getResponse.body.data.lessonSequenceEnabled).toBe(true);
+        });
+
+        it("returns 404 when course does not exist", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .patch(`/api/course/settings/${faker.string.uuid()}`)
+            .send({ quizFeedbackEnabled: false })
+            .set("Cookie", cookies)
+            .expect(404);
+        });
+      });
+
+      describe("when user is content creator", () => {
+        it("updates course settings for own course", async () => {
+          const contentCreator = await userFactory
+            .withCredentials({ password })
+            .withContentCreatorSettings(db)
+            .create({ role: USER_ROLES.CONTENT_CREATOR });
+          const cookies = await cookieFor(contentCreator, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: contentCreator.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const response = await request(app.getHttpServer())
+            .patch(`/api/course/settings/${course.id}`)
+            .send({ quizFeedbackEnabled: false })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(response.body.data.message).toBe("Course lesson settings updated successfully");
+
+          const getResponse = await request(app.getHttpServer())
+            .get(`/api/course/settings/${course.id}`)
+            .set("Cookie", cookies)
+            .expect(200);
+
+          expect(getResponse.body.data.quizFeedbackEnabled).toBe(false);
+        });
+      });
+    });
+  });
 });

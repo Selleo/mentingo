@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import Viewer from "~/components/RichText/Viever";
 import { Card } from "~/components/ui/card";
+import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
 import { FillInTheTextBlanks } from "./FillInTheTextBlanks";
 import { TextBlank } from "./TextBlank";
@@ -15,6 +16,7 @@ type FillInTheBlanksProps = {
 
 export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps) => {
   const { t } = useTranslation();
+  const { isQuizFeedbackRedacted } = useQuizContext();
 
   if (!question.description) return null;
 
@@ -37,7 +39,7 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
           );
         }}
       />
-      {isCompleted && !!question?.solutionExplanation && (
+      {isCompleted && !!question?.solutionExplanation && !isQuizFeedbackRedacted && (
         <div>
           <span className="body-base-md text-error-700">Correct sentence:</span>
           <Viewer content={question.solutionExplanation} />

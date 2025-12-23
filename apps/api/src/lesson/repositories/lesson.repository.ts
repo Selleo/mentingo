@@ -16,6 +16,7 @@ import {
   studentCourses,
   studentLessonProgress,
   studentChapterProgress,
+  coursesSettingsHelpers,
 } from "src/storage/schema";
 
 import type { LessonTypes } from "../lesson.type";
@@ -54,7 +55,7 @@ export class LessonRepository {
 
     const [{ isSequenceEnabled, courseId }] = await this.db
       .select({
-        isSequenceEnabled: sql<boolean>`(${courses.settings}->>'lessonSequenceEnabled')::boolean`,
+        isSequenceEnabled: coursesSettingsHelpers.select("lessonSequenceEnabled"),
         courseId: sql<UUIDType>`${courses.id}`,
       })
       .from(lessons)
@@ -116,6 +117,7 @@ export class LessonRepository {
         updatedAt: studentLessonProgress.updatedAt,
         isQuizPassed: sql<boolean | null>`${studentLessonProgress.isQuizPassed}`,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
+        quizFeedbackEnabled: coursesSettingsHelpers.select("quizFeedbackEnabled"),
         aiMentorDetails: sql<{
           minScore: number | null;
           maxScore: number | null;
@@ -128,11 +130,11 @@ export class LessonRepository {
             'maxScore', ${aiMentorStudentLessonProgress.maxScore},
             'score', ${aiMentorStudentLessonProgress.score},
             'percentage', ${aiMentorStudentLessonProgress.percentage},
-            'requiredScore', 
-              CASE 
-                WHEN ${aiMentorStudentLessonProgress.maxScore} > 0 
+            'requiredScore',
+              CASE
+                WHEN ${aiMentorStudentLessonProgress.maxScore} > 0
                 THEN CAST(${aiMentorStudentLessonProgress.minScore} AS FLOAT) / CAST(${aiMentorStudentLessonProgress.maxScore} AS FLOAT) * 100
-                ELSE 0 
+                ELSE 0
               END
           )
         `,
@@ -231,7 +233,7 @@ export class LessonRepository {
                 WHERE ${lessons.id} = ${questions.lessonId}
                 ORDER BY ${questions.displayOrder}
               ) AS questions_data
-            ), 
+            ),
             '[]'::json
           )
         `,

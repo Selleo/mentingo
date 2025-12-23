@@ -66,6 +66,10 @@ import {
 } from "src/courses/schemas/showCourseCommon.schema";
 import { UpdateCourseBody, updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import {
+  updateCourseSettingsSchema,
+  type UpdateCourseSettings,
+} from "src/courses/schemas/updateCourseSettings.schema";
+import {
   allCoursesValidation,
   coursesValidation,
   studentCoursesValidation,
@@ -75,12 +79,14 @@ import { GroupsFilterSchema } from "src/group/group.types";
 import { LearningTimeService, learningTimeStatisticsSchema } from "src/learning-time";
 import { USER_ROLES, UserRole } from "src/user/schemas/userRoles";
 
+import { coursesSettingsSchema } from "./schemas/coursesSettings.schema";
 import {
   CreateCoursesEnrollment,
   createCoursesEnrollmentSchema,
 } from "./schemas/createCoursesEnrollment";
 
 import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
+import type { CoursesSettings } from "./types/settings";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
@@ -422,27 +428,36 @@ export class CourseController {
     return new BaseResponse({ message: "Course with certificate updated successfully" });
   }
 
-  @Patch("update-lesson-sequence/:courseId")
+  @Patch("settings/:courseId")
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [
       { type: "param", name: "courseId", schema: UUIDSchema },
-      { type: "body", schema: Type.Object({ lessonSequenceEnabled: Type.Boolean() }) },
+      { type: "body", schema: updateCourseSettingsSchema },
     ],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
-  async updateLessonSequenceEnabled(
+  async updateCourseSettings(
     @Param("courseId") courseId: UUIDType,
-    @Body() body: { lessonSequenceEnabled: boolean },
+    @Body() body: UpdateCourseSettings,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
-    await this.courseService.updateLessonSequenceEnabled(
-      courseId,
-      body.lessonSequenceEnabled,
-      currentUser,
-    );
+    await this.courseService.updateCourseSettings(courseId, body, currentUser);
 
-    return new BaseResponse({ message: "Course lesson sequence updated successfully" });
+    return new BaseResponse({ message: "Course lesson settings updated successfully" });
+  }
+
+  @Get("settings/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    response: baseResponse(coursesSettingsSchema),
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+  })
+  async getCourseSettings(
+    @Param("courseId") courseId: UUIDType,
+  ): Promise<BaseResponse<CoursesSettings>> {
+    const data = await this.courseService.getCourseSettings(courseId);
+    return new BaseResponse(data);
   }
 
   @Get("lesson-sequence-enabled/:courseId")

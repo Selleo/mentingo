@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { cn } from "~/lib/utils";
+import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
 import type { QuizQuestionOption } from "../types";
 import type { QuizForm } from "~/modules/Courses/Lesson/types";
@@ -20,6 +21,7 @@ export const TextBlank = ({
   questionId,
 }: TextBlankProps) => {
   const { register } = useFormContext<QuizForm>();
+  const { isQuizFeedbackRedacted } = useQuizContext();
   const inputRef = useRef<HTMLInputElement>(null);
   const formFieldId = `${index + 1}`;
 
@@ -39,9 +41,13 @@ export const TextBlank = ({
   const textBlankClasses = cn(
     "bg-transparent border-dashed border-b mx-1.5 w-20 focus:ring-0 focus:outline-none text-accent-foreground border-b-accent-foreground",
     {
-      "border-b-success-500 text-success-500": isCorrectAnswer && studentAnswer?.isStudentAnswer,
+      "border-b-neutral-400 text-neutral-600": isQuizFeedbackRedacted && isQuizSubmitted,
+      "border-b-success-500 text-success-500":
+        !isQuizFeedbackRedacted && isCorrectAnswer && studentAnswer?.isStudentAnswer,
       "border-b-error-500 text-error-500":
-        typeof studentAnswer?.isStudentAnswer === "boolean" && !studentAnswer?.isStudentAnswer,
+        !isQuizFeedbackRedacted &&
+        typeof studentAnswer?.isStudentAnswer === "boolean" &&
+        !studentAnswer?.isStudentAnswer,
     },
   );
 
