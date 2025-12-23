@@ -258,7 +258,6 @@ Email templates are automatically built when starting the development server. To
 ### Testing
 
 - Frontend tests:
-
   - Unit
     ```bash
     pnpm test:web

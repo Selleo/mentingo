@@ -39,10 +39,10 @@ export class QAService {
     return this.qaRepository.getQA(qaId, language);
   }
 
-  async getAllQA(language: SupportedLanguages, currentUserId?: UUIDType) {
+  async getAllQA(language: SupportedLanguages, currentUserId?: UUIDType, searchQuery?: string) {
     await this.checkAccess(currentUserId);
 
-    return this.qaRepository.getAllQA(language);
+    return this.qaRepository.getAllQA(language, searchQuery);
   }
 
   async createLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUser) {

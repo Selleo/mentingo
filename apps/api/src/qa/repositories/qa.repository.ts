@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, getTableColumns, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
@@ -60,7 +60,22 @@ export class QARepository {
     return qa;
   }
 
-  async getAllQA(language?: SupportedLanguages) {
+  async getAllQA(language?: SupportedLanguages, searchQuery?: string) {
+    const conditions: ReturnType<typeof sql>[] = [];
+
+    // Full-text search setup
+    const isSearching = searchQuery && searchQuery.trim().length >= 3;
+    const searchTerm = isSearching ? searchQuery.trim() : null;
+    const qaTsVector = sql`(
+      setweight(jsonb_to_tsvector('english', ${questionsAndAnswers.title}, '["string"]'), 'A') ||
+      setweight(jsonb_to_tsvector('english', COALESCE(${questionsAndAnswers.description}, '{}'::jsonb), '["string"]'), 'B')
+    )`;
+
+    if (isSearching && searchTerm) {
+      const tsQuery = sql`websearch_to_tsquery('english', ${searchTerm})`;
+      conditions.push(sql`${qaTsVector} @@ ${tsQuery}`);
+    }
+
     return this.db
       .select({
         ...getTableColumns(questionsAndAnswers),
@@ -77,7 +92,13 @@ export class QARepository {
         baseLanguage: sql<SupportedLanguages>`${questionsAndAnswers.baseLanguage}`,
         availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
       })
-      .from(questionsAndAnswers);
+      .from(questionsAndAnswers)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(
+        isSearching && searchTerm
+          ? sql`ts_rank(${qaTsVector}, websearch_to_tsquery('english', ${searchTerm})) DESC`
+          : sql`${questionsAndAnswers.createdAt} DESC`,
+      );
   }
 
   async createLanguage(qaId: UUIDType, languages: string[], language: SupportedLanguages) {

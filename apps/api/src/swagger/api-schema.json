@@ -5777,6 +5777,14 @@
                 }
               ]
             }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6122,6 +6130,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -6687,6 +6703,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "searchQuery",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -14597,6 +14621,9 @@
                   "type": "string"
                 },
                 "chapterDisplayOrder": {
+                  "type": "number"
+                },
+                "searchRank": {
                   "type": "number"
                 }
               },

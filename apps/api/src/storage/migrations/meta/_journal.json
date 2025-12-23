@@ -512,6 +512,13 @@
       "when": 1766136948319,
       "tag": "0072_add_is_mandatory_and_due_date_columns_to_group_courses",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1766015221910,
+      "tag": "0073_add_fulltext_search_indexes",
+      "breakpoints": true
     }
   ]
 }
