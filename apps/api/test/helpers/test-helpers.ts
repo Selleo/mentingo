@@ -1,6 +1,11 @@
 import { sql } from "drizzle-orm";
 import request from "supertest";
 
+import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constants";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+
+import { settings } from "../../src/storage/schema";
+
 import type { DatabasePg } from "../../src/common";
 import type { INestApplication } from "@nestjs/common";
 import type { JwtService } from "@nestjs/jwt";
@@ -33,10 +38,26 @@ export function signInAs(userId: string, jwtService: JwtService): string {
 
 export async function truncateAllTables(connection: DatabasePg): Promise<void> {
   const tables = connection._.tableNamesMap;
+  const tableNames = Object.keys(tables)
+    .map((t) => `"${t}"`)
+    .join(", ");
 
-  for (const table of Object.keys(tables)) {
-    await connection.execute(sql.raw(`TRUNCATE TABLE "${table}" CASCADE;`));
-  }
+  // Disable FK constraints during truncate to prevent deadlocks with async operations
+  // session_replication_role = 'replica' disables all triggers including FK checks
+  await connection.execute(
+    sql.raw(`
+    SET session_replication_role = 'replica';
+    TRUNCATE TABLE ${tableNames} RESTART IDENTITY;
+    SET session_replication_role = 'origin';
+  `),
+  );
+
+  // Recreate global settings required for authentication
+  await connection.insert(settings).values({
+    userId: null,
+    createdAt: new Date().toISOString(),
+    settings: settingsToJSONBuildObject(DEFAULT_GLOBAL_SETTINGS),
+  });
 }
 
 export async function truncateTables(

@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -28,7 +30,10 @@ export function useUpdateTextLesson() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: ["course"] });
+
       toast({
         description: t("adminCourseView.curriculum.lesson.toast.textLessonUpdatedSuccessfully"),
       });

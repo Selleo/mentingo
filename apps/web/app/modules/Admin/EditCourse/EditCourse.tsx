@@ -2,7 +2,10 @@ import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react"
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
 import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
+import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
+import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -44,12 +47,15 @@ const EditCourse = () => {
   const { id } = useParams();
 
   const { data: isStripeConfigured } = useStripeConfigured();
+  const { data: isAIConfigured } = useAIConfigured();
 
   const { language } = useLanguageStore();
 
   const [courseLanguage, setCourseLanguage] = useState<SupportedLanguages>(language);
 
   const [openGenerateTranslationModal, setOpenGenerateTranslationModal] = useState(false);
+  const { mutateAsync: generateTranslations, isPending: isGenerationPending } =
+    useGenerateMissingTranslations();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const params = new URLSearchParams(searchParams);
@@ -66,6 +72,8 @@ const EditCourse = () => {
     error,
   } = useBetaCourseById(id, courseLanguage);
 
+  const { data: hasMissingTranslations } = useMissingTranslations(id, courseLanguage);
+
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
 
   useEffect(() => {
@@ -77,6 +85,12 @@ const EditCourse = () => {
   const handleTabChange = (tabValue: string) => {
     params.set("tab", tabValue);
     setSearchParams(params);
+  };
+
+  const handleGenerate = async () => {
+    await generateTranslations({ courseId: id, language: courseLanguage }).then(() =>
+      setOpenGenerateTranslationModal(false),
+    );
   };
 
   const canRefetchChapterList =
@@ -156,30 +170,51 @@ const EditCourse = () => {
                       availableLocales: course.availableLocales,
                     }
                   }
+                  isAIConfigured={isAIConfigured?.enabled ?? false}
                   onChange={setCourseLanguage}
                   setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
                 />
 
-                {/*Backend functionality will come in a second PR */}
-                <Dialog
-                  open={openGenerateTranslationModal}
-                  onOpenChange={setOpenGenerateTranslationModal}
-                >
-                  <DialogContent>
-                    <DialogTitle>
-                      {t("adminCourseView.common.generateMissingTranslations")}
-                    </DialogTitle>
-                    <DialogDescription>
-                      {t("adminCourseView.common.generateMissingTranslationsDescription")}
-                    </DialogDescription>
-                    <DialogFooter>
-                      <DialogTrigger asChild>
-                        <Button variant="outline">{t("contentCreatorView.button.cancel")}</Button>
-                      </DialogTrigger>
-                      <Button>{t("contentCreatorView.button.confirm")}</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                {hasMissingTranslations.data.hasMissingTranslations && isAIConfigured?.enabled && (
+                  <Dialog
+                    open={openGenerateTranslationModal}
+                    onOpenChange={setOpenGenerateTranslationModal}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Icon name="AiMentor" className="size-4" />
+                        {t("adminCourseView.common.generateMissingTranslations")}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogTitle>
+                        {t("adminCourseView.common.generateMissingTranslations")}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {t("adminCourseView.common.generateMissingTranslationsDescription")}
+                      </DialogDescription>
+                      <DialogFooter>
+                        <DialogTrigger asChild>
+                          <Button variant="outline">{t("contentCreatorView.button.cancel")}</Button>
+                        </DialogTrigger>
+                        <Button
+                          type="button"
+                          onClick={handleGenerate}
+                          disabled={isGenerationPending}
+                        >
+                          {isGenerationPending ? (
+                            <span className="flex items-center gap-2">
+                              <span className="size-4 border-2 border-t-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></span>
+                              {t("contentCreatorView.button.confirm")}
+                            </span>
+                          ) : (
+                            t("contentCreatorView.button.confirm")
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
 
               <Separator orientation="vertical" className="h-10" decorative />

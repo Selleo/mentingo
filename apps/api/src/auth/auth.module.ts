@@ -6,7 +6,7 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { EmailModule } from "src/common/emails/emails.module";
 import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
-import { FileService } from "src/file/file.service";
+import { FileModule } from "src/file/files.module";
 import { GroupModule } from "src/group/group.module";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -25,7 +25,7 @@ import { MicrosoftStrategy } from "./strategy/microsoft.strategy";
 import { TokenService } from "./token.service";
 
 @Module({
-  imports: [PassportModule, EmailModule, StatisticsModule, UserModule, GroupModule],
+  imports: [PassportModule, EmailModule, StatisticsModule, UserModule, FileModule, GroupModule],
   controllers: [AuthController],
   providers: [
     AuthService,
@@ -36,7 +36,6 @@ import { TokenService } from "./token.service";
     CreatePasswordService,
     ResetPasswordService,
     ResendVerificationMailCron,
-    FileService,
     S3Service,
     BunnyStreamService,
     GoogleStrategy,

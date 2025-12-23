@@ -52,6 +52,7 @@ type LanguageSelectorProps = {
   };
   onChange: (language: SupportedLanguages) => void;
   setOpenGenerateTranslationModal: (open: boolean) => void;
+  isAIConfigured: boolean;
 };
 
 export const CourseLanguageSelector = ({
@@ -59,6 +60,7 @@ export const CourseLanguageSelector = ({
   course,
   onChange,
   setOpenGenerateTranslationModal,
+  isAIConfigured,
 }: LanguageSelectorProps) => {
   const { t } = useTranslation();
 
@@ -184,6 +186,7 @@ export const CourseLanguageSelector = ({
           }}
           setOpenGenerateMissingTranslations={setOpenGenerateTranslationModal}
           courseId={course.id}
+          isAIConfigured={isAIConfigured}
         />
       )}
 

@@ -327,6 +327,31 @@ export class CourseController {
     );
   }
 
+  @Get("beta-course-missing-translations")
+  @Roles(USER_ROLES.CONTENT_CREATOR, USER_ROLES.ADMIN)
+  @Validate({
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: supportedLanguagesSchema },
+    ],
+    response: baseResponse(Type.Object({ hasMissingTranslations: Type.Boolean() })),
+  })
+  async hasMissingTranslations(
+    @Query("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId: UUIDType,
+    @CurrentUser("role") currentUserRole: UserRole,
+  ): Promise<BaseResponse<{ hasMissingTranslations: boolean }>> {
+    const hasMissingTranslations = await this.courseService.hasMissingTranslations(
+      id,
+      language,
+      currentUserId,
+      currentUserRole,
+    );
+
+    return new BaseResponse({ hasMissingTranslations });
+  }
+
   @Post()
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
@@ -777,5 +802,25 @@ export class CourseController {
     @CurrentUser("userId") userId: UUIDType,
   ) {
     return this.courseService.deleteLanguage(courseId, language, role, userId);
+  }
+
+  @Post("generate-translations/:courseId")
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
+  @Validate({
+    request: [
+      {
+        type: "query",
+        name: "language",
+        schema: supportedLanguagesSchema,
+      },
+      { type: "param", name: "courseId", schema: UUIDSchema },
+    ],
+  })
+  async generateTranslations(
+    @Query("language") language: SupportedLanguages,
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.courseService.generateMissingTranslations(courseId, language, currentUser);
   }
 }

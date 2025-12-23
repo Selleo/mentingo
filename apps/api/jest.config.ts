@@ -15,6 +15,9 @@ const config: Config = {
     "^src/(.*)$": "<rootDir>/src/$1",
   },
   modulePaths: ["."],
+  testTimeout: 30000,
+  maxWorkers: 1,
+  forceExit: true,
 };
 
 export default config;

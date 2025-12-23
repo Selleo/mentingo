@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
-import { getSocket } from "~/api/socket";
+import { acquireSocket, releaseSocket } from "~/api/socket";
 
 import type { Socket } from "socket.io-client";
 
@@ -54,7 +54,7 @@ export function useLearningTimeTracker({
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
 
-    const socket = getSocket();
+    const socket = acquireSocket();
     socketRef.current = socket;
 
     const startTracking = () => {
@@ -145,6 +145,7 @@ export function useLearningTimeTracker({
       window.removeEventListener("beforeunload", handleBeforeUnload);
 
       socketRef.current = null;
+      releaseSocket();
     };
   }, [enabled, lessonId, courseId, sendHeartbeat, resetIdleTimer]);
 

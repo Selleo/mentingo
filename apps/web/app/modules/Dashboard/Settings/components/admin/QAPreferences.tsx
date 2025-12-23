@@ -14,7 +14,6 @@ interface QAPreferencesProps {
 export default function QAPreferences({ globalSettings }: QAPreferencesProps) {
   const { t } = useTranslation();
   const { mutate: updateQAPreference } = useChangeQASetting();
-  t("qaPreferences.tooltip.disabled");
 
   return (
     <Card id="qa-preferences">

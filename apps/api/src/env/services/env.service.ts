@@ -132,7 +132,7 @@ export class EnvService {
   }
 
   async getStripeConfigured() {
-    const [stripeWebhookSecret, stripeSecretKey] = await Promise.all([
+    const [stripeSecretKey, stripeWebhookSecret] = await Promise.all([
       this.getEnv("STRIPE_SECRET_KEY")
         .then((r) => r.value)
         .catch(() => this.configService.get("stripe.secretKey")),
@@ -143,6 +143,16 @@ export class EnvService {
     ]);
 
     const enabled = !!(stripeWebhookSecret && stripeSecretKey);
+
+    return { enabled };
+  }
+
+  async getAIConfigured() {
+    const aiKey = await this.getEnv("OPENAI_API_KEY")
+      .then((r) => r.value)
+      .catch(() => process.env.OPENAI_API_KEY);
+
+    const enabled = !!aiKey;
 
     return { enabled };
   }

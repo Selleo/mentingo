@@ -31,5 +31,5 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  jest.restoreAllMocks;
+  jest.restoreAllMocks();
 });

@@ -17,7 +17,6 @@ import { USER_ROLES } from "src/user/schemas/userRoles";
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
-import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateAllTables } from "../../../test/helpers/test-helpers";
 import {
@@ -53,14 +52,13 @@ describe("Activity Logs E2E", () => {
 
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
-  let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let userFactory: ReturnType<typeof createUserFactory>;
 
   let globalSettingsId: UUIDType;
   let currentAdminUser: CurrentUser;
 
   beforeAll(async () => {
-    const { app: testAppInstance } = await createE2ETest();
+    const { app: testAppInstance } = await createE2ETest({ enableActivityLogs: true });
     app = testAppInstance;
 
     db = app.get("DB");
@@ -77,7 +75,6 @@ describe("Activity Logs E2E", () => {
 
     courseFactory = createCourseFactory(db);
     categoryFactory = createCategoryFactory(db);
-    settingsFactory = createSettingsFactory(db);
     userFactory = createUserFactory(db);
   }, 60000);
 
@@ -89,8 +86,10 @@ describe("Activity Logs E2E", () => {
   beforeEach(async () => {
     await truncateAllTables(db);
 
-    const globalSettings = await settingsFactory.create();
-    globalSettingsId = globalSettings.id;
+    const globalSettings = await db.query.settings.findFirst({
+      where: (s, { isNull }) => isNull(s.userId),
+    });
+    globalSettingsId = globalSettings!.id;
 
     const adminUser = await userFactory.withAdminRole().create();
     currentAdminUser = { userId: adminUser.id, role: USER_ROLES.ADMIN, email: adminUser.email };

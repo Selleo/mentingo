@@ -68,6 +68,7 @@ export { default as Article } from "./article.svg?react";
 export { default as News } from "./news.svg?react";
 export { default as Calendar } from "./calendar.svg?react";
 export { default as Group } from "./group.svg?react";
+export { default as Library } from "./library.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 

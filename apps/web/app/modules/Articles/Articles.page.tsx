@@ -1,9 +1,11 @@
 import { useNavigate } from "@remix-run/react";
+import { ACCESS_GUARD } from "@repo/shared";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useArticlesToc } from "~/api/queries";
 import { PageWrapper } from "~/components/PageWrapper";
+import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 function ArticlesPage() {
@@ -21,17 +23,19 @@ function ArticlesPage() {
   }, [sections, navigate]);
 
   return (
-    <PageWrapper
-      breadcrumbs={[
-        {
-          title: t("navigationSideBar.articles"),
-          href: "/articles",
-        },
-      ]}
-      className="flex flex-col"
-    >
-      <p></p>
-    </PageWrapper>
+    <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_ARTICLES_ACCESS}>
+      <PageWrapper
+        breadcrumbs={[
+          {
+            title: t("navigationSideBar.articles"),
+            href: "/articles",
+          },
+        ]}
+        className="flex flex-col"
+      >
+        <p></p>
+      </PageWrapper>
+    </ContentAccessGuard>
   );
 }
 

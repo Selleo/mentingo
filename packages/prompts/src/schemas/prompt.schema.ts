@@ -28,6 +28,10 @@ export const securityAndRagBlockSchema = Type.Object({
   language: Type.String(),
 });
 
+export const translationPromptSchema = Type.Object({
+  language: Type.String(),
+});
+
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
   mentorPrompt: aiPromptSchema,
@@ -36,4 +40,5 @@ export const PROMPT_MAP = {
   summaryPrompt: summaryPromptSchema,
   welcomePrompt: welcomePromptSchema,
   securityAndRagBlock: securityAndRagBlockSchema,
+  translationPrompt: translationPromptSchema,
 };

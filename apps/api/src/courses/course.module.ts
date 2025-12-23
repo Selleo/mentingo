@@ -1,6 +1,7 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
+import { AiModule } from "src/ai/ai.module";
 import { CertificatesModule } from "src/certificates/certificates.module";
 import { ChapterModule } from "src/chapter/chapter.module";
 import { EmailModule } from "src/common/emails/emails.module";
@@ -31,6 +32,7 @@ import { CourseService } from "./course.service";
     CertificatesModule,
     EmailModule,
     CqrsModule,
+    AiModule,
     forwardRef(() => StripeModule),
     forwardRef(() => UserModule),
   ],

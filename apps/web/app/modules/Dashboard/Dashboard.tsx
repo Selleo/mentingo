@@ -98,16 +98,35 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
     );
   }
 
-  const QAAccessible = globalSettings?.QAEnabled && globalSettings?.unregisteredUserQAAccessibility;
-  const coursesAccessible = globalSettings?.unregisteredUserCoursesAccessibility;
+  const enabledForPublic = (featureEnabled?: boolean, publicAccessible?: boolean) =>
+    Boolean(featureEnabled && publicAccessible);
+
+  const QAAccessible = enabledForPublic(
+    globalSettings?.QAEnabled,
+    globalSettings?.unregisteredUserQAAccessibility,
+  );
+
+  const newsAccessibleForPublic = enabledForPublic(
+    globalSettings?.newsEnabled,
+    globalSettings?.unregisteredUserNewsAccessibility,
+  );
+
+  const articlesAccessibleForPublic = enabledForPublic(
+    globalSettings?.articlesEnabled,
+    globalSettings?.unregisteredUserArticlesAccessibility,
+  );
+
+  const coursesAccessible = Boolean(globalSettings?.unregisteredUserCoursesAccessibility);
   const isArticlesRoute = pathname.startsWith("/articles");
 
   if (!isAuthenticated) {
     const publicNavigationLinks = [
       ...(QAAccessible ? [{ to: "/qa", label: t("navigationSideBar.qa") }] : []),
       ...(coursesAccessible ? [{ to: "/courses", label: t("navigationSideBar.courses") }] : []),
-      { to: "/articles", label: t("navigationSideBar.articles") },
-      { to: "/news", label: t("navigationSideBar.news") },
+      ...(articlesAccessibleForPublic
+        ? [{ to: "/articles", label: t("navigationSideBar.articles") }]
+        : []),
+      ...(newsAccessibleForPublic ? [{ to: "/news", label: t("navigationSideBar.news") }] : []),
     ];
 
     if (isArticlesRoute) {

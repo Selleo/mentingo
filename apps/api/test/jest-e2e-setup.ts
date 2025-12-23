@@ -2,8 +2,6 @@ import { applyFormats } from "nestjs-typebox";
 
 import { setupValidation } from "../src/utils/setup-validation";
 
-import { closeTestDatabase } from "./test-database";
-
 const originalLog = console.log;
 
 // Custom log filter function - filter only PostgreSQL NOTICE logs
@@ -29,6 +27,5 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await closeTestDatabase();
   jest.restoreAllMocks();
 });

@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
+import { ACCESS_GUARD } from "@repo/shared";
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { useUserRole } from "~/hooks/useUserRole";
 
 import Loader from "../common/Loader/Loader";
@@ -179,44 +181,44 @@ function NewsPage() {
 
   const isLoadingNewsList = isDraftTab ? isLoadingDraftNewsList : isLoadingPublishedNewsList;
 
-  if (isLoadingNewsList) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader />
-      </div>
-    );
-  }
-
   return (
-    <PageWrapper
-      breadcrumbs={[
-        {
-          title: t("adminUsersView.breadcrumbs.dashboard"),
-          href: "/",
-        },
-        {
-          title: t("adminUsersView.breadcrumbs.news"),
-          href: "/news",
-        },
-      ]}
-      className="flex flex-col"
-    >
-      {renderNewsContent()}
+    <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_NEWS_ACCESS}>
+      {isLoadingNewsList ? (
+        <div className="flex items-center justify-center h-full">
+          <Loader />
+        </div>
+      ) : (
+        <PageWrapper
+          breadcrumbs={[
+            {
+              title: t("adminUsersView.breadcrumbs.dashboard"),
+              href: "/",
+            },
+            {
+              title: t("adminUsersView.breadcrumbs.news"),
+              href: "/news",
+            },
+          ]}
+          className="flex flex-col"
+        >
+          {renderNewsContent()}
 
-      {totalItems > 0 ? (
-        <Pagination
-          className="border-t"
-          totalItems={totalItems}
-          overrideTotalPages={totalPages}
-          startItemOverride={startItem}
-          endItemOverride={endItem}
-          itemsPerPage={itemsPerPage as 7}
-          currentPage={currentPage}
-          canChangeItemsPerPage={false}
-          onPageChange={changePage}
-        />
-      ) : null}
-    </PageWrapper>
+          {totalItems > 0 ? (
+            <Pagination
+              className="border-t"
+              totalItems={totalItems}
+              overrideTotalPages={totalPages}
+              startItemOverride={startItem}
+              endItemOverride={endItem}
+              itemsPerPage={itemsPerPage as 7}
+              currentPage={currentPage}
+              canChangeItemsPerPage={false}
+              onPageChange={changePage}
+            />
+          ) : null}
+        </PageWrapper>
+      )}
+    </ContentAccessGuard>
   );
 }
 

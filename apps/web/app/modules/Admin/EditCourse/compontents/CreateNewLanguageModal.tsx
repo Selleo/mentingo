@@ -19,6 +19,7 @@ interface CreateLanguageDialogProps {
   onConfirm: (language: SupportedLanguages) => void;
   setOpenGenerateMissingTranslations: (open: boolean) => void;
   courseId: string;
+  isAIConfigured: boolean;
 }
 
 export const CreateLanguageDialog = ({
@@ -28,6 +29,7 @@ export const CreateLanguageDialog = ({
   onConfirm,
   setOpenGenerateMissingTranslations,
   courseId,
+  isAIConfigured,
 }: CreateLanguageDialogProps) => {
   const { t } = useTranslation();
 
@@ -37,8 +39,7 @@ export const CreateLanguageDialog = ({
     setOpen(false);
 
     await createLanguage({ courseId, language: languageToCreate }).then(() => {
-      // will be changed to true in next PR
-      setOpenGenerateMissingTranslations(false);
+      setOpenGenerateMissingTranslations(isAIConfigured);
       onConfirm(languageToCreate);
     });
   };

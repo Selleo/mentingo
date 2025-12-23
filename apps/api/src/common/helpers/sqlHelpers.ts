@@ -34,7 +34,7 @@ export function deleteJsonbField(field: AnyPgColumn, key: string) {
   return sql`${field} - ${key}::text`;
 }
 
-export function buildJsonbFieldWithMultipleEntries(entries: Record<string, string>) {
+export function buildJsonbFieldWithMultipleEntries(entries: Partial<Record<string, string>>) {
   const keys = Object.keys(entries);
 
   if (!keys.length) return undefined;

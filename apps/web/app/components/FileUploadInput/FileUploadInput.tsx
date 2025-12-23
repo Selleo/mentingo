@@ -18,6 +18,7 @@ type FileUploadInputProps = {
   contentTypeToDisplay: string;
   url?: string;
   className?: string;
+  onVideoSelected?: () => void;
 };
 
 const ACCEPTED_TYPE_FORMATS: Record<string, Record<string, string[]>> = {
@@ -49,6 +50,7 @@ const FileUploadInput = ({
   contentTypeToDisplay,
   url,
   className,
+  onVideoSelected,
 }: FileUploadInputProps) => {
   const acceptedTypes = ACCEPTED_TYPE_FORMATS[contentTypeToDisplay] || {};
 
@@ -76,8 +78,10 @@ const FileUploadInput = ({
       if (contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM) {
         const videoURL = URL.createObjectURL(file);
         setVideoPreview(videoURL);
+
+        onVideoSelected?.();
       }
-      await handleFileUpload(file);
+      handleFileUpload(file);
     }
   };
 

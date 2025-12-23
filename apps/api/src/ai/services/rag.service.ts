@@ -53,7 +53,7 @@ export class RagService {
   }
 
   private async getEmbedding(content: string) {
-    const provider = await this.getOpenAI();
+    const provider = await this.getAISdkOpenAI();
     const { embedding } = await embed({
       model: provider.textEmbeddingModel(OPENAI_MODELS.EMBEDDING),
       value: content,
@@ -63,7 +63,7 @@ export class RagService {
     return embedding;
   }
 
-  async getOpenAI() {
+  async getAISdkOpenAI() {
     return createOpenAI({
       apiKey: await this.envService
         .getEnv("OPENAI_API_KEY")

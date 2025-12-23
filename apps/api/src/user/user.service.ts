@@ -334,7 +334,7 @@ export class UserService {
     }
 
     if (userAvatar) {
-      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", {
+      const { fileKey } = await this.fileService.uploadFile(userAvatar, "user-avatars", undefined, {
         allowedTypes: AVATAR_ALLOWED_TYPES,
         maxSize: AVATAR_MAX_SIZE,
         maxResolution: AVATAR_MAX_RESOLUTION,

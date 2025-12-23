@@ -68,11 +68,14 @@
     "subHeader": "or drag and drop",
     "replace": "Click to replace",
     "toast": {
-      "fileUploadedSuccessfully": "File uploaded successfully"
+      "fileUploadedSuccessfully": "File uploaded successfully",
+      "videoFailed": "Video upload failed",
+      "videoReady": "Video is ready to use",
+      "videoProcessingStarted": "Video upload started. We'll notify you once it's processed."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG or SVG",
-      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 100MB)",
+      "video": "MP4, MOV, MPEG-2 or Hevc (max. to 5GB)",
       "presentation": "PPT/PPTX (max. to 100MB)"
     },
     "remove": {
@@ -145,10 +148,11 @@
     "dashboard": "Dashboard",
     "findInApplication": "Find in application",
     "courses": "Courses",
+    "content": "Content",
     "categories": "Categories",
     "users": "Users",
     "groups": "Groups",
-    "articles": "Articles",
+    "articles": "Knowledge base",
     "news": "News",
     "providerInformation": "Information",
     "announcements": "Announcements",
@@ -1023,7 +1027,10 @@
       "updateCourseMissingLanguage": "No language provided for translation",
       "successfullyDeletedLanguage": "Language deleted from the course successfully",
       "invalidLanguageToDelete": "You cannot delete this language.",
-      "cannotModifyQuestionsInNonBaseLanguage": "You cannot modify questions in a language other than the default."
+      "cannotModifyQuestionsInNonBaseLanguage": "You cannot modify questions in a language other than the default.",
+      "noMissingTranslations": "No missing translations",
+      "mismatchContentLength": "The number of translations does not match the number of generated translations",
+      "translationsGeneratedSuccessfully": "Translations generated successfully"
     },
     "settings": {
       "breadcrumbs": {
@@ -1777,6 +1784,8 @@
         "globalNotFound": "Global settings not found"
       },
       "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
+      "newsSettingUpdatedSuccessfully": "News settings updated successfully",
+      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully",
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully"
     }
   },
@@ -2156,6 +2165,46 @@
       "disabled": "To toggle this field, please enable the Q&A section first."
     }
   },
+  "newsPreferences": {
+    "subHeader": "Configure news settings",
+    "header": "News Settings",
+    "settings": {
+      "newsEnabled": {
+        "label": "Enable news section",
+        "description": "Enable the news section. When disabled, the news section is hidden for all users."
+      },
+      "newsPublic": {
+        "label": "Show news section to unregistered users",
+        "description": "Allow unregistered users to view the news section (can only be toggled, when news section is enabled)"
+      }
+    },
+    "toast": {
+      "newsNotEnabled": "The news section is not enabled"
+    },
+    "tooltip": {
+      "disabled": "To toggle this field, please enable the news section first."
+    }
+  },
+  "articlesPreferences": {
+    "subHeader": "Configure knowledge base settings",
+    "header": "Knowledge Base Settings",
+    "settings": {
+      "articlesEnabled": {
+        "label": "Enable knowledge base section",
+        "description": "Enable the knowledge base section. When disabled, the knowledge base section is hidden for all users."
+      },
+      "articlesPublic": {
+        "label": "Show knowledge base section to unregistered users",
+        "description": "Allow unregistered users to view the knowledge base section (can only be toggled, when the knowledge base section is enabled)"
+      }
+    },
+    "toast": {
+      "articlesNotEnabled": "The knowledge base section is not enabled"
+    },
+    "tooltip": {
+      "disabled": "To toggle this field, please enable the knowledge base section first."
+    }
+  },
   "qaView": {
     "button": {
       "createNew": "Create new Q&A"
@@ -2201,12 +2250,12 @@
         "add": "Add",
         "newLabel": "New",
         "newSection": "New section",
-        "newArticle": "New article"
+        "newArticle": "New knowledge base entry"
       }
     },
     "dialog": {
       "createArticle": {
-        "title": "Create article",
+        "title": "Create knowledge base entry",
         "sectionLabel": "Section",
         "sectionPlaceholder": "Select a section",
         "create": "Create"
@@ -2220,11 +2269,11 @@
       "minimumLanguageError": "At least one language is required",
       "cannotRemoveBaseLanguage": "Base language cannot be removed",
       "removeLanguageError": "Failed to remove language",
-      "sectionHasAssignedArticles": "Cannot delete a section with assigned articles",
+      "sectionHasAssignedArticles": "Cannot delete a section with assigned knowledge base entries",
       "deleteSectionError": "Failed to delete section",
-      "createError": "Failed to create article",
-      "deleteError": "Failed to delete article",
-      "notFoundError": "Article not found",
+      "createError": "Failed to create knowledge base entry",
+      "deleteError": "Failed to delete knowledge base entry",
+      "notFoundError": "Knowledge base entry not found",
       "invalidCoverType": "Invalid cover type",
       "invalidLanguageError": "Invalid language"
     },
@@ -2232,7 +2281,7 @@
       "editTitle": "Edit section",
       "editDescription": "Update the section title and manage translations.",
       "sectionId": "Section ID: {{id}}",
-      "cannotDeleteWithArticles": "You cannot delete a section that has assigned articles.",
+      "cannotDeleteWithArticles": "You cannot delete a section that has assigned knowledge base entries.",
       "languageLabel": "Language",
       "languageHelp": "Switch language to edit the title. If it isn't created yet, you'll be prompted to create it.",
       "fields": {
@@ -2254,8 +2303,8 @@
       }
     },
     "form": {
-      "createTitle": "Create article",
-      "editTitle": "Edit article",
+      "createTitle": "Create knowledge base entry",
+      "editTitle": "Edit knowledge base entry",
       "createButton": "Create and edit",
       "saveButton": "Save",
       "fields": {
@@ -2280,12 +2329,12 @@
     }
   },
   "articlesView": {
-    "notFound": "Article not found",
-    "previousArticle": "Previous article",
-    "nextArticle": "Next article",
+    "notFound": "Knowledge base entry not found",
+    "previousArticle": "Previous knowledge base entry",
+    "nextArticle": "Next knowledge base entry",
     "deleteModal": {
-      "title": "Delete article",
-      "description": "Are you sure you want to delete this article? This action cannot be undone."
+      "title": "Delete knowledge base entry",
+      "description": "Are you sure you want to delete this knowledge base entry? This action cannot be undone."
     }
   }
 }

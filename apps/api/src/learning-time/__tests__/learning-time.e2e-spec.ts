@@ -1,42 +1,39 @@
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { QueueService } from "src/queue";
 
-import { createUnitTest } from "../../../test/create-unit-test";
+import { createE2ETest } from "../../../test/create-e2e-test";
 import { createLearningTimeTestSetup } from "../../../test/factory/learning-time.factory";
-import { truncateTables } from "../../../test/helpers/test-helpers";
 
-import type { TestContext } from "../../../test/create-unit-test";
+import type { INestApplication } from "@nestjs/common";
+import type { TestingModule } from "@nestjs/testing";
 import type { DatabasePg } from "src/common";
 import type { LearningTimeJobData } from "src/queue/queue.types";
 
-describe("LearningTimeWorker (integration with real Redis)", () => {
-  let testContext: TestContext;
+describe("LearningTime", () => {
+  let app: INestApplication;
+  let moduleFixture: TestingModule;
   let db: DatabasePg;
+  let cleanup: () => Promise<void>;
   let repository: LearningTimeRepository;
   let queueService: QueueService;
 
   beforeAll(async () => {
-    testContext = await createUnitTest();
-    await testContext.module.init();
-
-    repository = testContext.module.get(LearningTimeRepository);
-    queueService = testContext.module.get(QueueService);
+    const testContext = await createE2ETest();
+    app = testContext.app;
+    moduleFixture = testContext.moduleFixture;
     db = testContext.db;
-  }, 60000); // Extended timeout for Redis + Postgres containers
+    cleanup = testContext.cleanup;
+
+    repository = moduleFixture.get(LearningTimeRepository);
+    queueService = moduleFixture.get(QueueService);
+  }, 60000);
 
   afterAll(async () => {
-    await truncateTables(db, [
-      "lesson_learning_time",
-      "lessons",
-      "chapters",
-      "courses",
-      "categories",
-      "users",
-    ]);
-    await testContext.teardown();
+    await app.close();
+    await cleanup();
   });
 
-  describe("job processing via real BullMQ queue", () => {
+  describe("job processing via BullMQ queue", () => {
     it("should process learning time job and update database", async () => {
       const { userId, lessonId, courseId } = await createLearningTimeTestSetup(db);
 
@@ -81,7 +78,7 @@ describe("LearningTimeWorker (integration with real Redis)", () => {
       await queueService.waitForJobsCompletion("learning-time", jobs);
 
       const result = await repository.getLearningTimeForUser(userId, lessonId);
-      expect(result).toBe(70); // 30 + 40 seconds from both jobs
+      expect(result).toBe(70);
     });
 
     it("should handle jobs for different users in parallel", async () => {

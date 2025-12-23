@@ -5,22 +5,24 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
 
-import type { BetaCreateLessonBody } from "../../generated-api";
+import type { BetaCreateLessonBody, BetaCreateLessonResponse } from "../../generated-api";
 import type { AxiosError } from "axios";
 
 type CreateFileOptions = {
   data: BetaCreateLessonBody;
 };
 
+type CreateLessonResult = BetaCreateLessonResponse["data"];
+
 export function useBetaCreateFileItem() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (options: CreateFileOptions) => {
+    mutationFn: async (options: CreateFileOptions): Promise<CreateLessonResult> => {
       const response = await ApiClient.api.lessonControllerBetaCreateLesson(options.data);
 
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       toast({

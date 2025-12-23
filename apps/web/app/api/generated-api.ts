@@ -182,6 +182,10 @@ export interface GetPublicGlobalSettingsResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
   };
 }
@@ -285,6 +289,10 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
   };
 }
@@ -321,6 +329,10 @@ export interface UpdateEnforceSSOResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
   };
 }
@@ -388,6 +400,10 @@ export interface UpdateColorSchemaResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
     ageLimit: 13 | 16 | null;
   };
 }
@@ -476,7 +492,27 @@ export interface UpdateAgeLimitBody {
 
 export interface FileUploadResponse {
   fileKey: string;
-  fileUrl: string;
+  fileUrl?: string;
+  status?: string;
+  uploadId?: string;
+}
+
+export interface HandleBunnyWebhookBody {
+  status?: number | string;
+  Status?: number | string;
+  videoId?: string;
+  VideoId?: string;
+  videoGuid?: string;
+  VideoGuid?: string;
+  guid?: string;
+  Guid?: string;
+}
+
+export interface AssociateUploadWithLessonBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  uploadId: string;
 }
 
 export interface GetUserStatisticsResponse {
@@ -1246,6 +1282,12 @@ export interface GetBetaCourseByIdResponse {
     title: string;
     availableLocales: ("en" | "pl")[];
     baseLanguage: "en" | "pl";
+  };
+}
+
+export interface HasMissingTranslationsResponse {
+  data: {
+    hasMissingTranslations: boolean;
   };
 }
 
@@ -2786,13 +2828,6 @@ export interface MarkAnnouncementAsReadResponse {
   };
 }
 
-export interface GetEnvKeyResponse {
-  data: {
-    name: string;
-    value: string;
-  };
-}
-
 export type BulkUpsertEnvBody = {
   name: string;
   value: string;
@@ -2818,6 +2853,12 @@ export interface GetStripeConfiguredResponse {
   };
 }
 
+export interface GetAIConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
 export interface GetIsConfigSetupResponse {
   data: {
     fullyConfigured: string[];
@@ -2831,6 +2872,13 @@ export interface GetIsConfigSetupResponse {
     }[];
     hasIssues: boolean;
     isWarningDismissed: boolean;
+  };
+}
+
+export interface GetEnvKeyResponse {
+  data: {
+    name: string;
+    value: string;
   };
 }
 
@@ -4215,6 +4263,38 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerUpdateNewsSetting
+     * @request PATCH:/api/settings/admin/news/{setting}
+     */
+    settingsControllerUpdateNewsSetting: (
+      setting: "newsEnabled" | "unregisteredUserNewsAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/news/${setting}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateArticlesSetting
+     * @request PATCH:/api/settings/admin/articles/{setting}
+     */
+    settingsControllerUpdateArticlesSetting: (
+      setting: "articlesEnabled" | "unregisteredUserArticlesAccessibility",
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/articles/${setting}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerUpdateAgeLimit
      * @request PATCH:/api/settings/admin/age-limit
      */
@@ -4239,6 +4319,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         file?: File;
         /** Optional resource type */
         resource?: string;
+        /** Optional lesson ID for existing lessons */
+        lessonId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -4268,6 +4350,39 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/file`,
         method: "DELETE",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerHandleBunnyWebhook
+     * @request POST:/api/file/bunny/webhook
+     */
+    fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/bunny/webhook`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerAssociateUploadWithLesson
+     * @request POST:/api/file/associate-upload
+     */
+    fileControllerAssociateUploadWithLesson: (
+      data: AssociateUploadWithLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file/associate-upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -5050,6 +5165,29 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name CourseControllerHasMissingTranslations
+     * @request GET:/api/course/beta-course-missing-translations
+     */
+    courseControllerHasMissingTranslations: (
+      query: {
+        /** @format uuid */
+        id: string;
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HasMissingTranslationsResponse, any>({
+        path: `/api/course/beta-course-missing-translations`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CourseControllerUpdateCourse
      * @request PATCH:/api/course/{id}
      */
@@ -5447,6 +5585,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/course/language/${courseId}`,
         method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGenerateTranslations
+     * @request POST:/api/course/generate-translations/{courseId}
+     */
+    courseControllerGenerateTranslations: (
+      courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/course/generate-translations/${courseId}`,
+        method: "POST",
         query: query,
         ...params,
       }),
@@ -6646,20 +6805,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EnvControllerGetEnvKey
-     * @request GET:/api/env/{envName}
-     */
-    envControllerGetEnvKey: (envName: string, params: RequestParams = {}) =>
-      this.request<GetEnvKeyResponse, any>({
-        path: `/api/env/${envName}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name EnvControllerBulkUpsertEnv
      * @request POST:/api/env/bulk
      */
@@ -6717,12 +6862,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name EnvControllerGetAiConfigured
+     * @request GET:/api/env/ai
+     */
+    envControllerGetAiConfigured: (params: RequestParams = {}) =>
+      this.request<GetAIConfiguredResponse, any>({
+        path: `/api/env/ai`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name EnvControllerGetIsConfigSetup
      * @request GET:/api/env/config/setup
      */
     envControllerGetIsConfigSetup: (params: RequestParams = {}) =>
       this.request<GetIsConfigSetupResponse, any>({
         path: `/api/env/config/setup`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetEnvKey
+     * @request GET:/api/env/{envName}
+     */
+    envControllerGetEnvKey: (envName: string, params: RequestParams = {}) =>
+      this.request<GetEnvKeyResponse, any>({
+        path: `/api/env/${envName}`,
         method: "GET",
         format: "json",
         ...params,

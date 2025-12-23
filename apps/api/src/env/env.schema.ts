@@ -40,6 +40,10 @@ export const stripePublishableKeyResponseSchema = Type.Object({
   publishableKey: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const aiConfiguredResponseSchema = Type.Object({
+  enabled: Type.Boolean(),
+});
+
 export const isEnvSetupResponseSchema = Type.Object({
   fullyConfigured: Type.Array(Type.String()),
   partiallyConfigured: Type.Array(

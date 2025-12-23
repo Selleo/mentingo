@@ -26,50 +26,53 @@ export class IngestionWorker implements OnModuleDestroy {
     this.worker = new Worker(
       QUEUE_NAMES.DOCUMENT_INGESTION,
       async (job: Job) => {
-        try {
-          const newFile = {
-            ...job.data.file,
-            buffer: Buffer.from(job.data.file.buffer.data),
-          };
-
-          const extractedPages = await this.chunkService.extractText(newFile);
-
-          const { loc: _loc, ...rest } = extractedPages[0].metadata;
-          await this.documentRepository.updateDocument(job.data.documentId, {
-            metadata: { ...rest },
-          });
-
-          const chunkedPages = await this.chunkService.chunkPages(extractedPages);
-
-          const embeddings = await this.embeddingService.embedPages(chunkedPages);
-
-          for (let i = 0; i < embeddings.length; i++) {
-            await this.documentRepository.insertDocumentChunk({
-              documentId: job.data.documentId,
-              chunkIndex: i,
-              metadata: chunkedPages[i].metadata?.loc,
-              content: chunkedPages[i].pageContent,
-              embedding: embeddings[i],
-            });
-          }
-
-          await this.documentService.updateDocumentStatus(
-            job.data.documentId,
-            DOCUMENT_STATUS.READY,
-          );
-
-          return { ok: true };
-        } catch (e) {
-          await this.documentService.updateDocumentStatus(
-            job.data.documentId,
-            DOCUMENT_STATUS.FAILED,
-            e,
-          );
-          return { ok: false };
+        if (job.name === "document-ingestion") {
+          await this.handleDocumentIngestion(job);
         }
       },
       { connection, concurrency: Number(process.env.WORKER_CONCURRENCY || 10) },
     );
+  }
+
+  async handleDocumentIngestion(job: Job) {
+    try {
+      const newFile = {
+        ...job.data.file,
+        buffer: Buffer.from(job.data.file.buffer.data),
+      };
+
+      const extractedPages = await this.chunkService.extractText(newFile);
+
+      const { loc: _loc, ...rest } = extractedPages[0].metadata;
+      await this.documentRepository.updateDocument(job.data.documentId, {
+        metadata: { ...rest },
+      });
+
+      const chunkedPages = await this.chunkService.chunkPages(extractedPages);
+
+      const embeddings = await this.embeddingService.embedPages(chunkedPages);
+
+      for (let i = 0; i < embeddings.length; i++) {
+        await this.documentRepository.insertDocumentChunk({
+          documentId: job.data.documentId,
+          chunkIndex: i,
+          metadata: chunkedPages[i].metadata?.loc,
+          content: chunkedPages[i].pageContent,
+          embedding: embeddings[i],
+        });
+      }
+
+      await this.documentService.updateDocumentStatus(job.data.documentId, DOCUMENT_STATUS.READY);
+
+      return { ok: true };
+    } catch (e) {
+      await this.documentService.updateDocumentStatus(
+        job.data.documentId,
+        DOCUMENT_STATUS.FAILED,
+        e,
+      );
+      return { ok: false };
+    }
   }
 
   async onModuleDestroy() {
