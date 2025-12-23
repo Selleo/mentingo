@@ -36,6 +36,7 @@ export const ACTIVITY_LOG_RESOURCE_TYPES = {
   QA: "qa",
   NEWS: "news",
   ARTICLE: "article",
+  ARTICLE_SECTION: "articleSection",
 } as const;
 
 export type ActivityLogResourceType =
@@ -227,6 +228,7 @@ export type ArticleActivityLogSnapshot = {
   title?: string | null;
   summary?: string | null;
   status?: string | null;
+  content?: string | null;
   isPublic?: boolean | null;
   publishedAt?: string | null;
   authorId?: UUIDType | null;
@@ -237,11 +239,6 @@ export type ArticleActivityLogSnapshot = {
 export type ArticleSectionActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
-  summary?: string | null;
-  status?: string | null;
-  isPublic?: boolean | null;
-  publishedAt?: string | null;
-  authorId?: UUIDType | null;
   baseLanguage?: string;
   availableLocales?: string[];
 };

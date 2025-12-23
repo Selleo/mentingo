@@ -76,8 +76,14 @@ export class ArticlesController {
     response: baseResponse(createArticleSectionResponseSchema),
   })
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
-  async createArticleSection(@Body() createArticleSectionBody: CreateArticleSection) {
-    const createdNews = await this.articlesService.createArticleSection(createArticleSectionBody);
+  async createArticleSection(
+    @Body() createArticleSectionBody: CreateArticleSection,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const createdNews = await this.articlesService.createArticleSection(
+      createArticleSectionBody,
+      currentUser,
+    );
 
     return new BaseResponse(createdNews);
   }
@@ -111,10 +117,12 @@ export class ArticlesController {
   async updateArticleSection(
     @Param("id") id: UUIDType,
     @Body() updateArticleSectionBody: UpdateArticleSection,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     const updatedSection = await this.articlesService.updateArticleSection(
       id,
       updateArticleSectionBody,
+      currentUser,
     );
 
     return new BaseResponse(updatedSection);
@@ -133,10 +141,12 @@ export class ArticlesController {
   async addNewLanguageToSection(
     @Param("id") id: UUIDType,
     @Body() createLanguageBody: CreateArticleSection,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     const createdLanguage = await this.articlesService.createArticleSectionLanguage(
       id,
       createLanguageBody,
+      currentUser,
     );
 
     return new BaseResponse(createdLanguage);
@@ -153,8 +163,9 @@ export class ArticlesController {
   async deleteArticleSectionLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    await this.articlesService.deleteArticleSectionLanguage(id, language);
+    await this.articlesService.deleteArticleSectionLanguage(id, language, currentUser);
   }
 
   @Delete("section/:id")
@@ -162,8 +173,11 @@ export class ArticlesController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
   @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
-  async deleteArticleSection(@Param("id") id: UUIDType) {
-    await this.articlesService.deleteArticleSection(id);
+  async deleteArticleSection(
+    @Param("id") id: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    await this.articlesService.deleteArticleSection(id, currentUser);
   }
 
   @Get("drafts")

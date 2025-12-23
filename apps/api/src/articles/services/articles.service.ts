@@ -1,10 +1,21 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { EventBus } from "@nestjs/cqrs";
 import { ARTICLE_STATUS, type SupportedLanguages } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
-import { isEmpty } from "lodash";
+import { eq, getTableColumns, sql } from "drizzle-orm";
+import { isEmpty, isEqual } from "lodash";
 import { match } from "ts-pattern";
 
+import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  CreateArticleEvent,
+  CreateArticleSectionEvent,
+  DeleteArticleEvent,
+  DeleteArticleSectionEvent,
+  UpdateArticleEvent,
+  UpdateArticleSectionEvent,
+} from "src/events";
 import {
   ENTITY_TYPES,
   RESOURCE_RELATIONSHIP_TYPES,
@@ -12,7 +23,7 @@ import {
 } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
-import { articles } from "src/storage/schema";
+import { articles, articleSections } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { baseArticleSectionTitle, baseArticleTitle } from "../constants";
@@ -28,6 +39,10 @@ import type {
 import type { ArticleResource, ArticleResources } from "../schemas/selectArticle.schema";
 import type { UpdateArticle, UpdateArticleSection } from "../schemas/updateArticle.schema";
 import type { InferSelectModel } from "drizzle-orm";
+import type {
+  ArticleActivityLogSnapshot,
+  ArticleSectionActivityLogSnapshot,
+} from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUser } from "src/common/types/current-user.type";
 
@@ -40,9 +55,14 @@ export class ArticlesService {
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
     private readonly articlesRepository: ArticlesRepository,
+    private readonly eventBus: EventBus,
+    @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
-  async createArticleSection(createArticleSectionBody: CreateArticleSection) {
+  async createArticleSection(
+    createArticleSectionBody: CreateArticleSection,
+    currentUser: CurrentUser,
+  ) {
     const { language } = createArticleSectionBody;
 
     const [section] = await this.articlesRepository.createArticleSection(
@@ -51,6 +71,20 @@ export class ArticlesService {
     );
 
     if (!section) throw new BadRequestException("adminArticleView.toast.createSectionError");
+
+    const createdSectionSnapshot = await this.buildArticleSectionActivitySnapshot(
+      section.id,
+      language,
+    );
+
+    this.eventBus.publish(
+      new CreateArticleSectionEvent({
+        articleSectionId: section.id,
+        actor: currentUser,
+        createdArticleSection: createdSectionSnapshot,
+        language,
+      }),
+    );
 
     return section;
   }
@@ -69,10 +103,16 @@ export class ArticlesService {
     return section;
   }
 
-  async updateArticleSection(sectionId: UUIDType, updateArticleSectionBody: UpdateArticleSection) {
+  async updateArticleSection(
+    sectionId: UUIDType,
+    updateArticleSectionBody: UpdateArticleSection,
+    currentUser: CurrentUser,
+  ) {
     const { language, title } = updateArticleSectionBody;
 
     await this.validateArticleSectionExists(sectionId, language);
+
+    const previousSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
 
     const [updatedSection] = await this.articlesRepository.updateArticleSectionTitle(
       sectionId,
@@ -82,13 +122,34 @@ export class ArticlesService {
 
     if (!updatedSection) throw new BadRequestException("adminArticleView.toast.updateError");
 
+    const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
+
+    if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
+      this.eventBus.publish(
+        new UpdateArticleSectionEvent({
+          articleSectionId: sectionId,
+          actor: currentUser,
+          previousArticleSectionData: previousSnapshot,
+          updatedArticleSectionData: updatedSnapshot,
+          language,
+          action: "update",
+        }),
+      );
+    }
+
     return updatedSection;
   }
 
-  async createArticleSectionLanguage(sectionId: UUIDType, body: CreateArticleSection) {
+  async createArticleSectionLanguage(
+    sectionId: UUIDType,
+    body: CreateArticleSection,
+    currentUser: CurrentUser,
+  ) {
     const { language } = body;
 
     const existingSection = await this.validateArticleSectionExists(sectionId, language, false);
+
+    const previousSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
 
     if (existingSection.availableLocales.includes(language))
       throw new BadRequestException("adminArticleView.toast.languageAlreadyExists");
@@ -103,11 +164,32 @@ export class ArticlesService {
     if (!createdLanguage)
       throw new BadRequestException("adminArticleView.toast.createLanguageError");
 
+    const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
+
+    if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
+      this.eventBus.publish(
+        new UpdateArticleSectionEvent({
+          articleSectionId: sectionId,
+          actor: currentUser,
+          previousArticleSectionData: previousSnapshot,
+          updatedArticleSectionData: updatedSnapshot,
+          language,
+          action: "add_language",
+        }),
+      );
+    }
+
     return createdLanguage;
   }
 
-  async deleteArticleSectionLanguage(sectionId: UUIDType, language: SupportedLanguages) {
+  async deleteArticleSectionLanguage(
+    sectionId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUser,
+  ) {
     const existingSection = await this.validateArticleSectionExists(sectionId, language);
+
+    const previousSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
 
     if (existingSection.availableLocales.length <= 1)
       throw new BadRequestException("adminArticleView.toast.minimumLanguageError");
@@ -126,11 +208,26 @@ export class ArticlesService {
     if (!updatedSection)
       throw new BadRequestException("adminArticleView.toast.removeLanguageError");
 
+    const updatedSnapshot = await this.buildArticleSectionActivitySnapshot(sectionId, language);
+
+    if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
+      this.eventBus.publish(
+        new UpdateArticleSectionEvent({
+          articleSectionId: sectionId,
+          actor: currentUser,
+          previousArticleSectionData: previousSnapshot,
+          updatedArticleSectionData: updatedSnapshot,
+          language,
+          action: "remove_language",
+        }),
+      );
+    }
+
     return updatedSection;
   }
 
-  async deleteArticleSection(sectionId: UUIDType) {
-    await this.validateArticleSectionExists(sectionId, undefined, false);
+  async deleteArticleSection(sectionId: UUIDType, currentUser: CurrentUser) {
+    const existingSection = await this.validateArticleSectionExists(sectionId, undefined, false);
 
     const assignedArticlesCount = await this.articlesRepository.countArticlesInSection(sectionId);
 
@@ -140,6 +237,16 @@ export class ArticlesService {
     const [deletedSection] = await this.articlesRepository.deleteSection(sectionId);
 
     if (!deletedSection) throw new BadRequestException("adminArticleView.toast.deleteSectionError");
+
+    this.eventBus.publish(
+      new DeleteArticleSectionEvent({
+        articleSectionId: sectionId,
+        actor: currentUser,
+        baseLanguage: existingSection.baseLanguage,
+        availableLocales: existingSection.availableLocales,
+        title: this.extractTitleByLanguage(existingSection.title, existingSection.baseLanguage),
+      }),
+    );
   }
 
   async createArticle(createArticleBody: CreateArticle, currentUser: CurrentUser) {
@@ -156,6 +263,20 @@ export class ArticlesService {
 
     if (!createdArticle) throw new BadRequestException("adminArticleView.toast.createError");
 
+    const createdArticleSnapshot = await this.buildArticleActivitySnapshot(
+      createdArticle.id,
+      language,
+    );
+
+    this.eventBus.publish(
+      new CreateArticleEvent({
+        articleId: createdArticle.id,
+        actor: currentUser,
+        createdArticle: createdArticleSnapshot,
+        language,
+      }),
+    );
+
     return createdArticle;
   }
 
@@ -169,9 +290,11 @@ export class ArticlesService {
 
     const { language, ...updateArticleData } = updateArticleBody;
 
-    const existingNews = await this.validateArticleExists(articleId, language);
+    const existingArticle = await this.validateArticleExists(articleId, language);
 
-    const finalUpdateData = this.buildUpdateData(existingNews, updateArticleData, language);
+    const previousSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+
+    const finalUpdateData = this.buildUpdateData(existingArticle, updateArticleData, language);
 
     if (coverFile) {
       await this.uploadCoverImageToArticle(
@@ -184,16 +307,31 @@ export class ArticlesService {
       );
     }
 
-    const [updatedNews] = await this.articlesRepository.updateArticle(
+    const [updatedArticle] = await this.articlesRepository.updateArticle(
       articleId,
       language,
       finalUpdateData,
       currentUser?.userId ?? null,
     );
 
-    if (!updatedNews) throw new BadRequestException("adminArticleView.toast.updateError");
+    if (!updatedArticle) throw new BadRequestException("adminArticleView.toast.updateError");
 
-    return updatedNews;
+    const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+
+    if (currentUser && !this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
+      this.eventBus.publish(
+        new UpdateArticleEvent({
+          articleId,
+          actor: currentUser,
+          previousArticleData: previousSnapshot,
+          updatedArticleData: updatedSnapshot,
+          language,
+          action: "update",
+        }),
+      );
+    }
+
+    return updatedArticle;
   }
 
   async getArticles(requestedLanguage: SupportedLanguages, currentUser?: CurrentUser) {
@@ -216,15 +354,17 @@ export class ArticlesService {
   ) {
     await this.validateAccess(articleId, currentUser);
 
-    const existingNews = await this.validateArticleExists(articleId, language);
+    const existingArticle = await this.validateArticleExists(articleId, language);
 
-    if (existingNews.availableLocales.length <= 1)
+    const previousSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+
+    if (existingArticle.availableLocales.length <= 1)
       throw new BadRequestException("adminArticleView.toast.minimumLanguageError");
 
-    if (existingNews.baseLanguage === language)
+    if (existingArticle.baseLanguage === language)
       throw new BadRequestException("adminArticleView.toast.cannotRemoveBaseLanguage");
 
-    const updatedLocales = existingNews.availableLocales.filter((locale) => locale !== language);
+    const updatedLocales = existingArticle.availableLocales.filter((locale) => locale !== language);
 
     const [updatedArticle] = await this.articlesRepository.deleteArticleLanguage(
       articleId,
@@ -235,15 +375,30 @@ export class ArticlesService {
     if (!updatedArticle)
       throw new BadRequestException("adminArticleView.toast.removeLanguageError");
 
+    const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+
+    if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
+      this.eventBus.publish(
+        new UpdateArticleEvent({
+          articleId,
+          actor: currentUser,
+          previousArticleData: previousSnapshot,
+          updatedArticleData: updatedSnapshot,
+          language,
+          action: "remove_language",
+        }),
+      );
+    }
+
     return updatedArticle;
   }
 
   async deleteArticle(articleId: UUIDType, currentUser?: CurrentUser) {
     await this.validateAccess(articleId, currentUser);
 
-    const existingNews = await this.validateArticleExists(articleId, undefined, false);
+    const existingArticle = await this.validateArticleExists(articleId, undefined, false);
 
-    if (existingNews.archived) return;
+    if (existingArticle.archived) return;
 
     const [deletedArticle] = await this.articlesRepository.archiveArticle(
       articleId,
@@ -251,6 +406,18 @@ export class ArticlesService {
     );
 
     if (!deletedArticle) throw new BadRequestException("adminArticleView.toast.deleteError");
+
+    if (currentUser) {
+      this.eventBus.publish(
+        new DeleteArticleEvent({
+          articleId,
+          actor: currentUser,
+          baseLanguage: existingArticle.baseLanguage,
+          availableLocales: existingArticle.availableLocales,
+          title: this.extractTitleByLanguage(existingArticle.title, existingArticle.baseLanguage),
+        }),
+      );
+    }
   }
 
   async getArticle(
@@ -334,7 +501,7 @@ export class ArticlesService {
       return { nextArticle: null, previousArticle: null };
     }
 
-    const adjacentNewsConditions = this.articlesRepository.getVisibleArticleConditions(
+    const adjacentArticleConditions = this.articlesRepository.getVisibleArticleConditions(
       language,
       currentUser,
       { isDraftMode, excludedId: currentArticleId },
@@ -344,7 +511,7 @@ export class ArticlesService {
 
     const { nextArticle, previousArticle } = await this.articlesRepository.getAdjacentArticleIds(
       referenceDate,
-      adjacentNewsConditions,
+      adjacentArticleConditions,
       sortColumn,
     );
 
@@ -356,26 +523,43 @@ export class ArticlesService {
 
   async createArticleLanguage(
     articleId: UUIDType,
-    createNewsBody: CreateLanguageArticle,
+    createArticleBody: CreateLanguageArticle,
     currentUser: CurrentUser,
   ) {
     await this.validateAccess(articleId, currentUser);
 
-    const { language } = createNewsBody;
+    const { language } = createArticleBody;
 
-    const existingNews = await this.validateArticleExists(articleId, language, false);
+    const existingArticle = await this.validateArticleExists(articleId, language, false);
 
-    if (existingNews.availableLocales.includes(language))
+    const previousSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+
+    if (existingArticle.availableLocales.includes(language))
       throw new BadRequestException("adminArticleView.toast.languageAlreadyExists");
 
     const [createdLanguage] = await this.articlesRepository.createArticleLanguage(
       articleId,
       language,
-      existingNews.availableLocales,
+      existingArticle.availableLocales,
     );
 
     if (!createdLanguage)
       throw new BadRequestException("adminArticleView.toast.createLanguageError");
+
+    const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
+
+    if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
+      this.eventBus.publish(
+        new UpdateArticleEvent({
+          articleId,
+          actor: currentUser,
+          previousArticleData: previousSnapshot,
+          updatedArticleData: updatedSnapshot,
+          language,
+          action: "add_language",
+        }),
+      );
+    }
 
     return createdLanguage;
   }
@@ -477,7 +661,7 @@ export class ArticlesService {
     const flatList: ArticleResource[] = [];
 
     resources.forEach((resource) => {
-      const baseResource = this.mapResourceToNewsResource(resource);
+      const baseResource = this.mapResourceToArticleResource(resource);
 
       flatList.push(baseResource);
 
@@ -500,7 +684,7 @@ export class ArticlesService {
       language,
     );
 
-    if (cover) groupedResources.coverImage = this.mapResourceToNewsResource(cover);
+    if (cover) groupedResources.coverImage = this.mapResourceToArticleResource(cover);
 
     return { grouped: groupedResources, flatList };
   }
@@ -598,8 +782,8 @@ export class ArticlesService {
   }
 
   private buildUpdateData(
-    existingNews: InferSelectModel<typeof articles>,
-    updateNewsData: Partial<Omit<UpdateArticle, "language">>,
+    existingArticle: InferSelectModel<typeof articles>,
+    updateArticleData: Partial<Omit<UpdateArticle, "language">>,
     language: SupportedLanguages,
   ): Record<string, unknown> {
     const localizableFields = ["title", "content", "summary"] as const;
@@ -608,15 +792,15 @@ export class ArticlesService {
     const updateData: Record<string, unknown> = {
       ...this.localizationService.updateLocalizableFields(
         localizableFields,
-        existingNews,
-        updateNewsData,
+        existingArticle,
+        updateArticleData,
         language,
       ),
     };
 
     directFields.forEach((field) => {
-      if (field in updateNewsData && updateNewsData[field] !== undefined)
-        updateData[field] = updateNewsData[field];
+      if (field in updateArticleData && updateArticleData[field] !== undefined)
+        updateData[field] = updateArticleData[field];
 
       if (field === "status" && !isEmpty(updateData[field])) {
         if (updateData[field] === ARTICLE_STATUS.PUBLISHED)
@@ -628,7 +812,7 @@ export class ArticlesService {
     return updateData;
   }
 
-  private mapResourceToNewsResource(resource: StoredArticleResource): ArticleResource {
+  private mapResourceToArticleResource(resource: StoredArticleResource): ArticleResource {
     return {
       id: resource.id,
       fileUrl: resource.fileUrl,
@@ -688,5 +872,121 @@ export class ArticlesService {
     const resources = await this.getArticleResources(articleId, language);
 
     return this.injectResourcesIntoContent(content, resources.flatList) ?? content;
+  }
+
+  private async buildArticleActivitySnapshot(
+    articleId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<ArticleActivityLogSnapshot> {
+    const [baseData] = await this.db
+      .select({
+        baseLanguage: sql<SupportedLanguages>`${articles.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${articles.availableLocales}`,
+      })
+      .from(articles)
+      .where(eq(articles.id, articleId));
+
+    if (!baseData) throw new NotFoundException("adminArticleView.toast.notFoundError");
+
+    const resolvedLanguage = this.resolveSnapshotLanguage(
+      language,
+      baseData.baseLanguage,
+      baseData.availableLocales,
+    );
+
+    const [snapshot] = await this.db
+      .select({
+        ...getTableColumns(articles),
+        title: this.localizationService.getFieldByLanguage(articles.title, resolvedLanguage),
+        summary: this.localizationService.getFieldByLanguage(articles.summary, resolvedLanguage),
+        content: this.localizationService.getFieldByLanguage(articles.content, resolvedLanguage),
+        publishedAt: sql<string | null>`${articles.publishedAt}`,
+        baseLanguage: sql<string>`${articles.baseLanguage}`,
+      })
+      .from(articles)
+      .where(eq(articles.id, articleId));
+
+    if (!snapshot) throw new NotFoundException("adminArticleView.toast.notFoundError");
+
+    return {
+      ...snapshot,
+      availableLocales: Array.isArray(snapshot.availableLocales)
+        ? snapshot.availableLocales
+        : [snapshot.availableLocales],
+    };
+  }
+
+  private async buildArticleSectionActivitySnapshot(
+    articleSectionId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<ArticleSectionActivityLogSnapshot> {
+    const [baseData] = await this.db
+      .select({
+        baseLanguage: sql<SupportedLanguages>`${articleSections.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${articleSections.availableLocales}`,
+      })
+      .from(articleSections)
+      .where(eq(articleSections.id, articleSectionId));
+
+    if (!baseData) throw new NotFoundException("adminArticleView.toast.notFoundError");
+
+    const resolvedLanguage = this.resolveSnapshotLanguage(
+      language,
+      baseData.baseLanguage,
+      baseData.availableLocales,
+    );
+
+    const [snapshot] = await this.db
+      .select({
+        ...getTableColumns(articleSections),
+        title: this.localizationService.getFieldByLanguage(articleSections.title, resolvedLanguage),
+        baseLanguage: sql<string>`${articleSections.baseLanguage}`,
+      })
+      .from(articleSections)
+      .where(eq(articleSections.id, articleSectionId));
+
+    if (!snapshot) throw new NotFoundException("adminArticleView.toast.notFoundError");
+
+    return {
+      ...snapshot,
+      availableLocales: Array.isArray(snapshot.availableLocales)
+        ? snapshot.availableLocales
+        : [snapshot.availableLocales],
+    };
+  }
+
+  private resolveSnapshotLanguage(
+    requestedLanguage: SupportedLanguages | undefined,
+    baseLanguage: SupportedLanguages,
+    availableLocales: SupportedLanguages[] | null,
+  ) {
+    if (requestedLanguage && Array.isArray(availableLocales)) {
+      if (availableLocales.includes(requestedLanguage)) return requestedLanguage;
+    }
+
+    return baseLanguage;
+  }
+
+  private areArticleSnapshotsEqual(
+    previousSnapshot: ArticleActivityLogSnapshot | null,
+    updatedSnapshot: ArticleActivityLogSnapshot | null,
+  ) {
+    return isEqual(previousSnapshot, updatedSnapshot);
+  }
+
+  private areSectionSnapshotsEqual(
+    previousSnapshot: ArticleSectionActivityLogSnapshot | null,
+    updatedSnapshot: ArticleSectionActivityLogSnapshot | null,
+  ) {
+    return isEqual(previousSnapshot, updatedSnapshot);
+  }
+
+  private extractTitleByLanguage(titleField: unknown, language: SupportedLanguages) {
+    if (!titleField || typeof titleField !== "object") return undefined;
+
+    const titleMap = titleField as Record<string, unknown>;
+    const title = titleMap[language];
+
+    return typeof title === "string" ? title : undefined;
   }
 }

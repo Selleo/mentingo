@@ -191,9 +191,7 @@ export async function createNiceCourses(
                   createdAt: createdAt,
                   updatedAt: createdAt,
                   questionId,
-                  optionText: sql`json_build_object('en', ${
-                    questionAnswerOption.optionText
-                  }::text)`,
+                  optionText: sql`json_build_object('en', ${questionAnswerOption.optionText}::text)`,
                   isCorrect: questionAnswerOption.isCorrect || false,
                   displayOrder: index + 1,
                   matchedWord: sql`json_build_object('en', ${
