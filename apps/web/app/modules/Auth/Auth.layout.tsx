@@ -1,25 +1,16 @@
-import { Outlet, redirect } from "@remix-run/react";
+import { Outlet } from "@remix-run/react";
 
 import { currentUserQueryOptions } from "~/api/queries";
 import { queryClient } from "~/api/queryClient";
+import { MFAGuard } from "~/Guards/MFAGuard";
 
 import { useCurrentUserStore } from "../common/store/useCurrentUserStore";
 
-import { LOGIN_REDIRECT_URL } from "./constants";
-
-import type { CurrentUserResponse } from "~/api/generated-api";
-
 export const clientLoader = async () => {
-  let user: CurrentUserResponse | null = null;
-
   try {
-    user = await queryClient.ensureQueryData(currentUserQueryOptions);
+    await queryClient.ensureQueryData(currentUserQueryOptions);
   } catch {
     return null;
-  }
-
-  if (user) {
-    throw redirect(LOGIN_REDIRECT_URL);
   }
 
   return null;
@@ -32,7 +23,9 @@ export default function AuthLayout() {
 
   return (
     <main className="flex h-screen w-screen items-center justify-center">
-      <Outlet />
+      <MFAGuard mode="auth">
+        <Outlet />
+      </MFAGuard>
     </main>
   );
 }

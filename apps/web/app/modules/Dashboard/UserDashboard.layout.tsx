@@ -3,6 +3,7 @@ import { useMemo } from "react";
 
 import { currentUserQueryOptions, useCurrentUser } from "~/api/queries/useCurrentUser";
 import { queryClient } from "~/api/queryClient";
+import { MFAGuard } from "~/Guards/MFAGuard";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { Dashboard } from "~/modules/Dashboard/Dashboard";
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
@@ -45,17 +46,17 @@ export default function UserDashboardLayout() {
 
   useSyncUserAfterLogin(user);
 
-  if (!hasVerifiedMFA) {
-    return <Navigate to="/auth/mfa" />;
-  }
-
   if (lastEntry && lastEntry.pathname !== location.pathname) {
     clearHistory();
 
     return <Navigate to={lastEntry.pathname || LOGIN_REDIRECT_URL} />;
   }
 
-  const isAuthenticated = Boolean(user && hasVerifiedMFA);
+  const isAuthenticated = Boolean(user && (!user.shouldVerifyMFA || hasVerifiedMFA));
 
-  return <Dashboard isAuthenticated={isAuthenticated} />;
+  return (
+    <MFAGuard mode="app">
+      <Dashboard isAuthenticated={isAuthenticated} />
+    </MFAGuard>
+  );
 }
