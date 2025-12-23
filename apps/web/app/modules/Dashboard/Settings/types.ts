@@ -13,6 +13,7 @@ export type GlobalSettings = {
   userEmailTriggers: GetPublicGlobalSettingsResponse["data"]["userEmailTriggers"];
   unregisteredUserQAAccessibility: GetPublicGlobalSettingsResponse["data"]["unregisteredUserQAAccessibility"];
   QAEnabled: GetPublicGlobalSettingsResponse["data"]["QAEnabled"];
+  ageLimit: GetPublicGlobalSettingsResponse["data"]["ageLimit"];
 };
 
 export type UserSettings = {

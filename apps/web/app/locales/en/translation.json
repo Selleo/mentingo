@@ -1131,7 +1131,6 @@
       "lesson": {
         "button": {
           "addLesson": "Add lesson",
-
           "addQuestion": "Add question",
           "addOption": "Add option",
           "deleteQuestion": "Delete question",
@@ -1476,7 +1475,8 @@
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email",
-      "password": "Password"
+      "password": "Password",
+      "birthday": "Date of birth"
     },
     "other": {
       "alreadyHaveAccount": "Already have an account?",
@@ -1489,7 +1489,8 @@
     "validation": {
       "firstName": "First name is required",
       "lastName": "Last name is required",
-      "email": "Invalid email"
+      "email": "Invalid email",
+      "birthday": "You must be at least {{ageLimit}} years old"
     }
   },
   "courseChapterView": {
@@ -1775,7 +1776,8 @@
       "error": {
         "globalNotFound": "Global settings not found"
       },
-      "qaSettingUpdatedSuccessfully": "QA settings updated successfully"
+      "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
+      "ageLimitUpdatedSuccessfully": "Age limit updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -2017,6 +2019,16 @@
       "gbp": {
         "label": "British Pound",
         "sign": "£"
+      }
+    }
+  },
+  "ageLimitView": {
+    "header": "Set age limit",
+    "subHeader": "Set age limit for new users",
+    "select": {
+      "placeholder": "Select age limit",
+      "null": {
+        "label": "No limitation"
       }
     }
   },

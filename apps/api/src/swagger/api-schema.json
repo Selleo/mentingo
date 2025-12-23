@@ -777,6 +777,27 @@
         }
       }
     },
+    "/api/settings/admin/age-limit": {
+      "patch": {
+        "operationId": "SettingsController_updateAgeLimit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAgeLimitBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/file": {
       "post": {
         "operationId": "FileController_uploadFile",
@@ -7630,6 +7651,21 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -7646,7 +7682,8 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "ageLimit"
             ]
           }
         },
@@ -8095,6 +8132,21 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -8111,7 +8163,8 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "ageLimit"
             ]
           }
         },
@@ -8293,6 +8346,21 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -8309,7 +8377,8 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "ageLimit"
             ]
           }
         },
@@ -8604,6 +8673,21 @@
               },
               "QAEnabled": {
                 "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -8620,7 +8704,8 @@
               "primaryColor",
               "contrastColor",
               "unregisteredUserQAAccessibility",
-              "QAEnabled"
+              "QAEnabled",
+              "ageLimit"
             ]
           }
         },
@@ -8893,6 +8978,29 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "UpdateAgeLimitBody": {
+        "type": "object",
+        "properties": {
+          "ageLimit": {
+            "anyOf": [
+              {
+                "const": 13,
+                "type": "number"
+              },
+              {
+                "const": 16,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "ageLimit"
         ]
       },
       "FileUploadResponse": {

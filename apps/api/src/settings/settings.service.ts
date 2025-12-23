@@ -34,6 +34,7 @@ import type {
   UserEmailTriggersSchema,
 } from "./schemas/settings.schema";
 import type {
+  AllowedAgeLimit,
   AllowedCurrency,
   UpdateMFAEnforcedRolesRequest,
   UpdateSettingsBody,
@@ -873,6 +874,40 @@ export class SettingsService {
     return updatedUserSettings;
   }
 
+  async updateAgeLimit(
+    ageLimit: AllowedAgeLimit,
+    actor?: CurrentUser,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    if (ageLimit !== null && (ageLimit < 0 || ageLimit > 100)) {
+      throw new BadRequestException("Invalid age limit value");
+    }
+
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const [{ settings: updatedSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`jsonb_set(
+          settings.settings,
+          '{ageLimit}',
+        ${ageLimit !== null ? sql`to_jsonb(${ageLimit}::integer)` : sql`'null'::jsonb`},
+          true
+        )`,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: this.buildSettingsSnapshot(updatedRecord),
+    });
+
+    return updatedSettings;
+  }
+
   private async getGlobalSettingsRecord(): Promise<{
     id: UUIDType;
     settings: GlobalSettingsJSONContentSchema;
@@ -975,6 +1010,7 @@ export class SettingsService {
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),
+      ageLimit: settings.ageLimit ?? null,
     };
   }
 

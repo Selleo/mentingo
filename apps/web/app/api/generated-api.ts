@@ -182,6 +182,7 @@ export interface GetPublicGlobalSettingsResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -284,6 +285,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -319,6 +321,7 @@ export interface UpdateEnforceSSOResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -385,6 +388,7 @@ export interface UpdateColorSchemaResponse {
     contrastColor: string | null;
     unregisteredUserQAAccessibility: boolean;
     QAEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -464,6 +468,10 @@ export interface UpdateConfigWarningDismissedResponse {
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
   };
+}
+
+export interface UpdateAgeLimitBody {
+  ageLimit: 13 | 16 | null;
 }
 
 export interface FileUploadResponse {
@@ -4201,6 +4209,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/settings/admin/qa/${setting}`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAgeLimit
+     * @request PATCH:/api/settings/admin/age-limit
+     */
+    settingsControllerUpdateAgeLimit: (data: UpdateAgeLimitBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/age-limit`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

@@ -2,7 +2,7 @@ import { Type } from "@sinclair/typebox";
 
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
+import { ALLOWED_AGE_LIMITS, ALLOWED_CURRENCIES } from "../constants/settings.constants";
 
 import type { Static } from "@sinclair/typebox";
 
@@ -40,6 +40,11 @@ export const globalSettingsJSONSchema = Type.Object({
   contrastColor: Type.Union([Type.String(), Type.Null()]),
   unregisteredUserQAAccessibility: Type.Boolean(),
   QAEnabled: Type.Boolean(),
+  ageLimit: Type.Union(
+    ALLOWED_AGE_LIMITS.map((currency) =>
+      currency === null ? Type.Null() : Type.Literal(currency),
+    ),
+  ),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({
