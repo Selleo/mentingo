@@ -1,20 +1,18 @@
 import { COURSE_ENROLLMENT } from "@repo/shared";
-import { and, eq } from "drizzle-orm";
-import { faker } from "@faker-js/faker";
 import request from "supertest";
 
+
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
-  courses,
   lessons,
   questions,
   questionAnswerOptions,
   studentCourses,
 } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
-import { QUESTION_TYPE } from "src/questions/schema/question.types";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
