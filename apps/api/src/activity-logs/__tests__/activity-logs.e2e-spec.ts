@@ -610,6 +610,20 @@ describe("Activity Logs E2E", () => {
       expect(changedFields).toEqual(expect.arrayContaining(["defaultCourseCurrency"]));
       expect(updateMetadata.after?.defaultCourseCurrency).toBe("eur");
     });
+
+    it("should record UPDATE activity log when age limit changes", async () => {
+      await settingsService.updateAgeLimit(null, currentAdminUser);
+
+      const [updateLog] = await waitForLogs({ resourceId: globalSettingsId });
+      const updateMetadata = parseMetadata(updateLog.metadata);
+      const changedFields = getChangedFields(updateMetadata);
+
+      expect(updateLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.UPDATE);
+      expect(updateLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.SETTINGS);
+      expect(updateLog.resourceId).toBe(globalSettingsId);
+      expect(changedFields).toEqual(expect.arrayContaining(["ageLimit"]));
+      expect(updateMetadata.after?.ageLimit).toBe(null);
+    });
   });
 
   describe("Env activity logs", () => {

@@ -1,12 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@remix-run/react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useRegisterUser } from "~/api/mutations/useRegisterUser";
-import { useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
+import { useGlobalSettings, useGlobalSettingsSuspense } from "~/api/queries/useGlobalSettings";
 import { useSSOEnabled } from "~/api/queries/useSSOEnabled";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
@@ -33,6 +33,7 @@ const registerSchema = z.object({
   email: z.string().email({ message: "registerView.validation.email" }),
   password: passwordSchema,
   language: z.enum([...SUPPORTED_LANGUAGES] as [string, ...string[]]),
+  birthday: z.string().optional(),
 });
 
 export default function RegisterPage() {
@@ -42,6 +43,9 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   const { data: ssoEnabled } = useSSOEnabled();
+  const { data: globalSettings } = useGlobalSettings();
+
+  const [ageValidationError, setAgeValidationError] = useState<string | null>(null);
 
   const isGoogleOAuthEnabled =
     (ssoEnabled?.data.google ?? import.meta.env.VITE_GOOGLE_OAUTH_ENABLED) === "true";
@@ -52,7 +56,7 @@ export default function RegisterPage() {
   const isSlackOAuthEnabled =
     (ssoEnabled?.data.slack ?? import.meta.env.VITE_SLACK_OAUTH_ENABLED) === "true";
 
-  const methods = useForm<RegisterBody>({
+  const methods = useForm<RegisterBody & { birthday: string }>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
     defaultValues: {
@@ -63,6 +67,7 @@ export default function RegisterPage() {
       language: SUPPORTED_LANGUAGES.includes(detectBrowserLanguage())
         ? detectBrowserLanguage()
         : "en",
+      birthday: "",
     },
   });
 
@@ -78,7 +83,38 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     formState: { errors, isValid },
+    watch,
   } = methods;
+
+  const birthdayValue = watch("birthday");
+
+  const calculateAge = (birthday: string) => {
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+  useEffect(() => {
+    if (globalSettings?.ageLimit && birthdayValue) {
+      const age = calculateAge(birthdayValue);
+      if (age < globalSettings.ageLimit) {
+        setAgeValidationError(
+          t(`registerView.validation.birthday`, { ageLimit: globalSettings.ageLimit }),
+        );
+      } else {
+        setAgeValidationError(null);
+      }
+    } else {
+      setAgeValidationError(null);
+    }
+  }, [birthdayValue, globalSettings?.ageLimit, t]);
 
   const isAnyProviderEnabled = useMemo(
     () => isGoogleOAuthEnabled || isMicrosoftOAuthEnabled || isSlackOAuthEnabled,
@@ -97,10 +133,25 @@ export default function RegisterPage() {
     // eslint-disable-next-line
   }, [inviteOnlyRegistration, navigate, toast]);
 
-  const onSubmit = async (data: RegisterBody) => {
+  const onSubmit = async (data: RegisterBody & { birthday: string }) => {
     if (isSSOEnforced && isAnyProviderEnabled) return;
 
-    registerUser({ data });
+    if (globalSettings?.ageLimit && data.birthday) {
+      const age = calculateAge(data.birthday);
+      if (age < globalSettings.ageLimit) {
+        toast({
+          description: t("registerView.validation.birthday", { ageLimit: globalSettings.ageLimit }),
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    /**
+     * We need to remove birthday from register data because we don't process personal data
+     */
+    const { birthday: _birthday, ...registerData } = data;
+    registerUser({ data: registerData });
   };
 
   return (
@@ -141,6 +192,14 @@ export default function RegisterPage() {
                 )}
               </div>
 
+              {globalSettings?.ageLimit && (
+                <div className="grid gap-2">
+                  <Label htmlFor="birthday">{t("registerView.field.birthday")}</Label>
+                  <Input id="birthday" type="date" {...register("birthday")} />
+                  {ageValidationError && <FormValidationError message={ageValidationError} />}
+                </div>
+              )}
+
               <div className="grid gap-2">
                 <Label htmlFor="email">{t("registerView.field.email")}</Label>
                 <Input
@@ -158,7 +217,7 @@ export default function RegisterPage() {
                 <PasswordValidationDisplay fieldName="password" />
               </div>
 
-              <Button type="submit" className="w-full" disabled={!isValid}>
+              <Button type="submit" className="w-full" disabled={!isValid || !!ageValidationError}>
                 {t("registerView.button.createAccount")}
               </Button>
             </form>

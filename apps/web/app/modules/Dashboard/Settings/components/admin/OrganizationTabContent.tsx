@@ -1,4 +1,5 @@
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
+import { AgeLimitSelect } from "~/modules/Dashboard/Settings/components/admin/AgeLimitSelect";
 import { InviteOnlyRegistration } from "~/modules/Dashboard/Settings/components/admin/InviteOnlyRegistration";
 import UserEmailTriggers from "~/modules/Dashboard/Settings/components/admin/UserEmailTriggers";
 
@@ -35,6 +36,7 @@ export default function OrganizationTabContent({
       {stripeConfigured?.enabled && (
         <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />
       )}
+      <AgeLimitSelect limit={globalSettings.ageLimit} />
     </>
   );
 }
