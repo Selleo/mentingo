@@ -14,6 +14,7 @@ import { QueueModule } from "src/queue";
 import { WebSocketModule } from "src/websocket";
 
 import { AiModule } from "./ai/ai.module";
+import { AnalyticsModule } from "./analytics/analytics.module";
 import { AnnouncementsModule } from "./announcements/announcements.module";
 import { ArticlesModule } from "./articles/articles.module";
 import { AuthModule } from "./auth/auth.module";
@@ -136,6 +137,7 @@ import { UserModule } from "./user/user.module";
     QAModule,
     NewsModule,
     ArticlesModule,
+    AnalyticsModule,
   ],
   controllers: [],
   providers: [
