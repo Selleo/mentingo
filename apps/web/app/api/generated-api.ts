@@ -484,7 +484,27 @@ export interface UpdateConfigWarningDismissedResponse {
 
 export interface FileUploadResponse {
   fileKey: string;
-  fileUrl: string;
+  fileUrl?: string;
+  status?: string;
+  uploadId?: string;
+}
+
+export interface HandleBunnyWebhookBody {
+  status?: number | string;
+  Status?: number | string;
+  videoId?: string;
+  VideoId?: string;
+  videoGuid?: string;
+  VideoGuid?: string;
+  guid?: string;
+  Guid?: string;
+}
+
+export interface AssociateUploadWithLessonBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  uploadId: string;
 }
 
 export interface GetUserStatisticsResponse {
@@ -4264,6 +4284,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         file?: File;
         /** Optional resource type */
         resource?: string;
+        /** Optional lesson ID for existing lessons */
+        lessonId?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -4293,6 +4315,39 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/file`,
         method: "DELETE",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerHandleBunnyWebhook
+     * @request POST:/api/file/bunny/webhook
+     */
+    fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/bunny/webhook`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerAssociateUploadWithLesson
+     * @request POST:/api/file/associate-upload
+     */
+    fileControllerAssociateUploadWithLesson: (
+      data: AssociateUploadWithLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file/associate-upload`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

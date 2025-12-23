@@ -99,7 +99,7 @@ import { UserModule } from "./user/user.module";
     }),
     MulterModule.register({
       limits: {
-        fileSize: 10 * 1024 * 1024,
+        fileSize: 5 * 1024 * 1024 * 1024, // 5GB for videos
       },
     }),
     AuthModule,

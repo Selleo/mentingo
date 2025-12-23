@@ -10,3 +10,4 @@ export * from "./constants/newsSettings";
 export * from "./constants/qaSettings";
 export * from "./constants/theme";
 export * from "./types/onboarding";
+export * from "./types/videoUploadTypes";

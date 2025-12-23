@@ -853,6 +853,10 @@
                   "resource": {
                     "type": "string",
                     "description": "Optional resource type"
+                  },
+                  "lessonId": {
+                    "type": "string",
+                    "description": "Optional lesson ID for existing lessons"
                   }
                 }
               }
@@ -888,6 +892,48 @@
         "responses": {
           "200": {
             "description": "File deleted successfully"
+          }
+        }
+      }
+    },
+    "/api/file/bunny/webhook": {
+      "post": {
+        "operationId": "FileController_handleBunnyWebhook",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandleBunnyWebhookBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/file/associate-upload": {
+      "post": {
+        "operationId": "FileController_associateUploadWithLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssociateUploadWithLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
           }
         }
       }
@@ -9025,11 +9071,76 @@
           },
           "fileUrl": {
             "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "uploadId": {
+            "type": "string"
           }
         },
         "required": [
-          "fileKey",
-          "fileUrl"
+          "fileKey"
+        ]
+      },
+      "HandleBunnyWebhookBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "Status": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "videoId": {
+            "type": "string"
+          },
+          "VideoId": {
+            "type": "string"
+          },
+          "videoGuid": {
+            "type": "string"
+          },
+          "VideoGuid": {
+            "type": "string"
+          },
+          "guid": {
+            "type": "string"
+          },
+          "Guid": {
+            "type": "string"
+          }
+        }
+      },
+      "AssociateUploadWithLessonBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lessonId",
+          "uploadId"
         ]
       },
       "GetUserStatisticsResponse": {

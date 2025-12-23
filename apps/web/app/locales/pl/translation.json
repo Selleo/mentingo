@@ -69,7 +69,10 @@
     "subHeader": "lub przeciągnij i upuść",
     "replace": "Kliknij, aby zastąpić",
     "toast": {
-      "fileUploadedSuccessfully": "Plik został pomyślnie przesłany"
+      "fileUploadedSuccessfully": "Plik został pomyślnie przesłany",
+      "videoFailed": "Nie udało się przesłać wideo",
+      "videoReady": "Wideo jest gotowe do użycia",
+      "videoProcessingStarted": "Rozpoczęto przesyłanie wideo. Powiadomimy Cię, gdy zostanie przetworzone."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG lub SVG",
