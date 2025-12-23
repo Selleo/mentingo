@@ -1,3 +1,4 @@
+import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { InviteOnlyRegistration } from "~/modules/Dashboard/Settings/components/admin/InviteOnlyRegistration";
 import UserEmailTriggers from "~/modules/Dashboard/Settings/components/admin/UserEmailTriggers";
 
@@ -21,6 +22,7 @@ export default function OrganizationTabContent({
   isAdmin,
   globalSettings,
 }: OrganizationTabContentProps) {
+  const { data: stripeConfigured } = useStripeConfigured();
   const canEditSSOEnforcement = (isGoogleOAuthEnabled || isMicrosoftOAuthEnabled) && isAdmin;
 
   return (
@@ -30,7 +32,9 @@ export default function OrganizationTabContent({
       <UserEmailTriggers userEmailTriggers={globalSettings.userEmailTriggers} />
       <InviteOnlyRegistration inviteOnlyRegistration={globalSettings.inviteOnlyRegistration} />
       <RoleBasedMFAEnforcementSwitch MFAEnforcedRoles={globalSettings.MFAEnforcedRoles} />
-      <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />
+      {stripeConfigured?.enabled && (
+        <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />
+      )}
     </>
   );
 }
