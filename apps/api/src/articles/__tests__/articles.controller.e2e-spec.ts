@@ -81,6 +81,35 @@ describe("ArticlesController (e2e)", () => {
       expect(response.body).toHaveLength(1);
       expect(response.body[0].title).toBe("Public article");
     });
+
+    it("returns private articles for authenticated admin", async () => {
+      const admin = await createAdmin();
+      const author = await userFactory.create();
+      const section = await sectionFactory.create({ title: "Admin view" });
+
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        title: "Public article",
+        isPublic: true,
+      });
+
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        title: "Private article",
+        isPublic: false,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/articles?language=en")
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body).toHaveLength(2);
+      const titles = response.body.map((article: { title: string }) => article.title);
+      expect(titles).toEqual(expect.arrayContaining(["Public article", "Private article"]));
+    });
   });
 
   describe("GET /api/articles/:id", () => {
@@ -100,6 +129,34 @@ describe("ArticlesController (e2e)", () => {
   describe("GET /api/articles/drafts", () => {
     it("requires authentication", async () => {
       await request(app.getHttpServer()).get("/api/articles/drafts?language=en").expect(401);
+    });
+
+    it("returns draft articles for admin", async () => {
+      const admin = await createAdmin();
+      const author = await userFactory.create();
+      const section = await sectionFactory.create({ title: "Draft section" });
+
+      const draft = await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        status: "draft",
+        title: "Draft article",
+      });
+
+      await articleFactory.create({
+        articleSectionId: section.id,
+        authorId: author.id,
+        status: "published",
+        title: "Published article",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/articles/drafts?language=en")
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].id).toBe(draft.id);
     });
   });
 
@@ -129,6 +186,79 @@ describe("ArticlesController (e2e)", () => {
         .set("Cookie", await cookieFor(user, app))
         .send({ language: "en" })
         .expect(403);
+    });
+  });
+
+  describe("GET /api/articles/section/:id", () => {
+    it("requires authentication", async () => {
+      const section = await sectionFactory.create({ title: "Restricted" });
+
+      await request(app.getHttpServer())
+        .get(`/api/articles/section/${section.id}?language=en`)
+        .expect(401);
+    });
+
+    it("returns section details for admin", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "Details" });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/articles/section/${section.id}?language=en`)
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.id).toBe(section.id);
+      expect(response.body.data.title).toBe("Details");
+      expect(response.body.data.assignedArticlesCount).toBe(0);
+    });
+  });
+
+  describe("PATCH /api/articles/section/:id", () => {
+    it("updates section title for admin", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "Old title" });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/articles/section/${section.id}`)
+        .set("Cookie", await cookieFor(admin, app))
+        .send({ language: "en", title: "New title" })
+        .expect(200);
+
+      expect(response.body.data.id).toBe(section.id);
+      expect(response.body.data.title).toBe("New title");
+    });
+  });
+
+  describe("POST /api/articles/section/:id/language", () => {
+    it("adds and removes language for section", async () => {
+      const admin = await createAdmin();
+      const section = await sectionFactory.create({ title: "Localized" });
+      const cookie = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .post(`/api/articles/section/${section.id}/language`)
+        .set("Cookie", cookie)
+        .send({ language: "pl" })
+        .expect(201);
+
+      const afterAdd = await request(app.getHttpServer())
+        .get(`/api/articles/section/${section.id}?language=en`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(afterAdd.body.data.availableLocales).toEqual(expect.arrayContaining(["en", "pl"]));
+
+      await request(app.getHttpServer())
+        .delete(`/api/articles/section/${section.id}/language?language=pl`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      const afterRemove = await request(app.getHttpServer())
+        .get(`/api/articles/section/${section.id}?language=en`)
+        .set("Cookie", cookie)
+        .expect(200);
+
+      expect(afterRemove.body.data.availableLocales).toEqual(["en"]);
     });
   });
 
