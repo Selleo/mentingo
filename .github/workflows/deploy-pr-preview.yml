@@ -45,7 +45,7 @@ jobs:
 
           # mask host from logs
           echo "::add-mask::$host"
-          uc machine add "${{ secrets.UNCLOUD_CONNECT }}" -i ~/.ssh/id_ecdsa --no-install --no-caddy
+          echo -e "Y\n" | uc machine init "${{ secrets.UNCLOUD_CONNECT }}" -i ~/.ssh/id_ecdsa
 
       - name: Render Compose for PR
         shell: bash
