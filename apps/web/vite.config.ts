@@ -13,7 +13,17 @@ import { routes } from "./routes";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
+  const envKeys = Object.keys(env).filter((key) => key.startsWith("VITE_"));
+  const defineEnv = envKeys.reduce(
+    (acc, key) => {
+      acc[`import.meta.env.${key}`] = JSON.stringify(env[key]);
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
+
   return {
+    define: defineEnv,
     plugins: [
       svgr(),
       cjsInterop({
