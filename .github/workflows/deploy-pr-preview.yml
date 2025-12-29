@@ -43,10 +43,10 @@ jobs:
       - name: Render Compose for PR
         shell: bash
         env:
-          PR_ID: ${{ github.event.pull_request.number }}
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
+          PR_ID=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
           PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN
@@ -65,11 +65,11 @@ jobs:
 
       - name: Comment PR - send message to PR preview link
         env:
-          PR_ID: ${{ github.event.pull_request.number }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
+          PR_ID=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
           PREVIEW_WEB_DOMAIN="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           body=$(jq -n --arg w "$PREVIEW_WEB_DOMAIN" --arg a "$PREVIEW_API_DOMAIN" \
@@ -105,10 +105,10 @@ jobs:
       - name: Cleanup PR Preview stack
         env:
           UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
-          PR_ID: ${{ github.event.pull_request.number }}
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
+          PR_ID=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
           # render compose as deployment does:
           PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
