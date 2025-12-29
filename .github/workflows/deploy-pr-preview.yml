@@ -45,6 +45,9 @@ jobs:
           # mask host from logs
           echo "::add-mask::$host"
 
+          # print 8 chars of the UNCLOUD_CONNECT:
+          echo "${{ secrets.UNCLOUD_CONNECT }}" | cut -c1-8
+
           UNCLOUD_SSH_KEY="~/.ssh/id_ecdsa"
           mkdir -p ~/.config/uncloud
           export UNCLOUD_SSH_KEY UNCLOUD_CONNECT
