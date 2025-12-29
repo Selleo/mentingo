@@ -62,6 +62,7 @@ jobs:
         env:
           PR_ID: ${{ github.event.pull_request.number }}
           UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
           POSTGRES_PASSWORD=$(openssl rand -base64 32)
