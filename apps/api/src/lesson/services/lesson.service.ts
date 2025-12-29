@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
 import * as cheerio from "cheerio";
-import { eq, isNotNull } from "drizzle-orm";
+import { isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
@@ -20,7 +20,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
-import { courses, studentLessonProgress } from "src/storage/schema";
+import { studentLessonProgress } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { USER_ROLES, type UserRole } from "src/user/schemas/userRoles";
 import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
@@ -218,7 +218,6 @@ export class LessonService {
   async evaluationQuiz(
     studentQuizAnswers: AnswerQuestionBody,
     userId: UUIDType,
-    userRole: UserRole,
   ): Promise<{
     correctAnswerCount: number;
     wrongAnswerCount: number;
