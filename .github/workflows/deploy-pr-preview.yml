@@ -39,6 +39,8 @@ jobs:
           chmod 700 ~/.ssh
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
+          # Extract the host from the UNCLOUD_CONNECT secret
+          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
 
           # mask host from logs
           echo "::add-mask::$host"
