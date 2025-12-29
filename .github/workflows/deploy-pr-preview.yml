@@ -42,10 +42,13 @@ jobs:
           chmod 600 ~/.ssh/id_ecdsa
           # Extract the host from the UNCLOUD_CONNECT secret
           host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+          # add to known_hosts:
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
 
           # mask host from logs
           echo "::add-mask::$host"
-          echo -e "Y\n" | uc machine init "${{ secrets.UNCLOUD_CONNECT }}" -i ~/.ssh/id_ecdsa
+          uc ps
 
       - name: Render Compose for PR
         shell: bash
@@ -70,13 +73,12 @@ jobs:
       - name: Deploy PR Preview stack
         env:
           PR_ID: ${{ github.event.pull_request.number }}
-          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
         run: |
           set -euo pipefail
           # master_key
           MASTER_KEY=$(echo -n "preview-pr-${PR_ID}" | openssl dgst -sha256 -binary | head -c 32 | openssl base64)
           export MASTER_KEY
-          uc --connect "$UNCLOUD_CONNECT" deploy -f docker-compose.pr.yml -y
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" deploy -f docker-compose.pr.yml -y
 
       - name: Comment PR - send message to PR preview link
         env:
