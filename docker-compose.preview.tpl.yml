@@ -1,20 +1,20 @@
 services:
-  db-preview-pr-${PR_ID}:
+  db-preview-pr-__PR_ID__:
     image: pgvector/pgvector:pg16
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_DB: database-pr-${PR_ID}
+      POSTGRES_DB: database-pr-__PR_ID__
     volumes:
-      - db-preview-pr-${PR_ID}-data:/var/lib/postgresql/data
+      - db-preview-pr-__PR_ID__-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
       timeout: 3s
       retries: 10
 
-  redis-preview-pr-${PR_ID}:
+  redis-preview-pr-__PR_ID__:
     image: redis:8.0-M02-alpine3.20
     restart: always
     healthcheck:
@@ -23,23 +23,23 @@ services:
       timeout: 3s
       retries: 10
     volumes:
-      - redis-preview-pr-${PR_ID}-data:/data
+      - redis-preview-pr-__PR_ID__-data:/data
 
-  mailhog-preview-pr-${PR_ID}:
+  mailhog-preview-pr-__PR_ID__:
     image: mailhog/mailhog
     restart: always
     x-ports:
       - ${PREVIEW_MAILHOG_DOMAIN}:8025/https
 
-  minio-preview-pr-${PR_ID}:
+  minio-preview-pr-__PR_ID__:
     image: quay.io/minio/minio:latest
-    container_name: minio-preview-pr-${PR_ID}
+    container_name: minio-preview-pr-__PR_ID__
     restart: always
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
     volumes:
-      - minio-preview-pr-${PR_ID}-data:/data
+      - minio-preview-pr-__PR_ID__-data:/data
     command: server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
@@ -47,41 +47,41 @@ services:
       timeout: 5s
       retries: 5
 
-  create-minio-bucket-preview-pr-${PR_ID}:
+  create-minio-bucket-preview-pr-__PR_ID__:
     image: quay.io/minio/mc:latest
-    container_name: minio-setup-preview-pr-${PR_ID}
+    container_name: minio-setup-preview-pr-__PR_ID__
     depends_on:
-      minio-preview-pr-${PR_ID}:
+      minio-preview-pr-__PR_ID__:
         condition: service_healthy
     restart: "no"
     environment:
-      S3_BUCKET_NAME: "preview-pr-${PR_ID}"
+      S3_BUCKET_NAME: "preview-pr-__PR_ID__"
       S3_ACCESS_KEY_ID: "minioadmin"
       S3_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
-      MINIO_HOST: "minio-preview-pr-${PR_ID}"
+      MINIO_HOST: "minio-preview-pr-__PR_ID__"
     volumes:
       - ./create-minio-bucket.sh:/create-minio-bucket.sh
     entrypoint: ["/bin/sh", "/create-minio-bucket.sh"]
 
-  api-preview-pr-${PR_ID}:
+  api-preview-pr-__PR_ID__:
     build:
       context: .
       dockerfile: api.Dockerfile
-    image: api-preview-pr-${PR_ID}:{{gitdate "20060102-150405"}}.{{gitsha 7}}
+    image: api-preview-pr-__PR_ID__:{{gitdate "20060102-150405"}}.{{gitsha 7}}
     restart: always
     depends_on:
-      db-preview-pr-${PR_ID}:
+      db-preview-pr-__PR_ID__:
         condition: service_healthy
-      redis-preview-pr-${PR_ID}:
+      redis-preview-pr-__PR_ID__:
         condition: service_healthy
-      minio-preview-pr-${PR_ID}:
+      minio-preview-pr-__PR_ID__:
         condition: service_healthy
-      create-minio-bucket-preview-pr-${PR_ID}:
+      create-minio-bucket-preview-pr-__PR_ID__:
         condition: service_completed_successfully
     command: server
     environment:
       EMAIL_ADAPTER: "mailhog"
-      SMTP_HOST: "mailhog-preview-pr-${PR_ID}"
+      SMTP_HOST: "mailhog-preview-pr-__PR_ID__"
       SMTP_PORT: "1025"
       SMTP_USER: ""
       SMTP_PASSWORD: ""
@@ -92,24 +92,24 @@ services:
       S3_REGION: "eu-central-1"
       S3_ACCESS_KEY_ID: "minioadmin"
       S3_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
-      S3_BUCKET_NAME: "preview-pr-${PR_ID}"
+      S3_BUCKET_NAME: "preview-pr-__PR_ID__"
       CORS_ORIGIN: "https://${PREVIEW_WEB_DOMAIN}"
-      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@db-preview-pr-${PR_ID}:5432/guidebook"
-      REDIS_URL: "redis://redis-preview-pr-${PR_ID}:6379"
-      S3_ENDPOINT: "http://minio-preview-pr-${PR_ID}:9000"
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@db-preview-pr-__PR_ID__:5432/guidebook"
+      REDIS_URL: "redis://redis-preview-pr-__PR_ID__:6379"
+      S3_ENDPOINT: "http://minio-preview-pr-__PR_ID__:9000"
     x-ports:
       - ${PREVIEW_API_DOMAIN}:3000/https
     volumes:
-      - api-preview-pr-${PR_ID}-uploads:/app/apps/api/uploads
+      - api-preview-pr-__PR_ID__-uploads:/app/apps/api/uploads
 
-  web-preview-pr-${PR_ID}:
+  web-preview-pr-__PR_ID__:
     build:
       context: .
       dockerfile: web.Dockerfile
-    image: web-preview-pr-${PR_ID}:{{gitdate "20060102-150405"}}.{{gitsha 7}}
+    image: web-preview-pr-__PR_ID__:{{gitdate "20060102-150405"}}.{{gitsha 7}}
     restart: always
     depends_on:
-      api-preview-pr-${PR_ID}:
+      api-preview-pr-__PR_ID__:
         condition: service_started
     x-ports:
       - ${PREVIEW_WEB_DOMAIN}:8080/https
@@ -117,11 +117,11 @@ services:
       VITE_API_URL: "https://${PREVIEW_API_DOMAIN}"
 
 volumes:
-  db-preview-pr-${PR_ID}-data:
+  db-preview-pr-__PR_ID__-data:
     driver: local
-  redis-preview-pr-${PR_ID}-data:
+  redis-preview-pr-__PR_ID__-data:
     driver: local
-  minio-preview-pr-${PR_ID}-data:
+  minio-preview-pr-__PR_ID__-data:
     driver: local
-  api-preview-pr-${PR_ID}-uploads:
+  api-preview-pr-__PR_ID__-uploads:
     driver: local

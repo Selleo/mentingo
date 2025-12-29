@@ -55,7 +55,8 @@ jobs:
           PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
-          envsubst '${PR_ID}' < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
+          sed "s/__PR_ID__/${PR_ID}/g" docker-compose.preview.tpl.yml > /tmp/docker-compose.pr.yml
+          # envsubst '${PR_ID}' < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
           # mv docker-compose.preview.tpl.yml /tmp/docker-compose.pr.yml
 
       - name: Deploy PR Preview stack
@@ -134,7 +135,8 @@ jobs:
           PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_MAILHOG_DOMAIN="mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
-          envsubst '${PR_ID}' < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
+          sed "s/__PR_ID__/${PR_ID}/g" docker-compose.preview.tpl.yml > /tmp/docker-compose.pr.yml
+          # envsubst '${PR_ID}' < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
           # mv docker-compose.preview.tpl.yml /tmp/docker-compose.pr.yml
           # collect services and volumes:
           services="$(yq -r '.services | keys | .[]' /tmp/docker-compose.pr.yml)"
