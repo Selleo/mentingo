@@ -34,15 +34,17 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
           # Extract the host from the UNCLOUD_CONNECT secret
           host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+          chmod 644 ~/.ssh/known_hosts
 
           # mask host from logs
           echo "::add-mask::$host"
           ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          echo -e "n\n" | uc machine init $host -i ~/.ssh/id_ecdsa --no-install --no-caddy --no-dns || true
+          uc machine add $host -i ~/.ssh/id_ecdsa --no-install --no-caddy
 
       - name: Render Compose for PR
         shell: bash
