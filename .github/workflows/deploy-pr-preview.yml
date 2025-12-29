@@ -58,7 +58,7 @@ jobs:
           GIT_SHA_SHORT=$(echo "$GITHUB_SHA" | cut -c1-7)
           VERSION_TAG="${GIT_DATE}.${GIT_SHA_SHORT}"
           export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
-          envsubst < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
+          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
       - name: Deploy PR Preview stack
         env:
@@ -69,7 +69,7 @@ jobs:
           # master_key
           MASTER_KEY=$(echo -n "preview-pr-${PR_ID}" | openssl dgst -sha256 -binary | head -c 32 | openssl base64)
           export MASTER_KEY
-          uc deploy -f /tmp/docker-compose.pr.yml -y
+          uc deploy -f docker-compose.pr.yml -y
 
       - name: Comment PR - send message to PR preview link
         env:
@@ -127,10 +127,10 @@ jobs:
           PREVIEW_MAILHOG_DOMAIN="mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           VERSION_TAG="0"
           export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
-          envsubst < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
+          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
           # mv docker-compose.preview.tpl.yml /tmp/docker-compose.pr.yml
           # collect services and volumes:
-          services="$(yq -r '.services | keys | .[]' /tmp/docker-compose.pr.yml)"
-          volumes="$(yq -r '.volumes | keys | .[]' /tmp/docker-compose.pr.yml)"
+          services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
+          volumes="$(yq -r '.volumes | keys | .[]' docker-compose.pr.yml)"
           echo "$services" | xargs -r uc rm || true
           echo "$volumes" | xargs -r uc volume rm -y || true
