@@ -39,11 +39,11 @@ jobs:
           chmod 600 ~/.ssh/id_ecdsa
           # Extract the host from the UNCLOUD_CONNECT secret
           host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
-          chmod 644 ~/.ssh/known_hosts
 
           # mask host from logs
           echo "::add-mask::$host"
           ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
           uc machine add $host -i ~/.ssh/id_ecdsa --no-install --no-caddy
 
       - name: Render Compose for PR
