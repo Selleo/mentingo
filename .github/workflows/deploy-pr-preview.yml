@@ -31,19 +31,17 @@ jobs:
 
       - name: Setup SSH
         shell: bash
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
-          # Extract the host from the UNCLOUD_CONNECT secret
-          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
 
           # mask host from logs
           echo "::add-mask::$host"
-          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
 
           UNCLOUD_SSH_KEY="~/.ssh/id_ecdsa"
           mkdir -p ~/.config/uncloud
