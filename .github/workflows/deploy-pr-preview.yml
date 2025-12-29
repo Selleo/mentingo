@@ -50,6 +50,7 @@ jobs:
           export UNCLOUD_SSH_KEY UNCLOUD_CONNECT
           envsubst < "uncloud-config.tpl.yml" > "uncloud-config.yaml"
           mv uncloud-config.yaml ~/.config/uncloud/config.yaml
+          uc ls
 
       - name: Render Compose for PR
         shell: bash
