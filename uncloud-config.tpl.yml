@@ -1,0 +1,6 @@
+current_context: "default"
+contexts:
+  default:
+    connections:
+      - ssh: ${UNCLOUD_CONNECT}
+      - ssh_key_file: ${UNCLOUD_SSH_KEY}
