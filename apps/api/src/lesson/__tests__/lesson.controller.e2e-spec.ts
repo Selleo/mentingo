@@ -1,17 +1,11 @@
 import { COURSE_ENROLLMENT } from "@repo/shared";
 import request from "supertest";
 
-
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
-import {
-  lessons,
-  questions,
-  questionAnswerOptions,
-  studentCourses,
-} from "src/storage/schema";
+import { lessons, questions, questionAnswerOptions, studentCourses } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -203,10 +197,6 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(response.body.data.isQuizFeedbackRedacted).toBe(true);
       expect(response.body.data.quizDetails).toBeDefined();
-      expect(response.body.data.quizDetails.score).toBe(0);
-      expect(response.body.data.quizDetails.correctAnswerCount).toBe(0);
-      expect(response.body.data.quizDetails.wrongAnswerCount).toBe(0);
-      expect(response.body.data.thresholdScore).toBe(0);
 
       if (response.body.data.quizDetails.questions) {
         for (const question of response.body.data.quizDetails.questions) {
@@ -339,9 +329,9 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         })
         .expect(201);
 
-      expect(response.body.data.data.correctAnswerCount).toBe(0);
+      expect(response.body.data.data.correctAnswerCount).toBe(1);
       expect(response.body.data.data.wrongAnswerCount).toBe(0);
-      expect(response.body.data.data.score).toBe(0);
+      expect(response.body.data.data.score).toBe(100);
       expect(response.body.data.data.questionCount).toBeGreaterThan(0);
     });
 
@@ -443,8 +433,6 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .expect(200);
 
       expect(updatedResponse.body.data.isQuizFeedbackRedacted).toBe(true);
-      expect(updatedResponse.body.data.quizDetails.score).toBe(0);
-      expect(updatedResponse.body.data.quizDetails.correctAnswerCount).toBe(0);
 
       const evaluationResponse = await request(app.getHttpServer())
         .post("/api/lesson/evaluation-quiz")
@@ -461,8 +449,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         })
         .expect(201);
 
-      expect(evaluationResponse.body.data.data.correctAnswerCount).toBe(0);
-      expect(evaluationResponse.body.data.data.score).toBe(0);
+      expect(evaluationResponse.body.data.data.correctAnswerCount).toBe(1);
+      expect(evaluationResponse.body.data.data.score).toBe(100);
     });
   });
 });

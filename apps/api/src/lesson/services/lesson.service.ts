@@ -157,14 +157,17 @@ export class LessonService {
       basicInfo?.languageAnswered ?? actualLanguage,
     );
 
+    const isQuizFeedbackRedacted = isStudent && !lesson.quizFeedbackEnabled;
+
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
         if (!question.photoS3Key) return question;
 
         try {
           const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
+          const questionResult = { ...question, photoS3Key: signedUrl };
 
-          return { ...question, photoS3Key: signedUrl };
+          return questionResult;
         } catch (error) {
           console.error(`Failed to get signed URL for ${question.photoS3Key}:`, error);
           return question;
@@ -172,33 +175,16 @@ export class LessonService {
       }),
     );
 
-    const isQuizFeedbackRedacted = isStudent && !lesson.quizFeedbackEnabled;
-
-    if (isQuizFeedbackRedacted) {
-      const redactedQuestions = questionListWithUrls.map((question) => ({
-        ...question,
-        passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
-        options: question.options?.map((option) => ({
-          ...option,
-          isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,
-        })),
-      }));
-
-      const quizDetails = {
-        questions: redactedQuestions,
-        questionCount: redactedQuestions.length,
-        score: 0,
-        correctAnswerCount: 0,
-        wrongAnswerCount: 0,
-      };
-
-      return {
-        ...lesson,
-        quizDetails,
-        thresholdScore: 0,
-        isQuizFeedbackRedacted: true,
-      };
-    }
+    const redactedQuestionList = isQuizFeedbackRedacted
+      ? questionListWithUrls.map((question) => ({
+          ...question,
+          passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
+          options: question.options?.map((option) => ({
+            ...option,
+            isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,
+          })),
+        }))
+      : questionListWithUrls;
 
     if (lesson.lessonCompleted && isNumber(lesson.quizScore)) {
       const [quizResult] = await this.lessonRepository.getQuizResult(
@@ -208,25 +194,25 @@ export class LessonService {
       );
 
       const quizDetails: QuestionDetails = {
-        questions: questionListWithUrls,
-        questionCount: questionListWithUrls.length,
+        questions: redactedQuestionList,
+        questionCount: redactedQuestionList.length,
         score: quizResult?.score ?? 0,
         correctAnswerCount: quizResult?.correctAnswerCount ?? 0,
         wrongAnswerCount: quizResult?.wrongAnswerCount ?? 0,
       };
 
-      return { ...lesson, quizDetails, isQuizFeedbackRedacted: false };
+      return { ...lesson, quizDetails, isQuizFeedbackRedacted };
     }
 
     const quizDetails = {
-      questions: questionListWithUrls,
-      questionCount: questionListWithUrls.length,
+      questions: redactedQuestionList,
+      questionCount: redactedQuestionList.length,
       score: null,
       correctAnswerCount: null,
       wrongAnswerCount: null,
     };
 
-    return { ...lesson, quizDetails, isQuizFeedbackRedacted: false };
+    return { ...lesson, quizDetails, isQuizFeedbackRedacted };
   }
 
   async evaluationQuiz(
@@ -324,24 +310,6 @@ export class LessonService {
             quizScore,
           ),
         );
-
-        const isStudent = userRole === USER_ROLES.STUDENT;
-        const [course] = await this.db
-          .select()
-          .from(courses)
-          .where(eq(courses.id, accessCourseLessonWithDetails.courseId))
-          .limit(1);
-
-        const isQuizFeedbackRedacted = isStudent && !course?.settings.quizFeedbackEnabled;
-
-        if (isQuizFeedbackRedacted) {
-          return {
-            correctAnswerCount: 0,
-            wrongAnswerCount: 0,
-            questionCount: evaluationResult.wrongAnswerCount + evaluationResult.correctAnswerCount,
-            score: 0,
-          };
-        }
 
         return {
           correctAnswerCount: evaluationResult.correctAnswerCount,

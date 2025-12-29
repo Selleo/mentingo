@@ -109,12 +109,11 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
           {!isPreviewMode && (
             <div className="flex w-full justify-between">
               <span className="group relative">
-                {!lesson.isQuizFeedbackRedacted &&
-                  t("studentLessonView.other.score", {
-                    score: lesson.quizDetails?.score ?? 0,
-                    correct: lesson.quizDetails?.correctAnswerCount ?? 0,
-                    questionsNumber: questions.length,
-                  })}
+                {t("studentLessonView.other.score", {
+                  score: lesson.quizDetails?.score ?? 0,
+                  correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                  questionsNumber: questions.length,
+                })}
               </span>
               <span>
                 {t("studentLessonView.other.passingThreshold", {
