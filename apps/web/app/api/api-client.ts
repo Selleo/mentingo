@@ -1,9 +1,11 @@
+import { get } from "lodash-es";
+import { match, P } from "ts-pattern";
+
 import { authService } from "~/modules/Auth/authService";
 import { useAuthStore } from "~/modules/Auth/authStore";
-import { get } from "lodash-es";
 
 import { API } from "./generated-api";
-import { match, P } from "ts-pattern";
+
 
 export const requestManager = {
   controller: new AbortController(),
@@ -18,7 +20,7 @@ const baseURL = (() => {
   const importEnvMode = get(import.meta.env, "MODE") || null;
   const windowEnvApiUrl =
     get(typeof window !== "undefined" ? window : {}, "ENV.VITE_API_URL") || null;
-  const importEnvApiUrl = get(import.meta.env, "VITE_API_URL") || null;
+  const importEnvApiUrl = import.meta.env.VITE_API_URL || null;
   const processEnvApiUrl = get(process.env, "VITE_API_URL") || null;
 
   return match({
@@ -31,7 +33,7 @@ const baseURL = (() => {
     .with({ processEnvApiUrl: P.string }, () => processEnvApiUrl)
     .with({ windowEnvApiUrl: P.string }, () => windowEnvApiUrl)
     .with({ importEnvApiUrl: P.string }, () => importEnvApiUrl)
-    .exhaustive();
+    .otherwise(() => null);
 })() as string;
 
 export const ApiClient = new API({

@@ -9,21 +9,19 @@ import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 import { routes } from "./routes";
+import { get } from "lodash-es";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  const envKeys = Object.keys(env).filter((key) => key.startsWith("VITE_"));
-  const defineEnv = envKeys.reduce(
-    (acc, key) => {
-      acc[`import.meta.env.${key}`] = JSON.stringify(env[key]);
-      return acc;
-    },
-    {} as Record<string, string>,
-  );
+  const processEnvApiUrl = get(process.env, "VITE_API_URL") || null;
+  const processEnvAppUrl = get(process.env, "VITE_APP_URL") || null;
 
   return {
-    define: defineEnv,
+    define: {
+      "import.meta.env.VITE_API_URL": JSON.stringify(processEnvApiUrl),
+      "import.meta.env.VITE_APP_URL": JSON.stringify(processEnvAppUrl),
+    },
     plugins: [
       svgr(),
       cjsInterop({
