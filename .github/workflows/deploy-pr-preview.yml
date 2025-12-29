@@ -38,6 +38,9 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
+          # remove new line from the end of the file and append one new line instead:
+          sed -i '$ d' ~/.ssh/id_ecdsa
+          echo >> ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
           # Extract the host from the UNCLOUD_CONNECT secret
           host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
