@@ -41,7 +41,7 @@ jobs:
           # mask host from logs
           echo "::add-mask::$host"
           ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          echo "GIT_SSH_COMMAND=ssh -i ~/.ssh/id_ecdsa -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes" >> $GITHUB_ENV
+          uc machine init $host -i ~/.ssh/id_ecdsa --no-install --no-caddy --no-dns
 
       - name: Render Compose for PR
         shell: bash
