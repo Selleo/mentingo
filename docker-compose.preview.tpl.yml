@@ -4,8 +4,8 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: guidebook
-      POSTGRES_DB: guidebook
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: database-pr-${PR_ID}
     volumes:
       - db-preview-pr-${PR_ID}-data:/var/lib/postgresql/data
     healthcheck:
@@ -25,13 +25,19 @@ services:
     volumes:
       - redis-preview-pr-${PR_ID}-data:/data
 
+  mailhog-preview-pr-${PR_ID}:
+    image: mailhog/mailhog
+    restart: always
+    x-ports:
+      - ${PREVIEW_MAILHOG_DOMAIN}:8025/tcp
+
   minio-preview-pr-${PR_ID}:
     image: quay.io/minio/minio:latest
     container_name: minio-preview-pr-${PR_ID}
     restart: always
     environment:
       MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
     volumes:
       - minio-preview-pr-${PR_ID}-data:/data
     command: server /data --console-address ":9001"
@@ -48,8 +54,10 @@ services:
       minio-preview-pr-${PR_ID}:
         condition: service_healthy
     restart: "no"
-    env_file: ./apps/api/.env
     environment:
+      S3_BUCKET_NAME: "preview-pr-${PR_ID}"
+      S3_ACCESS_KEY_ID: "minioadmin"
+      S3_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
       MINIO_HOST: "minio-preview-pr-${PR_ID}"
     volumes:
       - ./create-minio-bucket.sh:/create-minio-bucket.sh
@@ -72,7 +80,21 @@ services:
         condition: service_completed_successfully
     command: server
     environment:
-      DATABASE_URL: "postgresql://postgres:guidebook@db-preview-pr-${PR_ID}:5432/guidebook"
+      EMAIL_ADAPTER: "mailhog"
+      SMTP_HOST: "mailhog-preview-pr-${PR_ID}"
+      SMTP_PORT: "1025"
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+      SMTP_EMAIL_FROM: "noreply@lms.selleo.app"
+      JWT_SECRET: "${JWT_SECRET}"
+      JWT_REFRESH_SECRET: "${JWT_REFRESH_SECRET}"
+      JWT_EXPIRATION_TIME: "24h"
+      S3_REGION: "eu-central-1"
+      S3_ACCESS_KEY_ID: "minioadmin"
+      S3_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
+      S3_BUCKET_NAME: "preview-pr-${PR_ID}"
+      CORS_ORIGIN: "https://${PREVIEW_WEB_DOMAIN}"
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@db-preview-pr-${PR_ID}:5432/guidebook"
       REDIS_URL: "redis://redis-preview-pr-${PR_ID}:6379"
       S3_ENDPOINT: "http://minio-preview-pr-${PR_ID}:9000"
     x-ports:
