@@ -57,7 +57,7 @@ jobs:
           mv uncloud-config.yaml ~/.config/uncloud/config.yaml
           # make it 600:
           chmod 600 ~/.config/uncloud/config.yaml
-          uc ctx ls
+          uc ctx use default
           uc ls
 
       - name: Render Compose for PR
