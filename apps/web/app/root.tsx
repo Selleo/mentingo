@@ -5,10 +5,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
   useRouteError,
 } from "@remix-run/react";
-import { get } from "lodash-es";
 
 import { PlatformFavicon } from "./components/PlatformFavicon";
 import { Toaster } from "./components/ui/toaster";
@@ -29,22 +27,7 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export function loader() {
-  const importEnvApiUrl = get(import.meta.env, "VITE_API_URL") || null;
-  const processEnvApiUrl = get(process.env, "VITE_API_URL") || null;
-  const importEnvAppUrl = get(import.meta.env, "VITE_APP_URL") || null;
-  const processEnvAppUrl = get(process.env, "VITE_APP_URL") || null;
-
-  return {
-    ENV: {
-      VITE_API_URL: importEnvApiUrl || processEnvApiUrl || "",
-      VITE_APP_URL: importEnvAppUrl || processEnvAppUrl || "",
-    },
-  };
-}
-
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { ENV } = useLoaderData<typeof loader>();
   return (
     <html lang="en" className="scroll-smooth">
       <head>
@@ -52,10 +35,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        <script
-          type="text/javascript"
-          dangerouslySetInnerHTML={{ __html: `window.ENV = ${JSON.stringify(ENV)};` }}
-        />
       </head>
       <body>
         {children}

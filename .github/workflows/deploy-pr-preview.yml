@@ -54,7 +54,12 @@ jobs:
 
           # mask host from logs
           echo "::add-mask::$host"
-          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}"
+          # do not print output of uc ps, just test connection
+          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "Failed to connect to Uncloud"
+            exit 1
+          fi
 
       - name: Render Compose for PR
         shell: bash

@@ -16,15 +16,19 @@ export const requestManager = {
 
 const baseURL = (() => {
   const importEnvMode = get(import.meta.env, "MODE") || null;
-  const windowEnvApiUrl = get(window, "ENV.VITE_API_URL") || null;
+  const windowEnvApiUrl =
+    get(typeof window !== "undefined" ? window : {}, "ENV.VITE_API_URL") || null;
   const importEnvApiUrl = get(import.meta.env, "VITE_API_URL") || null;
+  const processEnvApiUrl = get(process.env, "VITE_API_URL") || null;
 
   return match({
     importEnvMode,
     windowEnvApiUrl,
     importEnvApiUrl,
+    processEnvApiUrl,
   })
     .with({ importEnvMode: "test" }, () => "http://localhost:3000")
+    .with({ processEnvApiUrl: P.string }, () => processEnvApiUrl)
     .with({ windowEnvApiUrl: P.string }, () => windowEnvApiUrl)
     .with({ importEnvApiUrl: P.string }, () => importEnvApiUrl)
     .exhaustive();
