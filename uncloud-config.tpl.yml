@@ -1,4 +1,4 @@
-current_context: "default"
+current_context: default
 contexts:
   default:
     connections:

@@ -80,7 +80,7 @@ jobs:
           # master_key
           MASTER_KEY=$(echo -n "preview-pr-${PR_ID}" | openssl dgst -sha256 -binary | head -c 32 | openssl base64)
           export MASTER_KEY
-          uc --connect "$UNCLOUD_CONNECT" deploy -f docker-compose.pr.yml -y
+          uc deploy -f docker-compose.pr.yml -y
 
       - name: Comment PR - send message to PR preview link
         env:
