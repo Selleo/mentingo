@@ -48,7 +48,7 @@ jobs:
 
           # mask host from logs
           echo "::add-mask::$host"
-          uc ps
+          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}"
 
       - name: Render Compose for PR
         shell: bash
