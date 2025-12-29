@@ -47,7 +47,6 @@ import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
-import { hasLocalizableUpdates } from "src/localization/utils/localization-helpers";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
@@ -72,6 +71,7 @@ import {
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
+import { hasLocalizableUpdates } from "src/utils/getLocalizableKeys";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
