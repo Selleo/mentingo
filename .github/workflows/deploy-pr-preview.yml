@@ -33,34 +33,21 @@ jobs:
         shell: bash
         env:
           UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
-          # remove new line from the end of the file and append one new line instead:
-          sed -i '$ d' ~/.ssh/id_ecdsa
-          echo >> ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
           # Extract the host from the UNCLOUD_CONNECT secret
           host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
 
           # mask host from logs
           echo "::add-mask::$host"
-
-          # print 8 chars of the UNCLOUD_CONNECT:
-          echo "${{ secrets.UNCLOUD_CONNECT }}" | cut -c1-8
-
-          UNCLOUD_SSH_KEY="~/.ssh/id_ecdsa"
-          mkdir -p ~/.config/uncloud
-          export UNCLOUD_SSH_KEY UNCLOUD_CONNECT
-          envsubst < "uncloud-config.tpl.yml" > "uncloud-config.yaml"
-          # print the uncloud-config.yaml file:
-          cat uncloud-config.yaml
-          mv uncloud-config.yaml ~/.config/uncloud/config.yaml
-          # make it 600:
-          chmod 600 ~/.config/uncloud/config.yaml
-          uc ls
+          chmod 644 ~/.ssh/known_hosts
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          uc machine add "${{ secrets.UNCLOUD_CONNECT }}" -i ~/.ssh/id_ecdsa --no-install --no-caddy
 
       - name: Render Compose for PR
         shell: bash
@@ -91,7 +78,7 @@ jobs:
           # master_key
           MASTER_KEY=$(echo -n "preview-pr-${PR_ID}" | openssl dgst -sha256 -binary | head -c 32 | openssl base64)
           export MASTER_KEY
-          uc deploy -f docker-compose.pr.yml -y
+          uc --connect "$UNCLOUD_CONNECT" deploy -f docker-compose.pr.yml -y
 
       - name: Comment PR - send message to PR preview link
         env:
