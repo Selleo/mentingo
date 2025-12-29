@@ -1,0 +1,119 @@
+name: PREVIEW PR - Deploy
+
+env:
+  HUSKY: 0
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: pr-preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy-pr-preview:
+    if: ${{ github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Uncloud CLI
+        run: |
+          curl -fsS https://get.uncloud.run/install.sh | sh
+          uc --version
+
+      - name: Setup SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
+          chmod 600 ~/.ssh/id_ecdsa
+          # Extract the host from the UNCLOUD_CONNECT secret
+          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+
+      - name: Render Compose for PR
+        shell: bash
+        env:
+          PR_ID: ${{ github.event.number }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+          PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN
+          envsubst < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
+          # ensure the file exists and contains PR_ID inside:
+          if ! grep -q "$PR_ID" /tmp/docker-compose.pr.yml; then
+            echo "Error: PR_ID not found in docker-compose.pr.yml"
+            exit 1
+          fi
+
+      - name: Deploy PR Preview stack
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+        run: |
+          uc deploy -f /tmp/docker-compose.pr.yml -y
+
+      - name: Comment PR - send message to PR preview link
+        env:
+          PR_ID: ${{ github.event.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+          url="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          body=$(jq -n --arg u "$url" '{body: "Preview of PR #${PR_ID} is available at: $u 🚀"}')
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/issues/${{ PR_ID }}/comments" \
+            -d "$body"
+
+  cleanup-pr-preview:
+    if: ${{ github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Uncloud CLI
+        run: |
+          curl -fsS https://get.uncloud.run/install.sh | sh
+          uc --version
+
+      - name: Setup SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
+          chmod 600 ~/.ssh/id_ecdsa
+          # Extract the host from the UNCLOUD_CONNECT secret
+          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+
+      - name: Cleanup PR Preview stack
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          PR_ID: ${{ github.event.number }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+          # render compose as deployment does:
+          PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN
+          envsubst < "docker-compose.preview.tpl.yml" > /tmp/docker-compose.pr.yml
+          # collect services and volumes:
+          services="$(yq -r '.services | keys | .[]' /tmp/docker-compose.pr.yml)"
+          volumes="$(yq -r '.volumes | keys | .[]' /tmp/docker-compose.pr.yml)"
+          echo "$services" | xargs -r uc rm || true
+          echo "$volumes" | xargs -r uc volume rm -y || true
