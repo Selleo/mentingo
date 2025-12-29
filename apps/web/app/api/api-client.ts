@@ -1,7 +1,9 @@
 import { authService } from "~/modules/Auth/authService";
 import { useAuthStore } from "~/modules/Auth/authStore";
+import { get } from "lodash-es";
 
 import { API } from "./generated-api";
+import { match, P } from "ts-pattern";
 
 export const requestManager = {
   controller: new AbortController(),
@@ -12,8 +14,24 @@ export const requestManager = {
   },
 };
 
+const baseURL = (() => {
+  const importEnvMode = get(import.meta.env, "MODE") || null;
+  const windowEnvApiUrl = get(window, "ENV.VITE_API_URL") || null;
+  const importEnvApiUrl = get(import.meta.env, "VITE_API_URL") || null;
+
+  return match({
+    importEnvMode,
+    windowEnvApiUrl,
+    importEnvApiUrl,
+  })
+    .with({ importEnvMode: "test" }, () => "http://localhost:3000")
+    .with({ windowEnvApiUrl: P.string }, () => windowEnvApiUrl)
+    .with({ importEnvApiUrl: P.string }, () => importEnvApiUrl)
+    .exhaustive();
+})() as string;
+
 export const ApiClient = new API({
-  baseURL: import.meta.env.MODE === "test" ? "http://localhost:3000" : import.meta.env.VITE_API_URL,
+  baseURL,
   secure: true,
   withCredentials: true,
 });

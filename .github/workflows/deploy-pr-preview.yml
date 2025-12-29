@@ -95,8 +95,31 @@ jobs:
           set -euo pipefail
           PREVIEW_WEB_DOMAIN="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+
+          # get comments:
+          comments=$(curl -sS \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/issues/${PR_ID}/comments")
+
+          already_exists=$(echo "$comments" | jq '
+            any(
+              .[] |
+              select(
+                (.user.type == "Bot" or .user.login == "github-actions[bot]") and
+                (.body | test("preview ready"; "i"))
+              )
+            )
+          ')
+
+          if [[ "$already_exists" == "true" ]]; then
+            echo "Preview comment already exists — skipping."
+            exit 0
+          fi
+
           body=$(jq -n --arg w "$PREVIEW_WEB_DOMAIN" --arg a "$PREVIEW_API_DOMAIN" \
             '{body: ("✅ Preview ready:\n- Web: " + $w + "\n- API: " + $a)}')
+
           curl -sS -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
