@@ -29,7 +29,7 @@ services:
     image: mailhog/mailhog
     restart: always
     x-ports:
-      - ${PREVIEW_MAILHOG_DOMAIN}:8025/tcp
+      - ${PREVIEW_MAILHOG_DOMAIN}:8025/https
 
   minio-preview-pr-${PR_ID}:
     image: quay.io/minio/minio:latest
