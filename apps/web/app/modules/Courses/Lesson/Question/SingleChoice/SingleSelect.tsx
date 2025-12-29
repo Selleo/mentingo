@@ -5,6 +5,7 @@ import { Icon } from "~/components/Icon";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
+import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 import { SELECT_OPTION_VARIANTS } from "~/modules/Courses/Lesson/constants";
 
 import type { QuizForm } from "~/modules/Courses/Lesson/types";
@@ -38,7 +39,12 @@ export const SingleSelect = ({
 }: SelectAnswerOptionQuizProps) => {
   const { register, setValue, getValues } = useFormContext<QuizForm>();
   const { t } = useTranslation();
+  const { isQuizFeedbackRedacted, isQuizSubmitted } = useQuizContext();
   const getAnswerClasses = () => {
+    if (isQuizFeedbackRedacted && isStudentAnswer && isQuizSubmitted) {
+      return SELECT_OPTION_VARIANTS.redactedAnswerSelected;
+    }
+
     if (isCorrectAnswer === null) return SELECT_OPTION_VARIANTS.default;
 
     if (isCorrectAnswer || isCorrectAnswerNotSelected) {
@@ -107,11 +113,14 @@ export const SingleSelect = ({
       />
       <Icon
         name={
-          isCorrectAnswer || isCorrectAnswerNotSelected
+          isQuizFeedbackRedacted && isStudentAnswer
             ? "InputRoundedMarkerSuccess"
-            : "InputRoundedMarkerError"
+            : isCorrectAnswer || isCorrectAnswerNotSelected
+              ? "InputRoundedMarkerSuccess"
+              : "InputRoundedMarkerError"
         }
         className={cn("!ml-0", {
+          grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
           "sr-only": !isCompleted || (!isCorrectAnswerNotSelected && !isStudentAnswer),
         })}
       />

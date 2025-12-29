@@ -157,20 +157,34 @@ export class LessonService {
       basicInfo?.languageAnswered ?? actualLanguage,
     );
 
+    const isQuizFeedbackRedacted = isStudent && !lesson.quizFeedbackEnabled;
+
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {
         if (!question.photoS3Key) return question;
 
         try {
           const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
+          const questionResult = { ...question, photoS3Key: signedUrl };
 
-          return { ...question, photoS3Key: signedUrl };
+          return questionResult;
         } catch (error) {
           console.error(`Failed to get signed URL for ${question.photoS3Key}:`, error);
           return question;
         }
       }),
     );
+
+    const redactedQuestionList = isQuizFeedbackRedacted
+      ? questionListWithUrls.map((question) => ({
+          ...question,
+          passQuestion: typeof question.passQuestion === "boolean" ? false : question.passQuestion,
+          options: question.options?.map((option) => ({
+            ...option,
+            isCorrect: typeof option.isCorrect === "boolean" ? false : option.isCorrect,
+          })),
+        }))
+      : questionListWithUrls;
 
     if (lesson.lessonCompleted && isNumber(lesson.quizScore)) {
       const [quizResult] = await this.lessonRepository.getQuizResult(
@@ -180,25 +194,25 @@ export class LessonService {
       );
 
       const quizDetails: QuestionDetails = {
-        questions: questionListWithUrls,
-        questionCount: questionListWithUrls.length,
+        questions: redactedQuestionList,
+        questionCount: redactedQuestionList.length,
         score: quizResult?.score ?? 0,
         correctAnswerCount: quizResult?.correctAnswerCount ?? 0,
         wrongAnswerCount: quizResult?.wrongAnswerCount ?? 0,
       };
 
-      return { ...lesson, quizDetails };
+      return { ...lesson, quizDetails, isQuizFeedbackRedacted };
     }
 
     const quizDetails = {
-      questions: questionListWithUrls,
-      questionCount: questionListWithUrls.length,
+      questions: redactedQuestionList,
+      questionCount: redactedQuestionList.length,
       score: null,
       correctAnswerCount: null,
       wrongAnswerCount: null,
     };
 
-    return { ...lesson, quizDetails };
+    return { ...lesson, quizDetails, isQuizFeedbackRedacted };
   }
 
   async evaluationQuiz(
@@ -408,8 +422,8 @@ export class LessonService {
 
     const tags = $("a").toArray();
 
-    const tagsWithImages = tags.filter((tag) =>
-      $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
+    const tagsWithImages = tags.filter(
+      (tag) => $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
     );
 
     tagsWithImages.forEach((tag) => {

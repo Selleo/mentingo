@@ -62,7 +62,11 @@
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Kolejność lekcji została pomyślnie zaktualizowana",
-    "sequenceUpdateFailed": "Nie udało się zaktualizować kolejności lekcji"
+    "sequenceUpdateFailed": "Nie udało się zaktualizować kolejności lekcji",
+    "quizFeedbackUpdatedSuccessfully": "Opcja \"Feedback po quizie\" została pomyślnie zaktualizowana",
+    "quizFeedbackUpdateFailed": "Nie udało się zaktualizować opcji \"Feedback po quizie\"",
+    "settingsUpdatedSuccessfully": "Ustawienia zostały pomyślnie zaktualizowane",
+    "settingsUpdateFailed": "Nie udało się zaktualizować ustawień"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",
@@ -1061,6 +1065,8 @@
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
         "enforceLessonSequence": "Wymuś sekwencję lekcji",
         "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
+        "enableQuizFeedback": "Feedback po quizie",
+        "enableQuizFeedbackDescription": "Po przesłaniu quizu student zobaczy, które odpowiedzi były poprawne, niepoprawne lub pominięte.",
         "fallbackLanguageWarning": "Ostrzeżenie: Niektóre pola są puste. Zamiast nich zostaną użyte tłumaczenia z języka bazowego.",
         "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
       },

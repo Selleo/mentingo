@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { CircularProgress } from "~/components/ui/circular-progress";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
+import { VideoProvider } from "~/components/VideoPlayer/VideoPlayerContext";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import { LessonContent } from "~/modules/Courses/Lesson/LessonContent";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -124,17 +125,19 @@ export default function LessonPreviewDialog({
               </div>
             </div>
           </div>
-          <LessonContent
-            lesson={lesson}
-            course={course}
-            lessonsAmount={currentChapter?.lessons.length ?? 0}
-            handleNext={() => {}}
-            handlePrevious={() => {}}
-            isLastLesson={true}
-            isFirstLesson={true}
-            lessonLoading={isLoadingLesson}
-            isPreviewMode={true}
-          />
+          <VideoProvider>
+            <LessonContent
+              lesson={lesson}
+              course={course}
+              lessonsAmount={currentChapter?.lessons.length ?? 0}
+              handleNext={() => {}}
+              handlePrevious={() => {}}
+              isLastLesson={true}
+              isFirstLesson={true}
+              lessonLoading={isLoadingLesson}
+              isPreviewMode={true}
+            />
+          </VideoProvider>
         </div>
       </DialogContent>
     </Dialog>

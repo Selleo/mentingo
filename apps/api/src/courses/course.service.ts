@@ -28,7 +28,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
-import { camelCase, isEmpty, isEqual } from "lodash";
+import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
 
 import { AiService } from "src/ai/services/ai.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
@@ -117,6 +117,8 @@ import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment"
 import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
+import type { CoursesSettings } from "./types/settings";
 import type { SupportedLanguages } from "@repo/shared";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -582,8 +584,9 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl =
-              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+              authorAvatarUrl,
+            );
 
             return {
               ...itemWithoutReferences,
@@ -672,7 +675,7 @@ export class CourseService {
           EXISTS (
             SELECT 1
             FROM ${studentChapterProgress}
-            JOIN ${studentCourses} ON ${studentCourses.courseId} = ${course.id} AND ${studentCourses.studentId} = ${studentChapterProgress.studentId} 
+            JOIN ${studentCourses} ON ${studentCourses.courseId} = ${course.id} AND ${studentCourses.studentId} = ${studentChapterProgress.studentId}
             WHERE ${studentChapterProgress.chapterId} = ${chapters.id}
               AND ${studentChapterProgress.courseId} = ${course.id}
               AND ${studentChapterProgress.studentId} = ${userId}
@@ -1039,8 +1042,9 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl =
-          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
+        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
+          authorAvatarUrl,
+        );
 
         return {
           ...courseWithoutReferences,
@@ -1101,9 +1105,9 @@ export class CourseService {
     return updatedCourse;
   }
 
-  async updateLessonSequenceEnabled(
+  async updateCourseSettings(
     courseId: UUIDType,
-    lessonSequenceEnabled: boolean,
+    settings: UpdateCourseSettings,
     currentUser: CurrentUser,
   ) {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
@@ -1119,17 +1123,11 @@ export class CourseService {
 
     const previousSnapshot = await this.buildCourseActivitySnapshot(courseId, resolvedLanguage);
 
+    const incomingSettings = pickBy(settings, (value) => value !== undefined && value !== null);
     const [updatedCourse] = await this.db
       .update(courses)
       .set({
-        settings: sql`
-          jsonb_set(
-            COALESCE(${courses.settings}, '{}'::jsonb),
-        '{lessonSequenceEnabled}',
-        to_jsonb(${lessonSequenceEnabled}::boolean),
-        true
-        )
-      `,
+        settings: { ...course.settings, ...incomingSettings },
       })
       .where(eq(courses.id, courseId))
       .returning();
@@ -1152,6 +1150,16 @@ export class CourseService {
     );
 
     return updatedCourse;
+  }
+
+  async getCourseSettings(courseId: UUIDType): Promise<CoursesSettings> {
+    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    return course.settings;
   }
 
   private areCourseSnapshotsEqual(

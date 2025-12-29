@@ -61,7 +61,11 @@
   },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
-    "sequenceUpdateFailed": "Failed to update lesson sequence"
+    "sequenceUpdateFailed": "Failed to update lesson sequence",
+    "quizFeedbackUpdatedSuccessfully": "\"Quiz feedback\" option updated successfully",
+    "quizFeedbackUpdateFailed": "Failed to update \"Quiz feedback\" option",
+    "settingsUpdatedSuccessfully": "Settings updated successfully",
+    "settingsUpdateFailed": "Failed to update settings"
   },
   "uploadFile": {
     "header": "Click to upload",
@@ -1077,6 +1081,8 @@
         "enableCertificate": "Enable certificate",
         "enforceLessonSequence": "Enforce lesson sequence",
         "requireSequentialLessons": "Require students to complete lessons in order",
+        "enableQuizFeedback": "Quiz feedback",
+        "enableQuizFeedbackDescription": "After submitting the quiz, the student will see which answers were correct, incorrect, or unanswered.",
         "fallbackLanguageWarning": "Warning: Some fields are empty. Translations from the base language will be used instead.",
         "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
       },

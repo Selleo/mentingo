@@ -19,6 +19,8 @@ import { toast } from "~/components/ui/use-toast";
 import { useUserRole } from "~/hooks/useUserRole";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { QuizContextProvider } from "../components/QuizContextProvider";
+
 import { Questions } from "./Questions";
 import { QuizFormSchema } from "./schemas";
 import {
@@ -91,91 +93,96 @@ export const Quiz = ({ lesson, userId, isPreviewMode = false, previewLessonId }:
 
   return (
     <FormProvider {...methods}>
-      <form
-        className="flex w-full flex-col gap-y-4"
-        onSubmit={methods.handleSubmit(handleOnSubmit, () => {
-          toast({
-            variant: "destructive",
-            description: t("studentLessonView.validation.unansweredQuestions"),
-          });
-        })}
+      <QuizContextProvider
+        isQuizFeedbackRedacted={lesson.isQuizFeedbackRedacted}
+        isQuizSubmitted={isUserSubmittedAnswer}
       >
-        {!isPreviewMode && (
-          <div className="flex w-full justify-between">
-            <span className="group relative">
-              {t("studentLessonView.other.score", {
-                score: lesson.quizDetails?.score ?? 0,
-                correct: lesson.quizDetails?.correctAnswerCount ?? 0,
-                questionsNumber: questions.length,
-              })}
-            </span>
-            <span>
-              {t("studentLessonView.other.passingThreshold", {
-                threshold: lesson.thresholdScore,
-                correct: requiredCorrect,
-                questionsNumber: questions.length,
-              })}
-            </span>
-          </div>
-        )}
-
-        <Questions
-          questions={questions}
-          isQuizCompleted={isUserSubmittedAnswer}
-          lessonId={previewLessonId || lessonId}
-        />
-        {!isPreviewMode && (
-          <div className="flex gap-x-2 self-end">
-            <div className="group relative">
-              <TooltipProvider delayDuration={0}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="inline-block">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={handleRetake}
-                        className="gap-x-1"
-                        disabled={isAdminLike || !isUserSubmittedAnswer || !canRetake}
-                      >
-                        <span>
-                          {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
-                            lesson.attempts,
-                            lesson.attemptsLimit,
-                            canRetake,
-                            hoursLeft,
-                          )}`}
-                        </span>
-                      </Button>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    align="center"
-                    className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                  >
-                    {getQuizTooltipText(
-                      isUserSubmittedAnswer,
-                      canRetake,
-                      hoursLeft,
-                      lesson.quizCooldownInHours,
-                    )}
-                    <TooltipArrow className="fill-black" />
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+        <form
+          className="flex w-full flex-col gap-y-4"
+          onSubmit={methods.handleSubmit(handleOnSubmit, () => {
+            toast({
+              variant: "destructive",
+              description: t("studentLessonView.validation.unansweredQuestions"),
+            });
+          })}
+        >
+          {!isPreviewMode && (
+            <div className="flex w-full justify-between">
+              <span className="group relative">
+                {t("studentLessonView.other.score", {
+                  score: lesson.quizDetails?.score ?? 0,
+                  correct: lesson.quizDetails?.correctAnswerCount ?? 0,
+                  questionsNumber: questions.length,
+                })}
+              </span>
+              <span>
+                {t("studentLessonView.other.passingThreshold", {
+                  threshold: lesson.thresholdScore,
+                  correct: requiredCorrect,
+                  questionsNumber: questions.length,
+                })}
+              </span>
             </div>
-            <Button
-              type="submit"
-              className="flex items-center gap-x-2"
-              disabled={isAdminLike || isUserSubmittedAnswer}
-            >
-              <span>{t("studentLessonView.button.submit")}</span>
-              <Icon name="ArrowRight" className="h-auto w-4" />
-            </Button>
-          </div>
-        )}
-      </form>
+          )}
+
+          <Questions
+            questions={questions}
+            isQuizCompleted={isUserSubmittedAnswer}
+            lessonId={previewLessonId || lessonId}
+          />
+          {!isPreviewMode && (
+            <div className="flex gap-x-2 self-end">
+              <div className="group relative">
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="inline-block">
+                        <Button
+                          variant="outline"
+                          type="button"
+                          onClick={handleRetake}
+                          className="gap-x-1"
+                          disabled={isAdminLike || !isUserSubmittedAnswer || !canRetake}
+                        >
+                          <span>
+                            {`${t("studentLessonView.button.retake")} ${leftAttemptsToDisplay(
+                              lesson.attempts,
+                              lesson.attemptsLimit,
+                              canRetake,
+                              hoursLeft,
+                            )}`}
+                          </span>
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                    >
+                      {getQuizTooltipText(
+                        isUserSubmittedAnswer,
+                        canRetake,
+                        hoursLeft,
+                        lesson.quizCooldownInHours,
+                      )}
+                      <TooltipArrow className="fill-black" />
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Button
+                type="submit"
+                className="flex items-center gap-x-2"
+                disabled={isAdminLike || isUserSubmittedAnswer}
+              >
+                <span>{t("studentLessonView.button.submit")}</span>
+                <Icon name="ArrowRight" className="h-auto w-4" />
+              </Button>
+            </div>
+          )}
+        </form>
+      </QuizContextProvider>
     </FormProvider>
   );
 };
