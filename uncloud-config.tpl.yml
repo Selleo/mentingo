@@ -3,4 +3,4 @@ contexts:
   default:
     connections:
       - ssh: ${UNCLOUD_CONNECT}
-      - ssh_key_file: ${UNCLOUD_SSH_KEY}
+        ssh_key_file: ${UNCLOUD_SSH_KEY}
