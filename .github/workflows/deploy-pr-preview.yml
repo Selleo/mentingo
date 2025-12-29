@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 concurrency:
-  group: pr-preview-${{ github.event.number }}
+  group: pr-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
@@ -43,7 +43,7 @@ jobs:
       - name: Render Compose for PR
         shell: bash
         env:
-          PR_ID: ${{ github.event.number }}
+          PR_ID: ${{ github.event.pull_request.number }}
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
@@ -65,7 +65,7 @@ jobs:
 
       - name: Comment PR - send message to PR preview link
         env:
-          PR_ID: ${{ github.event.number }}
+          PR_ID: ${{ github.event.pull_request.number }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
@@ -103,7 +103,7 @@ jobs:
       - name: Cleanup PR Preview stack
         env:
           UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
-          PR_ID: ${{ github.event.number }}
+          PR_ID: ${{ github.event.pull_request.number }}
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
