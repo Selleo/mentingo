@@ -47,6 +47,7 @@ import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { hasLocalizableUpdates } from "src/localization/utils/localization-helpers";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
@@ -1267,7 +1268,10 @@ export class CourseService {
           throw new BadRequestException("adminCourseView.toast.updateCourseMissingLanguage");
         }
 
-        if (!existingCourse.availableLocales.includes(updateCourseBody.language)) {
+        if (
+          !existingCourse.availableLocales.includes(updateCourseBody.language) &&
+          hasLocalizableUpdates(courses, updateCourseBody)
+        ) {
           throw new BadRequestException("adminCourseView.toast.languageNotSupported");
         }
 
