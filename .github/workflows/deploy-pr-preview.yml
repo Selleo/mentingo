@@ -45,8 +45,6 @@ jobs:
 
           # mask host from logs
           echo "::add-mask::$host"
-          chmod 644 ~/.ssh/known_hosts
-          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
           uc machine add "${{ secrets.UNCLOUD_CONNECT }}" -i ~/.ssh/id_ecdsa --no-install --no-caddy
 
       - name: Render Compose for PR
