@@ -71,6 +71,7 @@ import {
 import { StripeService } from "src/stripe/stripe.service";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { UserService } from "src/user/user.service";
+import { hasLocalizableUpdates } from "src/utils/getLocalizableKeys";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
@@ -1267,7 +1268,10 @@ export class CourseService {
           throw new BadRequestException("adminCourseView.toast.updateCourseMissingLanguage");
         }
 
-        if (!existingCourse.availableLocales.includes(updateCourseBody.language)) {
+        if (
+          !existingCourse.availableLocales.includes(updateCourseBody.language) &&
+          hasLocalizableUpdates(courses, updateCourseBody)
+        ) {
           throw new BadRequestException("adminCourseView.toast.languageNotSupported");
         }
 
