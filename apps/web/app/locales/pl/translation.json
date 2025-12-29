@@ -64,7 +64,9 @@
     "sequenceUpdatedSuccessfully": "Kolejność lekcji została pomyślnie zaktualizowana",
     "sequenceUpdateFailed": "Nie udało się zaktualizować kolejności lekcji",
     "quizFeedbackUpdatedSuccessfully": "Opcja \"Feedback po quizie\" została pomyślnie zaktualizowana",
-    "quizFeedbackUpdateFailed": "Nie udało się zaktualizować opcji \"Feedback po quizie\""
+    "quizFeedbackUpdateFailed": "Nie udało się zaktualizować opcji \"Feedback po quizie\"",
+    "settingsUpdatedSuccessfully": "Ustawienia zostały pomyślnie zaktualizowane",
+    "settingsUpdateFailed": "Nie udało się zaktualizować ustawień"
   },
   "uploadFile": {
     "header": "Kliknij, aby przesłać",

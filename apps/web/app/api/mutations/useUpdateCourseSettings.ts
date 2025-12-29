@@ -1,5 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
+import { get } from "lodash-es";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { ApiClient } from "~/api/api-client";
 import { queryClient } from "~/api/queryClient";
@@ -26,33 +28,33 @@ export function useUpdateCourseSettings() {
     },
     onSuccess: (_, { courseId, data }) => {
       queryClient.invalidateQueries({ queryKey: getCourseSettingsQueryKey({ courseId }) });
-      if ("lessonSequenceEnabled" in data) {
-        queryClient.invalidateQueries({ queryKey: getLessonSequenceQueryKey({ courseId }) });
-        toast({
-          variant: "default",
-          description: t("lessons.sequenceUpdatedSuccessfully"),
-        });
-      }
-      if ("quizFeedbackEnabled" in data) {
-        toast({
-          variant: "default",
-          description: t("lessons.quizFeedbackUpdatedSuccessfully"),
-        });
-      }
+      const changedValues = Object.keys(data).filter(
+        (key) => get(data, key) !== undefined,
+      ) as (keyof UpdateCourseSettingsBody)[];
+      const description = match(changedValues)
+        .with(["lessonSequenceEnabled"], () => {
+          queryClient.invalidateQueries({ queryKey: getLessonSequenceQueryKey({ courseId }) });
+          return t("lessons.sequenceUpdatedSuccessfully");
+        })
+        .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdatedSuccessfully"))
+        .otherwise(() => t("lessons.settingsUpdatedSuccessfully"));
+      toast({
+        variant: "default",
+        description,
+      });
     },
-    onError: (_, data) => {
-      if ("lessonSequenceEnabled" in data) {
-        toast({
-          variant: "destructive",
-          description: t("lessons.sequenceUpdateFailed"),
-        });
-      }
-      if ("quizFeedbackEnabled" in data) {
-        toast({
-          variant: "destructive",
-          description: t("lessons.quizFeedbackUpdateFailed"),
-        });
-      }
+    onError: (_, { data }) => {
+      const changedValues = Object.keys(data).filter(
+        (key) => get(data, key) !== undefined,
+      ) as (keyof UpdateCourseSettingsBody)[];
+      const description = match(changedValues)
+        .with(["lessonSequenceEnabled"], () => t("lessons.sequenceUpdateFailed"))
+        .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdateFailed"))
+        .otherwise(() => t("lessons.settingsUpdateFailed"));
+      toast({
+        variant: "destructive",
+        description,
+      });
     },
   });
 }

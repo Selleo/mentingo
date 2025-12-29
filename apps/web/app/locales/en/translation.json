@@ -63,7 +63,9 @@
     "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
     "sequenceUpdateFailed": "Failed to update lesson sequence",
     "quizFeedbackUpdatedSuccessfully": "\"Quiz feedback\" option updated successfully",
-    "quizFeedbackUpdateFailed": "Failed to update \"Quiz feedback\" option"
+    "quizFeedbackUpdateFailed": "Failed to update \"Quiz feedback\" option",
+    "settingsUpdatedSuccessfully": "Settings updated successfully",
+    "settingsUpdateFailed": "Failed to update settings"
   },
   "uploadFile": {
     "header": "Click to upload",
