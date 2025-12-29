@@ -70,8 +70,10 @@ jobs:
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
-          url="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
-          body=$(jq -n --arg u "$url" '{body: "Preview of PR #${PR_ID} is available at: $u 🚀"}')
+          PREVIEW_WEB_DOMAIN="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_API_DOMAIN="https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          body=$(jq -n --arg w "$PREVIEW_WEB_DOMAIN" --arg a "$PREVIEW_API_DOMAIN" \
+            '{body: ("✅ Preview ready:\n- Web: " + $w + "\n- API: " + $a)}')
           curl -sS -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
