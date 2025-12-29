@@ -115,6 +115,7 @@ services:
       - ${PREVIEW_WEB_DOMAIN}:8080/https
     environment:
       VITE_API_URL: "https://${PREVIEW_API_DOMAIN}"
+      VITE_APP_URL: "https://${PREVIEW_WEB_DOMAIN}"
 
 volumes:
   db-preview-pr-${PR_ID}-data:
