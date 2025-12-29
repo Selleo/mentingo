@@ -70,6 +70,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       "lessons",
       "questions",
       "question_answer_options",
+      "student_question_answers",
       "student_lesson_progress",
       "student_chapter_progress",
       "student_courses",
