@@ -42,7 +42,7 @@ jobs:
           # mask host from logs
           echo "::add-mask::$host"
           ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
-          echo -e "n\n" | uc machine init $host -i ~/.ssh/id_ecdsa --no-install --no-caddy --no-dns
+          echo -e "n\n" | uc machine init $host -i ~/.ssh/id_ecdsa --no-install --no-caddy --no-dns || true
 
       - name: Render Compose for PR
         shell: bash
