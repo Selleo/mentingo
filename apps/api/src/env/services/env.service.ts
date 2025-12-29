@@ -132,17 +132,21 @@ export class EnvService {
   }
 
   async getStripeConfigured() {
-    const [stripeSecretKey, stripeWebhookSecret] = await Promise.all([
+    const [stripeSecretKey, stripeWebhookSecret, stripePublishableKey] = await Promise.all([
       this.getEnv("STRIPE_SECRET_KEY")
-        .then((r) => r.value)
+        .then(({ value }) => value)
         .catch(() => this.configService.get("stripe.secretKey")),
 
       this.getEnv("STRIPE_WEBHOOK_SECRET")
-        .then((r) => r.value)
+        .then(({ value }) => value)
         .catch(() => this.configService.get("stripe.webhookSecret")),
+
+      this.getEnv("VITE_STRIPE_PUBLISHABLE_KEY")
+        .then(({ value }) => value)
+        .catch(() => this.configService.get("stripe.publishableKey")),
     ]);
 
-    const enabled = !!(stripeWebhookSecret && stripeSecretKey);
+    const enabled = !!(stripeWebhookSecret && stripeSecretKey && stripePublishableKey);
 
     return { enabled };
   }

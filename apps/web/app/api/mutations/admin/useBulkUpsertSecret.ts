@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { CONFIGURATION_STATE_QUERY_KEY } from "~/api/queries/admin/useConfigurationState";
+import { stripeConfiguredQueryOptions } from "~/api/queries/useStripeConfigured";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -25,6 +26,7 @@ export function useBulkUpsertSecret() {
       });
 
       queryClient.invalidateQueries({ queryKey: CONFIGURATION_STATE_QUERY_KEY });
+      queryClient.invalidateQueries(stripeConfiguredQueryOptions());
     },
     onError: (error) => {
       if (error instanceof AxiosError) {
