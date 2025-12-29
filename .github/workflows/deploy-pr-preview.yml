@@ -52,7 +52,12 @@ jobs:
           mkdir -p ~/.config/uncloud
           export UNCLOUD_SSH_KEY UNCLOUD_CONNECT
           envsubst < "uncloud-config.tpl.yml" > "uncloud-config.yaml"
+          # print the uncloud-config.yaml file:
+          cat uncloud-config.yaml
           mv uncloud-config.yaml ~/.config/uncloud/config.yaml
+          # make it 600:
+          chmod 600 ~/.config/uncloud/config.yaml
+          uc ctx ls
           uc ls
 
       - name: Render Compose for PR
