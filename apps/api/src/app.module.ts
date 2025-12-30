@@ -45,6 +45,7 @@ import { LessonModule } from "./lesson/lesson.module";
 import { LocalizationModule } from "./localization/localization.module";
 import { NewsModule } from "./news/news.module";
 import { QuestionsModule } from "./questions/question.module";
+import { ReportModule } from "./report/report.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
@@ -120,6 +121,7 @@ import { UserModule } from "./user/user.module";
     StripeModule,
     EventsModule,
     StatisticsModule,
+    ReportModule,
     ScormModule,
     CacheModule,
     QueueModule,

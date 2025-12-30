@@ -544,7 +544,13 @@
       "incorrect": "Błędne",
       "completed": "Ukończone",
       "enrolled": "Zapisane",
-      "noData": "Brak danych"
+      "noData": "Brak danych",
+      "downloadReport": "Pobierz raport",
+      "downloadingReport": "Pobieranie raportu..."
+    },
+    "toast": {
+      "reportDownloadSuccess": "Raport został pobrany pomyślnie",
+      "reportDownloadError": "Nie udało się pobrać raportu. Spróbuj ponownie."
     }
   },
   "adminPromotionCodesView": {

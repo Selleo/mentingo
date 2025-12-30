@@ -6648,6 +6648,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ReportControllerDownloadSummaryReport
+     * @request GET:/api/report/summary
+     */
+    reportControllerDownloadSummaryReport: (
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/report/summary`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ScormControllerUploadScormPackage
      * @request POST:/api/scorm/upload
      */

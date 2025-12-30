@@ -5482,6 +5482,36 @@
         }
       }
     },
+    "/api/report/summary": {
+      "get": {
+        "operationId": "ReportController_downloadSummaryReport",
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/scorm/upload": {
       "post": {
         "operationId": "ScormController_uploadScormPackage",

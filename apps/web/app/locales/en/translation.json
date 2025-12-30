@@ -567,7 +567,13 @@
       "incorrect": "Incorrect",
       "completed": "Completed",
       "enrolled": "Enrolled",
-      "noData": "No data"
+      "noData": "No data",
+      "downloadReport": "Download Report",
+      "downloadingReport": "Downloading report..."
+    },
+    "toast": {
+      "reportDownloadSuccess": "Report downloaded successfully",
+      "reportDownloadError": "Failed to download report. Please try again."
     }
   },
   "adminPromotionCodesView": {

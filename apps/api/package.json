@@ -125,6 +125,7 @@
     "tiktoken": "1.0.21",
     "ts-pattern": "5.2.0",
     "uuid": "10.0.0",
+    "write-excel-file": "2.3.10",
     "xml2js": "0.6.2"
   },
   "devDependencies": {
