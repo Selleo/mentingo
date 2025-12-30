@@ -1,42 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import writeXlsxFile from "write-excel-file/node";
 
+import { REPORT_HEADERS } from "./constants/report-headers";
 import { ReportRepository } from "./repositories/report.repository";
 
 import type { StudentCourseReportRow } from "./repositories/report.repository";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Schema } from "write-excel-file";
-
-interface ReportHeaders {
-  studentName: string;
-  groupName: string;
-  courseName: string;
-  lessonCount: string;
-  completedLessons: string;
-  progressPercentage: string;
-  quizResults: string;
-}
-
-const HEADERS: Record<SupportedLanguages, ReportHeaders> = {
-  en: {
-    studentName: "Name",
-    groupName: "Company (Group)",
-    courseName: "Course Name",
-    lessonCount: "Lesson Count",
-    completedLessons: "Completed Lessons",
-    progressPercentage: "Progress (%)",
-    quizResults: "Quiz Results (%)",
-  },
-  pl: {
-    studentName: "Imię i nazwisko",
-    groupName: "Firma (grupa)",
-    courseName: "Nazwa kursu",
-    lessonCount: "Liczba lekcji",
-    completedLessons: "Ukończone lekcje",
-    progressPercentage: "Progres (%)",
-    quizResults: "Ostatnie wyniki z quizów (%)",
-  },
-};
 
 @Injectable()
 export class ReportService {
@@ -44,7 +14,7 @@ export class ReportService {
 
   async generateSummaryReport(language: SupportedLanguages): Promise<Buffer> {
     const data = await this.reportRepository.getAllStudentCourseData(language);
-    const headers = HEADERS[language] || HEADERS.en;
+    const headers = REPORT_HEADERS[language] || REPORT_HEADERS.en;
 
     const schema: Schema<StudentCourseReportRow> = [
       {
