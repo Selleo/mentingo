@@ -68,10 +68,10 @@ jobs:
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
-          POSTGRES_PASSWORD=$(openssl rand -base64 32)
-          MINIO_ROOT_PASSWORD=$(openssl rand -base64 32)
-          JWT_SECRET=$(openssl rand -base64 32)
-          JWT_REFRESH_SECRET=$(openssl rand -base64 32)
+          POSTGRES_PASSWORD=postgrespass
+          MINIO_ROOT_PASSWORD=miniopass
+          JWT_SECRET=jwtsecret
+          JWT_REFRESH_SECRET=jwtrefreshsecret
           PREVIEW_MAILHOG_DOMAIN="mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
@@ -155,14 +155,29 @@ jobs:
 
       - name: Setup SSH
         shell: bash
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
           chmod 600 ~/.ssh/id_ecdsa
           # Extract the host from the UNCLOUD_CONNECT secret
           host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+          # add to known_hosts:
           ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          # mask host from logs
+          echo "::add-mask::$host"
+          # do not print output of uc ps, just test connection
+          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "Failed to connect to Uncloud"
+            exit 1
+          fi
 
       - name: Cleanup PR Preview stack
         env:
@@ -171,18 +186,17 @@ jobs:
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
-          # render compose as deployment does:
+          # render compose as deployment does but with empty values:
           POSTGRES_PASSWORD=""
           MINIO_ROOT_PASSWORD=""
           JWT_SECRET=""
           JWT_REFRESH_SECRET=""
-          PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
-          PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
-          PREVIEW_MAILHOG_DOMAIN="mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_WEB_DOMAIN=""
+          PREVIEW_API_DOMAIN=""
+          PREVIEW_MAILHOG_DOMAIN=""
           VERSION_TAG="0"
           export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
-          # mv docker-compose.preview.tpl.yml /tmp/docker-compose.pr.yml
           # collect services and volumes:
           services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
           volumes="$(yq -r '.volumes | keys | .[]' docker-compose.pr.yml)"
