@@ -120,18 +120,16 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             "${{ github.api_url }}/repos/${{ github.repository }}/issues/${PR_ID}/comments")
 
-          already_exists=$(echo "$comments" | jq '
-            any(
-              .[] |
-              select(
-                (.user.type == "Bot" or .user.login == "github-actions[bot]") and
-                (.body | test("preview ready"; "i"))
-              )
+          already_exists=$(echo "$comments" | jq -r '
+            any(.[];
+              ((.user.type == "Bot") or (.user.login == "github-actions[bot]"))
+              and
+              (.body | test("preview ready"; "i"))
             )
           ')
 
           if [[ "$already_exists" == "true" ]]; then
-            echo "Preview comment already exists — skipping."
+            echo "Preview comment already exists - skipping"
             exit 0
           fi
 
