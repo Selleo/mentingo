@@ -194,6 +194,7 @@ export default function RegisterPage() {
                           <PopoverContent className="w-auto p-2" align="start">
                             <Calendar
                               variant="default"
+                              captionLayout="dropdown-buttons"
                               mode="single"
                               selected={selectedDate ?? undefined}
                               onSelect={(date) => {
