@@ -67,6 +67,10 @@ services:
     build:
       context: .
       dockerfile: api.Dockerfile
+      cache_from:
+        - type=gha,scope=api-preview-pr-${PR_ID}
+      cache_to:
+        - type=gha,mode=max,scope=api-preview-pr-${PR_ID}
     image: api-preview-pr-${PR_ID}:${VERSION_TAG}
     restart: always
     depends_on:
@@ -132,6 +136,10 @@ services:
     build:
       context: .
       dockerfile: web.Dockerfile
+      cache_from:
+        - type=gha,scope=web-preview-pr-${PR_ID}
+      cache_to:
+        - type=gha,mode=max,scope=web-preview-pr-${PR_ID}
     image: web-preview-pr-${PR_ID}:${VERSION_TAG}
     restart: always
     depends_on:
