@@ -2,7 +2,6 @@ import path from "path";
 
 import { vitePlugin as remix } from "@remix-run/dev";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-import { get } from "lodash-es";
 import { defineConfig, loadEnv } from "vite";
 import { cjsInterop } from "vite-plugin-cjs-interop";
 import { viteStaticCopy } from "vite-plugin-static-copy";
@@ -14,14 +13,7 @@ import { routes } from "./routes";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  const processEnvApiUrl = get(process.env, "VITE_API_URL") || null;
-  const processEnvAppUrl = get(process.env, "VITE_APP_URL") || null;
-
   return {
-    define: {
-      "import.meta.env.VITE_API_URL": JSON.stringify(processEnvApiUrl),
-      "import.meta.env.VITE_APP_URL": JSON.stringify(processEnvAppUrl),
-    },
     plugins: [
       svgr(),
       cjsInterop({

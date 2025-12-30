@@ -1,7 +1,0 @@
-current_context: default-1
-contexts:
-  default-1:
-    connections:
-      - ssh: ${UNCLOUD_CONNECT}
-        ssh_key_file: ${UNCLOUD_SSH_KEY}
-        machine_id: 14bfc6afc215e00a2781a2f4cd5ae4c0
