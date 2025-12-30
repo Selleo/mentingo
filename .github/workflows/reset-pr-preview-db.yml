@@ -1,0 +1,111 @@
+name: PREVIEW PR - Reset Database
+
+env:
+  HUSKY: 0
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to reset database for'
+        required: true
+        type: string
+
+concurrency:
+  group: pr-preview-${{ inputs.pr_number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reset-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Uncloud CLI
+        run: |
+          curl -fsS https://get.uncloud.run/install.sh | sh
+          uc --version
+
+      - name: Setup SSH
+        shell: bash
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
+          chmod 600 ~/.ssh/id_ecdsa
+
+          # Extract the host from the UNCLOUD_CONNECT secret
+          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+
+          # add to known_hosts:
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          # mask host from logs
+          echo "::add-mask::$host"
+
+          # do not print output of uc ps, just test connection
+          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "Failed to connect to server"
+            exit 1
+          fi
+
+      - name: Check if PR preview exists
+        env:
+          PR_ID: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+
+          echo "Checking if preview for PR ${PR_ID} exists..."
+
+          if ! uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service inspect db-preview-pr-${PR_ID} > /dev/null 2>&1; then
+            echo "ERROR: Database container db-preview-pr-${PR_ID} does not exist"
+            exit 1
+          fi
+
+          if ! uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" service inspect api-preview-pr-${PR_ID} > /dev/null 2>&1; then
+            echo "ERROR: API container api-preview-pr-${PR_ID} does not exist"
+            exit 1
+          fi
+
+          echo "Preview for PR ${PR_ID} exists - proceeding with database reset"
+
+      - name: Drop and recreate database schema
+        env:
+          PR_ID: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+
+          echo "Dropping and recreating database schema for PR ${PR_ID}..."
+
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec db-preview-pr-${PR_ID} psql -U postgres -d guidebook -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;"
+
+      - name: Run database migrations
+        env:
+          PR_ID: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:migrate
+
+      - name: Seed database
+        continue-on-error: true
+        env:
+          PR_ID: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:seed || true
+
