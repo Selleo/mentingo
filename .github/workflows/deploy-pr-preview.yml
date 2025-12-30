@@ -91,9 +91,6 @@ jobs:
           echo "VITE_API_URL=https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" > apps/web/.env
           echo "VITE_APP_URL=https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" >> apps/web/.env
 
-          # copy .env.example to .env for api
-          cp apps/api/.env.example apps/api/.env
-
       - name: Deploy PR Preview stack
         env:
           PR_ID: ${{ github.event.pull_request.number }}
