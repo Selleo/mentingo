@@ -101,6 +101,20 @@ jobs:
           export MASTER_KEY
           uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" deploy -f docker-compose.pr.yml -y
 
+      - name: Run database migrations
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} /app/entrypoint.sh migrate
+
+      - name: Seed database
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} /app/entrypoint.sh seed-prod
+
       - name: Comment PR - send message to PR preview link
         env:
           PR_ID: ${{ github.event.pull_request.number }}
