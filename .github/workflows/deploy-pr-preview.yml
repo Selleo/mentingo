@@ -81,6 +81,16 @@ jobs:
           export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
+      - name: Create helpers to repair invalid stack building
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+          # create .env for web
+          echo "VITE_API_URL=https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" > apps/web/.env
+          echo "VITE_APP_URL=https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" >> apps/web/.env
+
       - name: Deploy PR Preview stack
         env:
           PR_ID: ${{ github.event.pull_request.number }}
