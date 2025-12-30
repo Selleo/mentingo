@@ -71,13 +71,14 @@ jobs:
           MINIO_ROOT_PASSWORD=miniopass
           JWT_SECRET=jwtsecret
           JWT_REFRESH_SECRET=jwtrefreshsecret
+          POSTGRES_PASSWORD=guidebook
           PREVIEW_MAILHOG_DOMAIN="mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           GIT_DATE=$(git show -s --format=%cd --date=format:'%Y%m%d-%H%M%S' "$GITHUB_SHA")
           GIT_SHA_SHORT=$(echo "$GITHUB_SHA" | cut -c1-7)
           VERSION_TAG="${GIT_DATE}.${GIT_SHA_SHORT}"
-          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
+          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
       - name: Create helpers to repair invalid stack building
@@ -186,11 +187,12 @@ jobs:
           MINIO_ROOT_PASSWORD=""
           JWT_SECRET=""
           JWT_REFRESH_SECRET=""
+          POSTGRES_PASSWORD=""
           PREVIEW_WEB_DOMAIN=""
           PREVIEW_API_DOMAIN=""
           PREVIEW_MAILHOG_DOMAIN=""
           VERSION_TAG="0"
-          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
+          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
           # collect services and volumes:
           services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"

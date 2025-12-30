@@ -4,7 +4,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: guidebook
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       POSTGRES_DB: guidebook
     volumes:
       - db-preview-pr-${PR_ID}-data:/var/lib/postgresql/data
@@ -83,7 +83,7 @@ services:
       CORS_ORIGIN: "https://${PREVIEW_WEB_DOMAIN}"
       EMAIL_ADAPTER: "mailhog"
       TEST_KEY: ""
-      DATABASE_URL: "postgresql://postgres:guidebook@db-preview-pr-${PR_ID}:5432/guidebook"
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@db-preview-pr-${PR_ID}:5432/guidebook"
       REDIS_URL: "redis://redis-preview-pr-${PR_ID}:6379"
       JWT_SECRET: "${JWT_SECRET}"
       JWT_REFRESH_SECRET: "${JWT_REFRESH_SECRET}"
