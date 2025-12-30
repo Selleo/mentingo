@@ -2,6 +2,7 @@ import path from "path";
 
 import { vitePlugin as remix } from "@remix-run/dev";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { get } from "lodash-es";
 import { defineConfig, loadEnv } from "vite";
 import { cjsInterop } from "vite-plugin-cjs-interop";
 import { viteStaticCopy } from "vite-plugin-static-copy";
@@ -9,7 +10,6 @@ import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 import { routes } from "./routes";
-import { get } from "lodash-es";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
