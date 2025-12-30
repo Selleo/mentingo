@@ -68,7 +68,6 @@ jobs:
           UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
         run: |
           set -euo pipefail
-          POSTGRES_PASSWORD=postgrespass
           MINIO_ROOT_PASSWORD=miniopass
           JWT_SECRET=jwtsecret
           JWT_REFRESH_SECRET=jwtrefreshsecret
@@ -78,7 +77,7 @@ jobs:
           GIT_DATE=$(git show -s --format=%cd --date=format:'%Y%m%d-%H%M%S' "$GITHUB_SHA")
           GIT_SHA_SHORT=$(echo "$GITHUB_SHA" | cut -c1-7)
           VERSION_TAG="${GIT_DATE}.${GIT_SHA_SHORT}"
-          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
+          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
 
       - name: Create helpers to repair invalid stack building
@@ -184,7 +183,6 @@ jobs:
         run: |
           set -euo pipefail
           # render compose as deployment does but with empty values:
-          POSTGRES_PASSWORD=""
           MINIO_ROOT_PASSWORD=""
           JWT_SECRET=""
           JWT_REFRESH_SECRET=""
@@ -192,7 +190,7 @@ jobs:
           PREVIEW_API_DOMAIN=""
           PREVIEW_MAILHOG_DOMAIN=""
           VERSION_TAG="0"
-          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN POSTGRES_PASSWORD MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
+          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET
           envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
           # collect services and volumes:
           services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
