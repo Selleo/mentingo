@@ -1,3 +1,4 @@
+import { ALLOWED_AGE_LIMITS } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,8 +20,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
-
-import { ALLOWED_AGE_LIMITS } from "../../constants";
 
 import type { GetPublicGlobalSettingsResponse, UpdateAgeLimitBody } from "~/api/generated-api";
 

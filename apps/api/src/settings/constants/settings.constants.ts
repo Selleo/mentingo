@@ -53,4 +53,3 @@ export const DEFAULT_ADMIN_SETTINGS = {
 };
 
 export const ALLOWED_CURRENCIES = ["pln", "eur", "gbp", "usd"] as const;
-export const ALLOWED_AGE_LIMITS = [13, 16, null] as const;

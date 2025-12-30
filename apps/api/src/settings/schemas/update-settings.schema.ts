@@ -1,9 +1,9 @@
-import { HEX_COLOR_REGEX } from "@repo/shared";
+import { ALLOWED_AGE_LIMITS, HEX_COLOR_REGEX } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
-import { ALLOWED_AGE_LIMITS, ALLOWED_CURRENCIES } from "../constants/settings.constants";
+import { ALLOWED_CURRENCIES } from "../constants/settings.constants";
 
 import {
   adminSettingsJSONContentSchema,
@@ -43,9 +43,7 @@ export const updateConfigWarningDismissedSchema = Type.Object({
 
 export const updateAgeLimitSchema = Type.Object({
   ageLimit: Type.Union(
-    ALLOWED_AGE_LIMITS.map((currency) =>
-      currency === null ? Type.Null() : Type.Literal(currency),
-    ),
+    ALLOWED_AGE_LIMITS.map((currency) => (!currency ? Type.Null() : Type.Literal(currency))),
   ),
 });
 
