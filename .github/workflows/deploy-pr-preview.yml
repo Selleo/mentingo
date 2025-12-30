@@ -143,8 +143,6 @@ jobs:
           PREVIEW_WEB_DOMAIN="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
           PREVIEW_MAILHOG_DOMAIN="https://mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
 
-          message="🚀 Preview ready"
-
           # get current comments
           comments=$(curl -sS \
             -H "Authorization: Bearer $GH_TOKEN" \
@@ -156,7 +154,7 @@ jobs:
             any(.[];
               ((.user.type == "Bot") or (.user.login == "github-actions[bot]"))
               and
-              (.body | test("$message"; "i"))
+              (.body | test("preview ready"; "i"))
             )
           ')
 
@@ -166,7 +164,7 @@ jobs:
           fi
 
           message=$(cat <<EOF
-          ${message}
+          🚀 Preview ready
           ---
           Mails do not leave the preview environment. Database has been seeded with test data.  You can access the preview at the following URLs:
 
