@@ -1,4 +1,5 @@
 import { COURSE_ENROLLMENT } from "@repo/shared";
+import { and, eq } from "drizzle-orm";
 import request from "supertest";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -155,6 +156,41 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     return { lesson, question: question1, correctOption: options[1] };
   };
 
+  const buildQuizAnswers = async (lessonId: UUIDType) => {
+    const quizQuestions = await db
+      .select({ id: questions.id })
+      .from(questions)
+      .where(eq(questions.lessonId, lessonId))
+      .orderBy(questions.displayOrder);
+
+    const questionsAnswers = await Promise.all(
+      quizQuestions.map(async (question) => {
+        const [correctOption] = await db
+          .select({ id: questionAnswerOptions.id })
+          .from(questionAnswerOptions)
+          .where(
+            and(
+              eq(questionAnswerOptions.questionId, question.id),
+              eq(questionAnswerOptions.isCorrect, true),
+            ),
+          )
+          .orderBy(questionAnswerOptions.displayOrder)
+          .limit(1);
+
+        if (!correctOption) {
+          throw new Error(`Missing correct option for question ${question.id}`);
+        }
+
+        return {
+          questionId: question.id,
+          answers: [{ answerId: correctOption.id }],
+        };
+      }),
+    );
+
+    return questionsAnswers;
+  };
+
   const enrollStudentToCourse = async (studentId: UUIDType, courseId: UUIDType) => {
     await db.insert(studentCourses).values({
       id: crypto.randomUUID(),
@@ -309,11 +345,9 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const chapter = await chapterFactory.create({ courseId: course.id });
       await enrollStudentToCourse(student.id, course.id);
 
-      const { lesson, question, correctOption } = await createQuizLesson(
-        course.id,
-        chapter.id,
-        contentCreator.id,
-      );
+      const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
 
       const response = await request(app.getHttpServer())
         .post("/api/lesson/evaluation-quiz")
@@ -321,12 +355,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .send({
           lessonId: lesson.id,
           language: "en",
-          questionsAnswers: [
-            {
-              questionId: question.id,
-              answers: [{ answerId: correctOption.id }],
-            },
-          ],
+          questionsAnswers,
         })
         .expect(201);
 
@@ -357,11 +386,9 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const chapter = await chapterFactory.create({ courseId: course.id });
       await enrollStudentToCourse(student.id, course.id);
 
-      const { lesson, question, correctOption } = await createQuizLesson(
-        course.id,
-        chapter.id,
-        contentCreator.id,
-      );
+      const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
 
       const response = await request(app.getHttpServer())
         .post("/api/lesson/evaluation-quiz")
@@ -369,12 +396,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .send({
           lessonId: lesson.id,
           language: "en",
-          questionsAnswers: [
-            {
-              questionId: question.id,
-              answers: [{ answerId: correctOption.id }],
-            },
-          ],
+          questionsAnswers,
         })
         .expect(201);
 
@@ -409,11 +431,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const chapter = await chapterFactory.create({ courseId: course.id });
       await enrollStudentToCourse(student.id, course.id);
 
-      const { lesson, question, correctOption } = await createQuizLesson(
-        course.id,
-        chapter.id,
-        admin.id,
-      );
+      const { lesson } = await createQuizLesson(course.id, chapter.id, admin.id);
 
       const initialResponse = await request(app.getHttpServer())
         .get(`/api/lesson/${lesson.id}?language=en`)
@@ -435,18 +453,15 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       expect(updatedResponse.body.data.isQuizFeedbackRedacted).toBe(true);
 
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+
       const evaluationResponse = await request(app.getHttpServer())
         .post("/api/lesson/evaluation-quiz")
         .set("Cookie", studentCookies)
         .send({
           lessonId: lesson.id,
           language: "en",
-          questionsAnswers: [
-            {
-              questionId: question.id,
-              answers: [{ answerId: correctOption.id }],
-            },
-          ],
+          questionsAnswers,
         })
         .expect(201);
 
