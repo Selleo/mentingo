@@ -211,5 +211,5 @@ jobs:
           # collect services and volumes:
           services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
           volumes="$(yq -r '.volumes | keys | .[]' docker-compose.pr.yml)"
-          echo "$services" | xargs -r uc rm || true
-          echo "$volumes" | xargs -r uc volume rm -y || true
+          echo "$services" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" rm || true
+          echo "$volumes" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" volume rm -y || true
