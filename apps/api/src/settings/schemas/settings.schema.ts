@@ -1,3 +1,4 @@
+import { ALLOWED_AGE_LIMITS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { USER_ROLES } from "src/user/schemas/userRoles";
@@ -44,6 +45,7 @@ export const globalSettingsJSONSchema = Type.Object({
   newsEnabled: Type.Boolean(),
   unregisteredUserArticlesAccessibility: Type.Boolean(),
   articlesEnabled: Type.Boolean(),
+  ageLimit: Type.Union(ALLOWED_AGE_LIMITS.map((age) => (!age ? Type.Null() : Type.Literal(age)))),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

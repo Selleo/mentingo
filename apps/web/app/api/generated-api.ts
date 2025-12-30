@@ -186,6 +186,7 @@ export interface GetPublicGlobalSettingsResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -292,6 +293,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -331,6 +333,7 @@ export interface UpdateEnforceSSOResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -401,6 +404,7 @@ export interface UpdateColorSchemaResponse {
     newsEnabled: boolean;
     unregisteredUserArticlesAccessibility: boolean;
     articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
   };
 }
 
@@ -480,6 +484,10 @@ export interface UpdateConfigWarningDismissedResponse {
     adminFinishedCourseNotification: boolean;
     configWarningDismissed: boolean;
   };
+}
+
+export interface UpdateAgeLimitBody {
+  ageLimit: 13 | 16 | null;
 }
 
 export interface FileUploadResponse {
@@ -2833,13 +2841,6 @@ export interface MarkAnnouncementAsReadResponse {
   };
 }
 
-export interface GetEnvKeyResponse {
-  data: {
-    name: string;
-    value: string;
-  };
-}
-
 export type BulkUpsertEnvBody = {
   name: string;
   value: string;
@@ -2884,6 +2885,13 @@ export interface GetIsConfigSetupResponse {
     }[];
     hasIssues: boolean;
     isWarningDismissed: boolean;
+  };
+}
+
+export interface GetEnvKeyResponse {
+  data: {
+    name: string;
+    value: string;
   };
 }
 
@@ -4294,6 +4302,21 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/settings/admin/articles/${setting}`,
         method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateAgeLimit
+     * @request PATCH:/api/settings/admin/age-limit
+     */
+    settingsControllerUpdateAgeLimit: (data: UpdateAgeLimitBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/settings/admin/age-limit`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -6829,20 +6852,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name EnvControllerGetEnvKey
-     * @request GET:/api/env/{envName}
-     */
-    envControllerGetEnvKey: (envName: string, params: RequestParams = {}) =>
-      this.request<GetEnvKeyResponse, any>({
-        path: `/api/env/${envName}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name EnvControllerBulkUpsertEnv
      * @request POST:/api/env/bulk
      */
@@ -6920,6 +6929,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     envControllerGetIsConfigSetup: (params: RequestParams = {}) =>
       this.request<GetIsConfigSetupResponse, any>({
         path: `/api/env/config/setup`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetEnvKey
+     * @request GET:/api/env/{envName}
+     */
+    envControllerGetEnvKey: (envName: string, params: RequestParams = {}) =>
+      this.request<GetEnvKeyResponse, any>({
+        path: `/api/env/${envName}`,
         method: "GET",
         format: "json",
         ...params,
