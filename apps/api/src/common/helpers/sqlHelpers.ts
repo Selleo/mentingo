@@ -15,9 +15,9 @@ export function setJsonbField(
   return sql`
     jsonb_set(
       COALESCE(${field}, '{}'::jsonb),
-      ARRAY[${key}]::text[],
-      to_jsonb(${value}::text),
-      ${createMissing}
+    ARRAY[${key}]::text[],
+    to_jsonb(${value}::text),
+    ${createMissing}
     )
   `;
 }
@@ -37,9 +37,9 @@ export function deleteJsonbField(field: AnyPgColumn, key: string) {
 export function buildJsonbFieldWithMultipleEntries(entries: Partial<Record<string, string>>) {
   const keys = Object.keys(entries);
 
-  if (!keys.length) return undefined;
+  if (!keys.length) return sql`'{}'::jsonb`;
 
-  const sqlEntries = keys.map((key) => sql`${key}::text, ${entries[key]}::text`);
+  const pairs = keys.flatMap((key) => [sql`${key}::text`, sql`${entries[key]}::text`]);
 
-  return sql`jsonb_build_object(${sql.join(sqlEntries, ", ")})`;
+  return sql`jsonb_build_object(${sql.join(pairs, sql`, `)})`;
 }
