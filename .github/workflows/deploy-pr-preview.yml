@@ -165,12 +165,12 @@ jobs:
           List of available accounts:
           | Role            | Email                         | Password   |
           | --------------- | ----------------------------- | ---------- |
-          | Student         | `student@example.com`         | `password` |
-          | Student         | `student0@example.com`        | `password` |
-          | Student         | `student2@example.com`        | `password` |
-          | Content Creator | `contentcreator@example.com`  | `password` |
-          | Content Creator | `contentcreator2@example.com` | `password` |
-          | Admin           | `admin@example.com`           | `password` |
+          | Student         | \`student@example.com\`         | \`password\` |
+          | Student         | \`student0@example.com\`        | \`password\` |
+          | Student         | \`student2@example.com\`        | \`password\` |
+          | Content Creator | \`contentcreator@example.com\`  | \`password\` |
+          | Content Creator | \`contentcreator2@example.com\` | \`password\` |
+          | Admin           | \`admin@example.com\`           | \`password\` |
           EOF)
 
           body=$(jq -n --arg message "$message" '{body: $message}')
