@@ -1,3 +1,8 @@
+/**
+ * Parse a birthday string in "YYYY-MM-DD" format into a Date.
+ * @param birthday - Birthday string in "YYYY-MM-DD" format.
+ * @returns Date when valid; otherwise null.
+ */
 export const parseBirthday = (birthday?: string) => {
   if (!birthday) return null;
 
@@ -12,6 +17,11 @@ export const parseBirthday = (birthday?: string) => {
   return birth;
 };
 
+/**
+ * Calculate age in full years from a birthday string.
+ * @param birthday - Birthday string in "YYYY-MM-DD" format.
+ * @returns Age in years when valid; otherwise null.
+ */
 export const calculateAge = (birthday?: string) => {
   const birth = parseBirthday(birthday);
 

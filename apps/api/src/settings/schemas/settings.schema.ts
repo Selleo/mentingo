@@ -45,9 +45,7 @@ export const globalSettingsJSONSchema = Type.Object({
   newsEnabled: Type.Boolean(),
   unregisteredUserArticlesAccessibility: Type.Boolean(),
   articlesEnabled: Type.Boolean(),
-  ageLimit: Type.Union(
-    ALLOWED_AGE_LIMITS.map((currency) => (!currency ? Type.Null() : Type.Literal(currency))),
-  ),
+  ageLimit: Type.Union(ALLOWED_AGE_LIMITS.map((age) => (!age ? Type.Null() : Type.Literal(age)))),
 });
 
 export const studentSettingsJSONContentSchema = Type.Object({

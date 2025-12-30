@@ -882,10 +882,6 @@ export class SettingsService {
     ageLimit: AllowedAgeLimit,
     actor?: CurrentUser,
   ): Promise<GlobalSettingsJSONContentSchema> {
-    if (ageLimit !== null && (ageLimit < 0 || ageLimit > 100)) {
-      throw new BadRequestException("Invalid age limit value");
-    }
-
     const previousRecord = await this.getGlobalSettingsRecord();
 
     const [{ settings: updatedSettings }] = await this.db
@@ -894,7 +890,7 @@ export class SettingsService {
         settings: sql`jsonb_set(
           settings.settings,
           '{ageLimit}',
-        ${ageLimit !== null ? sql`to_jsonb(${ageLimit}::integer)` : sql`'null'::jsonb`},
+          ${ageLimit !== null ? sql`to_jsonb(${ageLimit}::integer)` : sql`'null'::jsonb`},
           true
         )`,
       })

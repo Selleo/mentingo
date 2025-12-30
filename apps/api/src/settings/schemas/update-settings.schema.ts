@@ -42,9 +42,7 @@ export const updateConfigWarningDismissedSchema = Type.Object({
 });
 
 export const updateAgeLimitSchema = Type.Object({
-  ageLimit: Type.Union(
-    ALLOWED_AGE_LIMITS.map((currency) => (!currency ? Type.Null() : Type.Literal(currency))),
-  ),
+  ageLimit: Type.Union(ALLOWED_AGE_LIMITS.map((age) => (!age ? Type.Null() : Type.Literal(age)))),
 });
 
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
