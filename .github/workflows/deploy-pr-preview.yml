@@ -110,14 +110,16 @@ jobs:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} /app/entrypoint.sh migrate
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:migrate
 
       - name: Seed database
         env:
           PR_ID: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} /app/entrypoint.sh seed-prod
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:seed || true
 
       - name: Comment PR - send message to PR preview link
         env:
