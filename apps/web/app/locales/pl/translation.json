@@ -1490,7 +1490,8 @@
       "lastName": "Nazwisko",
       "email": "Email",
       "password": "Hasło",
-      "birthday": "Data urodzenia"
+      "birthday": "Data urodzenia",
+      "birthdayPlaceholder": "Wybierz datę"
     },
     "other": {
       "alreadyHaveAccount": "Masz już konto?",

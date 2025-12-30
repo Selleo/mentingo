@@ -1495,7 +1495,8 @@
       "lastName": "Last name",
       "email": "Email",
       "password": "Password",
-      "birthday": "Date of birth"
+      "birthday": "Date of birth",
+      "birthdayPlaceholder": "Select date"
     },
     "other": {
       "alreadyHaveAccount": "Already have an account?",
