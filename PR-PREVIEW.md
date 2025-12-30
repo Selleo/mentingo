@@ -2,8 +2,6 @@
 
 A comprehensive guide for setting up and managing automated PR preview environments using Uncloud.
 
-[Quick Reference](#quick-reference) • [Setup Guide](#setup-guide) • [Troubleshooting](#troubleshooting)
-
 ## Table of Contents
 
 - [PR Preview Deployment Guide](#pr-preview-deployment-guide)
