@@ -37,7 +37,6 @@ export class EmailService {
 
   async sendEmailWithLogo(email: Omit<Email, "from" | "attachments">): Promise<void> {
     const logoBuffer = await this.settingsService.getPlatformLogoBuffer();
-    const simpleLogoBuffer = await this.settingsService.getPlatformSimpleLogoBuffer();
     const borderCircleBuffer = await this.settingsService.getEmailBorderCircleBuffer();
 
     const attachments: Attachment[] = [];
@@ -48,15 +47,6 @@ export class EmailService {
         content: logoBuffer,
         contentType: "image/png",
         ...(this.usingMailhogAdapter ? {} : { cid: "logo" }),
-      });
-    }
-
-    if (simpleLogoBuffer) {
-      attachments.push({
-        filename: "simple-logo.png",
-        content: simpleLogoBuffer,
-        contentType: "image/png",
-        ...(this.usingMailhogAdapter ? {} : { cid: "simple-logo" }),
       });
     }
 

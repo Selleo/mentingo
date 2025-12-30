@@ -416,55 +416,6 @@ export class SettingsService {
     return await this.fileService.getFileUrl(platformSimpleLogoS3Key);
   }
 
-  public async getPlatformSimpleLogoBuffer(): Promise<Buffer | null> {
-    const [globalSettings] = await this.db
-      .select({
-        platformSimpleLogoS3Key: sql<
-          string | null
-        >`${settings.settings}->>'platformSimpleLogoS3Key'`,
-      })
-      .from(settings)
-      .where(isNull(settings.userId));
-
-    const defaultLogoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-logo.svg`;
-
-    const buffer: Buffer | null = await this.fileService.getFileBuffer(
-      globalSettings.platformSimpleLogoS3Key || defaultLogoUrl,
-    );
-
-    if (!buffer) {
-      return null;
-    }
-
-    const imageMeta = await sharp(buffer, { density: 300 }).metadata();
-
-    const imageHeight = imageMeta.height;
-    const imageWidth = imageMeta.width;
-    const halfImageHeight = Math.round(imageHeight / 2);
-
-    const resizedBuffer = await sharp(buffer, { density: 300 })
-      .extract({
-        left: 0,
-        top: halfImageHeight - 15,
-        width: imageWidth,
-        height: halfImageHeight + 14,
-      })
-      .composite([
-        {
-          input: Buffer.from(
-            `<svg width="${imageWidth}" height="${halfImageHeight + 14}">
-          <rect width="100%" height="100%" fill="white" fill-opacity="0.4"/>
-        </svg>`,
-          ),
-          blend: "dest-in",
-        },
-      ])
-      .png()
-      .toBuffer();
-
-    return resizedBuffer;
-  }
-
   public async uploadLoginBackgroundImage(
     file: Express.Multer.File | null | undefined,
     actor?: CurrentUser,
