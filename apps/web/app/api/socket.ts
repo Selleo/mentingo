@@ -12,7 +12,7 @@ export function getSocket(): Socket {
 
     socket = io(wsUrl, {
       withCredentials: true,
-      transports: ["polling"],
+      transports: ["polling", "websocket"],
       autoConnect: false,
       path: "/api/ws",
     });

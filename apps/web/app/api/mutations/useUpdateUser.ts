@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { currentUserQueryOptions, useCurrentUserSuspense } from "~/api/queries";
 import { COURSE_STATISTICS_FILTER_OPTIONS_QUERY_KEY } from "~/api/queries/admin/useCourseLearningTimeStatisticsFilterOptions";
+import { COURSE_STATISTICS_QUERY_KEY } from "~/api/queries/admin/useCourseStatistics";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
@@ -36,6 +37,7 @@ export function useUpdateUser() {
       await queryClient.invalidateQueries({
         queryKey: [COURSE_STATISTICS_FILTER_OPTIONS_QUERY_KEY],
       });
+      await queryClient.invalidateQueries({ queryKey: [COURSE_STATISTICS_QUERY_KEY] });
 
       toast({ description: t("changeUserInformationView.toast.userUpdatedSuccessfully") });
     },
