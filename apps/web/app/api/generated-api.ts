@@ -497,6 +497,42 @@ export interface FileUploadResponse {
   uploadId?: string;
 }
 
+export interface InitVideoUploadBody {
+  /** @minLength 1 */
+  filename: string;
+  /** @min 1 */
+  sizeBytes: number;
+  /** @minLength 1 */
+  mimeType: string;
+  title?: string;
+  resource?: string;
+  /** @format uuid */
+  lessonId?: string;
+}
+
+export interface InitVideoUploadResponse {
+  /** @format uuid */
+  uploadId: string;
+  bunnyGuid: string;
+  fileKey: string;
+  tusEndpoint: string;
+  tusHeaders: object;
+  expiresAt: string;
+}
+
+export type GetVideoUploadStatusResponse = {
+  uploadId: string;
+  placeholderKey: string;
+  status: "queued" | "uploaded" | "processed" | "failed";
+  fileKey?: string;
+  fileUrl?: string;
+  bunnyVideoId?: string;
+  fileType?: string;
+  lessonId?: string;
+  error?: string;
+  userId?: string;
+} | null;
+
 export interface HandleBunnyWebhookBody {
   status?: number | string;
   Status?: number | string;
@@ -4363,6 +4399,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/file`,
         method: "DELETE",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerInitVideoUpload
+     * @request POST:/api/file/videos/init
+     */
+    fileControllerInitVideoUpload: (data: InitVideoUploadBody, params: RequestParams = {}) =>
+      this.request<InitVideoUploadResponse, any>({
+        path: `/api/file/videos/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetVideoUploadStatus
+     * @request GET:/api/file/videos/{id}
+     */
+    fileControllerGetVideoUploadStatus: (id: string, params: RequestParams = {}) =>
+      this.request<GetVideoUploadStatusResponse, any>({
+        path: `/api/file/videos/${id}`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 

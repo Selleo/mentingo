@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
+  Param,
   Post,
   Query,
   UploadedFile,
@@ -12,7 +14,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { Validate } from "nestjs-typebox";
 
-import { UUIDType } from "src/common";
+import { UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -26,6 +28,16 @@ import {
   associateLessonWithUploadSchema,
   FileUploadResponse,
 } from "./schemas/file.schema";
+import {
+  videoInitResponseSchema,
+  videoInitSchema,
+  type VideoInitBody,
+  type VideoInitResponse,
+} from "./schemas/video-init.schema";
+import {
+  videoUploadStatusResponseSchema,
+  type VideoUploadStatusResponse,
+} from "./schemas/video-upload-status.schema";
 
 @UseGuards(RolesGuard)
 @Controller("file")
@@ -67,6 +79,29 @@ export class FileController {
     @CurrentUser("userId") userId?: UUIDType,
   ): Promise<FileUploadResponse> {
     return await this.fileService.uploadFile(file, resource, lessonId, undefined, userId);
+  }
+
+  @Roles(...Object.values(USER_ROLES))
+  @Post("videos/init")
+  @Validate({
+    request: [{ type: "body", schema: videoInitSchema }],
+    response: videoInitResponseSchema,
+  })
+  async initVideoUpload(
+    @Body() payload: VideoInitBody,
+    @CurrentUser("userId") userId?: UUIDType,
+  ): Promise<VideoInitResponse> {
+    return this.fileService.initVideoUpload(payload, userId);
+  }
+
+  @Roles(...Object.values(USER_ROLES))
+  @Get("videos/:id")
+  @Validate({
+    request: [{ type: "param", name: "id", schema: UUIDSchema }],
+    response: videoUploadStatusResponseSchema,
+  })
+  async getVideoUploadStatus(@Param("id") id: UUIDType): Promise<VideoUploadStatusResponse> {
+    return this.fileService.getVideoUploadStatus(id);
   }
 
   @Public()

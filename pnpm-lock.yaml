@@ -755,6 +755,9 @@ importers:
       ts-pattern:
         specifier: 5.2.0
         version: 5.2.0
+      tus-js-client:
+        specifier: 4.1.0
+        version: 4.1.0
       vite-plugin-cjs-interop:
         specifier: 2.1.4
         version: 2.1.4
@@ -9429,6 +9432,9 @@ packages:
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
 
+  combine-errors@3.0.3:
+    resolution: {integrity: sha512-C8ikRNRMygCwaTx+Ek3Yr+OuZzgZjduCOfSQBjbM8V3MfgcjSTeto/GXP6PAwKvJz/v15b7GHZvx5rOlczFw/Q==}
+
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
@@ -9694,6 +9700,9 @@ packages:
 
   csv-parse@6.1.0:
     resolution: {integrity: sha512-CEE+jwpgLn+MmtCpVcPtiCZpVtB6Z2OKPTr34pycYYoL7sxdOkXDdQ4lRiw6ioC0q6BLqhc6cKweCVvral8yhw==}
+
+  custom-error-instance@2.1.1:
+    resolution: {integrity: sha512-p6JFxJc3M4OTD2li2qaHkDCw9SfMw82Ldr6OC9Je1aXiGfhx2W8p3GaoeaGrPJTUN9NirTM/KTxHWMUdR1rsUg==}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -11921,6 +11930,9 @@ packages:
   jpeg-js@0.4.4:
     resolution: {integrity: sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==}
 
+  js-base64@3.7.8:
+    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
+
   js-beautify@1.15.1:
     resolution: {integrity: sha512-ESjNzSlt/sWE8sciZH8kBF8BPlwXPwhR6pWKAw8bw4Bwj+iZcnKW6ONWUutJ7eObuBZQpiIb8S7OYspWrKt7rA==}
     engines: {node: '>=14'}
@@ -12226,6 +12238,24 @@ packages:
   lodash-es@4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
 
+  lodash._baseiteratee@4.7.0:
+    resolution: {integrity: sha512-nqB9M+wITz0BX/Q2xg6fQ8mLkyfF7MU7eE+MNBNjTHFKeKaZAPEzEg+E8LWxKWf1DQVflNEn9N49yAuqKh2mWQ==}
+
+  lodash._basetostring@4.12.0:
+    resolution: {integrity: sha512-SwcRIbyxnN6CFEEK4K1y+zuApvWdpQdBHM/swxP962s8HIxPO3alBH5t3m/dl+f4CMUug6sJb7Pww8d13/9WSw==}
+
+  lodash._baseuniq@4.6.0:
+    resolution: {integrity: sha512-Ja1YevpHZctlI5beLA7oc5KNDhGcPixFhcqSiORHNsp/1QTv7amAXzw+gu4YOvErqVlMVyIJGgtzeepCnnur0A==}
+
+  lodash._createset@4.0.3:
+    resolution: {integrity: sha512-GTkC6YMprrJZCYU3zcqZj+jkXkrXzq3IPBcF/fIPpNEAB4hZEtXU8zp/RwKOvZl43NUmwDbyRk3+ZTbeRdEBXA==}
+
+  lodash._root@3.0.1:
+    resolution: {integrity: sha512-O0pWuFSK6x4EXhM1dhZ8gchNtG7JMqBtrHdoUFUWXD7dJnNSUze1GuyQr5sOs0aCvgGeI3o/OJW8f4ca7FDxmQ==}
+
+  lodash._stringtopath@4.8.0:
+    resolution: {integrity: sha512-SXL66C731p0xPDC5LZg4wI5H+dJo/EO4KTqOMwLYCH3+FmmfAKJEZCm6ohGpI+T1xwsDsJCfL4OnhorllvlTPQ==}
+
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
@@ -12283,6 +12313,12 @@ packages:
 
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
+
+  lodash.throttle@4.1.1:
+    resolution: {integrity: sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==}
+
+  lodash.uniqby@4.5.0:
+    resolution: {integrity: sha512-IRt7cfTtHy6f1aRVA5n7kT8rgN3N1nH6MOWLcHfpWG2SH19E3JksLK38MktLxZDhlAjCP9jpIXkOnRXlu6oByQ==}
 
   lodash.zip@4.2.0:
     resolution: {integrity: sha512-C7IOaBBK/0gMORRBd8OETNx3kmOkgIWIPvyDpZSCTwUrpYmgZwJkjZeOD8ww4xbOUOs4/attY+pciKvadNfFbg==}
@@ -13915,6 +13951,9 @@ packages:
 
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
+
+  proper-lockfile@4.1.2:
+    resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
 
   property-information@5.6.0:
     resolution: {integrity: sha512-YUHSPk+A30YPv+0Qf8i9Mbfe/C0hdPXk1s1jPVToV8pk8BQtpw10ct89Eo7OWkutrwqvT0eicAxlOg3dOAu8JA==}
@@ -15583,6 +15622,10 @@ packages:
   turbo@2.3.3:
     resolution: {integrity: sha512-DUHWQAcC8BTiUZDRzAYGvpSpGLiaOQPfYXlCieQbwUvmml/LRGIe3raKdrOPOoiX0DYlzxs2nH6BoWJoZrj8hA==}
     hasBin: true
+
+  tus-js-client@4.1.0:
+    resolution: {integrity: sha512-e/nC/kJahvNYBcnwcqzuhFIvVELMMpbVXIoOOKdUn74SdQCvJd2JjqV2jZLv2EFOVbV4qLiO0lV7BxBXF21b6Q==}
+    engines: {node: '>=18'}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -25254,7 +25297,7 @@ snapshots:
     dependencies:
       '@types/node': 20.17.6
       tapable: 2.2.1
-      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)
+      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
@@ -26723,6 +26766,11 @@ snapshots:
 
   colorette@2.0.20: {}
 
+  combine-errors@3.0.3:
+    dependencies:
+      custom-error-instance: 2.1.1
+      lodash.uniqby: 4.5.0
+
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
@@ -27000,6 +27048,8 @@ snapshots:
   csstype@3.1.3: {}
 
   csv-parse@6.1.0: {}
+
+  custom-error-instance@2.1.1: {}
 
   d3-array@3.2.4:
     dependencies:
@@ -30018,6 +30068,8 @@ snapshots:
 
   jpeg-js@0.4.4: {}
 
+  js-base64@3.7.8: {}
+
   js-beautify@1.15.1:
     dependencies:
       config-chain: 1.1.13
@@ -30341,6 +30393,25 @@ snapshots:
 
   lodash-es@4.17.21: {}
 
+  lodash._baseiteratee@4.7.0:
+    dependencies:
+      lodash._stringtopath: 4.8.0
+
+  lodash._basetostring@4.12.0: {}
+
+  lodash._baseuniq@4.6.0:
+    dependencies:
+      lodash._createset: 4.0.3
+      lodash._root: 3.0.1
+
+  lodash._createset@4.0.3: {}
+
+  lodash._root@3.0.1: {}
+
+  lodash._stringtopath@4.8.0:
+    dependencies:
+      lodash._basetostring: 4.12.0
+
   lodash.camelcase@4.3.0: {}
 
   lodash.castarray@4.4.0: {}
@@ -30378,6 +30449,13 @@ snapshots:
   lodash.once@4.1.1: {}
 
   lodash.sortby@4.7.0: {}
+
+  lodash.throttle@4.1.1: {}
+
+  lodash.uniqby@4.5.0:
+    dependencies:
+      lodash._baseiteratee: 4.7.0
+      lodash._baseuniq: 4.6.0
 
   lodash.zip@4.2.0: {}
 
@@ -32431,6 +32509,12 @@ snapshots:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+
+  proper-lockfile@4.1.2:
+    dependencies:
+      graceful-fs: 4.2.11
+      retry: 0.12.0
+      signal-exit: 3.0.7
 
   property-information@5.6.0:
     dependencies:
@@ -34514,7 +34598,7 @@ snapshots:
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.36.0
-      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)
+      webpack: 5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0)
     optionalDependencies:
       '@swc/core': 1.3.101(@swc/helpers@0.5.2)
       esbuild: 0.19.11
@@ -34871,6 +34955,16 @@ snapshots:
       turbo-linux-arm64: 2.3.3
       turbo-windows-64: 2.3.3
       turbo-windows-arm64: 2.3.3
+
+  tus-js-client@4.1.0:
+    dependencies:
+      buffer-from: 1.1.2
+      combine-errors: 3.0.3
+      is-stream: 2.0.1
+      js-base64: 3.7.8
+      lodash.throttle: 4.1.1
+      proper-lockfile: 4.1.2
+      url-parse: 1.5.10
 
   type-check@0.4.0:
     dependencies:
@@ -35556,36 +35650,6 @@ snapshots:
       - esbuild
       - uglify-js
 
-  webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11):
-    dependencies:
-      '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.6
-      '@webassemblyjs/ast': 1.14.1
-      '@webassemblyjs/wasm-edit': 1.14.1
-      '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.14.0
-      browserslist: 4.24.2
-      chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.17.1
-      es-module-lexer: 1.5.4
-      eslint-scope: 5.1.1
-      events: 3.3.0
-      glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
-      json-parse-even-better-errors: 2.3.1
-      loader-runner: 4.3.0
-      mime-types: 2.1.35
-      neo-async: 2.6.2
-      schema-utils: 3.3.0
-      tapable: 2.2.1
-      terser-webpack-plugin: 5.3.10(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)(webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11))
-      watchpack: 2.4.2
-      webpack-sources: 3.2.3
-    transitivePeerDependencies:
-      - '@swc/core'
-      - esbuild
-      - uglify-js
-
   webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.12):
     dependencies:
       '@types/eslint-scope': 3.7.7
@@ -35609,6 +35673,36 @@ snapshots:
       schema-utils: 3.3.0
       tapable: 2.2.1
       terser-webpack-plugin: 5.3.10(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.12)(webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.12))
+      watchpack: 2.4.2
+      webpack-sources: 3.2.3
+    transitivePeerDependencies:
+      - '@swc/core'
+      - esbuild
+      - uglify-js
+
+  webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.24.0):
+    dependencies:
+      '@types/eslint-scope': 3.7.7
+      '@types/estree': 1.0.6
+      '@webassemblyjs/ast': 1.14.1
+      '@webassemblyjs/wasm-edit': 1.14.1
+      '@webassemblyjs/wasm-parser': 1.14.1
+      acorn: 8.14.0
+      browserslist: 4.24.2
+      chrome-trace-event: 1.0.4
+      enhanced-resolve: 5.17.1
+      es-module-lexer: 1.5.4
+      eslint-scope: 5.1.1
+      events: 3.3.0
+      glob-to-regexp: 0.4.1
+      graceful-fs: 4.2.11
+      json-parse-even-better-errors: 2.3.1
+      loader-runner: 4.3.0
+      mime-types: 2.1.35
+      neo-async: 2.6.2
+      schema-utils: 3.3.0
+      tapable: 2.2.1
+      terser-webpack-plugin: 5.3.10(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11)(webpack@5.96.1(@swc/core@1.3.101(@swc/helpers@0.5.2))(esbuild@0.19.11))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:

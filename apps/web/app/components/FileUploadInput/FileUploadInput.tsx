@@ -15,6 +15,7 @@ type FileUploadInputProps = {
   handleFileUpload: (file: File) => Promise<void>;
   handleFileDelete: () => void;
   isUploading: boolean;
+  isProcessing?: boolean;
   contentTypeToDisplay: string;
   url?: string;
   className?: string;
@@ -47,6 +48,7 @@ const FileUploadInput = ({
   handleFileUpload,
   handleFileDelete,
   isUploading,
+  isProcessing,
   contentTypeToDisplay,
   url,
   className,
@@ -93,6 +95,7 @@ const FileUploadInput = ({
         return (
           <VideoPreview
             videoPreview={videoPreview}
+            isProcessing={isProcessing}
             handleFileDelete={handleFileDelete}
             setFile={setFile}
             setVideoPreview={setVideoPreview}

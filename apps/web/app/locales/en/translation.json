@@ -82,6 +82,10 @@
       "video": "MP4, MOV, MPEG-2 or Hevc (max. to 5GB)",
       "presentation": "PPT/PPTX (max. to 100MB)"
     },
+    "processing": {
+      "title": "Video is processing",
+      "body": "You can continue editing. We'll notify you when it's ready."
+    },
     "remove": {
       "video": "Remove video",
       "presentation": "Remove presentation"
@@ -1647,6 +1651,10 @@
     "aiMentor": {
       "title": "AI Mentor Session",
       "description": "This is an AI-powered mentoring session. The AI will guide you through the lesson based on the instructor's guidelines."
+    },
+    "videoProcessing": {
+      "title": "Video is being processed",
+      "body": "Please wait a moment. It will appear here once it is ready."
     },
     "placeholder": {
       "openQuestion": "Type your answer here"

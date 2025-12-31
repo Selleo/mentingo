@@ -1,9 +1,11 @@
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import Presentation from "~/components/Presentation/Presentation";
 import Viewer from "~/components/RichText/Viever";
 import { Video } from "~/components/VideoPlayer/Video";
+import { VideoProcessingPlaceholder } from "~/components/VideoPlayer/VideoProcessingPlaceholder";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
@@ -27,6 +29,11 @@ export const LessonContentRenderer = memo(
     lessonLoading,
     handleVideoEnded,
   }: LessonContentRendererProps) => {
+    const { t } = useTranslation();
+
+    const isVideoProcessing =
+      lesson.type === "video" && (!lesson.fileUrl || lesson.fileUrl.includes("processing-"));
+
     return match(lesson.type)
       .with("text", () => <Viewer variant="lesson" content={lesson?.description ?? ""} />)
       .with("quiz", () => (
@@ -37,13 +44,20 @@ export const LessonContentRenderer = memo(
           previewLessonId={lesson.id}
         />
       ))
-      .with("video", () => (
-        <Video
-          url={lesson.fileUrl}
-          isExternalUrl={lesson.isExternal}
-          onVideoEnded={handleVideoEnded}
-        />
-      ))
+      .with("video", () =>
+        isVideoProcessing ? (
+          <VideoProcessingPlaceholder
+            title={t("studentLessonView.videoProcessing.title")}
+            body={t("studentLessonView.videoProcessing.body")}
+          />
+        ) : (
+          <Video
+            url={lesson.fileUrl}
+            isExternalUrl={lesson.isExternal}
+            onVideoEnded={handleVideoEnded}
+          />
+        ),
+      )
       .with("presentation", () => (
         <Presentation url={lesson.fileUrl ?? ""} isExternalUrl={lesson.isExternal} />
       ))

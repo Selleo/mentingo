@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import * as tus from "tus-js-client";
 
 import { useDeleteFile } from "~/api/mutations/admin/useDeleteFile";
+import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import FileUploadInput from "~/components/FileUploadInput/FileUploadInput";
 import { FormTextareaField } from "~/components/Form/FormTextareaFiled";
@@ -25,6 +27,7 @@ import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { useFileLessonForm } from "./hooks/useFileLessonForm";
+import { useVideoUploadResumeStore } from "./store/useVideoUploadResumeStore";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -39,6 +42,9 @@ type FileLessonProps = {
 };
 
 type SourceType = "upload" | "external";
+
+const normalizeTusHeaders = (headers: object): Record<string, string> =>
+  Object.fromEntries(Object.entries(headers).map(([key, value]) => [key, String(value)]));
 
 const FileLessonForm = ({
   contentTypeToDisplay,
@@ -57,10 +63,12 @@ const FileLessonForm = ({
     language,
     processingUploadId,
   });
+  const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { mutateAsync: uploadFile } = useUploadFile();
   const { mutateAsync: deleteFile } = useDeleteFile();
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { getUploadForFile, saveUpload, clearUpload } = useVideoUploadResumeStore();
 
   const isExternalUrl = form.watch("isExternal");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,9 +94,87 @@ const FileLessonForm = ({
     setIsModalOpen(true);
   };
 
+  const handleVideoTusUpload = useCallback(
+    async (file: File) => {
+      const existingUpload = getUploadForFile(file);
+
+      const session =
+        existingUpload ??
+        (await initVideoUpload({
+          filename: file.name,
+          sizeBytes: file.size,
+          mimeType: file.type,
+          title: file.name,
+          resource: "lesson",
+          lessonId: lessonToEdit?.id,
+        }));
+
+      const tusHeaders = normalizeTusHeaders(session.tusHeaders);
+
+      saveUpload({
+        uploadId: session.uploadId,
+        bunnyGuid: session.bunnyGuid,
+        fileKey: session.fileKey,
+        tusEndpoint: session.tusEndpoint,
+        tusHeaders,
+        expiresAt: session.expiresAt,
+        filename: file.name,
+        sizeBytes: file.size,
+        lastModified: file.lastModified,
+      });
+
+      setProcessingUploadId(session.uploadId);
+      form.setValue("fileS3Key", session.fileKey);
+
+      const fileType = getFileTypeFromName(file.name);
+      if (fileType) {
+        form.setValue("fileType", fileType);
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        console.log("Starting video upload:", session.uploadId);
+        const upload = new tus.Upload(file, {
+          endpoint: session.tusEndpoint,
+          headers: tusHeaders,
+          metadata: {
+            filename: file.name,
+            filetype: file.type,
+          },
+          retryDelays: [0, 1000, 3000, 5000, 10000],
+          fingerprint: async () =>
+            `bunny-tus:${session.uploadId}:${file.name}:${file.size}:${file.lastModified}`,
+          onError: (error) => {
+            clearUpload(session.uploadId);
+            reject(error);
+          },
+          onSuccess: () => {
+            console.log("Finished video upload:", session.uploadId);
+            clearUpload(session.uploadId);
+            resolve();
+          },
+        });
+
+        upload.findPreviousUploads().then((previousUploads) => {
+          if (previousUploads.length > 0) {
+            console.log("Resuming video upload:", session.uploadId);
+            upload.resumeFromPreviousUpload(previousUploads[0]);
+          }
+          upload.start();
+        });
+      });
+    },
+    [clearUpload, form, getUploadForFile, initVideoUpload, lessonToEdit?.id, saveUpload],
+  );
+
   const handleFileUpload = useCallback(
     async (file: File) => {
+      setIsUploading(true);
       try {
+        if (contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM) {
+          await handleVideoTusUpload(file);
+          return;
+        }
+
         const result = await uploadFile({
           file,
           resource: "lesson",
@@ -108,10 +194,21 @@ const FileLessonForm = ({
         }
       } catch (error) {
         console.error("Error uploading file:", error);
+        const fallbackMessage =
+          contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM
+            ? t("uploadFile.toast.videoFailed")
+            : error instanceof Error
+              ? error.message
+              : t("uploadFile.toast.videoFailed");
+        toast({
+          description: fallbackMessage,
+          variant: "destructive",
+        });
+      } finally {
         setIsUploading(false);
       }
     },
-    [uploadFile, form, lessonToEdit?.id],
+    [contentTypeToDisplay, handleVideoTusUpload, lessonToEdit?.id, uploadFile, form, toast, t],
   );
 
   const handleFileDelete = useCallback(async () => {
@@ -154,6 +251,11 @@ const FileLessonForm = ({
       : t("presentation").toLowerCase();
 
   const missingTranslations = lessonToEdit && !lessonToEdit.title.trim();
+
+  const isVideoProcessing =
+    contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM &&
+    !!form.getValues("fileS3Key") &&
+    form.getValues("fileS3Key")?.startsWith("processing-");
 
   return (
     <div className="flex flex-col gap-y-6 rounded-lg bg-white p-8">
@@ -239,6 +341,7 @@ const FileLessonForm = ({
                   handleFileUpload={handleFileUpload}
                   handleFileDelete={handleFileDelete}
                   isUploading={isUploading}
+                  isProcessing={isVideoProcessing}
                   contentTypeToDisplay={contentTypeToDisplay}
                   url={displayFileUrl}
                   onVideoSelected={() => {
