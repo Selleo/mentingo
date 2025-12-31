@@ -24,6 +24,7 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   } as CSSProperties,
 
   logoSection: {
+    marginTop: "2.5rem",
     marginBottom: "4rem",
     maxWidth: "80%",
   } as CSSProperties,
