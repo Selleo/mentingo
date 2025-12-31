@@ -16,26 +16,17 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
   headerContainer: {
     backgroundColor: "#ffffff",
     margin: "0 auto",
+    paddingTop: "2rem",
     height: "100%",
     borderRadius: "1.5rem 1.5rem 0 0",
     width: "90%",
-    maxWidth: "600px",
+    maxWidth: "500px",
   } as CSSProperties,
 
   logoSection: {
+    marginTop: "2.5rem",
     marginBottom: "4rem",
     maxWidth: "80%",
-  } as CSSProperties,
-
-  simpleLogoSection: {
-    textAlign: "right" as const,
-    marginBottom: "2rem",
-  } as CSSProperties,
-
-  simpleLogoImage: {
-    display: "block",
-    marginLeft: "auto",
-    marginRight: "2.5rem",
   } as CSSProperties,
 
   contentSection: {
@@ -66,7 +57,7 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
     margin: "0 auto",
     borderRadius: "0 0 1.5rem 1.5rem",
     width: "90%",
-    maxWidth: "600px",
+    maxWidth: "500px",
   } as CSSProperties,
 
   buttonWrapper: {

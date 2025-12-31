@@ -56,15 +56,6 @@ export const BaseEmailTemplate = ({
       <Body style={styles.body}>
         <Section style={styles.headerSection} className="header-section">
           <Container style={styles.headerContainer} className="header-container">
-            <Section style={styles.simpleLogoSection} className="simple-logo-section">
-              <Img
-                src="cid:simple-logo"
-                width="auto"
-                height="50"
-                alt="platform icon"
-                style={styles.simpleLogoImage}
-              />
-            </Section>
             <Section style={styles.logoSection} className="logo-section">
               <Img src="cid:logo" width="auto" height="32" alt="platform logo" />
             </Section>
