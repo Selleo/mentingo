@@ -145,4 +145,43 @@ test.describe("Admin settings", () => {
     await page.waitForURL(/\/courses/);
     await expect(page).toHaveURL(/\/courses/);
   });
+
+  test("should not display sign-up option when invite-only registration is enabled", async ({
+    page,
+  }) => {
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page.getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("tab", { name: "Organization" }).click();
+    await page.locator("#invite-only-registration").getByRole("switch").click();
+    await page.locator("#invite-only-registration").getByRole("button", { name: "Save" }).click();
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+    const loginHeader = page.getByRole("heading", { name: "Login", exact: true });
+    await loginHeader.waitFor({ state: "visible" });
+    await expect(page.getByText("Don't have an account? Sign up")).not.toBeVisible();
+  });
+
+  test("should check courses visibility based on platform preferences", async ({ page }) => {
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+    await page.goto("https://app.lms.localhost/courses");
+    await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+    await page.getByPlaceholder("user@example.com").click();
+    await page.getByPlaceholder("user@example.com").fill("admin@example.com");
+    await page.getByLabel("Password").click();
+    await page.getByLabel("Password").fill("password");
+    await page.getByRole("button", { name: "Login" }).click();
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page.getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("tab", { name: "Platform Customization" }).click();
+    await page.getByLabel("Show courses to visitors").click();
+    await expect(
+      page.getByLabel("Notifications (F8)").getByText("Course visibility preferences"),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+    await page.goto("https://app.lms.localhost/courses");
+    await expect(page.getByRole("heading", { name: "Available Courses" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
+  });
 });
