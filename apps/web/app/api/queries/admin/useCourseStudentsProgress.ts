@@ -4,9 +4,9 @@ import { ApiClient } from "../../api-client";
 
 export const COURSE_STUDENTS_PROGRESS_QUERY_KEY = ["course-students-progress", "admin"];
 
-export type CourseStudentsProgressQueryParams = Parameters<
-  typeof ApiClient.api.courseControllerGetCourseStudentsProgress
->[1];
+export type CourseStudentsProgressQueryParams = NonNullable<
+  Parameters<typeof ApiClient.api.courseControllerGetCourseStudentsProgress>[1]
+>;
 
 interface CourseStudentsProgressOptions {
   id: string;
