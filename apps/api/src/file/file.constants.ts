@@ -63,6 +63,7 @@ export type EntityType = (typeof ENTITY_TYPES)[keyof typeof ENTITY_TYPES];
 export const RESOURCE_CATEGORIES = {
   NEWS: "news",
   ARTICLES: "articles",
+  LESSON: "lesson",
 } as const;
 
 export type ResourceCategory = (typeof RESOURCE_CATEGORIES)[keyof typeof RESOURCE_CATEGORIES];

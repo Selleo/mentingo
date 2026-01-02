@@ -48,9 +48,10 @@ export const LessonContent = ({
 }: LessonContentProps) => {
   const { t } = useTranslation();
 
-  const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const { clearVideo } = useVideoPlayer();
   const { autoplay, setAutoplay } = useVideoPreferencesStore();
+
+  const [isPreviousDisabled, setIsPreviousDisabled] = useState(false);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
 
   const { language } = useLanguageStore();
@@ -72,18 +73,6 @@ export const LessonContent = ({
   const prevChapter = course.chapters[currentChapterIndex - 1];
   const totalLessons = currentChapter.lessons.length;
   const queryClient = useQueryClient();
-
-  const handleVideoEnded = useCallback(() => {
-    setIsNextDisabled(false);
-    if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
-    if (autoplay) handleNext();
-  }, [isStudent, markLessonAsCompleted, lesson.id, language, autoplay, handleNext]);
-
-  useEffect(() => {
-    if (lesson.type !== "video") {
-      clearVideo();
-    }
-  }, [lesson.type, clearVideo]);
 
   const canAccessLesson = useCallback(
     (courseData: GetCourseResponse["data"], targetLessonId: string) => {
@@ -159,11 +148,7 @@ export const LessonContent = ({
   useEffect(() => {
     if (isPreviewMode) return;
 
-    if (
-      lesson.type === LessonType.TEXT ||
-      lesson.type === LessonType.PRESENTATION ||
-      lesson.type === LessonType.EMBED
-    ) {
+    if (lesson.type === LessonType.CONTENT || lesson.type === LessonType.EMBED) {
       markLessonAsCompleted({ lessonId: lesson.id, language });
     }
 
@@ -190,6 +175,26 @@ export const LessonContent = ({
     lesson.type,
     markLessonAsCompleted,
     language,
+  ]);
+
+  useEffect(() => {
+    if (lesson.id && !lesson.hasVideo) {
+      clearVideo();
+    }
+  }, [lesson.id, lesson.hasVideo, clearVideo]);
+
+  const handleVideoEnded = useCallback(() => {
+    setIsNextDisabled(false);
+    if (isStudent) markLessonAsCompleted({ lessonId: lesson.id, language });
+    if (autoplay && lesson.hasOnlyVideo) handleNext();
+  }, [
+    isStudent,
+    markLessonAsCompleted,
+    lesson.id,
+    language,
+    autoplay,
+    handleNext,
+    lesson.hasOnlyVideo,
   ]);
 
   return (
@@ -226,15 +231,15 @@ export const LessonContent = ({
                 <p className="h4 text-neutral-950 break-words min-w-0">{lesson.title}</p>
               </div>
               <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
-                {lesson.type === "video" && (
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <span className="text-sm text-neutral-600">
-                      {t("studentLessonView.button.autoplay")}
-                    </span>
-                    <Switch checked={autoplay} onCheckedChange={setAutoplay} />
-                  </label>
-                )}
                 <div className="flex flex-row gap-x-4">
+                  {lesson.type === LessonType.CONTENT && lesson.hasOnlyVideo && (
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <span className="text-sm text-neutral-600">
+                        {t("studentLessonView.button.autoplay")}
+                      </span>
+                      <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+                    </label>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
@@ -262,7 +267,7 @@ export const LessonContent = ({
             user={user}
             isPreviewMode={isPreviewMode}
             lessonLoading={lessonLoading}
-            handleVideoEnded={handleVideoEnded}
+            onVideoEnded={handleVideoEnded}
           />
         </div>
       </div>

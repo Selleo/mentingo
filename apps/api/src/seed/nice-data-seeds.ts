@@ -4,9 +4,21 @@ import * as dotenv from "dotenv";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 
+import {
+  appendResourceLinkToDescription,
+  getRandomPresentationUrl,
+  getRandomVideoUrl,
+} from "./seed-resource-links";
+
 import type { NiceCourseData } from "src/utils/types/test-types";
 
 dotenv.config({ path: "./.env" });
+
+const withVideoLink = (description?: string) =>
+  appendResourceLinkToDescription(description, getRandomVideoUrl(), "Watch the video");
+
+const withPresentationLink = (description?: string) =>
+  appendResourceLinkToDescription(description, getRandomPresentationUrl(), "Open the presentation");
 
 export const niceCourses: NiceCourseData[] = [
   {
@@ -25,7 +37,7 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "What is Data Science?",
             description:
               "Data science is an interdisciplinary field that uses scientific methods, processes, algorithms, and systems to extract knowledge and insights from structured and unstructured data. In this lesson, you'll learn about the fundamental concepts of data science, including data collection, cleaning, analysis, and interpretation. We'll explore how data science combines statistics, computer science, and domain expertise to solve complex problems and make data-driven decisions in various industries.",
@@ -83,7 +95,7 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Introduction to HTML",
             description:
               "HTML (HyperText Markup Language) is the standard language used to create the structure of web pages. In this lesson, you'll explore basic HTML elements and how they are used to build the framework of a website.",
@@ -110,10 +122,11 @@ export const niceCourses: NiceCourseData[] = [
               "Learner can identify and explain the purpose of basic HTML elements and successfully create a simple HTML page structure.",
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "HTML Elements Video",
-            description:
+            description: withVideoLink(
               "Learn the basics of web development with HTML! Master the structure and tags needed to build professional websites from scratch.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -182,10 +195,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "HTML Hyperlinks Presentation",
-            description:
+            description: withPresentationLink(
               "Learn the basics of web development with HTML! Master the structure and tags needed to build professional websites from scratch.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -606,7 +620,7 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Introduction to HTML",
             description:
               "HTML (HyperText Markup Language) is the standard language used to create the structure of web pages. In this lesson, you'll explore basic HTML elements and how they are used to build the framework of a website.",
@@ -625,10 +639,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "HTML Elements Video",
-            description:
+            description: withVideoLink(
               "Learn the basics of web development with HTML! Master the structure and tags needed to build professional websites from scratch.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -718,7 +733,7 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Introduction to Java for Android",
             description:
               "Java is the primary language used for Android app development. In this lesson, you'll learn about Java syntax, data types, and object-oriented programming principles that form the foundation of Android development.",
@@ -737,9 +752,9 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Java Basics Video Tutorial",
-            description: "Learn Java basics for Android development.",
+            description: withVideoLink("Learn Java basics for Android development."),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -796,9 +811,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "Java OOP Concepts Presentation",
-            description: "Explore Object-Oriented Programming principles in Java.",
+            description: withPresentationLink(
+              "Explore Object-Oriented Programming principles in Java.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -894,16 +911,17 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Introduction to Kotlin for Android",
             description:
               "Kotlin is a modern, concise language used for Android development. In this lesson, you'll learn about Kotlin syntax and basic concepts for creating Android apps.",
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Kotlin Basics Video Tutorial",
-            description:
+            description: withVideoLink(
               "A video tutorial to help you learn Kotlin syntax, object-oriented principles, and how to apply them to Android development.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -934,15 +952,17 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Setting Up Your Android Studio Environment",
             description:
               "Learn how to configure Android Studio for Kotlin development and create your first Android project.",
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "Creating a Simple Kotlin App",
-            description: "A step-by-step guide to building your first Android app using Kotlin.",
+            description: withPresentationLink(
+              "A step-by-step guide to building your first Android app using Kotlin.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -982,7 +1002,7 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Introduction to Arithmetic",
             description:
               "Arithmetic is the foundation of mathematics. In this lesson, you'll learn about numbers, basic operations, and their properties.",
@@ -1001,10 +1021,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Basic Arithmetic Video Tutorial",
-            description:
+            description: withVideoLink(
               "Learn the basics of arithmetic operations and how to use them in problem-solving scenarios.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -1036,16 +1057,17 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Understanding Geometry",
             description:
               "Geometry involves the study of shapes, sizes, and the properties of space. In this lesson, you'll learn about basic geometric figures and their properties.",
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "Geometric Shapes Presentation",
-            description:
+            description: withPresentationLink(
               "Explore various geometric shapes, their formulas for area and perimeter, and their real-life applications.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -1088,7 +1110,7 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Getting Started with Algebra",
             description:
               "Algebra helps us solve problems by finding unknown values. In this lesson, you'll learn about variables, expressions, and simple equations.",
@@ -1121,10 +1143,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Basic Algebra Video Guide",
-            description:
+            description: withVideoLink(
               "Learn to solve basic algebraic equations and understand how to work with variables.",
+            ),
           },
         ],
       },
@@ -1236,13 +1259,13 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Introduction to English Grammar",
             description:
               "Learn the essential grammar rules that form the backbone of English communication, covering nouns, verbs, adjectives, and more.",
           },
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Sentence Structure Basics",
             description:
               "Explore how sentences are structured, including subject-verb agreement and word order in affirmative, negative, and question forms.",
@@ -1261,10 +1284,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Grammar Rules Video Tutorial",
-            description:
+            description: withVideoLink(
               "Watch this tutorial to get a comprehensive overview of essential English grammar rules.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -1290,21 +1314,23 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Common English Words and Phrases",
             description:
               "A beginner-friendly list of common English words and phrases you can use in daily conversations.",
           },
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Synonyms and Antonyms",
             description:
               "Learn about the importance of synonyms and antonyms in expanding your vocabulary and making your speech more varied.",
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "English Vocabulary Expansion Presentation",
-            description: "A comprehensive slide presentation on expanding your vocabulary.",
+            description: withPresentationLink(
+              "A comprehensive slide presentation on expanding your vocabulary.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -1359,13 +1385,13 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Essential Pronunciation Tips",
             description:
               "Learn how to pronounce English words correctly and improve your accent with practical tips and exercises.",
           },
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Common Pronunciation Mistakes",
             description:
               "Identify and work on common pronunciation challenges for non-native English speakers.",
@@ -1390,9 +1416,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Pronunciation and Accent Video Tutorial",
-            description: "A step-by-step video guide on mastering English pronunciation.",
+            description: withVideoLink(
+              "A step-by-step video guide on mastering English pronunciation.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -1832,13 +1860,13 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Complex Sentences and Their Use",
             description:
               "Learn how to form and use complex sentences to convey more detailed thoughts and ideas effectively.",
           },
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Relative Clauses and Modifiers",
             description:
               "A deep dive into relative clauses and modifiers, which help to add extra information to sentences.",
@@ -1878,10 +1906,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Advanced Grammar Video Tutorial",
-            description:
+            description: withVideoLink(
               "Watch this in-depth video to understand complex sentence structures and advanced grammar.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -1908,22 +1937,23 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Academic Vocabulary and Its Application",
             description:
               "Master vocabulary words commonly used in academic papers, essays, and formal discussions.",
           },
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Using Formal Language in Communication",
             description:
               "Learn how to adjust your language for formal situations, such as presentations or professional meetings.",
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "Academic Vocabulary List",
-            description:
+            description: withPresentationLink(
               "Download this list of academic vocabulary and explore their meanings and usage in context.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -1987,13 +2017,13 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Understanding Idioms in Context",
             description:
               "Learn how idiomatic expressions are used in everyday conversations to sound more natural and fluent.",
           },
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Common Idioms and Their Meanings",
             description:
               "A list of frequently used idioms, their meanings, and examples of how to use them.",
@@ -2092,10 +2122,11 @@ export const niceCourses: NiceCourseData[] = [
             ],
           },
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "Idiomatic Expressions Video Tutorial",
-            description:
+            description: withVideoLink(
               "Watch this video to learn how to use idiomatic expressions in real conversations.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,
@@ -2147,22 +2178,24 @@ export const niceCourses: NiceCourseData[] = [
         isFreemium: false,
         lessons: [
           {
-            type: LESSON_TYPES.VIDEO,
+            type: LESSON_TYPES.CONTENT,
             title: "What is Artificial Intelligence? An Introductory Overview",
-            description:
+            description: withVideoLink(
               "A comprehensive video introduction to the concept of Artificial Intelligence, its history, and its significance in business.",
+            ),
           },
           {
-            type: LESSON_TYPES.TEXT,
+            type: LESSON_TYPES.CONTENT,
             title: "Key Concepts and Terminologies in AI",
             description:
               '<p>Artificial Intelligence (AI) refers to the simulation of human intelligence in machines programmed to think, learn, and make decisions. Below are some key concepts and terminologies essential to understanding AI:</p><ul><li><strong>Machine Learning (ML):</strong> A subset of AI focused on creating algorithms that allow computers to learn from and make predictions based on data. Example: A recommendation system suggesting movies based on your viewing history.</li><li><strong>Neural Networks:</strong> Inspired by the human brain, these are algorithms designed to recognize patterns and process data in layers, enabling tasks like image and speech recognition.</li><li><strong>Natural Language Processing (NLP):</strong> This involves teaching machines to understand, interpret, and generate human language. Example: Virtual assistants like Alexa or Siri.</li><li><strong>Computer Vision:</strong> A field of AI that enables computers to interpret and process visual data, such as images and videos. Example: Facial recognition technology.</li><li><strong>Deep Learning:</strong> A more complex subset of ML that uses large neural networks to analyze massive amounts of data and solve intricate problems, such as self-driving cars.</li><li><strong>Supervised vs. Unsupervised Learning:</strong><br>- <strong>Supervised Learning:</strong> The AI is trained on labeled data (e.g., images labeled as "cat" or "dog").<br>- <strong>Unsupervised Learning:</strong> The AI identifies patterns in unlabeled data without explicit instructions.</li><li><strong>Big Data:</strong> The large volume of structured and unstructured data generated by businesses and devices, which is essential for training AI models.</li><li><strong>Automation:</strong> AI is often used to automate repetitive tasks, freeing up human resources for more complex activities.</li><li><strong>Ethics in AI:</strong> As AI becomes more powerful, ensuring its ethical use (e.g., avoiding bias in decision-making) is critical for building trust.</li></ul><h3>Why These Concepts Matter</h3><p>Understanding these basic AI terms is the first step toward recognizing how AI can be applied in business. Each concept represents a building block of AI\'s potential to transform industries by increasing efficiency, improving decision-making, and creating innovative solutions.</p>',
           },
           {
-            type: LESSON_TYPES.PRESENTATION,
+            type: LESSON_TYPES.CONTENT,
             title: "AI Applications Across Industries",
-            description:
+            description: withPresentationLink(
               "A presentation exploring real-world AI applications in sectors like healthcare, finance, and retail.",
+            ),
           },
           {
             type: LESSON_TYPES.QUIZ,

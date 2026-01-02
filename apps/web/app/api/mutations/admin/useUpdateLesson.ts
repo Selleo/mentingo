@@ -8,7 +8,7 @@ import { ApiClient } from "../../api-client";
 import type { BetaUpdateLessonBody } from "../../generated-api";
 import type { AxiosError } from "axios";
 
-type UpdateTextLessonOptions = {
+type UpdateContentLessonOptions = {
   data: BetaUpdateLessonBody;
   lessonId: string;
 };
@@ -18,7 +18,7 @@ export function useUpdateLesson() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (options: UpdateTextLessonOptions) => {
+    mutationFn: async (options: UpdateContentLessonOptions) => {
       const response = await ApiClient.api.lessonControllerBetaUpdateLesson(options.data, {
         id: options.lessonId,
       });
