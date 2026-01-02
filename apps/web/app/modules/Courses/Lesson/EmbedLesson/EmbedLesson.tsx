@@ -29,7 +29,7 @@ export const EmbedLesson = ({ lessonResources, lesson }: EmbedLessonProps) => {
           key={resource.id}
           resource={{
             ...resource,
-            fileUrl: resource.fileUrl ?? resource.source ?? "",
+            fileUrl: resource.fileUrl ?? "",
           }}
           title={lesson.title}
         />

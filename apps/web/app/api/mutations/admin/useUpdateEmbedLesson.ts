@@ -12,13 +12,14 @@ type UpdateEmbedLessonBody = {
   title: string;
   type: "embed";
   lessonId: string;
-  language: string;
+  language: SupportedLanguages;
   resources: Array<{
     id?: string;
     fileUrl: string;
     allowFullscreen?: boolean;
   }>;
 };
+import type { SupportedLanguages } from "@repo/shared";
 import type { AxiosError } from "axios";
 
 type UpdateEmbedLessonOptions = {

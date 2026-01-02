@@ -148,7 +148,10 @@ export const LessonContent = ({
   useEffect(() => {
     if (isPreviewMode) return;
 
-    if (lesson.type === LessonType.CONTENT || lesson.type === LessonType.EMBED) {
+    if (
+      (lesson.type === LessonType.CONTENT || lesson.type === LessonType.EMBED) &&
+      !lesson.hasVideo
+    ) {
       markLessonAsCompleted({ lessonId: lesson.id, language });
     }
 
