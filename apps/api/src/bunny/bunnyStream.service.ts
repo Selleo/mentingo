@@ -1,3 +1,5 @@
+import { createHash } from "crypto";
+
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
@@ -102,6 +104,41 @@ export class BunnyStreamService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async createVideo(title: string): Promise<{ guid: string }> {
+    const cfg = await this.getConfig();
+    const httpClient = this.createHttpClient(cfg);
+
+    const { data } = await httpClient.post("/videos", {
+      title,
+    });
+
+    return { guid: data.guid };
+  }
+
+  async getTusUploadConfig(videoId: string): Promise<{
+    tusEndpoint: string;
+    tusHeaders: Record<string, string>;
+    expiresAt: string;
+  }> {
+    const cfg = await this.getConfig();
+
+    const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60;
+    const signature = createHash("sha256")
+      .update(`${cfg.libraryId}${cfg.apiKey}${expiresAt}${videoId}`)
+      .digest("hex");
+
+    return {
+      tusEndpoint: "https://video.bunnycdn.com/tusupload",
+      tusHeaders: {
+        AuthorizationSignature: signature,
+        AuthorizationExpire: String(expiresAt),
+        VideoId: videoId,
+        LibraryId: cfg.libraryId,
+      },
+      expiresAt: new Date(expiresAt * 1000).toISOString(),
+    };
   }
 
   async delete(videoId: string): Promise<{ success: boolean }> {

@@ -41,6 +41,7 @@ import { VideoUploadQueueService } from "./video-upload-queue.service";
 import type { ResourceRelationshipType, EntityType, ResourceCategory } from "./file.constants";
 import type { FileValidationOptions } from "./guards/file.guard";
 import type { BunnyWebhookBody } from "./schemas/bunny-webhook.schema";
+import type { VideoInitBody } from "./schemas/video-init.schema";
 import type { VideoUploadState } from "./video-processing-state.service";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Static, TSchema } from "@sinclair/typebox";
@@ -179,6 +180,60 @@ export class FileService {
     } catch (error) {
       throw new ConflictException("Failed to upload file");
     }
+  }
+
+  async initVideoUpload(data: VideoInitBody, currentUserId?: UUIDType) {
+    const { filename, sizeBytes, mimeType, title, resource = "lesson", lessonId } = data;
+
+    if (!ALLOWED_VIDEO_FILE_TYPES.includes(mimeType)) {
+      throw new BadRequestException("Invalid video mime type");
+    }
+
+    if (sizeBytes > MAX_VIDEO_SIZE) {
+      throw new BadRequestException("Video file exceeds maximum allowed size");
+    }
+
+    const uploadId = randomUUID();
+    const placeholderKey = `processing-${resource}-${uploadId}`;
+    const fileType = filename?.split(".").pop();
+
+    await this.videoProcessingStateService.initializeState(
+      uploadId,
+      placeholderKey,
+      fileType,
+      currentUserId,
+    );
+
+    let guid: string;
+
+    try {
+      const response = await this.bunnyStreamService.createVideo(title || filename);
+      guid = response.guid;
+      await this.videoProcessingStateService.registerVideoId({
+        uploadId,
+        bunnyVideoId: guid,
+        placeholderKey,
+      });
+
+      if (lessonId) {
+        await this.videoProcessingStateService.associateWithLesson(uploadId, lessonId);
+      }
+    } catch (error) {
+      await this.videoProcessingStateService.markFailed(uploadId, placeholderKey, error?.message);
+      throw error;
+    }
+
+    const { tusEndpoint, tusHeaders, expiresAt } =
+      await this.bunnyStreamService.getTusUploadConfig(guid);
+
+    return {
+      uploadId,
+      bunnyGuid: guid,
+      fileKey: placeholderKey,
+      tusEndpoint,
+      tusHeaders,
+      expiresAt,
+    };
   }
 
   async deleteFile(fileKey: string) {

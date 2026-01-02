@@ -75,12 +75,17 @@
       "fileUploadedSuccessfully": "File uploaded successfully",
       "videoFailed": "Video upload failed",
       "videoReady": "Video is ready to use",
-      "videoProcessingStarted": "Video upload started. We'll notify you once it's processed."
+      "videoUploading": "We're uploading your video. Please don't close the tab.",
+      "videoUploadedProcessing": "Your upload has been finished. Now your video is getting processed. Feel free to close the tab."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG or SVG",
       "video": "MP4, MOV, MPEG-2 or Hevc (max. to 5GB)",
       "presentation": "PPT/PPTX (max. to 100MB)"
+    },
+    "processing": {
+      "title": "Video is processing",
+      "body": "You can continue editing. We'll notify you when it's ready."
     },
     "remove": {
       "video": "Remove video",
@@ -1647,6 +1652,10 @@
     "aiMentor": {
       "title": "AI Mentor Session",
       "description": "This is an AI-powered mentoring session. The AI will guide you through the lesson based on the instructor's guidelines."
+    },
+    "videoProcessing": {
+      "title": "Video is being processed",
+      "body": "Please wait a moment. It will appear here once it is ready."
     },
     "placeholder": {
       "openQuestion": "Type your answer here"

@@ -26,4 +26,5 @@ allowedPackages:
   - pause@0.0.1 # MIT https://github.com/stream-utils/pause/tree/v0.0.1 (missing License file)
   - fast-shallow-equal@1.0.0 # Unlicense
   - css-value@0.0.1 # MIT on npm, but missing LICENSE file
-  - '@browserbasehq/sdk@2.6.0' # Apache-2.0
+  - "@browserbasehq/sdk@2.6.0" # Apache-2.0
+  - combine-errors@3.0.3 # MIT https://github.com/matthewmueller/combine-errors (missing LICENSE file, but said in README)

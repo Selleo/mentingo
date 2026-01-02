@@ -917,6 +917,60 @@
         }
       }
     },
+    "/api/file/videos/init": {
+      "post": {
+        "operationId": "FileController_initVideoUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitVideoUploadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitVideoUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/videos/{id}": {
+      "get": {
+        "operationId": "FileController_getVideoUploadStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetVideoUploadStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/file/bunny/webhook": {
       "post": {
         "operationId": "FileController_handleBunnyWebhook",
@@ -9345,6 +9399,139 @@
         },
         "required": [
           "fileKey"
+        ]
+      },
+      "InitVideoUploadBody": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sizeBytes": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mimeType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename",
+          "sizeBytes",
+          "mimeType"
+        ]
+      },
+      "InitVideoUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "bunnyGuid": {
+            "type": "string"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "tusEndpoint": {
+            "type": "string"
+          },
+          "tusHeaders": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {
+                "type": "string"
+              }
+            }
+          },
+          "expiresAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadId",
+          "bunnyGuid",
+          "fileKey",
+          "tusEndpoint",
+          "tusHeaders",
+          "expiresAt"
+        ]
+      },
+      "GetVideoUploadStatusResponse": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "uploadId": {
+                "type": "string"
+              },
+              "placeholderKey": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "queued",
+                    "type": "string"
+                  },
+                  {
+                    "const": "uploaded",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fileKey": {
+                "type": "string"
+              },
+              "fileUrl": {
+                "type": "string"
+              },
+              "bunnyVideoId": {
+                "type": "string"
+              },
+              "fileType": {
+                "type": "string"
+              },
+              "lessonId": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string"
+              },
+              "userId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "uploadId",
+              "placeholderKey",
+              "status"
+            ]
+          },
+          {
+            "type": "null"
+          }
         ]
       },
       "HandleBunnyWebhookBody": {

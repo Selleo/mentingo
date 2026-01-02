@@ -147,6 +147,36 @@ export class VideoProcessingStateService {
     return next;
   }
 
+  async registerVideoId(params: {
+    uploadId: string;
+    bunnyVideoId: string;
+    placeholderKey: string;
+  }) {
+    const current = (await this.getState(params.uploadId)) ?? {
+      uploadId: params.uploadId,
+      placeholderKey: params.placeholderKey,
+      status: VIDEO_UPLOAD_STATUS.QUEUED,
+      userId: "",
+    };
+
+    const next: VideoUploadState = {
+      ...current,
+      bunnyVideoId: params.bunnyVideoId,
+    };
+
+    await this.retryOperation(
+      () => this.cache.set(uploadKey(params.uploadId), next, this.UPLOAD_STATE_TTL),
+      `registerVideoId set upload state for ${params.uploadId}`,
+    );
+
+    await this.retryOperation(
+      () => this.cache.set(videoKey(params.bunnyVideoId), params.uploadId, this.VIDEO_MAPPING_TTL),
+      `registerVideoId set video mapping for ${params.bunnyVideoId}`,
+    );
+
+    return next;
+  }
+
   async markProcessed(bunnyVideoId: string, fileUrl?: string) {
     const uploadId = (await this.cache.get(videoKey(bunnyVideoId))) as string | undefined;
     if (!uploadId) return null;

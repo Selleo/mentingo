@@ -76,12 +76,17 @@
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany",
       "videoFailed": "Nie udało się przesłać wideo",
       "videoReady": "Wideo jest gotowe do użycia",
-      "videoProcessingStarted": "Rozpoczęto przesyłanie wideo. Powiadomimy Cię, gdy zostanie przetworzone."
+      "videoUploading": "Przesyłamy Twoje wideo. Proszę nie zamykaj karty.",
+      "videoUploadedProcessing": "Przesyłanie zakończone. Twoje wideo jest teraz przetwarzane. Możesz zamknąć kartę."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG lub SVG",
-      "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 100MB)",
+      "video": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 5GB)",
       "presentation": "PPT/PPTX (maksymalnie 100MB)"
+    },
+    "processing": {
+      "title": "Wideo jest przetwarzane",
+      "body": "Możesz dalej edytować. Powiadomimy, gdy będzie gotowe."
     },
     "remove": {
       "video": "Usuń wideo",
@@ -1643,6 +1648,10 @@
     "aiMentor": {
       "title": "Sesja AI Mentora",
       "description": "To jest sesja mentoringu z AI. AI poprowadzi Cię przez lekcję zgodnie z wytycznymi instruktora."
+    },
+    "videoProcessing": {
+      "title": "Wideo jest przetwarzane",
+      "body": "Poczekaj chwilę. Pojawi się tutaj, gdy będzie gotowe."
     },
     "placeholder": {
       "openQuestion": "Wpisz swoją odpowiedź tutaj"
