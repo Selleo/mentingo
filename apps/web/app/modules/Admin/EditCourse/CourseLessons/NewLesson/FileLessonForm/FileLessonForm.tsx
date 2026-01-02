@@ -138,6 +138,8 @@ const FileLessonForm = ({
       await new Promise<void>((resolve, reject) => {
         toast({
           description: t("uploadFile.toast.videoUploading"),
+          duration: Number.POSITIVE_INFINITY,
+          variant: "loading",
         });
         const upload = new tus.Upload(file, {
           endpoint: session.tusEndpoint,
@@ -158,6 +160,7 @@ const FileLessonForm = ({
             toast({
               description: t("uploadFile.toast.videoUploadedProcessing"),
               duration: Number.POSITIVE_INFINITY,
+              variant: "success",
             });
             resolve();
           },
@@ -347,10 +350,6 @@ const FileLessonForm = ({
                   contentTypeToDisplay={contentTypeToDisplay}
                   url={displayFileUrl}
                   onVideoSelected={() => {
-                    toast({
-                      description: t("uploadFile.toast.videoUploading"),
-                    });
-
                     form.setValue("fileS3Key", "processing-video");
                     form.setValue("fileType", "mp4");
                   }}
