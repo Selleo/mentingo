@@ -120,9 +120,8 @@ export class SettingsController {
   async updateUnregisteredUserCoursesAccessibility(
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
-    const result = await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility(
-      currentUser,
-    );
+    const result =
+      await this.settingsService.updateGlobalUnregisteredUserCoursesAccessibility(currentUser);
     return new BaseResponse(result);
   }
 
@@ -158,9 +157,8 @@ export class SettingsController {
   async updateAdminOverdueCourseNotification(
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<BaseResponse<AdminSettingsJSONContentSchema>> {
-    const result = await this.settingsService.updateAdminSetOverdueCourseNotificationForUser(
-      userId,
-    );
+    const result =
+      await this.settingsService.updateAdminSetOverdueCourseNotificationForUser(userId);
     return new BaseResponse(result);
   }
 

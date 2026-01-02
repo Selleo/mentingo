@@ -1525,6 +1525,7 @@ export interface GetCourseStudentsProgressResponse {
       | null;
     completedLessonsCount: number;
     lastActivity: string | null;
+    lastCompletedLessonName: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -5552,11 +5553,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         search?: string;
         sort?:
           | "studentName"
+          | "groupName"
           | "completedLessonsCount"
           | "lastActivity"
+          | "lastCompletedLessonName"
           | "-studentName"
+          | "-groupName"
           | "-completedLessonsCount"
-          | "-lastActivity";
+          | "-lastActivity"
+          | "-lastCompletedLessonName";
         /** @default "en" */
         language?: "en" | "pl";
       },
@@ -5623,10 +5628,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "lessonName"
           | "score"
           | "lastSession"
+          | "lastCompletedLessonName"
           | "-studentName"
           | "-lessonName"
           | "-score"
-          | "-lastSession";
+          | "-lastSession"
+          | "-lastCompletedLessonName";
         /** @default "en" */
         language?: "en" | "pl";
       },

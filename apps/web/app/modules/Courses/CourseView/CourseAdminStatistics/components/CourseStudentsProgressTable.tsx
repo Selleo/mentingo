@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useUserRole } from "~/hooks/useUserRole";
 import { cn } from "~/lib/utils";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -47,13 +48,14 @@ export function CourseStudentsProgressTable({
   const { id = "" } = useParams();
 
   const { isAdminLike } = useUserRole();
+  const { language } = useLanguageStore();
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const query = useMemo(() => {
     const sort = tanstackSortingToParam(sorting) as CourseStudentsProgressQueryParams["sort"];
-    return { ...searchParams, sort };
-  }, [searchParams, sorting]);
+    return { ...searchParams, sort, language };
+  }, [searchParams, sorting, language]);
 
   const { data: courseStudentsProgress, isFetching } = useCourseStudentsProgress({
     id,
@@ -170,6 +172,28 @@ export function CourseStudentsProgressTable({
           row.original.lastActivity
             ? format(new Date(row.original.lastActivity), "MMM dd, yyyy")
             : null,
+      },
+      {
+        accessorKey: "lastCompletedLessonName",
+        header: ({ column }) => (
+          <SortButton<CourseStudentsProgressColumn> column={column}>
+            {t("adminCourseView.statistics.field.lastCompletedLesson")}
+          </SortButton>
+        ),
+        cell: ({ row }) => {
+          const lastCompletedLessonName = row.original.lastCompletedLessonName;
+
+          return lastCompletedLessonName ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="max-w-xs truncate cursor-help">{lastCompletedLessonName}</div>
+                </TooltipTrigger>
+                <TooltipContent>{lastCompletedLessonName}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null;
+        },
       },
     ],
     [t, lessonCount],

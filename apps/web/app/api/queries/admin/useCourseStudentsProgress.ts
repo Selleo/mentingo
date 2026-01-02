@@ -4,18 +4,9 @@ import { ApiClient } from "../../api-client";
 
 export const COURSE_STUDENTS_PROGRESS_QUERY_KEY = ["course-students-progress", "admin"];
 
-export type CourseStudentsProgressQueryParams = {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  sort?:
-    | "studentName"
-    | "completedLessonsCount"
-    | "lastActivity"
-    | "-studentName"
-    | "-completedLessonsCount"
-    | "-lastActivity";
-};
+export type CourseStudentsProgressQueryParams = Parameters<
+  typeof ApiClient.api.courseControllerGetCourseStudentsProgress
+>[1];
 
 interface CourseStudentsProgressOptions {
   id: string;

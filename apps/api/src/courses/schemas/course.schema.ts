@@ -86,6 +86,7 @@ export const studentCourseProgressionSchema = Type.Object({
   ]),
   completedLessonsCount: Type.Number(),
   lastActivity: Type.Union([Type.String(), Type.Null()]),
+  lastCompletedLessonName: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const studentQuizResultSchema = Type.Object({
