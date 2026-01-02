@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import * as cheerio from "cheerio";
+import { load as loadHtml } from "cheerio";
 import { isNotNull } from "drizzle-orm";
 import { isNumber } from "lodash";
 
@@ -15,6 +15,7 @@ import { AiService } from "src/ai/services/ai.service";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { QuizCompletedEvent } from "src/events";
+import { ENTITY_TYPES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
@@ -28,6 +29,7 @@ import { isQuizAccessAllowed } from "src/utils/isQuizAccessAllowed";
 import { LESSON_TYPES } from "../lesson.type";
 import { LessonRepository } from "../repositories/lesson.repository";
 
+import type { LessonResourceMetadata } from "../lesson-resource.types";
 import type {
   AnswerQuestionBody,
   EnrolledLesson,
@@ -84,38 +86,43 @@ export class LessonService {
     if (isStudent && !lesson.isFreemium && !lesson.isEnrolled)
       throw new UnauthorizedException("You don't have access");
 
-    if (lesson.type === LESSON_TYPES.TEXT && !lesson.fileUrl) {
-      const { description, ...rest } = lesson;
-
-      const updatedDescription = await this.convertUrlsToImages(description);
-
-      return { ...rest, description: updatedDescription };
-    }
-
     if (
       lesson.type === LESSON_TYPES.QUIZ ||
-      lesson.type === LESSON_TYPES.VIDEO ||
+      lesson.type === LESSON_TYPES.CONTENT ||
       lesson.type === LESSON_TYPES.AI_MENTOR
     ) {
       await this.studentLessonProgressService.markLessonAsStarted(lesson.id, userId, userRole);
     }
 
-    if (
-      lesson.type !== LESSON_TYPES.QUIZ &&
-      lesson.type !== LESSON_TYPES.AI_MENTOR &&
-      lesson.type !== LESSON_TYPES.EMBED
-    ) {
-      if (!lesson.fileUrl) throw new NotFoundException("Lesson file not found");
+    if (lesson.type === LESSON_TYPES.CONTENT) {
+      const lessonResources = await this.fileService.getResourcesForEntity(
+        id,
+        ENTITY_TYPES.LESSON,
+        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        actualLanguage,
+      );
 
-      if (lesson.fileUrl.startsWith("https://")) return lesson;
+      const mappedResources = lessonResources.map((resource) => ({
+        id: resource.id,
+        fileUrl: resource.fileUrl,
+        contentType: resource.contentType,
+        title: typeof resource.title === "string" ? resource.title : undefined,
+        description: typeof resource.description === "string" ? resource.description : undefined,
+        fileName: this.extractOriginalFilename(resource.metadata),
+      }));
 
-      try {
-        const signedUrl = await this.fileService.getFileUrl(lesson.fileUrl);
-        return { ...lesson, fileUrl: signedUrl };
-      } catch (error) {
-        console.error(`Failed to get signed URL for ${lesson.fileUrl}:`, error);
-        throw new NotFoundException("Lesson file not found");
-      }
+      const { html: updatedDescription, contentCount } = this.injectResourcesIntoContent(
+        lesson.description,
+        mappedResources,
+      );
+
+      const hasVideo = this.hasOnlyVideo(contentCount);
+
+      return {
+        ...lesson,
+        description: updatedDescription ?? lesson.description,
+        hasOnlyVideo: hasVideo,
+      };
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR) {
@@ -145,9 +152,29 @@ export class LessonService {
     }
 
     if (lesson.type === LESSON_TYPES.EMBED) {
-      const lessonResources = await this.lessonRepository.getLessonResources(lesson.id);
+      const lessonResources = await this.fileService.getResourcesForEntity(
+        lesson.id,
+        ENTITY_TYPES.LESSON,
+        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        actualLanguage,
+      );
 
-      return { ...lesson, lessonResources };
+      const mappedResources = lessonResources.map((resource) => {
+        const metadata = resource.metadata as LessonResourceMetadata | undefined;
+        const fileName = metadata?.originalFilename;
+
+        return {
+          id: resource.id,
+          fileUrl: resource.fileUrl,
+          contentType: resource.contentType,
+          title: typeof resource.title === "string" ? resource.title : undefined,
+          description: typeof resource.description === "string" ? resource.description : undefined,
+          fileName,
+          allowFullscreen: metadata?.allowFullscreen,
+        };
+      });
+
+      return { ...lesson, lessonResources: mappedResources };
     }
 
     const questionList = await this.questionRepository.getQuestionsForLesson(
@@ -388,13 +415,17 @@ export class LessonService {
     });
   }
 
-  async getLessonImage(res: Response, userId: UUIDType, role: UserRole, resourceId: UUIDType) {
+  async getLessonResource(res: Response, userId: UUIDType, role: UserRole, resourceId: UUIDType) {
     const isStudent = role === USER_ROLES.STUDENT;
 
     const lessonResource = await this.lessonRepository.getResource(resourceId);
 
+    if (!lessonResource || lessonResource.entityType !== ENTITY_TYPE.LESSON) {
+      throw new NotFoundException("Lesson resource not found");
+    }
+
     const [lesson] = await this.lessonRepository.checkLessonAssignment(
-      lessonResource.lessonId,
+      lessonResource.entityId,
       userId,
     );
 
@@ -402,11 +433,11 @@ export class LessonService {
       throw new ForbiddenException("You are not allowed to access this lesson!");
     }
 
-    const s3Stream = await this.fileService.getFileStream(lessonResource.source);
+    const fileUrl = await this.fileService.getFileUrl(lessonResource.reference);
 
-    if (!s3Stream) throw new Error("Error fetching file stream");
+    if (!fileUrl) throw new Error("Error fetching file url");
 
-    s3Stream.pipe(res);
+    return res.redirect(fileUrl);
   }
 
   async getEnrolledLessons(
@@ -417,30 +448,153 @@ export class LessonService {
     return await this.lessonRepository.getEnrolledLessons(userId, filters, language);
   }
 
-  async convertUrlsToImages(content: string) {
-    const $ = cheerio.load(content);
+  extractOriginalFilename(metadata: unknown) {
+    if (!metadata || typeof metadata !== "object") return undefined;
+    if ("originalFilename" in metadata && typeof metadata.originalFilename === "string")
+      return metadata.originalFilename;
+    return undefined;
+  }
 
-    const tags = $("a").toArray();
+  private buildImageTag(resource: { fileUrl: string; title?: string }) {
+    return `<img src="${resource.fileUrl}" alt="${resource.title ?? ""}" />`;
+  }
 
-    const tagsWithImages = tags.filter((tag) =>
-      $(tag).attr("href")?.includes("/api/lesson/lesson-image"),
-    );
+  private buildVideoTag(resource: { fileUrl: string; title?: string }) {
+    const isExternal = this.isExternalVideoUrl(resource.fileUrl);
+    const externalAttr = isExternal ? "true" : "false";
 
-    tagsWithImages.forEach((tag) => {
-      const href = $(tag).attr("href");
-      if (href) {
-        const parent = $(tag).parent();
+    return `<div data-type="video" data-url="${
+      resource.fileUrl
+    }" data-external="${externalAttr}" aria-label="${resource.title ?? ""}"></div>`;
+  }
 
+  private isPresentationResource(resource: {
+    contentType: string | null;
+    fileUrl: string;
+    fileName?: string;
+  }) {
+    if (
+      resource.contentType ===
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    )
+      return true;
+
+    if (resource.fileName && /\.(pptx|ppt)(\?|#|$)/i.test(resource.fileName)) return true;
+
+    return /\.(pptx|ppt)(\?|#|$)/i.test(resource.fileUrl);
+  }
+
+  private isExternalPresentationUrl(fileUrl: string) {
+    if (!fileUrl) return false;
+    if (fileUrl.includes("/api/lesson/lesson-resource/")) return false;
+    if (fileUrl.includes("/api/lesson/lesson-image/")) return false;
+    return !/\.(pptx|ppt)(\?|#|$)/i.test(fileUrl);
+  }
+
+  private isExternalVideoUrl(fileUrl: string) {
+    if (!fileUrl) return false;
+    return !fileUrl.includes("iframe.mediadelivery.net/embed/");
+  }
+
+  private buildPresentationTag(resource: { fileUrl: string; title?: string }) {
+    const isExternal = this.isExternalPresentationUrl(resource.fileUrl);
+    const externalAttr = isExternal ? "true" : "false";
+
+    return `<div data-type="presentation" data-url="${
+      resource.fileUrl
+    }" data-external="${externalAttr}" aria-label="${resource.title ?? ""}"></div>`;
+  }
+
+  injectResourcesIntoContent(
+    content: string | null,
+    resources: Array<{
+      id: UUIDType;
+      fileUrl: string;
+      contentType: string | null;
+      title?: string;
+      description?: string;
+      fileName?: string;
+    }>,
+  ): { html: string | null; contentCount: Record<string, number> } {
+    const contentCount: Record<string, number> = {};
+
+    const increment = (key: string) => (contentCount[key] = (contentCount[key] ?? 0) + 1);
+
+    if (!content) return { html: content, contentCount };
+
+    if (!resources.length) return { html: content, contentCount };
+
+    const $ = loadHtml(content);
+    const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
+
+    $("a").each((_, element) => {
+      const anchor = $(element);
+      const href = anchor.attr("href") || "";
+      const dataResourceId = anchor.attr("data-resource-id");
+
+      const matchingResource =
+        (dataResourceId && resourceMap.get(dataResourceId as UUIDType)) ||
+        resources.find((resource) => href.includes(String(resource.id)));
+
+      if (!matchingResource) return;
+
+      const parent = anchor.parent();
+
+      if ((matchingResource.contentType ?? "").startsWith("image/")) {
+        const imgTag = this.buildImageTag(matchingResource);
         if (parent.is("p")) {
-          $(tag).replaceWith("");
-          parent.after(`<img src="${href}" alt="${href}">`);
+          anchor.remove();
+          parent.after(imgTag);
         } else {
-          $(tag).replaceWith(`<img src="${href}" alt="${href}">`);
+          anchor.replaceWith(imgTag);
         }
+
+        increment("image");
+        return;
       }
+
+      if ((matchingResource.contentType ?? "").startsWith("video/")) {
+        const iframe = this.buildVideoTag(matchingResource);
+        if (parent.is("p")) {
+          anchor.remove();
+          parent.after(iframe);
+        } else {
+          anchor.replaceWith(iframe);
+        }
+
+        increment("video");
+        return;
+      }
+
+      if (this.isPresentationResource(matchingResource)) {
+        const presentation = this.buildPresentationTag(matchingResource);
+        if (parent.is("p")) {
+          anchor.remove();
+          parent.after(presentation);
+        } else {
+          anchor.replaceWith(presentation);
+        }
+
+        increment("presentation");
+        return;
+      }
+
+      increment("file");
+
+      anchor.attr("href", matchingResource.fileUrl);
+      anchor.attr("download", matchingResource.fileName ?? "");
+      anchor.attr("target", "_blank");
+      anchor.attr("rel", "noopener noreferrer");
+      anchor.text(
+        matchingResource.title || matchingResource.fileName || matchingResource.description || "",
+      );
     });
 
-    return $.html($("body").children());
+    return { html: $.html($("body").children()), contentCount };
+  }
+
+  private hasOnlyVideo(contentCount: Record<string, number>) {
+    return contentCount.video === 1 && Object.keys(contentCount).length === 1;
   }
 
   // async studentAnswerOnQuestion(

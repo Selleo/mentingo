@@ -4,29 +4,27 @@ import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
   aiMentorLessons,
   aiMentorStudentLessonProgress,
   chapters,
   courses,
-  lessonResources,
   lessons,
   questions,
   quizAttempts,
   studentCourses,
   studentLessonProgress,
   studentChapterProgress,
+  resourceEntity,
+  resources,
   coursesSettingsHelpers,
 } from "src/storage/schema";
 
 import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type {
-  AdminQuestionBody,
-  EnrolledLessonsFilters,
-  LessonResourceType,
-} from "src/lesson/lesson.schema";
+import type { AdminQuestionBody, EnrolledLessonsFilters } from "src/lesson/lesson.schema";
 import type * as schema from "src/storage/schema";
 
 @Injectable()
@@ -329,22 +327,22 @@ export class LessonRepository {
       .limit(1);
   }
 
-  async getLessonResources(lessonId: UUIDType) {
-    return this.db
-      .select({
-        ...getTableColumns(lessonResources),
-        type: sql<LessonResourceType>`${lessonResources.type}`,
-      })
-      .from(lessonResources)
-      .where(eq(lessonResources.lessonId, lessonId))
-      .orderBy(lessonResources.displayOrder);
-  }
-
   async getResource(resourceId: UUIDType) {
     const [resource] = await this.db
-      .select()
-      .from(lessonResources)
-      .where(eq(lessonResources.id, resourceId));
+      .select({
+        ...getTableColumns(resources),
+        entityId: resourceEntity.entityId,
+        entityType: resourceEntity.entityType,
+      })
+      .from(resources)
+      .innerJoin(resourceEntity, eq(resourceEntity.resourceId, resources.id))
+      .where(
+        and(
+          eq(resources.id, resourceId),
+          eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
+          eq(resources.archived, false),
+        ),
+      );
 
     return resource;
   }

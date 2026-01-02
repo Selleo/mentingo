@@ -49,14 +49,8 @@ export const LessonCardList = ({
 
       setSelectedLesson(lesson);
       switch (lesson.type) {
-        case "video":
-          setContentTypeToDisplay(ContentTypes.VIDEO_LESSON_FORM);
-          break;
-        case "text":
-          setContentTypeToDisplay(ContentTypes.TEXT_LESSON_FORM);
-          break;
-        case "presentation":
-          setContentTypeToDisplay(ContentTypes.PRESENTATION_FORM);
+        case "content":
+          setContentTypeToDisplay(ContentTypes.CONTENT_LESSON_FORM);
           break;
         case "quiz":
           setContentTypeToDisplay(ContentTypes.QUIZ_FORM);

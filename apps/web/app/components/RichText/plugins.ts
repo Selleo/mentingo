@@ -7,6 +7,8 @@ import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
 
 import { Iframe } from "~/components/RichText/extensions/iframe";
+import { PresentationNode } from "~/components/RichText/extensions/presentation";
+import { VideoNode } from "~/components/RichText/extensions/video";
 
 const HeadingWithId = Heading.extend({
   name: "heading",
@@ -71,4 +73,6 @@ export const plugins = [
     },
   }),
   Iframe,
+  PresentationNode,
+  VideoNode,
 ];

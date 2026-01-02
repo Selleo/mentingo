@@ -10,16 +10,16 @@ import { ApiClient } from "../../api-client";
 
 import type { BetaCreateLessonBody } from "~/api/generated-api";
 
-type CreateTextBlockOptions = {
+type CreateContentLessonOptions = {
   data: BetaCreateLessonBody;
 };
 
-export function useCreateBetaTextLesson() {
+export function useCreateBetaContentLesson() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (options: CreateTextBlockOptions) => {
+    mutationFn: async (options: CreateContentLessonOptions) => {
       const response = await ApiClient.api.lessonControllerBetaCreateLesson(options.data);
 
       return response.data;
@@ -30,7 +30,7 @@ export function useCreateBetaTextLesson() {
 
       toast({
         variant: "default",
-        description: t("adminCourseView.curriculum.lesson.toast.textLessonCreatedSuccessfully"),
+        description: t("adminCourseView.curriculum.lesson.toast.contentLessonCreatedSuccessfully"),
       });
     },
     onError: (error) => {

@@ -1,3 +1,11 @@
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+} from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,13 +23,13 @@ import { baseUrl } from "~/utils/baseUrl";
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
-import { useTextLessonForm } from "./hooks/useTextLessonForm";
+import { useContentLessonForm } from "./hooks/useContentLessonForm";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 
-type TextLessonProps = {
+type ContentLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   chapterToEdit: Chapter | null;
   lessonToEdit: Lesson | null;
@@ -29,14 +37,14 @@ type TextLessonProps = {
   language: SupportedLanguages;
 };
 
-const TextLessonForm = ({
+const ContentLessonForm = ({
   setContentTypeToDisplay,
   chapterToEdit,
   lessonToEdit,
   setSelectedLesson,
   language,
-}: TextLessonProps) => {
-  const { form, onSubmit, onDelete } = useTextLessonForm({
+}: ContentLessonProps) => {
+  const { form, onSubmit, onDelete } = useContentLessonForm({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
@@ -59,9 +67,25 @@ const TextLessonForm = ({
   const handleFileUpload = async (file?: File, editor?: TiptapEditor | null) => {
     if (!file || !lessonToEdit?.id) return;
 
-    const uploaded = await uploadFile({ file, lessonId: lessonToEdit.id });
-    const imageUrl = `${baseUrl}/api/lesson/lesson-image/${uploaded}`;
-    editor?.chain().insertContent(`<a href="${imageUrl}">${imageUrl}</a>`).run();
+    await uploadFile(
+      {
+        file,
+        lessonId: lessonToEdit.id,
+        language,
+        title: file.name,
+        description: file.name,
+      },
+      {
+        onSuccess: (data) => {
+          const resourceUrl = `${baseUrl}/api/lesson/lesson-resource/${data.data.resourceId}`;
+          editor
+            ?.chain()
+            .insertContent("<br />")
+            .insertContent(`<a href="${resourceUrl}">${resourceUrl}</a>`)
+            .run();
+        },
+      },
+    );
   };
 
   const missingTranslations =
@@ -73,7 +97,7 @@ const TextLessonForm = ({
       <div className="flex flex-col gap-y-1">
         {!lessonToEdit && (
           <Breadcrumb
-            lessonLabel="Text"
+            lessonLabel={t("adminCoursesView.lessonCard.mappedTypes.content")}
             setContentTypeToDisplay={setContentTypeToDisplay}
             setSelectedLesson={setSelectedLesson}
           />
@@ -119,6 +143,14 @@ const TextLessonForm = ({
                     content={field.value}
                     lessonId={lessonToEdit?.id}
                     allowFiles={!!lessonToEdit?.id}
+                    acceptedFileTypes={[
+                      ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+                      ...ALLOWED_VIDEO_FILE_TYPES,
+                      ...ALLOWED_EXCEL_FILE_TYPES,
+                      ...ALLOWED_PDF_FILE_TYPES,
+                      ...ALLOWED_WORD_FILE_TYPES,
+                      ...ALLOWED_PRESENTATION_FILE_TYPES,
+                    ]}
                     onUpload={handleFileUpload}
                     {...field}
                   />
@@ -153,10 +185,10 @@ const TextLessonForm = ({
         open={isModalOpen}
         onClose={onCloseModal}
         onDelete={onDelete}
-        contentType={DeleteContentType.TEXT}
+        contentType={DeleteContentType.CONTENT}
       />
     </div>
   );
 };
 
-export default TextLessonForm;
+export default ContentLessonForm;

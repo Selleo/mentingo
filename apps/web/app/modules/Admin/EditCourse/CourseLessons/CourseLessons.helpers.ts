@@ -4,9 +4,7 @@ import { QuestionType } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson
 
 export const mapItemType = (itemType: string | undefined): string =>
   match(itemType)
-    .with("text", () => "Text")
-    .with("video", () => "Video")
-    .with("presentation", () => "Presentation")
+    .with("content", () => "Content")
     .with("question", () => "Quiz")
     .with("ai_mentor", () => "AiMentor")
     .with("embed", () => "Embed")
@@ -14,10 +12,9 @@ export const mapItemType = (itemType: string | undefined): string =>
 
 export const mapTypeToIcon = (itemType: string): string =>
   match(itemType)
-    .with("text", () => "Text")
-    .with("video", () => "Video")
-    .with("presentation", () => "Presentation")
+    .with("content", () => "Content")
     .with("question", () => "Quiz")
+    .with("quiz", () => "Quiz")
     .with("ai_mentor", () => "AiMentor")
     .with("embed", () => "Embed")
     .otherwise(() => "Quiz");

@@ -55,7 +55,7 @@ export const EmbedFrame = ({ resource, title }: EmbedFrameProps) => {
       {!hasFailed ? (
         <>
           <iframe
-            src={resource.source}
+            src={resource.fileUrl}
             title={title}
             allowFullScreen={resource.allowFullscreen}
             onLoad={handleLoad}
@@ -77,7 +77,7 @@ export const EmbedFrame = ({ resource, title }: EmbedFrameProps) => {
         <div className="flex h-full w-full flex-col items-center justify-center text-center text-sm text-gray-600">
           <p className="mb-2">⚠️ {t("studentLessonView.other.contentCantBeEmbedded")}</p>
           <a
-            href={resource.source}
+            href={resource.fileUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 underline"

@@ -26,14 +26,6 @@ export const defaultClasses = {
   taskList: "[&_[data-type='taskList']]:list-none [&_[data-type='taskList']]:pl-0",
 };
 
-export const lessonVariantClasses = {
-  layout: "[&>div]:flex [&>div]:flex-col",
-  h2: "[&>div>h2]:h6 [&>div>h2]:text-neutral-950",
-  p: "[&>div>p]:body-base [&>div>p]:text-neutral-900",
-  ul: "[&>div>ul>li>p]:body-base [&>div>ul>li>p]:text-neutral-900 [&>div>ul>li>p>strong]:text-neutral-950",
-  ol: "[&>div>ol>li>p]:body-base [&>div>ol>li>p]:text-neutral-900 [&>div>ol>li>p>strong]:text-neutral-950",
-};
-
 export const articleVariantClasses = {
   wrapper: "w-full py-10",
   layout:
@@ -63,3 +55,4 @@ export const articleVariantClasses = {
 };
 
 export const newsVariantClasses = articleVariantClasses;
+export const contentVariantClasses = articleVariantClasses;

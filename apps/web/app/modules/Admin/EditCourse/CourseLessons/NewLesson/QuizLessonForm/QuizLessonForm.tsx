@@ -399,7 +399,7 @@ const QuizLessonForm = ({
             </div>
 
             {questions && questions.length > 0 && (
-              <SortableList
+              <SortableList<Question>
                 items={questions}
                 onChange={(updatedItems) => {
                   if (isStructureLocked) return;

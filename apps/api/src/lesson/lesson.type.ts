@@ -1,7 +1,5 @@
 export const LESSON_TYPES = {
-  TEXT: "text",
-  PRESENTATION: "presentation",
-  VIDEO: "video",
+  CONTENT: "content",
   QUIZ: "quiz",
   AI_MENTOR: "ai_mentor",
   EMBED: "embed",

@@ -6,6 +6,7 @@ import {
   ALLOWED_EXCEL_FILE_TYPES,
   ALLOWED_LESSON_IMAGE_FILE_TYPES,
   ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
   VIDEO_UPLOAD_STATUS,
@@ -23,7 +24,8 @@ import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelper
 import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import { S3Service } from "src/s3/s3.service";
-import { resources, resourceEntity, lessons } from "src/storage/schema";
+import { resources, resourceEntity } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import {
   MAX_FILE_SIZE,
@@ -372,6 +374,7 @@ export class FileService {
         ...ALLOWED_WORD_FILE_TYPES,
         ...ALLOWED_VIDEO_FILE_TYPES,
         ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+        ...ALLOWED_PRESENTATION_FILE_TYPES,
       ],
       maxSize: MAX_FILE_SIZE,
     });
@@ -409,6 +412,78 @@ export class FileService {
       fileKey,
       fileUrl: await this.getFileUrl(fileKey),
     };
+  }
+
+  /**
+   * Create a resource record linked to an entity without uploading a file.
+   */
+  async createResourceForEntity(
+    reference: string,
+    contentType: string,
+    entityId: UUIDType,
+    entityType: EntityType,
+    relationshipType: ResourceRelationshipType = RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+    metadata: Record<string, unknown> = {},
+    title: Partial<Record<SupportedLanguages, string>> = {},
+    description: Partial<Record<SupportedLanguages, string>> = {},
+    currentUser?: CurrentUser,
+  ) {
+    const { insertedResource } = await this.db.transaction(async (trx) => {
+      const [insertedResource] = await trx
+        .insert(resources)
+        .values({
+          title: buildJsonbFieldWithMultipleEntries(title || {}),
+          description: buildJsonbFieldWithMultipleEntries(description || {}),
+          reference,
+          contentType,
+          metadata: settingsToJSONBuildObject(metadata),
+          uploadedBy: currentUser?.userId || null,
+        })
+        .returning();
+
+      await trx.insert(resourceEntity).values({
+        resourceId: insertedResource.id,
+        entityId,
+        entityType,
+        relationshipType,
+      });
+
+      return { insertedResource };
+    });
+
+    if (!insertedResource) throw new BadRequestException("adminResources.toast.uploadError");
+
+    return {
+      resourceId: insertedResource.id,
+      fileUrl: await this.getFileUrl(reference),
+    };
+  }
+
+  async updateResource(
+    resourceId: UUIDType,
+    updates: {
+      reference?: string;
+      contentType?: string;
+      metadata?: Record<string, unknown>;
+      title?: Partial<Record<SupportedLanguages, string>>;
+      description?: Partial<Record<SupportedLanguages, string>>;
+    },
+  ) {
+    const [updated] = await this.db
+      .update(resources)
+      .set({
+        reference: updates.reference,
+        contentType: updates.contentType,
+        metadata: updates.metadata,
+        title: updates.title ? buildJsonbFieldWithMultipleEntries(updates.title) : undefined,
+        description: updates.description
+          ? buildJsonbFieldWithMultipleEntries(updates.description)
+          : undefined,
+      })
+      .where(eq(resources.id, resourceId))
+      .returning();
+
+    return updated;
   }
 
   /**
@@ -513,23 +588,12 @@ export class FileService {
     }
 
     const state = await this.videoProcessingStateService.markProcessed(videoId, fileUrl);
-    const lessonKey = state?.placeholderKey || fileKey;
 
-    if (state?.lessonId) {
+    if (state?.placeholderKey) {
       await this.db
-        .update(lessons)
-        .set({ fileS3Key: fileKey, fileType: state?.fileType ?? null })
-        .where(eq(lessons.id, state.lessonId));
-    } else {
-      await this.db
-        .update(lessons)
-        .set({ fileS3Key: fileKey, fileType: state?.fileType ?? null })
-        .where(eq(lessons.fileS3Key, lessonKey));
-
-      await this.db
-        .update(lessons)
-        .set({ fileS3Key: fileKey, fileType: state?.fileType ?? null })
-        .where(eq(lessons.fileS3Key, fileKey));
+        .update(resources)
+        .set({ reference: fileKey })
+        .where(eq(resources.reference, state.placeholderKey));
     }
 
     return { success: true };

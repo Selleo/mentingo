@@ -1,18 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, inArray, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
   aiMentorLessons,
   chapters,
   courses,
-  lessonResources,
   lessons,
   questionAnswerOptions,
   questions,
+  resourceEntity,
+  resources,
 } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { LESSON_TYPES } from "../lesson.type";
 
@@ -21,9 +24,7 @@ import type {
   AdminQuestionBody,
   CreateAiMentorLessonBody,
   CreateLessonBody,
-  CreateLessonResourceBody,
   CreateQuizLessonBody,
-  LessonResourceType,
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
@@ -483,58 +484,134 @@ export class AdminLessonRepository {
     return result.id;
   }
 
-  async getLessonResourcesForLesson(lessonId: UUIDType) {
+  async getLessonResourcesForLesson(lessonId: UUIDType, language?: SupportedLanguages) {
+    const resourceSelect = language
+      ? {
+          ...getTableColumns(resources),
+          title: sql`COALESCE(${resources.title}->>${language}::text,'')`,
+          description: sql`COALESCE(${resources.description}->>${language}::text,'')`,
+        }
+      : getTableColumns(resources);
+
     return this.db
       .select({
-        ...getTableColumns(lessonResources),
-        type: sql<LessonResourceType>`${lessonResources.type}`,
+        ...resourceSelect,
       })
-      .from(lessonResources)
-      .where(eq(lessonResources.lessonId, lessonId))
-      .orderBy(lessonResources.displayOrder);
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityId, lessonId),
+          eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
+          eq(resources.archived, false),
+        ),
+      )
+      .orderBy(resources.createdAt);
   }
 
-  createLessonResources = async (data: CreateLessonResourceBody[]) => {
-    return this.db.insert(lessonResources).values(data).returning();
-  };
-
-  async deleteLessonResources(lessonId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {
-    const dbInstance = trx ?? this.db;
-
-    const [result] = await dbInstance
-      .delete(lessonResources)
-      .where(eq(lessonResources.lessonId, lessonId))
-      .returning();
-
-    return result.lessonId;
-  }
-
-  async deleteLessonResourcesByIds(ids: UUIDType[], trx?: PostgresJsDatabase<typeof schema>) {
-    const dbInstance = trx ?? this.db;
-
-    return dbInstance.delete(lessonResources).where(inArray(lessonResources.id, ids)).returning();
-  }
-
-  async upsertLessonResources(
-    data: CreateLessonResourceBody[],
+  async createLessonResources(
+    lessonId: UUIDType,
+    data: Array<{
+      reference: string;
+      contentType?: string;
+      metadata?: Record<string, unknown>;
+      uploadedById?: UUIDType | null;
+    }>,
     trx?: PostgresJsDatabase<typeof schema>,
   ) {
     const dbInstance = trx ?? this.db;
 
+    return dbInstance.transaction(async (tx) => {
+      const insertedResources = await tx
+        .insert(resources)
+        .values(
+          data.map((resource) => ({
+            reference: resource.reference,
+            contentType: resource.contentType ?? "text/html",
+            metadata: settingsToJSONBuildObject(resource.metadata ?? {}),
+            uploadedBy: resource.uploadedById ?? null,
+          })),
+        )
+        .returning();
+
+      if (!insertedResources.length) return [];
+
+      await tx.insert(resourceEntity).values(
+        insertedResources.map((inserted) => ({
+          resourceId: inserted.id,
+          entityId: lessonId,
+          entityType: ENTITY_TYPE.LESSON,
+        })),
+      );
+
+      return insertedResources;
+    });
+  }
+
+  async updateLessonResources(
+    data: Array<{
+      id: UUIDType;
+      reference: string;
+      contentType?: string;
+      metadata?: Record<string, unknown>;
+    }>,
+    trx?: PostgresJsDatabase<typeof schema>,
+  ) {
+    const dbInstance = trx ?? this.db;
+
+    return Promise.all(
+      data.map((resource) =>
+        dbInstance
+          .update(resources)
+          .set({
+            reference: resource.reference,
+            contentType: resource.contentType ?? "text/html",
+            metadata: settingsToJSONBuildObject(resource.metadata ?? {}),
+          })
+          .where(eq(resources.id, resource.id))
+          .returning(),
+      ),
+    );
+  }
+
+  async deleteLessonResourcesByIds(
+    resourceIds: UUIDType[],
+    trx?: PostgresJsDatabase<typeof schema>,
+  ) {
+    if (!resourceIds.length) return [];
+    const dbInstance = trx ?? this.db;
+
     return dbInstance
-      .insert(lessonResources)
-      .values(data)
-      .onConflictDoUpdate({
-        target: lessonResources.id,
-        set: {
-          lessonId: sql`EXCLUDED.lesson_id`,
-          type: sql`EXCLUDED.type`,
-          source: sql`EXCLUDED.source`,
-          isExternal: sql`EXCLUDED.is_external`,
-          allowFullscreen: sql`EXCLUDED.allow_fullscreen`,
-          displayOrder: sql`EXCLUDED.display_order`,
-        },
-      })
+      .update(resources)
+      .set({ archived: true })
+      .where(inArray(resources.id, resourceIds))
+      .returning();
+  }
+
+  async deleteLessonResources(lessonId: UUIDType, trx?: PostgresJsDatabase<typeof schema>) {
+    const dbInstance = trx ?? this.db;
+    const resourceIds = await dbInstance
+      .select({ id: resources.id })
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityId, lessonId),
+          eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
+        ),
+      );
+
+    if (!resourceIds.length) return [];
+
+    return dbInstance
+      .update(resources)
+      .set({ archived: true })
+      .where(
+        inArray(
+          resources.id,
+          resourceIds.map((item) => item.id),
+        ),
+      )
       .returning();
   }
 

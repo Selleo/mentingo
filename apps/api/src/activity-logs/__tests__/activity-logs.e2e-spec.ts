@@ -247,7 +247,7 @@ describe("Activity Logs E2E", () => {
         {
           chapterId: chapterId,
           title: "Initial Lesson",
-          type: LESSON_TYPES.TEXT,
+          type: LESSON_TYPES.CONTENT,
           description: "Lesson description",
         } satisfies CreateLessonBody,
         currentAdminUser,
@@ -276,7 +276,7 @@ describe("Activity Logs E2E", () => {
           language: "en",
           title: "Updated Lesson",
           description: "Updated description",
-          type: LESSON_TYPES.TEXT,
+          type: LESSON_TYPES.CONTENT,
         } satisfies UpdateLessonBody,
         currentAdminUser,
       );
