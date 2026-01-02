@@ -21,7 +21,7 @@ export class AuthFixture {
     await this.passwordInput.fill(password);
     await this.loginButton.click();
 
-    await expect(this.page).toHaveURL("/");
+    await expect(this.page).toHaveURL("/courses");
   }
 
   async logout() {
