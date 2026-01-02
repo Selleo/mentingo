@@ -1877,6 +1877,8 @@ export class CourseService {
             .from(lessons)
             .where(eq(lessons.chapterId, chapter.id));
 
+          if (chapterLessons.length === 0) return;
+
           await trx
             .insert(studentLessonProgress)
             .values(
