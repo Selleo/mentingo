@@ -1,6 +1,56 @@
+<a name="v3.25.0"></a>
+
+## [v3.25.0] - 02.01.2026
+
+### Features:
+
+- make video uploads more reliable with resume support and processing feedback ([#1157](https://github.com/Selleo/mentingo/issues/1157))
+
+- improve the appearance of email notifications ([#1154](https://github.com/Selleo/mentingo/issues/1154))
+
+- allow admins to define a minimum age for registration ([#1145](https://github.com/Selleo/mentingo/issues/1145))
+
+- allow generating and exporting reports to Excel ([#1142](https://github.com/Selleo/mentingo/issues/1142))
+
+- allow toggling quiz feedback visibility ([#1134](https://github.com/Selleo/mentingo/issues/1134))
+
+- enable automatic translations powered by AI ([#1089](https://github.com/Selleo/mentingo/issues/1089))
+
+- improve video upload experience ([#1090](https://github.com/Selleo/mentingo/issues/1090))
+
+- allow admins to manage news and articles visibility in settings ([#1123](https://github.com/Selleo/mentingo/issues/1123))
+
+- improve news navigation and summary readability ([#1120](https://github.com/Selleo/mentingo/issues/1120))
+
+- allow admins to mark courses as mandatory for groups ([#994](https://github.com/Selleo/mentingo/issues/994))
+
+- add bulk seed for k6 performance tests ([#1114](https://github.com/Selleo/mentingo/issues/1114))
+
+- add articles feature to the platform ([#1111](https://github.com/Selleo/mentingo/issues/1111))
+
+### Bug Fixes:
+
+- allow changing course status regardless of UI language ([#1147](https://github.com/Selleo/mentingo/issues/1147))
+
+- ensure lessons and courses update correctly after changes ([#1137](https://github.com/Selleo/mentingo/issues/1137))
+
+- improve account security by consistently enforcing MFA ([#1135](https://github.com/Selleo/mentingo/issues/1135))
+
+### Chores:
+
+- improve article change tracking and test coverage ([#1136](https://github.com/Selleo/mentingo/issues/1136))
+
+- show default course currency based on Stripe configuration ([#1141](https://github.com/Selleo/mentingo/issues/1141))
+
+- remove unused SCORM button ([#1131](https://github.com/Selleo/mentingo/issues/1131))
+
+### Code Refactoring:
+
+- simplify API tests setup for easier maintenance ([#1102](https://github.com/Selleo/mentingo/issues/1102))
+
 <a name="v3.24.0"></a>
 
-## [v3.24.0] - 17.12.2025
+## [v3.24.0] - 18.12.2025
 
 ### Features:
 
@@ -27,6 +77,10 @@
 ### Code Refactoring:
 
 - replaced exceljs lib
+
+### Documentation:
+
+- update changelog for version v3.24.0
 
 <a name="v3.23.0"></a>
 
@@ -2160,7 +2214,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.24.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.25.0...HEAD
+[v3.25.0]: https://github.com/Selleo/mentingo/compare/v3.24.0...v3.25.0
 [v3.24.0]: https://github.com/Selleo/mentingo/compare/v3.23.0...v3.24.0
 [v3.23.0]: https://github.com/Selleo/mentingo/compare/v3.22.0...v3.23.0
 [v3.22.0]: https://github.com/Selleo/mentingo/compare/v3.21.0...v3.22.0
