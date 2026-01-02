@@ -148,6 +148,7 @@ const FileLessonForm = ({
           },
           retryDelays: [0, 1000, 3000, 5000, 10000],
           fingerprint: async () => tusFingerprint,
+          removeFingerprintOnSuccess: true,
           onError: (error) => {
             clearUpload(session.uploadId);
             reject(error);
