@@ -76,7 +76,8 @@
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany",
       "videoFailed": "Nie udało się przesłać wideo",
       "videoReady": "Wideo jest gotowe do użycia",
-      "videoProcessingStarted": "Rozpoczęto przesyłanie wideo. Powiadomimy Cię, gdy zostanie przetworzone."
+      "videoUploading": "Przesyłamy Twoje wideo. Proszę nie zamykaj karty.",
+      "videoUploadedProcessing": "Przesyłanie zakończone. Twoje wideo jest teraz przetwarzane. Możesz zamknąć kartę."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG lub SVG",

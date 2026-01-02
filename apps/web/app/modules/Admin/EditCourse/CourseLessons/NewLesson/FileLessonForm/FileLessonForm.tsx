@@ -136,6 +136,9 @@ const FileLessonForm = ({
       }
 
       await new Promise<void>((resolve, reject) => {
+        toast({
+          description: t("uploadFile.toast.videoUploading"),
+        });
         const upload = new tus.Upload(file, {
           endpoint: session.tusEndpoint,
           headers: tusHeaders,
@@ -151,6 +154,10 @@ const FileLessonForm = ({
           },
           onSuccess: () => {
             clearUpload(session.uploadId);
+            toast({
+              description: t("uploadFile.toast.videoUploadedProcessing"),
+              duration: Number.POSITIVE_INFINITY,
+            });
             resolve();
           },
         });
@@ -163,7 +170,7 @@ const FileLessonForm = ({
         });
       });
     },
-    [clearUpload, form, getUploadForFile, initVideoUpload, lessonToEdit?.id, saveUpload],
+    [clearUpload, form, getUploadForFile, initVideoUpload, lessonToEdit?.id, saveUpload, t, toast],
   );
 
   const handleFileUpload = useCallback(
@@ -194,14 +201,8 @@ const FileLessonForm = ({
         }
       } catch (error) {
         console.error("Error uploading file:", error);
-        const fallbackMessage =
-          contentTypeToDisplay === ContentTypes.VIDEO_LESSON_FORM
-            ? t("uploadFile.toast.videoFailed")
-            : error instanceof Error
-              ? error.message
-              : t("uploadFile.toast.videoFailed");
         toast({
-          description: fallbackMessage,
+          description: t("uploadFile.toast.videoFailed"),
           variant: "destructive",
         });
       } finally {
@@ -346,7 +347,7 @@ const FileLessonForm = ({
                   url={displayFileUrl}
                   onVideoSelected={() => {
                     toast({
-                      description: t("uploadFile.toast.videoProcessingStarted"),
+                      description: t("uploadFile.toast.videoUploading"),
                     });
 
                     form.setValue("fileS3Key", "processing-video");
