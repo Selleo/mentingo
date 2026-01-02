@@ -29,7 +29,7 @@ export function useLessonFileUpload() {
       formData.append("title", options.title);
       formData.append("description", options.description);
 
-      const response = await ApiClient.api.lessonControllerUploadImageToLesson(options, {
+      const response = await ApiClient.api.lessonControllerUploadFileToLesson(options, {
         headers: { "Content-Type": "multipart/form-data" },
         transformRequest: () => {
           return formData;
