@@ -1,0 +1,265 @@
+name: PREVIEW PR - Deploy
+
+env:
+  HUSKY: 0
+  DOCKER_BUILDKIT: 1
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - apps/api/**
+      - apps/web/**
+      - .github/workflows/deploy-pr-preview.yml
+      - docker-compose.preview.tpl.yml
+
+concurrency:
+  group: pr-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy-pr-preview:
+    if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install Uncloud CLI
+        run: |
+          curl -fsS https://get.uncloud.run/install.sh | sh
+          uc --version
+
+      - name: Setup SSH
+        shell: bash
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
+          chmod 600 ~/.ssh/id_ecdsa
+
+          # Extract the host from the UNCLOUD_CONNECT secret
+          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+
+          # add to known_hosts:
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          # mask host from logs
+          echo "::add-mask::$host"
+
+          # do not print output of uc ps, just test connection
+          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "Failed to connect to server"
+            exit 1
+          fi
+
+      - name: Render Compose for PR
+        shell: bash
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+
+          MINIO_ROOT_PASSWORD=miniopass
+          JWT_SECRET=jwtsecret
+          JWT_REFRESH_SECRET=jwtrefreshsecret
+          POSTGRES_PASSWORD=guidebook
+          PREVIEW_MAILHOG_DOMAIN="mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_WEB_DOMAIN="pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_API_DOMAIN="api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          GIT_DATE=$(git show -s --format=%cd --date=format:'%Y%m%d-%H%M%S' "$GITHUB_SHA")
+          GIT_SHA_SHORT=$(echo "$GITHUB_SHA" | cut -c1-7)
+          VERSION_TAG="${GIT_DATE}.${GIT_SHA_SHORT}"
+
+          export VERSION_TAG PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
+          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
+
+      - name: Create helpers to repair invalid stack building
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+
+          # create .env for web
+          echo "VITE_API_URL=https://api-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" > apps/web/.env
+          echo "VITE_APP_URL=https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}" >> apps/web/.env
+
+      - name: Deploy PR Preview stack
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          # master_key
+          MASTER_KEY=$(echo -n "preview-pr-${PR_ID}" | openssl dgst -sha256 -binary | head -c 32 | openssl base64)
+          export MASTER_KEY
+
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" deploy -f docker-compose.pr.yml -y
+
+      - name: Run database migrations
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:migrate
+
+      - name: Seed database
+        continue-on-error: true
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm i -g tsx drizzle-kit drizzle-orm
+          uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" exec api-preview-pr-${PR_ID} npm run db:seed || true
+
+      - name: Comment PR - send message to PR preview link
+        env:
+          PR_ID: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+
+          PREVIEW_WEB_DOMAIN="https://pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+          PREVIEW_MAILHOG_DOMAIN="https://mailhog-pr-${PR_ID}.${UNCLOUD_PREVIEW_DOMAIN}"
+
+          # get current comments
+          comments=$(curl -sS \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/issues/${PR_ID}/comments")
+
+          # check if message already exists
+          already_exists=$(echo "$comments" | jq -r '
+            any(.[];
+              ((.user.type == "Bot") or (.user.login == "github-actions[bot]"))
+              and
+              (.body | test("preview ready"; "i"))
+            )
+          ')
+
+          if [[ "$already_exists" == "true" ]]; then
+            echo "Preview comment already exists - skipping"
+            exit 0
+          fi
+
+          message=$(cat <<EOF
+          🚀 Preview ready
+          ---
+          Mails do not leave the preview environment. Database has been seeded with test data.  You can access the preview at the following URLs:
+
+          List of available services:
+          | Service         | URL                           |
+          | --------------- | ----------------------------- |
+          | Web             | ${PREVIEW_WEB_DOMAIN}         |
+          | Mailhog         | ${PREVIEW_MAILHOG_DOMAIN}     |
+
+          List of available accounts:
+          | Role            | Email                         | Password   |
+          | --------------- | ----------------------------- | ---------- |
+          | Student         | \`student@example.com\`         | \`password\` |
+          | Student         | \`student0@example.com\`        | \`password\` |
+          | Student         | \`student2@example.com\`        | \`password\` |
+          | Content Creator | \`contentcreator@example.com\`  | \`password\` |
+          | Content Creator | \`contentcreator2@example.com\` | \`password\` |
+          | Admin           | \`admin@example.com\`           | \`password\` |
+          EOF)
+
+          body=$(jq -n --arg message "$message" '{body: $message}')
+
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/issues/${PR_ID}/comments" \
+            -d "$body"
+
+  cleanup-pr-preview:
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Uncloud CLI
+        run: |
+          curl -fsS https://get.uncloud.run/install.sh | sh
+          uc --version
+
+      - name: Setup SSH
+        shell: bash
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          UNCLOUD_SSH_KEY: ${{ secrets.UNCLOUD_SSH_KEY }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "${{ secrets.UNCLOUD_SSH_KEY }}" > ~/.ssh/id_ecdsa
+          chmod 600 ~/.ssh/id_ecdsa
+
+          # Extract the host from the UNCLOUD_CONNECT secret
+          host="$(echo "${{ secrets.UNCLOUD_CONNECT }}" | sed -E 's#^ssh(\+cli)?://##; s#^[^@]+@##; s#:/.*##; s#:.*##')"
+
+          # add to known_hosts:
+          ssh-keyscan -H "$host" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          # mask host from logs
+          echo "::add-mask::$host"
+
+          # do not print output of uc ps, just test connection
+          uc ps --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "Failed to connect to server"
+            exit 1
+          fi
+
+      - name: Cleanup PR Preview stack
+        env:
+          UNCLOUD_CONNECT: ${{ secrets.UNCLOUD_CONNECT }}
+          PR_ID: ${{ github.event.pull_request.number }}
+          UNCLOUD_PREVIEW_DOMAIN: ${{ vars.UNCLOUD_PREVIEW_DOMAIN }}
+        run: |
+          set -euo pipefail
+
+          # render compose as deployment does but with empty values:
+          MINIO_ROOT_PASSWORD=""
+          JWT_SECRET=""
+          JWT_REFRESH_SECRET=""
+          POSTGRES_PASSWORD=""
+          PREVIEW_WEB_DOMAIN=""
+          PREVIEW_API_DOMAIN=""
+          PREVIEW_MAILHOG_DOMAIN=""
+          VERSION_TAG="0"
+
+          export PR_ID PREVIEW_WEB_DOMAIN PREVIEW_API_DOMAIN PREVIEW_MAILHOG_DOMAIN MINIO_ROOT_PASSWORD JWT_SECRET JWT_REFRESH_SECRET POSTGRES_PASSWORD
+          envsubst < "docker-compose.preview.tpl.yml" > "docker-compose.pr.yml"
+
+          # collect services and volumes:
+          services="$(yq -r '.services | keys | .[]' docker-compose.pr.yml)"
+          volumes="$(yq -r '.volumes | keys | .[]' docker-compose.pr.yml)"
+
+          # remove services and volumes
+          echo "$services" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" rm || true
+          echo "$volumes" | xargs -r uc --connect "ssh+cli://${{ secrets.UNCLOUD_CONNECT }}" volume rm -y || true
