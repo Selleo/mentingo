@@ -147,10 +147,12 @@ export class SettingsService {
   }
 
   public async getUserSettings(userId: UUIDType): Promise<SettingsJSONContentSchema> {
-    const [{ settings: userSettings }] = await this.db
+    const [row] = await this.db
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
+
+    const userSettings = row?.settings;
 
     if (!userSettings) {
       throw new NotFoundException("User settings not found");
@@ -163,10 +165,12 @@ export class SettingsService {
     userId: UUIDType,
     updatedSettings: UpdateSettingsBody,
   ): Promise<SettingsJSONContentSchema> {
-    const [{ settings: currentSettings }] = await this.db
+    const [row] = await this.db
       .select({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` })
       .from(settings)
       .where(eq(settings.userId, userId));
+
+    const currentSettings = row?.settings;
 
     if (!currentSettings) {
       throw new NotFoundException("User settings not found");
