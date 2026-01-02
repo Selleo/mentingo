@@ -6,16 +6,22 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { EventBus } from "@nestjs/cqrs";
-import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { ALLOWED_AVATAR_IMAGE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
+import {
+  ENTITY_TYPES,
+  RESOURCE_CATEGORIES,
+  RESOURCE_RELATIONSHIP_TYPES,
+} from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
+import { LessonService } from "src/lesson/services/lesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { questionAnswerOptions, questions } from "src/storage/schema";
@@ -26,11 +32,11 @@ import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
 import { LessonRepository } from "../repositories/lesson.repository";
 
+import type { LessonResourceMetadata } from "../lesson-resource.types";
 import type {
   CreateAiMentorLessonBody,
   CreateLessonBody,
   CreateQuizLessonBody,
-  LessonResource,
   UpdateAiMentorLessonBody,
   UpdateLessonBody,
   UpdateQuizLessonBody,
@@ -54,18 +60,12 @@ export class AdminLessonService {
     private documentService: DocumentService,
     private fileService: FileService,
     private localizationService: LocalizationService,
+    private lessonService: LessonService,
     private readonly eventBus: EventBus,
   ) {}
 
   async createLessonForChapter(data: CreateLessonBody, currentUser: CurrentUser) {
     await this.validateAccess("chapter", currentUser.role, currentUser.userId, data.chapterId);
-
-    if (
-      (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
-      (!data.fileS3Key || (!data.fileType && !data.fileS3Key?.startsWith("processing-")))
-    ) {
-      throw new BadRequestException("File is required for video and presentation lessons");
-    }
 
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
@@ -310,13 +310,6 @@ export class AdminLessonService {
 
     if (!lesson) {
       throw new NotFoundException("Lesson not found");
-    }
-
-    if (
-      (data.type === LESSON_TYPES.PRESENTATION || data.type === LESSON_TYPES.VIDEO) &&
-      (!data.fileS3Key || (!data.fileType && !data.fileS3Key?.startsWith("processing-")))
-    ) {
-      throw new BadRequestException("File is required for video and presentation lessons");
     }
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
@@ -764,16 +757,17 @@ export class AdminLessonService {
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
 
     if (data.resources && data.resources.length > 0) {
-      const resourcesToInsert = data.resources.map((resource: LessonResource, index) => ({
-        lessonId: lesson.id,
-        type: resource.type,
-        source: resource.source,
-        isExternal: resource.isExternal,
-        allowFullscreen: resource.allowFullscreen,
-        displayOrder: index + 1,
-      }));
-
-      await this.adminLessonRepository.createLessonResources(resourcesToInsert);
+      await this.adminLessonRepository.createLessonResources(
+        lesson.id,
+        data.resources.map((resource) => ({
+          reference: resource.fileUrl,
+          contentType: "text/html",
+          metadata: {
+            allowFullscreen: resource.allowFullscreen ?? false,
+          },
+          uploadedById: currentUser.userId,
+        })),
+      );
     }
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
@@ -824,7 +818,7 @@ export class AdminLessonService {
       await this.adminLessonRepository.deleteLessonResources(lessonId);
     } else if (data.resources) {
       const existingResourcesIds = (
-        await this.adminLessonRepository.getLessonResourcesForLesson(lessonId)
+        await this.adminLessonRepository.getLessonResourcesForLesson(lessonId, data.language)
       ).map((r) => r.id);
 
       const resourceIdsToDelete = existingResourcesIds.filter(
@@ -838,14 +832,32 @@ export class AdminLessonService {
       if (resourceIdsToDelete.length > 0)
         await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
 
-      const resourcesToUpdate = data.resources.map((resource: LessonResource, index) => ({
-        ...resource,
-        lessonId,
-        displayOrder: index + 1,
-      }));
+      const resourcesToUpdate = data.resources
+        .filter((resource) => resource.id)
+        .map((resource) => ({
+          id: resource.id as UUIDType,
+          reference: resource.fileUrl,
+          contentType: "text/html",
+          metadata: {
+            allowFullscreen: resource.allowFullscreen ?? false,
+          },
+        }));
 
       if (resourcesToUpdate.length > 0)
-        await this.adminLessonRepository.upsertLessonResources(resourcesToUpdate);
+        await this.adminLessonRepository.updateLessonResources(resourcesToUpdate);
+
+      const resourcesToCreate = data.resources
+        .filter((resource) => !resource.id)
+        .map((resource) => ({
+          reference: resource.fileUrl,
+          contentType: "text/html",
+          metadata: {
+            allowFullscreen: resource.allowFullscreen ?? false,
+          },
+        }));
+
+      if (resourcesToCreate.length > 0)
+        await this.adminLessonRepository.createLessonResources(lessonId, resourcesToCreate);
     }
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
@@ -867,24 +879,57 @@ export class AdminLessonService {
     currentUserId: UUIDType,
     currentUserRole: UserRole,
     file: Express.Multer.File,
+    language: SupportedLanguages,
+    title: string,
+    description: string,
   ) {
     await this.validateAccess("lesson", currentUserRole, currentUserId, lessonId);
 
-    if (!ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException("Invalid file type");
+    const fileTitle = {
+      [language]: title,
+    };
+
+    const fileDescription = {
+      [language]: description,
+    };
+
+    if (ALLOWED_VIDEO_FILE_TYPES.includes(file.mimetype)) {
+      const lesson = await this.lessonRepository.getLesson(lessonId, language);
+
+      const resources = await this.fileService.getResourcesForEntity(lessonId, ENTITY_TYPE.LESSON);
+
+      const mappedResources = resources.map((resource) => ({
+        id: resource.id,
+        fileUrl: resource.fileUrl,
+        contentType: resource.contentType,
+        title: typeof resource.title === "string" ? resource.title : undefined,
+        description: typeof resource.description === "string" ? resource.description : undefined,
+        fileName: this.lessonService.extractOriginalFilename(resource.metadata),
+      }));
+
+      const { contentCount } = this.lessonService.injectResourcesIntoContent(
+        lesson.description,
+        mappedResources,
+      );
+
+      if (contentCount.video > 0) {
+        throw new BadRequestException("adminCourseView.toast.maxOneVideoUploaded");
+      }
     }
 
-    const uploadedFile = await this.fileService.uploadFile(file, "lesson");
+    const fileData = await this.fileService.uploadResource(
+      file,
+      "lesson-content",
+      RESOURCE_CATEGORIES.LESSON,
+      lessonId,
+      ENTITY_TYPES.LESSON,
+      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      fileTitle,
+      fileDescription,
+      undefined,
+    );
 
-    const [resource] = await this.adminLessonRepository.createLessonResources([
-      {
-        source: uploadedFile.fileKey,
-        type: "text",
-        lessonId,
-      },
-    ]);
-
-    return resource.id;
+    return { resourceId: fileData.resourceId };
   }
 
   async uploadAvatarToAiMentorLesson(
@@ -923,7 +968,12 @@ export class AdminLessonService {
 
     if (!lesson) throw new NotFoundException("Lesson not found");
 
-    const lessonResources = await this.adminLessonRepository.getLessonResourcesForLesson(lessonId);
+    const lessonResources = await this.fileService.getResourcesForEntity(
+      lessonId,
+      ENTITY_TYPES.LESSON,
+      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      language,
+    );
 
     const questions =
       lesson.type === LESSON_TYPES.QUIZ
@@ -943,14 +993,23 @@ export class AdminLessonService {
       thresholdScore: lesson.thresholdScore,
       attemptsLimit: lesson.attemptsLimit,
       quizCooldownInHours: lesson.quizCooldownInHours,
-      lessonResources: lessonResources.map((resource) => ({
-        id: resource.id,
-        source: resource.source,
-        type: resource.type,
-        isExternal: resource.isExternal,
-        allowFullscreen: resource.allowFullscreen,
-        displayOrder: resource.displayOrder,
-      })),
+      lessonResources: lessonResources.map((resource) => {
+        const metadata = resource.metadata as LessonResourceMetadata | undefined;
+        const fileName =
+          metadata && typeof metadata.originalFilename === "string"
+            ? metadata.originalFilename
+            : undefined;
+
+        return {
+          id: resource.id,
+          fileUrl: resource.fileUrl,
+          contentType: resource.contentType,
+          title: typeof resource.title === "string" ? resource.title : undefined,
+          description: typeof resource.description === "string" ? resource.description : undefined,
+          fileName,
+          allowFullscreen: metadata?.allowFullscreen,
+        };
+      }),
       questions: questions.map((question) => ({
         id: question.id,
         title: question.title,

@@ -31,8 +31,8 @@ const NEW_COURSE = {
     quizTitle: "Quiz for first exam",
     fillInTheBlankDescription:
       "The most popular programing language used to styling components is ",
-    textLessonTitle: "Introduction to CSS",
-    textLessonDescription:
+    contentLessonTitle: "Introduction to CSS",
+    contentLessonDescription:
       "CSS is a style sheet language used for describing the presentation of a document written in HTML.",
     presentationLessonTitle: "HTML tags presentation",
     presentationLessonDescription: "This presentation presents knowledge about tags in html",
@@ -45,16 +45,16 @@ const NEW_COURSE = {
   },
   editedLesson: {
     quizTitle: "Edited Quiz for first exam",
-    textLessonTitle: "Edited Introduction to CSS",
+    contentLessonTitle: "Edited Introduction to CSS",
     presentationLessonTitle: "Edited HTML tags presentation",
     videoLessonTitle: "Edited Video for CSS course",
-    textLessonDescription:
+    contentLessonDescription:
       "Edited CSS is a style sheet language used for describing the presentation of a document written in HTML.",
     videoLessonDescription: "Edited This video presents knowledge about tags in html",
     presentationLessonDescription: "Edited This presentation presents knowledge about tags in html",
   },
   lessonType: {
-    text: "Text",
+    content: "Content",
     presentation: "Presentation",
     video: "Video",
     quiz: "Quiz",
@@ -166,7 +166,7 @@ export class CreateCourseActions {
     return createChapterResJson.data.id;
   }
 
-  async addTextLesson(
+  async addContentLesson(
     page: Page,
     chapterLocator: Locator,
     lessonTitle: string,
@@ -176,7 +176,7 @@ export class CreateCourseActions {
       .getByRole("button", { name: new RegExp(NEW_COURSE.button.addLesson, "i") })
       .click();
 
-    const buttonWithText = await page.locator(`h3:has-text("${NEW_COURSE.lessonType.text}")`);
+    const buttonWithText = await page.locator(`h3:has-text("${NEW_COURSE.lessonType.content}")`);
     const lessonButton = buttonWithText.locator("..");
     await lessonButton.click();
 
@@ -391,18 +391,18 @@ export class CreateCourseActions {
     await page.locator(`text=${newChapterTitle}`).waitFor({ state: "visible" });
   }
 
-  async editTextLesson(page: Page) {
-    const lessonLocator = page.locator(`text=${NEW_COURSE.lessons.textLessonTitle}`);
+  async editContentLesson(page: Page) {
+    const lessonLocator = page.locator(`text=${NEW_COURSE.lessons.contentLessonTitle}`);
     await lessonLocator.click();
-    await page.getByLabel(NEW_COURSE.label.title).fill(NEW_COURSE.editedLesson.textLessonTitle);
+    await page.getByLabel(NEW_COURSE.label.title).fill(NEW_COURSE.editedLesson.contentLessonTitle);
     const descriptionField = page.locator("#description");
     const editorInput = descriptionField.locator('div[contenteditable="true"]');
     await expect(editorInput).toBeVisible();
     await editorInput.click();
-    await page.keyboard.type(NEW_COURSE.editedLesson.textLessonDescription, { delay: 5 });
+    await page.keyboard.type(NEW_COURSE.editedLesson.contentLessonDescription, { delay: 5 });
     await page.getByRole("button", { name: new RegExp(NEW_COURSE.button.save, "i") }).click();
     await page
-      .locator(`text=${NEW_COURSE.editedLesson.textLessonTitle}`)
+      .locator(`text=${NEW_COURSE.editedLesson.contentLessonTitle}`)
       .waitFor({ state: "visible" });
   }
 
@@ -534,14 +534,14 @@ test.describe.serial("Course management", () => {
     const chapterLocator = page.locator(`[data-chapter-id="${newChapterId}"]`);
     await expect(chapterLocator).toBeVisible();
 
-    await createCourseActions.addTextLesson(
+    await createCourseActions.addContentLesson(
       page,
       chapterLocator,
-      NEW_COURSE.lessons.textLessonTitle,
-      NEW_COURSE.lessons.textLessonDescription,
+      NEW_COURSE.lessons.contentLessonTitle,
+      NEW_COURSE.lessons.contentLessonDescription,
     );
     await expect(
-      chapterLocator.locator(`div[aria-label="Lesson: ${NEW_COURSE.lessons.textLessonTitle}"]`),
+      chapterLocator.locator(`div[aria-label="Lesson: ${NEW_COURSE.lessons.contentLessonTitle}"]`),
     ).toBeVisible();
 
     // await createCourseActions.addPresentationLesson(
@@ -652,7 +652,7 @@ test.describe.serial("Course management", () => {
       NEW_COURSE.chapter.title,
       NEW_COURSE.chapter.editedTitle,
     );
-    await createCourseActions.editTextLesson(page);
+    await createCourseActions.editContentLesson(page);
     // await createCourseActions.editPresentationLesson(page);
     // await createCourseActions.editVideoLesson(page);
     await createCourseActions.editQuizTitle(page);

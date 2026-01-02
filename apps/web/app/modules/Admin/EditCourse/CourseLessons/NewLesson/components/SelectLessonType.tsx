@@ -14,22 +14,10 @@ type SelectLessonTypeProps = {
 
 const lessonTypes = [
   {
-    type: ContentTypes.TEXT_LESSON_FORM,
-    icon: "Text",
-    title: "adminCourseView.curriculum.lesson.other.text",
-    description: "adminCourseView.curriculum.lesson.other.textLessonDescription",
-  },
-  {
-    type: ContentTypes.VIDEO_LESSON_FORM,
-    icon: "Video",
-    title: "adminCourseView.curriculum.lesson.other.video",
-    description: "adminCourseView.curriculum.lesson.other.videoLessonDescription",
-  },
-  {
-    type: ContentTypes.PRESENTATION_FORM,
-    icon: "Presentation",
-    title: "adminCourseView.curriculum.lesson.other.presentation",
-    description: "adminCourseView.curriculum.lesson.other.presentationLessonDescription",
+    type: ContentTypes.CONTENT_LESSON_FORM,
+    icon: "Content",
+    title: "adminCourseView.curriculum.lesson.other.content",
+    description: "adminCourseView.curriculum.lesson.other.contentLessonDescription",
   },
   {
     type: ContentTypes.QUIZ_FORM,

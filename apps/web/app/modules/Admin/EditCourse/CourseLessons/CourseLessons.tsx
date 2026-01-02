@@ -19,10 +19,9 @@ import CourseLessonEmptyState from "./components/CourseLessonEmptyState";
 import NewChapter from "./NewChapter/NewChapter";
 import AiMentorLessonForm from "./NewLesson/AiMentorLessonForm/AiMentorLessonForm";
 import SelectLessonType from "./NewLesson/components/SelectLessonType";
+import ContentLessonForm from "./NewLesson/ContentLessonForm/ContentLessonForm";
 import { EmbedLessonForm } from "./NewLesson/EmbedLessonForm/EmbedLessonForm";
-import FileLessonForm from "./NewLesson/FileLessonForm/FileLessonForm";
 import QuizLessonForm from "./NewLesson/QuizLessonForm/QuizLessonForm";
-import TextLessonForm from "./NewLesson/TextLessonForm/TextLessonForm";
 
 import type { Chapter, Lesson } from "../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -107,28 +106,8 @@ const CourseLessons = ({
           language={language}
         />
       ),
-      [ContentTypes.VIDEO_LESSON_FORM]: (
-        <FileLessonForm
-          contentTypeToDisplay={contentTypeToDisplay}
-          setContentTypeToDisplay={setContentTypeToDisplay}
-          chapterToEdit={selectedChapter}
-          lessonToEdit={selectedLesson}
-          setSelectedLesson={setSelectedLesson}
-          language={language}
-        />
-      ),
-      [ContentTypes.PRESENTATION_FORM]: (
-        <FileLessonForm
-          contentTypeToDisplay={contentTypeToDisplay}
-          setContentTypeToDisplay={setContentTypeToDisplay}
-          chapterToEdit={selectedChapter}
-          lessonToEdit={selectedLesson}
-          setSelectedLesson={setSelectedLesson}
-          language={language}
-        />
-      ),
-      [ContentTypes.TEXT_LESSON_FORM]: (
-        <TextLessonForm
+      [ContentTypes.CONTENT_LESSON_FORM]: (
+        <ContentLessonForm
           setContentTypeToDisplay={setContentTypeToDisplay}
           chapterToEdit={selectedChapter}
           lessonToEdit={selectedLesson}

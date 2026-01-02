@@ -1,5 +1,4 @@
 import type { UUIDType } from "src/common";
-import type { LessonResourceType } from "src/lesson/lesson.schema";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type { QuestionType } from "src/questions/schema/question.types";
 import type { UserRole } from "src/user/schemas/userRoles";
@@ -89,9 +88,8 @@ export type LessonActivityLogQuestion = {
 
 export type LessonActivityLogResource = {
   id?: UUIDType;
-  source: string;
-  type: LessonResourceType;
-  isExternal: boolean;
+  fileUrl?: string;
+  contentType?: string;
   allowFullscreen?: boolean;
   displayOrder?: number | null;
 };
