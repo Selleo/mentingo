@@ -1130,7 +1130,7 @@ export interface GetCourseResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+        type: "content" | "quiz" | "ai_mentor" | "embed";
         displayOrder: number;
         status: "not_started" | "in_progress" | "completed" | "blocked";
         quizQuestionCount: number | null;
@@ -1138,15 +1138,12 @@ export interface GetCourseResponse {
         lessonResources?: {
           /** @format uuid */
           id: string;
-          source: string;
-          isExternal: boolean;
-          allowFullscreen: boolean;
-          type: "embed";
-          /** @format uuid */
-          lessonId: string;
-          displayOrder: number;
-          createdAt: string;
-          updatedAt: string;
+          fileUrl: string;
+          contentType: string;
+          title?: string;
+          description?: string;
+          fileName?: string;
+          allowFullscreen?: boolean;
         }[];
       }[];
       completedLessonCount?: number;
@@ -1198,7 +1195,7 @@ export interface GetBetaCourseByIdResponse {
         /** @format uuid */
         id: string;
         title: string;
-        type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+        type: "content" | "quiz" | "ai_mentor" | "embed";
         description?: string | null;
         displayOrder: number;
         fileS3Key?: string | null;
@@ -1549,7 +1546,7 @@ export interface GetChapterWithLessonResponse {
       /** @format uuid */
       id: string;
       title: string;
-      type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+      type: "content" | "quiz" | "ai_mentor" | "embed";
       displayOrder: number;
       status: "not_started" | "in_progress" | "completed" | "blocked";
       quizQuestionCount: number | null;
@@ -1557,15 +1554,12 @@ export interface GetChapterWithLessonResponse {
       lessonResources?: {
         /** @format uuid */
         id: string;
-        source: string;
-        isExternal: boolean;
-        allowFullscreen: boolean;
-        type: "embed";
-        /** @format uuid */
-        lessonId: string;
-        displayOrder: number;
-        createdAt: string;
-        updatedAt: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+        allowFullscreen?: boolean;
       }[];
     }[];
     completedLessonCount?: number;
@@ -1586,7 +1580,7 @@ export type BetaCreateChapterBody = {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -1668,7 +1662,7 @@ export type UpdateChapterBody = ({
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed";
     description?: string | null;
     displayOrder: number;
     fileS3Key?: string | null;
@@ -1778,7 +1772,7 @@ export interface GetEnrolledLessonsResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed";
     description: string | null;
     displayOrder: number;
     lessonCompleted: boolean;
@@ -1797,7 +1791,7 @@ export interface GetLessonByIdResponse {
     /** @format uuid */
     id: string;
     title: string;
-    type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+    type: "content" | "quiz" | "ai_mentor" | "embed";
     description: string | null;
     fileType: string | null;
     fileUrl: string | null;
@@ -1859,16 +1853,15 @@ export interface GetLessonByIdResponse {
     lessonResources?: {
       /** @format uuid */
       id: string;
-      source: string;
-      isExternal: boolean;
-      allowFullscreen: boolean;
-      type: "embed";
-      /** @format uuid */
-      lessonId: string;
-      displayOrder: number;
-      createdAt: string;
-      updatedAt: string;
+      fileUrl: string;
+      contentType: string;
+      title?: string;
+      description?: string;
+      fileName?: string;
+      allowFullscreen?: boolean;
     }[];
+    hasOnlyVideo?: boolean;
+    hasVideo?: boolean;
     isQuizFeedbackRedacted?: boolean;
     aiMentorDetails?: {
       minScore: number | null;
@@ -1886,7 +1879,7 @@ export interface GetLessonByIdResponse {
 
 export type BetaCreateLessonBody = {
   title: string;
-  type: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2225,7 +2218,7 @@ export interface BetaUpdateQuizLessonResponse {
 
 export type BetaUpdateLessonBody = ({
   title?: string;
-  type?: "text" | "presentation" | "video" | "quiz" | "ai_mentor" | "embed";
+  type?: "content" | "quiz" | "ai_mentor" | "embed";
   description?: string | null;
   fileS3Key?: string | null;
   avatarReferenceUrl?: string;
@@ -2344,20 +2337,14 @@ export interface DeleteStudentQuizAnswersResponse {
 
 export interface CreateEmbedLessonBody {
   title: string;
-  type: "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed";
   /** @format uuid */
   chapterId: string;
   resources: {
+    /** @format uuid */
     id?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    /** @maxLength 1000 */
-    source: string;
-    isExternal?: boolean;
-    displayOrder?: number;
+    fileUrl: string;
     allowFullscreen?: boolean;
-    /** @maxLength 50 */
-    type?: string;
   }[];
 }
 
@@ -2369,18 +2356,12 @@ export interface CreateEmbedLessonResponse {
 
 export interface UpdateEmbedLessonBody {
   title: string;
-  type: "embed";
+  type: "content" | "quiz" | "ai_mentor" | "embed";
   resources: {
+    /** @format uuid */
     id?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    /** @maxLength 1000 */
-    source: string;
-    isExternal?: boolean;
-    displayOrder?: number;
+    fileUrl: string;
     allowFullscreen?: boolean;
-    /** @maxLength 50 */
-    type?: string;
   }[];
   /** @format uuid */
   lessonId: string;
@@ -5978,19 +5959,31 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LessonControllerUploadImageToLesson
+     * @name LessonControllerUploadFileToLesson
      * @request POST:/api/lesson/upload-files-to-lesson
      */
-    lessonControllerUploadImageToLesson: (
+    lessonControllerUploadFileToLesson: (
       data: {
         /** @format uuid */
         lessonId: string;
         /** @format binary */
         file: File;
+        language: "en" | "pl";
+        title: string;
+        description: string;
       },
       params: RequestParams = {},
     ) =>
-      this.request<string, any>({
+      this.request<
+        {
+          success: boolean;
+          data: {
+            resourceId: string;
+          };
+          message: string;
+        },
+        any
+      >({
         path: `/api/lesson/upload-files-to-lesson`,
         method: "POST",
         body: data,
@@ -6065,6 +6058,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     lessonControllerGetLessonImage: (resourceId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/lesson/lesson-image/${resourceId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerGetLessonResource
+     * @request GET:/api/lesson/lesson-resource/{resourceId}
+     */
+    lessonControllerGetLessonResource: (resourceId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/lesson/lesson-resource/${resourceId}`,
         method: "GET",
         ...params,
       }),
