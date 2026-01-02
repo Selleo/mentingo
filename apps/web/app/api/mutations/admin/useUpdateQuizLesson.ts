@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -31,6 +33,8 @@ export function useUpdateQuizLesson() {
         title: t("adminCourseView.curriculum.lesson.toast.lessonUpdatedSuccessfully"),
         description: t("adminCourseView.curriculum.lesson.toast.lessonUpdatedSuccessfully"),
       });
+
+      queryClient.invalidateQueries({ queryKey: COURSE_STUDENTS_PROGRESS_QUERY_KEY });
     },
     onError: (error: AxiosError) => {
       const apiResponseData = error.response?.data as { message: string; count: number };

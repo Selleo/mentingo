@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { courseQueryOptions, lessonQueryOptions } from "~/api/queries";
+import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -34,6 +35,7 @@ export function useUpdateEmbedLesson() {
         description: t("adminCourseView.curriculum.lesson.toast.embedLessonUpdatedSuccessfully"),
       });
 
+      queryClient.invalidateQueries({ queryKey: COURSE_STUDENTS_PROGRESS_QUERY_KEY });
       queryClient.invalidateQueries(courseQueryOptions(variables.courseId));
       queryClient.invalidateQueries(lessonQueryOptions(variables.lessonId));
     },

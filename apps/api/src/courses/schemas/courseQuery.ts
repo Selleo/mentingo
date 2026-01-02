@@ -146,6 +146,7 @@ export const courseStudentProgressionSortFields = [
   "groupName",
   "completedLessonsCount",
   "lastActivity",
+  "lastCompletedLessonName",
 ] as const;
 
 export type CourseStudentProgressionSortField = (typeof courseStudentProgressionSortFields)[number];
@@ -156,15 +157,12 @@ export const CourseStudentProgressionSortFields: Record<CourseStudentProgression
     groupName: "groupName",
     completedLessonsCount: "completedLessonsCount",
     lastActivity: "lastActivity",
+    lastCompletedLessonName: "lastCompletedLessonName",
   };
 
 export const sortCourseStudentProgressionOptions = Type.Union([
-  Type.Literal("studentName"),
-  Type.Literal("completedLessonsCount"),
-  Type.Literal("lastActivity"),
-  Type.Literal("-studentName"),
-  Type.Literal("-completedLessonsCount"),
-  Type.Literal("-lastActivity"),
+  ...courseStudentProgressionSortFields.map((field) => Type.Literal(field)),
+  ...courseStudentProgressionSortFields.map((field) => Type.Literal(`-${field}`)),
 ]);
 
 export type SortCourseStudentProgressionOptions = Static<
@@ -226,6 +224,7 @@ export const courseStudentAiMentorResultsSortFields = [
   "lessonName",
   "score",
   "lastSession",
+  "lastCompletedLessonName",
 ] as const;
 
 export type CourseStudentAiMentorResultsSortField =
@@ -239,6 +238,7 @@ export const CourseStudentAiMentorResultsSortFields: Record<
   lessonName: "lessonName",
   score: "score",
   lastSession: "lastSession",
+  lastCompletedLessonName: "lastCompletedLessonName",
 };
 
 export const sortCourseStudentAiMentorResultsOptions = Type.Union([

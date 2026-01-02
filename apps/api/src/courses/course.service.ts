@@ -584,9 +584,8 @@ export class CourseService {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
             const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
-            const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-              authorAvatarUrl,
-            );
+            const authorAvatarSignedUrl =
+              await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
             return {
               ...itemWithoutReferences,
@@ -1042,9 +1041,8 @@ export class CourseService {
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
 
-        const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
-          authorAvatarUrl,
-        );
+        const authorAvatarSignedUrl =
+          await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
         return {
           ...courseWithoutReferences,
@@ -2375,6 +2373,7 @@ export class CourseService {
       lastActivityExpression,
       completedLessonsCountExpression,
       groupNameExpression,
+      lastCompletedLessonName,
     } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     const conditions = [
@@ -2395,6 +2394,7 @@ export class CourseService {
         groups: groupNameExpression,
         completedLessonsCount: completedLessonsCountExpression,
         lastActivity: lastActivityExpression,
+        lastCompletedLessonName: lastCompletedLessonName,
       })
       .from(studentCourses)
       .leftJoin(users, eq(studentCourses.studentId, users.id))
@@ -2628,6 +2628,7 @@ export class CourseService {
       groupNameExpression,
       lastActivityExpression,
       completedLessonsCountExpression,
+      lastCompletedLessonName,
     } = await this.getStudentCourseStatisticsExpressions(courseId, language);
 
     switch (sort) {
@@ -2653,6 +2654,8 @@ export class CourseService {
         return aiMentorStudentLessonProgress.percentage;
       case CourseStudentAiMentorResultsSortFields.lastSession:
         return aiMentorStudentLessonProgress.updatedAt;
+      case CourseStudentAiMentorResultsSortFields.lastCompletedLessonName:
+        return lastCompletedLessonName;
       default:
         return studentNameExpression;
     }
@@ -2714,6 +2717,24 @@ export class CourseService {
             AND lessons.type = 'quiz'
         )`;
 
+    const lastCompletedLessonName = sql<string>`(
+          SELECT ${this.localizationService.getLocalizedSqlField(
+            lessons.title,
+            language,
+            courses,
+            "c",
+          )}
+          FROM ${studentLessonProgress} slp
+          JOIN ${lessons} ON slp.lesson_id = lessons.id
+          JOIN ${chapters} ch ON lessons.chapter_id = ch.id
+          JOIN ${courses} c ON c.id = ch.course_id
+          WHERE slp.student_id = ${users.id}
+            AND ch.course_id = ${courseId}
+            AND slp.completed_at IS NOT NULL
+          ORDER BY slp.completed_at DESC
+          LIMIT 1
+        )`;
+
     return {
       studentNameExpression,
       lastActivityExpression,
@@ -2721,6 +2742,7 @@ export class CourseService {
       groupNameExpression,
       lastAttemptExpression,
       quizNameExpression,
+      lastCompletedLessonName,
     };
   }
 

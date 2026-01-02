@@ -1440,6 +1440,7 @@
         "groupName": "Grupa",
         "completedLessonsCount": "Ukończone lekcje",
         "lastActivity": "Ostatnia aktywność",
+        "lastCompletedLesson": "Ostatnio ukończona lekcja",
         "quizName": "Quiz",
         "quizScore": "Wynik",
         "attempts": "Próby",
