@@ -1471,30 +1471,41 @@ export interface GetCourseStatisticsResponse {
       status: "not_started" | "in_progress" | "completed" | "blocked";
       count: number;
     }[];
+    averageSeconds: number;
   };
 }
 
 export interface GetCourseLearningTimeStatisticsResponse {
   data: {
-    averagePerLesson: {
-      lessonId: string;
-      lessonTitle: string;
-      averageSeconds: number;
-      totalUsers: number;
+    users: {
+      /** @format uuid */
+      id: string;
+      name: string;
+      studentAvatarUrl: string | null;
       totalSeconds: number;
+      groups:
+        | {
+            id: string;
+            name: string;
+          }[]
+        | null;
     }[];
-    totalPerStudent: {
-      userId: string;
-      userFirstName: string;
-      userLastName: string;
-      userEmail: string;
-      totalSeconds: number;
-      lessonsWithTime: number;
+  };
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetCourseLearningStatisticsFilterOptionsResponse {
+  data: {
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
     }[];
-    courseTotals: {
-      totalSeconds: number;
-      uniqueUsers: number;
-    };
   };
 }
 
@@ -5491,10 +5502,18 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CourseControllerGetCourseStatistics
      * @request GET:/api/course/{courseId}/statistics
      */
-    courseControllerGetCourseStatistics: (courseId: string, params: RequestParams = {}) =>
+    courseControllerGetCourseStatistics: (
+      courseId: string,
+      query?: {
+        /** @format uuid */
+        groupId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetCourseStatisticsResponse, any>({
         path: `/api/course/${courseId}/statistics`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -5507,10 +5526,37 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     courseControllerGetCourseLearningTimeStatistics: (
       courseId: string,
+      query?: {
+        /** @format uuid */
+        userId?: string;
+        /** @format uuid */
+        groupId?: string;
+        page?: number;
+        perPage?: number;
+        sort?: "studentName" | "totalSeconds" | "-studentName" | "-totalSeconds";
+      },
       params: RequestParams = {},
     ) =>
       this.request<GetCourseLearningTimeStatisticsResponse, any>({
         path: `/api/course/${courseId}/statistics/learning-time`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseLearningStatisticsFilterOptions
+     * @request GET:/api/course/{courseId}/statistics/learning-time-filter-options
+     */
+    courseControllerGetCourseLearningStatisticsFilterOptions: (
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCourseLearningStatisticsFilterOptionsResponse, any>({
+        path: `/api/course/${courseId}/statistics/learning-time-filter-options`,
         method: "GET",
         format: "json",
         ...params,
@@ -5525,6 +5571,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseControllerGetAverageQuizScores: (
       courseId: string,
       query?: {
+        /** @format uuid */
+        groupId?: string;
         /** @default "en" */
         language?: "en" | "pl";
       },
@@ -5550,6 +5598,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         search?: string;
+        /** @format uuid */
+        groupId?: string;
         sort?:
           | "studentName"
           | "completedLessonsCount"
@@ -5582,6 +5632,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         quizId?: string;
+        /** @format uuid */
+        groupId?: string;
+        search?: string;
         sort?:
           | "studentName"
           | "quizName"
@@ -5618,6 +5671,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         lessonId?: string;
+        /** @format uuid */
+        groupId?: string;
+        search?: string;
         sort?:
           | "studentName"
           | "lessonName"

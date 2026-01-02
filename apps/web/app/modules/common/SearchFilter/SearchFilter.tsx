@@ -182,7 +182,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
               <SelectContent>
                 {!filter.hideAll && (
                   <SelectItem value="all">
-                    {t("common.other.all")} {filter?.placeholder}
+                    {filter?.placeholder ?? t("common.other.all")}
                   </SelectItem>
                 )}
                 {filter?.options?.map(({ value, label }) => (

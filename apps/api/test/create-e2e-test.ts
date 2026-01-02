@@ -3,9 +3,8 @@ import cookieParser from "cookie-parser";
 import * as express from "express";
 
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
+import { AppModule } from "src/app.module";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-
-import { AppModule } from "../src/app.module";
 
 import { EmailTestingAdapter } from "./helpers/test-email.adapter";
 import { truncateAllTables } from "./helpers/test-helpers";

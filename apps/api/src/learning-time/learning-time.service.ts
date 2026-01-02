@@ -1,12 +1,20 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common";
+import { ilike, inArray, or, sql } from "drizzle-orm";
 
+import { getSortOptions } from "src/common/helpers/getSortOptions";
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { QUEUE_NAMES, QueueService } from "src/queue";
+import { S3Service } from "src/s3/s3.service";
+import { groups, lessonLearningTime, users } from "src/storage/schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 import { WsGateway } from "src/websocket";
 
 import type { createCache } from "cache-manager";
+import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
+import type { LearningTimeStatisticsSortField } from "src/learning-time/learning-time.schema";
+import type { LearningTimeQuery } from "src/learning-time/learning-time.types";
 import type { LearningTimeJobData } from "src/queue/queue.types";
 import type {
   AuthenticatedSocket,
@@ -39,6 +47,7 @@ export class LearningTimeService implements OnModuleInit {
     private readonly queueService: QueueService,
     private readonly learningTimeRepository: LearningTimeRepository,
     private readonly wsGateway: WsGateway,
+    private readonly s3Service: S3Service,
     @Inject(CACHE_MANAGER) private cacheManager: CacheManager,
   ) {}
 
@@ -239,21 +248,99 @@ export class LearningTimeService implements OnModuleInit {
     });
   }
 
-  async getLearningTimeStatistics(courseId: UUIDType) {
-    const [averagePerLesson, totalPerStudent, courseTotals] = await Promise.all([
-      this.learningTimeRepository.getAverageLearningTimePerLesson(courseId),
-      this.learningTimeRepository.getTotalLearningTimePerStudent(courseId),
-      this.learningTimeRepository.getCourseTotalLearningTime(courseId),
+  async getLearningTimeStatistics(courseId: UUIDType, query: LearningTimeQuery = {}) {
+    const { page = 1, perPage = DEFAULT_PAGE_SIZE, sort = "studentName", searchQuery = "" } = query;
+    const { sortOrder, sortedField } = getSortOptions(sort);
+    const availableUserIds = await this.getFilteredUserIds(query);
+
+    const conditions: SQL<unknown>[] = [];
+
+    if (searchQuery) {
+      const searchCondition = or(
+        ilike(users.firstName, `%${searchQuery}%`),
+        ilike(users.lastName, `%${searchQuery}%`),
+        ilike(groups.name, `%${searchQuery}%`),
+      );
+
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
+    }
+
+    if (availableUserIds.length) {
+      const usersCondition = inArray(lessonLearningTime.userId, availableUserIds);
+      if (usersCondition) {
+        conditions.push(usersCondition);
+      }
+    }
+
+    const [usersWithTime, totalItems] = await Promise.all([
+      this.learningTimeRepository.getTotalLearningTimePerStudentPaginated(
+        courseId,
+        conditions,
+        page,
+        perPage,
+        sortOrder(this.getLearningTimeSortColumn(sortedField as LearningTimeStatisticsSortField)),
+      ),
+      this.learningTimeRepository.getTotalLearningTimePerStudentCount(courseId, conditions),
     ]);
 
+    const usersWithAvatarUrls = await Promise.all(
+      usersWithTime.map(async ({ studentAvatarKey, ...student }) => {
+        const studentAvatarUrl = studentAvatarKey
+          ? await this.getUsersProfilePictureUrl(studentAvatarKey)
+          : null;
+        return { ...student, studentAvatarUrl };
+      }),
+    );
+
     return {
-      averagePerLesson,
-      totalPerStudent,
-      courseTotals,
+      data: { users: usersWithAvatarUrls },
+      pagination: {
+        totalItems,
+        page,
+        perPage,
+      },
     };
   }
 
   async getDetailedLearningTime(courseId: UUIDType) {
     return this.learningTimeRepository.getLearningTimeForCourse(courseId);
+  }
+
+  async getFilterOptions(courseId: UUIDType) {
+    const groups = await this.learningTimeRepository.getGroupsInCourse(courseId);
+
+    return { groups };
+  }
+
+  public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
+    if (!avatarReference) return null;
+    return await this.s3Service.getSignedUrl(avatarReference);
+  };
+
+  private async getFilteredUserIds(query: LearningTimeQuery) {
+    const userIds: UUIDType[] = [];
+
+    if (query.userId) {
+      userIds.push(query.userId);
+    }
+
+    if (query.groupId) {
+      const users = await this.learningTimeRepository.getStudentsByGroup(query.groupId);
+      users.forEach(({ id }) => userIds.push(id));
+    }
+
+    return Array.from(userIds) as UUIDType[];
+  }
+
+  private getLearningTimeSortColumn(sort: LearningTimeStatisticsSortField) {
+    switch (sort) {
+      case "totalSeconds":
+        return sql<number>`SUM(${lessonLearningTime.totalSeconds})::INTEGER`;
+      case "studentName":
+      default:
+        return sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
+    }
   }
 }
