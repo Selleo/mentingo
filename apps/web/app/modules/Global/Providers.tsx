@@ -5,6 +5,7 @@ import { useCallback, useEffect } from "react";
 import { I18nextProvider } from "react-i18next";
 
 import { useGlobalVideoUploadNotifications } from "~/hooks/useGlobalVideoUploadNotifications";
+import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
 
 import i18n from "../../../i18n";
 import { ApiClient } from "../../api/api-client";
@@ -51,6 +52,11 @@ function TourKeyboardHandler({
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useGlobalVideoUploadNotifications();
+  const { pruneExpiredUploads } = useVideoUploadResumeStore();
+
+  useEffect(() => {
+    pruneExpiredUploads();
+  }, [pruneExpiredUploads]);
 
   const handleCloseTour = useCallback(
     ({ meta, setIsOpen }: { meta?: string | undefined; setIsOpen: (isOpen: boolean) => void }) => {

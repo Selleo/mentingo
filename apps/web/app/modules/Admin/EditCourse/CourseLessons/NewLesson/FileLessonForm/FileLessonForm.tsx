@@ -21,13 +21,13 @@ import {
 import { useToast } from "~/components/ui/use-toast";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { MissingTranslationsAlert } from "~/modules/Admin/EditCourse/compontents/MissingTranslationsAlert";
+import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
 import { getFileTypeFromName } from "~/utils/getFileTypeFromName";
 
 import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { useFileLessonForm } from "./hooks/useFileLessonForm";
-import { useVideoUploadResumeStore } from "./store/useVideoUploadResumeStore";
 
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -45,6 +45,8 @@ type SourceType = "upload" | "external";
 
 const normalizeTusHeaders = (headers: object): Record<string, string> =>
   Object.fromEntries(Object.entries(headers).map(([key, value]) => [key, String(value)]));
+
+const buildFileFingerprint = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
 
 const FileLessonForm = ({
   contentTypeToDisplay,
@@ -96,6 +98,7 @@ const FileLessonForm = ({
 
   const handleVideoTusUpload = useCallback(
     async (file: File) => {
+      const fileFingerprint = buildFileFingerprint(file);
       const existingUpload = getUploadForFile(file);
 
       const session =
@@ -110,6 +113,7 @@ const FileLessonForm = ({
         }));
 
       const tusHeaders = normalizeTusHeaders(session.tusHeaders);
+      const tusFingerprint = `bunny-tus:${session.uploadId}:${fileFingerprint}`;
 
       saveUpload({
         uploadId: session.uploadId,
@@ -132,7 +136,6 @@ const FileLessonForm = ({
       }
 
       await new Promise<void>((resolve, reject) => {
-        console.log("Starting video upload:", session.uploadId);
         const upload = new tus.Upload(file, {
           endpoint: session.tusEndpoint,
           headers: tusHeaders,
@@ -141,14 +144,12 @@ const FileLessonForm = ({
             filetype: file.type,
           },
           retryDelays: [0, 1000, 3000, 5000, 10000],
-          fingerprint: async () =>
-            `bunny-tus:${session.uploadId}:${file.name}:${file.size}:${file.lastModified}`,
+          fingerprint: async () => tusFingerprint,
           onError: (error) => {
             clearUpload(session.uploadId);
             reject(error);
           },
           onSuccess: () => {
-            console.log("Finished video upload:", session.uploadId);
             clearUpload(session.uploadId);
             resolve();
           },
@@ -156,7 +157,6 @@ const FileLessonForm = ({
 
         upload.findPreviousUploads().then((previousUploads) => {
           if (previousUploads.length > 0) {
-            console.log("Resuming video upload:", session.uploadId);
             upload.resumeFromPreviousUpload(previousUploads[0]);
           }
           upload.start();

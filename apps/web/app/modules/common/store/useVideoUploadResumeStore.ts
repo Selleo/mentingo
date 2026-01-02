@@ -17,6 +17,7 @@ type VideoUploadResumeState = {
   uploads: Record<string, StoredVideoUpload>;
   saveUpload: (payload: StoredVideoUpload) => void;
   clearUpload: (uploadId: string) => void;
+  pruneExpiredUploads: () => void;
   getUploadForFile: (file: File) => StoredVideoUpload | null;
 };
 
@@ -30,6 +31,14 @@ const matchesFile = (entry: StoredVideoUpload, file: File) =>
   entry.sizeBytes === file.size &&
   entry.lastModified === file.lastModified;
 
+const pruneUploads = (uploads: Record<string, StoredVideoUpload>) => {
+  const now = Date.now();
+
+  return Object.fromEntries(
+    Object.entries(uploads).filter(([, entry]) => !isExpired(entry.expiresAt, now)),
+  );
+};
+
 export const useVideoUploadResumeStore = create<VideoUploadResumeState>()(
   persist(
     (set, get) => ({
@@ -42,6 +51,10 @@ export const useVideoUploadResumeStore = create<VideoUploadResumeState>()(
           delete next[uploadId];
           return { uploads: next };
         }),
+      pruneExpiredUploads: () =>
+        set((state) => ({
+          uploads: pruneUploads(state.uploads),
+        })),
       getUploadForFile: (file) => {
         const { uploads } = get();
         const now = Date.now();

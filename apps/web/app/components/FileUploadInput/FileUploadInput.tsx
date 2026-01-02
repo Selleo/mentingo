@@ -15,8 +15,8 @@ type FileUploadInputProps = {
   handleFileUpload: (file: File) => Promise<void>;
   handleFileDelete: () => void;
   isUploading: boolean;
-  isProcessing?: boolean;
   contentTypeToDisplay: string;
+  isProcessing?: boolean;
   url?: string;
   className?: string;
   onVideoSelected?: () => void;
