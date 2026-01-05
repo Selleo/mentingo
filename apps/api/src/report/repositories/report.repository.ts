@@ -40,7 +40,6 @@ export class ReportRepository {
     language: SupportedLanguages,
     currentUser: CurrentUser,
   ): Promise<StudentCourseReportRow[]> {
-    const courseNameField = this.localizationService.getLocalizedSqlField(courses.title, language);
     const conditions = [
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       eq(users.role, USER_ROLES.STUDENT),
@@ -51,96 +50,69 @@ export class ReportRepository {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
 
-    // Get all enrolled students with their course data
-    const rawData = await this.db
+    const reportData = await this.db
       .select({
-        studentId: users.id,
         studentName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        groupName: sql<string | null>`STRING_AGG(DISTINCT ${groups.name}, ', ')`,
-        courseId: courses.id,
-        courseName: courseNameField,
+        groupName: sql<string | null>`(
+          SELECT STRING_AGG(DISTINCT g.name, ', ')
+          FROM ${groups} g
+          JOIN ${groupUsers} gu ON gu.group_id = g.id
+          WHERE gu.user_id = ${users.id}
+        )`,
+        courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
+        lessonCount: sql<number>`(
+          SELECT COALESCE(SUM(ch.lesson_count), 0)::int
+          FROM ${chapters} ch
+          WHERE ch.course_id = ${courses.id}
+        )`,
+        completedLessons: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${studentLessonProgress} slp
+          JOIN ${lessons} l ON slp.lesson_id = l.id
+          JOIN ${chapters} ch ON l.chapter_id = ch.id
+          WHERE slp.student_id = ${users.id}
+            AND ch.course_id = ${courses.id}
+            AND slp.completed_at IS NOT NULL
+        )`,
+        quizResults: sql<string>`COALESCE((
+          SELECT STRING_AGG(
+            'Quiz ' || quiz_lesson.quiz_index || ': ' || quiz_lesson.quiz_score || '%',
+            ', '
+            ORDER BY quiz_lesson.chapter_order, quiz_lesson.lesson_order
+          )
+          FROM (
+            SELECT
+              ROW_NUMBER() OVER (ORDER BY COALESCE(ch.display_order, 0), COALESCE(l.display_order, 0)) AS quiz_index,
+              slp.quiz_score AS quiz_score,
+              COALESCE(ch.display_order, 0) AS chapter_order,
+              COALESCE(l.display_order, 0) AS lesson_order
+            FROM ${studentLessonProgress} slp
+            JOIN ${lessons} l ON slp.lesson_id = l.id
+            JOIN ${chapters} ch ON l.chapter_id = ch.id
+            WHERE slp.student_id = ${users.id}
+              AND ch.course_id = ${courses.id}
+              AND slp.quiz_score IS NOT NULL
+          ) quiz_lesson
+      ), '-')`,
       })
       .from(studentCourses)
       .innerJoin(users, eq(studentCourses.studentId, users.id))
       .innerJoin(courses, eq(studentCourses.courseId, courses.id))
-      .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-      .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(and(...conditions))
-      .groupBy(users.id, users.firstName, users.lastName, courses.id, courseNameField);
+      .where(and(...conditions));
 
-    // For each student-course combination, get lesson counts and quiz results
-    const reportData: StudentCourseReportRow[] = [];
-
-    for (const row of rawData) {
-      // Get total lesson count for this course
-      const [lessonCountResult] = await this.db
-        .select({
-          totalLessons: sql<number>`COALESCE(SUM(${chapters.lessonCount}), 0)::int`,
-        })
-        .from(chapters)
-        .where(eq(chapters.courseId, row.courseId));
-
-      const totalLessons = lessonCountResult?.totalLessons ?? 0;
-
-      // Get completed lessons count for this student in this course
-      const [completedResult] = await this.db
-        .select({
-          completedLessons: sql<number>`COUNT(*)::int`,
-        })
-        .from(studentLessonProgress)
-        .innerJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
-        .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
-        .where(
-          and(
-            eq(studentLessonProgress.studentId, row.studentId),
-            eq(chapters.courseId, row.courseId),
-            sql`${studentLessonProgress.completedAt} IS NOT NULL`,
-          ),
-        );
-
-      const completedLessons = completedResult?.completedLessons ?? 0;
-
-      // Get quiz results for this student in this course
-      const quizData = await this.db
-        .select({
-          lessonTitle: this.localizationService.getLocalizedSqlField(lessons.title, language),
-          quizScore: studentLessonProgress.quizScore,
-        })
-        .from(studentLessonProgress)
-        .innerJoin(lessons, eq(studentLessonProgress.lessonId, lessons.id))
-        .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
-        .innerJoin(courses, eq(chapters.courseId, courses.id))
-        .where(
-          and(
-            eq(studentLessonProgress.studentId, row.studentId),
-            eq(chapters.courseId, row.courseId),
-            sql`${studentLessonProgress.quizScore} IS NOT NULL`,
-          ),
-        )
-        .orderBy(
-          sql<number>`COALESCE(${chapters.displayOrder}, 0)`,
-          sql<number>`COALESCE(${lessons.displayOrder}, 0)`,
-        );
-
-      // Format quiz results as "Quiz 1: X%, Quiz 2: Y%"
-      const quizResults = quizData
-        .map((q, index) => `Quiz ${index + 1}: ${q.quizScore}%`)
-        .join(", ");
-
+    return reportData.map((row) => {
       const progressPercentage =
-        totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+        row.lessonCount > 0 ? Math.round((row.completedLessons / row.lessonCount) * 100) : 0;
 
-      reportData.push({
+      return {
         studentName: row.studentName,
         groupName: row.groupName,
         courseName: row.courseName,
-        lessonCount: totalLessons,
-        completedLessons,
+        lessonCount: row.lessonCount,
+        completedLessons: row.completedLessons,
         progressPercentage,
-        quizResults: quizResults || "-",
-      });
-    }
-
-    return reportData;
+        quizResults: row.quizResults,
+      };
+    });
   }
 }

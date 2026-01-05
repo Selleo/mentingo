@@ -17,7 +17,7 @@ export class ReportService {
     language: SupportedLanguages,
     currentUser: CurrentUser,
   ): Promise<Buffer> {
-    const data = await this.reportRepository.getAllStudentCourseData(language, currentUser);
+    const reportData = await this.reportRepository.getAllStudentCourseData(language, currentUser);
 
     const headers = REPORT_HEADERS[language] || REPORT_HEADERS.en;
 
@@ -74,7 +74,7 @@ export class ReportService {
       },
     ];
 
-    const buffer = await writeXlsxFile(data, {
+    const buffer = await writeXlsxFile(reportData, {
       schema,
       sheet: "Summary Report",
       stickyRowsCount: 1,
