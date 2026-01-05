@@ -13,20 +13,20 @@ export interface ReportHeaders {
 export const REPORT_HEADERS: Record<SupportedLanguages, ReportHeaders> = {
   en: {
     studentName: "Name",
-    groupName: "Company (Group)",
+    groupName: "Groups",
     courseName: "Course Name",
     lessonCount: "Lesson Count",
     completedLessons: "Completed Lessons",
     progressPercentage: "Progress (%)",
-    quizResults: "Quiz Results (%)",
+    quizResults: "Latest Quiz Attempt Results (%)",
   },
   pl: {
     studentName: "Imię i nazwisko",
-    groupName: "Firma (grupa)",
+    groupName: "Grupy",
     courseName: "Nazwa kursu",
     lessonCount: "Liczba lekcji",
     completedLessons: "Ukończone lekcje",
     progressPercentage: "Progres (%)",
-    quizResults: "Ostatnie wyniki z quizów (%)",
+    quizResults: "Wyniki z ostatnich podejść do quizów",
   },
 };

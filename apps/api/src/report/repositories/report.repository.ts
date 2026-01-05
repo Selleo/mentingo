@@ -17,6 +17,7 @@ import {
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
 import type { SupportedLanguages } from "@repo/shared";
+import type { CurrentUser } from "src/common/types/current-user.type";
 
 export interface StudentCourseReportRow {
   studentName: string;
@@ -35,28 +36,37 @@ export class ReportRepository {
     private readonly localizationService: LocalizationService,
   ) {}
 
-  async getAllStudentCourseData(language: SupportedLanguages): Promise<StudentCourseReportRow[]> {
+  async getAllStudentCourseData(
+    language: SupportedLanguages,
+    currentUser: CurrentUser,
+  ): Promise<StudentCourseReportRow[]> {
+    const courseNameField = this.localizationService.getLocalizedSqlField(courses.title, language);
+    const conditions = [
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      eq(users.role, USER_ROLES.STUDENT),
+      isNull(users.deletedAt),
+    ];
+
+    if (currentUser?.role === USER_ROLES.CONTENT_CREATOR) {
+      conditions.push(eq(courses.authorId, currentUser.userId));
+    }
+
     // Get all enrolled students with their course data
     const rawData = await this.db
       .select({
         studentId: users.id,
         studentName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        groupName: sql<string | null>`${groups.name}`,
+        groupName: sql<string | null>`STRING_AGG(DISTINCT ${groups.name}, ', ')`,
         courseId: courses.id,
-        courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
+        courseName: courseNameField,
       })
       .from(studentCourses)
       .innerJoin(users, eq(studentCourses.studentId, users.id))
       .innerJoin(courses, eq(studentCourses.courseId, courses.id))
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
-      .where(
-        and(
-          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-          eq(users.role, USER_ROLES.STUDENT),
-          isNull(users.deletedAt),
-        ),
-      );
+      .where(and(...conditions))
+      .groupBy(users.id, users.firstName, users.lastName, courses.id, courseNameField);
 
     // For each student-course combination, get lesson counts and quiz results
     const reportData: StudentCourseReportRow[] = [];
@@ -107,7 +117,10 @@ export class ReportRepository {
             sql`${studentLessonProgress.quizScore} IS NOT NULL`,
           ),
         )
-        .orderBy(lessons.displayOrder);
+        .orderBy(
+          sql<number>`COALESCE(${chapters.displayOrder}, 0)`,
+          sql<number>`COALESCE(${lessons.displayOrder}, 0)`,
+        );
 
       // Format quiz results as "Quiz 1: X%, Quiz 2: Y%"
       const quizResults = quizData
