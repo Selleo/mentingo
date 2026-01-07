@@ -1,3 +1,15 @@
+<a name="v3.26.0"></a>
+
+## [v3.26.0] - 07.01.2026
+
+### Bug Fixes:
+
+- ensure release process runs correctly ([#1170](https://github.com/Selleo/mentingo/issues/1170))
+
+### Chores:
+
+- refine report generation based on feedback ([#1167](https://github.com/Selleo/mentingo/issues/1167))
+
 <a name="v3.25.0"></a>
 
 ## [v3.25.0] - 02.01.2026
@@ -47,6 +59,10 @@
 ### Code Refactoring:
 
 - simplify API tests setup for easier maintenance ([#1102](https://github.com/Selleo/mentingo/issues/1102))
+
+### Documentation:
+
+- update changelog for version v3.25.0
 
 <a name="v3.24.0"></a>
 
@@ -2214,7 +2230,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.25.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v3.26.0...HEAD
+[v3.26.0]: https://github.com/Selleo/mentingo/compare/v3.25.0...v3.26.0
 [v3.25.0]: https://github.com/Selleo/mentingo/compare/v3.24.0...v3.25.0
 [v3.24.0]: https://github.com/Selleo/mentingo/compare/v3.23.0...v3.24.0
 [v3.23.0]: https://github.com/Selleo/mentingo/compare/v3.22.0...v3.23.0
