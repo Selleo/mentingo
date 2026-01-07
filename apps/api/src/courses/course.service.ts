@@ -2338,34 +2338,35 @@ export class CourseService {
     const [averageScorePerQuiz] = await this.db
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
-          (
-            SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
-            FROM (
-              SELECT
-                lessons.id AS quiz_id,
-                ${this.localizationService.getLocalizedSqlField(
-                  lessons.title,
-                  language,
-                  courses,
-                  "co",
-                )} AS quiz_name,
-                lessons.display_order AS lesson_order,
-                ROUND(AVG(slp.quiz_score), 0) AS average_score,
-                COUNT(DISTINCT slp.student_id) AS finished_count
-              FROM ${lessons}
-              JOIN ${studentLessonProgress} slp ON lessons.id = slp.lesson_id
-              JOIN ${chapters} c ON lessons.chapter_id = c.id
-              JOIN ${studentCourses} sc ON slp.student_id = sc.student_id AND sc.course_id = c.course_id
-              JOIN ${courses} co ON co.id = c.course_id
-              WHERE c.course_id = ${courseId} AND lessons.type = 'quiz' AND slp.completed_at IS NOT NULL AND slp.quiz_score IS NOT NULL AND sc.status = ${
-                COURSE_ENROLLMENT.ENROLLED
-              }
+        (
+          SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
+          FROM (
+            SELECT
+              ${lessons.id} AS quiz_id,
+              ${this.localizationService.getLocalizedSqlField(
+                lessons.title,
+                language,
+                courses,
+              )} AS quiz_name,
+              ${lessons.displayOrder} AS lesson_order,
+              ROUND(AVG(${studentLessonProgress.quizScore}), 0) AS average_score,
+              COUNT(DISTINCT ${studentLessonProgress.studentId}) AS finished_count
+            FROM ${lessons}
+            JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
+            JOIN ${chapters} ON ${lessons.chapterId} = ${chapters.id}
+            JOIN ${studentCourses} ON ${studentLessonProgress.studentId} = ${studentCourses.studentId} AND ${studentCourses.courseId} = ${chapters.courseId}
+            JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
+            WHERE ${chapters.courseId} = ${courseId}
+              AND ${lessons.type} = 'quiz'
+              AND ${studentLessonProgress.completedAt} IS NOT NULL
+              AND ${studentLessonProgress.quizScore} IS NOT NULL
+              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
               AND ${conditions.length ? sql`${and(...conditions)}` : true}
-              GROUP BY lessons.id, lessons.title, lessons.display_order, co.available_locales, co.base_language
-            ) AS subquery
-          ),
-          '[]'::jsonb
-        )`,
+            GROUP BY ${lessons.id}, ${lessons.title}, ${lessons.displayOrder}, ${courses.availableLocales}, ${courses.baseLanguage}
+          ) AS subquery
+        ),
+        '[]'::jsonb
+      )`,
       })
       .from(studentLessonProgress)
       .leftJoin(chapters, eq(studentLessonProgress.chapterId, chapters.id))
