@@ -4,7 +4,9 @@ import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { Roles } from "src/common/decorators/roles.decorator";
+import { CurrentUser } from "src/common/decorators/user.decorator";
 import { RolesGuard } from "src/common/guards/roles.guard";
+import { CurrentUser as CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { USER_ROLES } from "src/user/schemas/userRoles";
 
@@ -16,15 +18,16 @@ export class ReportController {
   constructor(private readonly reportService: ReportService) {}
 
   @Get("summary")
-  @Roles(USER_ROLES.ADMIN)
+  @Roles(USER_ROLES.ADMIN, USER_ROLES.CONTENT_CREATOR)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
   })
   async downloadSummaryReport(
     @Query("language") language: SupportedLanguages,
     @Res() res: Response,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<void> {
-    const buffer = await this.reportService.generateSummaryReport(language);
+    const buffer = await this.reportService.generateSummaryReport(language, currentUser);
 
     const filename = `summary-report-${new Date().toISOString().split("T")[0]}.xlsx`;
 

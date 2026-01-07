@@ -6,14 +6,19 @@ import { ReportRepository } from "./repositories/report.repository";
 
 import type { StudentCourseReportRow } from "./repositories/report.repository";
 import type { SupportedLanguages } from "@repo/shared";
+import type { CurrentUser } from "src/common/types/current-user.type";
 import type { Schema } from "write-excel-file";
 
 @Injectable()
 export class ReportService {
   constructor(private readonly reportRepository: ReportRepository) {}
 
-  async generateSummaryReport(language: SupportedLanguages): Promise<Buffer> {
-    const data = await this.reportRepository.getAllStudentCourseData(language);
+  async generateSummaryReport(
+    language: SupportedLanguages,
+    currentUser: CurrentUser,
+  ): Promise<Buffer> {
+    const reportData = await this.reportRepository.getAllStudentCourseData(language, currentUser);
+
     const headers = REPORT_HEADERS[language] || REPORT_HEADERS.en;
 
     const schema: Schema<StudentCourseReportRow> = [
@@ -69,7 +74,7 @@ export class ReportService {
       },
     ];
 
-    const buffer = await writeXlsxFile(data, {
+    const buffer = await writeXlsxFile(reportData, {
       schema,
       sheet: "Summary Report",
       stickyRowsCount: 1,
