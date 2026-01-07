@@ -50,6 +50,22 @@ export class ReportRepository {
       conditions.push(eq(courses.authorId, currentUser.userId));
     }
 
+    const lessonCountQuery = sql<number>`(
+      SELECT COALESCE(SUM(ch.lesson_count), 0)::int
+      FROM ${chapters} ch
+      WHERE ch.course_id = ${courses.id}
+    )`;
+
+    const completedLessonsQuery = sql<number>`(
+      SELECT COUNT(*)::int
+      FROM ${studentLessonProgress} slp
+      JOIN ${lessons} l ON slp.lesson_id = l.id
+      JOIN ${chapters} ch ON l.chapter_id = ch.id
+      WHERE slp.student_id = ${users.id}
+        AND ch.course_id = ${courses.id}
+        AND slp.completed_at IS NOT NULL
+    )`;
+
     const reportData = await this.db
       .select({
         studentName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
@@ -60,20 +76,8 @@ export class ReportRepository {
           WHERE gu.user_id = ${users.id}
         )`,
         courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
-        lessonCount: sql<number>`(
-          SELECT COALESCE(SUM(ch.lesson_count), 0)::int
-          FROM ${chapters} ch
-          WHERE ch.course_id = ${courses.id}
-        )`,
-        completedLessons: sql<number>`(
-          SELECT COUNT(*)::int
-          FROM ${studentLessonProgress} slp
-          JOIN ${lessons} l ON slp.lesson_id = l.id
-          JOIN ${chapters} ch ON l.chapter_id = ch.id
-          WHERE slp.student_id = ${users.id}
-            AND ch.course_id = ${courses.id}
-            AND slp.completed_at IS NOT NULL
-        )`,
+        lessonCount: lessonCountQuery.as("lesson_count"),
+        completedLessons: completedLessonsQuery.as("completed_lessons"),
         quizResults: sql<string>`COALESCE((
           SELECT STRING_AGG(
             'Quiz ' || quiz_lesson.quiz_index || ': ' || quiz_lesson.quiz_score || '%',
@@ -93,26 +97,14 @@ export class ReportRepository {
               AND ch.course_id = ${courses.id}
               AND slp.quiz_score IS NOT NULL
           ) quiz_lesson
-      ), '-')`,
+        ), '-')`,
+        progressPercentage: sql<number>`COALESCE((${completedLessonsQuery}) * 100 / NULLIF((${lessonCountQuery}), 0), 0)`,
       })
       .from(studentCourses)
       .innerJoin(users, eq(studentCourses.studentId, users.id))
       .innerJoin(courses, eq(studentCourses.courseId, courses.id))
       .where(and(...conditions));
 
-    return reportData.map((row) => {
-      const progressPercentage =
-        row.lessonCount > 0 ? Math.round((row.completedLessons / row.lessonCount) * 100) : 0;
-
-      return {
-        studentName: row.studentName,
-        groupName: row.groupName,
-        courseName: row.courseName,
-        lessonCount: row.lessonCount,
-        completedLessons: row.completedLessons,
-        progressPercentage,
-        quizResults: row.quizResults,
-      };
-    });
+    return reportData;
   }
 }
