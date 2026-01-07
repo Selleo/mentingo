@@ -27,6 +27,6 @@ export const REPORT_HEADERS: Record<SupportedLanguages, ReportHeaders> = {
     lessonCount: "Liczba lekcji",
     completedLessons: "Ukończone lekcje",
     progressPercentage: "Progres (%)",
-    quizResults: "Wyniki z ostatnich podejść do quizów",
+    quizResults: "Wyniki z ostatnich podejść do quizów (%)",
   },
 };
