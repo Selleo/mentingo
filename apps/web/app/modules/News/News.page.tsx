@@ -191,10 +191,6 @@ function NewsPage() {
         <PageWrapper
           breadcrumbs={[
             {
-              title: t("adminUsersView.breadcrumbs.dashboard"),
-              href: "/",
-            },
-            {
               title: t("adminUsersView.breadcrumbs.news"),
               href: "/news",
             },

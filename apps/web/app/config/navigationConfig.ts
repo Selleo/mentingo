@@ -50,9 +50,14 @@ export const getNavigationConfig = (
           iconName: "Course",
         },
         {
-          label: t("navigationSideBar.statistics"),
-          path: "",
+          label: t("navigationSideBar.analytics"),
+          path: "admin/analytics",
           iconName: "ChartNoAxes",
+        },
+        {
+          label: t("navigationSideBar.progress"),
+          path: "progress",
+          iconName: "Target",
         },
       ],
     },

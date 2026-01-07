@@ -77,6 +77,7 @@ const defineRoles = <R extends UserRole[]>(roles: [...R]) => roles;
 const ALL_ROLES = defineRoles([USER_ROLE.admin, USER_ROLE.contentCreator, USER_ROLE.student]);
 const ADMIN_ONLY = defineRoles([USER_ROLE.admin]);
 const ADMIN_AND_CONTENT_CREATOR = defineRoles([USER_ROLE.admin, USER_ROLE.contentCreator]);
+const STUDENT = defineRoles([USER_ROLE.student]);
 
 export const routeAccessConfig = createRouteConfig({
   "auth/login": ALL_ROLES,
@@ -85,7 +86,8 @@ export const routeAccessConfig = createRouteConfig({
   "auth/password-recovery": ALL_ROLES,
 
   // Client part
-  "": ALL_ROLES, // Dashboard
+  "": ALL_ROLES,
+  progress: STUDENT,
   settings: ALL_ROLES,
   "profile/:id": ALL_ROLES,
   "course/:courseId/lesson/:lessonId": ALL_ROLES,
@@ -104,6 +106,7 @@ export const routeAccessConfig = createRouteConfig({
   "news/:newsId": ALL_ROLES,
 
   // Admin part
+  "admin/analytics": ADMIN_AND_CONTENT_CREATOR,
   "admin/courses": ADMIN_AND_CONTENT_CREATOR,
   "admin/courses/new": ADMIN_AND_CONTENT_CREATOR,
   "admin/beta-courses/new": ADMIN_AND_CONTENT_CREATOR,

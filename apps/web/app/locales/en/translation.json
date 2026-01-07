@@ -156,6 +156,8 @@
     "profile": "Profile",
     "dashboard": "Dashboard",
     "statistics": "Statistics",
+    "analytics": "Analytics",
+    "progress": "Progress",
     "findInApplication": "Find in application",
     "courses": "Courses",
     "content": "Content",
@@ -273,7 +275,6 @@
     },
     "noCompanyInformationAvailable": "No company information available",
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "providerInformation": "Provider Information"
     }
   },
@@ -463,9 +464,6 @@
       "confirm": "Confirm",
       "deleteProfilePicture": "Delete profile picture"
     },
-    "breadcrumbs": {
-      "dashboard": "Dashboard"
-    },
     "field": {
       "firstName": "Name",
       "firstNamePlaceholder": "Enter your name",
@@ -617,7 +615,6 @@
       "createdAt": "Created At"
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "promotionCodes": "Promotion Codes",
       "createNew": "Create new",
       "update": "Update",
@@ -720,7 +717,6 @@
       "deleteCategoryFailed": "Failed to delete category"
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "categories": "Categories",
       "createNew": "Create new category",
       "back": "Back"
@@ -833,7 +829,6 @@
       }
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "users": "Users",
       "createNew": "Create new user",
       "back": "Back",
@@ -870,7 +865,6 @@
       "userNotFound": "User not found"
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "users": "Users",
       "userDetails": "User details",
       "back": "Back"
@@ -990,7 +984,6 @@
       "submit": "Delete"
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "groups": "Groups",
       "createNew": "Create new",
       "editGroup": "Edit group",
@@ -1425,7 +1418,6 @@
       "successResponse": "Students have been assigned to the course."
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "courses": "Courses",
       "back": "Back"
     },
@@ -1576,7 +1568,6 @@
       "successfullyEnrolledToCourse": "Successfully enrolled in the course"
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "courses": "Courses"
     },
     "button": {
@@ -1799,7 +1790,6 @@
       "platformCustomization": "Platform Customization"
     },
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "settings": "Settings"
     },
     "toast": {
@@ -1915,7 +1905,6 @@
   },
   "announcements": {
     "breadcrumbs": {
-      "dashboard": "Dashboard",
       "announcements": "Announcements",
       "createAnnouncement": "Create announcement"
     },
@@ -2122,7 +2111,9 @@
     "createNewCourse": "Create New Course",
     "admin": "Admin",
     "qa": "Q&A",
-    "createQA": "Create new Q&A"
+    "createQA": "Create new Q&A",
+    "analytics": "Analytics",
+    "progress": "Progress"
   },
   "lessonPreview": {
     "breadcrumbs": {

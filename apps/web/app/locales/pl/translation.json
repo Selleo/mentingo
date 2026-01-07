@@ -157,6 +157,8 @@
     "profile": "Profil",
     "dashboard": "Panel główny",
     "statistics": "Statystyki",
+    "analytics": "Analityka",
+    "progress": "Postępy",
     "courses": "Kursy",
     "content": "Treści",
     "findInApplication": "Znajdź w aplikacji",
@@ -276,7 +278,6 @@
     },
     "noCompanyInformationAvailable": "Brak informacji o dostawcy",
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "providerInformation": "Informacje o dostawcy"
     }
   },
@@ -440,9 +441,6 @@
       "confirm": "Potwierdź",
       "deleteProfilePicture": "Usuń zdjęcie profilowe"
     },
-    "breadcrumbs": {
-      "dashboard": "Panel główny"
-    },
     "field": {
       "firstName": "Imię",
       "firstNamePlaceholder": "Wprowadź swoje imię",
@@ -594,7 +592,6 @@
       "createdAt": "Utworzono"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "promotionCodes": "Kody promocyjne",
       "createNew": "Utwórz nowy",
       "update": "Edytuj",
@@ -702,7 +699,6 @@
       "deleteCategoryFailed": "Nie udało się usunąć kategorii"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "categories": "Kategorie",
       "createNew": "Utwórz nową kategorię",
       "back": "Wstecz"
@@ -819,7 +815,6 @@
       }
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "users": "Użytkownicy",
       "createNew": "Utwórz nowego użytkownika",
       "back": "Wstecz",
@@ -972,7 +967,6 @@
       "submit": "Usuń"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "groups": "Grupy",
       "createNew": "Utwórz nową",
       "editGroup": "Edytuj grupę",
@@ -1419,7 +1413,6 @@
       "successResponse": "studentów zostało zapisanych do kursu."
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "courses": "Kursy",
       "back": "Wstecz"
     },
@@ -1571,7 +1564,6 @@
       "successfullyEnrolledToCourse": "Pomyślnie zapisano na kurs"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "courses": "Kursy"
     },
     "button": {
@@ -1795,7 +1787,6 @@
       "platformCustomization": "Dostosowanie Platformy"
     },
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "settings": "Ustawienia"
     },
     "toast": {
@@ -1949,7 +1940,6 @@
   },
   "announcements": {
     "breadcrumbs": {
-      "dashboard": "Panel główny",
       "announcements": "Ogłoszenia",
       "createAnnouncement": "Utwórz ogłoszenie"
     },
@@ -2140,7 +2130,9 @@
     "createNewCourse": "Utwórz nowy kurs",
     "admin": "Administrator",
     "qa": "Q&A",
-    "createQA": "Utwórz nowe Q&A"
+    "createQA": "Utwórz nowe Q&A",
+    "analytics": "Analityka",
+    "progress": "Postępy"
   },
   "lessonPreview": {
     "breadcrumbs": {

@@ -309,10 +309,6 @@ const Courses = () => {
     <PageWrapper
       breadcrumbs={[
         {
-          title: t("adminCourseView.breadcrumbs.dashboard"),
-          href: "/",
-        },
-        {
           title: t("adminCourseView.breadcrumbs.courses"),
           href: "/admin/courses",
         },

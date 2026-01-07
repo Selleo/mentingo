@@ -89,7 +89,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
   const [previewContent, setPreviewContent] = useState("");
   const pageTitle = isEdit ? t("newsView.edit") : t("newsView.create");
   const breadcrumbs = [
-    { title: t("navigationSideBar.dashboard"), href: "/" },
     { title: t("navigationSideBar.news"), href: "/news" },
     { title: pageTitle, href: isEdit && id ? `/news/${id}` : "/news/add" },
   ];

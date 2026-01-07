@@ -35,9 +35,8 @@ export const routes: (
           });
         });
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
-          route("", "modules/Statistics/Statistics.page.tsx", {
-            index: true,
-          });
+          route("", "modules/Dashboard/IndexRedirect.page.tsx", { index: true });
+          route("progress", "modules/Statistics/Statistics.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
           route("announcements", "modules/Announcements/Announcements.page.tsx");
@@ -53,6 +52,7 @@ export const routes: (
           route("courses", "modules/Admin/Courses/Courses.page.tsx", {
             index: true,
           });
+          route("analytics", "modules/Statistics/Analytics.page.tsx");
           route("envs", "modules/Admin/Envs/Envs.page.tsx");
           route("beta-courses/new", "modules/Admin/AddCourse/AddCourse.tsx");
           route("courses/new-scorm", "modules/Admin/Scorm/CreateNewScormCourse.page.tsx");

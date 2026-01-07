@@ -71,7 +71,6 @@ export default function ArticleDetailsPage() {
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_ARTICLES_ACCESS}>
       <PageWrapper
         breadcrumbs={[
-          { title: t("navigationSideBar.dashboard"), href: "/" },
           { title: t("navigationSideBar.articles"), href: "/articles" },
           { title: article.title, href: `/articles/${article.id}` },
         ]}
