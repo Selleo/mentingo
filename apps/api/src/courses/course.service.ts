@@ -1597,6 +1597,7 @@ export class CourseService {
         .where(
           and(
             eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
             inArray(
               studentCourses.studentId,
               groupUsersList.map((gu) => gu.userId),

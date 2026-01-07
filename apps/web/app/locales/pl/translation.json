@@ -996,6 +996,7 @@
   },
   "adminCourseView": {
     "mandatoryCourse": "Kurs obowiązkowy",
+    "mandatoryCourseTooltip": "Oznacz kurs jako obowiązkowy dla tej grupy. Wymagane jest wskazanie daty, do której uczestnicy muszą ukończyć kurs. Po upływie terminu administrator otrzyma powiadomienie e-mail z listą osób, które nie ukończyły kursu.",
     "deadline": "Termin wykonania",
     "selectDate": "Wybierz datę",
     "deadlineRequired": "Termin wykonania jest wymagany dla obowiązkowego kursu",

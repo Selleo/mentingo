@@ -1,4 +1,7 @@
-import { format } from "date-fns";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
+import { format, isValid, parseISO } from "date-fns";
+import { enUS, pl } from "date-fns/locale";
+import { useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -6,10 +9,17 @@ import { cn } from "~/lib/utils";
 
 import { Icon } from "../../../../components/Icon";
 import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import { Calendar } from "../../../../components/ui/calendar";
 import { Checkbox } from "../../../../components/ui/checkbox";
 import { FormControl, FormField, FormItem, FormMessage } from "../../../../components/ui/form";
-import { Input } from "../../../../components/ui/input";
 import { Switch } from "../../../../components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../../../components/ui/tooltip";
 
 import type { GroupEnrollFormValues } from "./GroupEnrollModal";
 
@@ -22,11 +32,24 @@ type Props = {
 };
 
 export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }: Props) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { control, getValues } = useFormContext<GroupEnrollFormValues>();
 
   const selected = useWatch({ control, name: `groups.${index}.selected` });
   const obligatory = useWatch({ control, name: `groups.${index}.obligatory` });
+
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  const { showMandatorySection } = useMemo(() => {
+    const showMandatory = selected || obligatory;
+    return { showMandatorySection: showMandatory };
+  }, [selected, obligatory]);
+
+  const { currentYear, calendarLocale } = useMemo(() => {
+    const year = new Date().getFullYear();
+    const locale = i18n.language.startsWith("pl") ? pl : enUS;
+    return { currentYear: year, calendarLocale: locale };
+  }, [i18n.language]);
 
   return (
     <div
@@ -49,6 +72,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                   onCheckedChange={(currentValue) => field.onChange(Boolean(currentValue))}
                   aria-label={`select-group-${id}`}
                   className="mt-1.5"
+                  disabled={isGroupEnrolled}
                 />
               </FormControl>
             </FormItem>
@@ -87,7 +111,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
             {t("adminCourseView.enrolled.members", { count: usersCount })}
           </div>
         </div>
-        {selected ? (
+        {showMandatorySection ? (
           <div className="rounded-xl border border-neutral-200/80 bg-gradient-to-b from-white to-neutral-50 p-4 flex flex-col gap-3 shadow-sm">
             <div
               className={cn("flex items-center justify-between", {
@@ -98,7 +122,18 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                 <span className="text-color-black text-sm font-medium">
                   {t("adminCourseView.mandatoryCourse")}
                 </span>
-                <Icon name="Info" className="size-4 text-zest-600" />
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex">
+                        <Icon name="Info" className="size-4 text-zest-600" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      {t("adminCourseView.mandatoryCourseTooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <div className="rounded-full bg-white px-1 py-0.5">
                 <FormField
@@ -110,6 +145,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                         <Switch
                           checked={!!field.value}
                           onCheckedChange={(val) => field.onChange(Boolean(val))}
+                          disabled={isGroupEnrolled}
                         />
                       </FormControl>
                     </FormItem>
@@ -142,15 +178,67 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                         {t("adminCourseView.deadline")} *
                       </label>
                       <FormControl className="relative">
-                        <Input
-                          type="date"
-                          value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                          }}
-                          placeholder={t("adminCourseView.selectDate")}
-                          className="w-full bg-white"
-                        />
+                        <PopoverPrimitive.Root
+                          open={isCalendarOpen}
+                          onOpenChange={setIsCalendarOpen}
+                        >
+                          <PopoverPrimitive.Trigger asChild>
+                            <Button
+                              id={`groups.${index}.deadline`}
+                              type="button"
+                              variant="outline"
+                              className={cn(
+                                "w-full flex items-center gap-3 font-normal bg-white shadow-sm border-neutral-200",
+                                field.value && isValid(parseISO(field.value))
+                                  ? "text-neutral-900 hover:text-neutral-900"
+                                  : "text-neutral-500 hover:text-neutral-500",
+                              )}
+                              onClick={() => setIsCalendarOpen(true)}
+                              disabled={isGroupEnrolled}
+                            >
+                              <Icon name="Calendar" className="size-4 text-neutral-500" />
+                              <span className="grow text-left">
+                                {field.value && isValid(parseISO(field.value))
+                                  ? format(parseISO(field.value), "PPP", {
+                                      locale: calendarLocale,
+                                    })
+                                  : t("adminCourseView.selectDate")}
+                              </span>
+                            </Button>
+                          </PopoverPrimitive.Trigger>
+                          <PopoverPrimitive.Content
+                            align="start"
+                            sideOffset={4}
+                            className={cn(
+                              "z-50 w-auto rounded-lg border bg-popover p-2 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+                            )}
+                          >
+                            <Calendar
+                              variant="default"
+                              mode="single"
+                              captionLayout="dropdown-buttons"
+                              selected={
+                                field.value && isValid(parseISO(field.value))
+                                  ? parseISO(field.value)
+                                  : undefined
+                              }
+                              onSelect={(date) => {
+                                if (!date) {
+                                  field.onChange("");
+                                  return;
+                                }
+
+                                field.onChange(format(date, "yyyy-MM-dd"));
+                                setIsCalendarOpen(false);
+                              }}
+                              initialFocus
+                              weekStartsOn={1}
+                              fromYear={currentYear - 5}
+                              toYear={currentYear + 15}
+                              locale={calendarLocale}
+                            />
+                          </PopoverPrimitive.Content>
+                        </PopoverPrimitive.Root>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

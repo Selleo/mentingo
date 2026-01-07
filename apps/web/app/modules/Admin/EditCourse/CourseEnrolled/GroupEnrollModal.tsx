@@ -98,15 +98,16 @@ export const GroupEnrollModal = ({
     mode: "onChange",
     resolver: zodResolver(groupEnrollSchema),
   });
+
   const watched = useWatch({ control: form.control, name: "groups" });
   const selectedCount = (watched ?? []).filter((g) => g?.selected).length;
 
   const handleSubmit = async (values: GroupEnrollFormValues) => {
-    const idsToEnroll = values.groups.filter((g) => g.selected).map((g) => g.id);
+    const groupsToEnroll = values.groups.filter((g) => g.selected);
 
-    if (idsToEnroll.length > 0) {
+    if (groupsToEnroll.length > 0) {
       bulkGroupEnroll({
-        groups: values.groups.map((g) => ({
+        groups: groupsToEnroll.map((g) => ({
           id: g.id,
           isMandatory: g.obligatory,
           dueDate: g.deadline,
