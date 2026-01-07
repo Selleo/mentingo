@@ -1446,6 +1446,7 @@
         "groupName": "Group",
         "completedLessonsCount": "Completed lessons",
         "lastActivity": "Last activity",
+        "lastCompletedLesson": "Last completed lesson",
         "quizName": "Quiz",
         "quizScore": "Score",
         "attempts": "Attempts",
