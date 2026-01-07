@@ -32,7 +32,7 @@ release:
 			echo "Warning: TAG does not start with 'v', skipping staging to main promotion"; \
 			exit 0 \
 			;; \
-	esac; \
+	esac;
 
 .PHONY: dry-release
 dry-release:
