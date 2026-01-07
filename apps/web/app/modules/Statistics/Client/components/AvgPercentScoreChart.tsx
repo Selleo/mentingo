@@ -4,6 +4,7 @@ import { Label, Pie, PieChart } from "recharts";
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart";
 import { Skeleton } from "~/components/ui/skeleton";
+import { cn } from "~/lib/utils";
 import { ChartLegendBadge } from "~/modules/Statistics/Client/components/ChartLegendBadge";
 
 import type { ChartConfig } from "~/components/ui/chart";
@@ -14,6 +15,7 @@ type AvgPercentScoreChartProps = {
   chartConfig: ChartConfig;
   chartData: { state: string; percentage: number | undefined; fill: string }[];
   isLoading?: boolean;
+  className?: string;
 };
 
 const emptyChartData = {
@@ -27,6 +29,7 @@ export const AvgPercentScoreChart = ({
   title,
   chartConfig,
   chartData,
+  className,
   isLoading = false,
 }: AvgPercentScoreChartProps) => {
   const { t } = useTranslation();
@@ -46,7 +49,12 @@ export const AvgPercentScoreChart = ({
 
   if (isLoading) {
     return (
-      <div className="flex h-auto w-full flex-col items-center gap-6 rounded-lg bg-white p-8 drop-shadow-card md:w-[calc(50%-8px)]">
+      <div
+        className={cn(
+          "flex w-full flex-col gap-6 rounded-lg bg-white px-8 py-8 drop-shadow-card",
+          className,
+        )}
+      >
         <Skeleton className="h-[30px] w-full max-w-[240px] rounded-lg" />
         <div className="grid h-[250px] place-items-center">
           <Skeleton className="aspect-square h-full max-h-[200px] w-full rounded-full" />
@@ -60,7 +68,12 @@ export const AvgPercentScoreChart = ({
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 rounded-lg bg-white px-8 py-8 drop-shadow-card md:w-[calc(50%-8px)]">
+    <div
+      className={cn(
+        "flex w-full flex-col gap-6 rounded-lg bg-white px-8 py-8 drop-shadow-card",
+        className,
+      )}
+    >
       <h2 className="body-lg-md text-center text-neutral-950">{title}</h2>
       <div className="grid h-full place-items-center">
         <ChartContainer

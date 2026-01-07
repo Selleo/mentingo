@@ -369,10 +369,6 @@ const Users = () => {
     <PageWrapper
       breadcrumbs={[
         {
-          title: t("adminUsersView.breadcrumbs.dashboard"),
-          href: "/",
-        },
-        {
           title: t("adminUsersView.breadcrumbs.users"),
           href: "/admin/users",
         },

@@ -244,7 +244,6 @@ const Categories = () => {
   return (
     <PageWrapper
       breadcrumbs={[
-        { title: t("adminCategoriesView.breadcrumbs.dashboard"), href: "/" },
         { title: t("adminCategoriesView.breadcrumbs.categories"), href: "/admin/categories" },
       ]}
     >

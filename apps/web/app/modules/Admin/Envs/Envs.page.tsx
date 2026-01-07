@@ -99,10 +99,6 @@ const Envs = (): React.ReactElement => {
     <PageWrapper
       breadcrumbs={[
         {
-          title: t("adminGroupsView.breadcrumbs.dashboard"),
-          href: "/",
-        },
-        {
           title: t("adminEnvsView.breadcrumbs.envs"),
           href: "/admin/envs",
         },

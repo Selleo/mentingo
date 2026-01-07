@@ -30,10 +30,7 @@ export default function QAPage() {
       <PageWrapper
         role="main"
         className="!w-full !max-w-none"
-        breadcrumbs={[
-          { title: t("announcements.breadcrumbs.dashboard"), href: "/" },
-          { title: t("navigationSideBar.qa"), href: "/qa" },
-        ]}
+        breadcrumbs={[{ title: t("navigationSideBar.qa"), href: "/qa" }]}
       >
         <div className="flex w-full max-w-4xl mx-auto flex-col gap-16">
           <div className="flex h-auto w-full flex-col gap-6">

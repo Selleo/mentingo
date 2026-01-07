@@ -46,10 +46,6 @@ const CreateGroup = (): ReactElement => {
       className="flex h-full flex-col"
       breadcrumbs={[
         {
-          title: t("adminGroupsView.breadcrumbs.dashboard"),
-          href: "/",
-        },
-        {
           title: t("adminGroupsView.breadcrumbs.groups"),
           href: "/admin/groups",
         },

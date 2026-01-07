@@ -60,10 +60,7 @@ export default function SettingsPage() {
   return (
     <PageWrapper
       className="flex flex-col *:h-min"
-      breadcrumbs={[
-        { title: t("settings.breadcrumbs.dashboard"), href: "/" },
-        { title: t("settings.breadcrumbs.settings"), href: "/settings" },
-      ]}
+      breadcrumbs={[{ title: t("settings.breadcrumbs.settings"), href: "/settings" }]}
     >
       <Suspense
         fallback={

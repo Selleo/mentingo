@@ -85,7 +85,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
   const pageTitle = t("adminArticleView.form.editTitle");
 
   const breadcrumbs = [
-    { title: t("navigationSideBar.dashboard"), href: "/" },
     { title: t("navigationSideBar.articles"), href: "/articles" },
     { title: pageTitle, href: `/articles/${articleId}/edit` },
   ];

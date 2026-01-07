@@ -138,10 +138,6 @@ export default function CoursesPage() {
       <PageWrapper
         breadcrumbs={[
           {
-            title: t("studentCoursesView.breadcrumbs.dashboard"),
-            href: "/",
-          },
-          {
             title: t("studentCoursesView.breadcrumbs.courses"),
             href: "/courses",
           },

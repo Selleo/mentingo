@@ -91,10 +91,6 @@ const Groups = (): ReactElement => {
     <PageWrapper
       breadcrumbs={[
         {
-          title: t("adminGroupsView.breadcrumbs.dashboard"),
-          href: "/",
-        },
-        {
           title: t("adminGroupsView.breadcrumbs.groups"),
           href: "/admin/groups",
         },

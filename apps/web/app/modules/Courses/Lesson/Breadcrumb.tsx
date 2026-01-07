@@ -23,10 +23,6 @@ export default function Breadcrumb({ lessonData, courseId, courseTitle }: Breadc
     <div className="bg-primary-50">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href={`/`}>{t("studentLessonView.breadcrumbs.dashboard")}</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
           <BreadcrumbLink href={`/course/${courseId}`}>{courseTitle}</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

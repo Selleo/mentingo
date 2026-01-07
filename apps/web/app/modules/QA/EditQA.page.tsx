@@ -78,7 +78,6 @@ export default function EditQAPage() {
   return (
     <PageWrapper
       breadcrumbs={[
-        { title: t("announcements.breadcrumbs.dashboard"), href: "/" },
         { title: t("navigationSideBar.qa"), href: "/qa" },
         { title: qa?.title ?? "", href: `/qa/${qaId}` },
       ]}

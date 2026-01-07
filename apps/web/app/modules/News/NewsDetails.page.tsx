@@ -64,7 +64,6 @@ export default function NewsDetailsPage() {
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_NEWS_ACCESS}>
       <PageWrapper
         breadcrumbs={[
-          { title: t("navigationSideBar.dashboard"), href: "/" },
           { title: t("navigationSideBar.news"), href: "/news" },
           { title: news.title, href: `/news/${news.id}` },
         ]}
