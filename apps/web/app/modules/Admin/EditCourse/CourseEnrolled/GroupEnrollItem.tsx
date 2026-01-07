@@ -233,7 +233,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                               }}
                               initialFocus
                               weekStartsOn={1}
-                              fromYear={currentYear - 5}
+                              fromYear={currentYear}
                               toYear={currentYear + 15}
                               locale={calendarLocale}
                             />
