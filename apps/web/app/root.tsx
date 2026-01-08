@@ -8,6 +8,8 @@ import {
   useRouteError,
 } from "@remix-run/react";
 
+import { version } from "~/../version.json";
+
 import { PlatformFavicon } from "./components/PlatformFavicon";
 import { Toaster } from "./components/ui/toaster";
 import { useNavigationTracker } from "./hooks/useNavigationTracker";
@@ -33,6 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content={`Mentingo LMS ${version}`} />
         <Meta />
         <Links />
       </head>
