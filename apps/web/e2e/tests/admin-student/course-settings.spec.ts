@@ -18,7 +18,7 @@ const allowUnregisteredUsersToBrowseCourses = async (page: Page) => {
   await page.getByRole("link", { name: /settings/i }).click();
 
   await page
-    .getByRole("tab", { name: new RegExp(COURSE_SETTINGS_UI.button.organization, "i") })
+    .getByRole("tab", { name: new RegExp(COURSE_SETTINGS_UI.button.platformCustomization, "i") })
     .click();
 
   const showCoursesToggle = page.getByLabel(
@@ -177,7 +177,10 @@ test.describe("Course settings flow", () => {
       await navigateToPage(
         page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
-        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.myCourses,
+        page.getByRole("heading", {
+          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+        }),
       );
 
       await enterCourse(page, ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign);
@@ -253,7 +256,10 @@ test.describe("Course settings flow", () => {
       await navigateToPage(
         page,
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.browseCourses,
-        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses,
+        ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.button.myCourses,
+        page.getByRole("heading", {
+          name: new RegExp(ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.header.yourCourses, "i"),
+        }),
       );
 
       await studentEnrollToCourse(

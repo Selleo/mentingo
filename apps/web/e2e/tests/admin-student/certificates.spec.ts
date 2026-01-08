@@ -31,7 +31,7 @@ const TEXT = {
 
 const goToCourses = async (page: Page) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
 };
 
 const startCourseCreation = async (page: Page) => {
@@ -88,7 +88,7 @@ const login = async (page: Page, email: string, password: string) => {
 };
 
 const openCourseAsStudent = async (page: Page) => {
-  await page.getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   const nextSlide = page.getByRole("button", { name: "Next slide" });
   await nextSlide.waitFor({ state: "visible" });
   if (await nextSlide.isEnabled()) {

@@ -501,6 +501,8 @@ const selectLanguage = async (page: Page) => {
   await page.getByRole("combobox").click();
   await page.getByText("Polish").click();
   await page.getByRole("button", { name: "Confirm" }).click();
+  await expect(page.getByRole("heading", { name: "Generate missing translations" })).toBeVisible();
+  await page.getByRole("button", { name: "Confirm" }).click();
   await page.getByRole("tab", { name: "Settings" }).click();
   await page.getByLabel("* Course title").click();
   await page.getByLabel("* Course title").fill(TEST_DATA.base.titlePl);
@@ -547,7 +549,7 @@ const addChapters = async (page: Page) => {
 
   for (const title of TEST_DATA.chapters) {
     await addChapterButton.click();
-    const chapterTitleInput = page.getByLabel(NEW_COURSE.label.title, { exact: false }).first();
+    const chapterTitleInput = page.getByLabel("* Title");
     await chapterTitleInput.waitFor({ state: "visible" });
     await chapterTitleInput.fill(title);
     await expect(chapterTitleInput).toHaveValue(title);
@@ -579,7 +581,7 @@ const addLessonsToFirstChapter = async (page: Page) => {
   await page.getByText("contentheader").click();
   await page.getByText("contentheader").dblclick();
   await page.getByLabel("Curriculum").getByRole("combobox").click();
-  await page.getByLabel("H1").getByText("H1").click();
+  await page.getByLabel("Heading 1").getByText("Heading").click();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByLabel("Lesson: title")).toBeVisible();
 
@@ -611,11 +613,14 @@ const addLessonsToFirstChapter = async (page: Page) => {
   const presentationLessonType = page.getByLabel(
     "Choose adminCourseView.curriculum.lesson.other.presentation lesson type",
   );
-  await expect(presentationLessonType).toBeVisible();
   await presentationLessonType.waitFor({ state: "visible" });
+  await expect(presentationLessonType).toBeVisible();
   await expect(presentationLessonType).toBeEnabled();
   await presentationLessonType.click({ force: true });
-  await page.getByPlaceholder("Provide lesson title...").fill(TEST_DATA.lessons.presentation.title);
+  const lessonTitle = page.getByPlaceholder("Provide lesson title...");
+  await expect(lessonTitle).toBeVisible();
+  await lessonTitle.fill(TEST_DATA.lessons.presentation.title);
+  await expect(lessonTitle).toHaveValue(TEST_DATA.lessons.presentation.title);
   await page.getByLabel("Curriculum").getByRole("combobox").click();
   await page.getByLabel("Upload file").click();
   const presentationFileChooserPromise = page.waitForEvent("filechooser", { timeout: 5000 });

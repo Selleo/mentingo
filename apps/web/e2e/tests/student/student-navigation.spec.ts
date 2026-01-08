@@ -3,7 +3,6 @@ import { test, expect } from "@playwright/test";
 const TEST_NAVIGATION = {
   button: {
     createNew: "create new",
-    dashboard: "dashboard",
     browseCourses: "Courses",
     profile: "profile",
     settings: "settings",
@@ -22,16 +21,7 @@ test.describe("Student navigation", () => {
 
   test("should check student navigation", async ({ page }) => {
     await page
-      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.dashboard, "i") })
-      .click();
-    await page.waitForURL("");
-    const welcomeText = await page
-      .locator("p")
-      .filter({ hasText: TEST_NAVIGATION.header.welcomeBack });
-    await expect(welcomeText).toHaveText(new RegExp(TEST_NAVIGATION.header.welcomeBack, "i"));
-
-    await page
-      .getByRole("link", { name: new RegExp(TEST_NAVIGATION.button.browseCourses, "i") })
+      .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.browseCourses, "i") })
       .click();
     await page.waitForURL("/courses");
     const yourCoursesHeader = page.locator("h4", { hasText: TEST_NAVIGATION.header.yourCourses });
