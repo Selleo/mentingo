@@ -173,7 +173,10 @@ test.describe("Admin settings", () => {
     await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
     await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
     await page.goto("/courses");
-    await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+    const loginButton = page.getByRole("button", { name: "Login" });
+    await expect(loginButton).toBeVisible();
+    await loginButton.click();
+    await page.waitForURL("/auth/login");
     await page.getByPlaceholder("user@example.com").click();
     await page.getByPlaceholder("user@example.com").fill("admin@example.com");
     await page.getByLabel("Password").click();
@@ -207,7 +210,7 @@ test.describe("Admin settings", () => {
     await page.locator("#contrast-color-input").dblclick();
     await page.locator("#contrast-color-input").fill(HEX_CONTRAST.replace("#", ""));
     await page.getByRole("button", { name: "Save" }).nth(4).click();
-    await page.getByRole("button", { name: "Dashboard" }).getByRole("link").click();
+    await page.getByRole("link", { name: "Analytics" }).click();
     const downloadReport = page.getByRole("button", { name: "Download Report" });
     await expect(downloadReport).toBeVisible();
     await expect(downloadReport).toHaveCSS("background-color", RGB_PRIMARY);

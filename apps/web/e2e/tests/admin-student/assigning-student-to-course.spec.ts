@@ -164,11 +164,6 @@ const loginSequenceUser = async (page: Page, role: "admin" | "student") => {
   await page.getByRole("button", { name: "Login" }).click();
 };
 
-const logoutCurrentUser = async (page: Page) => {
-  await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
-  await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
-};
-
 const loginAndOpenSequenceCourse = async (page: Page, role: "admin" | "student") => {
   await loginSequenceUser(page, role);
   await openSequenceCourse(page);
@@ -185,7 +180,7 @@ const studentInitialSequenceView = async (page: Page) => {
   await page.getByRole("button", { name: "chapter 2" }).click();
   await page.getByRole("link", { name: `${SEQUENCE_COURSE.lessons.lesson3} Text` }).click();
   await expect(page.getByText(SEQUENCE_COURSE.lessons.lesson3).first()).toBeVisible();
-  await logoutCurrentUser(page);
+  await logoutStudent(page);
 };
 
 const adminEnableSequenceSetting = async (page: Page) => {
@@ -193,7 +188,7 @@ const adminEnableSequenceSetting = async (page: Page) => {
   await page.getByRole("button", { name: "Edit Course" }).click();
   await page.getByRole("tab", { name: "Settings" }).click();
   await page.getByLabel("Enforce lesson sequence").click();
-  await logoutCurrentUser(page);
+  await logoutAdmin(page);
 };
 
 const studentBlockedProgressFlow = async (page: Page) => {
@@ -219,7 +214,7 @@ const studentBlockedProgressFlow = async (page: Page) => {
   await expect(lesson2Link).toBeEnabled();
   await lesson2Link.click();
   await lesson2Link.click();
-  await logoutCurrentUser(page);
+  await logoutStudent(page);
 };
 
 const adminAddChapterFourWithQuizAndLesson = async (page: Page) => {
@@ -244,7 +239,7 @@ const adminAddChapterFourWithQuizAndLesson = async (page: Page) => {
   await clickAddLessonButton(page, 3);
   const descriptionEditor = getDescriptionEditor(page);
   await addTextLesson(page, 3, SEQUENCE_COURSE.lessons.lesson5, descriptionEditor, "desc");
-  await logoutCurrentUser(page);
+  await logoutAdmin(page);
 };
 
 const studentCompletesFinalLessons = async (page: Page) => {
@@ -281,8 +276,13 @@ export const login = async (page: Page, email: string, password: string) => {
   await authFixture.login(email, password);
 };
 
-const logout = async (page: Page) => {
-  await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+const logoutAdmin = async (page: Page) => {
+  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
+  await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
+};
+
+const logoutStudent = async (page: Page) => {
+  await page.getByRole("button", { name: "test Student profile test" }).click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
 };
 
@@ -351,7 +351,7 @@ const studentSeesCourse = async (page: Page) => {
       .filter({ hasText: /^Artificial Intelligence$/ })
       .nth(1),
   ).toBeVisible();
-  await logout(page);
+  await logoutStudent(page);
 };
 
 const unenrollStudent = async (page: Page) => {
@@ -364,14 +364,14 @@ const unenrollStudent = async (page: Page) => {
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Unenroll selected" }).click();
   await page.getByRole("button", { name: "Save" }).click();
-  await logout(page);
+  await logoutAdmin(page);
 };
 
 const expectCourseHiddenForStudent = async (page: Page) => {
   await login(page, USERS.student.email, USERS.student.password);
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await expect(page.getByTestId(COURSE.title)).toBeHidden();
-  await logout(page);
+  await logoutStudent(page);
 };
 
 const enrollGroupToCourse = async (page: Page) => {
@@ -387,7 +387,7 @@ const enrollGroupToCourse = async (page: Page) => {
   await page.getByLabel(IDS.groupSelect).click();
   await page.getByRole("button", { name: "Enroll groups" }).click();
   await expect(page.getByRole("cell", { name: "Enrolled by group" })).toBeVisible();
-  await logout(page);
+  await logoutAdmin(page);
 };
 
 const studentSeesCourseByGroup = async (page: Page) => {
@@ -395,7 +395,7 @@ const studentSeesCourseByGroup = async (page: Page) => {
   await page.getByRole("button", { name: "Courses" }).getByRole("link").click();
   await page.getByTestId(COURSE.title).click();
   await expect(page.getByRole("heading", { name: COURSE.title })).toBeVisible();
-  await logout(page);
+  await logoutStudent(page);
 };
 
 const unenrollGroup = async (page: Page) => {
@@ -410,7 +410,7 @@ const unenrollGroup = async (page: Page) => {
   await page.getByText(`${GROUP.name}Enrolled`, { exact: true }).click();
   await page.getByLabel(IDS.groupSelect).click();
   await page.getByRole("button", { name: "Unenroll selected" }).click();
-  await logout(page);
+  await logoutAdmin(page);
 };
 
 const setCourseAsPrivate = async (page: Page) => {
@@ -423,13 +423,13 @@ const setCourseAsPrivate = async (page: Page) => {
   await expect(
     page.getByRole("heading", { name: PRIVATE_COURSE.heading }).locator("div"),
   ).toBeVisible();
-  await logout(page);
+  await logoutAdmin(page);
 };
 
 const expectCourseHiddenForPrivateStudent = async (page: Page) => {
   await login(page, PRIVATE_COURSE.student.email, PRIVATE_COURSE.student.password);
   await expect(page.getByTestId(PRIVATE_COURSE.titleTestId)).toBeHidden();
-  await logout(page);
+  await logoutStudent(page);
 };
 
 const enrollStudentToPrivateCourse = async (page: Page) => {
@@ -441,7 +441,7 @@ const enrollStudentToPrivateCourse = async (page: Page) => {
   await page.getByRole("button", { name: "Enroll", exact: true }).click();
   await page.getByRole("button", { name: "Enroll selected", exact: true }).click();
   await page.getByRole("button", { name: "Save" }).click();
-  await logout(page);
+  await logoutAdmin(page);
 };
 
 const expectCourseVisibleForPrivateStudent = async (page: Page) => {
@@ -454,6 +454,13 @@ const expectCourseVisibleForPrivateStudent = async (page: Page) => {
 test.describe("Assigning students to course flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+  });
+
+  test("should set course as private and verify student course visibility", async ({ page }) => {
+    await setCourseAsPrivate(page);
+    await expectCourseHiddenForPrivateStudent(page);
+    await enrollStudentToPrivateCourse(page);
+    await expectCourseVisibleForPrivateStudent(page);
   });
 
   test("should assign student to course and student sees enrollment", async ({ page }) => {
@@ -523,7 +530,7 @@ test.describe("Assigning students to course flow", () => {
     await publishCourse(page);
     await enrollStudentIndividually(page);
     await expectIndividualEnrollment(page);
-    await logout(page);
+    await logoutAdmin(page);
 
     await studentSeesCourse(page);
     await unenrollStudent(page);
@@ -533,19 +540,12 @@ test.describe("Assigning students to course flow", () => {
     await unenrollGroup(page);
   });
 
-  test("should set course as private and verify student course visibility", async ({ page }) => {
-    await setCourseAsPrivate(page);
-    await expectCourseHiddenForPrivateStudent(page);
-    await enrollStudentToPrivateCourse(page);
-    await expectCourseVisibleForPrivateStudent(page);
-  });
-
   test("should check if enforcing lesson sequence works", async ({ page }) => {
     const descriptionEditor = await startSequenceCourseCreation(page);
     await enrollSequenceStudent(page);
     await buildInitialSequenceCurriculum(page, descriptionEditor);
     await publishSequenceCourse(page);
-    await logoutCurrentUser(page);
+    await logoutAdmin(page);
     await studentInitialSequenceView(page);
     await adminEnableSequenceSetting(page);
     await studentBlockedProgressFlow(page);

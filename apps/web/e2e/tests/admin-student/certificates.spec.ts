@@ -99,7 +99,7 @@ const openCourseAsStudent = async (page: Page) => {
   await page.getByRole("link", { name: TEXT.notStartedLesson }).click();
 
   const courseProgress = page.getByText("Course progress: 1/");
-  await courseProgress.waitFor({ state: "visible" });
+  await courseProgress.waitFor({ state: "visible", timeout: 10000 });
   await expect(courseProgress).toHaveText("Course progress: 1/1");
 
   const backToCourse = page.getByRole("link", { name: "new course" });
