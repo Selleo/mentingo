@@ -1008,6 +1008,7 @@
   },
   "adminCourseView": {
     "mandatoryCourse": "Mandatory course",
+    "mandatoryCourseTooltip": "Mark this course as mandatory for the selected group. You must set a completion deadline. After the deadline, the administrator will receive an email notification listing participants who have not completed the course.",
     "deadline": "Deadline",
     "selectDate": "Select date",
     "deadlineRequired": "Deadline is required for mandatory course",
