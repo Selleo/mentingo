@@ -103,4 +103,21 @@ export const QuizFormSchema = (t: typeof i18next.t) =>
           }
         });
       }
+
+      const trueOrFalseQuestions = data.trueOrFalseQuestions;
+      if (trueOrFalseQuestions) {
+        Object.entries(trueOrFalseQuestions).forEach(([questionId, answers]) => {
+          const isValid = Object.values(answers).every(
+            (value) => value === "true" || value === "false",
+          );
+
+          if (!isValid) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["trueOrFalseQuestions", questionId],
+              message: t("studentLessonView.validation.answerCannotBeEmpty"),
+            });
+          }
+        });
+      }
     });
