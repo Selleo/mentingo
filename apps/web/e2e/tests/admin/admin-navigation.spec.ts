@@ -63,7 +63,7 @@ test.describe("Admin navigation", () => {
       .getByRole("button", { name: new RegExp(TEST_NAVIGATION.button.createNew, "i") })
       .waitFor({ state: "visible" });
 
-    const userAvatar = page.getByRole("button", { name: "Avatar for email@example.com" });
+    const userAvatar = page.getByRole("button", { name: "Test Admin profile Test Admin" });
 
     await userAvatar.click();
 

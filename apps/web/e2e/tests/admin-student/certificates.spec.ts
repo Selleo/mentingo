@@ -77,7 +77,7 @@ const publishAndEnroll = async (page: Page) => {
 };
 
 const logout = async (page: Page) => {
-  await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
 };
 

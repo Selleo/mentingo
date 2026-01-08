@@ -501,8 +501,6 @@ const selectLanguage = async (page: Page) => {
   await page.getByRole("combobox").click();
   await page.getByText("Polish").click();
   await page.getByRole("button", { name: "Confirm" }).click();
-  await expect(page.getByRole("heading", { name: "Generate missing translations" })).toBeVisible();
-  await page.getByRole("button", { name: "Confirm" }).click();
   await page.getByRole("tab", { name: "Settings" }).click();
   await page.getByLabel("* Course title").click();
   await page.getByLabel("* Course title").fill(TEST_DATA.base.titlePl);
@@ -889,7 +887,7 @@ const studentCompletesCourse = async (page: Page) => {
 };
 
 const verifyAdminStats = async (page: Page) => {
-  await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
   await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
   await page.getByPlaceholder("user@example.com").fill(TEST_DATA.admin.email);
   await page.getByLabel("Password").fill(TEST_DATA.admin.password);
@@ -905,7 +903,7 @@ const verifyAdminStats = async (page: Page) => {
   await page.getByRole("tab", { name: "Quiz Results" }).click();
   await page.getByRole("tab", { name: "AI Mentor Results" }).click();
   await page.getByRole("tab", { name: "Progress" }).click();
-  await expect(page.getByRole("cell", { name: "Avatar for email@example.com" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Test Admin profile Test Admin" })).toBeVisible();
 };
 
 test.describe.serial("Course management", () => {

@@ -19,7 +19,7 @@ const openLanguageCombobox = async (page: Page) => {
 };
 
 const enableQASection = async (page: Page) => {
-  await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+  await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
   await page.getByRole("link", { name: "Settings" }).click();
   await page.getByRole("tab", { name: "Platform Customization" }).click();
   await page.getByLabel("Enable Q&A section").click();
@@ -130,7 +130,7 @@ test.describe("Q&A flow", () => {
     await logout(page);
     await login(page, USERS.admin);
     await page.getByText("MenuFind in applicationSearch").click();
-    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
     await page.getByRole("link", { name: "Settings" }).click();
     await page.getByRole("tab", { name: "Platform Customization" }).click();
     await page.getByLabel("Enable Q&A section").click();
