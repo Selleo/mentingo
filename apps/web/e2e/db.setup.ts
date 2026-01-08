@@ -6,7 +6,10 @@ import { test as setup } from "@playwright/test";
 setup("database reset", async () => {
   const clearDbAndContainers = () => {
     const apiDir = path.resolve(process.cwd(), "../api");
-    const command = "docker compose up -d && pnpm db:migrate && pnpm db:seed";
+    const isCI = process.env.CI === "true";
+    const command = isCI
+      ? "pnpm db:migrate && pnpm db:seed"
+      : "docker compose up -d && pnpm db:migrate && pnpm db:seed";
     execSync(command, { cwd: apiDir, stdio: "inherit", shell: true as unknown as string });
   };
 
