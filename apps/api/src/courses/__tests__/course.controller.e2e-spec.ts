@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
@@ -1879,6 +1880,88 @@ describe("CourseController (e2e)", () => {
           });
         });
 
+        it("stores group enrollment data", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const group = await groupFactory.withMembers([]).create();
+          const dueDate = new Date("2025-01-15T12:00:00.000Z");
+
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({ groups: [{ id: group.id, isMandatory: true, dueDate: dueDate.toISOString() }] })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          const [groupCourse] = await db
+            .select()
+            .from(groupCourses)
+            .where(and(eq(groupCourses.groupId, group.id), eq(groupCourses.courseId, course.id)));
+
+          expect(groupCourse).toBeDefined();
+          expect(groupCourse.isMandatory).toBe(true);
+          expect(groupCourse.enrolledBy).toBe(admin.id);
+          expect(groupCourse.dueDate?.toISOString()).toBe(dueDate.toISOString());
+        });
+
+        it("updates existing group enrollment metadata", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const group = await groupFactory.withMembers([]).create();
+          const cookies = await cookieFor(admin, app);
+          const initialDueDate = new Date("2025-02-01T08:30:00.000Z");
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({
+              groups: [{ id: group.id, isMandatory: true, dueDate: initialDueDate.toISOString() }],
+            })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          const updatedDueDate = new Date("2025-03-02T10:45:00.000Z");
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({
+              groups: [{ id: group.id, isMandatory: false, dueDate: updatedDueDate.toISOString() }],
+            })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          const [groupCourse] = await db
+            .select()
+            .from(groupCourses)
+            .where(and(eq(groupCourses.groupId, group.id), eq(groupCourses.courseId, course.id)));
+
+          expect(groupCourse).toBeDefined();
+          expect(groupCourse.isMandatory).toBe(false);
+          expect(groupCourse.dueDate?.toISOString()).toBe(updatedDueDate.toISOString());
+        });
+
         describe("when group is empty", () => {
           it("should enroll empty group to course successfully", async () => {
             const admin = await userFactory
@@ -2105,6 +2188,265 @@ describe("CourseController (e2e)", () => {
           });
         });
       });
+    });
+  });
+
+  describe("DELETE /api/course/:courseId/unenroll-groups-from-course", () => {
+    describe("when user is not logged in", () => {
+      it("returns 401 for unauthorized request", async () => {
+        await request(app.getHttpServer())
+          .delete(`/api/course/${faker.string.uuid()}/unenroll-groups-from-course`)
+          .send({ groupIds: [] })
+          .expect(401);
+      });
+    });
+
+    describe("when user is logged in", () => {
+      describe("when user is student", () => {
+        it("returns 403 for unauthorized request", async () => {
+          const category = await categoryFactory.create();
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create({ role: USER_ROLES.STUDENT });
+
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+          });
+
+          const cookies = await cookieFor(student, app);
+
+          await request(app.getHttpServer())
+            .delete(`/api/course/${course.id}/unenroll-groups-from-course`)
+            .send({ groupIds: [faker.string.uuid()] })
+            .set("Cookie", cookies)
+            .expect(403);
+        });
+      });
+
+      describe("when user is admin", () => {
+        it("returns 404 when group is not enrolled in the course", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+          });
+
+          const group = await groupFactory.withMembers([]).create();
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .delete(`/api/course/${course.id}/unenroll-groups-from-course`)
+            .send({ groupIds: [group.id] })
+            .set("Cookie", cookies)
+            .expect(404);
+        });
+
+        it("removes group enrollment and unenrolls group members", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const chapter = await chapterFactory.create({
+            courseId: course.id,
+            title: "Chapter 1",
+            isFreemium: true,
+          });
+          await db.insert(lessons).values({
+            chapterId: chapter.id,
+            type: LESSON_TYPES.QUIZ,
+            title: "Quiz",
+            thresholdScore: 0,
+          });
+
+          const student = await userFactory.withCredentials({ password }).create();
+          const group = await groupFactory.withMembers([student.id]).create();
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({ groups: [{ id: group.id, isMandatory: false, dueDate: null }] })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          await request(app.getHttpServer())
+            .delete(`/api/course/${course.id}/unenroll-groups-from-course`)
+            .send({ groupIds: [group.id] })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          const groupEnrollments = await db
+            .select()
+            .from(groupCourses)
+            .where(and(eq(groupCourses.groupId, group.id), eq(groupCourses.courseId, course.id)));
+
+          expect(groupEnrollments.length).toBe(0);
+
+          const [studentEnrollment] = await db
+            .select()
+            .from(studentCourses)
+            .where(
+              and(eq(studentCourses.studentId, student.id), eq(studentCourses.courseId, course.id)),
+            );
+
+          expect(studentEnrollment.status).toBe(COURSE_ENROLLMENT.NOT_ENROLLED);
+          expect(studentEnrollment.enrolledByGroupId).toBe(null);
+          expect(studentEnrollment.enrolledAt).toBe(null);
+        });
+
+        it("keeps students enrolled via other groups", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const chapter = await chapterFactory.create({
+            courseId: course.id,
+            title: "Chapter 1",
+            isFreemium: true,
+          });
+          await db.insert(lessons).values({
+            chapterId: chapter.id,
+            type: LESSON_TYPES.QUIZ,
+            title: "Quiz",
+            thresholdScore: 0,
+          });
+
+          const student = await userFactory.withCredentials({ password }).create();
+          const group1 = await groupFactory.withMembers([student.id]).create();
+          const group2 = await groupFactory.withMembers([student.id]).create();
+
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({ groups: [{ id: group1.id, isMandatory: false, dueDate: null }] })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({ groups: [{ id: group2.id, isMandatory: false, dueDate: null }] })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          const [initialEnrollment] = await db
+            .select()
+            .from(studentCourses)
+            .where(
+              and(eq(studentCourses.studentId, student.id), eq(studentCourses.courseId, course.id)),
+            );
+
+          expect(initialEnrollment.enrolledByGroupId).toBe(group1.id);
+
+          await request(app.getHttpServer())
+            .delete(`/api/course/${course.id}/unenroll-groups-from-course`)
+            .send({ groupIds: [group1.id] })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          const [updatedEnrollment] = await db
+            .select()
+            .from(studentCourses)
+            .where(
+              and(eq(studentCourses.studentId, student.id), eq(studentCourses.courseId, course.id)),
+            );
+
+          expect(updatedEnrollment.status).toBe(COURSE_ENROLLMENT.ENROLLED);
+          expect(updatedEnrollment.enrolledByGroupId).toBe(group2.id);
+        });
+      });
+    });
+  });
+
+  describe("DELETE /api/course/unenroll-course", () => {
+    it("keeps student enrolled when group is still enrolled", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      const chapter = await chapterFactory.create({
+        courseId: course.id,
+        title: "Chapter 1",
+        isFreemium: true,
+      });
+      await db.insert(lessons).values({
+        chapterId: chapter.id,
+        type: LESSON_TYPES.QUIZ,
+        title: "Quiz",
+        thresholdScore: 0,
+      });
+
+      const student = await userFactory.withCredentials({ password }).create();
+      const group = await groupFactory.withMembers([student.id]).create();
+
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .post(`/api/course/${course.id}/enroll-courses`)
+        .send({ studentIds: [student.id] })
+        .set("Cookie", cookies)
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/api/course/${course.id}/enroll-groups-to-course`)
+        .send({ groups: [{ id: group.id, isMandatory: false, dueDate: null }] })
+        .set("Cookie", cookies)
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .delete(`/api/course/unenroll-course?courseId=${course.id}&userIds[]=${student.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const [updatedEnrollment] = await db
+        .select()
+        .from(studentCourses)
+        .where(
+          and(eq(studentCourses.studentId, student.id), eq(studentCourses.courseId, course.id)),
+        );
+
+      expect(updatedEnrollment.status).toBe(COURSE_ENROLLMENT.ENROLLED);
+      expect(updatedEnrollment.enrolledByGroupId).toBe(group.id);
     });
   });
 

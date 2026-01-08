@@ -16,6 +16,7 @@ import {
   between,
   count,
   countDistinct,
+  desc,
   eq,
   getTableColumns,
   ilike,
@@ -1564,7 +1565,8 @@ export class CourseService {
     userId?: UUIDType,
     currentUserRole?: UserRole,
   ) {
-    const groupIds = groupsToEnroll.map((groupId) => groupId.id);
+    const groupIds = groupsToEnroll.map((group) => group.id);
+    const groupInfoById = new Map(groupsToEnroll.map((group) => [group.id, group]));
 
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
     if (!course) throw new NotFoundException(`Course ${courseId} not found`);
@@ -1576,67 +1578,23 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
     }
 
-    const groupUsersList = await this.db
-      .select({ ...getTableColumns(groupUsers), role: users.role })
-      .from(groupUsers)
-      .innerJoin(users, eq(groupUsers.userId, users.id))
-      .where(inArray(groupUsers.groupId, groupIds));
-
-    await this.db
-      .select({ groupId: groupCourses.groupId })
-      .from(groupCourses)
-      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
-
-    let existingStudentIds: string[] = [];
     let newStudentIds: string[] = [];
-    if (groupUsersList.length > 0) {
-      const existingEnrollments = await this.db
-        .select({
-          userId: users.id,
-          groupId: groupUsers.groupId,
-        })
-        .from(users)
-        .leftJoin(studentCourses, eq(users.id, studentCourses.studentId))
-        .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
-        .where(
-          and(
-            eq(studentCourses.courseId, courseId),
-            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
-            inArray(
-              studentCourses.studentId,
-              groupUsersList.map((gu) => gu.userId),
-            ),
-          ),
-        );
-
-      existingStudentIds = existingEnrollments.map((e) => e.userId);
-      newStudentIds = groupUsersList
-        .filter(
-          ({ role, userId }) => !existingStudentIds.includes(userId) && role === USER_ROLES.STUDENT,
-        )
-        .map((gu) => gu.userId);
-    }
-
-    const userIdToGroupId = new Map<string, string>();
-    for (const groupId of groupIds) {
-      const usersInGroup = groupUsersList.filter((gu) => gu.groupId === groupId);
-      usersInGroup.forEach((gu) => {
-        userIdToGroupId.set(gu.userId, groupId);
-      });
-    }
 
     await this.db.transaction(async (trx) => {
+      const groupIdsArray = sql`ARRAY[${sql.join(
+        groupIds.map((groupId) => sql`${groupId}::uuid`),
+        sql`, `,
+      )}]`;
+
       const groupCoursesValues = groupIds.map((groupId) => {
-        const isMandatory =
-          groupsToEnroll.find((group) => group.id === groupId)?.isMandatory ?? false;
-        const dueDateRaw = groupsToEnroll.find((group) => group.id === groupId)?.dueDate;
-        const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
+        const { isMandatory, dueDate } = groupInfoById.get(groupId) || {};
+
         return {
           groupId,
           courseId,
           enrolledBy: userId || null,
-          isMandatory,
-          dueDate,
+          isMandatory: isMandatory ?? false,
+          dueDate: dueDate ? new Date(dueDate) : null,
         };
       });
 
@@ -1652,31 +1610,43 @@ export class CourseService {
           },
         });
 
-      if (newStudentIds.length > 0) {
-        const studentCoursesValues = newStudentIds.map((studentId) => ({
-          studentId,
-          courseId,
-          enrolledByGroupId: userIdToGroupId.get(studentId) || null,
-          status: COURSE_ENROLLMENT.ENROLLED,
-        }));
+      const groupOrder = sql<number>`array_position(${groupIdsArray}, ${groupUsers.groupId})`;
 
-        const uniqueCoursesValues = Array.from(
-          new Map(
-            studentCoursesValues.map((student) => [
-              `${student.studentId}-${student.courseId}`,
-              {
-                studentId: student.studentId,
-                courseId: student.courseId,
-                enrolledByGroupId: student.enrolledByGroupId,
-                status: student.status,
-              },
-            ]),
-          ).values(),
-        );
+      const eligibleStudents = await trx
+        .selectDistinctOn([groupUsers.userId], {
+          studentId: groupUsers.userId,
+          groupId: groupUsers.groupId,
+        })
+        .from(groupUsers)
+        .innerJoin(users, eq(users.id, groupUsers.userId))
+        .leftJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.studentId, groupUsers.userId),
+            eq(studentCourses.courseId, courseId),
+            eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          ),
+        )
+        .where(
+          and(
+            inArray(groupUsers.groupId, groupIds),
+            eq(users.role, USER_ROLES.STUDENT),
+            isNull(studentCourses.id),
+          ),
+        )
+        .orderBy(groupUsers.userId, desc(groupOrder));
 
-        await trx
+      if (eligibleStudents.length) {
+        const insertedStudents = await trx
           .insert(studentCourses)
-          .values(uniqueCoursesValues)
+          .values(
+            eligibleStudents.map(({ studentId, groupId }) => ({
+              studentId,
+              courseId,
+              enrolledByGroupId: groupId,
+              status: COURSE_ENROLLMENT.ENROLLED,
+            })),
+          )
           .onConflictDoUpdate({
             target: [studentCourses.courseId, studentCourses.studentId],
             set: {
@@ -1684,7 +1654,10 @@ export class CourseService {
               status: sql`EXCLUDED.status`,
               enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
             },
-          });
+          })
+          .returning({ studentId: studentCourses.studentId });
+
+        newStudentIds = insertedStudents.map((student) => student.studentId);
 
         await Promise.all(
           newStudentIds.map(async (studentId) => {
