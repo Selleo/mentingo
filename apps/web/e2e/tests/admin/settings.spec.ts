@@ -15,6 +15,7 @@ const TEST_SETTINGS = {
   tabs: {
     account: "Account",
     organization: "Organization",
+    platformCustomization: "Platform Customization",
   },
 } as const;
 
@@ -71,11 +72,13 @@ test.describe("Admin settings", () => {
     await expect(accountTab).toHaveAttribute("data-state", "inactive");
   });
 
-  test("should toggle courses accessibility on Organization tab", async ({ page }) => {
+  test("should toggle courses accessibility on platform customization tab", async ({ page }) => {
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
-    await organizationTab.click();
-    await expect(organizationTab).toHaveAttribute("aria-selected", "true");
+    const platformTab = tablist.getByRole("tab", {
+      name: TEST_SETTINGS.tabs.platformCustomization,
+    });
+    await platformTab.click();
+    await expect(platformTab).toHaveAttribute("aria-selected", "true");
 
     const coursesSwitch = page.locator("#coursesVisibility");
 
@@ -91,8 +94,10 @@ test.describe("Admin settings", () => {
     page,
   }) => {
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
-    await organizationTab.click();
+    const platformTab = tablist.getByRole("tab", {
+      name: TEST_SETTINGS.tabs.platformCustomization,
+    });
+    await platformTab.click();
 
     const coursesSwitch = page.locator("#coursesVisibility");
 
@@ -122,8 +127,10 @@ test.describe("Admin settings", () => {
     page,
   }) => {
     const tablist = page.getByRole("tablist");
-    const organizationTab = tablist.getByRole("tab", { name: TEST_SETTINGS.tabs.organization });
-    await organizationTab.click();
+    const platformTab = tablist.getByRole("tab", {
+      name: TEST_SETTINGS.tabs.platformCustomization,
+    });
+    await platformTab.click();
 
     const coursesSwitch = page.locator("#coursesVisibility");
 

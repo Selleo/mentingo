@@ -14,6 +14,7 @@ const IMPORTED_USER_EMAIL = "janekk@example.com";
 const goToGroups = async (page: Page) => {
   await page.getByRole("button", { name: "Manage" }).nth(1).click();
   await page.getByRole("link", { name: "Groups" }).click();
+  await expect(page.getByRole("heading", { name: "Groups" })).toBeVisible();
 };
 
 const createGroup = async (page: Page) => {

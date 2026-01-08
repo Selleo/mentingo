@@ -10,7 +10,6 @@ export const LANGUAGE_PAGE_UI = {
       language: "polish",
       english: "angielski",
       sidebarItems: {
-        dashboard: "panel główny",
         browseCourses: "kursy",
         categories: "kategorie",
         users: "użytkownicy",
@@ -22,7 +21,6 @@ export const LANGUAGE_PAGE_UI = {
     english: {
       language: "english",
       sidebarItems: {
-        dashboard: "dashboard",
         browseCourses: "courses",
         categories: "categories",
         users: "users",
