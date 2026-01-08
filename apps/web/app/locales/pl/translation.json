@@ -2099,6 +2099,13 @@
       "upload": {
         "uploadFailed": "Nie udało się przesłać pliku",
         "tooltip": "Prześlij: Pozwala przesłać plik"
+      },
+      "externalResource": {
+        "tooltip": "Zasób zewnętrzny: Dodaj wideo lub prezentację za pomocą adresu URL",
+        "title": "Wstaw zasób zewnętrzny",
+        "selectType": "Wybierz typ treści",
+        "presentation": "Prezentacja",
+        "video": "Wideo"
       }
     }
   },

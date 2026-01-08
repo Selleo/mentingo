@@ -2080,6 +2080,13 @@
       "upload": {
         "uploadFailed": "File upload failed",
         "tooltip": "Upload: Allows you to upload file"
+      },
+      "externalResource": {
+        "tooltip": "External resource: Add a video or presentation using a URL",
+        "title": "Insert external resource",
+        "selectType": "Select content type",
+        "presentation": "Presentation",
+        "video": "Video"
       }
     }
   },

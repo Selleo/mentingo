@@ -84,7 +84,7 @@ const Viewer = ({ content, style, className, variant = "default", onVideoEnded }
   const editor = useEditor(
     {
       extensions,
-      content: content,
+      content,
       editable: false,
       editorProps: {
         attributes: {
