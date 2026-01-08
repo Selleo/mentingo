@@ -694,12 +694,6 @@ const buildQuiz = async (page: Page) => {
     .locator("label")
     .nth(3)
     .click();
-  await page
-    .locator("li")
-    .filter({ hasText: "*OptionsClick to replaceor" })
-    .locator("label")
-    .nth(3)
-    .click();
   await page.getByRole("button", { name: "Add question" }).click();
   await page.getByRole("button", { name: "Fill in the blanks" }).click();
   await page.locator('input[name="questions\\.3\\.title"]').click();
@@ -731,36 +725,6 @@ const buildQuiz = async (page: Page) => {
     .locator("div")
     .filter({ hasText: /^some cars has downpipe and some does not$/ })
     .nth(1)
-    .press("ArrowLeft");
-  await page
-    .locator("div")
-    .filter({ hasText: /^some cars has downpipe and some does not$/ })
-    .nth(1)
-    .press("Alt+ArrowLeft");
-  await page
-    .locator("div")
-    .filter({ hasText: /^some cars has downpipe and some does not$/ })
-    .nth(1)
-    .press("Alt+ArrowLeft");
-  await page
-    .locator("div")
-    .filter({ hasText: /^some cars has downpipe and some does not$/ })
-    .nth(1)
-    .press("Alt+ArrowLeft");
-  await page
-    .locator("div")
-    .filter({ hasText: /^some cars has downpipe and some does not$/ })
-    .nth(1)
-    .press("Alt+ArrowLeft");
-  await page
-    .locator("div")
-    .filter({ hasText: /^some cars has downpipe and some does not$/ })
-    .nth(1)
-    .press("Alt+Shift+ArrowRight");
-  await page
-    .locator("div")
-    .filter({ hasText: /^some cars has downpipe and some does not$/ })
-    .nth(1)
     .fill("some cars has and some does not");
   await page.getByRole("button", { name: "Add words" }).click();
   await page.getByTestId("new-word-input").fill("downpipe");
@@ -788,12 +752,8 @@ const buildQuiz = async (page: Page) => {
     .nth(2)
     .click();
   await page.getByTestId("drag-downpipe").click();
-  await page.getByTestId("drag-downpipe").click();
-  await page.getByText("some cars has and some does").click();
-  await page.getByText("some cars has and some does").click();
   await page.getByText("some cars has and some does").click();
   await page.getByRole("button", { name: "Save" }).click();
-  await page.getByTestId("drag-downpipe").click();
   await page.getByTestId("drag-downpipe").click();
   await page.getByRole("button", { name: "Delete question" }).nth(3).click();
   await page.getByRole("button", { name: "Delete" }).click();
@@ -886,8 +846,6 @@ const studentCompletesCourse = async (page: Page) => {
   await page.getByText("True", { exact: true }).click();
   await page.locator("label").filter({ hasText: "dark" }).first().click();
   await page.getByTestId("detailed-response").fill("free text");
-  await page.getByTestId("brief-response").fill("short naswer");
-  await page.getByTestId("brief-response").press("Alt+Shift+ArrowLeft");
   await page.getByTestId("brief-response").fill("short answer");
   await page.getByRole("button", { name: "Submit" }).click();
   await page.getByTestId("next-lesson-button").click();
@@ -1023,20 +981,6 @@ test.describe.serial("Course management", () => {
       chapterLocator.locator(`div[aria-label="Lesson: ${NEW_COURSE.lessons.contentLessonTitle}"]`),
     ).toBeVisible();
 
-    // await createCourseActions.addPresentationLesson(
-    //   page,
-    //   chapterLocator,
-    //   NEW_COURSE.lessons.presentationLessonTitle,
-    //   NEW_COURSE.lessons.presentationLessonDescription,
-    // );
-
-    // await createCourseActions.addVideoLesson(
-    //   page,
-    //   chapterLocator,
-    //   NEW_COURSE.lessons.videoLessonTitle,
-    //   NEW_COURSE.lessons.presentationLessonTitle,
-    // );
-
     await createCourseActions.addQuiz(page, chapterLocator);
 
     await createCourseActions.addQuestion(
@@ -1092,16 +1036,6 @@ test.describe.serial("Course management", () => {
     );
 
     await createCourseActions.addScaleQuestion(page, 6);
-
-    // await createCourseActions.addQuestion(
-    //   page,
-    //   NEW_COURSE.questionType.photoQuestion,
-
-    //   NEW_COURSE.questions.photoQuestion,
-    //   7,
-    // );
-    // const imagePath = "app/assets/thumbnail-e2e.jpg";
-    // await createCourseActions.addPhotoQuestion(page, 7, imagePath, 2);
 
     await createCourseActions.addQuestion(
       page,
@@ -1168,7 +1102,7 @@ test.describe.serial("Course management", () => {
     const chapterLocator = page.locator(`[data-chapter-id="${newChapterId}"]`);
     await chapterLocator.waitFor({ state: "visible" });
 
-    await expect(
+    expect(
       await page.locator(`[data-testid="Freemium - ${newChapterId}"]`).getAttribute("data-state"),
     ).toBe("checked");
   });
