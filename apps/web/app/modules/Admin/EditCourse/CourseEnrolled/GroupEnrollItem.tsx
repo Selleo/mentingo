@@ -4,8 +4,10 @@ import { enUS, pl } from "date-fns/locale";
 import { useMemo, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { cn } from "~/lib/utils";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { Icon } from "../../../../components/Icon";
 import { Badge } from "../../../../components/ui/badge";
@@ -32,8 +34,10 @@ type Props = {
 };
 
 export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }: Props) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { control, getValues } = useFormContext<GroupEnrollFormValues>();
+
+  const language = useLanguageStore((state) => state.language);
 
   const selected = useWatch({ control, name: `groups.${index}.selected` });
   const obligatory = useWatch({ control, name: `groups.${index}.obligatory` });
@@ -47,9 +51,13 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
 
   const { currentYear, calendarLocale } = useMemo(() => {
     const year = new Date().getFullYear();
-    const locale = i18n.language.startsWith("pl") ? pl : enUS;
+
+    const locale = match(language)
+      .with("pl", () => pl)
+      .otherwise(() => enUS);
+
     return { currentYear: year, calendarLocale: locale };
-  }, [i18n.language]);
+  }, [language]);
 
   return (
     <div
