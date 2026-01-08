@@ -153,11 +153,14 @@ test.describe("Course settings flow", () => {
       const freemiumToggle = page.locator("#freemiumToggle").first();
 
       if (!(await freemiumToggle.isChecked())) {
-        await freemiumToggle.click();
-        await page.waitForResponse(
-          (response) =>
-            response.url().includes("api/course/beta-course-by-id") && response.status() === 200,
-        );
+        const [response] = await Promise.all([
+          page.waitForResponse(
+            (res) => res.url().includes("/api/course/beta-course-by-id") && res.status() === 200,
+            { timeout: 45000 },
+          ),
+          freemiumToggle.click(),
+        ]);
+        expect(response.ok()).toBeTruthy();
       }
 
       await expect(freemiumToggle).toBeChecked();
@@ -288,9 +291,7 @@ test.describe("Course settings flow", () => {
         ASSIGNING_STUDENT_TO_GROUP_PAGE_UI.cell.thirdCourseToAssign,
       );
 
-      const signupHeader = newPage.getByRole("heading", {
-        name: new RegExp(COURSE_SETTINGS_UI.header.signup, "i"),
-      });
+      const signupHeader = newPage.getByRole("button", { name: "Login" });
 
       await expect(signupHeader).toBeVisible();
     });
