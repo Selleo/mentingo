@@ -72,7 +72,7 @@ export const getBaseEmailStyles = (primaryColor: string) => ({
     fontWeight: "400",
     textAlign: "center",
     display: "inline-block",
-    padding: "0.75rem 5rem",
+    padding: "0.75rem 3.5rem",
     letterSpacing: "0.2rem",
     margin: "0 auto",
   } as CSSProperties,
