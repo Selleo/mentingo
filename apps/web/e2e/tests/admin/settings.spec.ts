@@ -184,4 +184,25 @@ test.describe("Admin settings", () => {
     await expect(page.getByRole("heading", { name: "Available Courses" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
   });
+
+  test("should change platform colors", async ({ page }) => {
+    const HEX_PRIMARY = "#800080";
+    const HEX_CONTRAST = "#faf0e6";
+    const RGB_PRIMARY = "rgb(128, 0, 128)";
+    const RGB_CONTRAST = "rgb(250, 240, 230)";
+
+    await page.getByRole("button", { name: "Avatar for email@example.com" }).click();
+    await page.getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("tab", { name: "Platform Customization" }).click();
+    await page.locator("#primary-color-input").dblclick();
+    await page.locator("#primary-color-input").fill(HEX_PRIMARY.replace("#", ""));
+    await page.locator("#contrast-color-input").dblclick();
+    await page.locator("#contrast-color-input").fill(HEX_CONTRAST.replace("#", ""));
+    await page.getByRole("button", { name: "Save" }).nth(4).click();
+    await page.getByRole("button", { name: "Dashboard" }).getByRole("link").click();
+    const downloadReport = page.getByRole("button", { name: "Download Report" });
+    await expect(downloadReport).toBeVisible();
+    await expect(downloadReport).toHaveCSS("background-color", RGB_PRIMARY);
+    await expect(downloadReport).toHaveCSS("color", RGB_CONTRAST);
+  });
 });

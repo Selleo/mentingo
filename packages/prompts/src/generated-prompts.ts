@@ -1,5 +1,5 @@
 /* AUTO-GENERATED FILE - DO NOT EDIT BY HAND */
-/* Generated At: 12/23/2025, 1:25:36 PM */
+/* Generated At: 1/5/2026, 10:22:30 AM */
 
 export const promptTemplates = {
   judgePrompt: {

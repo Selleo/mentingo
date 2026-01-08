@@ -297,11 +297,9 @@ export class FileService {
 
     const validator = TypeCompiler.Compile(schema);
 
-    const fileStream = Readable.from(file.buffer);
-
     const rows =
       file.mimetype === ALLOWED_EXCEL_MIME_TYPES_MAP.csv
-        ? await this.readCsvToRows(fileStream)
+        ? await this.readCsvToRows(file.buffer)
         : await readXlsxFile(file.buffer, { sheet: 1 });
 
     if (!rows || rows.length <= 1)
@@ -341,22 +339,35 @@ export class FileService {
     return parsed.filter((item) => item !== null);
   }
 
-  async readCsvToRows(input: Readable, delimiter = ","): Promise<any[][]> {
+  async readCsvToRows(buffer: Buffer, delimiter = ","): Promise<any[][]> {
     return new Promise((resolve, reject) => {
-      const rows: any[][] = [];
-      input
-        .pipe(
-          parse({
-            delimiter,
-            relax_quotes: true,
-            bom: true,
-            trim: true,
-            skip_empty_lines: true,
-          }),
-        )
-        .on("data", (row) => rows.push(row))
-        .on("end", () => resolve(rows))
-        .on("error", reject);
+      const tryParse = async (delim: string) =>
+        new Promise<any[][]>((res, rej) => {
+          const parsed: any[][] = [];
+          const input = Readable.from(buffer);
+          input
+            .pipe(
+              parse({
+                delimiter: delim,
+                relax_quotes: true,
+                bom: true,
+                trim: true,
+                skip_empty_lines: true,
+              }),
+            )
+            .on("data", (row) => parsed.push(row))
+            .on("end", () => res(parsed))
+            .on("error", rej);
+        });
+
+      tryParse(delimiter)
+        .then((parsed) => {
+          if (parsed.length && parsed[0].length > 1) return resolve(parsed);
+          return tryParse(";").then(resolve).catch(reject);
+        })
+        .catch(() => {
+          tryParse(";").then(resolve).catch(reject);
+        });
     });
   }
 
