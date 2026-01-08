@@ -1432,7 +1432,8 @@
       "tabs": {
         "progress": "Progress",
         "quizResults": "Quiz Results",
-        "aiMentorResults": "AI Mentor Results"
+        "aiMentorResults": "AI Mentor Results",
+        "learningTime": "Learning Time"
       },
       "field": {
         "studentName": "Student",
@@ -1446,7 +1447,8 @@
         "lastAttempt": "Last Attempt",
         "lessonName": "Lesson",
         "lastSession": "Last Session",
-        "score": "Score"
+        "score": "Score",
+        "totalTime": "Total time"
       },
       "overview": {
         "enrolledCount": "Enrolled students count",
@@ -1462,8 +1464,8 @@
         "completedBy_other": "Completed by {{count}} students",
         "courseStatusDistribution": "Course status distribution",
         "courseStatusDistributionTooltip": "Shows how many users have completed, started, or not started the course.",
-        "totalLearningTime": "Total learning time",
-        "totalLearningTimeTooltip": "Total time spent by all users on this course.",
+        "averageLearningTime": "Average learning time",
+        "averageLearningTimeTooltip": "Average time spent by all users on this course.",
         "activeStudents": "Active students",
         "activeStudentsTooltip": "Number of students who have engaged with the course."
       },
@@ -1471,6 +1473,9 @@
         "noUsers": "No users",
         "enrolled": "enrolled",
         "noGroups": "No groups"
+      },
+      "groupFilter": {
+        "placeholder": "All groups"
       }
     },
     "createLanguage": {

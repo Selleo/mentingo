@@ -1427,7 +1427,8 @@
       "tabs": {
         "progress": "Postępy",
         "quizResults": "Wyniki quizów",
-        "aiMentorResults": "Wyniki AI Mentora"
+        "aiMentorResults": "Wyniki AI Mentora",
+        "learningTime": "Czas nauki"
       },
       "field": {
         "studentName": "Uczeń",
@@ -1441,7 +1442,8 @@
         "lastAttempt": "Ostatnia próba",
         "lessonName": "Lekcja",
         "lastSession": "Ostatnia sesja",
-        "score": "Wynik"
+        "score": "Wynik",
+        "totalTime": "Całkowity czas"
       },
       "overview": {
         "enrolledCount": "Łącznie zapisanych",
@@ -1458,8 +1460,8 @@
         "completedBy_many": "Ukończyło {{count}} studentów",
         "courseStatusDistribution": "Rozkład statusów kursów",
         "courseStatusDistributionTooltip": "Pokazuje, ilu użytkowników ukończyło, rozpoczęło lub nie rozpoczęło kursu.",
-        "totalLearningTime": "Całkowity czas nauki",
-        "totalLearningTimeTooltip": "Całkowity czas spędzony przez wszystkich użytkowników na tym kursie.",
+        "averageLearningTime": "Średni czas nauki",
+        "averageLearningTimeTooltip": "Średni czas spędzony przez wszystkich użytkowników na tym kursie.",
         "activeStudents": "Aktywni studenci",
         "activeStudentsTooltip": "Liczba studentów, którzy wzięli udział w kursie."
       },
@@ -1467,6 +1469,9 @@
         "noUsers": "Brak zapisanych",
         "enrolled": "użytkowników",
         "noGroups": "Brak grup"
+      },
+      "groupFilter": {
+        "placeholder": "Wszystkie grupy"
       }
     },
     "createLanguage": {

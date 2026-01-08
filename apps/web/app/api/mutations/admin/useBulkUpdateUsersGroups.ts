@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
+import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../../api-client";
@@ -32,7 +33,10 @@ export function useBulkUpdateUsersGroups() {
 
       await queryClient.invalidateQueries({ queryKey: ["users"] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+
+      await invalidateCourseStatisticsQueries();
     },
+
     onError: (error) => {
       if (error instanceof AxiosError) {
         return toast({

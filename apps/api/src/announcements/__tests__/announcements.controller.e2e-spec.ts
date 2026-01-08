@@ -7,8 +7,8 @@ import { createGroupFactory } from "../../../test/factory/group.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables, truncateAllTables, cookieFor } from "../../../test/helpers/test-helpers";
 
-import type { DatabasePg } from "../../common/index";
 import type { INestApplication } from "@nestjs/common";
+import type { DatabasePg } from "src/common";
 
 describe("AnnouncementsController (e2e)", () => {
   let app: INestApplication;
