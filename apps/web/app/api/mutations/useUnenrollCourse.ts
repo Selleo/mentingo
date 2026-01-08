@@ -1,11 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { COURSE_STATISTICS_QUERY_KEY } from "~/api/queries/admin/useCourseStatistics";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
+import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { useToast } from "~/components/ui/use-toast";
-import { invalidateAllStatisticsQueries } from "~/modules/Courses/CourseView/CourseAdminStatistics/CourseAdminStatistics";
 
 import { ApiClient } from "../api-client";
 
@@ -39,8 +38,7 @@ export function useUnenrollCourse() {
         description: t("enrollCourseView.toast.unenrollCourseSuccessfully"),
       });
 
-      await queryClient.invalidateQueries({ queryKey: [COURSE_STATISTICS_QUERY_KEY] });
-      await invalidateAllStatisticsQueries();
+      await invalidateCourseStatisticsQueries();
     },
     onError: (error: AxiosError) => {
       const apiResponseData = error.response?.data as { message: string; count: number };

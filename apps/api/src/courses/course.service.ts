@@ -2292,6 +2292,7 @@ export class CourseService {
             JOIN ${chapters} AS ch ON l.chapter_id = ch.id
             JOIN ${studentCourses} AS sc ON slp.student_id = sc.student_id AND ch.course_id = sc.course_id
             WHERE ch.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
+            ${userIds.length ? sql`AND sc.student_id IN ${userIds}` : sql``}
           ) AS stats
         ),
         0
@@ -2354,7 +2355,9 @@ export class CourseService {
             FROM ${lessons}
             JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
             JOIN ${chapters} ON ${lessons.chapterId} = ${chapters.id}
-            JOIN ${studentCourses} ON ${studentLessonProgress.studentId} = ${studentCourses.studentId} AND ${studentCourses.courseId} = ${chapters.courseId}
+            JOIN ${studentCourses} ON ${studentLessonProgress.studentId} = ${
+              studentCourses.studentId
+            } AND ${studentCourses.courseId} = ${chapters.courseId}
             JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
             WHERE ${chapters.courseId} = ${courseId}
               AND ${lessons.type} = 'quiz'
@@ -2362,7 +2365,9 @@ export class CourseService {
               AND ${studentLessonProgress.quizScore} IS NOT NULL
               AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
               AND ${conditions.length ? sql`${and(...conditions)}` : true}
-            GROUP BY ${lessons.id}, ${lessons.title}, ${lessons.displayOrder}, ${courses.availableLocales}, ${courses.baseLanguage}
+            GROUP BY ${lessons.id}, ${lessons.title}, ${lessons.displayOrder}, ${
+              courses.availableLocales
+            }, ${courses.baseLanguage}
           ) AS subquery
         ),
         '[]'::jsonb
