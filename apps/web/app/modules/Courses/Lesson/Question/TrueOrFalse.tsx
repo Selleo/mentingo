@@ -26,61 +26,59 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
       questionType="trueOrFalseQuestion"
       questionNumber={question.displayOrder ?? 0}
     >
-      {question.options?.map(
-        ({ optionText, id, studentAnswer = false, isStudentAnswer }, index) => {
-          const isAnswered = studentAnswer === "true" || studentAnswer === "false";
-          const isCorrectAnswer = Boolean(isStudentAnswer);
+      {question.options?.map(({ optionText, id, studentAnswer, isStudentAnswer }, index) => {
+        const isAnswered = studentAnswer === "true" || studentAnswer === "false";
+        const isCorrectAnswer = Boolean(isStudentAnswer);
 
-          return (
-            <div
-              key={index}
-              className={cn(
-                "body-base flex w-full gap-x-4 rounded-lg border border-neutral-200 px-4 py-3 text-neutral-950 flex-col sm:flex-row",
-                {
-                  "border-neutral-400 bg-neutral-100": isQuizFeedbackRedacted && isQuizSubmitted,
-                  "border-success-700 bg-success-50":
-                    !isQuizFeedbackRedacted && isCompleted && isCorrectAnswer,
-                  "border-error-700 bg-error-50":
-                    !isQuizFeedbackRedacted && isCompleted && isAnswered && !isCorrectAnswer,
-                  "has-[input:checked]:bg-primary-50 [&]:has-[input:checked]:border-primary-500":
-                    !isCompleted,
-                  "pointer-events-none": isCompleted,
-                },
-              )}
-            >
-              <div className="w-full">{optionText}</div>
-              <div className="flex gap-x-4">
-                <label className="flex items-center gap-x-1">
-                  <Input
-                    className={cn("size-4", {
-                      grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
-                    })}
-                    {...(studentAnswer === "true" && { checked: true })}
-                    type="radio"
-                    value="true"
-                    {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
-                    name={`trueOrFalseQuestions.${question.id}.${id}`}
-                  />
-                  {t("studentLessonView.other.true")}
-                </label>
-                <label className="flex items-center gap-x-1">
-                  <Input
-                    className={cn("size-4", {
-                      grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
-                    })}
-                    {...(studentAnswer === "false" && { checked: true })}
-                    {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
-                    name={`trueOrFalseQuestions.${question.id}.${id}`}
-                    type="radio"
-                    value="false"
-                  />
-                  {t("studentLessonView.other.false")}
-                </label>
-              </div>
+        return (
+          <div
+            key={index}
+            className={cn(
+              "body-base flex w-full gap-x-4 rounded-lg border border-neutral-200 px-4 py-3 text-neutral-950 flex-col sm:flex-row",
+              {
+                "border-neutral-400 bg-neutral-100": isQuizFeedbackRedacted && isQuizSubmitted,
+                "border-success-700 bg-success-50":
+                  !isQuizFeedbackRedacted && isCompleted && isCorrectAnswer,
+                "border-error-700 bg-error-50":
+                  !isQuizFeedbackRedacted && isCompleted && isAnswered && !isCorrectAnswer,
+                "has-[input:checked]:bg-primary-50 [&]:has-[input:checked]:border-primary-500":
+                  !isCompleted,
+                "pointer-events-none": isCompleted,
+              },
+            )}
+          >
+            <div className="w-full">{optionText}</div>
+            <div className="flex gap-x-4">
+              <label className="flex items-center gap-x-1">
+                <Input
+                  className={cn("size-4", {
+                    grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
+                  })}
+                  {...(studentAnswer === "true" && { checked: true })}
+                  type="radio"
+                  value="true"
+                  {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
+                  name={`trueOrFalseQuestions.${question.id}.${id}`}
+                />
+                {t("studentLessonView.other.true")}
+              </label>
+              <label className="flex items-center gap-x-1">
+                <Input
+                  className={cn("size-4", {
+                    grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
+                  })}
+                  {...(studentAnswer === "false" && { checked: true })}
+                  {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
+                  name={`trueOrFalseQuestions.${question.id}.${id}`}
+                  type="radio"
+                  value="false"
+                />
+                {t("studentLessonView.other.false")}
+              </label>
             </div>
-          );
-        },
-      )}
+          </div>
+        );
+      })}
     </QuestionCard>
   );
 };
