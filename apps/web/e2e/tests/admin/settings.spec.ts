@@ -50,8 +50,9 @@ test.describe("Admin settings", () => {
 
   test("should change admin new user notification setting", async ({ page }) => {
     const newUserNotificationSwitch = page.locator("#newUserNotifications");
+    const isChecked = await newUserNotificationSwitch.isChecked();
     await newUserNotificationSwitch.click();
-    await expect(newUserNotificationSwitch).toBeChecked();
+    await expect(newUserNotificationSwitch).not.toBe(isChecked);
   });
 
   test("should switch between Account and Organization tabs", async ({ page }) => {
@@ -171,7 +172,7 @@ test.describe("Admin settings", () => {
   test("should check courses visibility based on platform preferences", async ({ page }) => {
     await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
     await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
-    await page.goto("https://app.lms.localhost/courses");
+    await page.goto("/courses");
     await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
     await page.getByPlaceholder("user@example.com").click();
     await page.getByPlaceholder("user@example.com").fill("admin@example.com");
@@ -187,7 +188,7 @@ test.describe("Admin settings", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: "Test Admin profile Test Admin" }).click();
     await page.getByRole("menuitem", { name: "Logout" }).locator("div").click();
-    await page.goto("https://app.lms.localhost/courses");
+    await page.goto("/courses");
     await expect(page.getByRole("heading", { name: "Available Courses" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
   });

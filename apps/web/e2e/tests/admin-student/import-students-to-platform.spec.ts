@@ -59,7 +59,7 @@ const logoutAdmin = async (page: Page) => {
 };
 
 const createNewPasswordAndLoginAsStudent = async (page: Page) => {
-  await page.goto("https://app.lms.localhost/auth/login");
+  await page.goto("/auth/login");
 
   await page.goto("https://mailbox.lms.localhost/");
   await page.getByText("noreply@mentingo.com janekk@").first().click();
@@ -75,7 +75,7 @@ const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page2.getByLabel("Confirm password").click();
   await page2.getByLabel("Confirm password").fill("Pass@123");
   await page2.getByRole("button", { name: "Create password" }).click();
-  await page2.goto("https://app.lms.localhost/auth/login");
+  await page2.goto("/auth/login");
   await page2.getByPlaceholder("user@example.com").click();
   await page2.getByPlaceholder("user@example.com").fill("janekk@example.com");
   await page2.getByLabel("Password").click();
