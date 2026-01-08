@@ -126,7 +126,7 @@ const FileUploadInput = ({
     return (
       <div {...getRootProps()} className="max-w-[440px]">
         <EmptyStateUpload contentTypeToDisplay={contentTypeToDisplay} className={className} />
-        <input {...getInputProps()} className="sr-only" />
+        <input {...getInputProps()} className="sr-only" data-testid="fileUploadInput" />
       </div>
     );
   }
@@ -140,7 +140,7 @@ const FileUploadInput = ({
       {...getRootProps()}
     >
       {filePreview}
-      <input {...getInputProps()} className="sr-only" />
+      <input {...getInputProps()} className="sr-only" data-testid="fileUploadInput" />
     </div>
   );
 };

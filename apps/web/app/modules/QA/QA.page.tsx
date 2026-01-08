@@ -1,8 +1,10 @@
 import { Link } from "@remix-run/react";
 import { ACCESS_GUARD } from "@repo/shared";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import useAllQA from "~/api/queries/useAllQA";
+import { useUserSettings } from "~/api/queries/useUserSettings";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Accordion } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
@@ -20,10 +22,21 @@ export default function QAPage() {
   const { t } = useTranslation();
 
   const { isAdmin } = useUserRole();
+  const { data: settings } = useUserSettings();
 
   const { language } = useLanguageStore();
 
   const { data: QA } = useAllQA(language);
+
+  const filteredQA = useMemo(() => {
+    if (isAdmin) return QA;
+
+    return QA?.filter((item) => {
+      if (settings?.language !== "en" && settings?.language !== "pl") return false;
+
+      return item.availableLocales.includes(settings.language);
+    });
+  }, [QA, isAdmin, settings?.language]);
 
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_QA_ACCESS}>
@@ -45,10 +58,10 @@ export default function QAPage() {
                 </Link>
               )}
             </div>
-            {QA && QA.length > 0 && (
+            {filteredQA && filteredQA.length > 0 && (
               <div className="rounded-2xl bg-white border-border border overflow-hidden">
                 <Accordion type="single" collapsible className="w-full">
-                  {QA?.map((item) => (
+                  {filteredQA?.map((item) => (
                     <QAItem
                       key={item.id}
                       id={item.id}

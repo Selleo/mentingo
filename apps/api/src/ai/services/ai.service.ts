@@ -282,7 +282,6 @@ export class AiService {
         updateActiveTrace({ sessionId: `generate-missing-translations-${courseId}` });
 
         const openai = await this.promptService.getOpenAI();
-        // @ts-expect-error - translationPrompt is not defined in the prompts package
         const prompt = await this.promptService.loadPrompt("translationPrompt", { language });
 
         const translateChunk = async (
