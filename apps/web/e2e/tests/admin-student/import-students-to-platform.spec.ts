@@ -61,7 +61,7 @@ const logoutAdmin = async (page: Page) => {
 const createNewPasswordAndLoginAsStudent = async (page: Page) => {
   await page.goto("/auth/login");
 
-  await page.goto("https://mailbox.lms.localhost/");
+  await page.goto("http://localhost:8025/");
   await page.getByText("noreply@mentingo.com janekk@").first().click();
   const page2Promise = page.waitForEvent("popup");
   await page
